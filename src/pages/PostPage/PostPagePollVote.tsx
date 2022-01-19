@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import styles from '../../styles/components/PostPagePollVote.module.scss'
+import styles from '@styles/pages/PostPage/PostPagePollVote.module.scss'
 import PollAnswer from './Poll/PollAnswer'
 import { PostContext } from '../../contexts/PostContext'
 

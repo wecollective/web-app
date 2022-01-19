@@ -5,7 +5,7 @@ import { OverlayScrollbarsComponent as ScrollbarOverlay } from 'overlayscrollbar
 import config from '@src/Config'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
-import styles from '@styles/components/SpacePageSidebar.module.scss'
+import styles from '@styles/pages/SpacePage/SpacePageSidebar.module.scss'
 import Column from '@components/Column'
 import Row from '@components/Row'
 import ImageTitle from '@components/ImageTitle'

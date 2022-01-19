@@ -1,5 +1,5 @@
 import React from 'react'
-import styles from '@styles/components/SpaceCardPlaceholder.module.scss'
+import styles from '@styles/components/cards/SpaceCardPlaceholder.module.scss'
 
 const SpaceCardPlaceholder = (): JSX.Element => {
     return (

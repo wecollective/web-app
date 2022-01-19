@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import styles from '../../styles/components/PostPagePollResults.module.scss'
+import styles from '@styles/pages/PostPage/PostPagePollResults.module.scss'
 import PollResultsPieChart from './Poll/PollResultsPieChart'
 import PollResultsTimeGraph from './Poll/PollResultsTimeGraph'
 // import PollResultsAnswer from './Poll/PollResultsAnswer'

@@ -1,8 +1,8 @@
 import React, { useContext, useState } from 'react'
 import axios from 'axios'
-import config from '../../Config'
-import { AccountContext } from '../../contexts/AccountContext'
-import styles from '../../styles/components/ResetPasswordModal.module.scss'
+import config from '@src/Config'
+import { AccountContext } from '@contexts/AccountContext'
+import styles from '@styles/components/modals/ResetPasswordModal.module.scss'
 import CloseButton from '../CloseButton'
 import CloseOnClickOutside from '../CloseOnClickOutside'
 

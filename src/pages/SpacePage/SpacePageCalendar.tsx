@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from 'react'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
-import styles from '@styles/components/SpacePageAbout.module.scss'
+import styles from '@styles/pages/SpacePage/SpacePageAbout.module.scss'
 import Column from '@components/Column'
 import Row from '@components/Row'
 

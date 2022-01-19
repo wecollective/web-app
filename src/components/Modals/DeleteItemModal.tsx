@@ -1,7 +1,7 @@
 import React from 'react'
 import axios from 'axios'
-import config from '../../Config'
-import styles from '../../styles/components/DeleteCommentModal.module.scss'
+import config from '@src/Config'
+import styles from '@styles/components/modals/DeleteCommentModal.module.scss'
 import CloseButton from '../CloseButton'
 import CloseOnClickOutside from '../CloseOnClickOutside'
 

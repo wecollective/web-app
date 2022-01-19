@@ -1,6 +1,6 @@
 import React, { useContext } from 'react'
 import { SpaceContext } from '@contexts/SpaceContext'
-import styles from '@styles/components/SpacePageSideBarRight.module.scss'
+import styles from '@styles/pages/SpacePage/SpacePageSideBarRight.module.scss'
 // import SpacePageSideBarRightPlaceholder from '@components/SpacePage/SpacePageSideBarRightPlaceholder'
 import Column from '@components/Column'
 import Row from '@components/Row'

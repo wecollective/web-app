@@ -1,11 +1,11 @@
 import React, { useContext, useEffect } from 'react'
-import styles from '@styles/components/Bead.module.scss'
+import styles from '@styles/components/cards/BeadCard.module.scss'
 import { AccountContext } from '@contexts/AccountContext'
 import ImageTitle from '@components/ImageTitle'
 import { ReactComponent as PlayIconSVG } from '@svgs/play-solid.svg'
 import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
 
-const Bead = (props: {
+const BeadCard = (props: {
     postId: number
     bead: any
     index: number
@@ -44,4 +44,4 @@ const Bead = (props: {
     )
 }
 
-export default Bead
+export default BeadCard

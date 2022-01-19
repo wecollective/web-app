@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import styles from '@styles/components/VerticalUserCard.module.scss'
+import styles from '@styles/components/cards/VerticalUserCard.module.scss'
 import FlagImage from '@components/FlagImage'
 import ShowMoreLess from '@components/ShowMoreLess'
 import Markdown from '@components/Markdown'

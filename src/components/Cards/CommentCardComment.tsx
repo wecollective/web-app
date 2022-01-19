@@ -1,9 +1,9 @@
 import React, { useContext, useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import styles from '@styles/components/CommentCardComment.module.scss'
+import styles from '@styles/components/cards/CommentCardComment.module.scss'
 import { AccountContext } from '@contexts/AccountContext'
 import FlagImage from '@components/FlagImage'
-import DeleteItemModal from '@components/Modals/DeleteItemModal'
+import DeleteItemModal from '@src/components/modals/DeleteItemModal'
 import { timeSinceCreated, dateCreated } from '@src/Functions'
 
 const CommentCardComment = (props: {

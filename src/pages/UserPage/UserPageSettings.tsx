@@ -1,14 +1,14 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
-import styles from '@styles/components/UserPageSettings.module.scss'
+import styles from '@styles/pages/UserPage/UserPageSettings.module.scss'
 import Button from '@components/Button'
 import ShowMoreLess from '@components/ShowMoreLess'
 import Markdown from '@components/Markdown'
 import Column from '@components/Column'
 import Row from '@components/Row'
-import UpdateUserNameModal from '@components/Modals/UpdateUserNameModal'
-import UpdateUserBioModal from '@components/Modals/UpdateUserBioModal'
+import UpdateUserNameModal from '@src/components/modals/UpdateUserNameModal'
+import UpdateUserBioModal from '@src/components/modals/UpdateUserBioModal'
 
 const UserPageSettings = (): JSX.Element => {
     const { accountData, setSettingModalType, setSettingModalOpen } = useContext(AccountContext)

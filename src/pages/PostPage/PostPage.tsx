@@ -1,18 +1,18 @@
 import React, { useEffect, useContext } from 'react'
 import { Route, Switch } from 'react-router-dom' // Redirect
 // import AccountSideBar from '@components/AccountSideBar'
-import styles from '../styles/pages/PostPage.module.scss'
-import { PostContext } from '../contexts/PostContext'
+import styles from '@styles/pages/PostPage/PostPage.module.scss'
+import { PostContext } from '@contexts/PostContext'
 // import EmptyPage from './EmptyPage'
-import PostCard from '../components/Cards/PostCard/PostCard'
-import PageSectionSelector from '../components/PageSectionSelector'
+import PostCard from '@components/Cards/PostCard/PostCard'
+import PageSectionSelector from '@components/PageSectionSelector'
 // import PostPageComments from '../components/PostPage/PostPageComments'
-import PostPagePollVote from '../components/PostPage/PostPagePollVote'
-import PostPagePollResults from '../components/PostPage/PostPagePollResults'
-import Prism from '../components/Prism'
-import PlotGraph from '../components/PlotGraph'
-import GlassBeadGame from '../components/GlassBeadGame'
-import DecisionTree from '../components/DecisionTree'
+import PostPagePollVote from '@pages/PostPage/PostPagePollVote'
+import PostPagePollResults from '@pages/PostPage/PostPagePollResults'
+import Prism from '@components/Prism'
+import PlotGraph from '@components/PlotGraph'
+import GlassBeadGame from '@components/GlassBeadGame'
+import DecisionTree from '@components/DecisionTree'
 
 const PostPage = ({
     match,

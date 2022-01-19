@@ -1,7 +1,7 @@
 import React, { useContext } from 'react'
 import { Link } from 'react-router-dom'
 import { AccountContext } from '@contexts/AccountContext'
-import styles from '@styles/components/NavbarDropDownModal.module.scss'
+import styles from '@styles/components/modals/NavbarDropDownModal.module.scss'
 import CloseOnClickOutside from '@components/CloseOnClickOutside'
 
 const NavbarDropDownModal = (): JSX.Element => {

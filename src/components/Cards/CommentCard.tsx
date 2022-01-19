@@ -1,7 +1,7 @@
 import React, { useContext, useState, useRef } from 'react'
 import axios from 'axios'
 import config from '@src/Config'
-import styles from '@styles/components/CommentCard.module.scss'
+import styles from '@styles/components/cards/CommentCard.module.scss'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import FlagImage from '@components/FlagImage'

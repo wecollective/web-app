@@ -1,5 +1,5 @@
 import React from 'react'
-import styles from '../../../styles/components/PostCardUrlPreview.module.scss'
+import styles from '@styles/components/cards/PostCard/PostCardUrlPreview.module.scss'
 
 const PostCardUrlPreview = (props: {
     url: string | null

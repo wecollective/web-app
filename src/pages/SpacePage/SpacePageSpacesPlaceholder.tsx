@@ -1,7 +1,7 @@
 import React, { useContext } from 'react'
-import SpaceCardPlaceholder from '../Cards/SpaceCardPlaceholder'
-import { SpaceContext } from '../../contexts/SpaceContext'
-import styles from '../../styles/components/SpacePageSpacesPlaceholder.module.scss'
+import SpaceCardPlaceholder from '@components/Cards/SpaceCardPlaceholder'
+import { SpaceContext } from '@contexts/SpaceContext'
+import styles from '@styles/pages/SpacePage/SpacePageSpacesPlaceholder.module.scss'
 
 const SpacePageSpacesPlaceholder = (): JSX.Element => {
     // const { spaceContextLoading } = useContext(SpaceContext)

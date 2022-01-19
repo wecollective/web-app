@@ -1,7 +1,7 @@
 import React, { useContext } from 'react'
 import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
-import styles from '@styles/components/UserPageSidebar.module.scss'
+import styles from '@styles/pages/UserPage/UserPageSidebar.module.scss'
 import Column from '@components/Column'
 import ImageFade from '@components/ImageFade'
 import Markdown from '@components/Markdown'

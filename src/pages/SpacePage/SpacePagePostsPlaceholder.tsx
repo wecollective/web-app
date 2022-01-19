@@ -1,7 +1,7 @@
 import React from 'react'
-import PostCardPlaceholder from '../Cards/PostCard/PostCardPlaceholder'
+import PostCardPlaceholder from '@components/Cards/PostCard/PostCardPlaceholder'
 // import { SpaceContext } from '../../contexts/SpaceContext'
-import styles from '../../styles/components/SpacePagePostsPlaceholder.module.scss'
+import styles from '@styles/pages/SpacePage/SpacePagePostsPlaceholder.module.scss'
 
 const SpacePagePostsPlaceholder = (): JSX.Element => {
     return (

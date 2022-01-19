@@ -3,18 +3,18 @@ import React, { useState, useContext } from 'react'
 import { useHistory, Link } from 'react-router-dom'
 import { OverlayScrollbarsComponent as ScrollbarOverlay } from 'overlayscrollbars-react'
 import { AccountContext } from '@contexts/AccountContext'
-import styles from '@styles/components/PostCard.module.scss'
+import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
 import Column from '@src/components/Column'
 import Row from '@src/components/Row'
 import PostCardUrlPreview from '@components/Cards/PostCard/PostCardUrlPreview'
 import PostCardComments from '@components/Cards/PostCard/PostCardComments'
-import DeleteItemModal from '@components/Modals/DeleteItemModal'
+import DeleteItemModal from '@src/components/modals/DeleteItemModal'
 import ShowMoreLess from '@components/ShowMoreLess'
 import Markdown from '@components/Markdown'
 import ImageTitle from '@components/ImageTitle'
 import Button from '@components/Button'
 import StatButton from '@components/StatButton'
-import Bead from '@components/Cards/Bead'
+import BeadCard from '@src/components/Cards/BeadCard'
 import PostCardLikeModal from '@components/Cards/PostCard/PostCardLikeModal'
 import PostCardRepostModal from '@components/Cards/PostCard/PostCardRepostModal'
 import PostCardRatingModal from '@components/Cards/PostCard/PostCardRatingModal'
@@ -289,7 +289,7 @@ const PostCard = (props: {
                                 options={{ className: 'os-theme-none' }}
                             >
                                 {beads.map((bead, beadIndex) => (
-                                    <Bead
+                                    <BeadCard
                                         key={bead.id}
                                         postId={id}
                                         bead={bead}

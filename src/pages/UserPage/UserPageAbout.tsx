@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from 'react'
 import { UserContext } from '@contexts/UserContext'
-import styles from '@styles/components/UserPageAbout.module.scss'
+import styles from '@styles/pages/UserPage/UserPageAbout.module.scss'
 import { timeSinceCreated, dateCreated } from '@src/Functions'
 import Column from '@components/Column'
 import Row from '@components/Row'
