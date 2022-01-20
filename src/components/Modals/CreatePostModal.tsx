@@ -208,13 +208,13 @@ const CreatePostModal = (): JSX.Element => {
                         ...res.data,
                         total_comments: 0,
                         total_reactions: 0,
-                        creator: {
+                        Creator: {
                             handle: accountData.handle,
                             name: accountData.name,
                             flagImagePath: accountData.flagImagePath,
                         },
                         DirectSpaces,
-                        GlassBeadGame: { topic: topic.value },
+                        GlassBeadGame: { topic: topic.value, GlassBeads: [] },
                     }
                     setSpacePosts([newPost, ...spacePosts])
                     setTimeout(() => setCreatePostModalOpen(false), 1000)
