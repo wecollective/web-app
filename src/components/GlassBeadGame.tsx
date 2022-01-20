@@ -287,12 +287,7 @@ const GameSettingsModal = (props) => {
                 </Row>
                 <Row>
                     {!saved && (
-                        <Button
-                            text='Start game'
-                            color='blue'
-                            disabled={loading || saved}
-                            submit
-                        />
+                        <Button text='Start game' color='blue' disabled={loading || saved} submit />
                     )}
                     {loading && <LoadingWheel />}
                     {saved && <SuccessMessage text='Saved' />}
@@ -377,13 +372,6 @@ const GlassBeadGame = (): JSX.Element => {
     const iceConfig = {
         // iceTransportPolicy: 'relay',
         iceServers: [
-            // { urls: 'stun:stun.l.google.com:19302' },
-            // { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
-            // {
-            //     urls: 'turn:relay.backups.cz?transport=tcp',
-            //     credential: 'webrtc',
-            //     username: 'webrtc',
-            // },
             { urls: `stun:${config.turnServerUrl}` },
             {
                 urls: `turn:${config.turnServerUrl}`,
@@ -779,7 +767,7 @@ const GlassBeadGame = (): JSX.Element => {
         setBackgroundVideoModalOpen(false)
         // todo: use YouTube embed api
 
-        // const video = document.getElementById('#videoBackground') as 
+        // const video = document.getElementById('#videoBackground') as
         // if (video) video.playVideo()
     }
 
@@ -1242,7 +1230,7 @@ const GlassBeadGame = (): JSX.Element => {
                     })}
                 </div>
             </div>
-            <div className={`${styles.beads}`}>
+            <div className={`${styles.beads} ${showBackgroundVideo && styles.transparent}`}>
                 {beads.map((bead, index) => (
                     <div key={bead.id} className={styles.beadWrapper}>
                         <div className={styles.bead} id={`bead-${bead.index}`}>

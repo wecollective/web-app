@@ -123,7 +123,7 @@
     .gameLocked {
         display: flex;
         align-items: center;
-        margin-top: 15px;
+        margin: 15px 0;
         > svg {
             width: 25px;
             height: 25px;
@@ -379,7 +379,7 @@
 .beads {
     position: relative;
     padding: 0 40px;
-    background-color: #fbfbfb62;
+    background-color: $grey1;
     border-top: 1px solid #ddd;
     height: 200px;
     display: flex;
@@ -387,6 +387,10 @@
     align-items: center;
     z-index: 3;
     overflow-x: scroll;
+
+    &.transparent {
+        background-color: rgba($white, 0.3);
+    }
 }
 @keyframes fadeInOpacity {
 	0% { opacity: 0 }
@@ -464,7 +468,7 @@
     > svg {
         transform: rotate(90deg);
         height: 50px;
-        color: $grey2;
+        color: $grey3;
     }
 }
 .dividerLine {
