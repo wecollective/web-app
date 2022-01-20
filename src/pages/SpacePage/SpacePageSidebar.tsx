@@ -1,5 +1,4 @@
 import React, { useContext } from 'react'
-import { Link } from 'react-router-dom'
 import axios from 'axios'
 import { OverlayScrollbarsComponent as ScrollbarOverlay } from 'overlayscrollbars-react'
 import config from '@src/Config'
@@ -13,14 +12,13 @@ import ImageFade from '@components/ImageFade'
 // import SpacePageSideBarLeftPlaceholder from './SpacePageSideBarLeftPlaceholder'
 import FlagImageHighlights from '@components/FlagImageHighlights'
 import FlagImagePlaceholder from '@components/FlagImagePlaceholder'
-// import SideBarButton from '@components/SideBarButton'
 import { ReactComponent as ArrowUpIconSVG } from '@svgs/arrow-up-solid.svg' // chevron-up-solid.svg'
 import { ReactComponent as ArrowDownIconSVG } from '@svgs/arrow-down-solid.svg' // chevron-down-solid.svg'
 import { ReactComponent as EyeIconSVG } from '@svgs/eye-solid.svg'
 import { ReactComponent as EyeSlashIconSVG } from '@svgs/eye-slash-solid.svg'
 import { ReactComponent as PlusIconSVG } from '@svgs/plus.svg'
 import { ReactComponent as MinusIconSVG } from '@svgs/minus-solid.svg'
-import { isPlural, pluralise } from '@src/Functions'
+import { isPlural } from '@src/Functions'
 
 const SpacePageSidebar = (): JSX.Element => {
     const {

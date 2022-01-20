@@ -29,10 +29,7 @@ const FlagImage = (props: {
     return (
         <div className={classes.join(' ')} style={{ width: size, height: size }}>
             {imagePath ? (
-                <>
-                    <div className={styles.background} />
-                    <img className={styles.flagImage} src={imagePath} alt='' />
-                </>
+                <img className={styles.flagImage} src={imagePath} alt='' />
             ) : (
                 <FlagImagePlaceholder type={type} />
             )}
