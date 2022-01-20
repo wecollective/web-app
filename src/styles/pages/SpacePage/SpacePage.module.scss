@@ -9,13 +9,6 @@
         width: calc(100% - 300px);
         // background-color: $grey1;
 
-        .sticky {
-            position: -webkit-sticky;
-            position: sticky;
-            top: -130px;
-            background-color: $grey1;
-        }
-
         @media screen and (max-width: 1500px) {
             margin-left: 270px;
             width: calc(100% - 270px);

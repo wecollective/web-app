@@ -9,13 +9,14 @@ import SearchBar from '@components/SearchBar'
 import Button from '@components/Button'
 import Column from '@components/Column'
 import Row from '@components/Row'
-// import Toggle from '@components/Toggle'
-import { onPageBottomReached } from '@src/Functions'
 import SpacePageSpacesFilters from '@pages/SpacePage/SpacePageSpacesFilters'
 import SpacePageSpacesPlaceholder from '@pages/SpacePage/SpacePageSpacesPlaceholder'
 import SpacePageSpaceMap from '@pages/SpacePage/SpacePageSpaceMap'
+import Modal from '@components/Modal'
+import Toggle from '@components/Toggle'
 import CreateSpaceModal from '@src/components/modals/CreateSpaceModal'
-// import { ReactComponent as SlidersIconSVG } from '@svgs/sliders-h-solid.svg'
+import { ReactComponent as SlidersIconSVG } from '@svgs/sliders-h-solid.svg'
+import { ReactComponent as EyeIconSVG } from '@svgs/eye-solid.svg'
 
 const SpacePageSpaces = ({
     match,
@@ -25,13 +26,9 @@ const SpacePageSpaces = ({
     const { params } = match
     const { spaceHandle } = params
 
-    const {
-        accountDataLoading,
-        // setCreateSpaceModalOpen,
-        loggedIn,
-        setAlertModalOpen,
-        setAlertMessage,
-    } = useContext(AccountContext)
+    const { accountDataLoading, loggedIn, setAlertModalOpen, setAlertMessage } = useContext(
+        AccountContext
+    )
     const {
         spaceData,
         getSpaceData,
@@ -42,16 +39,17 @@ const SpacePageSpaces = ({
         spaceSpacesLoading,
         spaceSpacesFilters,
         updateSpaceSpacesFilter,
-        // spaceSpacesFiltersOpen,
-        // setSpaceSpacesFiltersOpen,
         setSelectedSpaceSubPage,
         spaceSpacesPaginationOffset,
         spaceSpacesPaginationHasMore,
         spaceSpacesPaginationLimit,
     } = useContext(SpaceContext)
-    const { view } = spaceSpacesFilters
-
+    const { innerWidth } = window
     const [createSpaceModalOpen, setCreateSpaceModalOpen] = useState(false)
+    const [filtersOpen, setFiltersOpen] = useState(false)
+    const [viewsModalOpen, setViewsModalOpen] = useState(false)
+    const [showSpaceList, setShowSpaceList] = useState(true)
+    const [showSpaceMap, setShowSpaceMap] = useState(innerWidth > 1500)
 
     const OSRef = useRef<OverlayScrollbars>(null)
     const OSOptions = {
@@ -80,10 +78,6 @@ const SpacePageSpaces = ({
         }
     }
 
-    // function toggleView() {
-    //     updateSpaceSpacesFilter('view', view === 'List' ? 'Map' : 'List')
-    // }
-
     // todo: use url instead of variable in store?
     useEffect(() => setSelectedSpaceSubPage('spaces'), [])
 
@@ -94,8 +88,8 @@ const SpacePageSpaces = ({
     useEffect(() => {
         if (!accountDataLoading) {
             if (spaceData.handle !== spaceHandle) {
-                getSpaceData(spaceHandle, view === 'List' ? getFirstSpaces : null)
-            } else if (view === 'List') {
+                getSpaceData(spaceHandle, showSpaceList ? getFirstSpaces : null)
+            } else if (showSpaceList) {
                 getFirstSpaces(spaceData.id)
             }
         }
@@ -118,117 +112,97 @@ const SpacePageSpaces = ({
                     placeholder='Search spaces...'
                     style={{ marginRight: 10 }}
                 />
-                <SpacePageSpacesFilters />
-            </Row>
-            <Row className={styles.content}>
-                <OverlayScrollbars
-                    className={`${styles.spaces} os-host-flexbox scrollbar-theme`}
-                    options={OSOptions}
-                    ref={OSRef}
-                >
-                    {accountDataLoading || spaceDataLoading || spaceSpacesLoading ? (
-                        <SpacePageSpacesPlaceholder />
-                    ) : (
-                        <>
-                            {spaceSpaces.length ? (
-                                spaceSpaces.map((space) => (
-                                    <HorizontalSpaceCard
-                                        key={space.id}
-                                        space={space}
-                                        style={{ marginBottom: 15 }}
+                <Button
+                    icon={<SlidersIconSVG />}
+                    color='grey'
+                    style={{ marginRight: 10 }}
+                    onClick={() => setFiltersOpen(!filtersOpen)}
+                />
+                <Button
+                    icon={<EyeIconSVG />}
+                    color='grey'
+                    onClick={() => setViewsModalOpen(true)}
+                />
+                {viewsModalOpen && (
+                    <Modal centered close={() => setViewsModalOpen(false)}>
+                        <h1>Views</h1>
+                        <p>Choose how to display the spaces</p>
+                        {innerWidth > 1600 ? (
+                            <Column centerX>
+                                <Row style={{ marginBottom: 20 }}>
+                                    <Toggle
+                                        leftText='List'
+                                        rightColor='blue'
+                                        positionLeft={!showSpaceList}
+                                        onClick={() => setShowSpaceList(!showSpaceList)}
                                     />
-                                ))
-                            ) : (
-                                <div className='wecoNoContentPlaceholder'>
-                                    No spaces yet that match those settings...
-                                </div>
-                            )}
-                        </>
-                    )}
-                </OverlayScrollbars>
-                <Column className={styles.spaceMap}>
-                    <SpacePageSpaceMap />
-                </Column>
+                                </Row>
+                                <Row>
+                                    <Toggle
+                                        leftText='Map'
+                                        rightColor='blue'
+                                        positionLeft={!showSpaceMap}
+                                        onClick={() => setShowSpaceMap(!showSpaceMap)}
+                                    />
+                                </Row>
+                            </Column>
+                        ) : (
+                            <Row>
+                                <Toggle
+                                    leftText='List'
+                                    rightText='Map'
+                                    positionLeft={showSpaceList}
+                                    onClick={() => {
+                                        setShowSpaceList(!showSpaceList)
+                                        setShowSpaceMap(!showSpaceMap)
+                                    }}
+                                />
+                            </Row>
+                        )}
+                    </Modal>
+                )}
             </Row>
-            {/* {view === 'List' && spaceSpacesPaginationOffset > 0 && spaceSpaces.length < 1 && (
-                <div className='wecoNoContentPlaceholder'>
-                    No spaces yet that match those settings...
-                </div>
+            {filtersOpen && (
+                <Row className={styles.filters}>
+                    <SpacePageSpacesFilters />
+                </Row>
             )}
-            {view === 'Map' && <SpacePageSpaceMap />} */}
+            <Row className={styles.content}>
+                {showSpaceList && (
+                    <OverlayScrollbars
+                        className={`${styles.spaces} os-host-flexbox scrollbar-theme`}
+                        options={OSOptions}
+                        ref={OSRef}
+                    >
+                        {accountDataLoading || spaceDataLoading || spaceSpacesLoading ? (
+                            <SpacePageSpacesPlaceholder />
+                        ) : (
+                            <>
+                                {spaceSpaces.length ? (
+                                    spaceSpaces.map((space) => (
+                                        <HorizontalSpaceCard
+                                            key={space.id}
+                                            space={space}
+                                            style={{ marginBottom: 15 }}
+                                        />
+                                    ))
+                                ) : (
+                                    <div className='wecoNoContentPlaceholder'>
+                                        No spaces yet that match those settings...
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </OverlayScrollbars>
+                )}
+                {showSpaceMap && (
+                    <Column className={styles.spaceMap}>
+                        <SpacePageSpaceMap />
+                    </Column>
+                )}
+            </Row>
         </Column>
     )
 }
 
 export default SpacePageSpaces
-
-/* <Button
-    icon={<SlidersIconSVG />}
-    color='grey'
-    style={{ marginRight: 10 }}
-    onClick={() => setSpaceSpacesFiltersOpen(!spaceSpacesFiltersOpen)}
-/> */
-
-/* <div className={styles.headerRowSection}>
-        <Toggle
-            leftText='List'
-            rightText='Map'
-            onClickFunction={toggleView}
-            positionLeft={view === 'List'}
-        />
-    </div>
-    </div>
-    {spaceSpacesFiltersOpen && <SpacePageSpacesFilters />}
-</div> */
-
-/* <OverlayScrollbars
-    className={`${styles.spaces} os-host-flexbox scrollbar-theme`}
-    options={OSOptions}
-    ref={OSRef}
->
-    {accountDataLoading || spaceDataLoading || spaceSpacesLoading ? (
-        <SpacePageSpacesPlaceholder />
-    ) : (
-        <>
-            {spaceSpaces.length ? (
-                spaceSpaces.map((space) => (
-                    <HorizontalSpaceCard
-                        key={space.id}
-                        space={space}
-                        style={{ marginBottom: 15 }}
-                    />
-                ))
-            ) : (
-                <div className='wecoNoContentPlaceholder'>
-                    No spaces yet that match those settings...
-                </div>
-            )}
-        </>
-    )}
-</OverlayScrollbars> */
-
-// {accountDataLoading || spaceDataLoading || spaceSpacesLoading ? (
-//     <SpacePageSpacesPlaceholder />
-// ) : (
-//     <>
-//         {spaceSpaces.length ? (
-//             <OverlayScrollbars
-//                 className={`${styles.spaces} os-host-flexbox scrollbar-theme`}
-//                 options={OSOptions}
-//                 ref={OSRef}
-//             >
-//                 {spaceSpaces.map((space) => (
-//                     <HorizontalSpaceCard
-//                         key={space.id}
-//                         space={space}
-//                         style={{ marginBottom: 15 }}
-//                     />
-//                 ))}
-//             </OverlayScrollbars>
-//         ) : (
-//             <div className='wecoNoContentPlaceholder'>
-//                 No spaces yet that match those settings...
-//             </div>
-//         )}
-//     </>
-// )}

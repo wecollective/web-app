@@ -12,10 +12,11 @@ import Toggle from '@components/Toggle'
 import Button from '@components/Button'
 import Row from '@components/Row'
 import Column from '@components/Column'
+import Modal from '@components/Modal'
 import SpacePagePostMap from '@pages/SpacePage/SpacePagePostMap'
 import LoadingWheel from '@components/LoadingWheel'
-// import { onPageBottomReached, onElementBottomReached } from '@src/Functions'
 import { ReactComponent as SlidersIconSVG } from '@svgs/sliders-h-solid.svg'
+import { ReactComponent as EyeIconSVG } from '@svgs/eye-solid.svg'
 
 const SpacePagePosts = ({ match }: { match: { params: { spaceHandle: string } } }): JSX.Element => {
     const { params } = match
@@ -41,11 +42,13 @@ const SpacePagePosts = ({ match }: { match: { params: { spaceHandle: string } } 
         spacePostsPaginationLimit,
         spacePostsFilters,
         updateSpacePostsFilter,
-        spacePostsFiltersOpen,
-        setSpacePostsFiltersOpen,
         spacePostsPaginationHasMore,
     } = useContext(SpaceContext)
-    const { view } = spacePostsFilters
+    const { innerWidth } = window
+    const [filtersOpen, setFiltersOpen] = useState(false)
+    const [viewsModalOpen, setViewsModalOpen] = useState(false)
+    const [showPostList, setShowPostList] = useState(true)
+    const [showPostMap, setShowPostMap] = useState(innerWidth > 1500)
 
     const OSRef = useRef<OverlayScrollbars>(null)
     const OSOptions = {
@@ -74,10 +77,6 @@ const SpacePagePosts = ({ match }: { match: { params: { spaceHandle: string } } 
         }
     }
 
-    // function toggleView() {
-    //     updateSpacePostsFilter('view', view === 'List' ? 'Map' : 'List')
-    // }
-
     // todo: use url instead of variable in store?
     useEffect(() => setSelectedSpaceSubPage('posts'), [])
 
@@ -88,8 +87,8 @@ const SpacePagePosts = ({ match }: { match: { params: { spaceHandle: string } } 
     useEffect(() => {
         if (!accountDataLoading) {
             if (spaceHandle !== spaceData.handle) {
-                getSpaceData(spaceHandle, view === 'List' ? getFirstPosts : null)
-            } else if (view === 'List') {
+                getSpaceData(spaceHandle, showPostList ? getFirstPosts : null)
+            } else if (showPostList) {
                 getFirstPosts(spaceData.id)
             }
         }
@@ -110,68 +109,106 @@ const SpacePagePosts = ({ match }: { match: { params: { spaceHandle: string } } 
                     placeholder='Search posts...'
                     style={{ marginRight: 10 }}
                 />
-                <SpacePagePostsFilters />
+                <Button
+                    icon={<SlidersIconSVG />}
+                    color='grey'
+                    style={{ marginRight: 10 }}
+                    onClick={() => setFiltersOpen(!filtersOpen)}
+                />
+                <Button
+                    icon={<EyeIconSVG />}
+                    color='grey'
+                    onClick={() => setViewsModalOpen(true)}
+                />
+                {viewsModalOpen && (
+                    <Modal centered close={() => setViewsModalOpen(false)}>
+                        <h1>Views</h1>
+                        <p>Choose how to display the posts</p>
+                        {innerWidth > 1600 ? (
+                            <Column centerX>
+                                <Row style={{ marginBottom: 20 }}>
+                                    <Toggle
+                                        leftText='List'
+                                        rightColor='blue'
+                                        positionLeft={!showPostList}
+                                        onClick={() => setShowPostList(!showPostList)}
+                                    />
+                                </Row>
+                                <Row>
+                                    <Toggle
+                                        leftText='Map'
+                                        rightColor='blue'
+                                        positionLeft={!showPostMap}
+                                        onClick={() => setShowPostMap(!showPostMap)}
+                                    />
+                                </Row>
+                            </Column>
+                        ) : (
+                            <Row>
+                                <Toggle
+                                    leftText='List'
+                                    rightText='Map'
+                                    positionLeft={showPostList}
+                                    onClick={() => {
+                                        setShowPostList(!showPostList)
+                                        setShowPostMap(!showPostMap)
+                                    }}
+                                />
+                            </Row>
+                        )}
+                    </Modal>
+                )}
             </Row>
+            {filtersOpen && (
+                <Row className={styles.filters}>
+                    <SpacePagePostsFilters />
+                </Row>
+            )}
             <Row className={styles.content}>
-                <OverlayScrollbars
-                    className={`${styles.posts} os-host-flexbox scrollbar-theme`}
-                    options={OSOptions}
-                    ref={OSRef}
-                >
-                    {accountDataLoading || spaceDataLoading || spacePostsLoading ? (
-                        <SpacePagePostsPlaceholder />
-                    ) : (
-                        <>
-                            {spacePosts.length ? (
-                                <>
-                                    {spacePosts.map((post) => (
-                                        <PostCard
-                                            post={post}
-                                            key={post.id}
-                                            location='space-posts'
-                                            style={{ marginBottom: 15 }}
-                                            // todo: add class to posts?
-                                        />
-                                    ))}
-                                    {nextSpacePostsLoading && (
-                                        <Row centerX>
-                                            <LoadingWheel />
-                                        </Row>
-                                    )}
-                                </>
-                            ) : (
-                                <div className='wecoNoContentPlaceholder'>
-                                    No posts yet that match those settings...
-                                </div>
-                            )}
-                        </>
-                    )}
-                </OverlayScrollbars>
-                <Column className={styles.postMap}>
-                    <SpacePagePostMap />
-                </Column>
+                {showPostList && (
+                    <OverlayScrollbars
+                        className={`${styles.posts} os-host-flexbox scrollbar-theme`}
+                        options={OSOptions}
+                        ref={OSRef}
+                    >
+                        {accountDataLoading || spaceDataLoading || spacePostsLoading ? (
+                            <SpacePagePostsPlaceholder />
+                        ) : (
+                            <>
+                                {spacePosts.length ? (
+                                    <>
+                                        {spacePosts.map((post) => (
+                                            <PostCard
+                                                post={post}
+                                                key={post.id}
+                                                location='space-posts'
+                                                style={{ marginBottom: 15 }}
+                                                // todo: add class prop to posts?
+                                            />
+                                        ))}
+                                        {nextSpacePostsLoading && (
+                                            <Row centerX>
+                                                <LoadingWheel />
+                                            </Row>
+                                        )}
+                                    </>
+                                ) : (
+                                    <div className='wecoNoContentPlaceholder'>
+                                        No posts yet that match those settings...
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </OverlayScrollbars>
+                )}
+                {showPostMap && (
+                    <Column className={styles.postMap}>
+                        <SpacePagePostMap />
+                    </Column>
+                )}
             </Row>
         </Column>
     )
 }
 
 export default SpacePagePosts
-
-// import SpacePagePostsPlaceholder from './SpacePagePostsPlaceholder'
-/* <SpacePagePostsPlaceholder/> */
-
-// // Pinned posts
-// let pinnedPosts = posts.filter((post) => {
-//     return post.pins === 'Global wall' && post.visible === true
-// })
-
-/* <ul className={pinnedPosts}>
-    {spaceData && pinnedPosts.map((post, index) => 
-        <Post
-            post={post}
-            index={index}
-            key={post.id}
-            spaceContextLoading={spaceContextLoading}
-        /> 
-    )}
-</ul> */

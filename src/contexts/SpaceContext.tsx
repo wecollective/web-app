@@ -76,15 +76,12 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     const [spacePosts, setSpacePosts] = useState<any[]>([])
     const [totalMatchingPosts, setTotalMatchingPosts] = useState(0)
     const [spacePostsFilters, setSpacePostsFilters] = useState(defaults.postFilters)
-    const [spacePostsFiltersOpen, setSpacePostsFiltersOpen] = useState(false)
     const [spacePostsPaginationLimit, setSpacePostsPaginationLimit] = useState(10)
     const [spacePostsPaginationOffset, setSpacePostsPaginationOffset] = useState(0)
     const [spacePostsPaginationHasMore, setSpacePostsPaginationHasMore] = useState(true)
 
     const [spaceSpaces, setSpaceSpaces] = useState<any[]>([])
     const [spaceSpacesFilters, setSpaceSpacesFilters] = useState(defaults.spaceFilters)
-    // const [spaceSpacesSearchQuery, setSpaceSpacesSearchQuery] = useState('')
-    const [spaceSpacesFiltersOpen, setSpaceSpacesFiltersOpen] = useState(false)
     const [spaceSpacesPaginationLimit, setSpaceSpacesPaginationLimit] = useState(10)
     const [spaceSpacesPaginationOffset, setSpaceSpacesPaginationOffset] = useState(0)
     const [spaceSpacesPaginationHasMore, setSpaceSpacesPaginationHasMore] = useState(true)
@@ -282,8 +279,6 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 setSpacePosts,
                 totalMatchingPosts,
                 spacePostsFilters,
-                spacePostsFiltersOpen,
-                setSpacePostsFiltersOpen,
                 spacePostsPaginationLimit,
                 spacePostsPaginationOffset,
                 spacePostsPaginationHasMore,
@@ -291,8 +286,6 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 spaceSpaces,
                 setSpaceSpaces,
                 spaceSpacesFilters,
-                spaceSpacesFiltersOpen,
-                setSpaceSpacesFiltersOpen,
                 spaceSpacesPaginationLimit,
                 spaceSpacesPaginationOffset,
                 spaceSpacesPaginationHasMore,

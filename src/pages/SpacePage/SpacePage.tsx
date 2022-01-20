@@ -1,6 +1,5 @@
 import React, { useContext, useEffect } from 'react'
-import { Route, Switch, Redirect, useLocation, Link } from 'react-router-dom'
-import { AccountContext } from '@contexts/AccountContext'
+import { Route, Switch, Redirect, useLocation } from 'react-router-dom'
 import { SpaceContext } from '@contexts/SpaceContext'
 import styles from '@styles/pages/SpacePage/SpacePage.module.scss'
 import Column from '@components/Column'
@@ -17,18 +16,11 @@ import SpacePageCalendar from '@pages/SpacePage/SpacePageCalendar'
 import SpacePageRooms from '@pages/SpacePage/SpacePageRooms'
 import SpacePageGovernance from '@pages/SpacePage/SpacePageGovernance'
 import { ReactComponent as SettingsIconSVG } from '@svgs/cog-solid.svg'
-// import SpacePageSideBarLeft from '@components/SpacePage/SpacePageSideBarLeft'
-// import SpacePageSideBarRight from '@components/SpacePage/SpacePageSideBarRight'
-// import SidebarSmall from '@components/SidebarSmall'
-// import FlagImage from '@components/FlagImage'
 // import EmptyPage from './EmptyPage'
 
 const SpacePage = ({ match }: { match: { url: string } }): JSX.Element => {
     const { url } = match
-    const { loggedIn, accountData } = useContext(AccountContext)
-    const { spaceData, spaceSpacesFilters, resetSpaceData, isModerator, fullScreen } = useContext(
-        SpaceContext
-    )
+    const { spaceData, resetSpaceData, isModerator } = useContext(SpaceContext)
     const location = useLocation()
     const subpage = location.pathname.split('/')[3]
     const tabs = {
@@ -58,14 +50,12 @@ const SpacePage = ({ match }: { match: { url: string } }): JSX.Element => {
         <Row className={styles.wrapper}>
             <SpacePageSidebar />
             <Column className={styles.content}>
-                <div className={styles.sticky}>
-                    <CoverImage
-                        coverImagePath={spaceData.coverImagePath}
-                        imageUploadType='holon-cover-image'
-                        canEdit={isModerator}
-                    />
-                    <PageTabs tabs={tabs} />
-                </div>
+                <CoverImage
+                    coverImagePath={spaceData.coverImagePath}
+                    imageUploadType='holon-cover-image'
+                    canEdit={isModerator}
+                />
+                <PageTabs tabs={tabs} />
                 <Column className={styles.centerPanel}>
                     <Switch>
                         <Redirect from={url} to={`${url}/posts`} exact />

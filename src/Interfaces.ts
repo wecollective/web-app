@@ -178,8 +178,6 @@ export interface ISpaceContext {
     setSpacePosts: (payload: any[]) => void
     totalMatchingPosts: number
     spacePostsFilters: any
-    spacePostsFiltersOpen: boolean
-    setSpacePostsFiltersOpen: (payload: boolean) => void
     spacePostsPaginationLimit: number
     spacePostsPaginationOffset: number
     spacePostsPaginationHasMore: boolean
@@ -187,8 +185,6 @@ export interface ISpaceContext {
     spaceSpaces: any[] // ISpace[]
     setSpaceSpaces: (payload: any[]) => void
     spaceSpacesFilters: any
-    spaceSpacesFiltersOpen: boolean
-    setSpaceSpacesFiltersOpen: (payload: boolean) => void
     spaceSpacesPaginationLimit: number
     spaceSpacesPaginationOffset: number
     spaceSpacesPaginationHasMore: boolean

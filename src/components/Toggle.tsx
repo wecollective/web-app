@@ -1,68 +1,44 @@
-import React, { useState, useEffect } from 'react'
-import styles from '../styles/components/Toggle.module.scss'
+import React, { useState } from 'react'
+import styles from '@styles/components/Toggle.module.scss'
+import Row from '@components/Row'
 
 const Toggle = (props: {
-    leftText: string
-    rightText: string
-    onClickFunction: () => void
-    positionLeft: boolean
+    leftText?: string
+    rightText?: string
+    leftColor?: 'blue' | 'red'
+    rightColor?: 'blue' | 'red'
+    positionLeft?: boolean
+    onClick: () => void
 }): JSX.Element => {
-    const { leftText, rightText, onClickFunction, positionLeft } = props
+    const { leftText, rightText, leftColor, rightColor, positionLeft, onClick } = props
+    const [toggleLeft, setToggleLeft] = useState(positionLeft)
 
-    const [toggleLeft, setToggleLeft] = useState(true)
-
-    function toggleClick() {
-        onClickFunction()
+    function handleClick() {
         setToggleLeft(!toggleLeft)
+        onClick()
     }
-    function textClickLeft() {
-        if (!toggleLeft) {
-            onClickFunction()
-            setToggleLeft(!toggleLeft)
-        }
-    }
-    function textClickRight() {
-        if (toggleLeft) {
-            onClickFunction()
-            setToggleLeft(!toggleLeft)
-        }
-    }
-
-    useEffect(() => {
-        if (!positionLeft) setToggleLeft(false)
-    }, [])
 
     return (
-        <div className={styles.toggleWrapper}>
-            <span
-                className={styles.leftText}
-                onClick={textClickLeft}
-                onKeyDown={textClickLeft}
-                role='button'
-                tabIndex={-1}
+        <button type='button' className={styles.wrapper} onClick={handleClick}>
+            <p>{leftText}</p>
+            <Row
+                className={`${styles.toggle} ${
+                    toggleLeft ? styles[leftColor || ''] : styles[rightColor || '']
+                }`}
             >
-                {leftText}
-            </span>
-            <div
-                className={`${styles.toggle} ${toggleLeft && styles.toggleLeft}`}
-                onClick={toggleClick}
-                onKeyDown={toggleClick}
-                role='button'
-                tabIndex={0}
-            >
-                <div className={styles.toggleButton} />
-            </div>
-            <span
-                className={styles.rightText}
-                onClick={textClickRight}
-                onKeyDown={textClickRight}
-                role='button'
-                tabIndex={-1}
-            >
-                {rightText}
-            </span>
-        </div>
+                <div className={`${styles.toggleButton} ${toggleLeft && styles.toggleLeft}`} />
+            </Row>
+            <p>{rightText}</p>
+        </button>
     )
+}
+
+Toggle.defaultProps = {
+    leftText: null,
+    rightText: null,
+    leftColor: null,
+    rightColor: null,
+    positionLeft: true,
 }
 
 export default Toggle
