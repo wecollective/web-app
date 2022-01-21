@@ -317,8 +317,8 @@ const GlassBeadGame = (): JSX.Element => {
     const [comments, setComments] = useState<any[]>([])
     const [showComments, setShowComments] = useState(true)
     const [newComment, setNewComment] = useState('')
-    const [audioTrackEnabled, setAudioTrackEnabled] = useState(false)
-    const [videoTrackEnabled, setVideoTrackEnabled] = useState(false)
+    const [audioTrackEnabled, setAudioTrackEnabled] = useState(true)
+    const [videoTrackEnabled, setVideoTrackEnabled] = useState(true)
     const [audioOnly, setAudioOnly] = useState(false)
     const [turn, setTurn] = useState(0)
     const [move, setMove] = useState(0)
@@ -1091,7 +1091,7 @@ const GlassBeadGame = (): JSX.Element => {
                         <div className={styles.gameControls}>
                             <Button
                                 text={`${userIsStreaming ? 'Disconnect' : 'Connect'} audio/video`}
-                                color={userIsStreaming ? 'red' : 'grey'}
+                                color={userIsStreaming ? 'red' : 'aqua'}
                                 style={{ marginBottom: 10 }}
                                 loading={loadingStream}
                                 disabled={loadingStream}
@@ -1106,14 +1106,14 @@ const GlassBeadGame = (): JSX.Element => {
                                 <>
                                     <Button
                                         text={`${beads.length ? 'Restart' : 'Start'} game`}
-                                        color='grey'
+                                        color={beads.length ? 'red' : 'blue'}
                                         style={{ marginBottom: 10 }}
                                         onClick={() => setGameSettingsModalOpen(true)}
                                     />
                                     {beads.length > 0 && (
                                         <Button
-                                            text='Save and lock game'
-                                            color='grey'
+                                            text='Save game'
+                                            color='blue'
                                             style={{ marginBottom: 10 }}
                                             onClick={saveGame}
                                         />
