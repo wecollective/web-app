@@ -65,16 +65,13 @@ const SearchSelector = (props: {
                 <div className={styles.dropDown}>
                     {type === 'topic'
                         ? options.map((option) => (
-                              <button
-                                  className={styles.topic}
-                                  type='button'
+                              <ImageTitle
+                                  key={option.handle}
+                                  type='space'
+                                  imagePath={option.imagePath}
+                                  title={option.name}
                                   onClick={() => selectOption(option)}
-                              >
-                                  <div>
-                                      <option.icon />
-                                  </div>
-                                  <p>{option.name}</p>
-                              </button>
+                              />
                           ))
                         : options.map((option) => (
                               <ImageTitle

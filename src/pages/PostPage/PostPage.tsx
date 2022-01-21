@@ -15,9 +15,11 @@ import GlassBeadGame from '@components/GlassBeadGame'
 import DecisionTree from '@components/DecisionTree'
 
 const PostPage = ({
+    history,
     match,
     location,
 }: {
+    history: any
     match: { url: string; params: { postId: number } }
     location: { pathname: string }
 }): JSX.Element => {
@@ -44,7 +46,7 @@ const PostPage = ({
         return <PlotGraph />
     }
     if (postData.type === 'glass-bead-game') {
-        return <GlassBeadGame />
+        return <GlassBeadGame history={history} />
     }
     if (postData.type === 'decision-tree') {
         return <DecisionTree />

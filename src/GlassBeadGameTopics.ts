@@ -1,51 +1,53 @@
-// Glass bead game topics (currently missing addiction svg)
-
-// import { ReactComponent as AddictionSVG } from '@svgs/archetopics/addiciton.svg'
-import { ReactComponent as ArtSVG } from '@svgs/archetopics/art.svg'
-import { ReactComponent as AttentionSVG } from '@svgs/archetopics/attention.svg'
-import { ReactComponent as BeautySVG } from '@svgs/archetopics/beauty.svg'
-import { ReactComponent as BeginningSVG } from '@svgs/archetopics/beginning.svg'
-import { ReactComponent as BirthSVG } from '@svgs/archetopics/birth.svg'
-import { ReactComponent as CosmosSVG } from '@svgs/archetopics/cosmos.svg'
-import { ReactComponent as DeathSVG } from '@svgs/archetopics/death.svg'
-import { ReactComponent as EgoSVG } from '@svgs/archetopics/ego.svg'
-import { ReactComponent as EmpathySVG } from '@svgs/archetopics/empathy.svg'
-import { ReactComponent as EndSVG } from '@svgs/archetopics/end.svg'
-import { ReactComponent as EutopiaSVG } from '@svgs/archetopics/eutopia.svg'
-import { ReactComponent as FutureSVG } from '@svgs/archetopics/future.svg'
-import { ReactComponent as GameSVG } from '@svgs/archetopics/game.svg'
-import { ReactComponent as GiftSVG } from '@svgs/archetopics/gift.svg'
-import { ReactComponent as HistorySVG } from '@svgs/archetopics/history.svg'
-import { ReactComponent as HumanSVG } from '@svgs/archetopics/human.svg'
-import { ReactComponent as LifeSVG } from '@svgs/archetopics/life.svg'
-import { ReactComponent as ParadoxSVG } from '@svgs/archetopics/paradox.svg'
-import { ReactComponent as ShadowSVG } from '@svgs/archetopics/shadow.svg'
-import { ReactComponent as SocietySVG } from '@svgs/archetopics/society.svg'
-import { ReactComponent as TimeSVG } from '@svgs/archetopics/time.svg'
-import { ReactComponent as TruthSVG } from '@svgs/archetopics/truth.svg'
-
-export default [
-    // { name: 'Addiction', icon: null },
-    { name: 'Art', icon: ArtSVG },
-    { name: 'Attention', icon: AttentionSVG },
-    { name: 'Beauty', icon: BeautySVG },
-    { name: 'Beginning', icon: BeginningSVG },
-    { name: 'Birth', icon: BirthSVG },
-    { name: 'Cosmos', icon: CosmosSVG },
-    { name: 'Death', icon: DeathSVG },
-    { name: 'Ego', icon: EgoSVG },
-    { name: 'Empathy', icon: EmpathySVG },
-    { name: 'End', icon: EndSVG },
-    { name: 'Eutopia', icon: EutopiaSVG },
-    { name: 'Future', icon: FutureSVG },
-    { name: 'Game', icon: GameSVG },
-    { name: 'Gift', icon: GiftSVG },
-    { name: 'History', icon: HistorySVG },
-    { name: 'Human', icon: HumanSVG },
-    { name: 'Life', icon: LifeSVG },
-    { name: 'Paradox', icon: ParadoxSVG },
-    { name: 'Shadow', icon: ShadowSVG },
-    { name: 'Society', icon: SocietySVG },
-    { name: 'Time', icon: TimeSVG },
-    { name: 'Truth', icon: TruthSVG },
-]
+export default {
+    archetopics: [
+        { name: 'Addiction', imagePath: '/images/archetopics/Addiction.png' },
+        { name: 'Art', imagePath: '/images/archetopics/art.png' },
+        { name: 'Attention', imagePath: '/images/archetopics/Attention.png' },
+        { name: 'Beauty', imagePath: '/images/archetopics/Beauty.png' },
+        { name: 'Beginning', imagePath: '/images/archetopics/Beginning.png' },
+        { name: 'Birth', imagePath: '/images/archetopics/Birth.png' },
+        { name: 'Cosmos', imagePath: '/images/archetopics/Cosmos.png' },
+        { name: 'Death', imagePath: '/images/archetopics/Death.png' },
+        { name: 'Ego', imagePath: '/images/archetopics/Ego.png' },
+        { name: 'Empathy', imagePath: '/images/archetopics/Empathy.png' },
+        { name: 'End', imagePath: '/images/archetopics/End.png' },
+        { name: 'Eutopia', imagePath: '/images/archetopics/Eutopia.png' },
+        { name: 'Future', imagePath: '/images/archetopics/Future.png' },
+        { name: 'Game', imagePath: '/images/archetopics/Game.png' },
+        { name: 'Gift', imagePath: '/images/archetopics/Gift.png' },
+        { name: 'History', imagePath: '/images/archetopics/History.png' },
+        { name: 'Human', imagePath: '/images/archetopics/Human.png' },
+        { name: 'Life', imagePath: '/images/archetopics/Life.png' },
+        { name: 'Paradox', imagePath: '/images/archetopics/Paradox.png' },
+        { name: 'Shadow', imagePath: '/images/archetopics/art.png' },
+        { name: 'Society', imagePath: '/images/archetopics/art.png' },
+        { name: 'Time', imagePath: '/images/archetopics/art.png' },
+        { name: 'Truth', imagePath: '/images/archetopics/art.png' },
+    ],
+    liminal: [
+        { name: 'Authentic Relating', imagePath: '/images/liminal/authentic-relating.png' },
+        {
+            name: 'Collaborative Governance',
+            imagePath: '/images/liminal/collaborative-governance.png',
+        },
+        { name: 'Community Building', imagePath: '/images/liminal/community-building.png' },
+        { name: 'Embodiment', imagePath: '/images/liminal/embodiment.png' },
+        { name: 'Emergence', imagePath: '/images/liminal/emergence.png' },
+        { name: 'Existential Risk', imagePath: '/images/liminal/existential-risk.png' },
+        { name: 'The Infinite Game', imagePath: '/images/liminal/the-infinite-game.png' },
+        { name: 'Integral Theory', imagePath: '/images/liminal/integral-theory.png' },
+        { name: 'Meditation', imagePath: '/images/liminal/meditation.png' },
+        { name: 'Metacrisis', imagePath: '/images/liminal/metacrisis.png' },
+        { name: 'Metamodernism', imagePath: '/images/liminal/metamodernism.png' },
+        { name: 'Permaculture', imagePath: '/images/liminal/permaculture.jpg' },
+        { name: 'Polarisation', imagePath: '/images/liminal/polarisation.png' },
+        { name: 'Psychedelic Medicine', imagePath: '/images/liminal/psychedelic-medicine.png' },
+        { name: 'Psychotechnology', imagePath: '/images/liminal/psychotechnology.png' },
+        { name: 'Sensemaking', imagePath: '/images/liminal/sensemaking.png' },
+        { name: 'Shadow Work', imagePath: '/images/liminal/shadow-work.png' },
+        { name: 'Stoicism', imagePath: '/images/liminal/stoicism.jpg' },
+        { name: 'Systems Change', imagePath: '/images/liminal/systems-change.png' },
+        { name: 'Trauma', imagePath: '/images/liminal/trauma.png' },
+        { name: 'Wisdom Cultivation', imagePath: '/images/liminal/wisdom-cultivation.png' },
+    ],
+}

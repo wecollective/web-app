@@ -114,7 +114,9 @@ const CreatePostModal = (): JSX.Element => {
     }
 
     function findTopics(query) {
-        const filteredTopics = GlassBeadGameTopics.filter((t) =>
+        const { archetopics, liminal } = GlassBeadGameTopics
+        const allGBGTopics = [...archetopics, ...liminal]
+        const filteredTopics = allGBGTopics.filter((t) =>
             t.name.toLowerCase().includes(query.toLowerCase())
         )
         setTopicOptions(filteredTopics)
@@ -264,12 +266,12 @@ const CreatePostModal = (): JSX.Element => {
                             />
                             {selectedArchetopic && (
                                 <Row style={{ margin: '0 10px 10px 0' }} centerY>
-                                    <div className={styles.archetopic}>
-                                        <div>
-                                            <selectedArchetopic.icon />
-                                        </div>
-                                        <p>{selectedArchetopic.name}</p>
-                                    </div>
+                                    <ImageTitle
+                                        type='space'
+                                        imagePath={selectedArchetopic.imagePath}
+                                        title={selectedArchetopic.name}
+                                        style={{ marginRight: 5 }}
+                                    />
                                     <CloseButton
                                         size={17}
                                         onClick={() => {

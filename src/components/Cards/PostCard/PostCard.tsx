@@ -87,9 +87,12 @@ const PostCard = (props: {
         postSpaces.length - 1
     )}`
 
-    function findTopicSVG(topicName) {
-        const topicMatch = GlassBeadGameTopics.find((t) => t.name === topicName)
-        return topicMatch ? <topicMatch.icon /> : null
+    function findTopicImage(topicName) {
+        const archetopicMatch = GlassBeadGameTopics.archetopics.find((t) => t.name === topicName)
+        if (archetopicMatch) return <img src={archetopicMatch.imagePath} alt='' />
+        const liminalMatch = GlassBeadGameTopics.liminal.find((t) => t.name === topicName)
+        if (liminalMatch) return <img src={liminalMatch.imagePath} alt='' />
+        return null
     }
 
     // todo: clean up bead handling (always auto play next bead and remove 'play all' button?, stop auido playing on other posts, create post component for other post types)
@@ -241,8 +244,8 @@ const PostCard = (props: {
             </header>
             <div className={styles.content}>
                 <Row>
-                    {type === 'glass-bead-game' && findTopicSVG(GlassBeadGame.topic) && (
-                        <div className={styles.topic}>{findTopicSVG(GlassBeadGame.topic)}</div>
+                    {type === 'glass-bead-game' && findTopicImage(GlassBeadGame.topic) && (
+                        <div className={styles.topic}>{findTopicImage(GlassBeadGame.topic)}</div>
                     )}
                     <Column>
                         {type === 'glass-bead-game' && <b>{GlassBeadGame.topic}</b>}

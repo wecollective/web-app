@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useState, useEffect, useContext, useRef } from 'react'
 import { io } from 'socket.io-client'
+import { useHistory } from 'react-router-dom'
 import axios from 'axios'
 import Peer from 'simple-peer'
 import * as d3 from 'd3'
@@ -297,7 +298,7 @@ const GameSettingsModal = (props) => {
     )
 }
 
-const GlassBeadGame = (): JSX.Element => {
+const GlassBeadGame = ({ history }): JSX.Element => {
     // todo: clean up user objects in usersRef, flatten data if possible
     const {
         loggedIn,
@@ -747,9 +748,12 @@ const GlassBeadGame = (): JSX.Element => {
         setBeads(newBeads)
     }
 
-    function findTopicSVG(topicName) {
-        const topicMatch = GlassBeadGameTopics.find((t) => t.name === topicName)
-        return topicMatch ? <topicMatch.icon /> : null
+    function findTopicImage(topicName) {
+        const archetopicMatch = GlassBeadGameTopics.archetopics.find((t) => t.name === topicName)
+        if (archetopicMatch) return <img src={archetopicMatch.imagePath} alt='' />
+        const liminalMatch = GlassBeadGameTopics.liminal.find((t) => t.name === topicName)
+        if (liminalMatch) return <img src={liminalMatch.imagePath} alt='' />
+        return null
     }
 
     function peopleInRoomText() {
@@ -771,6 +775,51 @@ const GlassBeadGame = (): JSX.Element => {
         // const video = document.getElementById('#videoBackground') as
         // if (video) video.playVideo()
     }
+
+    // // const history = useHistory()
+    // useEffect(() => {
+    //     console.log('history: ', history)
+    //     const path = history.location.pathname
+
+    //     const historyListener = history.listen((newLocation, action) => {
+    //         // console.log('test')
+    //         // console.log('newLocation: ', newLocation)
+    //         console.log('action: ', action)
+    //         if (action === 'POP') {
+    //             console.log('pop')
+    //             // if (path !== newLocation) {
+    //             //     console.log('attempted back button')
+    //             //     // Clone location object and push it to history
+    //             //     history.push({
+    //             //         pathname: newLocation.pathname,
+    //             //         search: newLocation.search,
+    //             //     })
+    //             // } else {
+    //             //     console.log('attempted back button 2')
+    //             //     // If a "POP" action event occurs,
+    //             //     // Send user back to the originating location
+    //             //     history.go(1)
+    //             // }
+    //         }
+    //         if (action === 'PUSH') {
+    //             console.log('push')
+    //             // if (path !== newLocation) {
+    //             //     console.log('attempted back button')
+    //             //     // Clone location object and push it to history
+    //             //     history.push({
+    //             //         pathname: newLocation.pathname,
+    //             //         search: newLocation.search,
+    //             //     })
+    //             // } else {
+    //             //     console.log('attempted back button 2')
+    //             //     // If a "POP" action event occurs,
+    //             //     // Send user back to the originating location
+    //             //     history.go(1)
+    //             // }
+    //         }
+    //     })
+    //     return () => historyListener()
+    // }, [])
 
     // todo: flatten out userData into user object with socketId
     useEffect(() => {
@@ -1164,7 +1213,7 @@ const GlassBeadGame = (): JSX.Element => {
                     )}
                     <Column centerX>
                         <h1 style={{ margin: 0 }}>{gameData.topic}</h1>
-                        <div className={styles.topic}>{findTopicSVG(gameData.topic)}</div>
+                        <div className={styles.topic}>{findTopicImage(gameData.topic)}</div>
                         <div className={`${styles.dna} ${styles.top}`}>
                             <DNAIconSVG />
                             <DNAIconSVG />
