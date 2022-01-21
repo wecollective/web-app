@@ -438,7 +438,8 @@ const GlassBeadGame = (): JSX.Element => {
                     setUserIsStreaming(true)
                     setAudioOnly(false)
                     streamRef.current = stream
-                    streamRef.current.getTracks().forEach((track) => (track.enabled = false))
+                    // auto disable video and audio tracks when connected
+                    // streamRef.current.getTracks().forEach((track) => (track.enabled = false))
                     peersRef.current.forEach((p) => p.peer.addStream(stream))
                     videoRef.current = document.getElementById('your-video')
                     videoRef.current.srcObject = stream
