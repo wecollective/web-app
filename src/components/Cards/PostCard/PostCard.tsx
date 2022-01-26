@@ -8,7 +8,6 @@ import Column from '@src/components/Column'
 import Row from '@src/components/Row'
 import PostCardUrlPreview from '@components/Cards/PostCard/PostCardUrlPreview'
 import PostCardComments from '@components/Cards/PostCard/PostCardComments'
-import DeleteItemModal from '@src/components/modals/DeleteItemModal'
 import ShowMoreLess from '@components/ShowMoreLess'
 import Markdown from '@components/Markdown'
 import ImageTitle from '@components/ImageTitle'
@@ -19,6 +18,7 @@ import PostCardLikeModal from '@components/Cards/PostCard/PostCardLikeModal'
 import PostCardRepostModal from '@components/Cards/PostCard/PostCardRepostModal'
 import PostCardRatingModal from '@components/Cards/PostCard/PostCardRatingModal'
 import PostCardLinkModal from '@components/Cards/PostCard/PostCardLinkModal'
+import DeletePostModal from '@components/Cards/PostCard/DeletePostModal'
 import { timeSinceCreated, dateCreated, pluralise, statTitle } from '@src/Functions'
 import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import { ReactComponent as LinkIconSVG } from '@svgs/link-solid.svg'
@@ -398,14 +398,9 @@ const PostCard = (props: {
                     />
                 )}
                 {deletePostModalOpen && (
-                    // todo: update
-                    <DeleteItemModal
-                        text='Are you sure you want to delete your post?'
-                        endpoint='delete-post'
-                        itemId={postData.id}
-                        getItems1={() => null}
-                        getItems2={() => null}
-                        setDeleteItemModalOpen={setDeletePostModalOpen}
+                    <DeletePostModal
+                        postId={postData.id}
+                        close={() => setDeletePostModalOpen(false)}
                     />
                 )}
             </div>
