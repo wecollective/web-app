@@ -4,7 +4,7 @@ import { AccountContext } from '@contexts/AccountContext'
 import styles from '@styles/components/Navbar.module.scss'
 import config from '@src/Config'
 import FlagImage from '@components/FlagImage'
-// import ImageTitle from '@components/ImageTitle'
+import Row from '@components/Row'
 import Button from '@components/Button'
 import { ReactComponent as NotificationIconSVG } from '@svgs/bell-solid.svg'
 // import { ReactComponent as MessageIconSVG } from '@svgs/envelope-solid.svg'
@@ -17,8 +17,8 @@ const Navbar = (): JSX.Element => {
         setLogInModalOpen,
         navBarDropDownModalOpen,
         setNavbarDropDownModalOpen,
+        setDonateModalOpen,
     } = useContext(AccountContext)
-    // const { fullScreen, setFullScreen } = useContext(SpaceContext)
 
     const [exploreDropDownOpen, setExploreDropDownOpen] = useState(false)
     const [selectedNavbarItem, setSelectedNavbarItem] = useState('')
@@ -126,9 +126,18 @@ const Navbar = (): JSX.Element => {
                         <FlagImage type='user' size={40} imagePath={accountData.flagImagePath} />
                         {/* <span className={styles.userName}>{accountData.name}</span> */}
                     </button>
+                    <Button text='Donate' color='purple' onClick={() => setDonateModalOpen(true)} />
                 </div>
             ) : (
-                <Button text='Log in' color='blue' onClick={() => setLogInModalOpen(true)} />
+                <Row>
+                    <Button
+                        text='Log in'
+                        color='blue'
+                        onClick={() => setLogInModalOpen(true)}
+                        style={{ marginRight: 10 }}
+                    />
+                    <Button text='Donate' color='purple' onClick={() => setDonateModalOpen(true)} />
+                </Row>
             )}
         </div>
     )

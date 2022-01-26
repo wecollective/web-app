@@ -42,6 +42,7 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
     const [imageUploadType, setImageUploadType] = useState('')
     const [resetPasswordModalOpen, setResetPasswordModalOpen] = useState(false)
     const [resetPasswordModalToken, setResetPasswordModalToken] = useState<string | null>('')
+    const [donateModalOpen, setDonateModalOpen] = useState(false)
 
     const cookies = new Cookies()
 
@@ -148,6 +149,8 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                 setResetPasswordModalOpen,
                 resetPasswordModalToken,
                 setResetPasswordModalToken,
+                donateModalOpen,
+                setDonateModalOpen,
                 // functions
                 getAccountData,
                 updateAccountData,
