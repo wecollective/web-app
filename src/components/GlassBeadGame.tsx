@@ -422,8 +422,8 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             streamRef.current.getTracks().forEach((track) => track.stop())
             streamRef.current = null
             setUserIsStreaming(false)
-            setAudioTrackEnabled(false)
-            setVideoTrackEnabled(false)
+            setAudioTrackEnabled(true)
+            setVideoTrackEnabled(true)
             const data = {
                 roomId: roomIdRef.current,
                 socketId: socketIdRef.current,
@@ -732,9 +732,14 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     }
 
     function saveGame() {
+        const signalData = {
+            roomId: roomIdRef.current,
+            userSignaling: userRef.current,
+            gameData,
+        }
+        socketRef.current.emit('sending-save-game', signalData)
         axios
             .post(`${config.apiURL}/save-glass-bead-game`, { gameId: gameData.gameId, beads })
-            .then(() => setGameData({ ...gameData, locked: true }))
             .catch((error) => console.log(error))
     }
 
@@ -847,13 +852,22 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             // room joined (currently firing after 'user-joined' event on page load)
             socketRef.current.on('room-joined', (payload) => {
                 const { socketId, usersInRoom } = payload
-                // console.log('usersInRoom: ', usersInRoom)
                 socketIdRef.current = socketId
                 // userRef.current.socketId = socketId
                 usersRef.current = usersInRoom
                 pushComment(`You joined the room`)
                 usersInRoom.forEach((user) => {
                     if (!isYou(user.socketId)) {
+                        // const peerObject = peersRef.current.find(
+                        //     (p) => p.socketId === user.socketId
+                        // )
+                        // if (peerObject) {
+                        //     console.log('peerObject: ', peerObject)
+                        //     peerObject.peer.destroy()
+                        //     peersRef.current = peersRef.current.filter(
+                        //         (p) => p.socketId !== user.socketId
+                        //     )
+                        // }
                         // create peer connection
                         const peer = new Peer({ initiator: true, config: iceConfig })
                         peer.on('signal', (data) => {
@@ -1021,6 +1035,11 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording')
                     mediaRecorderRef.current.stop()
             })
+            // save game signal recieved
+            socketRef.current.on('returning-save-game', (data) => {
+                pushComment(`${data.userSignaling.name} saved the game`)
+                setGameData({ ...data.gameData, locked: true })
+            })
             // audio bead recieved
             socketRef.current.on('returning-audio-bead', (data) => {
                 setBeads((previousBeads) => [...previousBeads, data])
@@ -1028,17 +1047,21 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             })
             // stream disconnected
             socketRef.current.on('stream-disconnected', (data) => {
+                // console.log('peersRef.current: ', peersRef.current)
                 const { socketId, userData } = data
                 videosRef.current = videosRef.current.filter((v) => v.socketId !== socketId)
                 setPlayers((ps) => [...ps.filter((p) => p.socketId !== socketId)])
                 pushComment(`${userData.name}'s stream disconnected`)
             })
         }
-        return () => socketRef.current && socketRef.current.disconnect()
-        // return () => {
-        //     // console.log('exit')
-        //     if (socketRef.current) socketRef.current.disconnect()
-        // }
+        // return () => socketRef.current && socketRef.current.disconnect()
+        return () => {
+            // console.log('exit 1')
+            if (socketRef.current) {
+                // console.log('exit 2')
+                socketRef.current.disconnect()
+            }
+        }
     }, [postData.id, accountDataLoading])
 
     useEffect(() => {
