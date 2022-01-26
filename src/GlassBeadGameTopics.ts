@@ -36,6 +36,7 @@ export default {
         { name: 'Existential Risk', imagePath: '/images/liminal/existential-risk.png' },
         { name: 'The Infinite Game', imagePath: '/images/liminal/the-infinite-game.png' },
         { name: 'Integral Theory', imagePath: '/images/liminal/integral-theory.png' },
+        { name: 'The Liminal Web', imagePath: '/images/liminal/the-liminal-web.jpg' },
         { name: 'Meditation', imagePath: '/images/liminal/meditation.png' },
         { name: 'Metacrisis', imagePath: '/images/liminal/metacrisis.png' },
         { name: 'Metamodernism', imagePath: '/images/liminal/metamodernism.png' },
