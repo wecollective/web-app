@@ -38,6 +38,11 @@
         color: $black2;
         > svg > path { fill: $grey6 }
     }
+    &.purple {
+        background-color: $purple1;
+        color: white;
+    }
+
     // sizes
     &.small {
         font-size: 14px;

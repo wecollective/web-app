@@ -5,7 +5,7 @@ import LoadingWheel from '@components/LoadingWheel'
 const Button = (props: {
     text?: string
     icon?: JSX.Element
-    color: 'blue' | 'aqua' | 'red' | 'grey'
+    color: 'blue' | 'aqua' | 'red' | 'purple' | 'grey' | 'light-green'
     size?: 'small' | 'medium' | 'large'
     style?: any
     disabled?: boolean

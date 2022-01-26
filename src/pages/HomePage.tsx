@@ -23,6 +23,7 @@ const Homepage = (): JSX.Element => {
         setLogInModalOpen,
         setResetPasswordModalOpen,
         setResetPasswordModalToken,
+        setDonateModalOpen,
     } = useContext(AccountContext)
     const urlParams = new URLSearchParams(window.location.search)
     const alert = urlParams.get('alert')
@@ -98,14 +99,16 @@ const Homepage = (): JSX.Element => {
                     <Button
                         text='Log in'
                         color='blue'
-                        style={{ marginRight: 10 }}
                         onClick={() => setLogInModalOpen(true)}
+                        style={{ marginRight: 10 }}
                     />
                     <Button
                         text='Create new account'
                         color='aqua'
                         onClick={() => setRegisterModalOpen(true)}
+                        style={{ marginRight: 10 }}
                     />
+                    <Button text='Donate' color='purple' onClick={() => setDonateModalOpen(true)} />
                 </div>
 
                 {highlights && (
