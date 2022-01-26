@@ -8,8 +8,14 @@ import Markdown from '@components/Markdown'
 import FlagImagePlaceholder from '@components/FlagImagePlaceholder'
 
 const UserPageSidebar = (): JSX.Element => {
-    const { userData } = useContext(UserContext)
+    const { setImageUploadType, setImageUploadModalOpen } = useContext(AccountContext)
+    const { userData, isOwnAccount } = useContext(UserContext)
     const { flagImagePath, name, handle, bio } = userData
+
+    function uploadFlagImage() {
+        setImageUploadType('user-flag-image')
+        setImageUploadModalOpen(true)
+    }
 
     return (
         <Column className={styles.wrapper}>
@@ -17,6 +23,11 @@ const UserPageSidebar = (): JSX.Element => {
                 <ImageFade imagePath={flagImagePath} speed={1000}>
                     <FlagImagePlaceholder type='user' />
                 </ImageFade>
+                {isOwnAccount && (
+                    <button type='button' className={styles.uploadButton} onClick={uploadFlagImage}>
+                        Upload new flag image
+                    </button>
+                )}
             </div>
             <Column className={styles.content}>
                 <h1>{name}</h1>

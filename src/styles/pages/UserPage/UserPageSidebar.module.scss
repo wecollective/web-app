@@ -15,6 +15,29 @@
         height: $sidebarWidth;
         object-fit: cover;
         flex-shrink: 0;
+        position: relative;
+
+        .uploadButton {
+            all: unset;
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            background-color: rgba(black, 0.4);
+            color: white;
+            font-size: 16px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition-property: opacity;
+            transition-duration: 0.3s;
+            &:hover {
+                opacity: 1;
+            }
+        }
     }
 
     @media screen and (max-width: 1500px) {

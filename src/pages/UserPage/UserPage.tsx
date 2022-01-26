@@ -54,7 +54,7 @@ const UserPage = ({
                 <div className={styles.sticky}>
                     <CoverImage
                         coverImagePath={userData.coverImagePath}
-                        imageUploadType='holon-cover-image'
+                        imageUploadType='user-cover-image'
                         canEdit={isOwnAccount}
                     />
                     <PageTabs tabs={tabs} />
