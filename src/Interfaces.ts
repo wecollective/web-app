@@ -240,8 +240,9 @@ export interface IUserContext {
     userPostsPaginationOffset: number
     userPostsPaginationHasMore: boolean
     // functions
-    getUserData: (payload: string) => void
-    getUserPosts: (payload: number) => void
+    getUserData: (handle: string, returnFunction?: any) => void
+    getUserPosts: (userId: number, offset: number) => void
     updateUserPostsFilter: (key: string, payload: string) => void
-    resetUserContext: () => void
+    resetUserData: () => void
+    resetUserPosts: () => void
 }

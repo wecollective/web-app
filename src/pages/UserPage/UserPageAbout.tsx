@@ -1,18 +1,26 @@
 import React, { useContext, useEffect } from 'react'
-import { UserContext } from '@contexts/UserContext'
+import { useLocation } from 'react-router-dom'
 import styles from '@styles/pages/UserPage/UserPageAbout.module.scss'
+import { AccountContext } from '@contexts/AccountContext'
+import { UserContext } from '@contexts/UserContext'
 import { timeSinceCreated, dateCreated } from '@src/Functions'
 import Column from '@components/Column'
 import Row from '@components/Row'
 import Markdown from '@components/Markdown'
 
-const UserPageAbout = (): JSX.Element => {
-    const { userData, setSelectedUserSubPage } = useContext(UserContext)
+const UserPageAbout = ({ match }: { match: { params: { userHandle: string } } }): JSX.Element => {
+    const { params } = match
+    const { userHandle } = params
+    const { accountDataLoading } = useContext(AccountContext)
+    const { userData, getUserData, setSelectedUserSubPage } = useContext(UserContext)
     const { createdAt, bio } = userData
+    const location = useLocation()
 
     useEffect(() => {
-        setSelectedUserSubPage('about')
-    }, [])
+        if (!accountDataLoading && userHandle !== userData.handle) getUserData(userHandle)
+    }, [accountDataLoading, location])
+
+    useEffect(() => setSelectedUserSubPage('about'), [])
 
     return (
         <Column className={styles.wrapper}>

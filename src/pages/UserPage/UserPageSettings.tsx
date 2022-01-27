@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'
+import { useHistory, useLocation } from 'react-router-dom'
 import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
 import styles from '@styles/pages/UserPage/UserPageSettings.module.scss'
@@ -10,105 +11,73 @@ import Row from '@components/Row'
 import UpdateUserNameModal from '@src/components/modals/UpdateUserNameModal'
 import UpdateUserBioModal from '@src/components/modals/UpdateUserBioModal'
 
-const UserPageSettings = (): JSX.Element => {
-    const { accountData, setSettingModalType, setSettingModalOpen } = useContext(AccountContext)
-    const { setSelectedUserSubPage } = useContext(UserContext)
+const UserPageSettings = ({
+    match,
+}: {
+    match: { params: { userHandle: string } }
+}): JSX.Element => {
+    const { params } = match
+    const { userHandle } = params
+    const { accountData, accountDataLoading } = useContext(AccountContext)
+    const { setSelectedUserSubPage, userData, getUserData, isOwnAccount } = useContext(UserContext)
     const { handle, name, bio } = accountData
 
     const [updateUserNameModalOpen, setUpdateUserNameModalOpen] = useState(false)
     const [updateUserBioModalOpen, setUpdateUserBioModalOpen] = useState(false)
 
-    const handleClick = (settingType: string) => {
-        setSettingModalType(settingType)
-        setSettingModalOpen(true)
+    const history = useHistory()
+    const location = useLocation()
+
+    function redirect(res) {
+        if (res.handle !== handle) history.push(`/u/${res.handle}/about`)
     }
 
     useEffect(() => {
-        setSelectedUserSubPage('settings')
-    }, [])
+        if (!accountDataLoading) {
+            if (userHandle !== userData.handle) {
+                getUserData(userHandle, redirect)
+            } else redirect({ handle: userHandle })
+        }
+    }, [accountDataLoading, location])
+
+    useEffect(() => setSelectedUserSubPage('settings'), [])
 
     return (
         <Column className={styles.wrapper}>
-            <Column className={styles.content}>
-                {/* <Row centerY>
-                    <h1>Handle:</h1>
-                    <p>{handle}</p>
-                    <Button
-                        text='Edit'
-                        color='blue'
-                        size='small'
-                        onClick={() => setUpdateSpaceHandleModalOpen(true)}
-                    />
-                    {updateSpaceHandleModalOpen && (
-                        <UpdateSpaceHandleModal
-                            close={() => setUpdateSpaceHandleModalOpen(false)}
+            {isOwnAccount && (
+                <Column className={styles.content}>
+                    <Row centerY>
+                        <h1>Name:</h1>
+                        <p>{name}</p>
+                        <Button
+                            text='Edit'
+                            color='blue'
+                            size='small'
+                            onClick={() => setUpdateUserNameModalOpen(true)}
                         />
-                    )}
-                </Row> */}
-                <Row centerY>
-                    <h1>Name:</h1>
-                    <p>{name}</p>
-                    <Button
-                        text='Edit'
-                        color='blue'
-                        size='small'
-                        onClick={() => setUpdateUserNameModalOpen(true)}
-                    />
-                    {updateUserNameModalOpen && (
-                        <UpdateUserNameModal close={() => setUpdateUserNameModalOpen(false)} />
-                    )}
-                </Row>
-                <Column style={{ alignItems: 'start' }}>
-                    <h1>Bio:</h1>
-                    <ShowMoreLess height={75}>
-                        <Markdown text={bio} />
-                    </ShowMoreLess>
-                    <Button
-                        text='Edit'
-                        color='blue'
-                        size='small'
-                        style={{ marginTop: 10 }}
-                        onClick={() => setUpdateUserBioModalOpen(true)}
-                    />
-                    {updateUserBioModalOpen && (
-                        <UpdateUserBioModal close={() => setUpdateUserBioModalOpen(false)} />
-                    )}
+                        {updateUserNameModalOpen && (
+                            <UpdateUserNameModal close={() => setUpdateUserNameModalOpen(false)} />
+                        )}
+                    </Row>
+                    <Column style={{ alignItems: 'start' }}>
+                        <h1>Bio:</h1>
+                        <ShowMoreLess height={75}>
+                            <Markdown text={bio} />
+                        </ShowMoreLess>
+                        <Button
+                            text='Edit'
+                            color='blue'
+                            size='small'
+                            style={{ marginTop: 10 }}
+                            onClick={() => setUpdateUserBioModalOpen(true)}
+                        />
+                        {updateUserBioModalOpen && (
+                            <UpdateUserBioModal close={() => setUpdateUserBioModalOpen(false)} />
+                        )}
+                    </Column>
                 </Column>
-            </Column>
+            )}
         </Column>
-        // <div className={styles.wrapper}>
-        //     <div className={styles.header}>Settings</div>
-        //     <div className={styles.body}>
-        //         <div className={styles.field}>
-        //             <div className={styles.text}>
-        //                 <b>Name:</b> {accountData && accountData.name}
-        //             </div>
-        //             <div
-        //                 className={styles.linkText}
-        //                 role='button'
-        //                 tabIndex={0}
-        //                 onClick={() => handleClick('change-user-name')}
-        //                 onKeyDown={() => handleClick('change-user-name')}
-        //             >
-        //                 Change
-        //             </div>
-        //         </div>
-        //         <div className={styles.field}>
-        //             <div className={styles.text}>
-        //                 <b>Bio:</b> {accountData && accountData.bio}
-        //             </div>
-        //             <div
-        //                 className={styles.linkText}
-        //                 role='button'
-        //                 tabIndex={0}
-        //                 onClick={() => handleClick('change-user-bio')}
-        //                 onKeyDown={() => handleClick('change-user-bio')}
-        //             >
-        //                 Change
-        //             </div>
-        //         </div>
-        //     </div>
-        // </div>
     )
 }
 

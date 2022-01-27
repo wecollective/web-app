@@ -21,8 +21,7 @@ const UserPage = ({
     match: { url: string; params: { userHandle: string } }
 }): JSX.Element => {
     const { url } = match
-    const { userHandle } = match.params
-    const { resetUserContext, userData, getUserData, isOwnAccount } = useContext(UserContext)
+    const { userData, isOwnAccount, resetUserData } = useContext(UserContext)
     const location = useLocation()
     const subpage = location.pathname.split('/')[3]
     const tabs = {
@@ -42,10 +41,7 @@ const UserPage = ({
         ],
     }
 
-    useEffect(() => {
-        if (userData.id) resetUserContext()
-        getUserData(userHandle)
-    }, [userHandle])
+    useEffect(() => () => resetUserData(), [])
 
     return (
         <Row className={styles.wrapper}>
@@ -62,20 +58,14 @@ const UserPage = ({
                 <Column className={styles.centerPanel}>
                     <Switch>
                         <Redirect from={`${url}`} to={`${url}/about`} exact />
-                        <Route path={`${url}/about`} component={UserPageAbout} exact />
-                        <Route path={`${url}/posts`} component={UserPagePosts} exact />
+                        <Route path='/u/:userHandle/about' component={UserPageAbout} exact />
+                        <Route path='/u/:userHandle/posts' component={UserPagePosts} exact />
                         <Route
-                            path={`${url}/notifications`}
+                            path='/u/:userHandle/notifications'
                             component={UserPageNotifications}
                             exact
                         />
-                        {/* // todo: auto redirect if not own account like on nofitications page */}
-                        {isOwnAccount && (
-                            <Route path={`${url}/settings`} component={UserPageSettings} exact />
-                        )}
-                        {/* {isOwnAccount && (
-                            <Route path={`${url}/messages`} component={UserPageMessages} exact />
-                        )} */}
+                        <Route path='/u/:userHandle/settings' component={UserPageSettings} exact />
                     </Switch>
                 </Column>
             </Column>

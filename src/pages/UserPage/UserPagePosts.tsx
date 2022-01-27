@@ -1,21 +1,25 @@
-import React, { useContext, useEffect, useState, useRef } from 'react'
+import React, { useContext, useEffect, useRef } from 'react'
 import { OverlayScrollbarsComponent as OverlayScrollbars } from 'overlayscrollbars-react'
+import { useLocation } from 'react-router-dom'
+import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
 import styles from '@styles/pages/UserPage/UserPagePosts.module.scss'
 import SearchBar from '@components/SearchBar'
 import UserPagePostsFilters from '@pages/UserPage/UserPagePostsFilters'
 import PostCard from '@components/Cards/PostCard/PostCard'
 import SpacePagePostsPlaceholder from '@pages/SpacePage/SpacePagePostsPlaceholder'
-import { onPageBottomReached } from '@src/Functions'
-import Button from '@components/Button'
 import Row from '@components/Row'
 import Column from '@components/Column'
 import LoadingWheel from '@components/LoadingWheel'
 import { ReactComponent as SlidersIconSVG } from '@svgs/sliders-h-solid.svg'
 
-const UserPagePosts = (): JSX.Element => {
+const UserPagePosts = ({ match }: { match: { params: { userHandle: string } } }): JSX.Element => {
+    const { params } = match
+    const { userHandle } = params
+    const { accountDataLoading } = useContext(AccountContext)
     const {
         userData,
+        getUserData,
         userPosts,
         userPostsLoading,
         nextUserPostsLoading,
@@ -26,9 +30,10 @@ const UserPagePosts = (): JSX.Element => {
         setSelectedUserSubPage,
         setUserPostsFiltersOpen,
         getUserPosts,
+        resetUserPosts,
         updateUserPostsFilter,
     } = useContext(UserContext)
-
+    const location = useLocation()
     const OSRef = useRef<OverlayScrollbars>(null)
     const OSOptions = {
         className: 'os-theme-none',
@@ -38,17 +43,24 @@ const UserPagePosts = (): JSX.Element => {
                 const instance = OSRef!.current!.osInstance()
                 const scrollInfo = instance!.scroll()
                 if (scrollInfo.ratio.y > 0.999 && userPostsPaginationHasMore) {
-                    getUserPosts(userPostsPaginationOffset)
+                    getUserPosts(userData.id, userPostsPaginationOffset)
                 }
             },
         },
     }
 
-    useEffect(() => setSelectedUserSubPage('posts'), [])
+    useEffect(() => {
+        if (!accountDataLoading) {
+            if (userHandle !== userData.handle) {
+                getUserData(userHandle, (user) => getUserPosts(user.id, 0))
+            } else getUserPosts(userData.id, 0)
+        }
+    }, [accountDataLoading, location, userPostsFilters])
 
     useEffect(() => {
-        if (userData.id) getUserPosts(0)
-    }, [userData.id, userPostsFilters])
+        setSelectedUserSubPage('posts')
+        return () => resetUserPosts()
+    }, [])
 
     return (
         <Column className={styles.wrapper}>

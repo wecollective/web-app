@@ -43,7 +43,7 @@ function UserContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
     const [userPostsPaginationOffset, setUserPostsPaginationOffset] = useState(0)
     const [userPostsPaginationHasMore, setUserPostsPaginationHasMore] = useState(false)
 
-    function getUserData(userHandle) {
+    function getUserData(userHandle, returnFunction) {
         console.log('UserContext: getUserData')
         setUserDataLoading(true)
         axios
@@ -51,11 +51,12 @@ function UserContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
             .then((res) => {
                 setUserData(res.data || defaults.userData)
                 setUserDataLoading(false)
+                if (returnFunction) returnFunction(res.data)
             })
             .catch((error) => console.log('GET user-data error: ', error))
     }
 
-    function getUserPosts(offset) {
+    function getUserPosts(userId, offset) {
         console.log(`UserContext: getUserPosts (${offset} to ${offset + userPostsPaginationLimit})`)
         const firstLoad = offset === 0
         if (firstLoad) setUserPostsLoading(true)
@@ -64,7 +65,7 @@ function UserContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
             .get(
                 // prettier-ignore
                 `${config.apiURL}/user-posts?accountId=${accountData.id
-                }&userId=${userData.id
+                }&userId=${userId
                 }&postType=${userPostsFilters.type
                 }&sortBy=${userPostsFilters.sortBy
                 }&sortOrder=${userPostsFilters.sortOrder
@@ -88,15 +89,14 @@ function UserContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
         setUserPostsFilters({ ...userPostsFilters, [key]: payload })
     }
 
-    function resetUserContext() {
-        console.log('UserContext: resetUserContext')
+    function resetUserData() {
+        console.log('UserContext: resetUserData')
         setUserData(defaults.userData)
+    }
+
+    function resetUserPosts() {
+        console.log('UserContext: resetUserPosts')
         setUserPosts([])
-        setUserPostsFilters(defaults.postFilters)
-        setUserPostsFiltersOpen(false)
-        setUserPostsPaginationLimit(10)
-        setUserPostsPaginationOffset(0)
-        setUserPostsPaginationHasMore(false)
     }
 
     // determine if user is owned by account
@@ -127,7 +127,8 @@ function UserContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
                 getUserData,
                 getUserPosts,
                 updateUserPostsFilter,
-                resetUserContext,
+                resetUserData,
+                resetUserPosts,
             }}
         >
             {children}
