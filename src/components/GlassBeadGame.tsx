@@ -403,7 +403,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             })
             setComments(res.data.GlassBeadGameComments)
             scrollToLatestComment()
-            setBeads(res.data.GlassBeads)
+            setBeads(res.data.GlassBeads.sort((a, b) => a.index - b.index))
             res.data.GlassBeads.forEach((bead) => {
                 d3.select(`#bead-${bead.index}`).select('audio').attr('src', bead.beadUrl)
             })
