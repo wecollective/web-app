@@ -1,6 +1,5 @@
-import React, { useContext, useEffect, useState, useRef } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import { OverlayScrollbarsComponent as OverlayScrollbars } from 'overlayscrollbars-react'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import styles from '@styles/pages/SpacePage/SpacePageSpaces.module.scss'
@@ -15,6 +14,7 @@ import SpacePageSpaceMap from '@pages/SpacePage/SpacePageSpaceMap'
 import Modal from '@components/Modal'
 import Toggle from '@components/Toggle'
 import CreateSpaceModal from '@src/components/modals/CreateSpaceModal'
+import Scrollbars from '@src/components/Scrollbars'
 import { ReactComponent as SlidersIconSVG } from '@svgs/sliders-h-solid.svg'
 import { ReactComponent as EyeIconSVG } from '@svgs/eye-solid.svg'
 
@@ -37,6 +37,7 @@ const SpacePageSpaces = ({
         getSpaceSpaces,
         resetSpaceSpaces,
         spaceSpacesLoading,
+        nextSpaceSpacesLoading,
         spaceSpacesFilters,
         updateSpaceSpacesFilter,
         setSelectedSpaceSubPage,
@@ -51,25 +52,6 @@ const SpacePageSpaces = ({
     const [showSpaceList, setShowSpaceList] = useState(true)
     const [showSpaceMap, setShowSpaceMap] = useState(innerWidth > 1500)
 
-    const OSRef = useRef<OverlayScrollbars>(null)
-    const OSOptions = {
-        className: 'os-theme-none',
-        callbacks: {
-            onScroll: () => {
-                // load next spaces when scroll bottom reached
-                const instance = OSRef!.current!.osInstance()
-                const scrollInfo = instance!.scroll()
-                if (scrollInfo.ratio.y > 0.999 && spaceSpacesPaginationHasMore) {
-                    getSpaceSpaces(
-                        spaceData.id,
-                        spaceSpacesPaginationOffset,
-                        spaceSpacesPaginationLimit
-                    )
-                }
-            },
-        },
-    }
-
     function openCreateSpaceModal() {
         if (loggedIn) setCreateSpaceModalOpen(true)
         else {
@@ -78,10 +60,16 @@ const SpacePageSpaces = ({
         }
     }
 
-    // todo: use url instead of variable in store?
-    useEffect(() => setSelectedSpaceSubPage('spaces'), [])
+    function onScrollBottom() {
+        if (!spaceSpacesLoading && !nextSpaceSpacesLoading && spaceSpacesPaginationHasMore)
+            getSpaceSpaces(spaceData.id, spaceSpacesPaginationOffset, spaceSpacesPaginationLimit)
+    }
 
-    useEffect(() => () => resetSpaceSpaces(), [])
+    useEffect(() => {
+        // todo: use url instead of variable in store?
+        setSelectedSpaceSubPage('spaces')
+        return () => resetSpaceSpaces()
+    }, [])
 
     const location = useLocation()
     const getFirstSpaces = (spaceId) => getSpaceSpaces(spaceId, 0, spaceSpacesPaginationLimit)
@@ -169,11 +157,7 @@ const SpacePageSpaces = ({
             )}
             <Row className={styles.content}>
                 {showSpaceList && (
-                    <OverlayScrollbars
-                        className={`${styles.spaces} os-host-flexbox scrollbar-theme`}
-                        options={OSOptions}
-                        ref={OSRef}
-                    >
+                    <Scrollbars className={styles.spaces} onScrollBottom={onScrollBottom}>
                         {accountDataLoading || spaceDataLoading || spaceSpacesLoading ? (
                             <SpacePageSpacesPlaceholder />
                         ) : (
@@ -193,7 +177,7 @@ const SpacePageSpaces = ({
                                 )}
                             </>
                         )}
-                    </OverlayScrollbars>
+                    </Scrollbars>
                 )}
                 {showSpaceMap && (
                     <Column className={styles.spaceMap}>

@@ -1,7 +1,6 @@
 /* eslint-disable no-param-reassign */
 import React, { useState, useContext } from 'react'
 import { useHistory, Link } from 'react-router-dom'
-import { OverlayScrollbarsComponent as ScrollbarOverlay } from 'overlayscrollbars-react'
 import { AccountContext } from '@contexts/AccountContext'
 import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
 import Column from '@src/components/Column'
@@ -14,6 +13,7 @@ import ImageTitle from '@components/ImageTitle'
 import Button from '@components/Button'
 import StatButton from '@components/StatButton'
 import BeadCard from '@src/components/Cards/BeadCard'
+import Scrollbars from '@src/components/Scrollbars'
 import PostCardLikeModal from '@components/Cards/PostCard/PostCardLikeModal'
 import PostCardRepostModal from '@components/Cards/PostCard/PostCardRepostModal'
 import PostCardRatingModal from '@components/Cards/PostCard/PostCardRatingModal'
@@ -62,8 +62,6 @@ const PostCard = (props: {
         GlassBeadGame,
     } = postData
 
-    // console.log('postData: ', postData)
-
     const [likeModalOpen, setLikeModalOpen] = useState(false)
     const [repostModalOpen, setRepostModalOpen] = useState(false)
     const [ratingModalOpen, setRatingModalOpen] = useState(false)
@@ -78,7 +76,6 @@ const PostCard = (props: {
     const isOwnPost = accountData && Creator && accountData.id === Creator.id
     const urlPreview = urlImage || urlDomain || urlTitle || urlDescription
     const postSpaces = DirectSpaces.filter((space) => space.type === 'post' && space.id !== 1) // vs. 'repost'. todo: apply filter on backend
-    // console.log(beads)
     const otherSpacesTitle = postSpaces
         .map((s) => s.handle)
         .filter((s, i) => i !== 0)
@@ -287,10 +284,7 @@ const PostCard = (props: {
                             />
                         </Row>
                         {beads.length > 0 ? (
-                            <ScrollbarOverlay
-                                className={`${styles.gbgBeads} os-host-flexbox scrollbar-theme row`}
-                                options={{ className: 'os-theme-none' }}
-                            >
+                            <Scrollbars className={`${styles.gbgBeads} row`}>
                                 {beads.map((bead, beadIndex) => (
                                     <BeadCard
                                         key={bead.id}
@@ -300,7 +294,7 @@ const PostCard = (props: {
                                         toggleAudio={toggleBeadAudio}
                                     />
                                 ))}
-                            </ScrollbarOverlay>
+                            </Scrollbars>
                         ) : (
                             <p className={styles.noSavedBeads}>No saved beads yet</p>
                         )}

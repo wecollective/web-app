@@ -1,6 +1,5 @@
-import React, { useContext, useEffect, useState, useRef } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import { OverlayScrollbarsComponent as OverlayScrollbars } from 'overlayscrollbars-react'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import styles from '@styles/pages/SpacePage/SpacePagePosts.module.scss'
@@ -15,6 +14,7 @@ import Column from '@components/Column'
 import Modal from '@components/Modal'
 import SpacePagePostMap from '@pages/SpacePage/SpacePagePostMap'
 import LoadingWheel from '@components/LoadingWheel'
+import Scrollbars from '@src/components/Scrollbars'
 import { ReactComponent as SlidersIconSVG } from '@svgs/sliders-h-solid.svg'
 import { ReactComponent as EyeIconSVG } from '@svgs/eye-solid.svg'
 
@@ -50,25 +50,6 @@ const SpacePagePosts = ({ match }: { match: { params: { spaceHandle: string } } 
     const [showPostList, setShowPostList] = useState(true)
     const [showPostMap, setShowPostMap] = useState(innerWidth > 1500)
 
-    const OSRef = useRef<OverlayScrollbars>(null)
-    const OSOptions = {
-        className: 'os-theme-none',
-        callbacks: {
-            onScroll: () => {
-                // load next spaces when scroll bottom reached
-                const instance = OSRef!.current!.osInstance()
-                const scrollInfo = instance!.scroll()
-                if (scrollInfo.ratio.y > 0.999 && spacePostsPaginationHasMore) {
-                    getSpacePosts(
-                        spaceData.id,
-                        spacePostsPaginationOffset,
-                        spacePostsPaginationLimit
-                    )
-                }
-            },
-        },
-    }
-
     function openCreatePostModal() {
         if (loggedIn) setCreatePostModalOpen(true)
         else {
@@ -77,10 +58,16 @@ const SpacePagePosts = ({ match }: { match: { params: { spaceHandle: string } } 
         }
     }
 
-    // todo: use url instead of variable in store?
-    useEffect(() => setSelectedSpaceSubPage('posts'), [])
+    function onScrollBottom() {
+        if (!spacePostsLoading && !nextSpacePostsLoading && spacePostsPaginationHasMore)
+            getSpacePosts(spaceData.id, spacePostsPaginationOffset, spacePostsPaginationLimit)
+    }
 
-    useEffect(() => () => resetSpacePosts(), [])
+    useEffect(() => {
+        // todo: use url instead of variable in store?
+        setSelectedSpaceSubPage('posts')
+        return () => resetSpacePosts()
+    }, [])
 
     const location = useLocation()
     const getFirstPosts = (spaceId) => getSpacePosts(spaceId, 0, spacePostsPaginationLimit)
@@ -166,11 +153,7 @@ const SpacePagePosts = ({ match }: { match: { params: { spaceHandle: string } } 
             )}
             <Row className={styles.content}>
                 {showPostList && (
-                    <OverlayScrollbars
-                        className={`${styles.posts} os-host-flexbox scrollbar-theme`}
-                        options={OSOptions}
-                        ref={OSRef}
-                    >
+                    <Scrollbars className={styles.posts} onScrollBottom={onScrollBottom}>
                         {accountDataLoading || spaceDataLoading || spacePostsLoading ? (
                             <SpacePagePostsPlaceholder />
                         ) : (
@@ -199,7 +182,7 @@ const SpacePagePosts = ({ match }: { match: { params: { spaceHandle: string } } 
                                 )}
                             </>
                         )}
-                    </OverlayScrollbars>
+                    </Scrollbars>
                 )}
                 {showPostMap && (
                     <Column className={styles.postMap}>

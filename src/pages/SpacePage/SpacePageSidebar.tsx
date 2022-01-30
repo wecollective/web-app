@@ -1,6 +1,5 @@
 import React, { useContext } from 'react'
 import axios from 'axios'
-import { OverlayScrollbarsComponent as ScrollbarOverlay } from 'overlayscrollbars-react'
 import config from '@src/Config'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
@@ -9,6 +8,7 @@ import Column from '@components/Column'
 import Row from '@components/Row'
 import ImageTitle from '@components/ImageTitle'
 import ImageFade from '@components/ImageFade'
+import Scrollbars from '@src/components/Scrollbars'
 // import SpacePageSideBarLeftPlaceholder from './SpacePageSideBarLeftPlaceholder'
 import FlagImageHighlights from '@components/FlagImageHighlights'
 import FlagImagePlaceholder from '@components/FlagImagePlaceholder'
@@ -181,10 +181,7 @@ const SpacePageSidebar = (): JSX.Element => {
                             <ArrowUpIconSVG />
                             <p>Parent spaces</p>
                         </Row>
-                        <ScrollbarOverlay
-                            className={`${styles.spaces} os-host-flexbox scrollbar-theme`}
-                            options={{ className: 'os-theme-none' }}
-                        >
+                        <Scrollbars className={styles.spaces}>
                             {parentSpaces.map((space) => (
                                 <Column>
                                     <Row centerY style={{ marginBottom: 10 }}>
@@ -247,7 +244,7 @@ const SpacePageSidebar = (): JSX.Element => {
                                     )}
                                 </Column>
                             ))}
-                        </ScrollbarOverlay>
+                        </Scrollbars>
                     </Column>
                 )}
                 {childSpaces.length > 0 && (
@@ -256,10 +253,7 @@ const SpacePageSidebar = (): JSX.Element => {
                             <ArrowDownIconSVG />
                             <p>Child spaces</p>
                         </Row>
-                        <ScrollbarOverlay
-                            className={`${styles.spaces} os-host-flexbox scrollbar-theme`}
-                            options={{ className: 'os-theme-none' }}
-                        >
+                        <Scrollbars className={styles.spaces}>
                             {childSpaces.map((space) => (
                                 <Column>
                                     <Row centerY style={{ marginBottom: 10 }}>
@@ -328,7 +322,7 @@ const SpacePageSidebar = (): JSX.Element => {
                                     )}
                                 </Column>
                             ))}
-                        </ScrollbarOverlay>
+                        </Scrollbars>
                     </Column>
                 )}
             </Column>
