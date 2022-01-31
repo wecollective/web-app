@@ -449,6 +449,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     }
                     setPlayers((previousPlayers) => [...previousPlayers, newPlayer])
                     setLoadingStream(false)
+                    setShowVideos(true)
                 })
                 .catch(() => {
                     console.log('Unable to connect video, trying audio only...')
@@ -614,6 +615,8 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     function startGame(data) {
         setGameData(data)
         setPlayers(data.players)
+        setShowComments(false)
+        setShowVideos(false)
         setMoveState('Intro')
         setSeconds(data.introDuration)
         const firstPlayer = data.players[0]
@@ -1049,6 +1052,8 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             })
             // stop game signal recieved
             socketRef.current.on('returning-stop-game', (data) => {
+                setShowComments(true)
+                setShowVideos(true)
                 pushComment(`${data.userSignaling.name} stopped the game`)
                 setGameInProgress(false)
                 clearInterval(secondsTimerRef.current)
