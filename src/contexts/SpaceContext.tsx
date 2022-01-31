@@ -97,7 +97,6 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         console.log(`SpaceContext: getSpaceData (${handle})`)
         setSpaceDataLoading(true)
         axios.get(`${config.apiURL}/space-data?handle=${handle}`).then((res) => {
-            console.log('res.data: ', res.data)
             setSpaceData(res.data || defaults.spaceData)
             setSpaceDataLoading(false)
             if (returnFunction) returnFunction(res.data.id)
@@ -105,7 +104,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     }
 
     function getSpacePosts(spaceId, offset, limit) {
-        console.log(`SpaceContext: getSpacePosts (${offset} to ${offset + limit})`)
+        console.log(`SpaceContext: getSpacePosts (${offset + 1} to ${offset + limit})`)
         const firstLoad = offset === 0
         if (firstLoad) setSpacePostsLoading(true)
         else setNextSpacePostsLoading(true)
@@ -136,7 +135,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     }
 
     function getSpaceSpaces(spaceId, offset, limit) {
-        console.log(`SpaceContext: getSpaceSpaces (${offset} to ${offset + limit})`)
+        console.log(`SpaceContext: getSpaceSpaces (${offset + 1} to ${offset + limit})`)
         const firstLoad = offset === 0
         if (firstLoad) setSpaceSpacesLoading(true)
         else setNextSpaceSpacesLoading(true)
@@ -164,7 +163,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     }
 
     function getSpacePeople(spaceId, offset, limit) {
-        console.log(`SpaceContext: getSpacePeople (${offset} to ${offset + limit})`)
+        console.log(`SpaceContext: getSpacePeople (${offset + 1} to ${offset + limit})`)
         const firstLoad = offset === 0
         if (firstLoad) setSpacePeopleLoading(true)
         else setNextSpacePeopleLoading(true)

@@ -12,20 +12,8 @@ import { IPost } from '@src/Interfaces'
 
 const SpacePagePostMap = (): JSX.Element => {
     const { accountData, loggedIn } = useContext(AccountContext)
-    const {
-        spaceData,
-        spacePostsFilters,
-        // spacePostsSortByFilter,
-        // spacePostsSortOrderFilter,
-        // spacePostsTimeRangeFilter,
-        // spacePostsTypeFilter,
-        // spacePostsDepthFilter,
-        // spacePostsSearchFilter,
-        fullScreen,
-    } = useContext(SpaceContext)
-
+    const { spaceData, spacePostsFilters, fullScreen } = useContext(SpaceContext)
     const { sortBy, sortOrder, timeRange, type, depth, searchQuery } = spacePostsFilters
-
     const [postMapData, setPostMapData] = useState([])
     const [selectedPost, setSelectedPost] = useState({ id: null })
     const defaultGravity = 30
@@ -41,7 +29,7 @@ const SpacePagePostMap = (): JSX.Element => {
     const gravityInput = useRef<HTMLInputElement>(null)
 
     function getPostMapData(limit) {
-        console.log(`getPostMapData (0 to ${postMapPaginationLimit})`)
+        console.log(`getPostMapData (1 to ${postMapPaginationLimit})`)
         axios
             .get(
                 /* prettier-ignore */
@@ -57,7 +45,7 @@ const SpacePagePostMap = (): JSX.Element => {
                 }&offset=0`
             )
             .then((res) => {
-                console.log('res: ', res)
+                // console.log('res: ', res)
                 // store previous node positions
                 interface INodePosition {
                     id: number
@@ -203,8 +191,7 @@ const SpacePagePostMap = (): JSX.Element => {
     }
 
     function findStroke(d) {
-        if (d.account_like || d.account_repost || d.account_rating || d.account_link)
-            return '#83b0ff'
+        if (d.accountLike || d.accountRepost || d.accountRating || d.accountLink) return '#83b0ff'
         return 'rgb(140 140 140)'
     }
 

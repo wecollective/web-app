@@ -31,6 +31,7 @@ import LoadingWheel from '@components/LoadingWheel'
 import SuccessMessage from '@components/SuccessMessage'
 import Row from '@components/Row'
 import Column from '@components/Column'
+import Scrollbars from '@components/Scrollbars'
 import { ReactComponent as AudioIconSVG } from '@svgs/microphone-solid.svg'
 import { ReactComponent as AudioSlashIconSVG } from '@svgs/microphone-slash-solid.svg'
 import { ReactComponent as VideoIconSVG } from '@svgs/video-solid.svg'
@@ -79,7 +80,8 @@ const Video = (props) => {
     return (
         <div className={`${styles.videoWrapper} ${size}`}>
             {audioOnly && <AudioIconSVG />}
-            <video id={id} muted={id === 'your-video'} autoPlay playsInline>
+            <video id={id} muted autoPlay playsInline>
+                {/* <video id={id} muted={id === 'your-video'} autoPlay playsInline> */}
                 <track kind='captions' />
             </video>
             <div className={styles.videoUser}>
@@ -317,6 +319,8 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     const [beads, setBeads] = useState<any[]>([])
     const [comments, setComments] = useState<any[]>([])
     const [showComments, setShowComments] = useState(true)
+    // const [showBeads, setShowBeads] = useState(false)
+    const [showVideos, setShowVideos] = useState(false)
     const [newComment, setNewComment] = useState('')
     const [audioTrackEnabled, setAudioTrackEnabled] = useState(true)
     const [videoTrackEnabled, setVideoTrackEnabled] = useState(true)
@@ -345,7 +349,6 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     const chunksRef = useRef<any[]>([])
     const streamRef = useRef<any>(null)
     const videoRef = useRef<any>(null)
-    const commentsRef = useRef<HTMLDivElement>(null)
 
     const highMetalTone = new Audio('/audio/hi-metal-tone.mp3')
     const lowMetalTone = new Audio('/audio/lo-metal-tone.mp3')
@@ -385,11 +388,6 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     const totalUsersStreaming = videosRef.current.length + (userIsStreaming ? 1 : 0)
     const isYou = (id) => id === socketIdRef.current
 
-    function scrollToLatestComment() {
-        const { current } = commentsRef
-        if (current) current.scrollTop = current.scrollHeight
-    }
-
     function getGameData() {
         axios.get(`${config.apiURL}/glass-bead-game-data?postId=${postData.id}`).then((res) => {
             setGameData({
@@ -402,7 +400,6 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 intervalDuration: res.data.intervalDuration,
             })
             setComments(res.data.GlassBeadGameComments)
-            scrollToLatestComment()
             setBeads(res.data.GlassBeads.sort((a, b) => a.index - b.index))
             res.data.GlassBeads.forEach((bead) => {
                 d3.select(`#bead-${bead.index}`).select('audio').attr('src', bead.beadUrl)
@@ -537,7 +534,6 @@ const GlassBeadGame = ({ history }): JSX.Element => {
 
     function pushComment(comment) {
         setComments((c) => [...c, comment.user ? comment : { text: comment }])
-        scrollToLatestComment()
     }
 
     function startArc(type: 'game' | 'turn' | 'move', duration: number, color?: string) {
@@ -766,6 +762,11 @@ const GlassBeadGame = ({ history }): JSX.Element => {
         return `${totalUsers} ${isPlural(totalUsers) ? 'people' : 'person'} in room`
     }
 
+    function peopleStreamingText() {
+        const totalStreaming = videosRef.current.length + (userIsStreaming ? 1 : 0)
+        return `${totalStreaming} ${isPlural(totalStreaming) ? 'people' : 'person'} streaming`
+    }
+
     function addBackgroundVideo() {
         // console.log('youTubeUrl: ', youTubeUrl)
         // let identifier
@@ -848,8 +849,8 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 roomId: roomIdRef.current,
                 userData: userRef.current,
             })
+
             // listen for signals:
-            // room joined (currently firing after 'user-joined' event on page load)
             socketRef.current.on('room-joined', (payload) => {
                 const { socketId, usersInRoom } = payload
                 socketIdRef.current = socketId
@@ -858,18 +859,25 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 pushComment(`You joined the room`)
                 usersInRoom.forEach((user) => {
                     if (!isYou(user.socketId)) {
-                        // const peerObject = peersRef.current.find(
-                        //     (p) => p.socketId === user.socketId
-                        // )
-                        // if (peerObject) {
-                        //     console.log('peerObject: ', peerObject)
-                        //     peerObject.peer.destroy()
-                        //     peersRef.current = peersRef.current.filter(
-                        //         (p) => p.socketId !== user.socketId
-                        //     )
-                        // }
+                        // remove old peer if present
+                        const peerObject = peersRef.current.find(
+                            (p) => p.socketId === user.socketId
+                        )
+                        if (peerObject) {
+                            peerObject.peer.destroy()
+                            peersRef.current = peersRef.current.filter(
+                                (p) => p.socketId !== user.socketId
+                            )
+                            videosRef.current = videosRef.current.filter(
+                                (v) => v.socketId !== user.socketId
+                            )
+                        }
                         // create peer connection
-                        const peer = new Peer({ initiator: true, config: iceConfig })
+                        const peer = new Peer({
+                            initiator: true,
+                            // reconnectTimer: 2000,
+                            config: iceConfig,
+                        })
                         peer.on('signal', (data) => {
                             socketRef.current.emit('sending-signal', {
                                 userToSignal: user.socketId,
@@ -880,6 +888,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                                 signal: data,
                             })
                         })
+                        peer.on('connect', () => console.log('connect 1'))
                         peer.on('stream', (stream) => {
                             videosRef.current.push({
                                 socketId: user.socketId,
@@ -889,17 +898,24 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                             })
                             pushComment(`${user.userData.name}'s video connected`)
                             const video = document.getElementById(user.socketId) as HTMLVideoElement
-                            video.srcObject = stream
-                            const newPlayer = {
-                                id: user.userData.id,
-                                name: user.userData.name,
-                                flagImagePath: user.userData.flagImagePath,
-                                socketId: user.socketId,
+                            if (video) {
+                                video.srcObject = stream
+                                console.log('video.play()')
+                                // video.play()
+                                // video.muted = false
                             }
-                            setPlayers((previousPlayers) => [...previousPlayers, newPlayer])
                         })
-                        peer.on('close', () => peer.destroy())
-                        peer.on('error', (error) => console.log(error))
+                        peer.on('close', () => {
+                            peer.destroy()
+                        })
+                        peer.on('error', (error) => {
+                            console.log(error)
+                            // handle error
+                        })
+                        peer.on('iceStateChange', (iceConnectionState, iceGatheringState) => {
+                            console.log('ice', iceConnectionState, iceGatheringState)
+                        })
+                        // peer._debug = console.log
                         peersRef.current.push({
                             socketId: user.socketId,
                             userData: user.userData,
@@ -910,12 +926,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             })
             // signal returned from peer
             socketRef.current.on('signal-returned', (payload) => {
-                // find peer in peers array
                 const peerObject = peersRef.current.find((p) => p.socketId === payload.id)
-                // pass singal to peer
-                // console.log('peerObject.peer: ', peerObject) // .destroying
-                // peerObject.peer.signal(payload.signal)
-                // console.log('peerObject: ', peerObject) .peer.readable
                 if (peerObject) {
                     if (peerObject.peer.readable) peerObject.peer.signal(payload.signal)
                     else {
@@ -923,6 +934,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                         peersRef.current = peersRef.current.filter((p) => p.socketId !== payload.id)
                     }
                 } else {
+                    console.log('no peer!')
                     //
                 }
             })
@@ -933,12 +945,13 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 // search for peer in peers array
                 const existingPeer = peersRef.current.find((p) => p.socketId === socketId)
                 // if peer exists, pass signal to peer
-                if (existingPeer) existingPeer.peer.signal(signal)
-                else {
+                if (existingPeer) {
+                    existingPeer.peer.signal(signal)
+                } else {
                     // otherwise, create new peer connection (with stream if running)
                     const peer = new Peer({
                         initiator: false,
-                        stream: streamRef.current || null,
+                        stream: streamRef.current,
                         config: iceConfig,
                     })
                     peer.on('signal', (data) => {
@@ -975,8 +988,11 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                         // }, 100)
                         const video = document.getElementById(socketId) as HTMLVideoElement
                         // causing error if no video:
-                        if (video) video.srcObject = stream
-                        else console.log('cant find video')
+                        if (video) {
+                            video.srcObject = stream
+                            // video.play()
+                            // video.muted = false
+                        } else console.log('cant find video 2')
                         const newPlayer = {
                             id: userData.id,
                             name: userData.name,
@@ -986,8 +1002,14 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                         setPlayers((previousPlayers) => [...previousPlayers, newPlayer])
                         // pushComment(`${userData.name}'s video connected`)
                     })
-                    peer.on('close', () => peer.destroy())
-                    peer.on('error', (error) => console.log(error))
+                    peer.on('close', () => {
+                        peer.destroy()
+                    })
+                    peer.on('error', (error) => {
+                        console.log('error 2: ', error)
+                        // todo: re-attemt to establish connection
+                    })
+                    // peer._debug = console.log
                     peer.signal(signal)
                     peersRef.current.push({ socketId, userData, peer })
                 }
@@ -1002,6 +1024,11 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             // user left room
             socketRef.current.on('user-left', (user) => {
                 const { socketId, userData } = user
+                const peerObject = peersRef.current.find((p) => p.socketId === socketId)
+                if (peerObject) {
+                    peerObject.peer.destroy()
+                    peersRef.current = peersRef.current.filter((p) => p.socketId !== socketId)
+                }
                 usersRef.current = usersRef.current.filter((u) => u.socketId !== socketId)
                 peersRef.current = peersRef.current.filter((p) => p.socketId !== socketId)
                 videosRef.current = videosRef.current.filter((v) => v.socketId !== socketId)
@@ -1054,14 +1081,8 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 pushComment(`${userData.name}'s stream disconnected`)
             })
         }
-        // return () => socketRef.current && socketRef.current.disconnect()
-        return () => {
-            // console.log('exit 1')
-            if (socketRef.current) {
-                // console.log('exit 2')
-                socketRef.current.disconnect()
-            }
-        }
+
+        return () => socketRef.current && socketRef.current.disconnect()
     }, [postData.id, accountDataLoading])
 
     useEffect(() => {
@@ -1093,47 +1114,51 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     }, [])
 
     return (
-        <div className={styles.wrapper}>
+        <Column className={styles.wrapper}>
             {showBackgroundVideo && (
                 <iframe
                     className={styles.videoBackground}
                     id='videoBackground'
-                    title='videoBackground'
+                    title='video background'
                     src={`https://www.youtube.com/embed/${youTubeUrl}?t=9&autoplay=1&mute=1&enablejsapi=1`} // PyFN_FYwqvc lXBr5tZu60o 6whHTP6L2Is UgHKb_7884o b7Cl7S0pLRw
                 />
             )}
-            <div className={styles.mainContent}>
-                <div
-                    className={`${styles.comments} ${!showComments && styles.hidden} ${
+            <Row
+                spaceBetween
+                className={`${styles.mainContent} ${beads.length && styles.showBeads}`}
+            >
+                <Column
+                    spaceBetween
+                    className={`${styles.commentBar} ${!showComments && styles.hidden} ${
                         showBackgroundVideo && styles.transparent
-                    } hide-scrollbars`}
+                    }`}
                 >
-                    <div ref={commentsRef} className='hide-scrollbars'>
+                    <Scrollbars className={styles.comments} autoScrollToBottom>
                         {comments.map((comment) => (
                             <Comment comment={comment} key={uuidv4()} />
                         ))}
-                    </div>
-                    <form onSubmit={createComment}>
+                    </Scrollbars>
+                    <form className={styles.commentInput} onSubmit={createComment}>
                         <Input
                             type='text'
                             placeholder='comment...'
-                            style={{ marginRight: 10 }}
                             value={newComment}
                             onChange={(v) => setNewComment(v)}
+                            style={{ marginRight: 10 }}
                         />
                         <Button text='Send' color='blue' submit />
                     </form>
                     <button
-                        type='button'
-                        className={styles.closeCommentsBar}
+                        className={styles.closeCommentsButton}
                         onClick={() => setShowComments(!showComments)}
+                        type='button'
                     >
                         <ChevronUpIconSVG transform={`rotate(${showComments ? 270 : 90})`} />
                     </button>
-                </div>
-                <div className={styles.centerPanel}>
+                </Column>
+                <Column centerX className={styles.centerPanel}>
                     {gameInProgress ? (
-                        <div className={styles.gameControls}>
+                        <Column className={styles.gameControls}>
                             <Button
                                 text='Stop game'
                                 color='red'
@@ -1158,9 +1183,9 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                                     />
                                 </Row>
                             ))}
-                        </div>
+                        </Column>
                     ) : (
-                        <div className={styles.gameControls}>
+                        <Column className={styles.gameControls}>
                             <Button
                                 text={`${userIsStreaming ? 'Disconnect' : 'Connect'} audio/video`}
                                 color={userIsStreaming ? 'red' : 'aqua'}
@@ -1170,10 +1195,10 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                                 onClick={toggleStream}
                             />
                             {gameData.locked ? (
-                                <div className={styles.gameLocked}>
+                                <Row centerY className={styles.gameLocked}>
                                     <LockIconSVG />
                                     <p>Game locked</p>
-                                </div>
+                                </Row>
                             ) : (
                                 <>
                                     <Button
@@ -1222,7 +1247,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                                     />
                                 </Modal>
                             )}
-                        </div>
+                        </Column>
                     )}
                     {gameSettingsModalOpen && (
                         <GameSettingsModal
@@ -1261,23 +1286,63 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                             </div>
                         </div>
                     </Column>
-                    <div className={`${styles.peopleInRoom} hide-scrollbars`}>
-                        <p>{peopleInRoomText()}</p>
-                        {usersRef.current.map((user) => (
-                            <ImageTitle
-                                key={user.socketId}
-                                type='user'
-                                imagePath={user.userData.flagImagePath}
-                                title={isYou(user.socketId) ? 'You' : user.userData.name}
-                                fontSize={16}
-                                imageSize={40}
+                    <Column className={styles.people}>
+                        {videosRef.current.length + (userIsStreaming ? 1 : 0) > 0 && (
+                            <Button
+                                color='blue'
+                                text={`${showVideos ? 'Hide' : 'Show'} videos`}
+                                onClick={() => setShowVideos(!showVideos)}
                                 style={{ marginBottom: 10 }}
                             />
-                        ))}
-                    </div>
-                </div>
-                {/* key={videoRenderKey} */}
-                <div className={`${styles.videos} hide-scrollbars`}>
+                        )}
+                        <Column>
+                            {(videosRef.current.length < 1 || !showVideos) && (
+                                <Column style={{ marginBottom: 10 }}>
+                                    <p style={{ marginBottom: 10 }}>{peopleStreamingText()}</p>
+                                    {userIsStreaming && (
+                                        <ImageTitle
+                                            type='user'
+                                            imagePath={userRef.current.flagImagePath}
+                                            title='You'
+                                            fontSize={16}
+                                            imageSize={40}
+                                            style={{ marginBottom: 10 }}
+                                        />
+                                    )}
+                                    {videosRef.current.map((user) => (
+                                        <ImageTitle
+                                            key={user.socketId}
+                                            type='user'
+                                            imagePath={user.userData.flagImagePath}
+                                            title={user.userData.name}
+                                            fontSize={16}
+                                            imageSize={40}
+                                            style={{ marginBottom: 10 }}
+                                        />
+                                    ))}
+                                </Column>
+                            )}
+                        </Column>
+                        <Column>
+                            <p style={{ marginBottom: 10 }}>{peopleInRoomText()}</p>
+                            {usersRef.current.map((user) => (
+                                <ImageTitle
+                                    key={user.socketId}
+                                    type='user'
+                                    imagePath={user.userData.flagImagePath}
+                                    title={isYou(user.socketId) ? 'You' : user.userData.name}
+                                    fontSize={16}
+                                    imageSize={40}
+                                    style={{ marginBottom: 10 }}
+                                />
+                            ))}
+                        </Column>
+                    </Column>
+                </Column>
+                <Scrollbars
+                    className={`${styles.videos} ${showVideos && styles.visible}`}
+                    style={{ width: findVideoSize() }}
+                >
                     {userIsStreaming && (
                         <Video
                             id='your-video'
@@ -1301,9 +1366,14 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                             />
                         )
                     })}
-                </div>
-            </div>
-            <div className={`${styles.beads} ${showBackgroundVideo && styles.transparent}`}>
+                </Scrollbars>
+            </Row>
+            <Row
+                centerY
+                className={`${styles.beads} ${beads.length && styles.visible} ${
+                    showBackgroundVideo && styles.transparent
+                }`}
+            >
                 {beads.map((bead, index) => (
                     <div key={bead.id} className={styles.beadWrapper}>
                         <div className={styles.bead} id={`bead-${bead.index}`}>
@@ -1328,434 +1398,13 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                         {beads.length > index + 1 && (
                             <div className={styles.beadDivider}>
                                 <DNAIconSVG />
-                                {/* <DNAIconSVG /> */}
                             </div>
                         )}
                     </div>
                 ))}
-            </div>
-        </div>
+            </Row>
+        </Column>
     )
 }
 
 export default GlassBeadGame
-// 1058
-// 1064
-// 1089
-// 1094
-// 1103
-// 1124
-// 1191
-
-/* <div className={styles.dividerLine} />
-<img
-    src='/icons/gbg/infinity.png'
-    alt='infinity'
-    className={styles.dividerConnector}
-/>
-<div className={styles.dividerLine} /> */
-
-// <PlayerPosition
-//     you={player.socketId === socketId}
-//     totalPlayers={players.length}
-//     position={index + 1}
-//     updatePosition={updatePlayerPosition}
-//     socketId={player.socketId}
-//     name={player.name}
-//     flagImagePath={player.flagImagePath}
-// />
-
-// const PlayerPosition = (props) => {
-//     const { you, totalPlayers, position, updatePosition, name, flagImagePath } = props
-//     return (
-//         <Row margin='10px 0 0 0'>
-//             <div className={styles.position}>{position}</div>
-//             <div className={styles.positionControls}>
-//                 {position > 1 && (
-//                     <button type='button' onClick={() => updatePosition(position, position - 1)}>
-//                         <ChevronUpIconSVG />
-//                     </button>
-//                 )}
-//                 {position < totalPlayers && (
-//                     <button type='button' onClick={() => updatePosition(position, position + 1)}>
-//                         <ChevronDownIconSVG />
-//                     </button>
-//                 )}
-//             </div>
-//             <ImageTitle
-//                 type='user'
-//                 imagePath={flagImagePath}
-//                 title={you ? 'You' : name}
-//                 fontSize={16}
-//                 imageSize={35}
-//             />
-//         </Row>
-//     )
-// }
-
-// todo: create gameData state, then remove 'new' from contsants names in game settings modal
-// const [gameId, setGameId] = useState(0)
-// const [locked, setLocked] = useState(false)
-// const [topic, setTopic] = useState('')
-// const [numberOfTurns, setNumberOfTurns] = useState(defaults.numberOfTurns)
-// const [moveDuration, setMoveDuration] = useState(defaults.moveDuration)
-// const [introDuration, setIntroDuration] = useState(defaults.introDuration)
-// const [intervalDuration, setIntervalDuration] = useState(defaults.intervalDuration)
-// const [moveInTurn, setMoveInTurn] = useState(0)
-
-// // game settings modal
-// type InputState = 'default' | 'valid' | 'invalid'
-// const [gameSettingsModalOpen, setGameSettingsModalOpen] = useState(false)
-// const [newNumberOfTurns, setNewNumberOfTurns] = useState(defaults.numberOfTurns)
-// const [newNumberOfTurnsState, setNewNumberOfTurnsState] = useState<InputState>('default')
-// const [newNumberOfTurnsErrors, setNewNumberOfTurnsErrors] = useState<string[]>([])
-// const [newMoveDuration, setNewMoveDuration] = useState(defaults.moveDuration)
-// const [newMoveDurationState, setNewMoveDurationState] = useState<InputState>('default')
-// const [newMoveDurationErrors, setNewMoveDurationErrors] = useState<string[]>([])
-// const [newIntroDuration, setNewIntroDuration] = useState(defaults.introDuration)
-// const [newIntroDurationState, setNewIntroDurationState] = useState<InputState>('default')
-// const [newIntroDurationErrors, setNewIntroDurationErrors] = useState<string[]>([])
-// const [newIntervalDuration, setNewIntervalDuration] = useState(defaults.intervalDuration)
-// const [newIntervalDurationState, setNewIntervalDurationState] = useState<InputState>('default')
-// const [newIntervalDurationErrors, setNewIntervalDurationErrors] = useState<string[]>([])
-// const [invalidPlayersError, setInvalidPlayersError] = useState(false)
-// // todo: remove, start game instead
-// const [loading, setLoading] = useState(false)
-// const [settingsSaved, setSettingsSaved] = useState(false)
-
-// <Modal close={() => closeGameSettingsModal()} centered>
-//     <h1>Game settings</h1>
-//     <p>
-//         Players must connect their audio/video to participate in the
-//         game
-//     </p>
-//     <form onSubmit={signalStartGame}>
-//         <Row margin='10px 0 30px 0'>
-//             <Column margin='0 60px 0 0'>
-//                 <Input
-//                     title='Intro duration (seconds)'
-//                     type='text'
-//                     style={{ marginBottom: 10 }}
-//                     state={newIntroDurationState}
-//                     errors={newIntroDurationErrors}
-//                     value={newIntroDuration}
-//                     onChange={(v) => {
-//                         setNewIntroDurationState('default')
-//                         setNewIntroDuration(+v.replace(/\D/g, ''))
-//                     }}
-//                 />
-//                 <Input
-//                     title='Number of turns'
-//                     type='text'
-//                     style={{ marginBottom: 10 }}
-//                     state={newNumberOfTurnsState}
-//                     errors={newNumberOfTurnsErrors}
-//                     value={newNumberOfTurns}
-//                     onChange={(v) => {
-//                         setNewNumberOfTurnsState('default')
-//                         setNewNumberOfTurns(+v.replace(/\D/g, ''))
-//                     }}
-//                 />
-//                 <Input
-//                     title='Move duration (seconds)'
-//                     type='text'
-//                     style={{ marginBottom: 10 }}
-//                     state={newMoveDurationState}
-//                     errors={newMoveDurationErrors}
-//                     value={newMoveDuration}
-//                     onChange={(v) => {
-//                         setNewMoveDurationState('default')
-//                         setNewMoveDuration(+v.replace(/\D/g, ''))
-//                     }}
-//                 />
-//                 <Input
-//                     title='Interval duration (seconds)'
-//                     type='text'
-//                     style={{ marginBottom: 10 }}
-//                     // disabled={loading || settingsSaved}
-//                     state={newIntervalDurationState}
-//                     errors={newIntervalDurationErrors}
-//                     value={newIntervalDuration}
-//                     onChange={(v) => {
-//                         setNewIntervalDurationState('default')
-//                         setNewIntervalDuration(+v.replace(/\D/g, ''))
-//                     }}
-//                 />
-//             </Column>
-//             <Column margin='0 60px 0 0'>
-//                 <h2>Player order</h2>
-//                 {players.map((player, index) => (
-//                     <PlayerPosition
-//                         you={player.socketId === socketIdRef.current}
-//                         totalPlayers={players.length}
-//                         position={index + 1}
-//                         updatePosition={updatePlayerPosition}
-//                         // setPosition={setPlayerPosition}
-//                         socketId={player.socketId}
-//                         name={player.name}
-//                         flagImagePath={player.flagImagePath}
-//                     />
-//                 ))}
-//                 {!players.length && (
-//                     <p className={styles.noUsersConnected}>
-//                         No users connected...
-//                     </p>
-//                 )}
-//                 {invalidPlayersError && (
-//                     <p className={styles.error}>
-//                         At least one player must connect their
-//                         audio/video
-//                     </p>
-//                 )}
-//             </Column>
-//         </Row>
-//         <Row>
-//             {!settingsSaved && (
-//                 <Button
-//                     text='Start game'
-//                     color='blue'
-//                     disabled={loading}
-//                     submit
-//                 />
-//             )}
-//             {loading && <LoadingWheel />}
-//             {settingsSaved && <SuccessMessage text='Saved' />}
-//         </Row>
-//     </form>
-// </Modal>
-
-// function signalStartGame(e) {
-//     e.preventDefault()
-//     // validate settings
-//     const invalidNumberOfTurns = newNumberOfTurns < 1 || newNumberOfTurns > 20
-//     const invalidMoveDuration = newMoveDuration < 10 || newMoveDuration > 600
-//     const invalidIntroDuration = newIntroDuration < 10 || newIntroDuration > 60
-//     const invalidIntervalDuration = newIntervalDuration < 10 || newIntervalDuration > 60
-//     const invalidPlayers = players.length < 1 || players.length > 20
-//     setNewNumberOfTurnsState(invalidNumberOfTurns ? 'invalid' : 'valid')
-//     setNewNumberOfTurnsErrors(invalidNumberOfTurns ? ['Must be between 1 and 20 turns'] : [])
-//     setNewMoveDurationState(invalidMoveDuration ? 'invalid' : 'valid')
-//     setNewMoveDurationErrors(
-//         invalidMoveDuration ? ['Must be between 10 seconds and 10 minutes'] : []
-//     )
-//     setNewIntroDurationState(invalidIntroDuration ? 'invalid' : 'valid')
-//     setNewIntroDurationErrors(
-//         invalidIntroDuration ? ['Must be between 10 seconds and 1 minute'] : []
-//     )
-//     setNewIntervalDurationState(invalidIntervalDuration ? 'invalid' : 'valid')
-//     setNewIntervalDurationErrors(
-//         invalidIntervalDuration ? ['Must be between 10 seconds and 1 minute'] : []
-//     )
-//     setInvalidPlayersError(invalidPlayers)
-//     // if all valid
-//     if (
-//         !invalidNumberOfTurns &&
-//         !invalidMoveDuration &&
-//         !invalidIntroDuration &&
-//         !invalidIntervalDuration &&
-//         !invalidPlayers
-//     ) {
-//         setLoading(true)
-//         // save new settings in local state
-//         setIntroDuration(newIntroDuration)
-//         setNumberOfTurns(newNumberOfTurns)
-//         setMoveDuration(newMoveDuration)
-//         setIntervalDuration(newIntervalDuration)
-//         // save new settings in db
-//         const data = {
-//             gameId,
-//             numberOfTurns: newNumberOfTurns,
-//             moveDuration: newMoveDuration,
-//             introDuration: newIntroDuration,
-//             intervalDuration: newIntervalDuration,
-//             playerOrder: players.map((p) => p.id).join(','),
-//         }
-//         axios
-//             .post(`${config.apiURL}/save-glass-bead-game-settings`, data)
-//             .then(() => {
-//                 setLoading(false)
-//                 setSettingsSaved(true)
-//                 const signalData = {
-//                     roomId: roomIdRef.current,
-//                     signaller: userRef.current,
-//                     gameData: {
-//                         players,
-//                         introDuration: newIntroDuration,
-//                         numberOfTurns: newNumberOfTurns,
-//                         moveDuration: newMoveDuration,
-//                         intervalDuration: newIntervalDuration,
-//                         turnDuration: players.length * (newMoveDuration + newIntervalDuration),
-//                     },
-//                 }
-//                 socketRef.current.emit('sending-start-game', signalData)
-//                 closeGameSettingsModal()
-//             })
-//             .catch((error) => console.log(error))
-//     }
-// }
-
-// function closeGameSettingsModal() {
-//     setGameSettingsModalOpen(false)
-//     setSettingsSaved(false)
-//     setNewNumberOfTurns(numberOfTurns)
-//     setNewNumberOfTurnsState('default')
-//     setNewNumberOfTurnsErrors([])
-//     setNewMoveDuration(moveDuration)
-//     setNewMoveDurationState('default')
-//     setNewMoveDurationErrors([])
-//     setNewIntroDuration(introDuration)
-//     setNewIntroDurationState('default')
-//     setNewIntroDurationErrors([])
-//     setNewIntervalDuration(intervalDuration)
-//     setNewIntervalDurationState('default')
-//     setNewIntervalDurationErrors([])
-//     setInvalidPlayersError(false)
-// }
-
-// function signalStartGame(data) {
-//     socketRef.current.emit('sending-start-game', data)
-// }
-
-// function updatePlayerPosition(from, to) {
-//     const newPlayers = [...players]
-//     const player = newPlayers[from - 1]
-//     newPlayers.splice(from - 1, 1)
-//     newPlayers.splice(to - 1, 0, player)
-//     setPlayers(newPlayers)
-// }
-
-/* <div
-    className={`${styles.button} ${
-        streamRef.current && styles.danger
-    } mr-10`}
-    role='button'
-    tabIndex={0}
-    onClick={toggleStream}
-    onKeyDown={toggleStream}
->
-    Connect video and audio
-</div> */
-
-/* <div>
-    <p>
-        {totalUsersStreaming}{' '}
-        {isPlural(totalUsersStreaming) ? 'people' : 'person'} streaming
-    </p>
-    {/* {usersRef.current.map((user) => (
-        // if (user.stream) return
-        <ImageTitle
-            key={user.socketId}
-            type='user'
-            imagePath={user.userData.flagImagePath}
-            title={user.userData.name}
-            fontSize={16}
-            imageSize={40}
-            style={{ marginBottom: 10 }}
-        />
-    ))} */
-// </div> */}
-
-/* <div className={styles.gameControls}>
-    <div>
-        <p className='mr-10'>Number of turns</p>
-        <input
-            type='number'
-            className={styles.numberInput}
-            value={numberOfTurns || undefined}
-            onChange={(e) => {
-                setNumberOfTurns(+e.target.value)
-            }}
-        />
-        <p className='mr-10'>Turn duration</p>
-        <input
-            type='number'
-            className={styles.numberInput}
-            value={moveDuration || undefined}
-            onChange={(e) => {
-                setMoveDuration(+e.target.value)
-            }}
-        />
-        <p className='mr-10'>Intro duration</p>
-        <input
-            type='number'
-            className={styles.numberInput}
-            value={introDuration || undefined}
-            onChange={(e) => {
-                setIntroDuration(+e.target.value)
-            }}
-        />
-        <p className='mr-10'>Interval duration</p>
-        <input
-            type='number'
-            className={styles.numberInput}
-            value={intervalDuration || undefined}
-            onChange={(e) => {
-                setIntervalDuration(+e.target.value)
-            }}
-        />
-    </div>
-    {numberOfPlayers > 0 && (
-        <p className='mr-10'>Number of players: {numberOfPlayers}</p>
-    )}
-    {locked ? (
-        <p>Game locked</p>
-    ) : (
-        <>
-            <div
-                className={`${styles.button} ${
-                    gameInProgress && styles.danger
-                }`}
-                role='button'
-                tabIndex={0}
-                onClick={signalStartGame}
-                onKeyDown={signalStartGame}
-            >
-                {gameInProgress ? 'Stop game' : 'Start game'}
-            </div>
-            <div
-                className={styles.button}
-                role='button'
-                tabIndex={0}
-                onClick={saveGame}
-                onKeyDown={saveGame}
-            >
-                Save game
-            </div>
-        </>
-    )}
-</div> */
-/* <div className={`${styles.rightPanel} hide-scrollbars`}>
-     <div className={`${styles.users} hide-scrollbars`}>
-        <div
-            className={`${styles.button} ${
-                streamRef.current && styles.danger
-            } mr-10`}
-            role='button'
-            tabIndex={0}
-            onClick={toggleStream}
-            onKeyDown={toggleStream}
-        >
-            Connect video and audio
-        </div>
-        <p>
-            {usersRef.current.length}{' '}
-            {isPlural(usersRef.current.length) ? 'people' : 'person'} in room
-        </p>
-        {usersRef.current.map((user) => (
-            <div className={styles.user} key={user.socketId}>
-                <FlagImage
-                    type='user'
-                    size={40}
-                    imagePath={user.userData.flagImagePath || null}
-                />
-                <p>{user.userData.name}</p>
-            </div>
-        ))}
-    </div> */
-/* <div className={`${styles.videos} hide-scrollbars`}>
-        {userIsStreaming && <Video mainUser size={findVideoSize()} />}
-        {videosRef.current.map((peer) => {
-            return <Video key={peer.socketId} peer={peer} size={findVideoSize()} />
-        })}
-    </div> 
-</div> */

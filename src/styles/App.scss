@@ -57,6 +57,14 @@ body {
         height: $scrollBarWidth;
     }
 
+    > .os-scrollbar-vertical {
+        height: 100%;
+    }
+
+    > .os-scrollbar-horizontal {
+        width: 100%;
+    }
+
     > .os-scrollbar-vertical, > .os-scrollbar-horizontal {
         //flex-shrink: 0;
         .os-scrollbar-track {
