@@ -156,24 +156,84 @@ $transitionSpeed: 1s;
         }
 
         .videos {
-            $width: 1280;
-            $height: 720;
+            $fullWidth: 1280;
+            $fullHeight: 720;
             $padding: 10px;
-            margin: $padding -450px $padding $padding;
+            margin: $padding;
+            width: 450px;
             border-radius: 5px;
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
             transition: margin $transitionSpeed;
-        
-            &.visible {
-                margin: $padding;
+
+            // sizing
+            // 1 - 2
+            &.xl {
+                $width: $fullWidth / 3 + px;
+                $height: $fullHeight / 3 + px;
+                &.hidden { margin-right: - $width }
+                width: $width;
+                .videoWrapper {
+                    width: $width;
+                    height: $height;
+                    > video {
+                        width: $width;
+                        height: $height;
+                    }
+                }
+            }
+            // 3
+            &.lg {
+                $width: $fullWidth / 4 + px;
+                $height: $fullHeight / 4 + px;
+                &.hidden { margin-right: - $width }
+                width: $width;
+                .videoWrapper {
+                    width: $width;
+                    height: $height;
+                    > video {
+                        width: $width;
+                        height: $height;
+                    }
+                }
+            }
+            // 4
+            &.md {
+                $width: $fullWidth / 5 + px;
+                $height: $fullHeight / 5 + px;
+                &.hidden { margin-right: - $width }
+                width: $width;
+                .videoWrapper {
+                    width: $width;
+                    height: $height;
+                    > video {
+                        width: $width;
+                        height: $height;
+                    }
+                }
+            }
+            // 5 +
+            &.sm {
+                $width: $fullWidth / 6 + px;
+                $height: $fullHeight / 6 + px;
+                &.hidden { margin-right: - $width }
+                width: $width;
+                .videoWrapper {
+                    width: $width;
+                    height: $height;
+                    > video {
+                        width: $width;
+                        height: $height;
+                    }
+                }
             }
         
             .videoWrapper {
                 display: flex;
                 position: relative;
                 margin-bottom: $padding;
+                flex-shrink: 0;
                 &:last-child { margin-bottom: 0 }
                 > svg {
                     position: absolute;
@@ -202,11 +262,14 @@ $transitionSpeed: 1s;
                     position: absolute;
                     bottom: 0;
                     right: 0;
-                    margin: 8px 12px;
+                    padding: 8px 12px;
                     display: flex;
                     > button {
                         all: unset;
                         color: $white;
+                        background-color: rgba($black1, 0.3);
+                        padding: 7px;
+                        border-radius: 50%;
                         cursor: pointer;
                         display: flex;
                         align-items: center;
@@ -215,34 +278,17 @@ $transitionSpeed: 1s;
                             margin-right: 10px;
                         }
                         > svg {
-                            width: 25px;
-                            height: 25px;
-                            opacity: 0.7;
-                            &:hover {
-                                opacity: 1;
-                            }
+                            width: 20px;
+                            height: 20px;
+                            opacity: 0.8;
+                            transition: opacity 0.5s;
+                        }
+                        transition: background-color 0.5s;
+                        &:hover {
+                            background-color: rgba($black1, 0.5);
+                            > svg { opacity: 1 }
                         }
                     }
-                }
-                // 1 - 2
-                &.xl > video {
-                    width: $width / 3 + px;
-                    height: $height / 3 + px;
-                }
-                // 3
-                &.lg > video {
-                        width: $width / 4 + px;
-                        height: $height / 4 + px;
-                }
-                // 4 - 6
-                &.md > video {
-                        width: $width / 5 + px;
-                        height: $height / 5 + px;
-                }
-                // 7 +
-                &.sm > video {
-                    width: $width / 6 + px;
-                    height: $height / 6 + px;
                 }
             }
         }

@@ -42,6 +42,7 @@ import { ReactComponent as DNAIconSVG } from '@svgs/dna.svg'
 import { ReactComponent as LockIconSVG } from '@svgs/lock-solid.svg'
 import { ReactComponent as PlayIconSVG } from '@svgs/play-solid.svg'
 import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
+import { ReactComponent as RefreshIconSVG } from '@svgs/repost.svg'
 
 const gameDefaults = {
     gameId: null,
@@ -76,12 +77,12 @@ const Video = (props) => {
         toggleAudio,
         toggleVideo,
         audioOnly,
+        refreshStream,
     } = props
     return (
         <div className={`${styles.videoWrapper} ${size}`}>
             {audioOnly && <AudioIconSVG />}
             <video id={id} muted autoPlay playsInline>
-                {/* <video id={id} muted={id === 'your-video'} autoPlay playsInline> */}
                 <track kind='captions' />
             </video>
             <div className={styles.videoUser}>
@@ -91,7 +92,7 @@ const Video = (props) => {
                     title={id === 'your-video' ? 'You' : user.name}
                 />
             </div>
-            {id === 'your-video' && (
+            {id === 'your-video' ? (
                 <div className={styles.videoButtons}>
                     <button type='button' onClick={toggleAudio}>
                         {audioEnabled ? <AudioIconSVG /> : <AudioSlashIconSVG />}
@@ -101,6 +102,12 @@ const Video = (props) => {
                             {videoEnabled ? <VideoIconSVG /> : <VideoSlashIconSVG />}
                         </button>
                     )}
+                </div>
+            ) : (
+                <div className={styles.videoButtons}>
+                    <button type='button' onClick={() => refreshStream(id, user)}>
+                        <RefreshIconSVG />
+                    </button>
                 </div>
             )}
         </div>
@@ -321,6 +328,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     const [showComments, setShowComments] = useState(true)
     // const [showBeads, setShowBeads] = useState(false)
     const [showVideos, setShowVideos] = useState(false)
+    const [firstInteractionWithPage, setFirstInteractionWithPage] = useState(true)
     const [newComment, setNewComment] = useState('')
     const [audioTrackEnabled, setAudioTrackEnabled] = useState(true)
     const [videoTrackEnabled, setVideoTrackEnabled] = useState(true)
@@ -427,6 +435,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 userData: userRef.current,
             }
             socketRef.current.emit('stream-disconnected', data)
+            if (!videosRef.current.length) setShowVideos(false)
         } else {
             // set up and signal stream
             setLoadingStream(true)
@@ -449,7 +458,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     }
                     setPlayers((previousPlayers) => [...previousPlayers, newPlayer])
                     setLoadingStream(false)
-                    setShowVideos(true)
+                    openVideoWall()
                 })
                 .catch(() => {
                     console.log('Unable to connect video, trying audio only...')
@@ -473,6 +482,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                             }
                             setPlayers((previousPlayers) => [...previousPlayers, newPlayer])
                             setLoadingStream(false)
+                            openVideoWall()
                         })
                         .catch(() => {
                             setAlertMessage('Unable to connect media devices')
@@ -481,6 +491,81 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                         })
                 })
         }
+    }
+
+    // todo: set up general createPeer function
+    // function createPeer(isInitiator) { }
+
+    function refreshStream(socketId, user) {
+        // singal refresh request
+        socketRef.current.emit('outgoing-refresh-request', {
+            userToSignal: socketId,
+            userSignaling: {
+                socketId: socketRef.current.id,
+                userData: userRef.current,
+            },
+        })
+        // destory old peer connection
+        const peerObject = peersRef.current.find((p) => p.socketId === socketId)
+        if (peerObject) {
+            peerObject.peer.destroy()
+            peersRef.current = peersRef.current.filter((p) => p.socketId !== socketId)
+            videosRef.current = videosRef.current.filter((v) => v.socketId !== socketId)
+            setPlayers((ps) => [...ps.filter((p) => p.socketId !== socketId)])
+        }
+        // create new peer connection
+        const peer = new Peer({
+            initiator: true,
+            // reconnectTimer: 2000,
+            config: iceConfig,
+            stream: streamRef.current,
+        })
+        peer.on('signal', (data) => {
+            socketRef.current.emit('sending-signal', {
+                userToSignal: socketId,
+                userSignaling: {
+                    socketId: socketRef.current.id,
+                    userData: userRef.current,
+                },
+                signal: data,
+            })
+        })
+        // peer.on('connect', () => console.log('connected'))
+        peer.on('stream', (stream) => {
+            videosRef.current.push({
+                socketId,
+                userData: user,
+                peer,
+                audioOnly: !stream.getVideoTracks().length,
+            })
+            pushComment(`${user.name}'s video connected`)
+            const video = document.getElementById(socketId) as HTMLVideoElement
+            if (video) {
+                video.srcObject = stream
+                video.muted = false
+                video.play()
+            }
+            const newPlayer = {
+                id: user.id,
+                name: user.name,
+                flagImagePath: user.flagImagePath,
+                socketId,
+            }
+            setPlayers((previousPlayers) => [...previousPlayers, newPlayer])
+        })
+        peer.on('close', () => {
+            peer.destroy()
+        })
+        peer.on('error', (error) => {
+            console.log(error)
+            // handle error
+        })
+
+        peersRef.current.push({
+            socketId,
+            userData: user,
+            peer,
+        })
     }
 
     function toggleAudioTrack() {
@@ -785,6 +870,21 @@ const GlassBeadGame = ({ history }): JSX.Element => {
         // if (video) video.playVideo()
     }
 
+    function openVideoWall() {
+        if (firstInteractionWithPage) {
+            // unmute videos
+            videosRef.current.forEach((v) => {
+                const video = document.getElementById(v.socketId) as HTMLVideoElement
+                if (video) {
+                    video.muted = false
+                    video.play()
+                }
+            })
+            setFirstInteractionWithPage(false)
+        }
+        setShowVideos(true)
+    }
+
     // // const history = useHistory()
     // useEffect(() => {
     //     console.log('history: ', history)
@@ -903,10 +1003,18 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                             const video = document.getElementById(user.socketId) as HTMLVideoElement
                             if (video) {
                                 video.srcObject = stream
-                                console.log('video.play()')
-                                // video.play()
-                                // video.muted = false
+                                if (showVideos) {
+                                    video.muted = false
+                                    video.play()
+                                }
                             }
+                            const newPlayer = {
+                                id: user.userData.id,
+                                name: user.userData.name,
+                                flagImagePath: user.userData.flagImagePath,
+                                socketId: user.socketId,
+                            }
+                            setPlayers((previousPlayers) => [...previousPlayers, newPlayer])
                         })
                         peer.on('close', () => {
                             peer.destroy()
@@ -959,43 +1067,25 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     })
                     peer.on('signal', (data) => {
                         socketRef.current.emit('returning-signal', {
+                            userToSignal: socketId,
                             signal: data,
-                            callerID: socketId,
                         })
                     })
+                    peer.on('connect', () => console.log('connect 2'))
                     peer.on('stream', (stream) => {
+                        console.log('stream 2')
                         videosRef.current.push({
                             socketId,
                             userData,
                             peer,
                             audioOnly: !stream.getVideoTracks().length,
                         })
-                        // setVideoRenderKey(videoRenderKey + 1)
                         pushComment(`${userData.name}'s video connected`)
-                        // const waitForVideo = setInterval(() => {
-                        //     const video = document.getElementById(socketId) as HTMLVideoElement
-                        //     console.log('wait')
-                        //     if (video) {
-                        //         video.srcObject = stream
-                        //         const newPlayer = {
-                        //             id: userData.id,
-                        //             name: userData.name,
-                        //             flagImagePath: userData.flagImagePath,
-                        //             socketId,
-                        //         }
-                        //         setPlayers((previousPlayers) => [...previousPlayers, newPlayer])
-                        //         pushComment(`${userData.name}'s video connected`)
-                        //         // setVideoRenderKey(videoRenderKey + 1)
-                        //         clearInterval(waitForVideo)
-                        //     }
-                        // }, 100)
+
                         const video = document.getElementById(socketId) as HTMLVideoElement
-                        // causing error if no video:
-                        if (video) {
-                            video.srcObject = stream
-                            // video.play()
-                            // video.muted = false
-                        } else console.log('cant find video 2')
+                        if (video) video.srcObject = stream
+                        else console.log('cant find video 2')
+
                         const newPlayer = {
                             id: userData.id,
                             name: userData.name,
@@ -1077,11 +1167,24 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 setBeads((previousBeads) => [...previousBeads, data])
                 d3.select(`#bead-${data.index}`).select('audio').attr('src', data.beadUrl)
             })
+
+            socketRef.current.on('incoming-refresh-request', (data) => {
+                console.log('incoming-refresh-request: ', data)
+                const { id } = data
+                // remove old peer if present
+                const peerObject = peersRef.current.find((p) => p.socketId === id)
+                if (peerObject) {
+                    peerObject.peer.destroy()
+                    peersRef.current = peersRef.current.filter((p) => p.socketId !== id)
+                    videosRef.current = videosRef.current.filter((v) => v.socketId !== id)
+                    setPlayers((ps) => [...ps.filter((p) => p.socketId !== id)])
+                }
+            })
             // stream disconnected
             socketRef.current.on('stream-disconnected', (data) => {
-                // console.log('peersRef.current: ', peersRef.current)
                 const { socketId, userData } = data
                 videosRef.current = videosRef.current.filter((v) => v.socketId !== socketId)
+                if (!videosRef.current.length && !streamRef.current) setShowVideos(false)
                 setPlayers((ps) => [...ps.filter((p) => p.socketId !== socketId)])
                 pushComment(`${userData.name}'s stream disconnected`)
             })
@@ -1091,6 +1194,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     }, [postData.id, accountDataLoading])
 
     useEffect(() => {
+        // create timer canvas
         const svg = d3
             .select('#timer')
             .append('svg')
@@ -1296,12 +1400,14 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                             <Button
                                 color='blue'
                                 text={`${showVideos ? 'Hide' : 'Show'} videos`}
-                                onClick={() => setShowVideos(!showVideos)}
+                                onClick={() =>
+                                    showVideos ? setShowVideos(false) : openVideoWall()
+                                }
                                 style={{ marginBottom: 10 }}
                             />
                         )}
                         <Column>
-                            {(videosRef.current.length < 1 || !showVideos) && (
+                            {!showVideos && (
                                 <Column style={{ marginBottom: 10 }}>
                                     <p style={{ marginBottom: 10 }}>{peopleStreamingText()}</p>
                                     {userIsStreaming && (
@@ -1345,8 +1451,9 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     </Column>
                 </Column>
                 <Scrollbars
-                    className={`${styles.videos} ${showVideos && styles.visible}`}
-                    style={{ width: findVideoSize() }}
+                    className={`${styles.videos} ${findVideoSize()} ${
+                        !showVideos && styles.hidden
+                    }`}
                 >
                     {userIsStreaming && (
                         <Video
@@ -1368,6 +1475,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                                 user={v.userData}
                                 size={findVideoSize()}
                                 audioOnly={v.audioOnly}
+                                refreshStream={refreshStream}
                             />
                         )
                     })}
@@ -1413,3 +1521,9 @@ const GlassBeadGame = ({ history }): JSX.Element => {
 }
 
 export default GlassBeadGame
+
+// peer.on('iceStateChange', (iceConnectionState, iceGatheringState) => {
+//     console.log('ice', iceConnectionState, iceGatheringState)
+// })
+
+// peer._debug = console.log
