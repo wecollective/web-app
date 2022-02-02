@@ -32,6 +32,7 @@ import SuccessMessage from '@components/SuccessMessage'
 import Row from '@components/Row'
 import Column from '@components/Column'
 import Scrollbars from '@components/Scrollbars'
+import Markdown from '@components/Markdown'
 import { ReactComponent as AudioIconSVG } from '@svgs/microphone-solid.svg'
 import { ReactComponent as AudioSlashIconSVG } from '@svgs/microphone-slash-solid.svg'
 import { ReactComponent as VideoIconSVG } from '@svgs/video-solid.svg'
@@ -120,21 +121,21 @@ const Comment = (props) => {
     const { user, text, createdAt } = comment
     if (user)
         return (
-            <div className={styles.userComment}>
+            <Row className={styles.userComment}>
                 <FlagImage type='user' size={40} imagePath={user.flagImagePath} />
-                <div className={styles.commentText}>
-                    <Row>
+                <Column className={styles.textWrapper}>
+                    <Row className={styles.header}>
                         <h1>{user.name}</h1>
                         <p title={dateCreated(createdAt)}>{timeSinceCreated(createdAt)}</p>
                     </Row>
-                    <p>{text}</p>
-                </div>
-            </div>
+                    <Markdown text={text} />
+                </Column>
+            </Row>
         )
     return (
-        <div className={styles.adminComment}>
+        <Row className={styles.adminComment}>
             <p>{text}</p>
-        </div>
+        </Row>
     )
 }
 
@@ -532,6 +533,8 @@ const GlassBeadGame = ({ history }): JSX.Element => {
         })
         // peer.on('connect', () => console.log('connected'))
         peer.on('stream', (stream) => {
+            console.log('a stream: ', stream)
+            console.log('a stream.getVideoTracks(): ', stream.getVideoTracks())
             videosRef.current.push({
                 socketId,
                 userData: user,
@@ -993,6 +996,8 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                         })
                         peer.on('connect', () => console.log('connect 1'))
                         peer.on('stream', (stream) => {
+                            console.log('b stream: ', stream)
+                            console.log('b stream.getVideoTracks(): ', stream.getVideoTracks())
                             videosRef.current.push({
                                 socketId: user.socketId,
                                 userData: user.userData,
@@ -1073,7 +1078,8 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     })
                     peer.on('connect', () => console.log('connect 2'))
                     peer.on('stream', (stream) => {
-                        console.log('stream 2')
+                        console.log('c stream: ', stream)
+                        console.log('c stream.getVideoTracks(): ', stream.getVideoTracks())
                         videosRef.current.push({
                             socketId,
                             userData,

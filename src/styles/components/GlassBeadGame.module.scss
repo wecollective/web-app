@@ -55,18 +55,16 @@ $transitionSpeed: 1s;
             .comments {
                 position: relative;
                 padding: 10px;
-                // width: 350px;
 
                 .userComment {
-                    display: flex;
-                    flex-direction: row;
                     margin-bottom: 10px;
                     overflow: hidden;
-                    .commentText {
+
+                    .textWrapper {
                         margin-left: 10px;
                         width: calc(100% - 50px);
-                        // header
-                        > div {
+
+                        .header {
                             > h1 {
                                 font-size: 14px;
                                 font-weight: 800;
@@ -74,25 +72,22 @@ $transitionSpeed: 1s;
                                 overflow-wrap: break-word;
                             }
                             > p {
-                                margin-left: 3px;
-                                font-size: 14px;
+                                margin-left: 5px;
                                 color: $grey4;
                                 overflow-wrap: break-word;
                             }
                         }
-                        // comment
-                        > p {
+
+                        p {
                             font-size: 14px;
-                            overflow-wrap: break-word;
+                            line-height: 20px;
                         }
                     }
                 }
 
                 .adminComment {
-                    display: flex;
-                    flex-direction: row;
                     margin-bottom: 10px;
-                    color: rgb(163, 163, 163);
+                    color: $grey4;
                 }
             }
 

@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
-import styles from '../styles/components/Markdown.module.scss'
+import styles from '@styles/components/Markdown.module.scss'
 
 const Markdown = (props: { text: string }): JSX.Element => {
     const { text } = props
