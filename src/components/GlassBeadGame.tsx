@@ -43,6 +43,7 @@ import { ReactComponent as LockIconSVG } from '@svgs/lock-solid.svg'
 import { ReactComponent as PlayIconSVG } from '@svgs/play-solid.svg'
 import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
 import { ReactComponent as RefreshIconSVG } from '@svgs/repost.svg'
+import { ReactComponent as CurvedDNASVG } from '@svgs/curved-dna.svg'
 
 const gameDefaults = {
     gameId: null,
@@ -326,7 +327,6 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     const [beads, setBeads] = useState<any[]>([])
     const [comments, setComments] = useState<any[]>([])
     const [showComments, setShowComments] = useState(true)
-    // const [showBeads, setShowBeads] = useState(false)
     const [showVideos, setShowVideos] = useState(false)
     const [firstInteractionWithPage, setFirstInteractionWithPage] = useState(true)
     const [newComment, setNewComment] = useState('')
@@ -1295,6 +1295,12 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                         </Column>
                     ) : (
                         <Column className={styles.gameControls}>
+                            {gameData.locked && (
+                                <Row centerY className={styles.gameLocked}>
+                                    <LockIconSVG />
+                                    <p>Game locked</p>
+                                </Row>
+                            )}
                             <Button
                                 text={`${userIsStreaming ? 'Disconnect' : 'Connect'} audio/video`}
                                 color={userIsStreaming ? 'red' : 'aqua'}
@@ -1303,12 +1309,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                                 disabled={loadingStream}
                                 onClick={toggleStream}
                             />
-                            {gameData.locked ? (
-                                <Row centerY className={styles.gameLocked}>
-                                    <LockIconSVG />
-                                    <p>Game locked</p>
-                                </Row>
-                            ) : (
+                            {!gameData.locked && (
                                 <>
                                     <Button
                                         text={`${beads.length ? 'Restart' : 'Start'} game`}
@@ -1369,20 +1370,9 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                         />
                     )}
                     <Column centerX>
+                        <CurvedDNASVG className={styles.curvedDNA} />
                         <h1 style={{ margin: 0 }}>{gameData.topic}</h1>
                         <div className={styles.topic}>{findTopicImage(gameData.topic)}</div>
-                        <div className={`${styles.dna} ${styles.top}`}>
-                            <DNAIconSVG />
-                            <DNAIconSVG />
-                            <DNAIconSVG />
-                            <DNAIconSVG />
-                        </div>
-                        <div className={`${styles.dna} ${styles.bottom}`}>
-                            <DNAIconSVG />
-                            <DNAIconSVG />
-                            <DNAIconSVG />
-                            <DNAIconSVG />
-                        </div>
                         <div id='timer' className={styles.timer}>
                             <div className={styles.timerArcTitles}>
                                 <p>Game</p>
@@ -1483,7 +1473,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             </Row>
             <Row
                 centerY
-                className={`${styles.beads} ${beads.length && styles.visible} ${
+                className={`${styles.beads} ${!beads.length && styles.hidden} ${
                     showBackgroundVideo && styles.transparent
                 }`}
             >

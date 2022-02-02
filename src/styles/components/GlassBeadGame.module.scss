@@ -2,6 +2,11 @@
 
 $transitionSpeed: 1s;
 
+@keyframes fadeInOpacity {
+	0% { opacity: 0 }
+	100% { opacity: 1 }
+}
+
 .wrapper {
     padding-top: 60px;
     width: 100%;
@@ -33,6 +38,7 @@ $transitionSpeed: 1s;
             background-color: $white;
             flex-shrink: 0;
             transition: margin-left $transitionSpeed;
+            z-index: $sidebarZIndex;
 
             &.hidden { margin-left: -330px }
 
@@ -141,6 +147,69 @@ $transitionSpeed: 1s;
                     }
                     > p {
                         color: $grey5;
+                    }
+                }
+            }
+
+            .curvedDNA {
+                position: absolute;
+                top: 160px;
+                height: calc(100vh - 200px);
+                color: $grey3;
+            }
+
+            .topic {
+                width: 140px;
+                height: 140px;
+                border-radius: 50%;
+                background-color: #fbfbfb;
+                box-shadow: 0 0 10px 0 rgba(10, 8, 72, 0.15);
+                margin: 10px 0 30px 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 3;
+                > img {
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 50%;
+                    object-fit: cover;
+                }
+            }
+
+            .timer {
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 3;
+                > .timerArcTitles {
+                    position: absolute;
+                    top: -1px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    > p {
+                        margin-bottom: 8px;
+                    }
+                    > span {
+                        font-size: 24px;
+                    }
+                }
+                > .mainBead {
+                    width: 160px;
+                    height: 160px;
+                    position: absolute;
+                    // border: 2px solid $grey3;
+                    background-color: #fbfbfb;
+                    border-radius: 10px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-shadow: 0 1px 10px 0 rgba(10, 8, 72, 0.15);
+                    > img {
+                        width: 120px;
+                        height: 120px;
                     }
                 }
             }
@@ -293,8 +362,88 @@ $transitionSpeed: 1s;
             }
         }
     }
+
+    .beads {
+        position: absolute;
+        bottom: 0;
+        padding: 0 40px;
+        background-color: rgba($grey1, 0.5);
+        border-top: 1px solid #ddd;
+        height: 200px;
+        width: 100%;
+        flex-shrink: 0;
+        overflow-x: scroll;
+        transition: height $transitionSpeed;
+    
+        &.hidden { height: 0 }
+    
+        &.transparent {
+            background-color: rgba($white, 0.3);
+        }
+
+        .beadWrapper {
+            display: flex;
+            flex-direction: row;
+
+            .bead {
+                position: relative;
+                width: 140px;
+                height: 140px;
+                background-color: white;
+                box-shadow: 0 1px 10px 0 rgba(10, 8, 72, 0.15);
+                border-radius: 10px;
+                padding: 10px;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                opacity: 1;
+                animation-name: fadeInOpacity;
+                animation-timing-function: ease-in;
+                animation-duration: 1s;
+                > audio {
+                    width: 100px;
+                }
+                > img {
+                    position: absolute;
+                    width: 80px;
+                    height: 80px;
+                    left: calc(50% - 40px);
+                    top: calc(50% - 40px);
+                }
+                .beadControls {
+                    display: flex;
+                    > button {
+                        all: unset;
+                        cursor: pointer;
+                        display: flex;
+                        > svg {
+                            height: 18px;
+                            color: $blue5;
+                        }
+                    }
+                }
+            }
+        }
+
+        .beadDivider {
+            width: 50px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            opacity: 1;
+            animation-name: fadeInOpacity;
+            animation-timing-function: ease-in;
+            animation-duration: 2s;
+            > svg {
+                transform: rotate(90deg);
+                height: 50px;
+                color: $grey3;
+            }
+        }
+    }
 }
 
+// game settings modal
 .position {
     width: 35px;
     height: 35px;
@@ -305,6 +454,7 @@ $transitionSpeed: 1s;
     justify-content: center;
     align-items: center;
 }
+
 .positionControls {
     height: 35px;
     margin-right: 10px;
@@ -315,7 +465,6 @@ $transitionSpeed: 1s;
         all: unset;
         cursor: pointer;
         display: flex;
-        //justify-content: center;
         color: $grey4;
         &:hover {
             color: $grey5;
@@ -332,234 +481,13 @@ $transitionSpeed: 1s;
     }
     
 }
-.topic {
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    background-color: #fbfbfb;
-    box-shadow: 0 0 10px 0 rgba(10, 8, 72, 0.15);
-    margin: 10px 0 30px 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 3;
-    > img {
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        object-fit: cover;
-    }
-}
-.topDNA {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    z-index: 1;
-    color: $grey2;
-    > svg {
-        height: 45px;
-    }
-}
-.dna {
-    &.top { top: 196px }
-    &.bottom { top: 500px }
-    position: absolute;
-    
-    display: flex;
-    flex-direction: column;
-    z-index: 1;
-    color: #e6e9ef; // $grey3; //#c3dbff; //rgb(253, 213, 125);
-    > svg {
-        height: 45px;
-    }
-}
-.timer {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 3;
-    > .timerArcTitles {
-        position: absolute;
-        top: -1px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        > p {
-            margin-bottom: 8px;
-        }
-        > span {
-            font-size: 24px;
-        }
-    }
-    > .mainBead {
-        width: 160px;
-        height: 160px;
-        position: absolute;
-        // border: 2px solid $grey3;
-        background-color: #fbfbfb;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 1px 10px 0 rgba(10, 8, 72, 0.15);
-        > img {
-            width: 120px;
-            height: 120px;
-        }
-    }
-}
+
 .grey {
     margin-top: 10px;
     color: $grey5;
 }
+
 .red {
     margin-top: 10px;
     color: $red;
-}
-.recordingFlag {
-    width: 15px;
-    height: 15px;
-    border-radius: 50%;
-    margin-left: 10px;
-    &.recording {
-        background-color: $red;
-    }
-    &.recordingNext {
-        background-color: $orange;
-    }
-}
-.soundWaveIcon {
-    width: 200px;
-    height: 200px;
-}
-.beads {
-    position: absolute;
-    bottom: -200px;
-    padding: 0 40px;
-    background-color: $grey1;
-    border-top: 1px solid #ddd;
-    height: 200px;
-    width: 100%;
-    flex-shrink: 0;
-    overflow-x: scroll;
-    transition: bottom $transitionSpeed;
-
-    &.visible { bottom: 0 }
-
-    &.transparent {
-        background-color: rgba($white, 0.3);
-    }
-}
-@keyframes fadeInOpacity {
-	0% { opacity: 0 }
-	100% { opacity: 1 }
-}
-.beadWrapper {
-    display: flex;
-    flex-direction: row;
-}
-.bead {
-    position: relative;
-    width: 140px;
-    height: 140px;
-    background-color: white;
-    box-shadow: 0 1px 10px 0 rgba(10, 8, 72, 0.15);
-    border-radius: 10px;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    // align-items: center;
-    opacity: 1;
-	animation-name: fadeInOpacity;
-	animation-timing-function: ease-in;
-	animation-duration: 1s;
-    > audio {
-        width: 100px;
-    }
-    // > img {
-    //     /// position: absolute;
-    //     width: 70px;
-    //     height: 70px;
-    // }
-    > img {
-        position: absolute;
-        width: 80px;
-        height: 80px;
-        left: calc(50% - 40px);
-        top: calc(50% - 40px);
-    }
-    .beadControls {
-        // height: 15px;
-        // // position: absolute;
-        display: flex;
-        // // align-items: center;
-        // // justify-content: center;
-        // width: 100%;
-        > button {
-            all: unset;
-            cursor: pointer;
-            display: flex;
-            > svg {
-                height: 18px;
-                color: $blue5;
-                // width: 15px;
-                // opacity: 0.5;
-                // color: rgb(198, 226, 252);
-            }
-        }
-    }
-}
-.beadText {
-    
-}
-.beadDivider {
-    width: 50px;
-    display: flex;
-    flex-direction: row;
-    //justify-content: center;
-    align-items: center;
-    opacity: 1;
-	animation-name: fadeInOpacity;
-	animation-timing-function: ease-in;
-	animation-duration: 2s;
-    > svg {
-        transform: rotate(90deg);
-        height: 50px;
-        color: $grey3;
-    }
-}
-.dividerLine {
-    height: 2px;
-    width: 40px;
-    background-color: #ddd;
-}
-.dividerConnector {
-    height: 40px;
-    width: 40px;
-}
-// .gameControls {
-//     margin-top: 10px;
-//     display: flex;
-//     flex-direction: column;
-//     align-items: center;
-//     > div {
-//         display: flex;
-//         align-items: center;
-//         margin-bottom: 10px;
-//         &:last-child {
-//             margin-bottom: 0;
-//         }
-//     }
-// }
-.numberInput {
-    border: none;
-    background-color: white;
-    width: 60px;
-    height: 40px;
-    border-radius: 5px;
-    font-size: 16px;
-    margin-right: 20px;
-    padding: 5px 10px;
 }
