@@ -12,25 +12,15 @@ import Column from '@components/Column'
 import Row from '@components/Row'
 import Input from '@components/Input'
 import Button from '@components/Button'
-import LoadingWheel from '@components/LoadingWheel'
 import SuccessMessage from '@components/SuccessMessage'
 import DropDownMenu from '@components/DropDownMenu'
 import SearchSelector from '@components/SearchSelector'
 import ImageTitle from '@components/ImageTitle'
 import CloseButton from '@components/CloseButton'
 import PostCard from '@components/Cards/PostCard/PostCard'
-import { allValid, defaultErrorState } from '@src/Functions'
+import { allValid, defaultErrorState, isValidUrl } from '@src/Functions'
 import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
-
-// todo: create custom regex and add to @src/Functions
-function isValidUrl(string) {
-    try {
-        new URL(string)
-    } catch (_) {
-        return false
-    }
-    return true
-}
+import Scrollbars from '@components/Scrollbars'
 
 const CreatePostModal = (): JSX.Element => {
     // todo: set create post modal open in page instead of account context
@@ -53,17 +43,25 @@ const CreatePostModal = (): JSX.Element => {
             value: '',
             ...defaultErrorState,
         },
+        topicGroup: {
+            value: '',
+            ...defaultErrorState,
+        },
+        topicImage: {
+            value: '',
+            ...defaultErrorState,
+        },
     })
-    const { postType, text, url, topic } = formData
+    const { postType, text, url, topic, topicGroup, topicImage } = formData
     const [spaceOptions, setSpaceOptions] = useState<any[]>([])
     const [selectedSpaces, setSelectedSpaces] = useState<any[]>([])
-    const [topicOptions, setTopicOptions] = useState<any[]>([])
-    const [selectedArchetopic, setSelectedArchetopic] = useState<any>(null)
     const [urlLoading, setUrlLoading] = useState(false)
     const [urlImage, setUrlImage] = useState(null)
     const [urlDomain, setUrlDomain] = useState(null)
     const [urlTitle, setUrlTitle] = useState(null)
     const [urlDescription, setUrlDescription] = useState(null)
+    const [selectedTopicGroup, setSelectedTopicGroup] = useState('archetopics')
+    const [selectedTopic, setSelectedTopic] = useState<any>(null)
     const [loading, setLoading] = useState(false)
     const [saved, setSaved] = useState(false)
     const [previewRenderKey, setPreviewRenderKey] = useState(0)
@@ -76,12 +74,13 @@ const CreatePostModal = (): JSX.Element => {
                 text: { ...formData.text, state: 'default' },
                 url: { ...formData.url, value: '', state: 'default' },
                 topic: { ...formData.topic, value: '', state: 'default' },
+                topicGroup: { ...formData.topicGroup, value: '', state: 'default' },
+                topicImage: { ...formData.topicImage, value: '', state: 'default' },
             }
             setUrlImage(null)
             setUrlDomain(null)
             setUrlTitle(null)
             setUrlDescription(null)
-            setSelectedArchetopic(null)
         }
         setFormData({
             ...formData,
@@ -113,24 +112,7 @@ const CreatePostModal = (): JSX.Element => {
         setSelectedSpaces((s) => [...s.filter((space) => space.id !== spaceId)])
     }
 
-    function findTopics(query) {
-        const { archetopics, liminal } = GlassBeadGameTopics
-        const allGBGTopics = [...archetopics, ...liminal]
-        const filteredTopics = allGBGTopics.filter((t) =>
-            t.name.toLowerCase().includes(query.toLowerCase())
-        )
-        setTopicOptions(filteredTopics)
-        updateValue('topic', query)
-    }
-
-    function selectTopic(selectedTopic) {
-        setTopicOptions([])
-        setSelectedArchetopic(selectedTopic)
-        updateValue('topic', selectedTopic.name)
-    }
-
     const scrapeURL = (urlString: string): void => {
-        // set up better url regex
         if (isValidUrl(urlString)) {
             setUrlLoading(true)
             axios
@@ -177,7 +159,15 @@ const CreatePostModal = (): JSX.Element => {
             topic: {
                 ...topic,
                 required: postType.value === 'Glass Bead Game',
-                validate: (v) => (!selectedArchetopic && !v ? ['Required'] : []),
+                validate: (v) => (!selectedTopic && !v ? ['Required'] : []),
+            },
+            topicGroup: {
+                ...topicGroup,
+                required: false,
+            },
+            topicImage: {
+                ...topicImage,
+                required: false,
             },
         }
         if (allValid(newFormData, setFormData)) {
@@ -190,7 +180,9 @@ const CreatePostModal = (): JSX.Element => {
                 urlDomain,
                 urlTitle,
                 urlDescription,
-                topic: selectedArchetopic ? selectedArchetopic.name : topic.value,
+                topic: selectedTopic ? selectedTopic.name : topic.value,
+                topicGroup: selectedTopic ? selectedTopicGroup : null,
+                topicImage: selectedTopic ? selectedTopic.imagePath : null,
                 spaceHandles: [...selectedSpaces.map((s) => s.handle), spaceData.handle],
             }
             const accessToken = cookies.get('accessToken')
@@ -208,20 +200,51 @@ const CreatePostModal = (): JSX.Element => {
                     })
                     const newPost = {
                         ...res.data,
-                        total_comments: 0,
-                        total_reactions: 0,
+                        totalLikes: 0,
+                        totalComments: 0,
+                        totalReposts: 0,
+                        totalRatings: 0,
+                        totalLinks: 0,
                         Creator: {
                             handle: accountData.handle,
                             name: accountData.name,
                             flagImagePath: accountData.flagImagePath,
                         },
                         DirectSpaces,
-                        GlassBeadGame: { topic: topic.value, GlassBeads: [] },
+                        GlassBeadGame: {
+                            topic: selectedTopic ? selectedTopic.name : topic.value,
+                            topicGroup: selectedTopic ? selectedTopicGroup : null,
+                            topicImage: selectedTopic ? selectedTopic.imagePath : null,
+                            GlassBeads: [],
+                        },
+                        Reactions: [],
+                        IncomingLinks: [],
+                        OutgoingLinks: [],
                     }
                     setSpacePosts([newPost, ...spacePosts])
                     setTimeout(() => setCreatePostModalOpen(false), 1000)
                 })
                 .catch((error) => console.log(error))
+        }
+    }
+
+    function textTitle() {
+        switch (postType.value) {
+            case 'Url':
+                return 'Text (not required for url posts)'
+            case 'Glass Bead Game':
+                return 'Add a description for the game'
+            default:
+                return 'Text'
+        }
+    }
+
+    function textPlaceholder() {
+        switch (postType.value) {
+            case 'Glass Bead Game':
+                return 'description...'
+            default:
+                return 'text...'
         }
     }
 
@@ -237,7 +260,6 @@ const CreatePostModal = (): JSX.Element => {
                     {spaceData.name}
                 </Link>
             </h1>
-
             <form onSubmit={createPost}>
                 <Column style={{ width: 700 }}>
                     <DropDownMenu
@@ -250,36 +272,68 @@ const CreatePostModal = (): JSX.Element => {
                     />
                     {postType.value === 'Glass Bead Game' && (
                         <Column style={{ marginTop: 5 }}>
-                            <SearchSelector
-                                type='topic'
-                                title='Choose a topic for the game'
-                                placeholder={
-                                    selectedArchetopic ? 'archetopic selected' : 'topic...'
-                                }
-                                style={{ marginBottom: 15 }}
+                            <Input
+                                title='Create a custom topic for the game'
+                                type='text'
+                                placeholder={selectedTopic ? 'topic selected' : 'custom topic...'}
                                 state={topic.state}
-                                disabled={!!selectedArchetopic}
                                 errors={topic.errors}
-                                onSearchQuery={(query) => findTopics(query)}
-                                onOptionSelected={(selectedTopic) => selectTopic(selectedTopic)}
-                                options={topicOptions}
+                                value={topic.value}
+                                disabled={selectedTopic}
+                                onChange={(value) => updateValue('topic', value)}
+                                style={{ marginBottom: 15 }}
                             />
-                            {selectedArchetopic && (
-                                <Row style={{ margin: '0 10px 10px 0' }} centerY>
-                                    <ImageTitle
-                                        type='space'
-                                        imagePath={selectedArchetopic.imagePath}
-                                        title={selectedArchetopic.name}
-                                        style={{ marginRight: 5 }}
-                                    />
-                                    <CloseButton
-                                        size={17}
-                                        onClick={() => {
-                                            setSelectedArchetopic(null)
-                                            updateValue('topic', '')
-                                        }}
-                                    />
+                            <p>Or select a topic from one of the topic groups below</p>
+                            <Row style={{ margin: '10px 0' }}>
+                                <Button
+                                    text='Archetopics'
+                                    color={selectedTopicGroup === 'archetopics' ? 'blue' : 'grey'}
+                                    onClick={() => setSelectedTopicGroup('archetopics')}
+                                    style={{ marginRight: 10 }}
+                                />
+                                <Button
+                                    text='Liminal'
+                                    color={selectedTopicGroup === 'liminal' ? 'blue' : 'grey'}
+                                    onClick={() => setSelectedTopicGroup('liminal')}
+                                />
+                            </Row>
+                            <Scrollbars className={styles.topics}>
+                                <Row wrap>
+                                    {GlassBeadGameTopics[selectedTopicGroup].map((t) => (
+                                        <Row className={styles.topicWrapper}>
+                                            <ImageTitle
+                                                type='space'
+                                                imagePath={t.imagePath}
+                                                imageSize={25}
+                                                title={t.name}
+                                                fontSize={12}
+                                                onClick={() => {
+                                                    setSelectedTopic(t)
+                                                    updateValue('topic', '')
+                                                }}
+                                            />
+                                        </Row>
+                                    ))}
                                 </Row>
+                            </Scrollbars>
+                            {selectedTopic && (
+                                <Column className={styles.selectedTopic}>
+                                    <p>Selected topic:</p>
+                                    <Row centerY className={styles.selectedTopicWrapper}>
+                                        <ImageTitle
+                                            type='space'
+                                            imagePath={selectedTopic.imagePath}
+                                            imageSize={25}
+                                            title={selectedTopic.name}
+                                            fontSize={12}
+                                            style={{ marginRight: 10 }}
+                                        />
+                                        <CloseButton
+                                            size={17}
+                                            onClick={() => setSelectedTopic(null)}
+                                        />
+                                    </Row>
+                                </Column>
                             )}
                         </Column>
                     )}
@@ -300,11 +354,9 @@ const CreatePostModal = (): JSX.Element => {
                         />
                     )}
                     <Input
-                        title={`Text${
-                            postType.value === 'Url' ? ' (not required for url posts)' : ''
-                        }`}
+                        title={textTitle()}
                         type='text-area'
-                        placeholder='text...'
+                        placeholder={textPlaceholder()}
                         style={{ marginBottom: 15 }}
                         rows={3}
                         state={text.state}
@@ -337,7 +389,7 @@ const CreatePostModal = (): JSX.Element => {
                             ))}
                         </Row>
                     )}
-                    <Column style={{ margin: '20px 0 10px 0' }}>
+                    {/* <Column style={{ margin: '20px 0 10px 0' }}>
                         <h2>Post preview</h2>
                         <PostCard
                             key={previewRenderKey}
@@ -383,18 +435,20 @@ const CreatePostModal = (): JSX.Element => {
                                 },
                             }}
                         />
-                    </Column>
+                    </Column> */}
                 </Column>
-                <Row>
-                    <Button
-                        text='Create Post'
-                        color='blue'
-                        style={{ marginRight: 10 }}
-                        disabled={urlLoading || loading || saved}
-                        submit
-                    />
-                    {loading && <LoadingWheel />}
-                    {saved && <SuccessMessage text='Post created!' />}
+                <Row style={{ marginTop: 40 }}>
+                    {!saved ? (
+                        <Button
+                            text='Create Post'
+                            color='blue'
+                            disabled={urlLoading}
+                            loading={loading}
+                            submit
+                        />
+                    ) : (
+                        <SuccessMessage text='Post created!' />
+                    )}
                 </Row>
             </form>
         </Modal>
@@ -402,263 +456,3 @@ const CreatePostModal = (): JSX.Element => {
 }
 
 export default CreatePostModal
-
-// attempted to auto add archetopic space to selected spaces in selectTopic() function
-// const newSelectedSpaces = [...selectedSpaces]
-// newSelectedSpaces.filter((s) => s.handle !== `gbg${selectedArchetopic.toLowerCase()}`)
-// newSelectedSpaces.push({ handle: `gbg${topic.name.toLowerCase()}` })
-// setSelectedSpaces(newSelectedSpaces)
-
-/* <DropDownMenu
-        title='Topic'
-        options={['Other', ...GlassBeadGameTopics.map((t) => t.name)]}
-        selectedOption={GBGTopic}
-        setSelectedOption={setGBGTopic}
-        orientation='horizontal'
-    /> */
-/* {GBGTopic === 'Other' && (
-        // <textarea
-        //     className={`wecoInput textArea white mb-10 ${
-        //         GBGCustomTopicError && 'error'
-        //     }`}
-        //     style={{ height: 30, width: 250 }}
-        //     placeholder='title...'
-        //     value={GBGCustomTopic}
-        //     onChange={(e) => {
-        //         setGBGCustomTopic(e.target.value)
-        //         setGBGCustomTopicError(false)
-        //     }}
-        // />
-        <Input
-            type='text-area'
-            // title='Handle (the unique identifier used in the spaces url):'
-            // prefix='weco.io/s/'
-            placeholder='custom topic...'
-            state={handleState}
-            errors={handleErrors}
-            value={handle}
-            onChange={(newValue) => {
-                setHandleState('default')
-                setHandle(newValue.toLowerCase().replace(/[^a-z0-9]/g, '-'))
-            }}
-        />
-    )} */
-
-/* <textarea
-    className={`wecoInput textArea white mb-10 ${textError && 'error'}`}
-    placeholder='Text (max 20,000 characters)'
-    value={text}
-    onChange={(e) => {
-        setText(e.target.value)
-        setTextError(false)
-        resizeTextArea(e.target)
-    }}
-/> */
-
-/* {postType === 'Url' && (
-    <div className={styles.urlInput}>
-        <input
-            className={`wecoInput white mb-10 ${urlError && 'error'}`}
-            placeholder='Url'
-            type='url'
-            value={url || undefined}
-            onChange={(e) => {
-                setUrlError(false)
-                // setUrlFlashMessage('')
-                setUrl(e.target.value)
-                scrapeURL(e.target.value)
-            }}
-        />
-        {urlLoading && <div className={styles.spinner} />}
-    </div>
-)} */
-
-// import PollAnswerForm from '@components/PostPage/Poll/PollAnswerForm'
-
-// useEffect(() => {
-//     if (createPostFromTurn) setPostType('Glass Bead')
-// }, [])
-
-// useEffect(() => {
-//     if (postType === 'Poll') setSubType('Single Choice')
-//     else setSubType('')
-//     setNumberOfPlotGraphAxes(0)
-// }, [postType])
-
-// const [pollAnswers, setPollAnswers] = useState([])
-// const [newPollAnswer, setNewPollAnswer] = useState('')
-
-// const [numberOfPrismPlayers, setNumberOfPrismPlayers] = useState(3)
-// const [prismDuration, setPrismDuration] = useState('1 Month')
-// const [prismPrivacy, setPrismPrivacy] = useState('Private')
-
-// const [numberOfPlotGraphAxes, setNumberOfPlotGraphAxes] = useState(0)
-// const [axis1Left, setAxis1Left] = useState('')
-// const [axis1Right, setAxis1Right] = useState('')
-// const [axis2Top, setAxis2Top] = useState('')
-// const [axis2Bottom, setAxis2Bottom] = useState('')
-// const [axis1LeftError, setAxis1LeftError] = useState(false)
-// const [axis1RightError, setAxis1RightError] = useState(false)
-// const [axis2TopError, setAxis2TopError] = useState(false)
-// const [axis2BottomError, setAxis2BottomError] = useState(false)
-
-// pollAnswers,
-// numberOfPrismPlayers,
-// prismDuration,
-// prismPrivacy,
-// numberOfPlotGraphAxes,
-// axis1Left,
-// axis1Right,
-// axis2Top,
-// axis2Bottom,
-// createPostFromTurnData,
-
-// {postType === 'Poll' && (
-//     <DropDownMenu
-//         title='Poll Type'
-//         options={['Single Choice', 'Multiple Choice', 'Weighted Choice']}
-//         selectedOption={subType}
-//         setSelectedOption={setSubType}
-//         orientation='horizontal'
-//     />
-// )}
-// {postType === 'Prism' && (
-//     <>
-//         <DropDownMenu
-//             title='Number Of Players'
-//             options={[3, 6, 12]}
-//             selectedOption={numberOfPrismPlayers}
-//             setSelectedOption={setNumberOfPrismPlayers}
-//             orientation='horizontal'
-//         />
-//         <DropDownMenu
-//             title='Duration'
-//             options={['1 Week', '1 Month', '1 Year']}
-//             selectedOption={prismDuration}
-//             setSelectedOption={setPrismDuration}
-//             orientation='horizontal'
-//         />
-//         <DropDownMenu
-//             title='Visibility'
-//             options={['Private', 'Public']}
-//             selectedOption={prismPrivacy}
-//             setSelectedOption={setPrismPrivacy}
-//             orientation='horizontal'
-//         />
-//     </>
-// )}
-
-// {postType === 'Poll' && (
-//     <PollAnswerForm
-//         pollAnswers={pollAnswers}
-//         setPollAnswers={setPollAnswers}
-//         newPollAnswer={newPollAnswer}
-//         setNewPollAnswer={setNewPollAnswer}
-//         newPollAnswerError={newPollAnswerError}
-//         setNewPollAnswerError={setNewPollAnswerError}
-//     />
-// )}
-
-// {postType === 'Plot Graph' && (
-//     <DropDownMenu
-//         title='Number Of Axes'
-//         options={[0, 1, 2]}
-//         selectedOption={numberOfPlotGraphAxes}
-//         setSelectedOption={setNumberOfPlotGraphAxes}
-//         orientation='horizontal'
-//     />
-// )}
-// {numberOfPlotGraphAxes > 1 && (
-//     <div className={styles.yAxesValues}>
-//         <textarea
-//             className={`wecoInput textArea mb-10 ${axis2TopError && 'error'}`}
-//             style={{ height: 40, width: 250 }}
-//             placeholder='Axis 2: top value...'
-//             value={axis2Top}
-//             onChange={(e) => {
-//                 setAxis2Top(e.target.value)
-//                 setAxis2TopError(false)
-//             }}
-//         />
-//     </div>
-// )}
-// {numberOfPlotGraphAxes > 0 && (
-//     <div className={styles.xAxesValues}>
-//         <textarea
-//             className={`wecoInput textArea mb-10 ${axis1LeftError && 'error'}`}
-//             style={{ height: 40, width: 250 }}
-//             placeholder='Axis 1: left value...'
-//             value={axis1Left}
-//             onChange={(e) => {
-//                 setAxis1Left(e.target.value)
-//                 setAxis1LeftError(false)
-//             }}
-//         />
-//         <textarea
-//             className={`wecoInput textArea mb-10 ${axis1RightError && 'error'}`}
-//             style={{ height: 40, width: 250 }}
-//             placeholder='Axis 1: right value...'
-//             value={axis1Right}
-//             onChange={(e) => {
-//                 setAxis1Right(e.target.value)
-//                 setAxis1RightError(false)
-//             }}
-//         />
-//     </div>
-// )}
-// {numberOfPlotGraphAxes > 1 && (
-//     <div className={styles.yAxesValues}>
-//         <textarea
-//             className={`wecoInput textArea mb-10 ${
-//                 axis2BottomError && 'error'
-//             }`}
-//             style={{ height: 40, width: 250 }}
-//             placeholder='Axis 2: bottom value...'
-//             value={axis2Bottom}
-//             onChange={(e) => {
-//                 setAxis2Bottom(e.target.value)
-//                 setAxis2BottomError(false)
-//             }}
-//         />
-//     </div>
-// )}
-
-/* {createPostFromTurn && (
-    <div className={styles.turnLink}>
-        <span className='mr-10'>Linked from</span>
-        <Link
-            className={styles.imageTextLink}
-            to={`/u/${createPostFromTurnData.creatorHandle}`}
-            onClick={closeForm}
-        >
-            <FlagImage
-                type='user'
-                size={30}
-                imagePath={createPostFromTurnData.creatorFlagImagePath}
-            />
-            <span className={styles.linkText}>
-                {`${createPostFromTurnData.creatorName}'s`}
-            </span>
-        </Link>
-        <Link
-            className={styles.imageTextLink}
-            to={`/p/${createPostFromTurnData.postId}`}
-            onClick={() => {
-                closeForm()
-                setPostId(createPostFromTurnData.postId)
-            }}
-        >
-            <span className='blueText'>post</span>
-        </Link>
-    </div>
-)} */
-
-/* <UrlPreview
-    url={url}
-    urlLoading={urlLoading}
-    urlImage={urlImage}
-    urlDomain={urlDomain}
-    urlTitle={urlTitle}
-    urlDescription={urlDescription}
-    urlFlashMessage={urlFlashMessage}
-/> */

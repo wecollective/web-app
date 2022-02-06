@@ -101,3 +101,13 @@ export const defaultErrorState = {
 export function statTitle(text: string, value: number): string {
     return `${value} ${text}${pluralise(value)}`
 }
+
+// todo: create custom regex check
+export function isValidUrl(url: string) {
+    try {
+        new URL(url)
+    } catch (_) {
+        return false
+    }
+    return true
+}
