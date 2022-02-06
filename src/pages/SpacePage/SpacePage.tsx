@@ -50,11 +50,7 @@ const SpacePage = ({ match }: { match: { url: string } }): JSX.Element => {
         <Row className={styles.wrapper}>
             <SpacePageSidebar />
             <Column className={styles.content}>
-                <CoverImage
-                    coverImagePath={spaceData.coverImagePath}
-                    imageUploadType='holon-cover-image'
-                    canEdit={isModerator}
-                />
+                <CoverImage type='space' image={spaceData.coverImagePath} canEdit={isModerator} />
                 <PageTabs tabs={tabs} />
                 <Column className={styles.centerPanel}>
                     <Switch>

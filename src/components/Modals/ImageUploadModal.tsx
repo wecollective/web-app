@@ -9,7 +9,8 @@ import Row from '@components/Row'
 import Input from '@components/Input'
 
 const ImageUploadModal = (props: {
-    type: 'space-flag' | 'space-cover' | 'user-flag' | 'user-cover' | 'gbg-topic' | 'gbg-background'
+    type: 'user-flag' | 'user-cover' | 'space-flag' | 'space-cover' | 'gbg-topic' | 'gbg-background'
+    shape: 'circle' | 'square' | 'rectangle'
     id: number
     title: string
     subTitle?: string
@@ -17,7 +18,7 @@ const ImageUploadModal = (props: {
     onSaved?: (imageURL: string) => void
     close: () => void
 }): JSX.Element => {
-    const { type, id, title, subTitle, mbLimit, onSaved, close } = props
+    const { type, shape, id, title, subTitle, mbLimit, onSaved, close } = props
     const [imageFile, setImageFile] = useState<File>()
     const [imageURL, setImageURL] = useState('')
     const [imagePreviewURL, setImagePreviewURL] = useState('')
@@ -79,7 +80,7 @@ const ImageUploadModal = (props: {
             {imagePreviewURL && (
                 <img
                     id='image-preview'
-                    className={styles.imagePreview}
+                    className={`${styles.imagePreview} ${styles[shape]}`}
                     src={imagePreviewURL}
                     alt=''
                 />

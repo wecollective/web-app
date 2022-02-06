@@ -1,21 +1,16 @@
-import React, { useContext } from 'react'
-import { AccountContext } from '@contexts/AccountContext'
+import React, { useContext, useState } from 'react'
 import { UserContext } from '@contexts/UserContext'
 import styles from '@styles/pages/UserPage/UserPageSidebar.module.scss'
 import Column from '@components/Column'
 import ImageFade from '@components/ImageFade'
 import Markdown from '@components/Markdown'
 import FlagImagePlaceholder from '@components/FlagImagePlaceholder'
+import ImageUploadModal from '@components/modals/ImageUploadModal'
 
 const UserPageSidebar = (): JSX.Element => {
-    const { setImageUploadType, setImageUploadModalOpen } = useContext(AccountContext)
-    const { userData, isOwnAccount } = useContext(UserContext)
-    const { flagImagePath, name, handle, bio } = userData
-
-    function uploadFlagImage() {
-        setImageUploadType('user-flag-image')
-        setImageUploadModalOpen(true)
-    }
+    const { userData, setUserData, isOwnAccount } = useContext(UserContext)
+    const { id, handle, name, bio, flagImagePath } = userData
+    const [imageUploadModalOpen, setImageUploadModalOpen] = useState(false)
 
     return (
         <Column className={styles.wrapper}>
@@ -24,9 +19,26 @@ const UserPageSidebar = (): JSX.Element => {
                     <FlagImagePlaceholder type='user' />
                 </ImageFade>
                 {isOwnAccount && (
-                    <button type='button' className={styles.uploadButton} onClick={uploadFlagImage}>
-                        Upload new flag image
+                    <button
+                        type='button'
+                        className={styles.uploadButton}
+                        onClick={() => setImageUploadModalOpen(true)}
+                    >
+                        Upload a new flag image
                     </button>
+                )}
+                {imageUploadModalOpen && (
+                    <ImageUploadModal
+                        type='user-flag'
+                        shape='square'
+                        id={id}
+                        title='Add a new flag image'
+                        mbLimit={2}
+                        onSaved={(imageURL) =>
+                            setUserData({ ...userData, flagImagePath: imageURL })
+                        }
+                        close={() => setImageUploadModalOpen(false)}
+                    />
                 )}
             </div>
             <Column className={styles.content}>

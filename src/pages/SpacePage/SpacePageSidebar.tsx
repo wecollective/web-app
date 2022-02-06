@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import axios from 'axios'
 import config from '@src/Config'
 import { AccountContext } from '@contexts/AccountContext'
@@ -9,6 +9,7 @@ import Row from '@components/Row'
 import ImageTitle from '@components/ImageTitle'
 import ImageFade from '@components/ImageFade'
 import Scrollbars from '@src/components/Scrollbars'
+import ImageUploadModal from '@components/modals/ImageUploadModal'
 // import SpacePageSideBarLeftPlaceholder from './SpacePageSideBarLeftPlaceholder'
 import FlagImageHighlights from '@components/FlagImageHighlights'
 import FlagImagePlaceholder from '@components/FlagImagePlaceholder'
@@ -21,19 +22,11 @@ import { ReactComponent as MinusIconSVG } from '@svgs/minus-solid.svg'
 import { isPlural } from '@src/Functions'
 
 const SpacePageSidebar = (): JSX.Element => {
-    const {
-        loggedIn,
-        accountData,
-        updateAccountData,
-        accountDataLoading,
-        setImageUploadType,
-        setImageUploadModalOpen,
-    } = useContext(AccountContext)
+    const { loggedIn, accountData, updateAccountData } = useContext(AccountContext)
     const {
         spaceData,
         setSpaceData,
         isFollowing,
-        spaceDataLoading,
         setIsFollowing,
         isModerator,
         selectedSpaceSubPage,
@@ -45,14 +38,10 @@ const SpacePageSidebar = (): JSX.Element => {
         totalUsers,
     } = spaceData
 
-    const loading = accountDataLoading || spaceDataLoading
+    const [imageUploadModalOpen, setImageUploadModalOpen] = useState(false)
+    // const loading = accountDataLoading || spaceDataLoading
 
     const imagePaths = (users || []).map((user) => user.flagImagePath)
-
-    function uploadFlagImage() {
-        setImageUploadType('holon-flag-image')
-        setImageUploadModalOpen(true)
-    }
 
     function followSpace() {
         // todo: merge into single request
@@ -97,9 +86,6 @@ const SpacePageSidebar = (): JSX.Element => {
                 })
         }
     }
-    // console.log('users: ', users && users[0].flagImagePath)
-
-    // if (loading) return <SpacePageSideBarLeftPlaceholder />
 
     function expandSpace(type, spaceId) {
         const key = `Direct${type}Holons`
@@ -108,21 +94,11 @@ const SpacePageSidebar = (): JSX.Element => {
         const newSpace = newSpaces.find((s) => s.id === spaceId)
 
         if (space.expanded) {
-            // const newSpaces = [...spaceData[key]]
-            // const newSpace = newSpaces.find((s) => s.id === spaceId)
             newSpace.expanded = false
-            setSpaceData({
-                ...spaceData,
-                [key]: newSpaces,
-            })
+            setSpaceData({ ...spaceData, [key]: newSpaces })
         } else if (space[key]) {
-            // const newSpaces = [...spaceData[key]]
-            // const newSpace = newSpaces.find((s) => s.id === spaceId)
             newSpace.expanded = true
-            setSpaceData({
-                ...spaceData,
-                [key]: newSpaces,
-            })
+            setSpaceData({ ...spaceData, [key]: newSpaces })
         } else {
             const filters =
                 'timeRange=AllTime&sortBy=Likes&sortOrder=Descending&depth=Only Direct Descendants&offset=0'
@@ -131,14 +107,9 @@ const SpacePageSidebar = (): JSX.Element => {
                     `${config.apiURL}/space-spaces?accountId=${accountData.id}&spaceId=${spaceId}&${filters}`
                 )
                 .then((res) => {
-                    // const newSpaces = [...spaceData[key]]
-                    // const newSpace = newSpaces.find((s) => s.id === spaceId)
                     newSpace[key] = res.data
                     newSpace.expanded = true
-                    setSpaceData({
-                        ...spaceData,
-                        [key]: newSpaces,
-                    })
+                    setSpaceData({ ...spaceData, [key]: newSpaces })
                 })
                 .catch((error) => console.log(error))
         }
@@ -151,9 +122,26 @@ const SpacePageSidebar = (): JSX.Element => {
                     <FlagImagePlaceholder type='space' />
                 </ImageFade>
                 {isModerator && (
-                    <button type='button' className={styles.uploadButton} onClick={uploadFlagImage}>
-                        Upload new flag image
+                    <button
+                        type='button'
+                        className={styles.uploadButton}
+                        onClick={() => setImageUploadModalOpen(true)}
+                    >
+                        Add a new flag image
                     </button>
+                )}
+                {imageUploadModalOpen && (
+                    <ImageUploadModal
+                        type='space-flag'
+                        shape='square'
+                        id={spaceData.id}
+                        title='Add a new flag image'
+                        mbLimit={2}
+                        onSaved={(imageURL) =>
+                            setSpaceData({ ...spaceData, flagImagePath: imageURL })
+                        }
+                        close={() => setImageUploadModalOpen(false)}
+                    />
                 )}
             </div>
             <Column className={styles.content}>
@@ -165,7 +153,6 @@ const SpacePageSidebar = (): JSX.Element => {
                     imagePaths={imagePaths}
                     text={`${totalUsers} ${isPlural(totalUsers) ? 'People' : 'Person'}`}
                     style={{ marginBottom: 20 }}
-                    // shadow
                     outline
                 />
                 {loggedIn && spaceData.handle !== 'all' && (
@@ -174,7 +161,7 @@ const SpacePageSidebar = (): JSX.Element => {
                         <p>{isFollowing ? 'Following' : 'Not Following'}</p>
                     </button>
                 )}
-                {/* Todo: make space expansion recursive */}
+                {/* Todo: reorganise space expansion and make recursive */}
                 {parentSpaces.length > 0 && (
                     <Column className={styles.spacesWrapper}>
                         <Row>
@@ -334,73 +321,3 @@ const SpacePageSidebar = (): JSX.Element => {
 }
 
 export default SpacePageSidebar
-
-/* {isModerator && (
-    <SideBarButton
-        icon='cog-solid.svg'
-        text='Settings'
-        url='settings'
-        selected={selectedSpaceSubPage === 'settings'}
-        marginBottom={5}
-    />
-)} */
-/* <SideBarButton
-    icon='book-open-solid.svg'
-    text='About'
-    url='about'
-    selected={selectedSpaceSubPage === 'about'}
-    marginBottom={5}
-/> */
-/* <SideBarButton
-    icon='edit-solid.svg'
-    text='Posts'
-    url='posts'
-    selected={selectedSpaceSubPage === 'posts'}
-    marginBottom={5}
-    total={spaceData.totalPosts}
-/> */
-/* <SideBarButton
-    icon='overlapping-circles-thick.svg'
-    text='Spaces'
-    url='spaces'
-    selected={selectedSpaceSubPage === 'spaces'}
-    marginBottom={5}
-    total={spaceData.totalSpaces}
-/> */
-/* <SideBarButton
-        icon='overlapping-circles-thick.svg'
-        text='Spaces'
-        url='spaces'
-        selected={selectedSpaceSubPage === 'spaces'}
-        marginBottom={5}
-        total={spaceData.total_spaces}
-    /> */
-/* <SideBarButton
-    icon='users-solid.svg'
-    text='Users'
-    url='users'
-    selected={selectedSpaceSubPage === 'users'}
-    marginBottom={5}
-    total={spaceData.totalUsers}
-/> */
-/* {spaceData.handle === 'coops' && (
-    <>
-        <SideBarButton
-            icon='users-solid.svg'
-            text='Cooperators'
-            url='users'
-            // selected={selectedSpaceSubPage === 'users'}
-            marginBottom={5}
-            total={spaceData.total_users}
-        />
-    </>
-)} */
-/* {isModerator && (
-    <SideBarButton
-        icon='cog-solid.svg'
-        text='Settings'
-        url='settings'
-        selected={selectedSpaceSubPage === 'settings'}
-        marginBottom={5}
-    />
-)} */

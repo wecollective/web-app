@@ -1,11 +1,21 @@
 @import '@styles/Variables';
 
 .imagePreview {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
     object-fit: cover;
     margin-bottom: 20px;
+    &.circle {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+    }
+    &.square {
+        width: 230px;
+        height: 230px;
+    }
+    &.rectangle {
+        width: 500px;
+        height: 150px;
+    }
 }
 
 .fileUploadInput {
