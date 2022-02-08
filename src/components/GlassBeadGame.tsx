@@ -341,6 +341,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     const [backgroundModalOpen, setBackgroundModalOpen] = useState(false)
     const [showLoadingAnimation, setShowLoadingAnimation] = useState(true)
     const [imageUploadModalOpen, setImageUploadModalOpen] = useState(false)
+    const [leaveRoomModalOpen, setLeaveRoomModalOpen] = useState(false)
     // const [videoRenderKey, setVideoRenderKey] = useState(0)
 
     // state refs (used for up to date values between renders)
@@ -1309,6 +1310,30 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                                     <LockIconSVG />
                                     <p>Game locked</p>
                                 </Row>
+                            )}
+                            <Button
+                                text='Leave game room'
+                                color='purple'
+                                style={{ marginBottom: 10 }}
+                                onClick={() => setLeaveRoomModalOpen(true)}
+                            />
+                            {leaveRoomModalOpen && (
+                                <Modal centered close={() => setLeaveRoomModalOpen(false)}>
+                                    <h1>Are you sure you want to leave?</h1>
+                                    <Row>
+                                        <Button
+                                            text='Yes, leave room'
+                                            color='red'
+                                            style={{ marginRight: 10 }}
+                                            onClick={() => history.push('/s/all')}
+                                        />
+                                        <Button
+                                            text='No, cancel'
+                                            color='blue'
+                                            onClick={() => setLeaveRoomModalOpen(false)}
+                                        />
+                                    </Row>
+                                </Modal>
                             )}
                             {!gameData.locked && (
                                 <>
