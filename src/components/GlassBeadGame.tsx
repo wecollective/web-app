@@ -766,6 +766,8 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     d3.select(`#turn-arc`).remove()
                     d3.select(`#move-arc`).remove()
                     d3.selectAll(`.${styles.playerState}`).text('')
+                    setShowComments(true)
+                    updateShowVideos(true)
                 }
             }
         }, 1000)
@@ -946,64 +948,60 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 const { socketId, usersInRoom } = payload
                 socketIdRef.current = socketId
                 // userRef.current.socketId = socketId
-                usersRef.current = usersInRoom
+                usersRef.current = [...usersInRoom, { socketId, userData: userRef.current }]
                 pushComment(`You joined the room`)
                 usersInRoom.forEach((user) => {
-                    if (!isYou(user.socketId)) {
-                        // remove old peer if present
-                        const peerObject = peersRef.current.find(
-                            (p) => p.socketId === user.socketId
+                    // remove old peer if present
+                    const peerObject = peersRef.current.find((p) => p.socketId === user.socketId)
+                    if (peerObject) {
+                        peerObject.peer.destroy()
+                        peersRef.current = peersRef.current.filter(
+                            (p) => p.socketId !== user.socketId
                         )
-                        if (peerObject) {
-                            peerObject.peer.destroy()
-                            peersRef.current = peersRef.current.filter(
-                                (p) => p.socketId !== user.socketId
-                            )
-                            videosRef.current = videosRef.current.filter(
-                                (v) => v.socketId !== user.socketId
-                            )
-                        }
-                        // create peer connection
-                        const peer = new Peer({
-                            initiator: true,
-                            config: iceConfig,
+                        videosRef.current = videosRef.current.filter(
+                            (v) => v.socketId !== user.socketId
+                        )
+                    }
+                    // create peer connection
+                    const peer = new Peer({
+                        initiator: true,
+                        config: iceConfig,
+                    })
+                    peer.on('signal', (data) => {
+                        socketRef.current.emit('sending-signal', {
+                            userToSignal: user.socketId,
+                            userSignaling: {
+                                socketId: socketRef.current.id,
+                                userData: userRef.current,
+                            },
+                            signal: data,
                         })
-                        peer.on('signal', (data) => {
-                            socketRef.current.emit('sending-signal', {
-                                userToSignal: user.socketId,
-                                userSignaling: {
-                                    socketId: socketRef.current.id,
-                                    userData: userRef.current,
-                                },
-                                signal: data,
-                            })
-                        })
-                        peer.on('connect', () => console.log('connect 1'))
-                        peer.on('stream', (stream) => {
-                            videosRef.current.push({
-                                socketId: user.socketId,
-                                userData: user.userData,
-                                peer,
-                                audioOnly: !stream.getVideoTracks().length,
-                            })
-                            pushComment(`${user.userData.name}'s video connected`)
-                            addStreamToVideo(user.socketId, stream)
-                            const newPlayer = {
-                                id: user.userData.id,
-                                name: user.userData.name,
-                                flagImagePath: user.userData.flagImagePath,
-                                socketId: user.socketId,
-                            }
-                            setPlayers((previousPlayers) => [...previousPlayers, newPlayer])
-                        })
-                        peer.on('close', () => peer.destroy())
-                        peer.on('error', (error) => console.log(error))
-                        peersRef.current.push({
+                    })
+                    peer.on('connect', () => console.log('connect 1'))
+                    peer.on('stream', (stream) => {
+                        videosRef.current.push({
                             socketId: user.socketId,
                             userData: user.userData,
                             peer,
+                            audioOnly: !stream.getVideoTracks().length,
                         })
-                    }
+                        pushComment(`${user.userData.name}'s video connected`)
+                        addStreamToVideo(user.socketId, stream)
+                        const newPlayer = {
+                            id: user.userData.id,
+                            name: user.userData.name,
+                            flagImagePath: user.userData.flagImagePath,
+                            socketId: user.socketId,
+                        }
+                        setPlayers((previousPlayers) => [...previousPlayers, newPlayer])
+                    })
+                    peer.on('close', () => peer.destroy())
+                    peer.on('error', (error) => console.log(error))
+                    peersRef.current.push({
+                        socketId: user.socketId,
+                        userData: user.userData,
+                        peer,
+                    })
                 })
             })
             // signal returned from peer
