@@ -20,7 +20,6 @@ import PostCardRatingModal from '@components/Cards/PostCard/PostCardRatingModal'
 import PostCardLinkModal from '@components/Cards/PostCard/PostCardLinkModal'
 import DeletePostModal from '@components/Cards/PostCard/DeletePostModal'
 import { timeSinceCreated, dateCreated, pluralise, statTitle } from '@src/Functions'
-import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import { ReactComponent as LinkIconSVG } from '@svgs/link-solid.svg'
 // import { ReactComponent as FireIconSVG } from '@svgs/fire-alt-solid.svg'
 import { ReactComponent as CommentIconSVG } from '@svgs/comment-solid.svg'
@@ -83,14 +82,6 @@ const PostCard = (props: {
     const otherSpacesText = `and ${postSpaces.length - 1} other space${pluralise(
         postSpaces.length - 1
     )}`
-
-    function findTopicImage(topicName) {
-        const archetopicMatch = GlassBeadGameTopics.archetopics.find((t) => t.name === topicName)
-        if (archetopicMatch) return <img src={archetopicMatch.imagePath} alt='' />
-        const liminalMatch = GlassBeadGameTopics.liminal.find((t) => t.name === topicName)
-        if (liminalMatch) return <img src={liminalMatch.imagePath} alt='' />
-        return null
-    }
 
     // todo: clean up bead handling (always auto play next bead and remove 'play all' button?, stop auido playing on other posts, create post component for other post types)
     function playNextBead(beadIndex) {
@@ -241,8 +232,8 @@ const PostCard = (props: {
             </header>
             <div className={styles.content}>
                 <Row>
-                    {type === 'glass-bead-game' && findTopicImage(GlassBeadGame.topic) && (
-                        <div className={styles.topic}>{findTopicImage(GlassBeadGame.topic)}</div>
+                    {type === 'glass-bead-game' && GlassBeadGame.topicImage && (
+                        <img className={styles.topicImage} src={GlassBeadGame.topicImage} alt='' />
                     )}
                     <Column>
                         {type === 'glass-bead-game' && <b>{GlassBeadGame.topic}</b>}
@@ -283,7 +274,7 @@ const PostCard = (props: {
                                 onClick={() => history.push(`/p/${id}`)}
                             />
                         </Row>
-                        {beads.length > 0 ? (
+                        {beads.length > 0 && (
                             <Scrollbars className={`${styles.gbgBeads} row`}>
                                 {beads.map((bead, beadIndex) => (
                                     <BeadCard
@@ -295,8 +286,6 @@ const PostCard = (props: {
                                     />
                                 ))}
                             </Scrollbars>
-                        ) : (
-                            <p className={styles.noSavedBeads}>No saved beads yet</p>
                         )}
                     </Column>
                 )}

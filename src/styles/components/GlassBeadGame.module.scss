@@ -8,18 +8,39 @@ $transitionSpeed: 1s;
 }
 
 .wrapper {
-    padding-top: 60px;
     width: 100%;
     height: 100vh;
-    z-index: $pageContentZIndex;
+    z-index: 90;
     background-color: $grey1;
 
-    .videoBackground {
+    .loadingAnimation {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: $white;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-transition: opacity 1s linear;
+        transition: opacity 1s linear;
+    }
+
+    .backgroundVideo {
         width: 100%;
         height: 100%;
         z-index: -1;
         position: absolute;
         border: none;
+    }
+
+    .backgroundImage {
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        position: absolute;
+        object-fit: cover;
     }
 
     .mainContent {
@@ -100,8 +121,6 @@ $transitionSpeed: 1s;
             .closeCommentsButton {
                 all: unset;
                 position: absolute;
-                // border-left: 1px solid $grey3;
-                // border-right: 1px solid $grey3;
                 cursor: pointer;
                 display: flex;
                 justify-content: center;
@@ -146,65 +165,98 @@ $transitionSpeed: 1s;
                 }
             }
 
-            .curvedDNA {
-                position: absolute;
-                top: 160px;
-                height: calc(100vh - 200px);
-                color: $grey3;
-            }
+            .timerColumn {
+                margin-top: 40px;
 
-            .topic {
-                width: 140px;
-                height: 140px;
-                border-radius: 50%;
-                background-color: #fbfbfb;
-                box-shadow: 0 0 10px 0 rgba(10, 8, 72, 0.15);
-                margin: 10px 0 30px 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 3;
-                > img {
-                    width: 100%;
-                    height: 100%;
+                .curvedDNA {
+                    position: absolute;
+                    top: 200px;
+                    height: calc(100vh - 200px);
+                    color: $grey3;
+                    z-index: -1;
+                }
+
+                .topicImage {
+                    width: 140px;
+                    height: 140px;
                     border-radius: 50%;
-                    object-fit: cover;
-                }
-            }
-
-            .timer {
-                position: relative;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 3;
-                > .timerArcTitles {
-                    position: absolute;
-                    top: -1px;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    > p {
-                        margin-bottom: 8px;
-                    }
-                    > span {
-                        font-size: 24px;
-                    }
-                }
-                > .mainBead {
-                    width: 160px;
-                    height: 160px;
-                    position: absolute;
-                    // border: 2px solid $grey3;
                     background-color: #fbfbfb;
-                    border-radius: 10px;
+                    box-shadow: 0 0 10px 0 rgba(10, 8, 72, 0.15);
+                    margin: 10px 0 30px 0;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    box-shadow: 0 1px 10px 0 rgba(10, 8, 72, 0.15);
-                    > img {
-                        width: 120px;
-                        height: 120px;
+                    z-index: 3;
+                    position: relative;
+
+                    img {
+                        width: 100%;
+                        height: 100%;
+                        border-radius: 50%;
+                        object-fit: cover;
+                    }
+
+                    .uploadTopicImageButton {
+                        all: unset;
+                        position: absolute;
+                        top: 0;
+                        width: 100%;
+                        height: 100%;
+                        border-radius: 50%;
+                        cursor: pointer;
+                        background-color: rgba(black, 0.4);
+                        color: white;
+                        font-size: 16px;
+                        text-align: center;
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                        justify-content: center;
+                        opacity: 0;
+                        transition-property: opacity;
+                        transition-duration: 0.3s;
+                        &:hover {
+                            opacity: 1;
+                        }
+                        p {
+                            padding: 0 15px;
+                        }
+                    }
+                }
+
+                .timer {
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 3;
+                    > .timerArcTitles {
+                        position: absolute;
+                        top: -1px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        > p {
+                            margin-bottom: 8px;
+                        }
+                        > span {
+                            font-size: 24px;
+                        }
+                    }
+                    > .mainBead {
+                        width: 160px;
+                        height: 160px;
+                        position: absolute;
+                        background-color: #fbfbfb;
+                        border-radius: 10px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        box-shadow: 0 1px 10px 0 rgba(10, 8, 72, 0.15);
+                        > img {
+                            width: 120px;
+                            height: 120px;
+                        }
                     }
                 }
             }
