@@ -10,11 +10,10 @@ import Input from '@components/Input'
 
 const GBGBackgroundModal = (props: {
     gameData: any
-    setGameData: (payload: any) => void
-    // todo: add signal players function
+    signalNewBackground: (type: 'image' | 'video', url: string, startTime?: number) => void
     close: () => void
 }): JSX.Element => {
-    const { gameData, setGameData, close } = props
+    const { gameData, signalNewBackground, close } = props
     const [imageFile, setImageFile] = useState<File>()
     const [imageURL, setImageURL] = useState('')
     const [videoURL, setVideoURL] = useState('')
@@ -89,21 +88,8 @@ const GBGBackgroundModal = (props: {
         axios
             .post(`${config.apiURL}/gbg-background?gameId=${gameData.id}`, data, options)
             .then((res) => {
-                if (videoURL)
-                    setGameData({
-                        ...gameData,
-                        backgroundImage: null,
-                        backgroundVideo: videoURL,
-                        backgroundVideoStartTime: videoStartTime,
-                    })
-                else
-                    setGameData({
-                        ...gameData,
-                        backgroundImage: imageURL || res.data.imageURL,
-                        backgroundVideo: null,
-                        backgroundVideoStartTime: null,
-                    })
-                // todo: signal other players
+                if (videoURL) signalNewBackground('video', videoURL, videoStartTime)
+                else signalNewBackground('image', imageURL || res.data.imageURL)
                 setLoading(false)
                 close()
             })
