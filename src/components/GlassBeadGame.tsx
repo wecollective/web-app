@@ -339,7 +339,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     const [loadingStream, setLoadingStream] = useState(false)
     const [backgroundModalOpen, setBackgroundModalOpen] = useState(false)
     const [showLoadingAnimation, setShowLoadingAnimation] = useState(true)
-    const [imageUploadModalOpen, setImageUploadModalOpen] = useState(false)
+    const [topicImageModalOpen, setTopicImageModalOpen] = useState(false)
     const [leaveRoomModalOpen, setLeaveRoomModalOpen] = useState(false)
     // const [videoRenderKey, setVideoRenderKey] = useState(0)
 
@@ -446,7 +446,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 socketId: socketIdRef.current,
                 userData: userRef.current,
             }
-            socketRef.current.emit('stream-disconnected', data)
+            socketRef.current.emit('outgoing-stream-disconnected', data)
             if (!videosRef.current.length) updateShowVideos(false)
         } else {
             // set up and signal stream
@@ -536,7 +536,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             stream: streamRef.current,
         })
         peer.on('signal', (data) => {
-            socketRef.current.emit('sending-signal', {
+            socketRef.current.emit('outgoing-signal-request', {
                 userToSignal: socketId,
                 userSignaling: {
                     socketId: socketRef.current.id,
@@ -608,7 +608,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                         text: newComment,
                         createdAt: new Date(),
                     }
-                    socketRef.current.emit('sending-comment', signalData)
+                    socketRef.current.emit('outgoing-comment', signalData)
                     setNewComment('')
                 })
                 .catch((error) => console.log(error))
@@ -660,7 +660,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                         beadUrl: res.data,
                         index: moveNumber,
                     }
-                    socketRef.current.emit('sending-audio-bead', signalData)
+                    socketRef.current.emit('outgoing-audio-bead', signalData)
                 })
                 .catch((error) => {
                     const { message } = error.response.data
@@ -688,7 +688,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             userSignaling: userRef.current,
             gameData: data,
         }
-        socketRef.current.emit('sending-start-game', signalData)
+        socketRef.current.emit('outgoing-start-game', signalData)
     }
 
     function startGame(data) {
@@ -809,7 +809,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             userSignaling: userRef.current,
             gameId: gameData.id,
         }
-        socketRef.current.emit('sending-stop-game', data)
+        socketRef.current.emit('outgoing-stop-game', data)
     }
 
     function saveGame() {
@@ -818,7 +818,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             userSignaling: userRef.current,
             gameData,
         }
-        socketRef.current.emit('sending-save-game', signalData)
+        socketRef.current.emit('outgoing-save-game', signalData)
         axios
             .post(`${config.apiURL}/save-glass-bead-game`, { gameId: gameData.id, beads })
             .catch((error) => console.log(error))
@@ -868,6 +868,16 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             setFirstInteractionWithPage(false)
         }
         updateShowVideos(true)
+    }
+
+    function signalNewTopicImage(url) {
+        const data = {
+            roomId: roomIdRef.current,
+            userSignaling: userRef.current,
+            gameData,
+            url,
+        }
+        socketRef.current.emit('outgoing-new-topic-image', data)
     }
 
     function signalNewBackground(type, url, startTime) {
@@ -952,13 +962,13 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 // create new connection to socket
                 socketRef.current = io(config.apiWebSocketURL || '')
                 // join room
-                socketRef.current.emit('join-room', {
+                socketRef.current.emit('outgoing-join-room', {
                     roomId: roomIdRef.current,
                     userData: userRef.current,
                 })
 
                 // listen for signals:
-                socketRef.current.on('room-joined', (payload) => {
+                socketRef.current.on('incoming-room-joined', (payload) => {
                     const { socketId, usersInRoom } = payload
                     socketIdRef.current = socketId
                     // userRef.current.socketId = socketId
@@ -984,7 +994,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                             config: iceConfig,
                         })
                         peer.on('signal', (data) => {
-                            socketRef.current.emit('sending-signal', {
+                            socketRef.current.emit('outgoing-signal-request', {
                                 userToSignal: user.socketId,
                                 userSignaling: {
                                     socketId: socketRef.current.id,
@@ -1021,7 +1031,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     })
                 })
                 // signal returned from peer
-                socketRef.current.on('signal-returned', (payload) => {
+                socketRef.current.on('incoming-signal', (payload) => {
                     const peerObject = peersRef.current.find((p) => p.socketId === payload.id)
                     if (peerObject) {
                         if (peerObject.peer.readable) peerObject.peer.signal(payload.signal)
@@ -1034,7 +1044,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     } else console.log('no peer!')
                 })
                 // signal request from peer
-                socketRef.current.on('signal-request', (payload) => {
+                socketRef.current.on('incoming-signal-request', (payload) => {
                     const { signal, userSignaling } = payload
                     const { socketId, userData } = userSignaling
                     // search for peer in peers array
@@ -1050,7 +1060,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                             config: iceConfig,
                         })
                         peer.on('signal', (data) => {
-                            socketRef.current.emit('returning-signal', {
+                            socketRef.current.emit('outgoing-signal', {
                                 userToSignal: socketId,
                                 signal: data,
                             })
@@ -1080,12 +1090,12 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     }
                 })
                 // user joined room
-                socketRef.current.on('user-joined', (user) => {
+                socketRef.current.on('incoming-user-joined', (user) => {
                     usersRef.current.push(user)
                     pushComment(`${user.userData.name} joined the room`)
                 })
                 // user left room
-                socketRef.current.on('user-left', (user) => {
+                socketRef.current.on('incoming-user-left', (user) => {
                     const { socketId, userData } = user
                     const peerObject = peersRef.current.find((p) => p.socketId === socketId)
                     if (peerObject) {
@@ -1099,11 +1109,11 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     pushComment(`${userData.name} left the room`)
                 })
                 // comment recieved
-                socketRef.current.on('returning-comment', (data) => {
+                socketRef.current.on('incoming-comment', (data) => {
                     pushComment(data)
                 })
                 // start game signal recieved
-                socketRef.current.on('returning-start-game', (data) => {
+                socketRef.current.on('incoming-start-game', (data) => {
                     setGameSettingsModalOpen(false)
                     setGameInProgress(true)
                     setBeads([])
@@ -1111,7 +1121,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     startGame(data.gameData)
                 })
                 // stop game signal recieved
-                socketRef.current.on('returning-stop-game', (data) => {
+                socketRef.current.on('incoming-stop-game', (data) => {
                     setShowComments(true)
                     updateShowVideos(true)
                     pushComment(`${data.userSignaling.name} stopped the game`)
@@ -1127,12 +1137,12 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                         mediaRecorderRef.current.stop()
                 })
                 // save game signal recieved
-                socketRef.current.on('returning-save-game', (data) => {
+                socketRef.current.on('incoming-save-game', (data) => {
                     pushComment(`${data.userSignaling.name} saved the game`)
                     setGameData({ ...data.gameData, locked: true })
                 })
                 // audio bead recieved
-                socketRef.current.on('returning-audio-bead', (data) => {
+                socketRef.current.on('incoming-audio-bead', (data) => {
                     setBeads((previousBeads) => [...previousBeads, data])
                     d3.select(`#bead-${data.index}`).select('audio').attr('src', data.beadUrl)
                 })
@@ -1167,8 +1177,14 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     }
                     pushComment(`${userSignaling.name} added a new background`)
                 })
+                // new topic image
+                socketRef.current.on('incoming-new-topic-image', (data) => {
+                    const { userSignaling, url } = data
+                    setGameData({ ...data.gameData, topicImage: url })
+                    pushComment(`${userSignaling.name} added a new topic image`)
+                })
                 // stream disconnected
-                socketRef.current.on('stream-disconnected', (data) => {
+                socketRef.current.on('incoming-stream-disconnected', (data) => {
                     const { socketId, userData } = data
                     videosRef.current = videosRef.current.filter((v) => v.socketId !== socketId)
                     if (!videosRef.current.length && !streamRef.current) updateShowVideos(false)
@@ -1249,15 +1265,16 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     close={() => setBackgroundModalOpen(false)}
                 />
             )}
-            {imageUploadModalOpen && (
+            {topicImageModalOpen && (
                 <ImageUploadModal
                     type='gbg-topic'
                     shape='circle'
                     id={gameData.id}
                     title='Add a new topic image'
                     mbLimit={2}
-                    onSaved={(imageURL) => setGameData({ ...gameData, topicImage: imageURL })}
-                    close={() => setImageUploadModalOpen(false)}
+                    onSaved={(imageURL) => signalNewTopicImage(imageURL)}
+                    // onSaved={(imageURL) => setGameData({ ...gameData, topicImage: imageURL })}
+                    close={() => setTopicImageModalOpen(false)}
                 />
             )}
             <Row
@@ -1406,7 +1423,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                             <button
                                 type='button'
                                 className={styles.uploadTopicImageButton}
-                                onClick={() => setImageUploadModalOpen(true)}
+                                onClick={() => setTopicImageModalOpen(true)}
                             >
                                 <p>Add a new topic image</p>
                             </button>
