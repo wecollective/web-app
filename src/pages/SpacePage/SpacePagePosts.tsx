@@ -73,11 +73,9 @@ const SpacePagePosts = ({ match }: { match: { params: { spaceHandle: string } } 
     const getFirstPosts = (spaceId) => getSpacePosts(spaceId, 0, spacePostsPaginationLimit)
     useEffect(() => {
         if (!accountDataLoading) {
-            if (spaceHandle !== spaceData.handle) {
+            if (spaceHandle !== spaceData.handle)
                 getSpaceData(spaceHandle, showPostList ? getFirstPosts : null)
-            } else if (showPostList) {
-                getFirstPosts(spaceData.id)
-            }
+            else if (showPostList) getFirstPosts(spaceData.id)
         }
     }, [accountDataLoading, location, spacePostsFilters])
 

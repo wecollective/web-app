@@ -17,8 +17,8 @@ const Scrollbars = (props: {
             onScroll: () => {
                 const instance = ref!.current!.osInstance()
                 const scrollInfo = instance!.scroll()
-                if (onScrollBottom && scrollInfo.ratio.y > 0.999) onScrollBottom()
-                if (onScrollTop && scrollInfo.ratio.y < 0.001) onScrollTop()
+                if (onScrollBottom && scrollInfo.ratio.y > 0.99) onScrollBottom()
+                if (onScrollTop && scrollInfo.ratio.y < 0.01) onScrollTop()
             },
         },
     }

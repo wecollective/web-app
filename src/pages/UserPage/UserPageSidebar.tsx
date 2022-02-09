@@ -24,7 +24,7 @@ const UserPageSidebar = (): JSX.Element => {
                         className={styles.uploadButton}
                         onClick={() => setImageUploadModalOpen(true)}
                     >
-                        Upload a new flag image
+                        Add a new flag image
                     </button>
                 )}
                 {imageUploadModalOpen && (
