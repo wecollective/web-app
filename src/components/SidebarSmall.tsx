@@ -7,44 +7,33 @@ import FlagImage from '@components/FlagImage'
 import Column from '@components/Column'
 import { ReactComponent as PlusIconSVG } from '@svgs/plus.svg'
 
-const Item = (props: { data: any }): JSX.Element => {
-    const { data } = props
-    const { selectedSpaceSubPage } = useContext(SpaceContext)
-    return (
-        <Link to={`/s/${data.handle}/${selectedSpaceSubPage || 'posts'}`}>
-            <FlagImage type={data.type} size={50} imagePath={data.flagImagePath} />
-        </Link>
-    )
-}
-
 const SidebarSmall = (): JSX.Element => {
     const { accountData, loggedIn } = useContext(AccountContext)
+    const { selectedSpaceSubPage } = useContext(SpaceContext)
+    const { FollowedHolons: followedSpaces } = accountData
 
     useEffect(() => {
-        console.log('SidebarSmall render')
         // todo: get root space data
     }, [])
 
     return (
         <div className={`${styles.wrapper} hide-scrollbars`}>
-            <Item
-                data={{
-                    type: 'space',
-                    handle: 'all',
-                    flagImagePath: 'https://weco-prod-space-flag-images.s3.eu-west-1.amazonaws.com/1614556880362',
-                }}
-            />
+            <Link to={`/s/all/${selectedSpaceSubPage || 'posts'}`}>
+                <FlagImage
+                    type='space'
+                    size={50}
+                    imagePath='https://weco-prod-space-flag-images.s3.eu-west-1.amazonaws.com/1614556880362'
+                />
+            </Link>
             <div className={styles.divider} />
             <Column className={`${styles.section} hide-scrollbars`}>
-                {accountData.FollowedHolons.map((space) => (
-                    <Item
+                {followedSpaces.map((space) => (
+                    <Link
                         key={space.id}
-                        data={{
-                            type: 'space',
-                            handle: space.handle,
-                            flagImagePath: space.flagImagePath,
-                        }}
-                    />
+                        to={`/s/${space.handle}/${selectedSpaceSubPage || 'posts'}`}
+                    >
+                        <FlagImage type='space' size={50} imagePath={space.flagImagePath} />
+                    </Link>
                 ))}
                 <button className={styles.followSpaceButton} type='button'>
                     <PlusIconSVG />
@@ -52,8 +41,6 @@ const SidebarSmall = (): JSX.Element => {
             </Column>
         </div>
     )
-    // }
-    // return null
 }
 
 export default SidebarSmall

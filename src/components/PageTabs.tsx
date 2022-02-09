@@ -1,10 +1,7 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import styles from '@styles/components/PageTabs.module.scss'
 import Row from '@components/Row'
-import { SpaceContext } from '@contexts/SpaceContext'
-import { UserContext } from '@contexts/UserContext'
-import { ReactComponent as SettingsIconSVG } from '@svgs/cog-solid.svg'
 
 const PageTabs = (props: { tabs: any }): JSX.Element => {
     const { tabs } = props
@@ -19,6 +16,7 @@ const PageTabs = (props: { tabs: any }): JSX.Element => {
                         .filter((t) => t.visible)
                         .map((tab) => (
                             <Link
+                                key={tab.text}
                                 to={`${tabs.baseRoute}/${tab.text.toLowerCase()}`}
                                 className={`${styles.tab} ${tab.selected && styles.selected}`}
                             >
@@ -33,6 +31,7 @@ const PageTabs = (props: { tabs: any }): JSX.Element => {
                         .filter((t) => t.visible)
                         .map((tab) => (
                             <Link
+                                key={tab.text}
                                 to={`${tabs.baseRoute}/${tab.text.toLowerCase()}`}
                                 className={`${styles.tab} ${
                                     subpage === tab.text.toLowerCase() && styles.selected

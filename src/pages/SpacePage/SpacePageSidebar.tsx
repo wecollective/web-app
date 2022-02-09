@@ -170,10 +170,9 @@ const SpacePageSidebar = (): JSX.Element => {
                         </Row>
                         <Scrollbars className={styles.spaces}>
                             {parentSpaces.map((space) => (
-                                <Column>
+                                <Column key={space.id}>
                                     <Row centerY style={{ marginBottom: 10 }}>
                                         <ImageTitle
-                                            key={space.id}
                                             type='space'
                                             imagePath={space.flagImagePath}
                                             title={space.name}
@@ -197,10 +196,9 @@ const SpacePageSidebar = (): JSX.Element => {
                                             style={{ marginLeft: 15 }}
                                         >
                                             {(space.DirectParentHolons || []).map((s) => (
-                                                <Column>
+                                                <Column key={s.id}>
                                                     <Row centerY style={{ marginBottom: 10 }}>
                                                         <ImageTitle
-                                                            key={s.id}
                                                             type='space'
                                                             imagePath={s.flagImagePath}
                                                             title={s.name}
@@ -242,10 +240,9 @@ const SpacePageSidebar = (): JSX.Element => {
                         </Row>
                         <Scrollbars className={styles.spaces}>
                             {childSpaces.map((space) => (
-                                <Column>
+                                <Column key={space.id}>
                                     <Row centerY style={{ marginBottom: 10 }}>
                                         <ImageTitle
-                                            key={space.id}
                                             type='space'
                                             imagePath={space.flagImagePath}
                                             title={space.name}
@@ -275,10 +272,9 @@ const SpacePageSidebar = (): JSX.Element => {
                                             style={{ marginLeft: 15 }}
                                         >
                                             {(space.DirectChildHolons || []).map((s) => (
-                                                <Column>
+                                                <Column key={s.id}>
                                                     <Row centerY style={{ marginBottom: 10 }}>
                                                         <ImageTitle
-                                                            key={s.id}
                                                             type='space'
                                                             imagePath={s.flagImagePath}
                                                             title={s.name}
