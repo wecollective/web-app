@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 /* eslint-disable no-return-assign */
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-use-before-define */
@@ -334,8 +333,6 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     const [videoTrackEnabled, setVideoTrackEnabled] = useState(true)
     const [audioOnly, setAudioOnly] = useState(false)
     const [turn, setTurn] = useState(0)
-    const [seconds, setSeconds] = useState<number | null>(null)
-    const [moveState, setMoveState] = useState<'Intro' | 'Move' | 'Interval'>('Move')
     const [loadingStream, setLoadingStream] = useState(false)
     const [backgroundModalOpen, setBackgroundModalOpen] = useState(false)
     const [showLoadingAnimation, setShowLoadingAnimation] = useState(true)
@@ -621,7 +618,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
 
     function startArc(type: 'game' | 'turn' | 'move', duration: number, color?: string) {
         d3.select(`#${type}-arc`).remove()
-        d3.select('#timer-group')
+        d3.select('#timer-arcs')
             .append('path')
             .datum({ startAngle: 0, endAngle: 2 * Math.PI })
             .attr('id', `${type}-arc`)
@@ -696,15 +693,15 @@ const GlassBeadGame = ({ history }): JSX.Element => {
         setPlayers(data.players)
         setShowComments(false)
         updateShowVideos(false)
-        setMoveState('Intro')
-        setSeconds(data.introDuration)
+        d3.select('#timer-move-state').text('Intro')
+        d3.select('#timer-seconds').text(data.introDuration)
         const firstPlayer = data.players[0]
         d3.select(`#player-${firstPlayer.socketId}`).text('(up next)')
         startArc('move', data.introDuration, colors.yellow)
         let timeLeft = data.introDuration
         secondsTimerRef.current = setInterval(() => {
             timeLeft -= 1
-            setSeconds(timeLeft)
+            d3.select('#timer-seconds').text(timeLeft)
             if (timeLeft < 1) {
                 clearInterval(secondsTimerRef.current)
                 startMove(1, 0, firstPlayer, data)
@@ -736,15 +733,15 @@ const GlassBeadGame = ({ history }): JSX.Element => {
         startArc('move', moveDuration, colors.green)
         lowMetalTone.play()
         // update ui state
-        setMoveState('Move')
-        setSeconds(moveDuration)
+        d3.select('#timer-move-state').text('Move')
+        d3.select('#timer-seconds').text(moveDuration)
         d3.selectAll(`.${styles.playerState}`).text('')
         d3.select(`#player-${player.socketId}`).text('(recording)')
         // start seconds timer
         let timeLeft = moveDuration
         secondsTimerRef.current = setInterval(() => {
             timeLeft -= 1
-            setSeconds(timeLeft)
+            d3.select('#timer-seconds').text(timeLeft)
             if (timeLeft < 1) {
                 // end seconds timer
                 clearInterval(secondsTimerRef.current)
@@ -767,7 +764,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     highMetalTone.play()
                     setGameInProgress(false)
                     setTurn(0)
-                    setSeconds(null)
+                    d3.select('#timer-seconds').text('')
                     pushComment('The game ended')
                     d3.select(`#game-arc`).remove()
                     d3.select(`#turn-arc`).remove()
@@ -786,15 +783,15 @@ const GlassBeadGame = ({ history }): JSX.Element => {
         startArc('move', intervalDuration, colors.yellow)
         lowMetalTone.play()
         // update ui state
-        setMoveState('Interval')
-        setSeconds(intervalDuration)
+        d3.select('#timer-move-state').text('Interval')
+        d3.select('#timer-seconds').text(intervalDuration)
         d3.selectAll(`.${styles.playerState}`).text('')
         d3.select(`#player-${nextPlayer.socketId}`).text('(up next)')
         // start seconds timer
         let timeLeft = intervalDuration
         secondsTimerRef.current = setInterval(() => {
             timeLeft -= 1
-            setSeconds(timeLeft)
+            d3.select('#timer-seconds').text(timeLeft)
             if (timeLeft === 0) {
                 // end seconds timer and start move
                 clearInterval(secondsTimerRef.current)
@@ -1131,7 +1128,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     d3.select(`#game-arc`).remove()
                     d3.select(`#turn-arc`).remove()
                     d3.select(`#move-arc`).remove()
-                    setSeconds(null)
+                    d3.select('#timer-seconds').text('')
                     setTurn(0)
                     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording')
                         mediaRecorderRef.current.stop()
@@ -1198,6 +1195,9 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     }, [accountDataLoading, postDataLoading, postData.id])
 
     useEffect(() => {
+        const loadingAnimationDuration = 2000
+        const timerFadeInDuration = 3000
+
         // display loading animation for 5 seconds then fade out
         setTimeout(() => {
             const loadingAnimation = document.getElementById('loading-animation')
@@ -1206,22 +1206,33 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 setShowLoadingAnimation(false)
                 setShowComments(true)
             }, 1000)
-        }, 5000)
-        // create timer canvas
+        }, loadingAnimationDuration)
+
+        // set up timer canvas
         const svg = d3
-            .select('#timer')
+            .select('#timer-canvas')
             .append('svg')
             .attr('id', 'timer-svg')
-            .attr('width', gameArcRadius * 2)
-            .attr('height', gameArcRadius * 2)
+            .attr('viewBox', `0 0 ${gameArcRadius * 2} ${gameArcRadius * 2}`)
+            .attr('perserveAspectRatio', 'xMaxYMax')
 
-        const timerGroup = svg
-            .append('g')
-            .attr('id', 'timer-group')
-            .attr('transform', `translate(${gameArcRadius},${gameArcRadius})`)
+        const imageDefs = svg.append('defs').attr('id', 'image-defs')
+
+        function createTimerGroup(id: string) {
+            return svg
+                .append('g')
+                .attr('id', id)
+                .attr('transform', `translate(${gameArcRadius},${gameArcRadius})`)
+        }
+
+        // order is important here to ensure correct layering
+        const timerBackground = createTimerGroup('timer-background')
+        createTimerGroup('timer-arcs')
+        const timerText = createTimerGroup('timer-text')
+        const timerBead = createTimerGroup('timer-bead')
 
         function createArcBarckground(type: 'game' | 'turn' | 'move', color: string) {
-            timerGroup
+            timerBackground
                 .append('path')
                 .datum({ startAngle: 0, endAngle: 2 * Math.PI })
                 .attr('id', `${type}-arc-background`)
@@ -1230,9 +1241,78 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 .attr('d', arcs[`${type}Arc`])
         }
 
+        function createArcTitle(text: string, fontSize: number, yOffset: number, id?: string) {
+            timerText
+                .append('text')
+                .text(text)
+                .attr('id', id)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', `${fontSize}px`)
+                .attr('x', 0)
+                .attr('y', yOffset)
+                .style('opacity', 0)
+                .transition()
+                .delay(loadingAnimationDuration)
+                .duration(timerFadeInDuration)
+                .style('opacity', 1)
+        }
+
         createArcBarckground('game', colors.grey1)
         createArcBarckground('turn', colors.grey2)
         createArcBarckground('move', colors.grey3)
+        createArcTitle('Game', 16, -194)
+        createArcTitle('Turn', 16, -164)
+        createArcTitle('Move', 16, -134, 'timer-move-state')
+        createArcTitle('', 24, -98, 'timer-seconds')
+
+        timerBead
+            .append('rect')
+            .attr('x', -80)
+            .attr('y', -80)
+            .attr('width', 160)
+            .attr('height', 160)
+            .attr('rx', 10)
+            .attr('ry', 10)
+            .attr('fill', 'white')
+
+        imageDefs
+            .append('pattern')
+            .attr('id', 'wave-form-pattern')
+            .attr('height', 1)
+            .attr('width', 1)
+            .append('image')
+            .attr('id', 'wave-form-image')
+            .attr('height', 120)
+            .attr('xlink:href', '/icons/gbg/sound-wave.png')
+
+        timerBead
+            .append('rect')
+            .attr('width', 120)
+            .attr('height', 120)
+            .attr('x', -60)
+            .attr('y', -60)
+            .style('fill', 'url(#wave-form-pattern)')
+
+        d3.xml('/icons/play-solid.svg').then((data) => {
+            timerBead.node().append(data.documentElement)
+            const playButton = timerBead.select('svg')
+            playButton
+                .attr('width', 60)
+                .attr('height', 60)
+                .attr('x', -30)
+                .attr('y', -30)
+                .style('color', '#8ad1ff')
+                .style('cursor', 'pointer')
+                .on('mouseover', () => {
+                    playButton.transition().duration(300).style('color', '#44b1f7')
+                })
+                .on('mouseout', () => {
+                    playButton.transition().duration(300).style('color', '#8ad1ff')
+                })
+                .on('mousedown', () => {
+                    console.log('play!')
+                })
+        })
     }, [])
 
     return (
@@ -1250,7 +1330,9 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 <iframe
                     className={styles.backgroundVideo}
                     title='background video'
-                    src={`https://www.youtube.com/embed/${gameData.backgroundVideo}?start=${gameData.backgroundVideoStartTime}&autoplay=1&mute=1&enablejsapi=1`}
+                    src={`https://www.youtube.com/embed/${gameData.backgroundVideo}?start=${
+                        gameData.backgroundVideoStartTime || 1
+                    }&autoplay=1&mute=1&enablejsapi=1`}
                 />
             )}
             {gameData.backgroundImage && (
@@ -1428,17 +1510,9 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                                 <p>Add a new topic image</p>
                             </button>
                         </div>
-                        <div id='timer' className={styles.timer}>
-                            <div className={styles.timerArcTitles}>
-                                <p>Game</p>
-                                <p>Turn</p>
-                                <p>{moveState}</p>
-                                <span>{seconds}</span>
-                            </div>
-                            <div className={styles.mainBead}>
-                                <img src='/icons/gbg/sound-wave.png' alt='' />
-                            </div>
-                        </div>
+                        <Column className={styles.timerContainer}>
+                            <div id='timer-canvas' className={styles.timer} />
+                        </Column>
                     </Column>
                     <Column className={styles.people}>
                         <Button

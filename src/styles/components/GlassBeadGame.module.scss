@@ -138,7 +138,6 @@ $transitionSpeed: 1s;
 
         .centerPanel {
             width: 100%;
-            padding-top: 20px;
             position: relative;
 
             .gameControls {
@@ -166,7 +165,9 @@ $transitionSpeed: 1s;
             }
 
             .timerColumn {
-                margin-top: 40px;
+                margin-top: 30px;
+                width: 100%;
+                overflow: hidden;
 
                 .curvedDNA {
                     position: absolute;
@@ -182,12 +183,12 @@ $transitionSpeed: 1s;
                     border-radius: 50%;
                     background-color: #fbfbfb;
                     box-shadow: 0 0 10px 0 rgba(10, 8, 72, 0.15);
-                    margin: 10px 0 30px 0;
+                    margin-top: 10px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    z-index: 3;
                     position: relative;
+                    flex-shrink: 0;
 
                     img {
                         width: 100%;
@@ -224,12 +225,20 @@ $transitionSpeed: 1s;
                     }
                 }
 
+                .timerContainer {
+                    width: 100%;
+                    max-width: 550px;
+                    height: 100%;
+                    height: calc(100% - 216px);
+                    padding: 50px;
+                }
+
                 .timer {
-                    position: relative;
+                    height: 100%;
                     display: flex;
-                    align-items: center;
                     justify-content: center;
-                    z-index: 3;
+                    position: relative;
+
                     > .timerArcTitles {
                         position: absolute;
                         top: -1px;
@@ -247,6 +256,7 @@ $transitionSpeed: 1s;
                         width: 160px;
                         height: 160px;
                         position: absolute;
+                        top: calc(50% - 80px);
                         background-color: #fbfbfb;
                         border-radius: 10px;
                         display: flex;
