@@ -1,27 +1,31 @@
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useRef } from 'react'
 import styles from '@styles/components/cards/BeadCard.module.scss'
 import { AccountContext } from '@contexts/AccountContext'
 import ImageTitle from '@components/ImageTitle'
-import { ReactComponent as PlayIconSVG } from '@svgs/play-solid.svg'
-import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
+import Column from '@src/components/Column'
+import Row from '@src/components/Row'
 
 const BeadCard = (props: {
     postId: number
-    bead: any
     index: number
+    bead: any
     toggleAudio: (beadIndex: number) => void
 }): JSX.Element => {
-    const { postId, bead, index, toggleAudio } = props
+    const { postId, index, bead, toggleAudio } = props
     const { accountData } = useContext(AccountContext)
+    const audioRef = useRef<HTMLAudioElement>(null)
 
     useEffect(() => {
-        const audio = document.getElementById(`${postId}-${index}`) as HTMLAudioElement
-        audio.src = bead.beadUrl
+        if (audioRef && audioRef.current) audioRef.current.src = bead.beadUrl
     }, [])
 
     return (
         <div className={styles.wrapper}>
-            <div className={styles.bead}>
+            <Column
+                spaceBetween
+                id={`gbg-bead-${postId}-${index}`}
+                className={`gbg-bead ${styles.bead} ${styles.paused}`}
+            >
                 <ImageTitle
                     type='user'
                     imagePath={bead.user.flagImagePath}
@@ -31,15 +35,18 @@ const BeadCard = (props: {
                     style={{ marginRight: 10 }}
                 />
                 <img src='/icons/gbg/sound-wave.png' alt='sound-wave' />
-                <div className={styles.beadControls}>
-                    <button type='button' onClick={() => toggleAudio(index)}>
-                        {bead.playing ? <PauseIconSVG /> : <PlayIconSVG />}
-                    </button>
-                </div>
-                <audio id={`${postId}-${index}`}>
+                <Row className={styles.controls}>
+                    <button
+                        className={styles.playButton}
+                        type='button'
+                        aria-label='toggle-audio'
+                        onClick={() => toggleAudio(index)}
+                    />
+                </Row>
+                <audio ref={audioRef}>
                     <track kind='captions' />
                 </audio>
-            </div>
+            </Column>
         </div>
     )
 }

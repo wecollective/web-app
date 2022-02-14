@@ -3,6 +3,7 @@ import React, { useState, useContext } from 'react'
 import { useHistory, Link } from 'react-router-dom'
 import { AccountContext } from '@contexts/AccountContext'
 import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
+import beadStyles from '@styles/components/cards/BeadCard.module.scss'
 import Column from '@src/components/Column'
 import Row from '@src/components/Row'
 import PostCardUrlPreview from '@components/Cards/PostCard/PostCardUrlPreview'
@@ -21,10 +22,9 @@ import PostCardLinkModal from '@components/Cards/PostCard/PostCardLinkModal'
 import DeletePostModal from '@components/Cards/PostCard/DeletePostModal'
 import { timeSinceCreated, dateCreated, pluralise, statTitle } from '@src/Functions'
 import { ReactComponent as LinkIconSVG } from '@svgs/link-solid.svg'
-// import { ReactComponent as FireIconSVG } from '@svgs/fire-alt-solid.svg'
 import { ReactComponent as CommentIconSVG } from '@svgs/comment-solid.svg'
 import { ReactComponent as LikeIconSVG } from '@svgs/like.svg'
-import { ReactComponent as RepostIconSVG } from '@svgs/repost.svg' // '@svgs/retweet-solid.svg'
+import { ReactComponent as RepostIconSVG } from '@svgs/repost.svg'
 import { ReactComponent as RatingIconSVG } from '@svgs/star-solid.svg'
 import { ReactComponent as ArrowRightIconSVG } from '@svgs/arrow-alt-circle-right-solid.svg'
 
@@ -67,9 +67,7 @@ const PostCard = (props: {
     const [linkModalOpen, setLinkModalOpen] = useState(false)
     const [commentsOpen, setCommentsOpen] = useState(false)
     const [deletePostModalOpen, setDeletePostModalOpen] = useState(false)
-    const [beads, setBeads] = useState(
-        GlassBeadGame ? GlassBeadGame.GlassBeads.sort((a, b) => a.index - b.index) : []
-    )
+    const beads = GlassBeadGame ? GlassBeadGame.GlassBeads.sort((a, b) => a.index - b.index) : []
 
     const history = useHistory()
     const isOwnPost = accountData && Creator && accountData.id === Creator.id
@@ -83,76 +81,27 @@ const PostCard = (props: {
         postSpaces.length - 1
     )}`
 
-    // todo: clean up bead handling (always auto play next bead and remove 'play all' button?, stop auido playing on other posts, create post component for other post types)
-    function playNextBead(beadIndex) {
-        const newBeads = [...beads]
-        const previousBead = newBeads[beadIndex - 1]
-        previousBead.playing = false
-        const bead = newBeads[beadIndex]
-        bead.playing = true
-        const audio = document.getElementById(`${id}-${beadIndex}`) as HTMLAudioElement
-        audio.currentTime = 0
-        audio.play()
-        if (newBeads.length > beadIndex + 1) {
-            audio.addEventListener('ended', () => {
-                playNextBead(beadIndex + 1)
-            })
-        } else {
-            audio.addEventListener('ended', () => {
-                const newBeads2 = [...beads]
-                const bead2 = newBeads[beadIndex]
-                bead2.playing = false
-                setBeads(newBeads2)
-            })
-        }
-        setBeads(newBeads)
-    }
-
-    function playAll() {
-        const newBeads = [...beads]
-        // stop all playing beads
-        newBeads.forEach((b, i) => {
-            if (b.playing) {
-                const audio = document.getElementById(`${id}-${i}`) as HTMLAudioElement
-                audio.pause()
-                audio.currentTime = 0
-                b.playing = false
+    function toggleBeadAudio(beadIndex: number, reset?: boolean) {
+        const bead = document.getElementById(`gbg-bead-${id}-${beadIndex}`) as HTMLDivElement
+        if (bead) {
+            const beadAudio = bead.getElementsByTagName('audio')[0] as HTMLAudioElement
+            if (beadAudio.paused) {
+                // stop all playing beads
+                const liveBeads = document.getElementsByClassName('gbg-bead')
+                for (let i = 0; i < liveBeads.length; i += 1) {
+                    const b = liveBeads[i].getElementsByTagName('audio')[0] as HTMLAudioElement
+                    b.pause()
+                }
+                // start selected bead
+                if (reset) beadAudio.currentTime = 0
+                bead.classList.remove(beadStyles.paused)
+                beadAudio.play()
+                beadAudio.addEventListener('ended', () => toggleBeadAudio(beadIndex + 1, true))
+            } else {
+                bead.classList.add(beadStyles.paused)
+                beadAudio.pause()
             }
-        })
-        const bead = newBeads[0]
-        const audio = document.getElementById(`${id}-${0}`) as HTMLAudioElement
-        audio.currentTime = 0
-        audio.play()
-        bead.playing = true
-        setBeads(newBeads)
-        audio.addEventListener('ended', () => playNextBead(1))
-    }
-
-    function toggleBeadAudio(beadIndex) {
-        const newBeads = [...beads]
-        // stop other beads
-        newBeads.forEach((b, i) => {
-            if (i !== beadIndex && b.playing) {
-                const audio = document.getElementById(`${id}-${i}`) as HTMLAudioElement
-                audio.pause()
-                audio.currentTime = 0
-                b.playing = false
-            }
-        })
-        const bead = newBeads[beadIndex]
-        const audio = document.getElementById(`${id}-${beadIndex}`) as HTMLAudioElement
-        if (bead.playing) audio.pause()
-        else {
-            audio.play()
-            audio.addEventListener('ended', () => {
-                const newBeads2 = [...beads]
-                const bead2 = newBeads[beadIndex]
-                bead2.playing = false
-                setBeads(newBeads2)
-            })
         }
-        bead.playing = !bead.playing
-        setBeads(newBeads)
     }
 
     return (
@@ -258,15 +207,6 @@ const PostCard = (props: {
                 {type === 'glass-bead-game' && (
                     <Column className={styles.gbgContent}>
                         <Row className={styles.gbgButtons}>
-                            {beads.length > 0 && (
-                                <Button
-                                    text='Play all beads'
-                                    color='blue'
-                                    size='small'
-                                    onClick={playAll}
-                                    style={{ marginRight: 5 }}
-                                />
-                            )}
                             <Button
                                 text='Open game room'
                                 color='aqua'
@@ -281,7 +221,7 @@ const PostCard = (props: {
                                         key={bead.id}
                                         postId={id}
                                         bead={bead}
-                                        index={beadIndex}
+                                        index={beadIndex + 1}
                                         toggleAudio={toggleBeadAudio}
                                     />
                                 ))}
