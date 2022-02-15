@@ -3,7 +3,6 @@ import React, { useState, useContext } from 'react'
 import { useHistory, Link } from 'react-router-dom'
 import { AccountContext } from '@contexts/AccountContext'
 import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
-import beadStyles from '@styles/components/cards/BeadCard.module.scss'
 import Column from '@src/components/Column'
 import Row from '@src/components/Row'
 import PostCardUrlPreview from '@components/Cards/PostCard/PostCardUrlPreview'
@@ -80,29 +79,6 @@ const PostCard = (props: {
     const otherSpacesText = `and ${postSpaces.length - 1} other space${pluralise(
         postSpaces.length - 1
     )}`
-
-    function toggleBeadAudio(beadIndex: number, reset?: boolean) {
-        const bead = document.getElementById(`gbg-bead-${id}-${beadIndex}`) as HTMLDivElement
-        if (bead) {
-            const beadAudio = bead.getElementsByTagName('audio')[0] as HTMLAudioElement
-            if (beadAudio.paused) {
-                // stop all playing beads
-                const liveBeads = document.getElementsByClassName('gbg-bead')
-                for (let i = 0; i < liveBeads.length; i += 1) {
-                    const b = liveBeads[i].getElementsByTagName('audio')[0] as HTMLAudioElement
-                    b.pause()
-                }
-                // start selected bead
-                if (reset) beadAudio.currentTime = 0
-                bead.classList.remove(beadStyles.paused)
-                beadAudio.play()
-                beadAudio.addEventListener('ended', () => toggleBeadAudio(beadIndex + 1, true))
-            } else {
-                bead.classList.add(beadStyles.paused)
-                beadAudio.pause()
-            }
-        }
-    }
 
     return (
         <div className={`${styles.post} ${styles[location]}`} key={id} style={style}>
@@ -222,7 +198,7 @@ const PostCard = (props: {
                                         postId={id}
                                         bead={bead}
                                         index={beadIndex + 1}
-                                        toggleAudio={toggleBeadAudio}
+                                        style={{ marginRight: 12 }}
                                     />
                                 ))}
                             </Scrollbars>
@@ -337,194 +313,3 @@ PostCard.defaultProps = {
 }
 
 export default PostCard
-
-// const [likePreviewOpen, setLikePreviewOpen] = useState(false)
-// const [repostPreviewOpen, setRepostPreviewOpen] = useState(false)
-// const [ratingPreviewOpen, setRatingPreviewOpen] = useState(false)
-// const [linkPreviewOpen, setLinkPreviewOpen] = useState(false)
-// const [reactionsOpen, setReactionsOpen] = useState(false)
-
-/* {reactionsOpen && (
-    <PostCardReactions
-        postData={postData}
-        totalReactions={totalReactions}
-        totalLikes={totalLikes}
-        totalRatings={totalRatings}
-        totalRatingPoints={totalRatingPoints}
-        totalReposts={totalReposts}
-        totalLinks={totalLinks}
-        accountLike={accountLike}
-        accountRating={accountRating}
-        accountRepost={accountRepost}
-        accountLink={accountLink}
-        setTotalReactions={setTotalReactions}
-        setTotalLikes={setTotalLikes}
-        setTotalRatings={setTotalRatings}
-        setTotalRatingPoints={setTotalRatingPoints}
-        setTotalReposts={setTotalReposts}
-        setTotalLinks={setTotalLinks}
-        setAccountLike={setAccountLike}
-        setAccountRating={setAccountRating}
-        setAccountRepost={setAccountRepost}
-        setAccountLink={setAccountLink}
-        blockedSpaces={blockedSpaces}
-        setBlockedSpaces={setBlockedSpaces}
-    />
-)} */
-
-/* <div
-    className={styles.interactItem}
-    role='button'
-    tabIndex={0}
-    onClick={() => setReactionsOpen(!reactionsOpen)}
-    onKeyDown={() => setReactionsOpen(!reactionsOpen)}
->
-    <img
-        className={`${styles.icon} ${
-            (accountLike ||
-                accountRating ||
-                accountRepost ||
-                (accountLink && accountLink > 0)) &&
-            styles.selected
-        }`}
-        src='/icons/fire-alt-solid.svg'
-        alt=''
-    />
-    <span className='greyText'>{totalReactions} Reactions</span>
-</div> */
-/* <div
-    className={styles.interactItem}
-    role='button'
-    tabIndex={0}
-    onClick={() => setCommentsOpen(!commentsOpen)}
-    onKeyDown={() => setCommentsOpen(!commentsOpen)}
->
-    <img className={styles.icon} src='/icons/comment-solid.svg' alt='' />
-    <span className='greyText'>{totalComments} Comments</span>
-</div>
-
-// function syncPostState() {
-//     setReactionsOpen(false)
-//     setCommentsOpen(false)
-//     setTotalComments(total_comments)
-//     setTotalReactions(total_reactions)
-//     setTotalLikes(total_likes)
-//     setTotalRatings(total_ratings)
-//     setTotalRatingPoints(total_rating_points)
-//     setTotalReposts(total_reposts)
-//     setTotalLinks(total_links)
-//     setAccountLike(account_like)
-//     setAccountRating(account_rating)
-//     setAccountRepost(account_repost)
-//     setAccountLink(account_link)
-//     if (DirectSpaces && IndirectSpaces) {
-//         setBlockedSpaces([
-//             ...DirectSpaces.map((s) => s.handle),
-//             ...IndirectSpaces.map((s) => s.handle),
-//         ])
-//     }
-// }
-
-// useEffect(() => {
-//     if (postData.id) syncPostState()
-// }, [postData.id])
-
-// // local post state
-// const [totalComments, setTotalComments] = useState<number | undefined>(0)
-// const [totalReactions, setTotalReactions] = useState<number | undefined>(0)
-// const [totalLikes, setTotalLikes] = useState<number | undefined>(0)
-// const [totalRatings, setTotalRatings] = useState<number | undefined>(0)
-// const [totalRatingPoints, setTotalRatingPoints] = useState<number | undefined>(0)
-// const [totalReposts, setTotalReposts] = useState<number | undefined>(0)
-// const [totalLinks, setTotalLinks] = useState<number | undefined>(0)
-// // TODO: change account state below to true/false booleans
-// const [accountLike, setAccountLike] = useState<number | undefined>(0)
-// const [accountRating, setAccountRating] = useState<number | undefined>(0)
-// const [accountRepost, setAccountRepost] = useState<number | undefined>(0)
-// const [accountLink, setAccountLink] = useState<number | undefined>(0)
-
-// const {
-//     id,
-//     creator,
-//     type,
-//     text,
-//     url,
-//     urlImage,
-//     urlDomain,
-//     urlTitle,
-//     urlDescription,
-//     createdAt,
-//     total_comments,
-//     total_reactions,
-//     total_likes,
-//     total_ratings,
-//     total_rating_points,
-//     total_reposts,
-//     total_links,
-//     account_like,
-//     account_rating,
-//     account_repost,
-//     account_link,
-//     DirectSpaces,
-//     IndirectSpaces,
-//     GlassBeadGame,
-//     IncomingLinks,
-//     OutgoingLinks,
-// } = postData
-
-/* {type === 'glass-bead' && (
-    <div
-        className={styles.interactItem}
-        role='button'
-        tabIndex={0}
-        onClick={() => createPostFromTurn()}
-        onKeyDown={() => createPostFromTurn()}
-    >
-        <img
-            className={`${styles.icon} ${
-                accountTurn > 0 && styles.selected
-            }`}
-            src='/icons/arrow-alt-circle-right-solid.svg'
-            alt=''
-        />
-        <span className='greyText'>Add turn</span>
-    </div>
-)} */
-
-// function createPostFromTurn() {
-//     if (loggedIn && creator) {
-//         const data = {
-//             creatorName: creator.name,
-//             creatorHandle: creator.handle,
-//             creatorFlagImagePath: creator.flagImagePath,
-//             postId: id,
-//         }
-//         setCreatePostFromTurn(true)
-//         setCreatePostFromTurnData(data)
-//         setCreatePostModalOpen(true)
-//     } else {
-//         setAlertMessage('Log in to add a turn')
-//         setAlertModalOpen(true)
-//     }
-// }
-
-// {!pins &&
-//     <div className={`${styles.postInteractItem} ${styles.opacity50}`}>{/* onClick={ pinPost } */}
-//         <img className={styles.postIcon} src="/icons/thumbtack-solid.svg" alt=''/>
-//         <span>Pin post</span>
-//     </div>
-// }
-
-// function pinPost() {
-//     axios({ method: 'put', url: config.apiURL + '/pinpost', data: { id } })
-//         //.then(setTimeout(() => { updatePosts() }, 100))
-//         .catch(error => { console.log(error) })
-// }
-
-// function unpinPost() {
-//     axios({ method: 'put', url: config.apiURL + '/unpinpost', data: { id } })
-//         //.then(setTimeout(() => { updatePosts() }, 100))
-//         .catch(error => { console.log(error) })
-// }
-
-/* {pins && <div className={styles.pinFlag} onClick={ unpinPost }></div>} */

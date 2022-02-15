@@ -438,50 +438,6 @@ $transitionSpeed: 1s;
             background-color: rgba($white, 0.3);
         }
 
-        .beadWrapper {
-            display: flex;
-            flex-direction: row;
-
-            .bead {
-                position: relative;
-                width: 140px;
-                height: 140px;
-                background-color: white;
-                box-shadow: 0 1px 10px 0 rgba(10, 8, 72, 0.15);
-                border-radius: 10px;
-                padding: 10px;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-                opacity: 1;
-                animation-name: fadeInOpacity;
-                animation-timing-function: ease-in;
-                animation-duration: 1s;
-                > audio {
-                    width: 100px;
-                }
-                > img {
-                    position: absolute;
-                    width: 80px;
-                    height: 80px;
-                    left: calc(50% - 40px);
-                    top: calc(50% - 40px);
-                }
-                .beadControls {
-                    display: flex;
-                    > button {
-                        all: unset;
-                        cursor: pointer;
-                        display: flex;
-                        > svg {
-                            height: 18px;
-                            color: $blue5;
-                        }
-                    }
-                }
-            }
-        }
-
         .beadDivider {
             width: 50px;
             display: flex;

@@ -19,6 +19,7 @@ import {
     notNull,
     allValid,
     defaultErrorState,
+    toggleBeadAudio,
 } from '@src/Functions'
 import Modal from '@components/Modal'
 import ImageUploadModal from '@components/modals/ImageUploadModal'
@@ -32,6 +33,7 @@ import Column from '@components/Column'
 import Scrollbars from '@components/Scrollbars'
 import Markdown from '@components/Markdown'
 import GBGBackgroundModal from '@components/modals/GBGBackgroundModal'
+import BeadCard from '@src/components/Cards/BeadCard'
 import { ReactComponent as AudioIconSVG } from '@svgs/microphone-solid.svg'
 import { ReactComponent as AudioSlashIconSVG } from '@svgs/microphone-slash-solid.svg'
 import { ReactComponent as VideoIconSVG } from '@svgs/video-solid.svg'
@@ -821,16 +823,6 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             .catch((error) => console.log(error))
     }
 
-    function toggleBeadAudio(beadIndex) {
-        const newBeads = [...beads]
-        const bead = newBeads.find((b) => b.index === beadIndex)
-        const audio = d3.select(`#bead-${beadIndex}`).select('audio').node()
-        if (bead.playing) audio.pause()
-        else audio.play()
-        bead.playing = !bead.playing
-        setBeads(newBeads)
-    }
-
     function peopleInRoomText() {
         const totalUsers = usersRef.current.length
         return `${totalUsers} ${isPlural(totalUsers) ? 'people' : 'person'} in room`
@@ -1309,9 +1301,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 .on('mouseout', () => {
                     playButton.transition().duration(300).style('color', '#8ad1ff')
                 })
-                .on('mousedown', () => {
-                    console.log('play!')
-                })
+                .on('mousedown', () => toggleBeadAudio(postData.id, 1, true))
         })
     }, [])
 
@@ -1608,41 +1598,22 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     })}
                 </Scrollbars>
             </Row>
-            <Row
-                centerY
+            <Scrollbars
                 className={`${styles.beads} ${!beads.length && styles.hidden} ${
                     (gameData.backgroundImage || gameData.backgroundVideo) && styles.transparent
-                }`}
+                } row`}
             >
-                {beads.map((bead, index) => (
-                    <div key={bead.id} className={styles.beadWrapper}>
-                        <div className={styles.bead} id={`bead-${bead.index}`}>
-                            <ImageTitle
-                                type='user'
-                                imagePath={bead.user.flagImagePath}
-                                title={bead.user.id === accountData.id ? 'You' : bead.user.name}
-                                fontSize={12}
-                                imageSize={20}
-                                style={{ marginRight: 10 }}
-                            />
-                            <img src='/icons/gbg/sound-wave.png' alt='sound-wave' />
-                            <div className={styles.beadControls}>
-                                <button type='button' onClick={() => toggleBeadAudio(bead.index)}>
-                                    {bead.playing ? <PauseIconSVG /> : <PlayIconSVG />}
-                                </button>
-                            </div>
-                            <audio>
-                                <track kind='captions' />
-                            </audio>
-                        </div>
-                        {beads.length > index + 1 && (
+                {beads.map((bead, beadIndex) => (
+                    <Row centerY key={bead.id} className={styles.beadWrapper}>
+                        <BeadCard postId={postData.id} bead={bead} index={beadIndex + 1} />
+                        {beads.length > beadIndex + 1 && (
                             <div className={styles.beadDivider}>
                                 <DNAIconSVG />
                             </div>
                         )}
-                    </div>
+                    </Row>
                 ))}
-            </Row>
+            </Scrollbars>
         </Column>
     )
 }

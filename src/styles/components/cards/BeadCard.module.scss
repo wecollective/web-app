@@ -1,53 +1,49 @@
 @import '@styles/Variables';
 
-.wrapper {
-    &:not(:last-child) { margin-right: 12px }
-    .bead {
-        position: relative;
-        width: 140px;
-        height: 140px;
-        background-color: white;
-        box-shadow: 0 1px 10px 0 rgba(10, 8, 72, 0.15);
-        border-radius: 10px;
-        padding: 10px;
+@keyframes fadeInOpacity {
+	0% { opacity: 0 }
+	100% { opacity: 1 }
+}
+
+.bead {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    background-color: white;
+    box-shadow: 0 1px 10px 0 rgba(10, 8, 72, 0.15);
+    border-radius: 10px;
+    padding: 10px;
+    opacity: 1;
+    animation-name: fadeInOpacity;
+    animation-timing-function: ease-in;
+    animation-duration: 1s;
+    flex-shrink: 0;
+
+    > audio {
+        width: 100px;
+    }
+
+    > img {
+        position: absolute;
+        width: 80px;
+        height: 80px;
+        left: calc(50% - 40px);
+        top: calc(50% - 40px);
+    }
+
+    .playButton {
+        all: unset;
+        cursor: pointer;
         display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        // align-items: center;
-        opacity: 1;
-        animation-name: fadeInOpacity;
-        animation-timing-function: ease-in;
-        animation-duration: 1s;
-        > audio {
-            width: 100px;
-        }
-        > img {
-            position: absolute;
-            width: 80px;
-            height: 80px;
-            left: calc(50% - 40px);
-            top: calc(50% - 40px);
-        }
-        .beadControls {
-            //height: 20px;
-            // height: calc(100% - 20px);
-            // width: calc(100% - 20px);
-            // position: absolute;
-            display: flex;
-            // align-items: center;
-            // justify-content: center;
-            
-            > button {
-                all: unset;
-                cursor: pointer;
-                display: flex;
-                > svg {
-                    height: 18px;
-                    // width: 15px;
-                    //opacity: 0.8;
-                    color: $blue5; //#aa8dfa; //rgb(168, 210, 250);
-                }
-            }
+        width: 18px;
+        height: 18px;
+        background-image: url('/icons/pause-solid.svg');
+        background-repeat: no-repeat;
+    }
+
+    &.paused {
+        .playButton {
+            background-image: url('/icons/play-solid.svg');
         }
     }
 }
