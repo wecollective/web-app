@@ -37,13 +37,6 @@
         display: flex;
         width: 18px;
         height: 18px;
-        background-image: url('/icons/pause-solid.svg');
-        background-repeat: no-repeat;
-    }
-
-    &.paused {
-        .playButton {
-            background-image: url('/icons/play-solid.svg');
-        }
+        color: $blue5;
     }
 }

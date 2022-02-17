@@ -1,5 +1,3 @@
-import beadStyles from '@styles/components/cards/BeadCard.module.scss'
-
 export function isPlural(value: number): boolean {
     return value < 1 || value > 1
 }
@@ -122,18 +120,15 @@ export function toggleBeadAudio(postId: number, beadIndex: number, reset?: boole
             // stop all playing beads
             const liveBeads = document.getElementsByClassName('gbg-bead')
             for (let i = 0; i < liveBeads.length; i += 1) {
-                liveBeads[i].classList.add(beadStyles.paused)
                 const audio = liveBeads[i].getElementsByTagName('audio')[0] as HTMLAudioElement
                 audio.pause()
             }
             // start selected bead
             if (reset) beadAudio.currentTime = 0
-            bead.classList.remove(beadStyles.paused)
             beadAudio.play()
             beadAudio.addEventListener('ended', () => toggleBeadAudio(postId, beadIndex + 1, true))
         } else {
             // pause bead
-            bead.classList.add(beadStyles.paused)
             beadAudio.pause()
         }
     }
