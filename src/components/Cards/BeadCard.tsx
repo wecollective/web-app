@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState, useRef } from 'react'
+import * as d3 from 'd3'
 import styles from '@styles/components/cards/BeadCard.module.scss'
 import { AccountContext } from '@contexts/AccountContext'
 import ImageTitle from '@components/ImageTitle'
 import Column from '@src/components/Column'
 import Row from '@src/components/Row'
-import { toggleBeadAudio } from '@src/Functions'
 import { ReactComponent as PlayIconSVG } from '@svgs/play-solid.svg'
 import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
 
@@ -19,11 +19,34 @@ const BeadCard = (props: {
     const [audioPlaying, setAudioPlaying] = useState(false)
     const audioRef = useRef<HTMLAudioElement>(null)
 
+    function toggleBeadAudio(beadIndex: number, reset?: boolean): void {
+        const audio = d3.select(`#gbg-bead-${postId}-${beadIndex}`).select('audio').node()
+        if (audio) {
+            if (audio.paused) {
+                // stop all playing beads
+                const allBeads = document.getElementsByClassName('gbg-bead')
+                for (let i = 0; i < allBeads.length; i += 1) {
+                    const beadAudio = allBeads[i].getElementsByTagName(
+                        'audio'
+                    )[0] as HTMLAudioElement
+                    beadAudio.pause()
+                }
+                // start selected bead
+                if (reset) audio.currentTime = 0
+                audio.play()
+            } else {
+                // pause bead
+                audio.pause()
+            }
+        }
+    }
+
     useEffect(() => {
         if (audioRef && audioRef.current) {
             audioRef.current.src = bead.beadUrl
             audioRef.current.addEventListener('play', () => setAudioPlaying(true))
             audioRef.current.addEventListener('pause', () => setAudioPlaying(false))
+            audioRef.current.addEventListener('ended', () => toggleBeadAudio(index + 1, true))
         }
     }, [])
 
@@ -31,7 +54,7 @@ const BeadCard = (props: {
         <Column
             spaceBetween
             id={`gbg-bead-${postId}-${index}`}
-            className={`gbg-bead ${styles.bead} ${styles.paused}`}
+            className={`gbg-bead ${styles.bead} ${audioPlaying && styles.focused}`}
             style={style}
         >
             <ImageTitle
@@ -48,7 +71,7 @@ const BeadCard = (props: {
                     className={styles.playButton}
                     type='button'
                     aria-label='toggle-audio'
-                    onClick={() => toggleBeadAudio(postId, index)}
+                    onClick={() => toggleBeadAudio(index)}
                 >
                     {audioPlaying ? <PauseIconSVG /> : <PlayIconSVG />}
                 </button>

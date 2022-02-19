@@ -111,25 +111,3 @@ export function isValidUrl(url: string): boolean {
     }
     return true
 }
-
-export function toggleBeadAudio(postId: number, beadIndex: number, reset?: boolean): void {
-    const bead = document.getElementById(`gbg-bead-${postId}-${beadIndex}`) as HTMLDivElement
-    if (bead) {
-        const beadAudio = bead.getElementsByTagName('audio')[0] as HTMLAudioElement
-        if (beadAudio.paused) {
-            // stop all playing beads
-            const liveBeads = document.getElementsByClassName('gbg-bead')
-            for (let i = 0; i < liveBeads.length; i += 1) {
-                const audio = liveBeads[i].getElementsByTagName('audio')[0] as HTMLAudioElement
-                audio.pause()
-            }
-            // start selected bead
-            if (reset) beadAudio.currentTime = 0
-            beadAudio.play()
-            beadAudio.addEventListener('ended', () => toggleBeadAudio(postId, beadIndex + 1, true))
-        } else {
-            // pause bead
-            beadAudio.pause()
-        }
-    }
-}

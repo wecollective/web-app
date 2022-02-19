@@ -18,9 +18,10 @@
     animation-timing-function: ease-in;
     animation-duration: 1s;
     flex-shrink: 0;
+    transition: box-shadow 1s;
 
-    > audio {
-        width: 100px;
+    &.focused {
+        box-shadow: 0 1px 15px 0 rgba(56, 111, 212, 0.5);
     }
 
     > img {
@@ -38,5 +39,9 @@
         width: 18px;
         height: 18px;
         color: $blue5;
+    }
+
+    audio {
+        width: 100px;
     }
 }

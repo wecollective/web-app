@@ -19,7 +19,6 @@ import {
     notNull,
     allValid,
     defaultErrorState,
-    toggleBeadAudio,
 } from '@src/Functions'
 import Modal from '@components/Modal'
 import ImageUploadModal from '@components/modals/ImageUploadModal'
@@ -357,6 +356,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     const audioRef = useRef<any>(null)
     const videoRef = useRef<any>(null)
     const showVideoRef = useRef(showVideos)
+    const liveBeadIndexRef = useRef(1)
 
     // const location = useLocation()
     // const postId = +location.pathname.split('/')[2]
@@ -926,17 +926,53 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     //     return () => historyListener()
     // }, [])
 
+    function addPlayButtonToCenterBead() {
+        d3.xml('/icons/play-solid.svg').then((data) => {
+            const timerBead = d3.select('#timer-bead')
+            timerBead.node().append(data.documentElement)
+            const playButton = timerBead.select('svg')
+            playButton
+                .attr('width', 60)
+                .attr('height', 60)
+                .attr('x', -30)
+                .attr('y', -30)
+                .style('color', '#8ad1ff')
+                .style('cursor', 'pointer')
+                .on('mouseover', () => {
+                    playButton.transition().duration(300).style('color', '#44b1f7')
+                })
+                .on('mouseout', () => {
+                    playButton.transition().duration(300).style('color', '#8ad1ff')
+                })
+                .on('mousedown', () => {
+                    const audio = d3
+                        .select(`#gbg-bead-${postData.id}-${liveBeadIndexRef.current}`)
+                        .select('audio')
+                        .node()
+                    if (audio.paused) audio.play()
+                    else audio.pause()
+                })
+        })
+    }
+
     // todo: flatten out userData into user object with socketId
     useEffect(() => {
         if (!accountDataLoading && !postDataLoading && postData.id) {
             axios.get(`${config.apiURL}/glass-bead-game-data?postId=${postData.id}`).then((res) => {
+                const { GlassBeadGameComments, GlassBeads } = res.data
                 // todo: move beads and comments into gamedata and set in one go?
                 setGameData(res.data)
-                setComments(res.data.GlassBeadGameComments)
-                setBeads(res.data.GlassBeads.sort((a, b) => a.index - b.index))
-                res.data.GlassBeads.forEach((bead) => {
-                    d3.select(`#bead-${bead.index}`).select('audio').attr('src', bead.beadUrl)
+                setComments(GlassBeadGameComments)
+                setBeads(GlassBeads.sort((a, b) => a.index - b.index))
+                GlassBeads.forEach((bead) => {
+                    d3.select(`#gbg-bead-${postData.id}-${bead.index}`)
+                        .select('audio')
+                        .on('play', () => (liveBeadIndexRef.current = bead.index))
+                        .on('ended', () => {
+                            if (bead.index === GlassBeads.length) liveBeadIndexRef.current = 1
+                        })
                 })
+                if (GlassBeads.length) addPlayButtonToCenterBead()
                 // set roomIdRef and userRef
                 roomIdRef.current = postData.id
                 userRef.current = {
@@ -1132,7 +1168,10 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 })
                 // audio bead recieved
                 socketRef.current.on('incoming-audio-bead', (data) => {
-                    setBeads((previousBeads) => [...previousBeads, data])
+                    setBeads((previousBeads) => {
+                        if (!previousBeads.length) addPlayButtonToCenterBead()
+                        return [...previousBeads, data]
+                    })
                     d3.select(`#bead-${data.index}`).select('audio').attr('src', data.beadUrl)
                 })
                 // peer refresh request
@@ -1284,25 +1323,6 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             .attr('x', -60)
             .attr('y', -60)
             .style('fill', 'url(#wave-form-pattern)')
-
-        d3.xml('/icons/play-solid.svg').then((data) => {
-            timerBead.node().append(data.documentElement)
-            const playButton = timerBead.select('svg')
-            playButton
-                .attr('width', 60)
-                .attr('height', 60)
-                .attr('x', -30)
-                .attr('y', -30)
-                .style('color', '#8ad1ff')
-                .style('cursor', 'pointer')
-                .on('mouseover', () => {
-                    playButton.transition().duration(300).style('color', '#44b1f7')
-                })
-                .on('mouseout', () => {
-                    playButton.transition().duration(300).style('color', '#8ad1ff')
-                })
-                .on('mousedown', () => toggleBeadAudio(postData.id, 1, true))
-        })
     }, [])
 
     return (
@@ -1345,7 +1365,6 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     title='Add a new topic image'
                     mbLimit={2}
                     onSaved={(imageURL) => signalNewTopicImage(imageURL)}
-                    // onSaved={(imageURL) => setGameData({ ...gameData, topicImage: imageURL })}
                     close={() => setTopicImageModalOpen(false)}
                 />
             )}
