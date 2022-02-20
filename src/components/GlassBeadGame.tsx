@@ -772,6 +772,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     d3.select(`#turn-arc`).remove()
                     d3.select(`#move-arc`).remove()
                     d3.selectAll(`.${styles.playerState}`).text('')
+                    addPlayButtonToCenterBead()
                     setShowComments(true)
                     updateShowVideos(true)
                 }
@@ -927,32 +928,85 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     // }, [])
 
     function addPlayButtonToCenterBead() {
-        d3.xml('/icons/play-solid.svg').then((data) => {
-            const timerBead = d3.select('#timer-bead')
-            timerBead.node().append(data.documentElement)
-            const playButton = timerBead.select('svg')
-            playButton
-                .attr('width', 60)
-                .attr('height', 60)
-                .attr('x', -30)
-                .attr('y', -30)
-                .style('color', '#8ad1ff')
-                .style('cursor', 'pointer')
-                .on('mouseover', () => {
-                    playButton.transition().duration(300).style('color', '#44b1f7')
-                })
-                .on('mouseout', () => {
-                    playButton.transition().duration(300).style('color', '#8ad1ff')
-                })
-                .on('mousedown', () => {
-                    const audio = d3
-                        .select(`#gbg-bead-${postData.id}-${liveBeadIndexRef.current}`)
-                        .select('audio')
-                        .node()
-                    if (audio.paused) audio.play()
-                    else audio.pause()
-                })
-        })
+        Promise.all([d3.xml('/icons/play-solid.svg'), d3.xml('/icons/pause-solid.svg')]).then(
+            ([play, pause]) => {
+                const timerBead = d3.select('#timer-bead')
+                timerBead.node().append(play.documentElement)
+                timerBead.node().append(pause.documentElement)
+                timerBead
+                    .selectAll('svg')
+                    .attr('width', 60)
+                    .attr('height', 60)
+                    .attr('x', -30)
+                    .attr('y', -30)
+                    .style('color', '#8ad1ff')
+                    .style('cursor', 'pointer')
+
+                const playButton = d3.select(timerBead.selectAll('svg').nodes()[0])
+                const pauseButton = d3.select(timerBead.selectAll('svg').nodes()[1])
+                playButton
+                    .attr('id', 'play-button')
+                    .style('opacity', 0)
+                    .on('mouseover', () => {
+                        playButton.transition().duration(300).style('color', '#44b1f7')
+                    })
+                    .on('mouseout', () => {
+                        playButton.transition().duration(300).style('color', '#8ad1ff')
+                    })
+                    .on('mousedown', () => {
+                        playButton.attr('display', 'none')
+                        pauseButton.attr('display', 'flex')
+                        const audio = d3
+                            .select(`#gbg-bead-${postData.id}-${liveBeadIndexRef.current}`)
+                            .select('audio')
+                            .node()
+                        if (audio) audio.play()
+                    })
+                    .transition()
+                    .duration(1000)
+                    .style('opacity', 1)
+                pauseButton
+                    .attr('id', 'pause-button')
+                    .attr('display', 'none')
+                    .on('mouseover', () => {
+                        pauseButton.transition().duration(300).style('color', '#44b1f7')
+                    })
+                    .on('mouseout', () => {
+                        pauseButton.transition().duration(300).style('color', '#8ad1ff')
+                    })
+                    .on('mousedown', () => {
+                        pauseButton.attr('display', 'none')
+                        playButton.attr('display', 'flex')
+                        const audio = d3
+                            .select(`#gbg-bead-${postData.id}-${liveBeadIndexRef.current}`)
+                            .select('audio')
+                            .node()
+                        if (audio) audio.pause()
+                    })
+            }
+        )
+    }
+
+    function addEventListenersToBead(beadIndex) {
+        d3.select(`#gbg-bead-${postData.id}-${beadIndex}`)
+            .select('audio')
+            .on('play', () => {
+                liveBeadIndexRef.current = beadIndex
+                d3.select('#play-button').attr('display', 'none')
+                d3.select('#pause-button').attr('display', 'flex')
+            })
+            .on('pause', () => {
+                d3.select('#play-button').attr('display', 'flex')
+                d3.select('#pause-button').attr('display', 'none')
+            })
+            .on('ended', () => {
+                const totalBeads = d3.selectAll('.gbg-bead').nodes()
+                if (beadIndex === totalBeads.length) {
+                    liveBeadIndexRef.current = 1
+                    d3.select('#play-button').attr('display', 'flex')
+                    d3.select('#pause-button').attr('display', 'none')
+                }
+            })
     }
 
     // todo: flatten out userData into user object with socketId
@@ -964,14 +1018,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 setGameData(res.data)
                 setComments(GlassBeadGameComments)
                 setBeads(GlassBeads.sort((a, b) => a.index - b.index))
-                GlassBeads.forEach((bead) => {
-                    d3.select(`#gbg-bead-${postData.id}-${bead.index}`)
-                        .select('audio')
-                        .on('play', () => (liveBeadIndexRef.current = bead.index))
-                        .on('ended', () => {
-                            if (bead.index === GlassBeads.length) liveBeadIndexRef.current = 1
-                        })
-                })
+                GlassBeads.forEach((bead) => addEventListenersToBead(bead.index))
                 if (GlassBeads.length) addPlayButtonToCenterBead()
                 // set roomIdRef and userRef
                 roomIdRef.current = postData.id
@@ -1142,6 +1189,17 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     setGameSettingsModalOpen(false)
                     setGameInProgress(true)
                     setBeads([])
+                    d3.select('#play-button')
+                        .transition()
+                        .duration(1000)
+                        .style('opacity', 0)
+                        .remove()
+                    d3.select('#pause-button')
+                        .transition()
+                        .duration(1000)
+                        .style('opacity', 0)
+                        .remove()
+                    liveBeadIndexRef.current = 1
                     pushComment(`${data.userSignaling.name} started the game`)
                     startGame(data.gameData)
                 })
@@ -1157,6 +1215,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     d3.select(`#turn-arc`).remove()
                     d3.select(`#move-arc`).remove()
                     d3.select('#timer-seconds').text('')
+                    addPlayButtonToCenterBead()
                     setTurn(0)
                     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording')
                         mediaRecorderRef.current.stop()
@@ -1168,11 +1227,8 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 })
                 // audio bead recieved
                 socketRef.current.on('incoming-audio-bead', (data) => {
-                    setBeads((previousBeads) => {
-                        if (!previousBeads.length) addPlayButtonToCenterBead()
-                        return [...previousBeads, data]
-                    })
-                    d3.select(`#bead-${data.index}`).select('audio').attr('src', data.beadUrl)
+                    setBeads((previousBeads) => [...previousBeads, data])
+                    addEventListenersToBead(data.index)
                 })
                 // peer refresh request
                 socketRef.current.on('incoming-refresh-request', (data) => {
