@@ -22,21 +22,16 @@ const BeadCard = (props: {
     function toggleBeadAudio(beadIndex: number, reset?: boolean): void {
         const audio = d3.select(`#gbg-bead-${postId}-${beadIndex}`).select('audio').node()
         if (audio) {
-            if (audio.paused) {
-                // stop all playing beads
-                const allBeads = document.getElementsByClassName('gbg-bead')
+            if (!audio.paused) audio.pause()
+            else {
+                // pause all playing beads
+                const allBeads = d3.selectAll('.gbg-bead').select('audio').nodes()
                 for (let i = 0; i < allBeads.length; i += 1) {
-                    const beadAudio = allBeads[i].getElementsByTagName(
-                        'audio'
-                    )[0] as HTMLAudioElement
-                    beadAudio.pause()
+                    if (!allBeads[i].paused) allBeads[i].pause()
                 }
                 // start selected bead
                 if (reset) audio.currentTime = 0
                 audio.play()
-            } else {
-                // pause bead
-                audio.pause()
             }
         }
     }
