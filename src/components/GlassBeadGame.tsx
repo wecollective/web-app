@@ -145,7 +145,7 @@ const GameSettingsModal = (props) => {
     const [formData, setFormData] = useState({
         introDuration: {
             value: notNull(gameData.introDuration) || gameDefaults.introDuration,
-            validate: (v) => (v < 10 || v > 60 ? ['Must be between 10 and 60 seconds'] : []),
+            validate: (v) => (v < 10 || v > 300 ? ['Must be between 10 seconds and 5 mins'] : []),
             ...defaultErrorState,
         },
         numberOfTurns: {
