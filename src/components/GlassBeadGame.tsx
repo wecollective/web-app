@@ -54,6 +54,7 @@ const gameDefaults = {
     numberOfTurns: 3,
     moveDuration: 60,
     intervalDuration: 0,
+    outroDuration: 0,
 }
 
 const colors = {
@@ -163,8 +164,13 @@ const GameSettingsModal = (props) => {
             validate: (v) => (v > 60 ? ['Must be 60 seconds or less'] : []),
             ...defaultErrorState,
         },
+        outroDuration: {
+            value: notNull(gameData.outroDuration) || gameDefaults.outroDuration,
+            validate: (v) => (v > 300 ? ['Must be 5 minutes or less'] : []),
+            ...defaultErrorState,
+        },
     })
-    const { introDuration, numberOfTurns, moveDuration, intervalDuration } = formData
+    const { introDuration, numberOfTurns, moveDuration, intervalDuration, outroDuration } = formData
     const [playersError, setPlayersError] = useState('')
     const [loading, setLoading] = useState(false)
     const [saved, setSaved] = useState(false)
@@ -192,6 +198,7 @@ const GameSettingsModal = (props) => {
                 moveDuration: moveDuration.value,
                 introDuration: introDuration.value,
                 intervalDuration: intervalDuration.value,
+                outroDuration: outroDuration.value,
                 playerOrder: players.map((p) => p.id).join(','),
             }
             axios
@@ -205,6 +212,7 @@ const GameSettingsModal = (props) => {
                         moveDuration: moveDuration.value,
                         introDuration: introDuration.value,
                         intervalDuration: intervalDuration.value,
+                        outroDuration: outroDuration.value,
                         players,
                     })
                     close()
@@ -259,6 +267,16 @@ const GameSettingsModal = (props) => {
                             errors={intervalDuration.errors}
                             value={intervalDuration.value}
                             onChange={(v) => updateValue('intervalDuration', +v.replace(/\D/g, ''))}
+                        />
+                        <Input
+                            title='Outro duration (seconds)'
+                            type='text'
+                            style={{ marginBottom: 10 }}
+                            disabled={loading || saved}
+                            state={outroDuration.state}
+                            errors={outroDuration.errors}
+                            value={outroDuration.value}
+                            onChange={(v) => updateValue('outroDuration', +v.replace(/\D/g, ''))}
                         />
                     </Column>
                     <Column style={{ width: 250 }}>
@@ -761,21 +779,8 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                         startInterval(moveNumber + 1, newTurnNumber, nextPlayer, data)
                     // else start next move
                     else startMove(moveNumber + 1, newTurnNumber, nextPlayer, data)
-                } else {
-                    // end game
-                    highMetalTone.play()
-                    setGameInProgress(false)
-                    setTurn(0)
-                    d3.select('#timer-seconds').text('')
-                    pushComment('The game ended')
-                    d3.select(`#game-arc`).remove()
-                    d3.select(`#turn-arc`).remove()
-                    d3.select(`#move-arc`).remove()
-                    d3.selectAll(`.${styles.playerState}`).text('')
-                    addPlayButtonToCenterBead()
-                    setShowComments(true)
-                    updateShowVideos(true)
-                }
+                } else if (data.outroDuration) startOutro(data)
+                else endGame()
             }
         }, 1000)
     }
@@ -801,6 +806,37 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 startMove(moveNumber, turnNumber, nextPlayer, data)
             }
         }, 1000)
+    }
+
+    function startOutro(data) {
+        d3.select('#timer-move-state').text('Outro')
+        d3.select('#timer-seconds').text(data.outroDuration)
+        startArc('move', data.outroDuration, colors.yellow)
+        let timeLeft = data.outroDuration
+        secondsTimerRef.current = setInterval(() => {
+            timeLeft -= 1
+            d3.select('#timer-seconds').text(timeLeft)
+            if (timeLeft < 1) {
+                clearInterval(secondsTimerRef.current)
+                endGame()
+            }
+        }, 1000)
+    }
+
+    function endGame() {
+        highMetalTone.play()
+        setGameInProgress(false)
+        setTurn(0)
+        d3.select('#timer-seconds').text('')
+        d3.select('#timer-move-state').text('Move')
+        pushComment('The game ended')
+        d3.select(`#game-arc`).remove()
+        d3.select(`#turn-arc`).remove()
+        d3.select(`#move-arc`).remove()
+        d3.selectAll(`.${styles.playerState}`).text('')
+        addPlayButtonToCenterBead()
+        setShowComments(true)
+        updateShowVideos(true)
     }
 
     function signalStopGame() {
