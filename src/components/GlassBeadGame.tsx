@@ -224,7 +224,6 @@ const GameSettingsModal = (props) => {
     return (
         <Modal close={close} centered>
             <h1>Game settings</h1>
-            <p>Players must be streaming to participate in the game</p>
             <form onSubmit={saveSettings}>
                 <Row style={{ margin: '10px 0 30px 0' }}>
                     <Column style={{ marginRight: 60 }}>
@@ -280,9 +279,9 @@ const GameSettingsModal = (props) => {
                         />
                     </Column>
                     <Column style={{ width: 250 }}>
-                        <h2 style={{ margin: 0 }}>Player order</h2>
+                        <h2 style={{ margin: 0, lineHeight: '20px' }}>Player order</h2>
                         {players.map((player, i) => (
-                            <Row style={{ marginTop: 10 }}>
+                            <Row style={{ marginTop: 10 }} key={player.socketId}>
                                 <div className={styles.position}>{i + 1}</div>
                                 <div className={styles.positionControls}>
                                     {i > 0 && (
@@ -1732,7 +1731,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 } row`}
             >
                 {beads.map((bead, beadIndex) => (
-                    <Row centerY key={bead.id} className={styles.beadWrapper}>
+                    <Row centerY key={`${bead.roomId}${bead.index}`} className={styles.beadWrapper}>
                         <BeadCard postId={postData.id} bead={bead} index={beadIndex + 1} />
                         {beads.length > beadIndex + 1 && (
                             <div className={styles.beadDivider}>
