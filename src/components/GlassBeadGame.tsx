@@ -636,11 +636,16 @@ const GlassBeadGame = ({ history }): JSX.Element => {
         setComments((c) => [...c, comment.user ? comment : { text: comment }])
     }
 
-    function startArc(type: 'game' | 'turn' | 'move', duration: number, color?: string) {
+    function startArc(
+        type: 'game' | 'turn' | 'move',
+        duration: number,
+        color: string,
+        reverse?: boolean
+    ) {
         d3.select(`#${type}-arc`).remove()
         d3.select('#timer-arcs')
             .append('path')
-            .datum({ startAngle: 0, endAngle: 2 * Math.PI })
+            .datum({ startAngle: 0, endAngle: reverse ? -2 * Math.PI : 2 * Math.PI })
             .attr('id', `${type}-arc`)
             .style('fill', color)
             .style('opacity', 0.8)
@@ -811,7 +816,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     function startOutro(data) {
         d3.select('#timer-move-state').text('Outro')
         d3.select('#timer-seconds').text(data.outroDuration)
-        startArc('move', data.outroDuration, colors.yellow)
+        startArc('move', data.outroDuration, colors.yellow, true)
         let timeLeft = data.outroDuration
         secondsTimerRef.current = setInterval(() => {
             timeLeft -= 1
