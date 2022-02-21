@@ -177,6 +177,18 @@ $transitionSpeed: 1s;
                     z-index: -1;
                 }
 
+                .topicText {
+                    > h1 { margin: 0 }
+                    > button {
+                        all: unset;
+                        cursor: pointer;
+                        margin-left: 10px;
+                        width: 24px;
+                        height: 24px;
+                        color: $grey3;
+                    }
+                }
+
                 .topicImage {
                     width: 140px;
                     height: 140px;

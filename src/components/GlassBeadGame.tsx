@@ -41,8 +41,7 @@ import { ReactComponent as ChevronUpIconSVG } from '@svgs/chevron-up-solid.svg'
 import { ReactComponent as ChevronDownIconSVG } from '@svgs/chevron-down-solid.svg'
 import { ReactComponent as DNAIconSVG } from '@svgs/dna.svg'
 import { ReactComponent as LockIconSVG } from '@svgs/lock-solid.svg'
-import { ReactComponent as PlayIconSVG } from '@svgs/play-solid.svg'
-import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
+import { ReactComponent as EditIconSVG } from '@svgs/edit-solid.svg'
 import { ReactComponent as RefreshIconSVG } from '@svgs/repost.svg'
 import { ReactComponent as CurvedDNASVG } from '@svgs/curved-dna.svg'
 
@@ -347,6 +346,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     const [showVideos, setShowVideos] = useState(false)
     const [firstInteractionWithPage, setFirstInteractionWithPage] = useState(true)
     const [newComment, setNewComment] = useState('')
+    const [newTopic, setNewTopic] = useState('')
     const [audioTrackEnabled, setAudioTrackEnabled] = useState(true)
     const [videoTrackEnabled, setVideoTrackEnabled] = useState(true)
     const [audioOnly, setAudioOnly] = useState(false)
@@ -355,6 +355,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     const [backgroundModalOpen, setBackgroundModalOpen] = useState(false)
     const [showLoadingAnimation, setShowLoadingAnimation] = useState(true)
     const [topicImageModalOpen, setTopicImageModalOpen] = useState(false)
+    const [topicTextModalOpen, setTopicTextModalOpen] = useState(false)
     const [leaveRoomModalOpen, setLeaveRoomModalOpen] = useState(false)
     // const [videoRenderKey, setVideoRenderKey] = useState(0)
 
@@ -833,11 +834,11 @@ const GlassBeadGame = ({ history }): JSX.Element => {
         setTurn(0)
         d3.select('#timer-seconds').text('')
         d3.select('#timer-move-state').text('Move')
-        pushComment('The game ended')
         d3.select(`#game-arc`).remove()
         d3.select(`#turn-arc`).remove()
         d3.select(`#move-arc`).remove()
         d3.selectAll(`.${styles.playerState}`).text('')
+        pushComment('The game ended')
         addPlayButtonToCenterBead()
         setShowComments(true)
         updateShowVideos(true)
@@ -920,6 +921,23 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             startTime,
         }
         socketRef.current.emit('outgoing-new-background', data)
+    }
+
+    function saveNewTopic(e) {
+        e.preventDefault()
+        axios
+            .post(`${config.apiURL}/save-gbg-topic`, { gameId: gameData.id, newTopic })
+            .then(() => {
+                const data = {
+                    roomId: roomIdRef.current,
+                    userSignaling: userRef.current,
+                    gameData,
+                    newTopicText: newTopic,
+                }
+                socketRef.current.emit('outgoing-new-topic-text', data)
+                setTopicTextModalOpen(false)
+            })
+            .catch((error) => console.log(error))
     }
 
     // // const history = useHistory()
@@ -1311,6 +1329,12 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     }
                     pushComment(`${userSignaling.name} added a new background`)
                 })
+                // new topic text
+                socketRef.current.on('incoming-new-topic-text', (data) => {
+                    const { userSignaling, newTopicText } = data
+                    setGameData({ ...data.gameData, topic: newTopicText, topicGroup: null })
+                    pushComment(`${userSignaling.name} updated the topic`)
+                })
                 // new topic image
                 socketRef.current.on('incoming-new-topic-image', (data) => {
                     const { userSignaling, url } = data
@@ -1462,6 +1486,22 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     }
                     close={() => setBackgroundModalOpen(false)}
                 />
+            )}
+            {topicTextModalOpen && (
+                <Modal centered close={() => setTopicTextModalOpen(false)}>
+                    <h1>Change the topic</h1>
+                    <p>Current topic: {gameData.topic}</p>
+                    <form onSubmit={saveNewTopic}>
+                        <Input
+                            type='text'
+                            placeholder='new topic...'
+                            value={newTopic}
+                            onChange={(v) => setNewTopic(v)}
+                            style={{ marginBottom: 30 }}
+                        />
+                        <Button text='Save' color='blue' disabled={!newTopic} submit />
+                    </form>
+                </Modal>
             )}
             {topicImageModalOpen && (
                 <ImageUploadModal
@@ -1616,7 +1656,12 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     )}
                     <Column centerX className={styles.timerColumn}>
                         <CurvedDNASVG className={styles.curvedDNA} />
-                        <h1 style={{ margin: 0 }}>{gameData.topic}</h1>
+                        <Row centerY className={styles.topicText}>
+                            <h1>{gameData.topic}</h1>
+                            <button type='button' onClick={() => setTopicTextModalOpen(true)}>
+                                <EditIconSVG />
+                            </button>
+                        </Row>
                         <div className={styles.topicImage}>
                             {gameData.topicImage && <img src={gameData.topicImage} alt='' />}
                             <button
