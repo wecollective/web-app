@@ -1570,15 +1570,17 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                             )}
                             {!gameData.locked && (
                                 <>
-                                    <Button
-                                        text={`${beads.length ? 'Restart' : 'Start'} game`}
-                                        color={beads.length ? 'red' : 'blue'}
-                                        style={{ marginBottom: 10 }}
-                                        onClick={() =>
-                                            allowedTo('start-game') &&
-                                            setGameSettingsModalOpen(true)
-                                        }
-                                    />
+                                    {userIsStreaming && (
+                                        <Button
+                                            text={`${beads.length ? 'Restart' : 'Start'} game`}
+                                            color={beads.length ? 'red' : 'blue'}
+                                            style={{ marginBottom: 10 }}
+                                            onClick={() =>
+                                                allowedTo('start-game') &&
+                                                setGameSettingsModalOpen(true)
+                                            }
+                                        />
+                                    )}
                                     {beads.length > 0 && (
                                         <Button
                                             text='Save game'
