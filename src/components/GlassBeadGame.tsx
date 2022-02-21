@@ -987,12 +987,16 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 const pauseButton = d3.select(timerBead.selectAll('svg').nodes()[1])
                 playButton
                     .attr('id', 'play-button')
+                    .attr('display', 'flex')
+                    .classed('transitioning', true)
                     .style('opacity', 0)
                     .on('mouseover', () => {
-                        playButton.transition().duration(300).style('color', '#44b1f7')
+                        if (!playButton.classed('transitioning'))
+                            playButton.transition().duration(300).style('color', '#44b1f7')
                     })
                     .on('mouseout', () => {
-                        playButton.transition().duration(300).style('color', '#8ad1ff')
+                        if (!playButton.classed('transitioning'))
+                            playButton.transition().duration(300).style('color', '#8ad1ff')
                     })
                     .on('mousedown', () => {
                         playButton.attr('display', 'none')
@@ -1006,14 +1010,18 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     .transition()
                     .duration(1000)
                     .style('opacity', 1)
+                    .on('end', () => playButton.classed('transitioning', false))
                 pauseButton
                     .attr('id', 'pause-button')
                     .attr('display', 'none')
+                    .classed('transitioning', false)
                     .on('mouseover', () => {
-                        pauseButton.transition().duration(300).style('color', '#44b1f7')
+                        if (!pauseButton.classed('transitioning'))
+                            pauseButton.transition().duration(300).style('color', '#44b1f7')
                     })
                     .on('mouseout', () => {
-                        pauseButton.transition().duration(300).style('color', '#8ad1ff')
+                        if (!pauseButton.classed('transitioning'))
+                            pauseButton.transition().duration(300).style('color', '#8ad1ff')
                     })
                     .on('mousedown', () => {
                         pauseButton.attr('display', 'none')
@@ -1231,11 +1239,13 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     setGameInProgress(true)
                     setBeads([])
                     d3.select('#play-button')
+                        .classed('transitioning', true)
                         .transition()
                         .duration(1000)
                         .style('opacity', 0)
                         .remove()
                     d3.select('#pause-button')
+                        .classed('transitioning', true)
                         .transition()
                         .duration(1000)
                         .style('opacity', 0)
