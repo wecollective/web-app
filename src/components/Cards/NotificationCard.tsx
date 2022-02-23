@@ -66,14 +66,14 @@ const State = (props: {
                     <Button
                         text='Accept'
                         color='blue'
-                        size='small'
+                        size='medium'
                         style={{ marginRight: 5 }}
                         onClick={() => respond('accepted')}
                     />
                     <Button
                         text='Reject'
                         color='aqua'
-                        size='small'
+                        size='medium'
                         style={{ marginRight: 5 }}
                         onClick={() => respond('rejected')}
                     />

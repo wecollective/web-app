@@ -144,20 +144,6 @@ const Homepage = (): JSX.Element => {
                         />
                     </div>
                 )}
-
-                {/* <div className={styles.authButtons}>
-                    <Button
-                        text='Log in'
-                        color='blue'
-                        style={{ marginRight: 10 }}
-                        onClick={() => setLogInModalOpen(true)}
-                    />
-                    <Button
-                        text='Create new account'
-                        color='aqua'
-                        onClick={() => setRegisterModalOpen(true)}
-                    />
-                </div> */}
             </div>
             <div className={styles.backgroundImage}>
                 {/* <BackgroundImageSVG /> */}

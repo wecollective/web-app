@@ -186,7 +186,7 @@ const PostCard = (props: {
                             <Button
                                 text='Open game room'
                                 color='aqua'
-                                size='small'
+                                size='medium'
                                 onClick={() => history.push(`/p/${id}`)}
                             />
                         </Row>

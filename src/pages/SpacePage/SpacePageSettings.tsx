@@ -83,7 +83,7 @@ const SpacePageSettings = ({
                     <Button
                         text='Edit'
                         color='blue'
-                        size='small'
+                        size='medium'
                         onClick={() => setUpdateSpaceHandleModalOpen(true)}
                     />
                     {updateSpaceHandleModalOpen && (
@@ -98,7 +98,7 @@ const SpacePageSettings = ({
                     <Button
                         text='Edit'
                         color='blue'
-                        size='small'
+                        size='medium'
                         onClick={() => setUpdateSpaceNameModalOpen(true)}
                     />
                     {updateSpaceNameModalOpen && (
@@ -113,7 +113,7 @@ const SpacePageSettings = ({
                     <Button
                         text='Edit'
                         color='blue'
-                        size='small'
+                        size='medium'
                         style={{ marginTop: 10 }}
                         onClick={() => setUpdateSpaceDescriptionModalOpen(true)}
                     />

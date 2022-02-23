@@ -252,7 +252,7 @@ const PostCardLinkModal = (props: {
                                 <Button
                                     text='Delete'
                                     color='blue'
-                                    size='small'
+                                    size='medium'
                                     onClick={() => removeLink('incoming', link.id, link.PostA.id)}
                                 />
                             )}
@@ -283,7 +283,7 @@ const PostCardLinkModal = (props: {
                                 <Button
                                     text='Delete'
                                     color='blue'
-                                    size='small'
+                                    size='medium'
                                     onClick={() => removeLink('outgoing', link.id, link.PostB.id)}
                                 />
                             )}

@@ -52,7 +52,7 @@ const UserPageSettings = ({
                         <Button
                             text='Edit'
                             color='blue'
-                            size='small'
+                            size='medium'
                             onClick={() => setUpdateUserNameModalOpen(true)}
                         />
                         {updateUserNameModalOpen && (
@@ -67,7 +67,7 @@ const UserPageSettings = ({
                         <Button
                             text='Edit'
                             color='blue'
-                            size='small'
+                            size='medium'
                             style={{ marginTop: 10 }}
                             onClick={() => setUpdateUserBioModalOpen(true)}
                         />

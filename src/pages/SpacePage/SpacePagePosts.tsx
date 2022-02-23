@@ -85,7 +85,6 @@ const SpacePagePosts = ({ match }: { match: { params: { spaceHandle: string } } 
                 <Button
                     text='New post'
                     color='blue'
-                    size='medium'
                     onClick={openCreatePostModal}
                     style={{ marginRight: 10 }}
                 />

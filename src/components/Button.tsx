@@ -17,7 +17,7 @@ const Button = (props: {
 
     return (
         <button
-            className={`${styles.button} ${styles[color]} ${styles[size || 'medium']} ${
+            className={`${styles.button} ${styles[color]} ${styles[size || 'large']} ${
                 (disabled || loading) && styles.disabled
             }`}
             style={style}
@@ -35,7 +35,7 @@ const Button = (props: {
 Button.defaultProps = {
     text: null,
     icon: null,
-    size: 'medium',
+    size: 'large',
     style: null,
     disabled: false,
     loading: false,
