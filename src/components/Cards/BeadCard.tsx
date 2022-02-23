@@ -13,8 +13,9 @@ const BeadCard = (props: {
     index: number
     bead: any
     style?: any
+    className?: string
 }): JSX.Element => {
-    const { postId, index, bead, style } = props
+    const { postId, index, bead, style, className } = props
     const { accountData } = useContext(AccountContext)
     const [audioPlaying, setAudioPlaying] = useState(false)
     const audioRef = useRef<HTMLAudioElement>(null)
@@ -49,7 +50,7 @@ const BeadCard = (props: {
         <Column
             spaceBetween
             id={`gbg-bead-${postId}-${index}`}
-            className={`gbg-bead ${styles.bead} ${audioPlaying && styles.focused}`}
+            className={`gbg-bead ${styles.bead} ${audioPlaying && styles.focused} ${className}`}
             style={style}
         >
             <ImageTitle
@@ -80,6 +81,7 @@ const BeadCard = (props: {
 
 BeadCard.defaultProps = {
     style: null,
+    className: null,
 }
 
 export default BeadCard

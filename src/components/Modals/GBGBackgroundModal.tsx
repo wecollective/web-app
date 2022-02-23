@@ -97,7 +97,7 @@ const GBGBackgroundModal = (props: {
     }
 
     return (
-        <Modal centered close={close} style={{ width: 600, textAlign: 'center' }}>
+        <Modal centered close={close} style={{ textAlign: 'center' }}>
             <h1>Add a new background</h1>
             {showImagePreview && (
                 <img

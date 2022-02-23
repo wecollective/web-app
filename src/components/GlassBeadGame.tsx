@@ -44,6 +44,8 @@ import { ReactComponent as LockIconSVG } from '@svgs/lock-solid.svg'
 import { ReactComponent as EditIconSVG } from '@svgs/edit-solid.svg'
 import { ReactComponent as RefreshIconSVG } from '@svgs/repost.svg'
 import { ReactComponent as CurvedDNASVG } from '@svgs/curved-dna.svg'
+import { ReactComponent as CommentIconSVG } from '@svgs/comment-solid.svg'
+import { ReactComponent as CastaliaIconSVG } from '@svgs/castalia-logo.svg'
 
 const gameDefaults = {
     id: null,
@@ -224,8 +226,8 @@ const GameSettingsModal = (props) => {
         <Modal close={close} centered>
             <h1>Game settings</h1>
             <form onSubmit={saveSettings}>
-                <Row style={{ margin: '10px 0 30px 0' }}>
-                    <Column style={{ marginRight: 60 }}>
+                <div className={styles.settingSections}>
+                    <Column style={{ marginRight: 60, marginBottom: 20 }}>
                         <Input
                             title='Intro duration (seconds)'
                             type='text'
@@ -277,7 +279,7 @@ const GameSettingsModal = (props) => {
                             onChange={(v) => updateValue('outroDuration', +v.replace(/\D/g, ''))}
                         />
                     </Column>
-                    <Column style={{ width: 250 }}>
+                    <Column style={{ width: 250, marginBottom: 20 }}>
                         <h2 style={{ margin: 0, lineHeight: '20px' }}>Player order</h2>
                         {players.map((player, i) => (
                             <Row style={{ marginTop: 10 }} key={player.socketId}>
@@ -312,7 +314,7 @@ const GameSettingsModal = (props) => {
                         {!players.length && <p className={styles.grey}>No users connected...</p>}
                         {!!playersError.length && <p className={styles.red}>{playersError}</p>}
                     </Column>
-                </Row>
+                </div>
                 <Row>
                     {!saved && (
                         <Button text='Start game' color='blue' disabled={loading || saved} submit />
@@ -357,6 +359,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     const [topicImageModalOpen, setTopicImageModalOpen] = useState(false)
     const [topicTextModalOpen, setTopicTextModalOpen] = useState(false)
     const [leaveRoomModalOpen, setLeaveRoomModalOpen] = useState(false)
+    const [mobileTab, setMobileTab] = useState<'comments' | 'game' | 'videos'>('game')
     // const [videoRenderKey, setVideoRenderKey] = useState(0)
 
     // state refs (used for up to date values between renders)
@@ -378,6 +381,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
 
     // const location = useLocation()
     // const postId = +location.pathname.split('/')[2]
+    const largeScreen = document.body.clientWidth >= 900
     const highMetalTone = new Audio('/audio/hi-metal-tone.mp3')
     const lowMetalTone = new Audio('/audio/lo-metal-tone.mp3')
     const arcWidth = 20
@@ -442,6 +446,14 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             case 'change-background':
                 if (gameData.locked) return alert('Game locked')
                 if (!loggedIn) return alert('Log in to change the background')
+                return true
+            case 'change-topic-text':
+                if (gameData.locked) return alert('Game locked')
+                if (!loggedIn) return alert('Log in to change the topic')
+                return true
+            case 'change-topic-image':
+                if (gameData.locked) return alert('Game locked')
+                if (!loggedIn) return alert('Log in to change the topic image')
                 return true
             default:
                 return false
@@ -1075,6 +1087,38 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             })
     }
 
+    function updateMobileTab(tab: 'comments' | 'game' | 'videos') {
+        switch (tab) {
+            case 'comments':
+                if (showComments) {
+                    setMobileTab('game')
+                    setShowComments(false)
+                } else {
+                    setMobileTab('comments')
+                    setShowComments(true)
+                    updateShowVideos(false)
+                }
+                break
+            case 'game':
+                setMobileTab('game')
+                setShowComments(false)
+                updateShowVideos(false)
+                break
+            case 'videos':
+                if (showVideos) {
+                    setMobileTab('game')
+                    updateShowVideos(false)
+                } else {
+                    setMobileTab('videos')
+                    openVideoWall()
+                    setShowComments(false)
+                }
+                break
+            default:
+                break
+        }
+    }
+
     // todo: flatten out userData into user object with socketId
     useEffect(() => {
         if (!accountDataLoading && !postDataLoading && postData.id) {
@@ -1365,7 +1409,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             if (loadingAnimation) loadingAnimation.style.opacity = '0'
             setTimeout(() => {
                 setShowLoadingAnimation(false)
-                setShowComments(true)
+                if (largeScreen) setShowComments(true)
             }, 1000)
         }, loadingAnimationDuration)
 
@@ -1514,6 +1558,29 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     close={() => setTopicImageModalOpen(false)}
                 />
             )}
+            <Row centerY className={styles.mobileHeader}>
+                <button
+                    type='button'
+                    onClick={() => updateMobileTab('comments')}
+                    className={`${mobileTab === 'comments' && styles.selected}`}
+                >
+                    <CommentIconSVG />
+                </button>
+                <button
+                    type='button'
+                    onClick={() => updateMobileTab('game')}
+                    className={`${mobileTab === 'game' && styles.selected}`}
+                >
+                    <CastaliaIconSVG />
+                </button>
+                <button
+                    type='button'
+                    onClick={() => updateMobileTab('videos')}
+                    className={`${mobileTab === 'videos' && styles.selected}`}
+                >
+                    <VideoIconSVG />
+                </button>
+            </Row>
             <Row
                 spaceBetween
                 className={`${styles.mainContent} ${beads.length && styles.showBeads}`}
@@ -1549,23 +1616,24 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 </Column>
                 <Column centerX className={styles.centerPanel}>
                     {gameInProgress ? (
-                        <Column className={styles.gameControls}>
+                        <Column className={`${styles.gameControls} ${largeScreen && styles.large}`}>
                             <Button
                                 text='Stop game'
                                 color='red'
+                                size={largeScreen ? 'large' : 'small'}
                                 style={{ marginBottom: 10 }}
                                 onClick={signalStopGame}
                             />
                             <p>{`Turn ${turn} / ${gameData.numberOfTurns}`}</p>
                             {players.map((player, index) => (
-                                <Row centerY style={{ marginTop: 10 }} key={player.socketId}>
+                                <Row centerY key={player.socketId} className={styles.player}>
                                     <div className={styles.position}>{index + 1}</div>
                                     <ImageTitle
                                         type='user'
                                         imagePath={player.flagImagePath}
                                         title={isYou(player.socketId) ? 'You' : player.name}
-                                        fontSize={16}
-                                        imageSize={35}
+                                        fontSize={largeScreen ? 16 : 10}
+                                        imageSize={largeScreen ? 35 : 20}
                                         style={{ marginRight: 10 }}
                                     />
                                     <p
@@ -1586,22 +1654,24 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                             <Button
                                 text='Leave game room'
                                 color='purple'
+                                size={largeScreen ? 'large' : 'small'}
                                 style={{ marginBottom: 10 }}
                                 onClick={() => setLeaveRoomModalOpen(true)}
                             />
                             {leaveRoomModalOpen && (
                                 <Modal centered close={() => setLeaveRoomModalOpen(false)}>
                                     <h1>Are you sure you want to leave?</h1>
-                                    <Row>
+                                    <Row wrap>
                                         <Button
                                             text='Yes, leave room'
                                             color='red'
-                                            style={{ marginRight: 10 }}
+                                            style={{ marginRight: 10, marginBottom: 10 }}
                                             onClick={() => history.push('/s/all')}
                                         />
                                         <Button
                                             text='No, cancel'
                                             color='blue'
+                                            style={{ marginBottom: 10 }}
                                             onClick={() => setLeaveRoomModalOpen(false)}
                                         />
                                     </Row>
@@ -1613,6 +1683,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                                         <Button
                                             text={`${beads.length ? 'Restart' : 'Start'} game`}
                                             color={beads.length ? 'red' : 'blue'}
+                                            size={largeScreen ? 'large' : 'small'}
                                             style={{ marginBottom: 10 }}
                                             onClick={() =>
                                                 allowedTo('start-game') &&
@@ -1624,6 +1695,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                                         <Button
                                             text='Save game'
                                             color='blue'
+                                            size={largeScreen ? 'large' : 'small'}
                                             style={{ marginBottom: 10 }}
                                             onClick={() => allowedTo('save-game') && saveGame()}
                                         />
@@ -1637,6 +1709,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                                         : 'Add'
                                 } background`}
                                 color='grey'
+                                size={largeScreen ? 'large' : 'small'}
                                 style={{ marginBottom: 10 }}
                                 onClick={() =>
                                     allowedTo('change-background') && setBackgroundModalOpen(true)
@@ -1655,23 +1728,32 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                         />
                     )}
                     <Column centerX className={styles.timerColumn}>
-                        <CurvedDNASVG className={styles.curvedDNA} />
+                        <CurvedDNASVG
+                            className={`${styles.curvedDNA} ${beads.length && styles.withBeads}`}
+                        />
                         <Row centerY className={styles.topicText}>
                             <h1>{gameData.topic}</h1>
-                            <button type='button' onClick={() => setTopicTextModalOpen(true)}>
+                            <button
+                                type='button'
+                                onClick={() =>
+                                    allowedTo('change-topic-text') && setTopicTextModalOpen(true)
+                                }
+                            >
                                 <EditIconSVG />
                             </button>
                         </Row>
-                        <div className={styles.topicImage}>
+                        <Row centerY centerX className={styles.topicImage}>
                             {gameData.topicImage && <img src={gameData.topicImage} alt='' />}
                             <button
                                 type='button'
                                 className={styles.uploadTopicImageButton}
-                                onClick={() => setTopicImageModalOpen(true)}
+                                onClick={() =>
+                                    allowedTo('change-topic-image') && setTopicImageModalOpen(true)
+                                }
                             >
                                 <p>Add a new topic image</p>
                             </button>
-                        </div>
+                        </Row>
                         <Column className={styles.timerContainer}>
                             <div id='timer-canvas' className={styles.timer} />
                         </Column>
@@ -1776,12 +1858,17 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 } row`}
             >
                 {beads.map((bead, beadIndex) => (
-                    <Row centerY key={`${bead.roomId}${bead.index}`} className={styles.beadWrapper}>
-                        <BeadCard postId={postData.id} bead={bead} index={beadIndex + 1} />
+                    <Row centerY key={`${bead.roomId}${bead.index}`}>
+                        <BeadCard
+                            postId={postData.id}
+                            bead={bead}
+                            index={beadIndex + 1}
+                            className={styles.bead}
+                        />
                         {beads.length > beadIndex + 1 && (
-                            <div className={styles.beadDivider}>
+                            <Row centerY className={styles.beadDivider}>
                                 <DNAIconSVG />
-                            </div>
+                            </Row>
                         )}
                     </Row>
                 ))}

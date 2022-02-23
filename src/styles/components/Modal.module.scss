@@ -69,13 +69,18 @@ $modalTransitionSpeed: 0.3s;
     border-radius: 10px;
     background-color: $grey1;
     color: black;
-    padding: 50px;
+    padding: 20px;
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     max-height: calc(100vh - #{$navbarHeight});
-    //overflow-y: scroll;
+    max-width: calc(100vw - #{$navbarHeight});
+    overflow-y: scroll;
+
+    @include for-tablet-landscape-up {
+        padding: 50px;
+    }
 
     &.centered {
         align-items: center;

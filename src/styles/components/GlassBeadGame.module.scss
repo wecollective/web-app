@@ -43,25 +43,74 @@ $transitionSpeed: 1s;
         object-fit: cover;
     }
 
+    .mobileHeader {
+        height: 60px;
+        width: 100%;
+        flex-shrink: 0;
+        background-color: $grey2;
+
+        @include for-tablet-landscape-up {
+            display: none;
+        }
+
+        > button {
+            all: unset;
+            width: calc(100% / 3);
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.5s;
+            &:hover {
+                background-color: $grey3;
+            }
+            &.selected {
+                background-color: $grey4;
+                > svg {
+                    color: $blue5;
+                }
+            }
+            > svg {
+                height: 40px;
+                width: 40px;
+                color: $grey6;
+            }
+        }
+    }
+
     .mainContent {
         width: 100%;
-        height: 100%;
+        height: calc(100% - 60px);
         transition: height $transitionSpeed;
+        @include for-tablet-landscape-up {
+            height: 100%;
+        }
         &.showBeads {
             height: calc(100% - 200px);
         }
         
         .commentBar {
             position: relative;
-            padding-right: 20px;
-            width: 350px;
+            width: 100%;
             height: 100%;
             background-color: $white;
             flex-shrink: 0;
-            transition: margin-left $transitionSpeed;
+            transition: margin-left $transitionSpeed, width $transitionSpeed;
             z-index: $sidebarZIndex;
 
-            &.hidden { margin-left: -330px }
+            @include for-tablet-landscape-up {
+                padding-right: 20px;
+                width: 350px;
+            }
+
+            &.hidden {
+                width: 350px;
+                margin-left: -350px;
+                @include for-tablet-landscape-up {
+                    margin-left: -330px;
+                }
+            }
 
             &.transparent {
                 background-color: rgba($white, 0.3);
@@ -122,7 +171,7 @@ $transitionSpeed: 1s;
                 all: unset;
                 position: absolute;
                 cursor: pointer;
-                display: flex;
+                display: none;
                 justify-content: center;
                 align-items: center;
                 right: 0;
@@ -132,6 +181,9 @@ $transitionSpeed: 1s;
                 > svg {
                     color: $grey4;
                     height: 18px;
+                }
+                @include for-tablet-landscape-up {
+                    display: flex;
                 }
             }
         }
@@ -146,9 +198,44 @@ $transitionSpeed: 1s;
                 left: 20px;
                 top: 20px;
 
-                > p { margin-bottom: 5px }
+                @include for-phone-only {
+                    top: 70px;
+                }
 
-                .playerState { color: $grey4 }
+                &.large {
+                    > p { font-size: 16px }
+                    .position {
+                        width: 35px;
+                        height: 35px;
+                        font-size: 16px;
+                    }
+                    .playerState {
+                        font-size: 16px;
+                    }
+                }
+
+                > p {
+                    font-size: 10px;
+                    margin-bottom: 5px
+                }
+
+                .player {
+                    margin-top: 5px;
+                    @include for-tablet-landscape-up {
+                        margin-top: 10px;
+                    }
+
+                    .position {
+                        width: 20px;
+                        height: 20px;
+                        font-size: 10px;
+                    }
+
+                    .playerState {
+                        color: $grey4;
+                        font-size: 10px;
+                    }
+                }
 
                 .gameLocked {
                     margin: 5px 0 15px 0;
@@ -167,18 +254,36 @@ $transitionSpeed: 1s;
             .timerColumn {
                 margin-top: 30px;
                 width: 100%;
+                height: 100%;
+                min-width: 300px;
                 overflow: hidden;
 
                 .curvedDNA {
                     position: absolute;
-                    top: 200px;
-                    height: calc(100vh - 200px);
+                    top: 140px;
+                    height: calc(100% - 140px);
                     color: $grey3;
                     z-index: -1;
+                    @include for-tablet-landscape-up {
+                        top: 200px;
+                        height: calc(100% - 200px);
+                    }
+
+                    &.withBeads {
+                        height:  100%;
+                    }
                 }
 
                 .topicText {
-                    > h1 { margin: 0 }
+                    > h1 {
+                        margin: 0;
+                        font-size: 20px;
+                        line-height: 20px;
+                        @include for-tablet-landscape-up {
+                            font-size: 25px;
+                            line-height: 25px;
+                        }
+                    }
                     > button {
                         all: unset;
                         cursor: pointer;
@@ -186,21 +291,25 @@ $transitionSpeed: 1s;
                         width: 24px;
                         height: 24px;
                         color: $grey3;
+                        flex-shrink: 0;
                     }
                 }
 
                 .topicImage {
-                    width: 140px;
-                    height: 140px;
+                    width: 100px;
+                    height: 100px;
+                    margin-top: 10px;
                     border-radius: 50%;
                     background-color: #fbfbfb;
                     box-shadow: 0 0 10px 0 rgba(10, 8, 72, 0.15);
-                    margin-top: 10px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
                     position: relative;
                     flex-shrink: 0;
+
+                    @include for-tablet-landscape-up {
+                        width: 140px;
+                        height: 140px;
+                        margin-top: 20px;
+                    }
 
                     img {
                         width: 100%;
@@ -240,9 +349,13 @@ $transitionSpeed: 1s;
                 .timerContainer {
                     width: 100%;
                     max-width: 550px;
-                    height: 100%;
-                    height: calc(100% - 216px);
-                    padding: 50px;
+                    height: calc(100% - 134px);
+                    padding: 30px;
+
+                    @include for-tablet-landscape-up {
+                        height: calc(100% - 186px);
+                        padding: 50px;
+                    }
                 }
 
                 .timer {
@@ -284,11 +397,15 @@ $transitionSpeed: 1s;
             }
 
             .people {
+                display: none;
                 position: absolute;
                 right: 20px;
                 top: 20px;
                 > p {
                     margin-bottom: 10px;
+                }
+                @include for-tablet-landscape-up {
+                    display: flex;
                 }
             }
         }
@@ -435,14 +552,19 @@ $transitionSpeed: 1s;
     .beads {
         position: absolute;
         bottom: 0;
-        padding: 0 40px;
+        padding: 0 20px;
         background-color: rgba($grey1, 0.5);
         border-top: 1px solid #ddd;
-        height: 200px;
+        height: 140px;
         width: 100%;
         flex-shrink: 0;
         overflow-x: scroll;
         transition: height $transitionSpeed;
+
+        @include for-tablet-landscape-up {
+            height: 200px;
+            padding: 0 40px;
+        }
     
         &.hidden { height: 0 }
     
@@ -450,25 +572,58 @@ $transitionSpeed: 1s;
             background-color: rgba($white, 0.3);
         }
 
+        .bead {
+            width: 100px;
+            height: 100px;
+            > img {
+                width: 50px;
+                height: 50px;
+                left: calc(50% - 25px);
+                top: calc(50% - 25px);
+            }
+            @include for-tablet-landscape-up {
+                width: 140px;
+                height: 140px;
+                > img {
+                    width: 80px;
+                    height: 80px;
+                    left: calc(50% - 40px);
+                    top: calc(50% - 40px);
+                }
+            }
+        }
+
         .beadDivider {
-            width: 50px;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
+            width: 30px;
             opacity: 1;
             animation-name: fadeInOpacity;
             animation-timing-function: ease-in;
             animation-duration: 2s;
             > svg {
                 transform: rotate(90deg);
-                height: 50px;
+                height: 30px;
                 color: $grey3;
+            }
+
+            @include for-tablet-landscape-up {
+                width: 50px;
+                > svg {
+                    height: 50px;
+                }
             }
         }
     }
 }
 
 // game settings modal
+.settingSections {
+    display: flex;
+    margin: '10px 0 30px 0';
+
+    @include for-phone-only {
+        flex-direction: column;
+    }
+}
 .position {
     width: 35px;
     height: 35px;
