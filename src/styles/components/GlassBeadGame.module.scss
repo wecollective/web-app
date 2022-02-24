@@ -191,6 +191,9 @@ $transitionSpeed: 1s;
         .centerPanel {
             width: 100%;
             position: relative;
+            transition: margin-left $transitionSpeed;
+
+            &.hidden { margin-left: -350px }
 
             .gameControls {
                 align-items: flex-start;
@@ -238,15 +241,29 @@ $transitionSpeed: 1s;
                 }
 
                 .gameLocked {
-                    margin: 5px 0 15px 0;
+                    margin-bottom: 10px;
                     > svg {
-                        width: 25px;
-                        height: 25px;
+                        width: 15px;
+                        height: 15px;
                         opacity: 0.3;
-                        margin-right: 7px;
+                        margin-right: 5px;
                     }
                     > p {
                         color: $grey5;
+                        font-size: 12px;
+                    }
+
+                    @include for-tablet-landscape-up {
+                        margin-bottom: 15px;
+                        > svg {
+                            width: 25px;
+                            height: 25px;
+                            margin-right: 7px;
+                        }
+                        > p {
+                            color: $grey5;
+                            font-size: 16px;
+                        }
                     }
                 }
             }
@@ -397,15 +414,21 @@ $transitionSpeed: 1s;
             }
 
             .people {
-                display: none;
                 position: absolute;
                 right: 20px;
                 top: 20px;
-                > p {
-                    margin-bottom: 10px;
+
+                > p { margin-bottom: 10px }
+
+                @include for-phone-only {
+                    top: 70px;
                 }
-                @include for-tablet-landscape-up {
-                    display: flex;
+
+                .peopleStreaming, .peopleInRoom {
+                    display: none;
+                    @include for-tablet-landscape-up {
+                        display: flex;
+                    }
                 }
             }
         }
@@ -474,6 +497,22 @@ $transitionSpeed: 1s;
                 $height: $fullHeight / 6 + px;
                 &.hidden { margin-right: - $width }
                 width: $width;
+                .videoWrapper {
+                    width: $width;
+                    height: $height;
+                    > video {
+                        width: $width;
+                        height: $height;
+                    }
+                }
+            }
+            // mobile
+            &.mobile {
+                $width: 100%;
+                $height: auto;
+                &.hidden { margin-right: -100% }
+                width: $width;
+                width: calc(100% - 20px);
                 .videoWrapper {
                     width: $width;
                     height: $height;

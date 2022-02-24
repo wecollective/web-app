@@ -476,7 +476,10 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 userData: userRef.current,
             }
             socketRef.current.emit('outgoing-stream-disconnected', data)
-            if (!videosRef.current.length) updateShowVideos(false)
+            if (!videosRef.current.length) {
+                updateShowVideos(false)
+                updateMobileTab('game')
+            }
         } else {
             // set up and signal stream
             setLoadingStream(true)
@@ -617,6 +620,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
         if (totalUsersStreaming > 2) videoSize = styles.lg
         if (totalUsersStreaming > 3) videoSize = styles.md
         if (totalUsersStreaming > 4) videoSize = styles.sm
+        if (document.body.clientWidth < 600) videoSize = styles.mobile
         return videoSize
     }
 
@@ -828,6 +832,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     function startOutro(data) {
         d3.select('#timer-move-state').text('Outro')
         d3.select('#timer-seconds').text(data.outroDuration)
+        d3.selectAll(`.${styles.playerState}`).text('')
         startArc('move', data.outroDuration, colors.yellow, true)
         let timeLeft = data.outroDuration
         secondsTimerRef.current = setInterval(() => {
@@ -852,8 +857,10 @@ const GlassBeadGame = ({ history }): JSX.Element => {
         d3.selectAll(`.${styles.playerState}`).text('')
         pushComment('The game ended')
         addPlayButtonToCenterBead()
-        setShowComments(true)
-        updateShowVideos(true)
+        if (largeScreen) {
+            setShowComments(true)
+            updateShowVideos(true)
+        }
     }
 
     function signalStopGame() {
@@ -1317,8 +1324,10 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 })
                 // stop game signal recieved
                 socketRef.current.on('incoming-stop-game', (data) => {
-                    setShowComments(true)
-                    updateShowVideos(true)
+                    if (largeScreen) {
+                        setShowComments(true)
+                        updateShowVideos(true)
+                    }
                     pushComment(`${data.userSignaling.name} stopped the game`)
                     setGameInProgress(false)
                     clearInterval(secondsTimerRef.current)
@@ -1614,7 +1623,12 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                         <ChevronUpIconSVG transform={`rotate(${showComments ? 270 : 90})`} />
                     </button>
                 </Column>
-                <Column centerX className={styles.centerPanel}>
+                <Column
+                    centerX
+                    className={`${styles.centerPanel} ${
+                        !largeScreen && showVideos && styles.hidden
+                    }`}
+                >
                     {gameInProgress ? (
                         <Column className={`${styles.gameControls} ${largeScreen && styles.large}`}>
                             <Button
@@ -1634,7 +1648,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                                         title={isYou(player.socketId) ? 'You' : player.name}
                                         fontSize={largeScreen ? 16 : 10}
                                         imageSize={largeScreen ? 35 : 20}
-                                        style={{ marginRight: 10 }}
+                                        style={{ marginRight: largeScreen ? 10 : 5 }}
                                     />
                                     <p
                                         id={`player-${player.socketId}`}
@@ -1758,74 +1772,86 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                             <div id='timer-canvas' className={styles.timer} />
                         </Column>
                     </Column>
-                    <Column className={styles.people}>
-                        <Button
-                            text={`${userIsStreaming ? 'Stop' : 'Start'} streaming`}
-                            color={userIsStreaming ? 'red' : 'aqua'}
-                            style={{ marginBottom: 10 }}
-                            loading={loadingStream}
-                            disabled={loadingStream}
-                            onClick={() => allowedTo('stream') && toggleStream()}
-                        />
-                        {videosRef.current.length + (userIsStreaming ? 1 : 0) > 0 && (
+                    {largeScreen && (
+                        <Column className={styles.people}>
                             <Button
-                                color='blue'
-                                text={`${showVideos ? 'Hide' : 'Show'} videos`}
-                                onClick={() =>
-                                    showVideos ? updateShowVideos(false) : openVideoWall()
-                                }
-                                style={{ marginBottom: 10 }}
+                                text={`${userIsStreaming ? 'Stop' : 'Start'} streaming`}
+                                color={userIsStreaming ? 'red' : 'aqua'}
+                                style={{ marginBottom: 10, alignSelf: 'flex-start' }}
+                                loading={loadingStream}
+                                disabled={loadingStream}
+                                onClick={() => allowedTo('stream') && toggleStream()}
                             />
-                        )}
-                        <Column>
-                            {!showVideos && (
-                                <Column style={{ marginBottom: 10 }}>
-                                    <p style={{ marginBottom: 10 }}>{peopleStreamingText()}</p>
-                                    {userIsStreaming && (
-                                        <ImageTitle
-                                            type='user'
-                                            imagePath={userRef.current.flagImagePath}
-                                            title='You'
-                                            fontSize={16}
-                                            imageSize={40}
-                                            style={{ marginBottom: 10 }}
-                                        />
-                                    )}
-                                    {videosRef.current.map((user) => (
-                                        <ImageTitle
-                                            key={user.socketId}
-                                            type='user'
-                                            imagePath={user.userData.flagImagePath}
-                                            title={user.userData.name}
-                                            fontSize={16}
-                                            imageSize={40}
-                                            style={{ marginBottom: 10 }}
-                                        />
-                                    ))}
-                                </Column>
-                            )}
-                        </Column>
-                        <Column>
-                            <p style={{ marginBottom: 10 }}>{peopleInRoomText()}</p>
-                            {usersRef.current.map((user) => (
-                                <ImageTitle
-                                    key={user.socketId}
-                                    type='user'
-                                    imagePath={user.userData.flagImagePath}
-                                    title={isYou(user.socketId) ? 'You' : user.userData.name}
-                                    fontSize={16}
-                                    imageSize={40}
-                                    style={{ marginBottom: 10 }}
+                            {videosRef.current.length + (userIsStreaming ? 1 : 0) > 0 && (
+                                <Button
+                                    color='blue'
+                                    text={`${showVideos ? 'Hide' : 'Show'} videos`}
+                                    onClick={() =>
+                                        showVideos ? updateShowVideos(false) : openVideoWall()
+                                    }
+                                    style={{ marginBottom: 10, alignSelf: 'flex-start' }}
                                 />
-                            ))}
+                            )}
+                            <Column className={styles.peopleStreaming}>
+                                {!showVideos && (
+                                    <Column style={{ marginBottom: 10 }}>
+                                        <p style={{ marginBottom: 10 }}>{peopleStreamingText()}</p>
+                                        {userIsStreaming && (
+                                            <ImageTitle
+                                                type='user'
+                                                imagePath={userRef.current.flagImagePath}
+                                                title='You'
+                                                fontSize={16}
+                                                imageSize={40}
+                                                style={{ marginBottom: 10 }}
+                                            />
+                                        )}
+                                        {videosRef.current.map((user) => (
+                                            <ImageTitle
+                                                key={user.socketId}
+                                                type='user'
+                                                imagePath={user.userData.flagImagePath}
+                                                title={user.userData.name}
+                                                fontSize={16}
+                                                imageSize={40}
+                                                style={{ marginBottom: 10 }}
+                                            />
+                                        ))}
+                                    </Column>
+                                )}
+                            </Column>
+                            <Column className={styles.peopleInRoom}>
+                                <p style={{ marginBottom: 10 }}>{peopleInRoomText()}</p>
+                                {usersRef.current.map((user) => (
+                                    <ImageTitle
+                                        key={user.socketId}
+                                        type='user'
+                                        imagePath={user.userData.flagImagePath}
+                                        title={isYou(user.socketId) ? 'You' : user.userData.name}
+                                        fontSize={16}
+                                        imageSize={40}
+                                        style={{ marginBottom: 10 }}
+                                    />
+                                ))}
+                            </Column>
                         </Column>
-                    </Column>
+                    )}
                 </Column>
                 <Scrollbars
                     className={`${styles.videos} ${findVideoSize()} ${
                         !showVideos && styles.hidden
                     }`}
                 >
+                    {!largeScreen && (
+                        <Button
+                            text={`${userIsStreaming ? 'Stop' : 'Start'} streaming`}
+                            color={userIsStreaming ? 'red' : 'aqua'}
+                            style={{ marginBottom: 10, alignSelf: 'flex-start' }}
+                            loading={loadingStream}
+                            disabled={loadingStream}
+                            onClick={() => allowedTo('stream') && toggleStream()}
+                        />
+                    )}
                     {userIsStreaming && (
                         <Video
                             id='your-video'
@@ -1858,7 +1884,11 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 } row`}
             >
                 {beads.map((bead, beadIndex) => (
-                    <Row centerY key={`${bead.roomId}${bead.index}`}>
+                    <Row
+                        centerY
+                        key={`${bead.roomId}${bead.index}`}
+                        style={{ paddingRight: beads.length === beadIndex + 1 ? 20 : 0 }}
+                    >
                         <BeadCard
                             postId={postData.id}
                             bead={bead}
