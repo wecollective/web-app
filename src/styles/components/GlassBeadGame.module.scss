@@ -23,6 +23,7 @@ $transitionSpeed: 1s;
         display: flex;
         align-items: center;
         justify-content: center;
+        overflow: hidden;
         -webkit-transition: opacity 1s linear;
         transition: opacity 1s linear;
     }

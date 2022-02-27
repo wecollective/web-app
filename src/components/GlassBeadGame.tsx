@@ -1412,10 +1412,66 @@ const GlassBeadGame = ({ history }): JSX.Element => {
         const loadingAnimationDuration = 2000
         const timerFadeInDuration = 3000
 
-        // display loading animation for 5 seconds then fade out
+        const width = 500
+        const center = width / 2
+        const circleWidth = 100
+        const circleOffset = circleWidth * (13 / 15)
+
+        const loadingAnimationSVG = d3
+            .select('#loading-animation')
+            .append('svg')
+            .attr('id', 'loading-animation-svg')
+            .attr('viewBox', `0 0 ${width} ${width}`)
+            .attr('perserveAspectRatio', 'xMinYMin')
+            .style('max-width', 500)
+
+        function createCircle(id, cx, cy) {
+            loadingAnimationSVG
+                .append('circle')
+                .attr('id', id)
+                .attr('stroke', 'black')
+                .attr('fill', 'none')
+                .attr('stroke-width', 2)
+                .attr('r', circleWidth)
+                .attr('cx', cx)
+                .attr('cy', cy)
+        }
+
+        createCircle('center', center, center)
+        createCircle('center-top', center, center - circleWidth)
+        createCircle('center-bottom', center, center + circleWidth)
+        createCircle('left-top', center - circleOffset, center - circleWidth / 2)
+        createCircle('left-bottom', center - circleOffset, center + circleWidth / 2)
+        createCircle('right-top', center + circleOffset, center - circleWidth / 2)
+        createCircle('right-bottom', center + circleOffset, center + circleWidth / 2)
+
+        function animateCircle(id, offset) {
+            d3.select(`#${id}`)
+                .transition()
+                .ease(d3.easeCubicInOut)
+                .duration(3000)
+                .attr('cx', center + offset)
+                .on('end', () => {
+                    d3.select(`#${id}`)
+                        .transition()
+                        .ease(d3.easeCubicInOut)
+                        .duration(3000)
+                        .attr('cx', center - offset)
+                        .on('end', () => {
+                            animateCircle(id, offset)
+                        })
+                })
+        }
+
+        animateCircle('left-top', circleOffset)
+        animateCircle('left-bottom', circleOffset)
+        animateCircle('right-top', -circleOffset)
+        animateCircle('right-bottom', -circleOffset)
+
+        // fade out loading animation
         setTimeout(() => {
-            const loadingAnimation = document.getElementById('loading-animation')
-            if (loadingAnimation) loadingAnimation.style.opacity = '0'
+            const loadingAnimation = d3.select('#loading-animation')
+            if (loadingAnimation) loadingAnimation.style('opacity', 0)
             setTimeout(() => {
                 setShowLoadingAnimation(false)
                 if (largeScreen) setShowComments(true)
@@ -1511,13 +1567,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     return (
         <Column className={styles.wrapper}>
             {showLoadingAnimation && (
-                <div className={styles.loadingAnimation} id='loading-animation'>
-                    {/* <img src='/images/loading-animation-01.gif' alt='' /> */}
-                    <video width='640' height='483' muted autoPlay>
-                        <source src='/videos/loading-animation-01.mp4' type='video/mp4' />
-                        <track kind='captions' />
-                    </video>
-                </div>
+                <div className={styles.loadingAnimation} id='loading-animation' />
             )}
             {gameData.backgroundVideo && (
                 <iframe
