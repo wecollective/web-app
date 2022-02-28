@@ -382,6 +382,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     // const location = useLocation()
     // const postId = +location.pathname.split('/')[2]
     const largeScreen = document.body.clientWidth >= 900
+    const roomIntro = new Audio('/audio/room-intro.mp3')
     const highMetalTone = new Audio('/audio/hi-metal-tone.mp3')
     const lowMetalTone = new Audio('/audio/lo-metal-tone.mp3')
     const arcWidth = 20
@@ -1463,6 +1464,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 })
         }
 
+        roomIntro.play()
         animateCircle('left-top', circleOffset)
         animateCircle('left-bottom', circleOffset)
         animateCircle('right-top', -circleOffset)
