@@ -130,6 +130,8 @@ export interface IAccountContext {
     setNavbarDropDownModalOpen: (payload: boolean) => void
     createPostModalOpen: boolean
     setCreatePostModalOpen: (payload: boolean) => void
+    createPostModalType: string
+    setCreatePostModalType: (payload: string) => void
     // createSpaceModalOpen: boolean
     // setCreateSpaceModalOpen: (payload: boolean) => void
     createCommentModalOpen: boolean

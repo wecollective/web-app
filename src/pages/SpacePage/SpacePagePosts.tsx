@@ -25,6 +25,7 @@ const SpacePagePosts = ({ match }: { match: { params: { spaceHandle: string } } 
         accountDataLoading,
         loggedIn,
         setCreatePostModalOpen,
+        setCreatePostModalType,
         setAlertModalOpen,
         setAlertMessage,
     } = useContext(AccountContext)
@@ -50,9 +51,11 @@ const SpacePagePosts = ({ match }: { match: { params: { spaceHandle: string } } 
     const [showPostList, setShowPostList] = useState(true)
     const [showPostMap, setShowPostMap] = useState(innerWidth > 1500)
 
-    function openCreatePostModal() {
-        if (loggedIn) setCreatePostModalOpen(true)
-        else {
+    function openCreatePostModal(type) {
+        if (loggedIn) {
+            setCreatePostModalType(type)
+            setCreatePostModalOpen(true)
+        } else {
             setAlertModalOpen(true)
             setAlertMessage('Log in to create a post')
         }
@@ -85,9 +88,17 @@ const SpacePagePosts = ({ match }: { match: { params: { spaceHandle: string } } 
                 <Button
                     text='New post'
                     color='blue'
-                    onClick={openCreatePostModal}
+                    onClick={() => openCreatePostModal('Text')}
                     style={{ marginRight: 10 }}
                 />
+                {spaceData.HolonHandles.map((h) => h.handle).includes('castalia') && (
+                    <Button
+                        text='New game'
+                        color='purple'
+                        onClick={() => openCreatePostModal('Glass Bead Game')}
+                        style={{ marginRight: 10 }}
+                    />
+                )}
                 <SearchBar
                     setSearchFilter={(payload) => updateSpacePostsFilter('searchQuery', payload)}
                     placeholder='Search posts...'

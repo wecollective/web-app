@@ -34,6 +34,7 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
     const [forgotPasswordModalOpen, setForgotPasswordModalOpen] = useState(false)
     const [navBarDropDownModalOpen, setNavbarDropDownModalOpen] = useState(false)
     const [createPostModalOpen, setCreatePostModalOpen] = useState(false)
+    const [createPostModalType, setCreatePostModalType] = useState('Text')
     // const [createSpaceModalOpen, setCreateSpaceModalOpen] = useState(false)
     const [createCommentModalOpen, setCreateCommentModalOpen] = useState(false)
     const [settingModalOpen, setSettingModalOpen] = useState(false)
@@ -113,10 +114,6 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                 setAccountData,
                 accountDataLoading,
                 setAccountDataLoading,
-                // notifications,
-                // setNotifications,
-                // notificationsLoading,
-                // modals (todo: most to be removed...)
                 alertModalOpen,
                 setAlertModalOpen,
                 alertMessage,
@@ -133,8 +130,8 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                 setNavbarDropDownModalOpen,
                 createPostModalOpen,
                 setCreatePostModalOpen,
-                // createSpaceModalOpen,
-                // setCreateSpaceModalOpen,
+                createPostModalType,
+                setCreatePostModalType,
                 createCommentModalOpen,
                 setCreateCommentModalOpen,
                 settingModalOpen,
@@ -154,8 +151,6 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                 // functions
                 getAccountData,
                 updateAccountData,
-                // getNotifications,
-                // updateAccountNotification,
                 logOut,
             }}
         >

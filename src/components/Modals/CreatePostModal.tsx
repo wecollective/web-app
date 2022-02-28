@@ -24,11 +24,11 @@ import Scrollbars from '@components/Scrollbars'
 
 const CreatePostModal = (): JSX.Element => {
     // todo: set create post modal open in page instead of account context
-    const { setCreatePostModalOpen, accountData } = useContext(AccountContext)
+    const { accountData, setCreatePostModalOpen, createPostModalType } = useContext(AccountContext)
     const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
     const [formData, setFormData] = useState({
         postType: {
-            value: 'Text',
+            value: createPostModalType,
             ...defaultErrorState,
         },
         text: {
@@ -262,14 +262,16 @@ const CreatePostModal = (): JSX.Element => {
             </h1>
             <form onSubmit={createPost}>
                 <Column style={{ width: 700 }}>
-                    <DropDownMenu
-                        title='Post Type'
-                        options={['Text', 'Url', 'Glass Bead Game']}
-                        selectedOption={postType.value}
-                        setSelectedOption={(value) => updateValue('postType', value)}
-                        orientation='horizontal'
-                        style={{ marginBottom: 10 }}
-                    />
+                    {createPostModalType !== 'Glass Bead Game' && (
+                        <DropDownMenu
+                            title='Post Type'
+                            options={['Text', 'Url', 'Glass Bead Game']}
+                            selectedOption={postType.value}
+                            setSelectedOption={(value) => updateValue('postType', value)}
+                            orientation='horizontal'
+                            style={{ marginBottom: 10 }}
+                        />
+                    )}
                     {postType.value === 'Glass Bead Game' && (
                         <Column style={{ marginTop: 5 }}>
                             <Input
@@ -440,7 +442,9 @@ const CreatePostModal = (): JSX.Element => {
                 <Row style={{ marginTop: 40 }}>
                     {!saved ? (
                         <Button
-                            text='Create Post'
+                            text={`Create ${
+                                postType.value === 'Glass Bead Game' ? 'game' : 'post'
+                            }`}
                             color='blue'
                             disabled={urlLoading}
                             loading={loading}
