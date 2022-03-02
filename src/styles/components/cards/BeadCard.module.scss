@@ -32,13 +32,78 @@
         top: calc(50% - 40px);
     }
 
-    .playButton {
-        all: unset;
-        cursor: pointer;
-        display: flex;
-        width: 18px;
-        height: 18px;
-        color: $blue5;
+    .controls {
+        height: 20px;
+        .playButton {
+            all: unset;
+            cursor: pointer;
+            display: flex;
+            width: 18px;
+            height: 18px;
+            color: $blue5;
+            margin-right: 5px;
+            flex-shrink: 0;
+        }
+
+        .slider {
+            position: relative;
+            height: 20px;
+            cursor: pointer;
+            // width: 100%;
+
+            .progressBar {
+                display: flex;
+                position: absolute;
+                top: 8px;
+                height: 4px;
+                background-color: #98d1f5;
+                // opacity: 0.5;
+                pointer-events: none;
+            }
+
+            .progressBarBackground {
+                display: flex;
+                position: absolute;
+                width: 100%;
+                top: 8px;
+                height: 4px;
+                background-color: $grey4;
+                // opacity: 0.5;
+                pointer-events: none;
+            }
+
+            .thumb {
+                position: absolute;
+                top: 2px;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                background-color: $blue5;
+                pointer-events: none;
+            }
+
+            > input {
+                width: 100%;
+                height: 20px;
+                -webkit-appearance: none;
+            }
+
+            > input::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                opacity: 0;
+            }
+
+            > input::-moz-range-thumb {
+                -webkit-appearance: none;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                opacity: 0;
+            }
+        }
     }
 
     audio {

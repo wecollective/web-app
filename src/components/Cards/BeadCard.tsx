@@ -18,6 +18,9 @@ const BeadCard = (props: {
     const { postId, index, bead, style, className } = props
     const { accountData } = useContext(AccountContext)
     const [audioPlaying, setAudioPlaying] = useState(false)
+    const [sliderPercent, setSliderPercent] = useState(0)
+    const [thumbOffset, setThumbOffset] = useState(0)
+    const [currentTime, setCurrentTime] = useState(0)
     const audioRef = useRef<HTMLAudioElement>(null)
 
     function toggleBeadAudio(beadIndex: number, reset?: boolean): void {
@@ -35,6 +38,28 @@ const BeadCard = (props: {
                 audio.play()
             }
         }
+    }
+
+    function updateSlider(e) {
+        // setSliderPercent(e.target.value)
+        // const thumbWidth = 15
+        // const offset = (thumbWidth / 100) * e.target.value * -1
+        // setThumbOffset(offset)
+    }
+
+    function onLoadedData(e) {
+        console.log('duration: ', e.currentTarget.duration.toFixed(0))
+    }
+
+    function onTimeUpdate(e) {
+        // console.log('curentTime: ', e.currentTarget.currentTime)
+        const percent = (e.currentTarget.currentTime / e.currentTarget.duration) * 100
+        setSliderPercent(+percent)
+        setCurrentTime(e.currentTarget.currentTime)
+
+        const thumbWidth = 15
+        const offset = (thumbWidth / 100) * percent * -1
+        setThumbOffset(offset)
     }
 
     useEffect(() => {
@@ -62,7 +87,7 @@ const BeadCard = (props: {
                 style={{ marginRight: 10 }}
             />
             <img src='/icons/gbg/sound-wave.png' alt='sound-wave' />
-            <Row className={styles.controls}>
+            <Row centerY className={styles.controls}>
                 <button
                     className={styles.playButton}
                     type='button'
@@ -71,8 +96,17 @@ const BeadCard = (props: {
                 >
                     {audioPlaying ? <PauseIconSVG /> : <PlayIconSVG />}
                 </button>
+                <div className={styles.slider}>
+                    <div className={styles.progressBarBackground} />
+                    <div className={styles.progressBar} style={{ width: `${sliderPercent}%` }} />
+                    <div
+                        className={styles.thumb}
+                        style={{ left: `${sliderPercent}%`, marginLeft: `${thumbOffset}px` }}
+                    />
+                    <input type='range' onChange={updateSlider} />
+                </div>
             </Row>
-            <audio ref={audioRef}>
+            <audio ref={audioRef} onLoadedData={onLoadedData} onTimeUpdate={onTimeUpdate}>
                 <track kind='captions' />
             </audio>
         </Column>
