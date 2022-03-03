@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useRef } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import * as d3 from 'd3'
 import styles from '@styles/components/cards/BeadCard.module.scss'
 import { AccountContext } from '@contexts/AccountContext'
@@ -23,12 +23,12 @@ const BeadCard = (props: {
     const [thumbOffset, setThumbOffset] = useState(0)
     const [duration, setDuration] = useState('00m 00s')
     const [currentTime, setCurrentTime] = useState('00m 00s')
-    const audioRef = useRef<HTMLAudioElement>(null)
+    const audio = d3.select(`#gbg-bead-${postId}-${index}`).select('audio').node()
 
     function toggleBeadAudio(beadIndex: number, reset?: boolean): void {
-        const audio = d3.select(`#gbg-bead-${postId}-${beadIndex}`).select('audio').node()
-        if (audio) {
-            if (!audio.paused) audio.pause()
+        const beadAudio = d3.select(`#gbg-bead-${postId}-${beadIndex}`).select('audio').node()
+        if (beadAudio) {
+            if (!beadAudio.paused) beadAudio.pause()
             else {
                 // pause all playing beads
                 const allBeads = d3.selectAll('.gbg-bead').select('audio').nodes()
@@ -36,24 +36,28 @@ const BeadCard = (props: {
                     if (!allBeads[i].paused) allBeads[i].pause()
                 }
                 // start selected bead
-                if (reset) audio.currentTime = 0
-                audio.play()
+                if (reset) beadAudio.currentTime = 0
+                beadAudio.play()
             }
         }
     }
 
     function formatTime(seconds) {
+        // format: '00m 00s'
         const mins = Math.floor(seconds / 60)
         const secs = mins ? seconds - mins * 60 : seconds
         return `${mins < 10 ? '0' : ''}${mins}m ${+secs < 10 ? '0' : ''}${secs}s`
     }
 
+    function updateThumbOffset(percent) {
+        const thumbWidth = 15
+        setThumbOffset(-(thumbWidth / 100) * percent)
+    }
+
     function updateSlider(e) {
         setSliderPercent(e.target.value)
-        const thumbWidth = 15
-        const offset = (thumbWidth / 100) * e.target.value * -1
-        setThumbOffset(offset)
-        audioRef!.current!.currentTime = (audioRef!.current!.duration / 100) * e.target.value
+        updateThumbOffset(e.target.value)
+        audio.currentTime = (audio.duration / 100) * e.target.value
     }
 
     function onLoadedData(e) {
@@ -62,32 +66,31 @@ const BeadCard = (props: {
 
     function onTimeUpdate(e) {
         const percent = (e.currentTarget.currentTime / e.currentTarget.duration) * 100
-        setSliderPercent(+percent)
+        setSliderPercent(percent)
         setCurrentTime(formatTime(+e.currentTarget.currentTime.toFixed(0)))
-        const thumbWidth = 15
-        const offset = (thumbWidth / 100) * percent * -1
-        setThumbOffset(offset)
+        updateThumbOffset(percent)
     }
 
     useEffect(() => {
-        if (audioRef && audioRef.current) {
-            audioRef.current.src = bead.beadUrl
-            audioRef.current.addEventListener('play', () => setAudioPlaying(true))
-            audioRef.current.addEventListener('pause', () => setAudioPlaying(false))
-            audioRef.current.addEventListener('ended', () => toggleBeadAudio(index + 1, true))
-            audioRef.current.addEventListener('progress', () => {
-                const audio = d3.select(`#gbg-bead-${postId}-${index}`).select('audio').node()
-                if (audio && audio.duration > 0) {
-                    for (let i = 0; i < audio.buffered.length; i += 1) {
-                        const percent =
-                            (audio.buffered.end(audio.buffered.length - 1 - i) / audio.duration) *
-                            100
-                        setBufferPercent(percent)
+        if (audio) {
+            audio.src = bead.beadUrl
+            d3.select(audio)
+                .on('play.beadCard', () => setAudioPlaying(true))
+                .on('pause.beadCard', () => setAudioPlaying(false))
+                .on('ended.beadCard', () => toggleBeadAudio(index + 1, true))
+                .on('progress.beadCard', () => {
+                    if (audio && audio.duration > 0) {
+                        for (let i = 0; i < audio.buffered.length; i += 1) {
+                            const percent =
+                                (audio.buffered.end(audio.buffered.length - 1 - i) /
+                                    audio.duration) *
+                                100
+                            setBufferPercent(percent)
+                        }
                     }
-                }
-            })
+                })
         }
-    }, [])
+    }, [audio])
 
     return (
         <Column
@@ -122,13 +125,13 @@ const BeadCard = (props: {
                     className={styles.thumb}
                     style={{ left: `${sliderPercent}%`, marginLeft: `${thumbOffset}px` }}
                 />
-                <input type='range' onChange={updateSlider} />
+                <input type='range' onClick={updateSlider} onChange={updateSlider} />
             </Row>
             <Row centerY spaceBetween className={styles.times}>
                 <p>{currentTime}</p>
                 <p>{duration}</p>
             </Row>
-            <audio ref={audioRef} onLoadedData={onLoadedData} onTimeUpdate={onTimeUpdate}>
+            <audio onLoadedData={onLoadedData} onTimeUpdate={onTimeUpdate}>
                 <track kind='captions' />
             </audio>
         </Column>
