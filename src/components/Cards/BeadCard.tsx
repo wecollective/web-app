@@ -19,8 +19,10 @@ const BeadCard = (props: {
     const { accountData } = useContext(AccountContext)
     const [audioPlaying, setAudioPlaying] = useState(false)
     const [sliderPercent, setSliderPercent] = useState(0)
+    const [bufferPercent, setBufferPercent] = useState(0)
     const [thumbOffset, setThumbOffset] = useState(0)
-    const [currentTime, setCurrentTime] = useState(0)
+    const [duration, setDuration] = useState('00m 00s')
+    const [currentTime, setCurrentTime] = useState('00m 00s')
     const audioRef = useRef<HTMLAudioElement>(null)
 
     function toggleBeadAudio(beadIndex: number, reset?: boolean): void {
@@ -40,23 +42,28 @@ const BeadCard = (props: {
         }
     }
 
+    function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60)
+        const secs = mins ? seconds - mins * 60 : seconds
+        return `${mins < 10 ? '0' : ''}${mins}m ${+secs < 10 ? '0' : ''}${secs}s`
+    }
+
     function updateSlider(e) {
-        // setSliderPercent(e.target.value)
-        // const thumbWidth = 15
-        // const offset = (thumbWidth / 100) * e.target.value * -1
-        // setThumbOffset(offset)
+        setSliderPercent(e.target.value)
+        const thumbWidth = 15
+        const offset = (thumbWidth / 100) * e.target.value * -1
+        setThumbOffset(offset)
+        audioRef!.current!.currentTime = (audioRef!.current!.duration / 100) * e.target.value
     }
 
     function onLoadedData(e) {
-        console.log('duration: ', e.currentTarget.duration.toFixed(0))
+        setDuration(formatTime(+e.currentTarget.duration.toFixed(0)))
     }
 
     function onTimeUpdate(e) {
-        // console.log('curentTime: ', e.currentTarget.currentTime)
         const percent = (e.currentTarget.currentTime / e.currentTarget.duration) * 100
         setSliderPercent(+percent)
-        setCurrentTime(e.currentTarget.currentTime)
-
+        setCurrentTime(formatTime(+e.currentTarget.currentTime.toFixed(0)))
         const thumbWidth = 15
         const offset = (thumbWidth / 100) * percent * -1
         setThumbOffset(offset)
@@ -68,12 +75,22 @@ const BeadCard = (props: {
             audioRef.current.addEventListener('play', () => setAudioPlaying(true))
             audioRef.current.addEventListener('pause', () => setAudioPlaying(false))
             audioRef.current.addEventListener('ended', () => toggleBeadAudio(index + 1, true))
+            audioRef.current.addEventListener('progress', () => {
+                const audio = d3.select(`#gbg-bead-${postId}-${index}`).select('audio').node()
+                if (audio && audio.duration > 0) {
+                    for (let i = 0; i < audio.buffered.length; i += 1) {
+                        const percent =
+                            (audio.buffered.end(audio.buffered.length - 1 - i) / audio.duration) *
+                            100
+                        setBufferPercent(percent)
+                    }
+                }
+            })
         }
     }, [])
 
     return (
         <Column
-            spaceBetween
             id={`gbg-bead-${postId}-${index}`}
             className={`gbg-bead ${styles.bead} ${audioPlaying && styles.focused} ${className}`}
             style={style}
@@ -86,8 +103,8 @@ const BeadCard = (props: {
                 imageSize={20}
                 style={{ marginRight: 10 }}
             />
-            <img src='/icons/gbg/sound-wave.png' alt='sound-wave' />
-            <Row centerY className={styles.controls}>
+            <Row centerX centerY className={styles.centerPanel}>
+                <img src='/icons/gbg/sound-wave.png' alt='sound-wave' />
                 <button
                     className={styles.playButton}
                     type='button'
@@ -96,15 +113,20 @@ const BeadCard = (props: {
                 >
                     {audioPlaying ? <PauseIconSVG /> : <PlayIconSVG />}
                 </button>
-                <div className={styles.slider}>
-                    <div className={styles.progressBarBackground} />
-                    <div className={styles.progressBar} style={{ width: `${sliderPercent}%` }} />
-                    <div
-                        className={styles.thumb}
-                        style={{ left: `${sliderPercent}%`, marginLeft: `${thumbOffset}px` }}
-                    />
-                    <input type='range' onChange={updateSlider} />
-                </div>
+            </Row>
+            <Row centerY className={styles.slider}>
+                <div className={styles.progressBarBackground} />
+                <div className={styles.bufferedAmount} style={{ width: `${bufferPercent}%` }} />
+                <div className={styles.progressBar} style={{ width: `${sliderPercent}%` }} />
+                <div
+                    className={styles.thumb}
+                    style={{ left: `${sliderPercent}%`, marginLeft: `${thumbOffset}px` }}
+                />
+                <input type='range' onChange={updateSlider} />
+            </Row>
+            <Row centerY spaceBetween className={styles.times}>
+                <p>{currentTime}</p>
+                <p>{duration}</p>
             </Row>
             <audio ref={audioRef} onLoadedData={onLoadedData} onTimeUpdate={onTimeUpdate}>
                 <track kind='captions' />
