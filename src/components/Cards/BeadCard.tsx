@@ -55,9 +55,11 @@ const BeadCard = (props: {
     }
 
     function updateSlider(e) {
-        setSliderPercent(e.target.value)
-        updateThumbOffset(e.target.value)
-        audio.currentTime = (audio.duration / 100) * e.target.value
+        if (audio) {
+            setSliderPercent(e.target.value)
+            updateThumbOffset(e.target.value)
+            audio.currentTime = (audio.duration / 100) * e.target.value
+        }
     }
 
     function onLoadedData(e) {
@@ -73,7 +75,7 @@ const BeadCard = (props: {
 
     useEffect(() => {
         if (audio) {
-            audio.src = bead.beadUrl
+            audio.src = bead.beadUrl // '/audio/test.mp3'
             d3.select(audio)
                 .on('play.beadCard', () => setAudioPlaying(true))
                 .on('pause.beadCard', () => setAudioPlaying(false))
@@ -89,6 +91,60 @@ const BeadCard = (props: {
                         }
                     }
                 })
+
+            const ctx = new AudioContext()
+            const audioSource = ctx.createMediaElementSource(audio)
+            const analyser = ctx.createAnalyser()
+
+            audioSource.connect(analyser)
+            audioSource.connect(ctx.destination)
+
+            const frequencyData = new Uint8Array(analyser.frequencyBinCount)
+            analyser.getByteFrequencyData(frequencyData)
+
+            const numberOfBars = 60
+            const barHeight = 20
+            const selectedBead = d3.select(`#gbg-bead-${postId}-${index}`)
+            const visualiser = selectedBead
+                .select(`.${styles.centerPanel}`)
+                .append('svg')
+                .attr('id', 'visualiser')
+                .attr('width', '100%')
+                .attr('height', 60)
+
+            const topBars = visualiser.append('g').attr('id', 'top-bars')
+            const bottomBars = visualiser
+                .append('g')
+                .attr('id', 'bottom-bars')
+                .attr('transform', 'scale(1,-1)')
+
+            const createBar = (location, type, i) => {
+                location
+                    .append('rect')
+                    .attr('id', `${type}-bar-${i}`)
+                    .attr('x', (120 / numberOfBars) * i)
+                    .attr('y', type === 'top' ? 30 : -30)
+                    .attr('width', 120 / numberOfBars)
+                    .attr('fill', '#cbd8ff')
+            }
+
+            for (let i = 0; i < numberOfBars; i += 1) {
+                createBar(topBars, 'top', i)
+                createBar(bottomBars, 'bottom', i)
+            }
+
+            const renderVisualizer = () => {
+                analyser.getByteFrequencyData(frequencyData)
+                for (let i = 0; i < numberOfBars; i += 1) {
+                    const barIndex = Math.floor((255 / numberOfBars) * i)
+                    const value = (barHeight / 255) * frequencyData[barIndex] // 0 to 255
+                    selectedBead.select(`#top-bar-${i}`).attr('height', value)
+                    selectedBead.select(`#bottom-bar-${i}`).attr('height', value)
+                }
+                window.requestAnimationFrame(renderVisualizer)
+            }
+
+            renderVisualizer()
         }
     }, [audio])
 
@@ -107,7 +163,7 @@ const BeadCard = (props: {
                 style={{ marginRight: 10 }}
             />
             <Row centerX centerY className={styles.centerPanel}>
-                <img src='/icons/gbg/sound-wave.png' alt='sound-wave' />
+                {/* <img src='/icons/gbg/sound-wave.png' alt='sound-wave' /> */}
                 <button
                     className={styles.playButton}
                     type='button'
