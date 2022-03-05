@@ -23,7 +23,6 @@ const BeadCard = (props: {
     const [thumbOffset, setThumbOffset] = useState(0)
     const [duration, setDuration] = useState('00m 00s')
     const [currentTime, setCurrentTime] = useState('00m 00s')
-    const audio = d3.select(`#gbg-bead-${postId}-${index}`).select('audio').node()
 
     function toggleBeadAudio(beadIndex: number, reset?: boolean): void {
         const beadAudio = d3.select(`#gbg-bead-${postId}-${beadIndex}`).select('audio').node()
@@ -55,6 +54,7 @@ const BeadCard = (props: {
     }
 
     function updateSlider(e) {
+        const audio = d3.select(`#gbg-bead-${postId}-${index}`).select('audio').node()
         if (audio) {
             setSliderPercent(e.target.value)
             updateThumbOffset(e.target.value)
@@ -74,8 +74,10 @@ const BeadCard = (props: {
     }
 
     useEffect(() => {
+        const audio = d3.select(`#gbg-bead-${postId}-${index}`).select('audio').node()
         if (audio) {
-            audio.src = bead.beadUrl // '/audio/test.mp3'
+            audio.crossOrigin = 'anonymous'
+            audio.src = bead.beadUrl
             d3.select(audio)
                 .on('play.beadCard', () => setAudioPlaying(true))
                 .on('pause.beadCard', () => setAudioPlaying(false))
@@ -146,7 +148,7 @@ const BeadCard = (props: {
 
             renderVisualizer()
         }
-    }, [audio])
+    }, [])
 
     return (
         <Column
