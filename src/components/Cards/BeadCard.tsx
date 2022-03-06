@@ -5,6 +5,7 @@ import { AccountContext } from '@contexts/AccountContext'
 import ImageTitle from '@components/ImageTitle'
 import Column from '@src/components/Column'
 import Row from '@src/components/Row'
+import AudioVisualiser from '@src/components/AudioVisualiser'
 import AudioTimeSlider from '@src/components/AudioTimeSlider'
 import { ReactComponent as PlayIconSVG } from '@svgs/play-solid.svg'
 import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
@@ -47,60 +48,6 @@ const BeadCard = (props: {
                 .on('play.beadCard', () => setAudioPlaying(true))
                 .on('pause.beadCard', () => setAudioPlaying(false))
                 .on('ended.beadCard', () => toggleBeadAudio(index + 1, true))
-
-            const ctx = new AudioContext()
-            const audioSource = ctx.createMediaElementSource(audio)
-            const analyser = ctx.createAnalyser()
-
-            audioSource.connect(analyser)
-            audioSource.connect(ctx.destination)
-
-            const frequencyData = new Uint8Array(analyser.frequencyBinCount)
-            analyser.getByteFrequencyData(frequencyData)
-
-            const numberOfBars = 60
-            const barHeight = 20
-            const selectedBead = d3.select(`#gbg-bead-${postId}-${index}`)
-            const visualiser = selectedBead
-                .select(`.${styles.centerPanel}`)
-                .append('svg')
-                .attr('id', 'visualiser')
-                .attr('width', '100%')
-                .attr('height', 60)
-
-            const topBars = visualiser.append('g').attr('id', 'top-bars')
-            const bottomBars = visualiser
-                .append('g')
-                .attr('id', 'bottom-bars')
-                .attr('transform', 'scale(1,-1)')
-
-            const createBar = (location, type, i) => {
-                location
-                    .append('rect')
-                    .attr('id', `${type}-bar-${i}`)
-                    .attr('x', (120 / numberOfBars) * i)
-                    .attr('y', type === 'top' ? 30 : -30)
-                    .attr('width', 120 / numberOfBars)
-                    .attr('fill', '#cbd8ff')
-            }
-
-            for (let i = 0; i < numberOfBars; i += 1) {
-                createBar(topBars, 'top', i)
-                createBar(bottomBars, 'bottom', i)
-            }
-
-            const renderVisualizer = () => {
-                analyser.getByteFrequencyData(frequencyData)
-                for (let i = 0; i < numberOfBars; i += 1) {
-                    const barIndex = Math.floor((255 / numberOfBars) * i)
-                    const value = (barHeight / 255) * frequencyData[barIndex] // 0 to 255
-                    selectedBead.select(`#top-bar-${i}`).attr('height', value)
-                    selectedBead.select(`#bottom-bar-${i}`).attr('height', value)
-                }
-                window.requestAnimationFrame(renderVisualizer)
-            }
-
-            renderVisualizer()
         }
     }, [])
 
@@ -119,6 +66,11 @@ const BeadCard = (props: {
                 style={{ marginRight: 10 }}
             />
             <Row centerX centerY className={styles.centerPanel}>
+                <AudioVisualiser
+                    audioId={audioId}
+                    color='#cbd8ff'
+                    style={{ width: '100%', height: 50 }}
+                />
                 <button
                     className={styles.playButton}
                     type='button'
