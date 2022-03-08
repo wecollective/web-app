@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useState } from 'react'
 import * as d3 from 'd3'
 import styles from '@styles/components/cards/BeadCard.module.scss'
 import { AccountContext } from '@contexts/AccountContext'
@@ -39,18 +39,6 @@ const BeadCard = (props: {
         }
     }
 
-    useEffect(() => {
-        const audio = d3.select(`#${audioId}`).node()
-        if (audio) {
-            audio.crossOrigin = 'anonymous'
-            audio.src = bead.beadUrl
-            d3.select(audio)
-                .on('play.beadCard', () => setAudioPlaying(true))
-                .on('pause.beadCard', () => setAudioPlaying(false))
-                .on('ended.beadCard', () => toggleBeadAudio(index + 1, true))
-        }
-    }, [])
-
     return (
         <Column
             id={`gbg-bead-${postId}-${index}`}
@@ -68,6 +56,7 @@ const BeadCard = (props: {
             <Row centerX centerY className={styles.centerPanel}>
                 <AudioVisualiser
                     audioId={audioId}
+                    numberOfBars={80}
                     color='#cbd8ff'
                     style={{ width: '100%', height: 50 }}
                 />
@@ -80,7 +69,13 @@ const BeadCard = (props: {
                     {audioPlaying ? <PauseIconSVG /> : <PlayIconSVG />}
                 </button>
             </Row>
-            <AudioTimeSlider audioId={audioId} />
+            <AudioTimeSlider
+                audioSource={bead.beadUrl}
+                audioId={audioId}
+                onPlay={() => setAudioPlaying(true)}
+                onPause={() => setAudioPlaying(false)}
+                onEnded={() => toggleBeadAudio(index + 1, true)}
+            />
         </Column>
     )
 }

@@ -60,6 +60,14 @@ export function timeSinceCreated(createdAt: string | undefined): string | undefi
     return time
 }
 
+export function formatTimeMMSS(seconds: number): string {
+    // output: '00m 00s'
+    const s = Math.floor(seconds)
+    const mins = Math.floor(s / 60)
+    const secs = mins ? s - mins * 60 : s
+    return `${mins < 10 ? '0' : ''}${mins}m ${+secs < 10 ? '0' : ''}${secs}s`
+}
+
 export function onPageBottomReached(set: (payload: boolean) => void): void {
     const offset = 150
     const d = document.documentElement

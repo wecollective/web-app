@@ -1,23 +1,24 @@
 import React, { useState, useEffect } from 'react'
 import * as d3 from 'd3'
+import getBlobDuration from 'get-blob-duration'
 import styles from '@styles/components/AudioTimeSlider.module.scss'
 import Column from '@components/Column'
 import Row from '@components/Row'
+import { formatTimeMMSS } from '@src/Functions'
 
-const AudioTimeSlider = (props: { audioId: string }): JSX.Element => {
-    const { audioId } = props
+const AudioTimeSlider = (props: {
+    audioSource: string
+    audioId: string
+    onPlay?: () => void
+    onPause?: () => void
+    onEnded?: () => void
+}): JSX.Element => {
+    const { audioSource, audioId, onPlay, onPause, onEnded } = props
     const [duration, setDuration] = useState(0)
     const [currentTime, setCurrentTime] = useState(0)
     const [sliderPercent, setSliderPercent] = useState(0)
     const [bufferPercent, setBufferPercent] = useState(0)
     const [thumbOffset, setThumbOffset] = useState(0)
-
-    function formatTime(seconds) {
-        // output: '00m 00s'
-        const mins = Math.floor(seconds / 60)
-        const secs = mins ? seconds - mins * 60 : seconds
-        return `${mins < 10 ? '0' : ''}${mins}m ${+secs < 10 ? '0' : ''}${secs}s`
-    }
 
     function updateThumbOffset(percent) {
         const thumbWidth = 15
@@ -29,34 +30,43 @@ const AudioTimeSlider = (props: { audioId: string }): JSX.Element => {
         if (audio) {
             setSliderPercent(e.target.value)
             updateThumbOffset(e.target.value)
-            audio.currentTime = (audio.duration / 100) * e.target.value
+            audio.currentTime = (duration / 100) * e.target.value
         }
     }
 
-    function onLoadedData(e) {
-        setDuration(+e.currentTarget.duration.toFixed(0))
+    async function onLoadedData(e) {
+        if (e.currentTarget.duration === Infinity) setDuration(await getBlobDuration(audioSource))
+        else setDuration(e.currentTarget.duration)
     }
 
     function onTimeUpdate(e) {
-        const percent = (e.currentTarget.currentTime / e.currentTarget.duration) * 100
+        const percent = (e.currentTarget.currentTime / duration) * 100
         setSliderPercent(percent)
-        setCurrentTime(+e.currentTarget.currentTime.toFixed(0))
+        setCurrentTime(e.currentTarget.currentTime)
         updateThumbOffset(percent)
     }
 
     useEffect(() => {
         const audio = d3.select(`#${audioId}`).node()
         if (audio) {
-            d3.select(audio).on('progress', () => {
-                if (audio.duration > 0) {
-                    for (let i = 0; i < audio.buffered.length; i += 1) {
-                        const percent =
-                            (audio.buffered.end(audio.buffered.length - 1 - i) / audio.duration) *
-                            100
-                        setBufferPercent(percent)
+            audio.crossOrigin = 'anonymous'
+            audio.src = audioSource
+            audio.currentTime = 0
+            d3.select(audio)
+                .on('progress.timeSlider', () => {
+                    if (audio.duration > 0) {
+                        for (let i = 0; i < audio.buffered.length; i += 1) {
+                            const percent =
+                                (audio.buffered.end(audio.buffered.length - 1 - i) /
+                                    audio.duration) *
+                                100
+                            setBufferPercent(percent)
+                        }
                     }
-                }
-            })
+                })
+                .on('play.timeSlider', () => onPlay && onPlay())
+                .on('pause.timeSlider', () => onPause && onPause())
+                .on('ended.timeSlider', () => onEnded && onEnded())
         }
     }, [])
 
@@ -73,14 +83,20 @@ const AudioTimeSlider = (props: { audioId: string }): JSX.Element => {
                 <input type='range' onClick={updateSlider} onChange={updateSlider} />
             </Row>
             <Row centerY spaceBetween className={styles.times}>
-                <p>{formatTime(currentTime)}</p>
-                <p>{formatTime(duration)}</p>
+                <p>{formatTimeMMSS(currentTime)}</p>
+                <p>{formatTimeMMSS(duration)}</p>
             </Row>
             <audio id={audioId} onLoadedData={onLoadedData} onTimeUpdate={onTimeUpdate}>
                 <track kind='captions' />
             </audio>
         </Column>
     )
+}
+
+AudioTimeSlider.defaultProps = {
+    onPlay: null,
+    onPause: null,
+    onEnded: null,
 }
 
 export default AudioTimeSlider

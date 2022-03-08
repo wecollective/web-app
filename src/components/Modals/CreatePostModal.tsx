@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import * as d3 from 'd3'
 import axios from 'axios'
 import Cookies from 'universal-cookie'
 import { SpaceContext } from '@contexts/SpaceContext'
@@ -17,10 +18,14 @@ import DropDownMenu from '@components/DropDownMenu'
 import SearchSelector from '@components/SearchSelector'
 import ImageTitle from '@components/ImageTitle'
 import CloseButton from '@components/CloseButton'
-import PostCard from '@components/Cards/PostCard/PostCard'
-import { allValid, defaultErrorState, isValidUrl } from '@src/Functions'
+import AudioVisualiser from '@src/components/AudioVisualiser'
+import AudioTimeSlider from '@src/components/AudioTimeSlider'
+// import PostCard from '@components/Cards/PostCard/PostCard'
+import { allValid, defaultErrorState, isValidUrl, formatTimeMMSS } from '@src/Functions'
 import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import Scrollbars from '@components/Scrollbars'
+import { ReactComponent as PlayIconSVG } from '@svgs/play-solid.svg'
+import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
 
 const CreatePostModal = (): JSX.Element => {
     // todo: set create post modal open in page instead of account context
@@ -62,10 +67,20 @@ const CreatePostModal = (): JSX.Element => {
     const [urlDescription, setUrlDescription] = useState(null)
     const [selectedTopicGroup, setSelectedTopicGroup] = useState('archetopics')
     const [selectedTopic, setSelectedTopic] = useState<any>(null)
+    const [audioFile, setAudioFile] = useState<File>()
+    const [audioSizeError, setAudioSizeError] = useState(false)
+    const [audioPlaying, setAudioPlaying] = useState(false)
+    const [showRecordControls, setShowRecordControls] = useState(false)
+    const [recording, setRecording] = useState(false)
+    const [recordingTime, setRecordingTime] = useState(0)
     const [loading, setLoading] = useState(false)
     const [saved, setSaved] = useState(false)
     const [previewRenderKey, setPreviewRenderKey] = useState(0)
+    const audioRecorderRef = useRef<any>(null)
+    const audioChunksRef = useRef<any>([])
+    const recordingIntervalRef = useRef<any>(null)
     const cookies = new Cookies()
+    const audioMBLimit = 100
 
     function updateValue(name, value) {
         let resetState = {}
@@ -130,6 +145,63 @@ const CreatePostModal = (): JSX.Element => {
         } else {
             console.log('invalid Url')
             // setUrlFlashMessage('invalid Url')
+        }
+    }
+
+    function resetAudioState() {
+        setAudioFile(undefined)
+        setRecordingTime(0)
+        audioChunksRef.current = []
+        const input = d3.select('#file-input').node()
+        if (input) input.value = ''
+    }
+
+    function selectAudioFile() {
+        setShowRecordControls(false)
+        const input = d3.select('#file-input').node()
+        if (input && input.files && input.files[0]) {
+            if (input.files[0].size > audioMBLimit * 1024 * 1024) {
+                setAudioSizeError(true)
+                resetAudioState()
+            } else {
+                setAudioSizeError(false)
+                setAudioFile(input.files[0])
+            }
+        }
+    }
+
+    function toggleAudioRecording() {
+        if (recording) {
+            audioRecorderRef.current.stop()
+            setRecording(false)
+        } else {
+            resetAudioState()
+            navigator.mediaDevices.getUserMedia({ audio: true }).then((audio) => {
+                audioRecorderRef.current = new MediaRecorder(audio)
+                audioRecorderRef.current.ondataavailable = (e) => {
+                    audioChunksRef.current.push(e.data)
+                }
+                audioRecorderRef.current.onstart = () => {
+                    recordingIntervalRef.current = setInterval(() => {
+                        setRecordingTime((t) => t + 1)
+                    }, 1000)
+                }
+                audioRecorderRef.current.onstop = () => {
+                    clearInterval(recordingIntervalRef.current)
+                    const blob = new Blob(audioChunksRef.current, { type: 'audio/mpeg-3' })
+                    setAudioFile(new File([blob], 'blobAudioFile'))
+                }
+                audioRecorderRef.current.start()
+                setRecording(true)
+            })
+        }
+    }
+
+    function toggleAudio() {
+        const audio = d3.select('#new-post-audio').node()
+        if (audio) {
+            if (audio.paused) audio.play()
+            else audio.pause()
         }
     }
 
@@ -232,6 +304,8 @@ const CreatePostModal = (): JSX.Element => {
         switch (postType.value) {
             case 'Url':
                 return 'Text (not required for url posts)'
+            case 'Audio':
+                return 'Text (not required for audio posts)'
             case 'Glass Bead Game':
                 return 'Add a description for the game'
             default:
@@ -248,7 +322,7 @@ const CreatePostModal = (): JSX.Element => {
         }
     }
 
-    const postTypeName = ['Text', 'Url'].includes(postType.value)
+    const postTypeName = ['Text', 'Url', 'Audio'].includes(postType.value)
         ? `${postType.value.toLowerCase()} post`
         : postType.value
 
@@ -265,7 +339,7 @@ const CreatePostModal = (): JSX.Element => {
                     {createPostModalType !== 'Glass Bead Game' && (
                         <DropDownMenu
                             title='Post Type'
-                            options={['Text', 'Url', 'Glass Bead Game']}
+                            options={['Text', 'Url', 'Audio', 'Glass Bead Game']}
                             selectedOption={postType.value}
                             setSelectedOption={(value) => updateValue('postType', value)}
                             orientation='horizontal'
@@ -302,7 +376,7 @@ const CreatePostModal = (): JSX.Element => {
                             <Scrollbars className={styles.topics}>
                                 <Row wrap>
                                     {GlassBeadGameTopics[selectedTopicGroup].map((t) => (
-                                        <Row className={styles.topicWrapper}>
+                                        <Row className={styles.topicWrapper} key={t.name}>
                                             <ImageTitle
                                                 type='space'
                                                 imagePath={t.imagePath}
@@ -354,6 +428,79 @@ const CreatePostModal = (): JSX.Element => {
                                 scrapeURL(value)
                             }}
                         />
+                    )}
+                    {postType.value === 'Audio' && (
+                        <Column style={{ marginTop: 10 }}>
+                            <Row style={{ marginBottom: 20 }}>
+                                <Button
+                                    text='Record audio'
+                                    color='grey'
+                                    style={{ marginRight: 10 }}
+                                    onClick={() => {
+                                        resetAudioState()
+                                        setShowRecordControls(true)
+                                    }}
+                                />
+                                <Row className={styles.fileUploadInput}>
+                                    <label htmlFor='file-input'>
+                                        Upload audio
+                                        <input
+                                            type='file'
+                                            id='file-input'
+                                            accept='.mp3'
+                                            onChange={selectAudioFile}
+                                            hidden
+                                        />
+                                    </label>
+                                </Row>
+                            </Row>
+                            {audioFile && (
+                                <Column key={audioFile.lastModified} style={{ marginBottom: 20 }}>
+                                    <p>{audioFile.name}</p>
+                                    <AudioVisualiser
+                                        audioId='new-post-audio'
+                                        numberOfBars={160}
+                                        color='#cbd8ff'
+                                        style={{ width: '100%', height: 80 }}
+                                    />
+                                    <Row centerY>
+                                        <button
+                                            className={styles.playButton}
+                                            type='button'
+                                            aria-label='toggle-audio'
+                                            onClick={toggleAudio}
+                                        >
+                                            {audioPlaying ? <PauseIconSVG /> : <PlayIconSVG />}
+                                        </button>
+                                        <AudioTimeSlider
+                                            audioSource={URL.createObjectURL(audioFile)}
+                                            audioId='new-post-audio'
+                                            onPlay={() => setAudioPlaying(true)}
+                                            onPause={() => setAudioPlaying(false)}
+                                            onEnded={() => setAudioPlaying(false)}
+                                        />
+                                    </Row>
+                                </Column>
+                            )}
+                            {showRecordControls && (
+                                <Column centerX style={{ marginBottom: 20 }}>
+                                    <h2>{formatTimeMMSS(recordingTime)}</h2>
+                                    <Row>
+                                        <Button
+                                            text={`${
+                                                recording
+                                                    ? 'Stop'
+                                                    : `${audioFile ? 'Restart' : 'Start'}`
+                                            } recording`}
+                                            color='red'
+                                            style={{ marginRight: 10 }}
+                                            onClick={toggleAudioRecording}
+                                        />
+                                    </Row>
+                                </Column>
+                            )}
+                            {audioSizeError && <p>Audio too large. Max size: {audioMBLimit}MB</p>}
+                        </Column>
                     )}
                     <Input
                         title={textTitle()}
