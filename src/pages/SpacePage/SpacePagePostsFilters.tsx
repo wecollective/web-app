@@ -10,7 +10,7 @@ const SpacePagePostsFilters = (): JSX.Element => {
         <Row style={{ width: '100%' }}>
             <DropDownMenu
                 title='Type'
-                options={['All Types', 'Text', 'Url', 'Glass Bead Game', 'Prism']}
+                options={['All Types', 'Text', 'Url', 'Audio', 'Glass Bead Game', 'Prism']}
                 selectedOption={type}
                 setSelectedOption={(payload) => updateSpacePostsFilter('type', payload)}
                 style={{ marginRight: 10 }}

@@ -65,3 +65,11 @@
     margin-right: 10px;
     flex-shrink: 0;
 }
+
+.errors {
+    margin-bottom: 10px;
+    > p {
+        font-size: 14px;
+        color: $red;
+    }
+}

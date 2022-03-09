@@ -172,6 +172,9 @@ const SpacePagePostMap = (): JSX.Element => {
         if (d.type === 'url') {
             return colors.yellow
         }
+        if (d.type === 'audio') {
+            return colors.orange
+        }
         if (d.type === 'poll') {
             return colors.red
         }
@@ -502,9 +505,12 @@ const SpacePagePostMap = (): JSX.Element => {
                         .append('text')
                         .classed('post-map-node-text', true)
                         .text((d) => {
-                            let text = d.text.substring(0, 20)
-                            if (text.length === 20) text = text.concat('...')
-                            return text
+                            if (d.text) {
+                                let text = d.text.substring(0, 20)
+                                if (d.text.length > 20) text = text.concat('...')
+                                return text
+                            }
+                            return null
                         })
                         .attr('opacity', 0)
                         .attr('pointer-events', 'none')

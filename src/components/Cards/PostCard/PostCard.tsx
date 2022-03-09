@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 import React, { useState, useContext } from 'react'
+import * as d3 from 'd3'
 import { useHistory, Link } from 'react-router-dom'
 import { AccountContext } from '@contexts/AccountContext'
 import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
@@ -14,6 +15,8 @@ import Button from '@components/Button'
 import StatButton from '@components/StatButton'
 import BeadCard from '@src/components/Cards/BeadCard'
 import Scrollbars from '@src/components/Scrollbars'
+import AudioVisualiser from '@src/components/AudioVisualiser'
+import AudioTimeSlider from '@src/components/AudioTimeSlider'
 import PostCardLikeModal from '@components/Cards/PostCard/PostCardLikeModal'
 import PostCardRepostModal from '@components/Cards/PostCard/PostCardRepostModal'
 import PostCardRatingModal from '@components/Cards/PostCard/PostCardRatingModal'
@@ -26,6 +29,8 @@ import { ReactComponent as LikeIconSVG } from '@svgs/like.svg'
 import { ReactComponent as RepostIconSVG } from '@svgs/repost.svg'
 import { ReactComponent as RatingIconSVG } from '@svgs/star-solid.svg'
 import { ReactComponent as ArrowRightIconSVG } from '@svgs/arrow-alt-circle-right-solid.svg'
+import { ReactComponent as PlayIconSVG } from '@svgs/play-solid.svg'
+import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
 
 const PostCard = (props: {
     post: any
@@ -66,6 +71,7 @@ const PostCard = (props: {
     const [linkModalOpen, setLinkModalOpen] = useState(false)
     const [commentsOpen, setCommentsOpen] = useState(false)
     const [deletePostModalOpen, setDeletePostModalOpen] = useState(false)
+    const [audioPlaying, setAudioPlaying] = useState(false)
     const beads = GlassBeadGame ? GlassBeadGame.GlassBeads.sort((a, b) => a.index - b.index) : []
 
     const history = useHistory()
@@ -79,6 +85,19 @@ const PostCard = (props: {
     const otherSpacesText = `and ${postSpaces.length - 1} other space${pluralise(
         postSpaces.length - 1
     )}`
+
+    function toggleAudio() {
+        const audio = d3.select(`#post-audio-${id}`).node()
+        if (audio) {
+            if (audio.paused) {
+                // pause all playing audio
+                d3.selectAll('audio')
+                    .nodes()
+                    .forEach((node) => node.pause())
+                audio.play()
+            } else audio.pause()
+        }
+    }
 
     return (
         <div className={`${styles.post} ${styles[location]}`} key={id} style={style}>
@@ -179,6 +198,33 @@ const PostCard = (props: {
                         urlTitle={urlTitle}
                         urlDescription={urlDescription}
                     />
+                )}
+                {type === 'audio' && (
+                    <Column className={styles.audioContent}>
+                        <AudioVisualiser
+                            audioId={`post-audio-${id}`}
+                            numberOfBars={160}
+                            color='#cbd8ff'
+                            style={{ width: '100%', height: 80 }}
+                        />
+                        <Row centerY>
+                            <button
+                                className={styles.playButton}
+                                type='button'
+                                aria-label='toggle-audio'
+                                onClick={toggleAudio}
+                            >
+                                {audioPlaying ? <PauseIconSVG /> : <PlayIconSVG />}
+                            </button>
+                            <AudioTimeSlider
+                                audioSource={url}
+                                audioId={`post-audio-${id}`}
+                                onPlay={() => setAudioPlaying(true)}
+                                onPause={() => setAudioPlaying(false)}
+                                onEnded={() => setAudioPlaying(false)}
+                            />
+                        </Row>
+                    </Column>
                 )}
                 {type === 'glass-bead-game' && (
                     <Column className={styles.gbgContent}>

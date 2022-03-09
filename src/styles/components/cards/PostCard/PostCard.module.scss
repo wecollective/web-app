@@ -78,6 +78,10 @@
                 color: $postTypeUrl;
                 border: 2px solid $postTypeUrl;
             }
+            &.audio {
+                color: $postTypeAudio;
+                border: 2px solid $postTypeAudio;
+            }
             &.glass-bead-game {
                 color: $postTypeGlassBeadGame;
                 border: 2px solid $postTypeGlassBeadGame;
@@ -102,6 +106,22 @@
         flex-direction: column;
         align-items: flex-start;
 
+        .audioContent {
+            width: 100%;
+            margin-bottom: 20px;
+
+            .playButton {
+                all: unset;
+                cursor: pointer;
+                display: flex;
+                width: 20px;
+                height: 20px;
+                color: $blue5;
+                margin-right: 10px;
+                flex-shrink: 0;
+            }
+        }
+
         .topicImage {
             width: 50px;
             height: 50px;
@@ -120,7 +140,6 @@
             }
     
             .gbgBeads {
-                // width: 100%;
                 display: flex;
                 padding: 10px 10px 20px 10px;
                 margin-left: -10px;

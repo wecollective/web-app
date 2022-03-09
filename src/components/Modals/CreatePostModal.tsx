@@ -73,6 +73,7 @@ const CreatePostModal = (): JSX.Element => {
     const [showRecordControls, setShowRecordControls] = useState(false)
     const [recording, setRecording] = useState(false)
     const [recordingTime, setRecordingTime] = useState(0)
+    const [audioPostError, setAudioPostError] = useState(false)
     const [loading, setLoading] = useState(false)
     const [saved, setSaved] = useState(false)
     const [previewRenderKey, setPreviewRenderKey] = useState(0)
@@ -150,6 +151,7 @@ const CreatePostModal = (): JSX.Element => {
 
     function resetAudioState() {
         setAudioFile(undefined)
+        setAudioPostError(false)
         setRecordingTime(0)
         audioChunksRef.current = []
         const input = d3.select('#file-input').node()
@@ -165,6 +167,7 @@ const CreatePostModal = (): JSX.Element => {
                 resetAudioState()
             } else {
                 setAudioSizeError(false)
+                setAudioPostError(false)
                 setAudioFile(input.files[0])
             }
         }
@@ -189,7 +192,7 @@ const CreatePostModal = (): JSX.Element => {
                 audioRecorderRef.current.onstop = () => {
                     clearInterval(recordingIntervalRef.current)
                     const blob = new Blob(audioChunksRef.current, { type: 'audio/mpeg-3' })
-                    setAudioFile(new File([blob], 'blobAudioFile'))
+                    setAudioFile(new File([blob], ''))
                 }
                 audioRecorderRef.current.start()
                 setRecording(true)
@@ -207,7 +210,7 @@ const CreatePostModal = (): JSX.Element => {
 
     function createPost(e) {
         e.preventDefault()
-        // add validation with latest values to form data (is there a way around this?)
+        // add validation with latest values to form data (todo: avoid this set using refs?)
         const newFormData = {
             postType: {
                 ...postType,
@@ -215,7 +218,7 @@ const CreatePostModal = (): JSX.Element => {
             },
             text: {
                 ...text,
-                required: postType.value !== 'Url',
+                required: !['Url', 'Audio'].includes(postType.value),
                 validate: (v) => {
                     const errors: string[] = []
                     if (!v) errors.push('Required')
@@ -242,70 +245,104 @@ const CreatePostModal = (): JSX.Element => {
                 required: false,
             },
         }
+
         if (allValid(newFormData, setFormData)) {
-            setLoading(true)
-            const postData = {
-                type: postType.value.replace(/\s+/g, '-').toLowerCase(),
-                text: text.value,
-                url: url.value,
-                urlImage,
-                urlDomain,
-                urlTitle,
-                urlDescription,
-                topic: selectedTopic ? selectedTopic.name : topic.value,
-                topicGroup: selectedTopic ? selectedTopicGroup : null,
-                topicImage: selectedTopic ? selectedTopic.imagePath : null,
-                spaceHandles: [...selectedSpaces.map((s) => s.handle), spaceData.handle],
-            }
-            const accessToken = cookies.get('accessToken')
-            const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
-            axios
-                .post(`${config.apiURL}/create-post`, postData, authHeader)
-                .then((res) => {
-                    setLoading(false)
-                    setSaved(true)
-                    // todo: update direct spaces
-                    const DirectSpaces = [spaceData, ...selectedSpaces]
-                    DirectSpaces.forEach((s) => {
-                        s.type = 'post'
-                        s.state = 'active'
+            if (postType.value === 'Audio' && !audioFile) {
+                if (!audioSizeError) setAudioPostError(true)
+            } else {
+                setLoading(true)
+                const accessToken = cookies.get('accessToken')
+                const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+                const postData = {
+                    type: postType.value.replace(/\s+/g, '-').toLowerCase(),
+                    text: text.value || null,
+                    url: url.value || null,
+                    urlImage,
+                    urlDomain,
+                    urlTitle,
+                    urlDescription,
+                    topic: selectedTopic ? selectedTopic.name : topic.value,
+                    topicGroup: selectedTopic ? selectedTopicGroup : null,
+                    topicImage: selectedTopic ? selectedTopic.imagePath : null,
+                    spaceHandles: [spaceData.handle, ...selectedSpaces.map((s) => s.handle)],
+                }
+                let fileData
+                let type
+                if (postType.value === 'Audio') {
+                    fileData = new FormData()
+                    const isBlob = audioFile && !audioFile.name
+                    fileData.append(
+                        'file',
+                        isBlob
+                            ? new Blob(audioChunksRef.current, { type: 'audio/mpeg-3' })
+                            : audioFile
+                    )
+                    fileData.append('postData', JSON.stringify(postData))
+                    type = isBlob ? 'audio-blob' : 'audio-file'
+                    options.headers['Content-Type'] = 'multipart/form-data'
+                }
+                axios
+                    .post(
+                        `${config.apiURL}/create-post?type=${type}`,
+                        fileData || postData,
+                        options
+                    )
+                    .then((res) => {
+                        setLoading(false)
+                        setSaved(true)
+                        // todo: update direct spaces
+                        const DirectSpaces = [spaceData, ...selectedSpaces]
+                        DirectSpaces.forEach((s) => {
+                            s.type = 'post'
+                            s.state = 'active'
+                        })
+                        const newPost = {
+                            ...res.data,
+                            totalLikes: 0,
+                            totalComments: 0,
+                            totalReposts: 0,
+                            totalRatings: 0,
+                            totalLinks: 0,
+                            Creator: {
+                                handle: accountData.handle,
+                                name: accountData.name,
+                                flagImagePath: accountData.flagImagePath,
+                            },
+                            DirectSpaces,
+                            GlassBeadGame: {
+                                topic: selectedTopic ? selectedTopic.name : topic.value,
+                                topicGroup: selectedTopic ? selectedTopicGroup : null,
+                                topicImage: selectedTopic ? selectedTopic.imagePath : null,
+                                GlassBeads: [],
+                            },
+                            Reactions: [],
+                            IncomingLinks: [],
+                            OutgoingLinks: [],
+                        }
+                        setSpacePosts([newPost, ...spacePosts])
+                        setTimeout(() => setCreatePostModalOpen(false), 1000)
                     })
-                    const newPost = {
-                        ...res.data,
-                        totalLikes: 0,
-                        totalComments: 0,
-                        totalReposts: 0,
-                        totalRatings: 0,
-                        totalLinks: 0,
-                        Creator: {
-                            handle: accountData.handle,
-                            name: accountData.name,
-                            flagImagePath: accountData.flagImagePath,
-                        },
-                        DirectSpaces,
-                        GlassBeadGame: {
-                            topic: selectedTopic ? selectedTopic.name : topic.value,
-                            topicGroup: selectedTopic ? selectedTopicGroup : null,
-                            topicImage: selectedTopic ? selectedTopic.imagePath : null,
-                            GlassBeads: [],
-                        },
-                        Reactions: [],
-                        IncomingLinks: [],
-                        OutgoingLinks: [],
-                    }
-                    setSpacePosts([newPost, ...spacePosts])
-                    setTimeout(() => setCreatePostModalOpen(false), 1000)
-                })
-                .catch((error) => console.log(error))
+                    .catch((error) => {
+                        const { message } = error.response.data
+                        switch (message) {
+                            case 'File size too large':
+                                setAudioSizeError(true)
+                                break
+                            default:
+                                console.log('error: ', error)
+                                break
+                        }
+                        setLoading(false)
+                    })
+            }
         }
     }
 
     function textTitle() {
         switch (postType.value) {
             case 'Url':
-                return 'Text (not required for url posts)'
             case 'Audio':
-                return 'Text (not required for audio posts)'
+                return 'Text (optional)'
             case 'Glass Bead Game':
                 return 'Add a description for the game'
             default:
@@ -430,14 +467,21 @@ const CreatePostModal = (): JSX.Element => {
                         />
                     )}
                     {postType.value === 'Audio' && (
-                        <Column style={{ marginTop: 10 }}>
+                        <Column>
+                            <Column className={styles.errors}>
+                                {audioSizeError && (
+                                    <p>Audio too large. Max size: {audioMBLimit}MB</p>
+                                )}
+                                {audioPostError && <p>Audio recording or upload required</p>}
+                            </Column>
                             <Row style={{ marginBottom: 20 }}>
                                 <Button
                                     text='Record audio'
-                                    color='grey'
+                                    color='blue'
                                     style={{ marginRight: 10 }}
                                     onClick={() => {
                                         resetAudioState()
+                                        setAudioSizeError(false)
                                         setShowRecordControls(true)
                                     }}
                                 />
@@ -492,14 +536,13 @@ const CreatePostModal = (): JSX.Element => {
                                                     ? 'Stop'
                                                     : `${audioFile ? 'Restart' : 'Start'}`
                                             } recording`}
-                                            color='red'
+                                            color={recording ? 'red' : 'aqua'}
                                             style={{ marginRight: 10 }}
                                             onClick={toggleAudioRecording}
                                         />
                                     </Row>
                                 </Column>
                             )}
-                            {audioSizeError && <p>Audio too large. Max size: {audioMBLimit}MB</p>}
                         </Column>
                     )}
                     <Input
