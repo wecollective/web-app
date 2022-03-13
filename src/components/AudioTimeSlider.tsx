@@ -7,13 +7,13 @@ import Row from '@components/Row'
 import { formatTimeMMSS } from '@src/Functions'
 
 const AudioTimeSlider = (props: {
-    audioSource: string
-    audioId: string
+    audioElementId: string
+    audioURL: string
     onPlay?: () => void
     onPause?: () => void
     onEnded?: () => void
 }): JSX.Element => {
-    const { audioSource, audioId, onPlay, onPause, onEnded } = props
+    const { audioURL, audioElementId, onPlay, onPause, onEnded } = props
     const [duration, setDuration] = useState(0)
     const [currentTime, setCurrentTime] = useState(0)
     const [sliderPercent, setSliderPercent] = useState(0)
@@ -26,7 +26,7 @@ const AudioTimeSlider = (props: {
     }
 
     function updateSlider(e) {
-        const audio = d3.select(`#${audioId}`).node()
+        const audio = d3.select(`#${audioElementId}`).node()
         if (audio) {
             setSliderPercent(e.target.value)
             updateThumbOffset(e.target.value)
@@ -35,7 +35,7 @@ const AudioTimeSlider = (props: {
     }
 
     async function onLoadedData(e) {
-        if (e.currentTarget.duration === Infinity) setDuration(await getBlobDuration(audioSource))
+        if (e.currentTarget.duration === Infinity) setDuration(await getBlobDuration(audioURL))
         else setDuration(e.currentTarget.duration)
     }
 
@@ -47,10 +47,10 @@ const AudioTimeSlider = (props: {
     }
 
     useEffect(() => {
-        const audio = d3.select(`#${audioId}`).node()
+        const audio = d3.select(`#${audioElementId}`).node()
         if (audio) {
             audio.crossOrigin = 'anonymous'
-            audio.src = audioSource
+            audio.src = audioURL
             audio.currentTime = 0
             d3.select(audio)
                 .on('progress.timeSlider', () => {
@@ -86,7 +86,7 @@ const AudioTimeSlider = (props: {
                 <p>{formatTimeMMSS(currentTime)}</p>
                 <p>{formatTimeMMSS(duration)}</p>
             </Row>
-            <audio id={audioId} onLoadedData={onLoadedData} onTimeUpdate={onTimeUpdate}>
+            <audio id={audioElementId} onLoadedData={onLoadedData} onTimeUpdate={onTimeUpdate}>
                 <track kind='captions' />
             </audio>
         </Column>

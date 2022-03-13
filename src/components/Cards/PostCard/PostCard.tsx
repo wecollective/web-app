@@ -4,6 +4,7 @@ import * as d3 from 'd3'
 import { useHistory, Link } from 'react-router-dom'
 import { AccountContext } from '@contexts/AccountContext'
 import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
+import colors from '@styles/Colors.module.scss'
 import Column from '@src/components/Column'
 import Row from '@src/components/Row'
 import PostCardUrlPreview from '@components/Cards/PostCard/PostCardUrlPreview'
@@ -202,9 +203,12 @@ const PostCard = (props: {
                 {type === 'audio' && (
                     <Column className={styles.audioContent}>
                         <AudioVisualiser
-                            audioId={`post-audio-${id}`}
-                            numberOfBars={160}
-                            color='#cbd8ff'
+                            audioElementId={`post-audio-${id}`}
+                            audioURL={url}
+                            staticBars={1200}
+                            staticColor={colors.audioVisualiserColor}
+                            dynamicBars={160}
+                            dynamicColor={colors.audioVisualiserColor}
                             style={{ width: '100%', height: 80 }}
                         />
                         <Row centerY>
@@ -217,8 +221,8 @@ const PostCard = (props: {
                                 {audioPlaying ? <PauseIconSVG /> : <PlayIconSVG />}
                             </button>
                             <AudioTimeSlider
-                                audioSource={url}
-                                audioId={`post-audio-${id}`}
+                                audioElementId={`post-audio-${id}`}
+                                audioURL={url}
                                 onPlay={() => setAudioPlaying(true)}
                                 onPause={() => setAudioPlaying(false)}
                                 onEnded={() => setAudioPlaying(false)}

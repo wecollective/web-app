@@ -8,6 +8,7 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
 import styles from '@styles/components/modals/CreatePostModal.module.scss'
+import colors from '@styles/Colors.module.scss'
 import Modal from '@components/Modal'
 import Column from '@components/Column'
 import Row from '@components/Row'
@@ -502,9 +503,12 @@ const CreatePostModal = (): JSX.Element => {
                                 <Column key={audioFile.lastModified} style={{ marginBottom: 20 }}>
                                     <p>{audioFile.name}</p>
                                     <AudioVisualiser
-                                        audioId='new-post-audio'
-                                        numberOfBars={160}
-                                        color='#cbd8ff'
+                                        audioElementId='new-post-audio'
+                                        audioURL={URL.createObjectURL(audioFile)}
+                                        staticBars={1200}
+                                        staticColor={colors.audioVisualiserColor}
+                                        dynamicBars={160}
+                                        dynamicColor={colors.audioVisualiserColor}
                                         style={{ width: '100%', height: 80 }}
                                     />
                                     <Row centerY>
@@ -517,8 +521,8 @@ const CreatePostModal = (): JSX.Element => {
                                             {audioPlaying ? <PauseIconSVG /> : <PlayIconSVG />}
                                         </button>
                                         <AudioTimeSlider
-                                            audioSource={URL.createObjectURL(audioFile)}
-                                            audioId='new-post-audio'
+                                            audioElementId='new-post-audio'
+                                            audioURL={URL.createObjectURL(audioFile)}
                                             onPlay={() => setAudioPlaying(true)}
                                             onPause={() => setAudioPlaying(false)}
                                             onEnded={() => setAudioPlaying(false)}

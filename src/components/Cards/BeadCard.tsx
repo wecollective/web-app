@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react'
 import * as d3 from 'd3'
 import styles from '@styles/components/cards/BeadCard.module.scss'
+import colors from '@styles/Colors.module.scss'
 import { AccountContext } from '@contexts/AccountContext'
 import ImageTitle from '@components/ImageTitle'
 import Column from '@src/components/Column'
@@ -27,11 +28,10 @@ const BeadCard = (props: {
         if (beadAudio) {
             if (!beadAudio.paused) beadAudio.pause()
             else {
-                // pause all playing beads
-                const allBeads = d3.selectAll('.gbg-bead').select('audio').nodes()
-                for (let i = 0; i < allBeads.length; i += 1) {
-                    if (!allBeads[i].paused) allBeads[i].pause()
-                }
+                // pause all playing audio
+                d3.selectAll('audio')
+                    .nodes()
+                    .forEach((node) => node.pause())
                 // start selected bead
                 if (reset) beadAudio.currentTime = 0
                 beadAudio.play()
@@ -55,9 +55,12 @@ const BeadCard = (props: {
             />
             <Row centerX centerY className={styles.centerPanel}>
                 <AudioVisualiser
-                    audioId={audioId}
-                    numberOfBars={80}
-                    color='#cbd8ff'
+                    audioElementId={audioId}
+                    audioURL={bead.beadUrl}
+                    staticBars={1200}
+                    staticColor={colors.audioVisualiserColor}
+                    dynamicBars={80}
+                    dynamicColor={colors.audioVisualiserColor}
                     style={{ width: '100%', height: 50 }}
                 />
                 <button
@@ -70,8 +73,8 @@ const BeadCard = (props: {
                 </button>
             </Row>
             <AudioTimeSlider
-                audioSource={bead.beadUrl}
-                audioId={audioId}
+                audioElementId={audioId}
+                audioURL={bead.beadUrl}
                 onPlay={() => setAudioPlaying(true)}
                 onPause={() => setAudioPlaying(false)}
                 onEnded={() => toggleBeadAudio(index + 1, true)}
