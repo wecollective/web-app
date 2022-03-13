@@ -57,7 +57,7 @@ const BeadCard = (props: {
                 <AudioVisualiser
                     audioElementId={audioId}
                     audioURL={bead.beadUrl}
-                    staticBars={1200}
+                    staticBars={800}
                     staticColor={colors.audioVisualiserColor}
                     dynamicBars={80}
                     dynamicColor={colors.audioVisualiserColor}

@@ -101,8 +101,10 @@ const AudioVisualiser = (props: {
 
             audio.on('play.visualiser', () => {
                 const totalBars = Math.min(dynamicBars, 255)
-                audioContext.current = new AudioContext()
-                audioSource.current = audioContext.current.createMediaElementSource(audio.node())
+                audioContext.current = audioContext.current || new AudioContext()
+                audioSource.current =
+                    audioSource.current ||
+                    audioContext.current.createMediaElementSource(audio.node())
                 const analyser = audioContext.current.createAnalyser()
                 audioSource.current.connect(analyser)
                 audioSource.current.connect(audioContext.current.destination)
