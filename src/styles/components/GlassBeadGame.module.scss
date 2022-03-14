@@ -208,13 +208,15 @@ $transitionSpeed: 1s;
 
                 &.large {
                     > p { font-size: 16px }
-                    .position {
-                        width: 35px;
-                        height: 35px;
-                        font-size: 16px;
-                    }
-                    .playerState {
-                        font-size: 16px;
+                    .player {
+                        .position {
+                            width: 35px;
+                            height: 35px;
+                            font-size: 16px;
+                        }
+                        .playerState {
+                            font-size: 16px;
+                        }
                     }
                 }
 

@@ -1193,7 +1193,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                                 signal: data,
                             })
                         })
-                        peer.on('connect', () => console.log('connect 1'))
+                        // peer.on('connect', () => console.log('connect 1'))
                         peer.on('stream', (stream) => {
                             videosRef.current.push({
                                 socketId: user.socketId,

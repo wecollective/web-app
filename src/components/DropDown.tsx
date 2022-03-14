@@ -20,10 +20,12 @@ const DropDown = (props: {
         <Row centerY className={styles.wrapper} style={style}>
             <p className={styles.title}>{title}</p>
             <div className={styles.divider} />
-            <button
-                type='button'
+            <div
+                role='button'
                 className={styles.selectedOption}
                 onClick={() => setMenuOpen(!menuOpen)}
+                onKeyDown={() => setMenuOpen(!menuOpen)}
+                tabIndex={0}
             >
                 <p>{selectedOption}</p>
                 <CaretDownIconSVG />
@@ -32,8 +34,9 @@ const DropDown = (props: {
                         <Column className={styles.options}>
                             {options.map((option) => (
                                 <button
-                                    type='button'
                                     className={styles.option}
+                                    key={option}
+                                    type='button'
                                     onClick={() => {
                                         setSelectedOption(option)
                                         setMenuOpen(false)
@@ -45,7 +48,7 @@ const DropDown = (props: {
                         </Column>
                     </CloseOnClickOutside>
                 )}
-            </button>
+            </div>
             {/* {menuOpen && (
                 <CloseOnClickOutside onClick={() => setMenuOpen(false)}>
                     <Column className={styles.options}>

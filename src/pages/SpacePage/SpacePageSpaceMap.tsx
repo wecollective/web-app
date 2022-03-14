@@ -151,7 +151,7 @@ const SpacePageSpaceMap = (): JSX.Element => {
         )
 
     function resetTreePosition() {
-        console.log('resetTreePosition')
+        // console.log('resetTreePosition')
         const svg = d3.select('#space-map-svg')
         const svgWidth = parseInt(svg.style('width'), 10)
         const svgHeight = parseInt(svg.style('height'), 10)
@@ -292,7 +292,7 @@ const SpacePageSpaceMap = (): JSX.Element => {
     }
 
     function updateTree(data, resetPosition) {
-        console.log('updateTree')
+        // console.log('updateTree')
 
         if (resetPosition) resetTreePosition()
 

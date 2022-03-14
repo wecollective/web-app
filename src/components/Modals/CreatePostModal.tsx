@@ -82,7 +82,7 @@ const CreatePostModal = (): JSX.Element => {
     const audioChunksRef = useRef<any>([])
     const recordingIntervalRef = useRef<any>(null)
     const cookies = new Cookies()
-    const audioMBLimit = 100
+    const audioMBLimit = 5
 
     function updateValue(name, value) {
         let resetState = {}

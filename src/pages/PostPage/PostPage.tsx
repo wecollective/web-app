@@ -33,6 +33,8 @@ const PostPage = ({
         getPostData(postId)
     }, [postId])
 
+    useEffect(() => () => resetPostContext(), [])
+
     // useEffect(() => {
     //     if (pathname.includes('comments')) { setPageSectionSelected('comments') }
     //     if (pathname.includes('vote')) { setPageSectionSelected('vote') }

@@ -29,7 +29,7 @@ const AudioVisualiser = (props: {
         const visualiser = d3.select(`#${audioElementId}-visualiser`)
         if (visualiser.node()) {
             const { height, width } = visualiser.node().getBoundingClientRect()
-            const maxBars = 2000
+            const maxBars = 8000
             const totalBars = Math.min(staticBars, maxBars)
             const leftChannel = buffer.getChannelData(0)
             const barGap = Math.floor(leftChannel.length / totalBars)
@@ -48,7 +48,7 @@ const AudioVisualiser = (props: {
             let maxValue = 0
             for (let i = 0; i <= totalBars; i += 1) {
                 const barIndex = Math.floor(barGap * i)
-                const initialValue = leftChannel[barIndex]
+                const initialValue = leftChannel[barIndex] || 0
                 const usedValue = initialValue > 0 ? initialValue : -initialValue
                 if (usedValue > maxValue) maxValue = usedValue
             }
@@ -56,10 +56,10 @@ const AudioVisualiser = (props: {
             // draw lines
             for (let i = 0; i <= totalBars; i += 1) {
                 const barIndex = Math.floor(barGap * i)
-                const x = i * barWidth
-                const initialValue = leftChannel[barIndex]
+                const initialValue = leftChannel[barIndex] || 0
                 const usedValue = initialValue > 0 ? initialValue : -initialValue
                 const barHeight = usedValue * (height / maxValue)
+                const x = i * barWidth
                 const y = height / 2 - barHeight / 2
                 staticVisualiser
                     .append('rect')
@@ -79,7 +79,7 @@ const AudioVisualiser = (props: {
         req.responseType = 'arraybuffer'
         req.onreadystatechange = () => {
             if (req.readyState === 4) {
-                offlineAudioContext.current = new OfflineAudioContext(1, 1, 44100)
+                offlineAudioContext.current = new OfflineAudioContext(1, 1, 8000)
                 offlineAudioContext.current.decodeAudioData(
                     req.response,
                     (buffer) => drawStaticVisualisation(buffer),

@@ -26,14 +26,12 @@ const SpacePageCalendar = ({
     return (
         <Column className={styles.wrapper}>
             <Column className={styles.content}>
-                <h2>Still to be developed...</h2>
+                <h2>In progress...</h2>
                 <p>
                     This section will display a general purpose calendar with search and filter
                     functionality that pulls in all games and events included in the space and
                     contained child-spaces.
                 </p>
-                <br />
-                <p>Estimate start date: February 2022</p>
             </Column>
         </Column>
     )
