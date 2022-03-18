@@ -73,3 +73,16 @@
         color: $red;
     }
 }
+
+.dateTimePicker {
+    position: relative;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    > div {
+        position: relative;
+        input {
+            cursor: pointer;
+        }
+    }
+}

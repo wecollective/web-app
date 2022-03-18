@@ -107,6 +107,12 @@ body {
     }
 }
 
+.flatpickr-calendar {
+    top: unset !important;
+    bottom: -345px !important;
+    left: 0 !important;
+}
+
 // .os-theme-dark {
 //     .os-scrollbar {
 //         width: 80px !important;//$scrollBarWidth;

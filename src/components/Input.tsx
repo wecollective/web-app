@@ -7,13 +7,14 @@ import { ReactComponent as SuccessIconSVG } from '@svgs/check-circle-solid.svg'
 
 const Input = (props: {
     type: 'text' | 'number' | 'text-area' | 'password' | 'email'
+    id?: string
     title?: string
     prefix?: string
     placeholder?: string
     state?: 'default' | 'valid' | 'invalid'
     errors?: string[]
-    value: string | number
-    onChange: (payload: string) => void
+    value?: string | number
+    onChange?: (payload: string) => void
     rows?: number
     style?: any
     disabled?: boolean
@@ -21,6 +22,7 @@ const Input = (props: {
 }): JSX.Element => {
     const {
         type,
+        id,
         title,
         prefix,
         placeholder,
@@ -42,21 +44,23 @@ const Input = (props: {
                 {prefix && <span>{prefix}</span>}
                 {type === 'text-area' ? (
                     <textarea
+                        id={id}
                         rows={rows}
                         placeholder={placeholder}
                         value={value}
                         onChange={(e) => {
-                            onChange(e.target.value)
+                            if (onChange) onChange(e.target.value)
                             resizeTextArea(e.target)
                         }}
                         disabled={disabled}
                     />
                 ) : (
                     <input
+                        id={id}
                         placeholder={placeholder}
                         type={type}
                         value={value}
-                        onChange={(e) => onChange(e.target.value)}
+                        onChange={(e) => onChange && onChange(e.target.value)}
                         disabled={disabled}
                     />
                 )}
@@ -70,10 +74,13 @@ const Input = (props: {
 
 Input.defaultProps = {
     title: null,
+    id: null,
     prefix: null,
     placeholder: null,
     state: 'default',
     errors: null,
+    value: '',
+    onChange: null,
     rows: null,
     style: null,
     disabled: false,

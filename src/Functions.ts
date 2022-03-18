@@ -68,6 +68,20 @@ export function formatTimeMMSS(seconds: number): string {
     return `${mins < 10 ? '0' : ''}${mins}m ${+secs < 10 ? '0' : ''}${secs}s`
 }
 
+export function formatTimeDHM(seconds: number): string {
+    // output: '0 days, 0 hours, 0 mins'
+    const min = 60
+    const hour = min * 60
+    const day = hour * 24
+    const days = Math.floor(seconds / day)
+    const hours = Math.floor(seconds / hour) - days * 24
+    const mins = Math.floor(seconds / min) - (days * 1440 + hours * 60)
+
+    return `${days} day${pluralise(days)}, ${hours} hour${pluralise(hours)}, ${mins} min${pluralise(
+        mins
+    )}`
+}
+
 export function onPageBottomReached(set: (payload: boolean) => void): void {
     const offset = 150
     const d = document.documentElement

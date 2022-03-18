@@ -1,9 +1,12 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable no-param-reassign */
-import React, { useContext, useState, useRef } from 'react'
+import React, { useContext, useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import * as d3 from 'd3'
 import axios from 'axios'
 import Cookies from 'universal-cookie'
+import flatpickr from 'flatpickr'
+import 'flatpickr/dist/themes/material_green.css'
 import { SpaceContext } from '@contexts/SpaceContext'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
@@ -22,7 +25,13 @@ import CloseButton from '@components/CloseButton'
 import AudioVisualiser from '@src/components/AudioVisualiser'
 import AudioTimeSlider from '@src/components/AudioTimeSlider'
 // import PostCard from '@components/Cards/PostCard/PostCard'
-import { allValid, defaultErrorState, isValidUrl, formatTimeMMSS } from '@src/Functions'
+import {
+    allValid,
+    defaultErrorState,
+    isValidUrl,
+    formatTimeMMSS,
+    formatTimeDHM,
+} from '@src/Functions'
 import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import Scrollbars from '@components/Scrollbars'
 import { ReactComponent as PlayIconSVG } from '@svgs/play-solid.svg'
@@ -45,6 +54,18 @@ const CreatePostModal = (): JSX.Element => {
             value: '',
             ...defaultErrorState,
         },
+        title: {
+            value: '',
+            ...defaultErrorState,
+        },
+        eventStartTime: {
+            value: '',
+            ...defaultErrorState,
+        },
+        eventEndTime: {
+            value: '',
+            ...defaultErrorState,
+        },
         topic: {
             value: '',
             ...defaultErrorState,
@@ -58,7 +79,17 @@ const CreatePostModal = (): JSX.Element => {
             ...defaultErrorState,
         },
     })
-    const { postType, text, url, topic, topicGroup, topicImage } = formData
+    const {
+        postType,
+        text,
+        url,
+        title,
+        eventStartTime,
+        eventEndTime,
+        topic,
+        topicGroup,
+        topicImage,
+    } = formData
     const [spaceOptions, setSpaceOptions] = useState<any[]>([])
     const [selectedSpaces, setSelectedSpaces] = useState<any[]>([])
     const [urlLoading, setUrlLoading] = useState(false)
@@ -75,6 +106,9 @@ const CreatePostModal = (): JSX.Element => {
     const [recording, setRecording] = useState(false)
     const [recordingTime, setRecordingTime] = useState(0)
     const [audioPostError, setAudioPostError] = useState(false)
+    const [startTime, setStartTime] = useState('')
+    const [endTime, setEndTime] = useState('')
+    const [duration, setDuration] = useState<string | number>('Undefined')
     const [loading, setLoading] = useState(false)
     const [saved, setSaved] = useState(false)
     const [previewRenderKey, setPreviewRenderKey] = useState(0)
@@ -85,11 +119,15 @@ const CreatePostModal = (): JSX.Element => {
     const audioMBLimit = 5
 
     function updateValue(name, value) {
+        // console.log('updateValue: ', name, value)
         let resetState = {}
         if (name === 'postType') {
             resetState = {
                 text: { ...formData.text, state: 'default' },
                 url: { ...formData.url, value: '', state: 'default' },
+                title: { ...formData.title, value: '', state: 'default' },
+                eventStartTime: { ...formData.eventStartTime, value: '', state: 'default' },
+                eventEndTime: { ...formData.eventEndTime, value: '', state: 'default' },
                 topic: { ...formData.topic, value: '', state: 'default' },
                 topicGroup: { ...formData.topicGroup, value: '', state: 'default' },
                 topicImage: { ...formData.topicImage, value: '', state: 'default' },
@@ -98,6 +136,9 @@ const CreatePostModal = (): JSX.Element => {
             setUrlDomain(null)
             setUrlTitle(null)
             setUrlDescription(null)
+            setDuration('Undefined')
+            setStartTime('')
+            setEndTime('')
         }
         setFormData({
             ...formData,
@@ -135,11 +176,10 @@ const CreatePostModal = (): JSX.Element => {
             axios
                 .get(`${config.apiURL}/scrape-url?url=${urlString}`)
                 .then((res) => {
-                    const { description, domain, image, title } = res.data
-                    setUrlDescription(description)
-                    setUrlDomain(domain)
-                    setUrlImage(image)
-                    setUrlTitle(title)
+                    setUrlDescription(res.data.description)
+                    setUrlDomain(res.data.domain)
+                    setUrlImage(res.data.image)
+                    setUrlTitle(res.data.title)
                     setUrlLoading(false)
                     setPreviewRenderKey((k) => k + 1)
                 })
@@ -209,8 +249,7 @@ const CreatePostModal = (): JSX.Element => {
         }
     }
 
-    function createPost(e) {
-        e.preventDefault()
+    function createPost() {
         // add validation with latest values to form data (todo: avoid this set using refs?)
         const newFormData = {
             postType: {
@@ -231,6 +270,20 @@ const CreatePostModal = (): JSX.Element => {
                 ...url,
                 required: postType.value === 'Url',
                 validate: (v) => (!isValidUrl(v) ? ['Must be a valid URL'] : []),
+            },
+            eventStartTime: {
+                ...eventStartTime,
+                required: postType.value === 'Event',
+                validate: (v) => (!v ? ['Required'] : []),
+            },
+            eventEndTime: {
+                ...eventEndTime,
+                required: false,
+            },
+            title: {
+                ...title,
+                required: postType.value === 'Event',
+                validate: (v) => (!v ? ['Required'] : []),
             },
             topic: {
                 ...topic,
@@ -256,8 +309,11 @@ const CreatePostModal = (): JSX.Element => {
                 const options = { headers: { Authorization: `Bearer ${accessToken}` } }
                 const postData = {
                     type: postType.value.replace(/\s+/g, '-').toLowerCase(),
-                    text: text.value || null,
-                    url: url.value || null,
+                    text: text.value, // || null,
+                    title: title.value,
+                    eventStartTime: eventStartTime.value,
+                    eventEndTime: eventEndTime.value,
+                    url: url.value, // || null,
                     urlImage,
                     urlDomain,
                     urlTitle,
@@ -344,6 +400,8 @@ const CreatePostModal = (): JSX.Element => {
             case 'Url':
             case 'Audio':
                 return 'Text (optional)'
+            case 'Event':
+                return 'Description'
             case 'Glass Bead Game':
                 return 'Add a description for the game'
             default:
@@ -353,6 +411,8 @@ const CreatePostModal = (): JSX.Element => {
 
     function textPlaceholder() {
         switch (postType.value) {
+            case 'Event':
+                return 'event description...'
             case 'Glass Bead Game':
                 return 'description...'
             default:
@@ -360,9 +420,59 @@ const CreatePostModal = (): JSX.Element => {
         }
     }
 
-    const postTypeName = ['Text', 'Url', 'Audio'].includes(postType.value)
+    const postTypeName = ['Text', 'Url', 'Audio', 'Event'].includes(postType.value)
         ? `${postType.value.toLowerCase()} post`
         : postType.value
+
+    const dateTimeOptions = {
+        enableTime: true,
+        clickOpens: true,
+        disableMobile: true,
+        minDate: new Date(),
+        minuteIncrement: 1,
+        altInput: true,
+    }
+
+    useEffect(() => {
+        if (postType.value === 'Event') {
+            flatpickr('#date-time-start', {
+                ...dateTimeOptions,
+                appendTo: document.getElementById('date-time-start-wrapper') || undefined,
+                onChange: ([value]) => setStartTime(value.toString()),
+            })
+            flatpickr('#date-time-end', {
+                ...dateTimeOptions,
+                appendTo: document.getElementById('date-time-end-wrapper') || undefined,
+                onChange: ([value]) => setEndTime(value.toString()),
+            })
+        }
+    }, [postType.value])
+
+    useEffect(() => {
+        if (startTime) {
+            const startTimeDate = new Date(startTime)
+            updateValue('eventStartTime', startTimeDate)
+            const endTimeInstance = d3.select('#date-time-end').node()._flatpickr
+            endTimeInstance.set('minDate', startTimeDate)
+            if (endTime) {
+                const endTimeDate = new Date(endTime)
+                const difference = (endTimeDate.getTime() - startTimeDate.getTime()) / 1000
+                if (difference < 0) {
+                    setEndTime(startTime)
+                    endTimeInstance.setDate(startTimeDate)
+                    setDuration(formatTimeDHM(0))
+                } else setDuration(formatTimeDHM(difference))
+            }
+        }
+    }, [startTime])
+
+    useEffect(() => {
+        if (startTime && endTime) {
+            const difference = (new Date(endTime).getTime() - new Date(startTime).getTime()) / 1000
+            setDuration(formatTimeDHM(difference))
+            updateValue('eventEndTime', endTime)
+        }
+    }, [endTime])
 
     return (
         <Modal close={() => setCreatePostModalOpen(false)} centered>
@@ -377,7 +487,7 @@ const CreatePostModal = (): JSX.Element => {
                     {createPostModalType !== 'Glass Bead Game' && (
                         <DropDownMenu
                             title='Post Type'
-                            options={['Text', 'Url', 'Audio', 'Glass Bead Game']}
+                            options={['Text', 'Url', 'Audio', 'Event', 'Glass Bead Game']}
                             selectedOption={postType.value}
                             setSelectedOption={(value) => updateValue('postType', value)}
                             orientation='horizontal'
@@ -533,20 +643,61 @@ const CreatePostModal = (): JSX.Element => {
                             {showRecordControls && (
                                 <Column centerX style={{ marginBottom: 20 }}>
                                     <h2>{formatTimeMMSS(recordingTime)}</h2>
-                                    <Row>
-                                        <Button
-                                            text={`${
-                                                recording
-                                                    ? 'Stop'
-                                                    : `${audioFile ? 'Restart' : 'Start'}`
-                                            } recording`}
-                                            color={recording ? 'red' : 'aqua'}
-                                            style={{ marginRight: 10 }}
-                                            onClick={toggleAudioRecording}
-                                        />
-                                    </Row>
+                                    <Button
+                                        text={`${
+                                            recording
+                                                ? 'Stop'
+                                                : `${audioFile ? 'Restart' : 'Start'}`
+                                        } recording`}
+                                        color={recording ? 'red' : 'aqua'}
+                                        onClick={toggleAudioRecording}
+                                    />
                                 </Column>
                             )}
+                        </Column>
+                    )}
+                    {postType.value === 'Event' && (
+                        <Column>
+                            <div className={styles.dateTimePicker}>
+                                <div id='date-time-start-wrapper'>
+                                    <Input
+                                        id='date-time-start'
+                                        title='Start time'
+                                        type='text'
+                                        placeholder='select start time...'
+                                        state={eventStartTime.state}
+                                        errors={eventStartTime.errors}
+                                    />
+                                </div>
+                                <div id='date-time-end-wrapper'>
+                                    <Input
+                                        id='date-time-end'
+                                        title='End time (optional)'
+                                        type='text'
+                                        placeholder='select end time...'
+                                        state={eventEndTime.state}
+                                        errors={eventEndTime.errors}
+                                    />
+                                </div>
+                                <Input
+                                    title='Duration'
+                                    type='text'
+                                    placeholder='Undefined'
+                                    value={duration}
+                                    disabled
+                                    style={{ width: 'auto' }}
+                                />
+                            </div>
+                            <Input
+                                title='Title'
+                                type='text'
+                                placeholder='event title...'
+                                style={{ marginBottom: 15 }}
+                                state={title.state}
+                                errors={title.errors}
+                                value={title.value}
+                                onChange={(value) => updateValue('title', value)}
+                            />
                         </Column>
                     )}
                     <Input
@@ -642,7 +793,7 @@ const CreatePostModal = (): JSX.Element => {
                             color='blue'
                             disabled={urlLoading}
                             loading={loading}
-                            submit
+                            onClick={createPost}
                         />
                     ) : (
                         <SuccessMessage text='Post created!' />
