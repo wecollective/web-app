@@ -5,8 +5,6 @@
     border-radius: 10px;
     background-color: white;
     box-shadow: 0 7px 10px 0 rgba(10, 8, 72, 0.04);
-    display: flex;
-    flex-direction: column;
     position: relative;
     opacity: 1;
     padding: 25px 35px 15px 35px;
@@ -25,17 +23,12 @@
         flex-shrink: 0;
         color: rgba(0, 0, 0, 0.15);
     }
-    > header {
+
+    .header {
         font-size: 15px;
-        // line-height: 14px;
         margin-bottom: 10px;
-        display: flex;
-        justify-content: space-between;
-        // flex-direction: row;
-        align-items: center;
-        // flex-wrap: wrap;
+
         p {
-            //color: $grey5;
             margin-right: 5px;
         }
         .postSpaces {
@@ -43,9 +36,6 @@
             flex-direction: row;
             justify-content: flex-start;
             align-items: center;
-            // > p {
-            //     color: rgb(155, 155, 155);
-            // }
             > p, > a {
                 margin-right: 5px;
             }
@@ -82,6 +72,10 @@
                 color: $postTypeAudio;
                 border: 2px solid $postTypeAudio;
             }
+            &.event {
+                color: $postTypeEvent;
+                border: 2px solid $postTypeEvent;
+            }
             &.glass-bead-game {
                 color: $postTypeGlassBeadGame;
                 border: 2px solid $postTypeGlassBeadGame;
@@ -102,24 +96,17 @@
     }
     .content {
         width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
+        margin-bottom: 15px;
 
-        .audioContent {
-            width: 100%;
-            margin-bottom: 20px;
-
-            .playButton {
-                all: unset;
-                cursor: pointer;
-                display: flex;
-                width: 20px;
-                height: 20px;
-                color: $blue5;
-                margin-right: 10px;
-                flex-shrink: 0;
-            }
+        .playButton {
+            all: unset;
+            cursor: pointer;
+            display: flex;
+            width: 20px;
+            height: 20px;
+            color: $blue5;
+            margin-right: 10px;
+            flex-shrink: 0;
         }
 
         .topicImage {
@@ -130,49 +117,40 @@
             object-fit: cover;
             margin-right: 10px;
         }
-
-        .gbgContent {
-            width: 100%;
-            margin-top: 5px;
-
-            .gbgButtons {
-                margin-bottom: 10px;
-            }
     
             .gbgBeads {
                 display: flex;
-                padding: 10px 10px 20px 10px;
-                margin-left: -10px;
-                margin-bottom: 10px;
+                padding: 10px;
+                margin: 5px 0 0 -10px;
             }
 
             .noSavedBeads {
                 margin: 10px 0;
                 color: $grey4;
             }
-        }
 
         .playAllButton {
             all: unset;
             cursor: pointer;
-            //display: flex;
         }
 
     }
 
-    .statButtons {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        flex-shrink: 0;
-        flex-wrap: wrap;
-        > button {
-            font-size: 15px;
-            margin-right: 12px;
-            color: $grey4;
-            &:hover {
-                color: $grey6;
-                cursor: pointer;
+    .footer {
+        .statButtons {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+            > button {
+                font-size: 15px;
+                margin-right: 12px;
+                color: $grey4;
+                &:hover {
+                    color: $grey6;
+                    cursor: pointer;
+                }
             }
         }
     }

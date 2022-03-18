@@ -101,9 +101,9 @@ const PostCard = (props: {
     }
 
     return (
-        <div className={`${styles.post} ${styles[location]}`} key={id} style={style}>
+        <Column className={`${styles.post} ${styles[location]}`} key={id} style={style}>
             {!!index && <div className={styles.index}>{index! + 1}</div>}
-            <header>
+            <Row spaceBetween className={styles.header}>
                 <Row centerY>
                     <ImageTitle
                         type='user'
@@ -174,14 +174,15 @@ const PostCard = (props: {
                         </div>
                     )}
                 </Row>
-            </header>
-            <div className={styles.content}>
-                <Row>
-                    {type === 'glass-bead-game' && GlassBeadGame.topicImage && (
-                        <img className={styles.topicImage} src={GlassBeadGame.topicImage} alt='' />
-                    )}
+            </Row>
+            <Column className={styles.content}>
+                {type === 'text' && (
+                    <ShowMoreLess height={150}>
+                        <Markdown text={text} />
+                    </ShowMoreLess>
+                )}
+                {type === 'url' && (
                     <Column>
-                        {type === 'glass-bead-game' && <b>{GlassBeadGame.topic}</b>}
                         {text && (
                             <Column style={{ marginBottom: 10 }}>
                                 <ShowMoreLess height={150}>
@@ -189,19 +190,24 @@ const PostCard = (props: {
                                 </ShowMoreLess>
                             </Column>
                         )}
+                        {urlPreview && (
+                            <PostCardUrlPreview
+                                url={url}
+                                urlImage={urlImage}
+                                urlDomain={urlDomain}
+                                urlTitle={urlTitle}
+                                urlDescription={urlDescription}
+                            />
+                        )}
                     </Column>
-                </Row>
-                {urlPreview && (
-                    <PostCardUrlPreview
-                        url={url}
-                        urlImage={urlImage}
-                        urlDomain={urlDomain}
-                        urlTitle={urlTitle}
-                        urlDescription={urlDescription}
-                    />
                 )}
                 {type === 'audio' && (
-                    <Column className={styles.audioContent}>
+                    <Column>
+                        {text && (
+                            <ShowMoreLess height={150}>
+                                <Markdown text={text} />
+                            </ShowMoreLess>
+                        )}
                         <AudioVisualiser
                             audioElementId={`post-audio-${id}`}
                             audioURL={url}
@@ -230,9 +236,27 @@ const PostCard = (props: {
                         </Row>
                     </Column>
                 )}
+                {type === 'event' && <Column className={styles.eventContent}>event!!!</Column>}
                 {type === 'glass-bead-game' && (
-                    <Column className={styles.gbgContent}>
-                        <Row className={styles.gbgButtons}>
+                    <Column>
+                        <Row>
+                            {GlassBeadGame.topicImage && (
+                                <img
+                                    className={styles.topicImage}
+                                    src={GlassBeadGame.topicImage}
+                                    alt=''
+                                />
+                            )}
+                            <Column>
+                                <b>{GlassBeadGame.topic}</b>
+                                {text && (
+                                    <ShowMoreLess height={150}>
+                                        <Markdown text={text} />
+                                    </ShowMoreLess>
+                                )}
+                            </Column>
+                        </Row>
+                        <Row style={{ marginTop: 10 }}>
                             <Button
                                 text='Open game room'
                                 color='aqua'
@@ -255,6 +279,8 @@ const PostCard = (props: {
                         )}
                     </Column>
                 )}
+            </Column>
+            <Row className={styles.footer}>
                 <div className={styles.statButtons}>
                     <StatButton
                         icon={<LikeIconSVG />}
@@ -352,8 +378,8 @@ const PostCard = (props: {
                         close={() => setDeletePostModalOpen(false)}
                     />
                 )}
-            </div>
-        </div>
+            </Row>
+        </Column>
     )
 }
 

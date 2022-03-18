@@ -175,21 +175,24 @@ const SpacePagePostMap = (): JSX.Element => {
         if (d.type === 'audio') {
             return colors.orange
         }
-        if (d.type === 'poll') {
+        if (d.type === 'event') {
             return colors.red
         }
+        // if (d.type === 'poll') {
+        //     return colors.red
+        // }
         if (d.type === 'text') {
             return colors.green
         }
-        if (d.type === 'prism') {
-            return colors.purple
-        }
+        // if (d.type === 'prism') {
+        //     return colors.purple
+        // }
         if (d.type === 'glass-bead-game') {
             return colors.blue
         }
-        if (d.type === 'plot-graph') {
-            return colors.orange
-        }
+        // if (d.type === 'plot-graph') {
+        //     return colors.orange
+        // }
         return null
     }
 
