@@ -1,6 +1,9 @@
 /* eslint-disable no-param-reassign */
 import React, { useState, useContext } from 'react'
 import * as d3 from 'd3'
+import axios from 'axios'
+import config from '@src/Config'
+import Cookies from 'universal-cookie'
 import { useHistory, Link } from 'react-router-dom'
 import { AccountContext } from '@contexts/AccountContext'
 import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
@@ -16,6 +19,7 @@ import Button from '@components/Button'
 import StatButton from '@components/StatButton'
 import BeadCard from '@src/components/Cards/BeadCard'
 import Scrollbars from '@src/components/Scrollbars'
+import FlagImageHighlights from '@components/FlagImageHighlights'
 import AudioVisualiser from '@src/components/AudioVisualiser'
 import AudioTimeSlider from '@src/components/AudioTimeSlider'
 import PostCardLikeModal from '@components/Cards/PostCard/PostCardLikeModal'
@@ -23,7 +27,14 @@ import PostCardRepostModal from '@components/Cards/PostCard/PostCardRepostModal'
 import PostCardRatingModal from '@components/Cards/PostCard/PostCardRatingModal'
 import PostCardLinkModal from '@components/Cards/PostCard/PostCardLinkModal'
 import DeletePostModal from '@components/Cards/PostCard/DeletePostModal'
-import { timeSinceCreated, dateCreated, pluralise, statTitle } from '@src/Functions'
+import {
+    timeSinceCreated,
+    dateCreated,
+    pluralise,
+    statTitle,
+    formatTimeDHM,
+    formatTimeMDYT,
+} from '@src/Functions'
 import { ReactComponent as LinkIconSVG } from '@svgs/link-solid.svg'
 import { ReactComponent as CommentIconSVG } from '@svgs/comment-solid.svg'
 import { ReactComponent as LikeIconSVG } from '@svgs/like.svg'
@@ -32,6 +43,10 @@ import { ReactComponent as RatingIconSVG } from '@svgs/star-solid.svg'
 import { ReactComponent as ArrowRightIconSVG } from '@svgs/arrow-alt-circle-right-solid.svg'
 import { ReactComponent as PlayIconSVG } from '@svgs/play-solid.svg'
 import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
+import { ReactComponent as ClockIconSVG } from '@svgs/clock-solid.svg'
+import { ReactComponent as CalendarIconSVG } from '@svgs/calendar-days-solid.svg'
+import { ReactComponent as SuccessIconSVG } from '@svgs/check-circle-solid.svg'
+import { ReactComponent as FailIconSVG } from '@svgs/times-circle-regular.svg'
 
 const PostCard = (props: {
     post: any
@@ -40,7 +55,7 @@ const PostCard = (props: {
     style?: any
 }): JSX.Element => {
     const { post, index, location, style } = props
-    const { accountData, loggedIn } = useContext(AccountContext)
+    const { accountData, loggedIn, setAlertModalOpen, setAlertMessage } = useContext(AccountContext)
     const [postData, setPostData] = useState(post)
     const {
         id,
@@ -64,6 +79,7 @@ const PostCard = (props: {
         Creator,
         DirectSpaces,
         GlassBeadGame,
+        Event,
     } = postData
 
     const [likeModalOpen, setLikeModalOpen] = useState(false)
@@ -76,6 +92,7 @@ const PostCard = (props: {
     const beads = GlassBeadGame ? GlassBeadGame.GlassBeads.sort((a, b) => a.index - b.index) : []
 
     const history = useHistory()
+    const cookies = new Cookies()
     const isOwnPost = accountData && Creator && accountData.id === Creator.id
     const urlPreview = urlImage || urlDomain || urlTitle || urlDescription
     const postSpaces = DirectSpaces.filter((space) => space.type === 'post' && space.id !== 1) // vs. 'repost'. todo: apply filter on backend
@@ -86,6 +103,10 @@ const PostCard = (props: {
     const otherSpacesText = `and ${postSpaces.length - 1} other space${pluralise(
         postSpaces.length - 1
     )}`
+    const goingToEvent = Event && Event.Going.map((u) => u.id).includes(accountData.id)
+    const goingToEventImages = Event && Event.Going.map((u) => u.flagImagePath)
+    const interestedInEvent = Event && Event.Interested.map((u) => u.id).includes(accountData.id)
+    const interestedInEventImages = Event && Event.Interested.map((u) => u.flagImagePath)
 
     function toggleAudio() {
         const audio = d3.select(`#post-audio-${id}`).node()
@@ -97,6 +118,20 @@ const PostCard = (props: {
                     .forEach((node) => node.pause())
                 audio.play()
             } else audio.pause()
+        }
+    }
+
+    function respondToEvent(response) {
+        if (!loggedIn) {
+            setAlertMessage('Log in to respond to events')
+            setAlertModalOpen(true)
+        } else {
+            const accessToken = cookies.get('accessToken')
+            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+            const data = { eventId: Event.id, response }
+            axios.post(`${config.apiURL}/respond-to-event`, data, options).then((res) => {
+                console.log('res: ', res)
+            })
         }
     }
 
@@ -236,7 +271,72 @@ const PostCard = (props: {
                         </Row>
                     </Column>
                 )}
-                {type === 'event' && <Column className={styles.eventContent}>event!!!</Column>}
+                {type === 'event' && (
+                    <Column>
+                        <Row centerY className={styles.eventTitle}>
+                            <CalendarIconSVG />
+                            <h1>{Event.title}</h1>
+                        </Row>
+                        <Row centerY className={styles.eventTimes}>
+                            <ClockIconSVG />
+                            <p>{`${formatTimeMDYT(Event.eventStartTime)} ${
+                                Event.eventEndTime ? `→ ${formatTimeMDYT(Event.eventEndTime)}` : ''
+                            }`}</p>
+                            {Event.eventEndTime && (
+                                <p>{`(duration: ${formatTimeDHM(
+                                    (new Date(Event.eventEndTime).getTime() -
+                                        new Date(Event.eventStartTime).getTime()) /
+                                        1000
+                                )})`}</p>
+                            )}
+                        </Row>
+                        {(Event.Going.length > 0 || Event.Interested.length > 0) && (
+                            <Row style={{ marginTop: 10 }}>
+                                {Event.Going.length > 0 && (
+                                    <FlagImageHighlights
+                                        type='user'
+                                        imagePaths={goingToEventImages}
+                                        imageSize={30}
+                                        text={`${Event.Going.length} going`}
+                                        style={{ marginRight: 15 }}
+                                        outline
+                                    />
+                                )}
+                                {Event.Interested.length > 0 && (
+                                    <FlagImageHighlights
+                                        type='user'
+                                        imagePaths={interestedInEventImages}
+                                        imageSize={30}
+                                        text={`${Event.Interested.length} interested`}
+                                        outline
+                                    />
+                                )}
+                            </Row>
+                        )}
+                        <Row style={{ marginTop: 10 }}>
+                            <Button
+                                text='Going'
+                                color='aqua'
+                                size='medium'
+                                icon={goingToEvent ? <SuccessIconSVG /> : undefined}
+                                style={{ marginRight: 5 }}
+                                onClick={() => respondToEvent('going')}
+                            />
+                            <Button
+                                text='Interested'
+                                color='aqua'
+                                size='medium'
+                                icon={interestedInEvent ? <SuccessIconSVG /> : undefined}
+                                onClick={() => respondToEvent('interested')}
+                            />
+                        </Row>
+                        <Column style={{ marginTop: 10 }}>
+                            <ShowMoreLess height={150}>
+                                <Markdown text={text} />
+                            </ShowMoreLess>
+                        </Column>
+                    </Column>
+                )}
                 {type === 'glass-bead-game' && (
                     <Column>
                         <Row>
@@ -280,7 +380,7 @@ const PostCard = (props: {
                     </Column>
                 )}
             </Column>
-            <Row className={styles.footer}>
+            <Column className={styles.footer}>
                 <div className={styles.statButtons}>
                     <StatButton
                         icon={<LikeIconSVG />}
@@ -378,7 +478,7 @@ const PostCard = (props: {
                         close={() => setDeletePostModalOpen(false)}
                     />
                 )}
-            </Row>
+            </Column>
         </Column>
     )
 }

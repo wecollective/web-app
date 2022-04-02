@@ -98,6 +98,36 @@
         width: 100%;
         margin-bottom: 15px;
 
+        // event posts
+        .eventTitle {
+            svg {
+                width: 30px;
+                height: 30px;
+                color: $red2;
+                margin-right: 5px;
+            }
+            h1 {
+                margin: 0;
+                font-size: 24px;
+                line-height: 24px;
+            }
+        }
+        .eventTimes {
+            margin-top: 10px;
+            svg {
+                width: 20px;
+                height: 20px;
+                color: $grey4;
+            }
+
+            svg, p {
+                margin-right: 5px;
+            }
+
+            p { font-size: 14px }
+        }
+
+        // audio posts
         .playButton {
             all: unset;
             cursor: pointer;
@@ -109,6 +139,7 @@
             flex-shrink: 0;
         }
 
+        // glass bead game posts
         .topicImage {
             width: 50px;
             height: 50px;
@@ -118,16 +149,16 @@
             margin-right: 10px;
         }
     
-            .gbgBeads {
-                display: flex;
-                padding: 10px;
-                margin: 5px 0 0 -10px;
-            }
+        .gbgBeads {
+            display: flex;
+            padding: 10px;
+            margin: 5px 0 0 -10px;
+        }
 
-            .noSavedBeads {
-                margin: 10px 0;
-                color: $grey4;
-            }
+        .noSavedBeads {
+            margin: 10px 0;
+            color: $grey4;
+        }
 
         .playAllButton {
             all: unset;
