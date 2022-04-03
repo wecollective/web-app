@@ -20,6 +20,7 @@ import StatButton from '@components/StatButton'
 import BeadCard from '@src/components/Cards/BeadCard'
 import Scrollbars from '@src/components/Scrollbars'
 import FlagImageHighlights from '@components/FlagImageHighlights'
+import Modal from '@components/Modal'
 import AudioVisualiser from '@src/components/AudioVisualiser'
 import AudioTimeSlider from '@src/components/AudioTimeSlider'
 import PostCardLikeModal from '@components/Cards/PostCard/PostCardLikeModal'
@@ -86,6 +87,8 @@ const PostCard = (props: {
     const [repostModalOpen, setRepostModalOpen] = useState(false)
     const [ratingModalOpen, setRatingModalOpen] = useState(false)
     const [linkModalOpen, setLinkModalOpen] = useState(false)
+    const [eventGoingModalOpen, setEventGoingModalOpen] = useState(false)
+    const [eventInterestedModalOpen, setEventInterestedModalOpen] = useState(false)
     const [commentsOpen, setCommentsOpen] = useState(false)
     const [deletePostModalOpen, setDeletePostModalOpen] = useState(false)
     const [audioPlaying, setAudioPlaying] = useState(false)
@@ -298,6 +301,7 @@ const PostCard = (props: {
                                         imagePaths={goingToEventImages}
                                         imageSize={30}
                                         text={`${Event.Going.length} going`}
+                                        onClick={() => setEventGoingModalOpen(true)}
                                         style={{ marginRight: 15 }}
                                         outline
                                     />
@@ -308,10 +312,45 @@ const PostCard = (props: {
                                         imagePaths={interestedInEventImages}
                                         imageSize={30}
                                         text={`${Event.Interested.length} interested`}
+                                        onClick={() => setEventInterestedModalOpen(true)}
                                         outline
                                     />
                                 )}
                             </Row>
+                        )}
+                        {eventGoingModalOpen && (
+                            <Modal centered close={() => setEventGoingModalOpen(false)}>
+                                <h1>Going to event</h1>
+                                <Column>
+                                    {Event.Going.map((user) => (
+                                        <ImageTitle
+                                            key={user.id}
+                                            type='user'
+                                            imagePath={user.flagImagePath}
+                                            title={user.name}
+                                            link={`/u/${user.handle}`}
+                                            style={{ marginBottom: 10 }}
+                                        />
+                                    ))}
+                                </Column>
+                            </Modal>
+                        )}
+                        {eventInterestedModalOpen && (
+                            <Modal centered close={() => setEventInterestedModalOpen(false)}>
+                                <h1>Interested in event</h1>
+                                <Column>
+                                    {Event.Interested.map((user) => (
+                                        <ImageTitle
+                                            key={user.id}
+                                            type='user'
+                                            imagePath={user.flagImagePath}
+                                            title={user.name}
+                                            link={`/u/${user.handle}`}
+                                            style={{ marginBottom: 10 }}
+                                        />
+                                    ))}
+                                </Column>
+                            </Modal>
                         )}
                         <Row style={{ marginTop: 10 }}>
                             <Button
