@@ -133,7 +133,47 @@ const PostCard = (props: {
             const options = { headers: { Authorization: `Bearer ${accessToken}` } }
             const data = { eventId: Event.id, response }
             axios.post(`${config.apiURL}/respond-to-event`, data, options).then((res) => {
-                console.log('res: ', res)
+                if (res.data.message === 'UserEvent added') {
+                    if (response === 'going') {
+                        setPostData({
+                            ...postData,
+                            Event: {
+                                ...Event,
+                                Going: [...Event.Going, accountData],
+                                Interested: [
+                                    ...Event.Interested.filter((u) => u.id !== accountData.id),
+                                ],
+                            },
+                        })
+                    } else {
+                        setPostData({
+                            ...postData,
+                            Event: {
+                                ...Event,
+                                Interested: [...Event.Interested, accountData],
+                                Going: [...Event.Going.filter((u) => u.id !== accountData.id)],
+                            },
+                        })
+                    }
+                } else if (response === 'going') {
+                    setPostData({
+                        ...postData,
+                        Event: {
+                            ...Event,
+                            Going: [...Event.Going.filter((u) => u.id !== accountData.id)],
+                        },
+                    })
+                } else {
+                    setPostData({
+                        ...postData,
+                        Event: {
+                            ...Event,
+                            Interested: [
+                                ...Event.Interested.filter((u) => u.id !== accountData.id),
+                            ],
+                        },
+                    })
+                }
             })
         }
     }
