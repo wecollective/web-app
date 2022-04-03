@@ -1,11 +1,12 @@
 @import '@styles/Variables';
 
 .wrapper {
+    all: unset;
     display: flex;
     flex-direction: row;
     align-items: center;
-    // margin-bottom: 40px;
-    // &:not(:last-child) { margin-right: 20px }
+
+    &.clickable { cursor: pointer }
 
     > p { margin-left: 10px }
 

@@ -1,6 +1,4 @@
-import React, { useContext } from 'react'
-import { Link } from 'react-router-dom'
-import { SpaceContext } from '@contexts/SpaceContext'
+import React from 'react'
 import styles from '@styles/components/FlagImageHighlights.module.scss'
 import FlagImage from '@components/FlagImage'
 
@@ -12,15 +10,15 @@ const FlagImageHighlights = (props: {
     style?: any
     outline?: boolean
     shadow?: boolean
+    onClick?: () => void
 }): JSX.Element => {
-    const { type, imagePaths, imageSize, text, style, outline, shadow } = props
-    const { spaceData } = useContext(SpaceContext)
-    const path = type === 'user' ? 'people' : `${type}s`
+    const { type, imagePaths, imageSize, text, style, outline, shadow, onClick } = props
     return (
-        <Link
-            to={`/s/${spaceData.handle || 'all'}/${path}`}
-            className={styles.wrapper}
+        <button
+            className={`${styles.wrapper} ${onClick && styles.clickable}`}
+            type='button'
             style={style}
+            onClick={onClick}
         >
             {imagePaths.length > 0 && (
                 <div className={styles.item1}>
@@ -55,8 +53,8 @@ const FlagImageHighlights = (props: {
                     />
                 </div>
             )}
-            {!!text && <p>{text}</p>}
-        </Link>
+            {!!text && <p style={{ marginLeft: imageSize! / 6 }}>{text}</p>}
+        </button>
     )
 }
 
@@ -66,6 +64,7 @@ FlagImageHighlights.defaultProps = {
     style: null,
     outline: false,
     shadow: false,
+    onClick: null,
 }
 
 export default FlagImageHighlights

@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react'
 import axios from 'axios'
 import config from '@src/Config'
+import { useHistory } from 'react-router-dom'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import styles from '@styles/pages/SpacePage/SpacePageSidebar.module.scss'
@@ -40,7 +41,7 @@ const SpacePageSidebar = (): JSX.Element => {
 
     const [imageUploadModalOpen, setImageUploadModalOpen] = useState(false)
     // const loading = accountDataLoading || spaceDataLoading
-
+    const history = useHistory()
     const imagePaths = (users || []).map((user) => user.flagImagePath)
 
     function followSpace() {
@@ -153,6 +154,7 @@ const SpacePageSidebar = (): JSX.Element => {
                     imagePaths={imagePaths}
                     text={`${totalUsers} ${isPlural(totalUsers) ? 'People' : 'Person'}`}
                     style={{ marginBottom: 20 }}
+                    onClick={() => history.push(`/s/${spaceData.handle}/people`)}
                     outline
                 />
                 {loggedIn && spaceData.handle !== 'all' && (

@@ -1,9 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 import axios from 'axios'
 import styles from '@styles/pages/HomePage.module.scss'
 import { AccountContext } from '@contexts/AccountContext'
-import FlagImage from '@components/FlagImage'
 import Button from '@components/Button'
 import FlagImageHighlights from '@components/FlagImageHighlights'
 import config from '@src/Config'
@@ -27,6 +26,7 @@ const Homepage = (): JSX.Element => {
     } = useContext(AccountContext)
     const urlParams = new URLSearchParams(window.location.search)
     const alert = urlParams.get('alert')
+    const history = useHistory()
 
     const [highlights, setHighlights] = useState<any>(null)
 
@@ -120,6 +120,7 @@ const Homepage = (): JSX.Element => {
                             text={`${highlights.totals.totalPosts} Post${pluralise(
                                 highlights.posts.length
                             )}`}
+                            onClick={() => history.push('/s/all/posts')}
                             style={{ marginRight: 30 }}
                             outline
                         />
@@ -130,6 +131,7 @@ const Homepage = (): JSX.Element => {
                             text={`${highlights.totals.totalSpaces} Space${pluralise(
                                 highlights.totals.totalSpaces
                             )}`}
+                            onClick={() => history.push('/s/all/spaces')}
                             style={{ marginRight: 30 }}
                             outline
                         />
@@ -140,6 +142,7 @@ const Homepage = (): JSX.Element => {
                             text={`${highlights.totals.totalUsers} ${
                                 isPlural(highlights.totals.totalUsers) ? 'People' : 'Person'
                             }`}
+                            onClick={() => history.push('/s/all/people')}
                             outline
                         />
                     </div>
