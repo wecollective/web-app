@@ -69,7 +69,7 @@ export function formatTimeMMSS(seconds: number): string {
 }
 
 export function formatTimeDHM(seconds: number): string {
-    // output: '0 days, 0 hours, 0 mins'
+    // output: '0 days, 0 hours, 0 mins' (days and hours only included if > 0)
     const min = 60
     const hour = min * 60
     const day = hour * 24
@@ -77,9 +77,34 @@ export function formatTimeDHM(seconds: number): string {
     const hours = Math.floor(seconds / hour) - days * 24
     const mins = Math.floor(seconds / min) - (days * 1440 + hours * 60)
 
-    return `${days} day${pluralise(days)}, ${hours} hour${pluralise(hours)}, ${mins} min${pluralise(
-        mins
-    )}`
+    return `${days ? `${days} day${pluralise(days)}${hours || mins ? ', ' : ''}` : ''}${
+        hours ? `${hours} hour${pluralise(hours)}${mins ? ', ' : ''}` : ''
+    }${mins ? `${mins} min${pluralise(mins)}` : ''}`
+}
+
+export function formatTimeMDYT(isoDate: Date): string {
+    // output: 'March 22, 2022 14:02'
+    const date = new Date(isoDate)
+    const monthNames = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+    ]
+    const month = monthNames[date.getMonth()]
+    const day = date.getDate()
+    const year = date.getFullYear()
+    const hours = date.getHours()
+    const mins = date.getMinutes()
+    return `${month} ${day}, ${year} at ${hours}:${mins}`
 }
 
 export function onPageBottomReached(set: (payload: boolean) => void): void {
