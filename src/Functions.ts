@@ -118,6 +118,14 @@ export function formatTimeMDYT(isoDate: Date): string {
     return `${month} ${day}, ${year} at ${hours}:${mins}`
 }
 
+export function formatTimeHM(isoDate: Date): string {
+    // output: '14:02'
+    const date = new Date(isoDate)
+    const hours = date.getHours()
+    const mins = date.getMinutes()
+    return `${hours}:${mins}`
+}
+
 export function onPageBottomReached(set: (payload: boolean) => void): void {
     const offset = 150
     const d = document.documentElement
