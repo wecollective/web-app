@@ -1,7 +1,7 @@
 @import '@styles/App.scss';
 
 .wrapper {
-    width: 870px;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -9,6 +9,7 @@
 
     .content {
         width: 100%;
+        min-height: 800px;
         background-color: white;
         border-radius: 10px;
         padding: 20px;
@@ -16,44 +17,77 @@
         h1 { margin: 0 }
 
         .header {
-            margin-bottom: 20px;
-            width: 280px;
-            > h1 {
-                margin: 0 10px;
-                line-height: 26px;
-            }
-            > button {
-                all: unset;
-                cursor: pointer;
-                width: 20px;
-                height: 20px;
-                > svg {
+            width: 100%;
+
+            .month {
+                width: 280px;
+                margin-bottom: 10px;
+
+                > h1 {
+                    margin: 0 10px;
+                    line-height: 26px;
+                }
+
+                > button {
+                    all: unset;
+                    cursor: pointer;
                     width: 20px;
                     height: 20px;
-                    color: $grey3;
+    
+                    > svg {
+                        width: 20px;
+                        height: 20px;
+                        color: $grey3;
+                    }
+                }
+            }
+            .days {
+                > p {
+                    width: calc(100% / 7);
+                    text-align: center;
                 }
             }
         }
 
         .days {
-            margin-bottom: 10px;
-        }
+            width: 100%;
 
-        .paddingSquare {
-            width: 100px;
-            height: 100px;
-            margin: 5px;
-        }
+            .padding, .day {
+                width: calc(100% / 7 - 10px);
+                height: 150px;
+                margin: 5px;
+                border-radius: 5px;
+            }
 
-        .daySquare {
-            width: 100px;
-            height: 100px;
-            border: 1px solid $grey2;
-            margin: 5px;
-            padding: 5px;
+            .padding {
+                background-color: $grey1;
+            }
 
-            &.highlighted {
-                border: 2px solid $blue2;
+            .day {
+                border: 1px solid $grey2;
+                padding: 10px;
+
+                &.highlighted {
+                    border: 2px solid $blue2;
+                }
+
+                > p {
+                    font-size: 12px;
+                    line-height: 12px;
+                    margin-bottom: 8px;
+                }
+
+                .event {
+                    background-color: $blue8;
+                    margin-bottom: 5px;
+                    padding: 5px;
+                    border-radius: 5px;
+
+                    > p {
+                        font-size: 12px;
+                        margin-right: 5px;
+                    }
+                }
             }
         }
     }
