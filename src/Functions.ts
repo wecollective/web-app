@@ -1,3 +1,28 @@
+export const weekDays = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+]
+
+export const monthNames = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+]
+
 export function isPlural(value: number): boolean {
     return value < 1 || value > 1
 }
@@ -85,20 +110,6 @@ export function formatTimeDHM(seconds: number): string {
 export function formatTimeMDYT(isoDate: Date): string {
     // output: 'March 22, 2022 14:02'
     const date = new Date(isoDate)
-    const monthNames = [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December',
-    ]
     const month = monthNames[date.getMonth()]
     const day = date.getDate()
     const year = date.getFullYear()
