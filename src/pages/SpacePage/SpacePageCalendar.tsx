@@ -7,6 +7,10 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import { weekDays, monthNames, formatTimeHM } from '@src/Functions'
 import Column from '@components/Column'
 import Row from '@components/Row'
+import Scrollbars from '@components/Scrollbars'
+import Modal from '@components/Modal'
+import PostCard from '@components/Cards/PostCard/PostCard'
+import LoadingWheel from '@components/LoadingWheel'
 import { ReactComponent as LeftChevronSVG } from '@svgs/chevron-left-solid.svg'
 import { ReactComponent as RightChevronSVG } from '@svgs/chevron-right-solid.svg'
 
@@ -24,6 +28,16 @@ const SpacePageCalendar = ({
     const [monthText, setMonthText] = useState('')
     const [yearText, setYearText] = useState(0)
     const [squares, setSquares] = useState<any[]>([])
+    const [eventPosts, setEventPosts] = useState<any[]>([])
+    const [selectedEvent, setSelectedEvent] = useState<any>(null)
+    const [eventModalOpen, setEventModalOpen] = useState(false)
+    const [loading, setLoading] = useState(false)
+
+    function openEventModal(eventId) {
+        setSelectedEvent(eventPosts.find((p) => p.Event.id === eventId))
+        console.log(eventPosts.find((p) => p.Event.id === eventId))
+        setEventModalOpen(true)
+    }
 
     useEffect(() => {
         setSelectedSpaceSubPage('calendar')
@@ -31,8 +45,8 @@ const SpacePageCalendar = ({
     }, [accountDataLoading, spaceHandle])
 
     useEffect(() => {
+        setLoading(true)
         setSquares([])
-        // calculate month data
         const date = new Date()
         if (dateOffset !== 0) date.setMonth(new Date().getMonth() + dateOffset)
         const day = date.getDate()
@@ -40,15 +54,6 @@ const SpacePageCalendar = ({
         const year = date.getFullYear()
         setMonthText(monthNames[month])
         setYearText(year)
-        const firstDayOfMonth = new Date(year, month, 1)
-        const daysInMonth = new Date(year, month + 1, 0).getDate()
-        const dateString = firstDayOfMonth.toLocaleDateString('en-GB', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'numeric',
-            day: 'numeric',
-        })
-        const paddingDays = weekDays.indexOf(dateString.split(', ')[0])
         // get events
         axios
             .get(
@@ -59,9 +64,20 @@ const SpacePageCalendar = ({
                 }&month=${+month + 1}`
             )
             .then((res) => {
+                setEventPosts(res.data)
+                // calculate month data
+                const firstDayOfMonth = new Date(year, month, 1)
+                const daysInMonth = new Date(year, month + 1, 0).getDate()
+                const dateString = firstDayOfMonth.toLocaleDateString('en-GB', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'numeric',
+                    day: 'numeric',
+                })
+                const paddingDays = weekDays.indexOf(dateString.split(', ')[0])
                 // loop through days, add event data
                 for (let i = 1; i <= daysInMonth + paddingDays; i += 1) {
-                    if (i <= paddingDays) setSquares((ds) => [...ds, { type: 'padding' }])
+                    if (i <= paddingDays) setSquares((s) => [...s, { type: 'padding' }])
                     else {
                         const dayNumber = i - paddingDays
                         const dayEvents = [] as any[]
@@ -69,8 +85,8 @@ const SpacePageCalendar = ({
                             const eventDate = new Date(post.Event.eventStartTime).getDate()
                             if (eventDate === dayNumber) dayEvents.push(post.Event)
                         })
-                        setSquares((previousDaySquares) => [
-                            ...previousDaySquares,
+                        setSquares((s) => [
+                            ...s,
                             {
                                 day: dayNumber,
                                 events: dayEvents,
@@ -79,6 +95,7 @@ const SpacePageCalendar = ({
                         ])
                     }
                 }
+                setLoading(false)
             })
     }, [spaceHandle, dateOffset])
 
@@ -103,27 +120,49 @@ const SpacePageCalendar = ({
                         ))}
                     </Row>
                 </Column>
-                <Row wrap className={styles.days}>
-                    {squares.map((square) => (
-                        <Column
-                            className={`${
-                                square.type === 'padding' ? styles.padding : styles.day
-                            } ${square.highlighted && styles.highlighted}`}
-                        >
-                            <p style={{ fontWeight: 800 }}>{square.day}</p>
-                            {square.events && (
-                                <Column>
-                                    {square.events.map((event) => (
-                                        <Row className={styles.event}>
-                                            <p>{formatTimeHM(event.eventStartTime)}</p>
-                                            <p style={{ fontWeight: 800 }}>{event.title}</p>
-                                        </Row>
-                                    ))}
-                                </Column>
-                            )}
-                        </Column>
-                    ))}
-                </Row>
+                {loading ? (
+                    <Column centerY style={{ height: 400 }}>
+                        <LoadingWheel />
+                    </Column>
+                ) : (
+                    <Row wrap className={styles.days}>
+                        {squares.map((square) => (
+                            <Column
+                                className={`${
+                                    square.type === 'padding' ? styles.padding : styles.day
+                                } ${square.highlighted && styles.highlighted}`}
+                            >
+                                <p style={{ fontWeight: 800 }}>{square.day}</p>
+                                {square.events && (
+                                    <Scrollbars>
+                                        {square.events
+                                            .sort((a, b) => {
+                                                return (
+                                                    new Date(a.eventStartTime).getTime() -
+                                                    new Date(b.eventStartTime).getTime()
+                                                )
+                                            })
+                                            .map((event) => (
+                                                <button
+                                                    className={styles.event}
+                                                    type='button'
+                                                    onClick={() => openEventModal(event.id)}
+                                                >
+                                                    <p>{formatTimeHM(event.eventStartTime)}</p>
+                                                    <p style={{ fontWeight: 800 }}>{event.title}</p>
+                                                </button>
+                                            ))}
+                                    </Scrollbars>
+                                )}
+                            </Column>
+                        ))}
+                    </Row>
+                )}
+                {eventModalOpen && (
+                    <Modal close={() => setEventModalOpen(false)}>
+                        <PostCard location='post-page' post={selectedEvent} />
+                    </Modal>
+                )}
             </Column>
         </Column>
     )

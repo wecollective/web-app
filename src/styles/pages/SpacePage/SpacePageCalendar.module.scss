@@ -78,6 +78,10 @@
                 }
 
                 .event {
+                    all: unset;
+                    cursor: pointer;
+                    display: flex;
+                    width: calc(100% - 10px);
                     background-color: $blue8;
                     margin-bottom: 5px;
                     padding: 5px;
