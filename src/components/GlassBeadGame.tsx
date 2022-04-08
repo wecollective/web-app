@@ -47,6 +47,83 @@ import { ReactComponent as CurvedDNASVG } from '@svgs/curved-dna.svg'
 import { ReactComponent as CommentIconSVG } from '@svgs/comment-solid.svg'
 import { ReactComponent as CastaliaIconSVG } from '@svgs/castalia-logo.svg'
 
+interface GameSettingsData {
+    gameId: number
+    numberOfTurns: number
+    moveDuration: number
+    introDuration: number
+    intervalDuration: number
+    outroDuration: number
+    playerOrder: string // user id's seperated by commas ('25,2,109,38')
+}
+
+interface NewCommentData {
+    gameId: number
+    userId: number
+    text: string
+}
+
+interface Bead {
+    id: number
+    index: number
+    beadUrl: string
+    createdAt: Date
+    updatedAt: Date
+    user: {
+        handle: string
+        name: string
+        flagImagePath: string
+    }
+}
+
+interface Comment {
+    id: number
+    text: string
+    createdAt: Date
+    updatedAt: Date
+    user: {
+        handle: string
+        name: string
+        flagImagePath: string
+    }
+}
+
+interface GameData {
+    id: number
+    locked: boolean
+    intervalDuration: number | null
+    introDuration: number | null
+    moveDuration: number | null
+    numberOfTurns: number | null
+    outroDuration: number | null
+    topic: string
+    topicGroup: string | null
+    topicImage: string | null
+    backgroundImage: string | null
+    backgroundVideo: string | null
+    backgroundVideoStartTime: number | null
+    GlassBeadGameComments: Comment[]
+    GlassBeads: Bead[]
+}
+
+const backendShim = {
+    saveGameSettings: (data: GameSettingsData): Promise<void> =>
+        axios.post(`${config.apiURL}/save-glass-bead-game-settings`, data),
+    saveComment: (data: NewCommentData): Promise<void> =>
+        axios.post(`${config.apiURL}/glass-bead-game-comment`, data),
+    uploadBeadAudio: (formData: FormData): Promise<{ data: string }> =>
+        // returns bead audio url
+        axios.post(`${config.apiURL}/audio-upload`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        }),
+    saveGame: (gameId: number, beads: Bead[]): Promise<void> =>
+        axios.post(`${config.apiURL}/save-glass-bead-game`, { gameId, beads }),
+    updateTopic: (gameId: number, newTopic: string): Promise<void> =>
+        axios.post(`${config.apiURL}/save-gbg-topic`, { gameId, newTopic }),
+    getGameData: (postId: number): Promise<{ data: GameData }> =>
+        axios.get(`${config.apiURL}/glass-bead-game-data?postId=${postId}`),
+}
+
 const gameDefaults = {
     id: null,
     topic: null,
@@ -193,7 +270,7 @@ const GameSettingsModal = (props) => {
         setPlayersError(players.length ? '' : 'At least one player must be streaming')
         if (allValid(formData, setFormData) && players.length) {
             setLoading(true)
-            const dbData = {
+            const data = {
                 gameId: gameData.id,
                 numberOfTurns: numberOfTurns.value,
                 moveDuration: moveDuration.value,
@@ -202,8 +279,8 @@ const GameSettingsModal = (props) => {
                 outroDuration: outroDuration.value,
                 playerOrder: players.map((p) => p.id).join(','),
             }
-            axios
-                .post(`${config.apiURL}/save-glass-bead-game-settings`, dbData)
+            backendShim
+                .saveGameSettings(data)
                 .then(() => {
                     setLoading(false)
                     setSaved(true)
@@ -633,8 +710,8 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 userId: accountData.id,
                 text: newComment,
             }
-            axios
-                .post(`${config.apiURL}/glass-bead-game-comment`, data)
+            backendShim
+                .saveComment(data)
                 .then(() => {
                     const signalData = {
                         roomId: roomIdRef.current,
@@ -688,9 +765,8 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             const blob = new Blob(chunksRef.current, { type: 'audio/mpeg-3' }) // audio/webm;codecs=opus' })
             const formData = new FormData()
             formData.append('file', blob)
-            const options = { headers: { 'Content-Type': 'multipart/form-data' } }
-            axios
-                .post(`${config.apiURL}/audio-upload`, formData, options)
+            backendShim
+                .uploadBeadAudio(formData)
                 .then((res) => {
                     chunksRef.current = []
                     const signalData = {
@@ -880,9 +956,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             gameData,
         }
         socketRef.current.emit('outgoing-save-game', signalData)
-        axios
-            .post(`${config.apiURL}/save-glass-bead-game`, { gameId: gameData.id, beads })
-            .catch((error) => console.log(error))
+        backendShim.saveGame(gameData.id, beads).catch((error) => console.log(error))
     }
 
     function peopleInRoomText() {
@@ -945,8 +1019,8 @@ const GlassBeadGame = ({ history }): JSX.Element => {
 
     function saveNewTopic(e) {
         e.preventDefault()
-        axios
-            .post(`${config.apiURL}/save-gbg-topic`, { gameId: gameData.id, newTopic })
+        backendShim
+            .updateTopic(gameData.id, newTopic)
             .then(() => {
                 const data = {
                     roomId: roomIdRef.current,
@@ -1130,7 +1204,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     // todo: flatten out userData into user object with socketId
     useEffect(() => {
         if (!accountDataLoading && !postDataLoading && postData.id) {
-            axios.get(`${config.apiURL}/glass-bead-game-data?postId=${postData.id}`).then((res) => {
+            backendShim.getGameData(postData.id).then((res) => {
                 const { GlassBeadGameComments, GlassBeads } = res.data
                 // todo: move beads and comments into gamedata and set in one go?
                 setGameData(res.data)
@@ -1424,7 +1498,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             .attr('id', 'loading-animation-svg')
             .attr('viewBox', `0 0 ${width} ${width}`)
             .attr('perserveAspectRatio', 'xMinYMin')
-            .style('max-width', 500)
+            .attr('style', 'max-width: 500px')
 
         function createCircle(id, cx, cy) {
             loadingAnimationSVG
