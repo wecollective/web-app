@@ -24,7 +24,7 @@ import ImageTitle from '@components/ImageTitle'
 import CloseButton from '@components/CloseButton'
 import AudioVisualiser from '@src/components/AudioVisualiser'
 import AudioTimeSlider from '@src/components/AudioTimeSlider'
-// import PostCard from '@components/Cards/PostCard/PostCard'
+import PostCard from '@components/Cards/PostCard/PostCard'
 import {
     allValid,
     defaultErrorState,
@@ -372,6 +372,13 @@ const CreatePostModal = (): JSX.Element => {
                                 topicImage: selectedTopic ? selectedTopic.imagePath : null,
                                 GlassBeads: [],
                             },
+                            Event: {
+                                title: title.value,
+                                eventStartTime: eventStartTime.value,
+                                eventEndTime: eventEndTime.value,
+                                Going: [],
+                                Interested: [],
+                            },
                             Reactions: [],
                             IncomingLinks: [],
                             OutgoingLinks: [],
@@ -434,7 +441,7 @@ const CreatePostModal = (): JSX.Element => {
     }
 
     useEffect(() => {
-        if (postType.value === 'Event') {
+        if (postType.value === 'Event' || postType.value === 'Glass Bead Game') {
             flatpickr('#date-time-start', {
                 ...dateTimeOptions,
                 appendTo: document.getElementById('date-time-start-wrapper') || undefined,
@@ -496,6 +503,36 @@ const CreatePostModal = (): JSX.Element => {
                     )}
                     {postType.value === 'Glass Bead Game' && (
                         <Column style={{ marginTop: 5 }}>
+                            <div className={styles.dateTimePicker}>
+                                <div id='date-time-start-wrapper'>
+                                    <Input
+                                        id='date-time-start'
+                                        title='Start time'
+                                        type='text'
+                                        placeholder='select start time...'
+                                        state={eventStartTime.state}
+                                        errors={eventStartTime.errors}
+                                    />
+                                </div>
+                                <div id='date-time-end-wrapper'>
+                                    <Input
+                                        id='date-time-end'
+                                        title='End time (optional)'
+                                        type='text'
+                                        placeholder='select end time...'
+                                        state={eventEndTime.state}
+                                        errors={eventEndTime.errors}
+                                    />
+                                </div>
+                                <Input
+                                    title='Duration'
+                                    type='text'
+                                    placeholder='Undefined'
+                                    value={duration}
+                                    disabled
+                                    style={{ width: 'auto' }}
+                                />
+                            </div>
                             <Input
                                 title='Create a custom topic for the game'
                                 type='text'
@@ -736,53 +773,55 @@ const CreatePostModal = (): JSX.Element => {
                             ))}
                         </Row>
                     )}
-                    {/* <Column style={{ margin: '20px 0 10px 0' }}>
-                        <h2>Post preview</h2>
-                        <PostCard
-                            key={previewRenderKey}
-                            location='preview'
-                            post={{
-                                text:
-                                    postType.value === 'Url'
-                                        ? text.value
-                                        : text.value || '*sample text*',
-                                type: postType.value.toLowerCase().split(' ').join('-'),
-                                url: url.value,
-                                urlImage,
-                                urlDomain,
-                                urlTitle,
-                                urlDescription,
-                                totalComments: 0,
-                                totalLikes: 0,
-                                totalRatings: 0,
-                                totalReposts: 0,
-                                totalLinks: 0,
-                                Creator: {
-                                    handle: accountData.handle,
-                                    name: accountData.name,
-                                    flagImagePath: accountData.flagImagePath,
-                                },
-                                DirectSpaces: [
-                                    {
-                                        ...spaceData,
-                                        type: 'post',
-                                        state: 'active',
+                    {postType.value === 'Url' && (
+                        <Column style={{ margin: '20px 0 10px 0' }}>
+                            <h2>Post preview</h2>
+                            <PostCard
+                                key={previewRenderKey}
+                                location='preview'
+                                post={{
+                                    text:
+                                        postType.value === 'Url'
+                                            ? text.value
+                                            : text.value || '*sample text*',
+                                    type: postType.value.toLowerCase().split(' ').join('-'),
+                                    url: url.value,
+                                    urlImage,
+                                    urlDomain,
+                                    urlTitle,
+                                    urlDescription,
+                                    totalComments: 0,
+                                    totalLikes: 0,
+                                    totalRatings: 0,
+                                    totalReposts: 0,
+                                    totalLinks: 0,
+                                    Creator: {
+                                        handle: accountData.handle,
+                                        name: accountData.name,
+                                        flagImagePath: accountData.flagImagePath,
                                     },
-                                    ...selectedSpaces.map((s) => {
-                                        return {
-                                            ...s,
+                                    DirectSpaces: [
+                                        {
+                                            ...spaceData,
                                             type: 'post',
                                             state: 'active',
-                                        }
-                                    }),
-                                ],
-                                GlassBeadGame: {
-                                    topic: topic.value,
-                                    GlassBeads: [],
-                                },
-                            }}
-                        />
-                    </Column> */}
+                                        },
+                                        ...selectedSpaces.map((s) => {
+                                            return {
+                                                ...s,
+                                                type: 'post',
+                                                state: 'active',
+                                            }
+                                        }),
+                                    ],
+                                    GlassBeadGame: {
+                                        topic: topic.value,
+                                        GlassBeads: [],
+                                    },
+                                }}
+                            />
+                        </Column>
+                    )}
                 </Column>
                 <Row style={{ marginTop: 40 }}>
                     {!saved ? (
