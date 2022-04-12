@@ -13,7 +13,7 @@ const defaults = {
         name: null,
         bio: null,
         flagImagePath: null,
-        unseen_notifications: 0,
+        unseenNotifications: 0,
         FollowedHolons: [],
         ModeratedHolons: [],
     },

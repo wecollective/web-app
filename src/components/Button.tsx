@@ -25,8 +25,8 @@ const Button = (props: {
             disabled={disabled || loading}
             onClick={onClick}
         >
-            {!!text && <p>{text}</p>}
             {!!icon && icon}
+            {!!text && <p>{text}</p>}
             {loading && <LoadingWheel size={25} />}
         </button>
     )

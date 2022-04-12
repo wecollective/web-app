@@ -13,13 +13,12 @@ const HolonCardNew = (props: { holon: ISpace }): JSX.Element => {
         description,
         flagImagePath,
         coverImagePath,
-        total_followers,
-        total_posts,
-        total_comments,
-        total_reactions,
-        // total_likes,
-        // total_hearts,
-        // total_ratings
+        totalFollowers,
+        totalPosts,
+        totalComments,
+        totalReactions,
+        // totalLikes,
+        // totalRatings
     } = holon
 
     const { setSpaceHandle } = useContext(SpaceContext)
@@ -98,19 +97,19 @@ const HolonCardNew = (props: { holon: ISpace }): JSX.Element => {
             <div className={styles.stats}>
                 <div className={styles.stat}>
                     <img className={styles.statIcon} src='/icons/users-solid.svg' alt='' />
-                    <span>{total_followers} Followers</span>
+                    <span>{totalFollowers} Followers</span>
                 </div>
                 <div className={styles.stat}>
                     <img className={styles.statIcon} src='/icons/edit-solid.svg' alt='' />
-                    <span>{total_posts} Posts</span>
+                    <span>{totalPosts} Posts</span>
                 </div>
                 <div className={styles.stat}>
                     <img className={styles.statIcon} src='/icons/comment-solid.svg' alt='' />
-                    <span>{total_comments} Comments</span>
+                    <span>{totalComments} Comments</span>
                 </div>
                 <div className={styles.stat}>
                     <img className={styles.statIcon} src='/icons/fire-alt-solid.svg' alt='' />
-                    <span>{total_reactions} Reactions</span>
+                    <span>{totalReactions} Reactions</span>
                 </div>
             </div>
         </div>

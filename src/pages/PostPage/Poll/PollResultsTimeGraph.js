@@ -54,10 +54,10 @@ const PollResultsTimeGraph = () => {
             parsedCreatedAt: Date.parse(new Date()),
         })
         // add total score to answer
-        answer.total_score = answer.values[answer.values.length - 1].accumulatedValue
+        answer.totalScore = answer.values[answer.values.length - 1].accumulatedValue
     })
 
-    pollVotesGroupedByAnswer.sort((a, b) => b.total_score - a.total_score)
+    pollVotesGroupedByAnswer.sort((a, b) => b.totalScore - a.totalScore)
 
     // X-axis (horizontal) = time
     const minX = Date.parse(postData.createdAt)

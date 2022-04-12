@@ -29,9 +29,9 @@ function PollResultsPieChart() {
                 // .sort(null)
                 .value(function (d) {
                     if (postData.subType === 'weighted-choice') {
-                        return d.total_score
+                        return d.totalScore
                     }
-                    return d.total_votes
+                    return d.totalVotes
                 })
 
             const angleInterpolation = d3.interpolate(pie.startAngle()(), pie.endAngle()())
@@ -88,15 +88,15 @@ function PollResultsPieChart() {
                 .style('opacity', 1)
                 .text(function (d) {
                     if (postData.subType === 'weighted-choice') {
-                        if ((d.data.total_score / totalPollVotes) * 100 < 4) {
+                        if ((d.data.totalScore / totalPollVotes) * 100 < 4) {
                             return ''
                         }
-                        return `${d.data.total_score} ↑` // ↑⇧⇑⇪⬆
+                        return `${d.data.totalScore} ↑` // ↑⇧⇑⇪⬆
                     }
-                    if (((d.data.total_votes / totalPollVotes) * 100).toFixed(1) < 4) {
+                    if (((d.data.totalVotes / totalPollVotes) * 100).toFixed(1) < 4) {
                         return ''
                     }
-                    return `${d.data.total_votes} ↑` // ↑⇧⇑⇪⬆
+                    return `${d.data.totalVotes} ↑` // ↑⇧⇑⇪⬆
                 })
 
             g.append('text')
@@ -114,10 +114,10 @@ function PollResultsPieChart() {
                 .duration(2000)
                 .style('opacity', 1)
                 .text(function (d) {
-                    if (((d.data.total_score / totalPollVotes) * 100).toFixed(2) < 4) {
+                    if (((d.data.totalScore / totalPollVotes) * 100).toFixed(2) < 4) {
                         return ''
                     }
-                    return `${((d.data.total_score / totalPollVotes) * 100).toFixed(1)}%`
+                    return `${((d.data.totalScore / totalPollVotes) * 100).toFixed(1)}%`
                 })
 
             g.append('text')
@@ -135,7 +135,7 @@ function PollResultsPieChart() {
                 .duration(2000)
                 .style('opacity', 1)
                 .text(function (d, i) {
-                    if (((d.data.total_votes / totalPollVotes) * 100).toFixed(2) < 4) {
+                    if (((d.data.totalVotes / totalPollVotes) * 100).toFixed(2) < 4) {
                         return ''
                     }
                     return `${i + 1}`
@@ -178,7 +178,7 @@ export default PollResultsPieChart
 // function PollResultsPieChart(props) {
 //     const height = 300
 //     const width = 300
-//     const data = [3, 6, 26, 1, 2]// props.pollAnswers.map((answer) => answer.total_votes)
+//     const data = [3, 6, 26, 1, 2]// props.pollAnswers.map((answer) => answer.totalVotes)
 
 //     useEffect(() => {
 //         let svg = d3.select(".chart").append("svg")
@@ -215,7 +215,7 @@ export default PollResultsPieChart
 // function PollResultsPieChart(props) {
 //     const height = 300
 //     const width = 300
-//     const data = props.pollAnswers.map((answer) => answer.total_votes)//[3, 6, 26, 1, 2]// props.pollAnswers.map((answer) => answer.total_votes)
+//     const data = props.pollAnswers.map((answer) => answer.totalVotes)//[3, 6, 26, 1, 2]// props.pollAnswers.map((answer) => answer.totalVotes)
 
 //     let pieChart = d3.pie()(data)
 

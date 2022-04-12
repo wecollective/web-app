@@ -87,13 +87,13 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                             flagImagePath: null,
                             coverImagePath: null,
                             createdAt: new Date(),
-                            total_followers: 0,
-                            total_comments: 0,
-                            total_reactions: 0,
-                            total_likes: 0,
-                            total_ratings: 0,
-                            total_posts: 0,
-                            total_children: 0,
+                            totalFollowers: 0,
+                            totalComments: 0,
+                            totalReactions: 0,
+                            totalLikes: 0,
+                            totalRatings: 0,
+                            totalPosts: 0,
+                            totalChildren: 0,
                         }
                         const newDirectChildSpaces = [newSpaceData, ...spaceData.DirectChildHolons]
                         setSpaceData({ ...spaceData, DirectChildHolons: newDirectChildSpaces })

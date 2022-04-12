@@ -50,12 +50,12 @@ const UserPageSideBarLeft = (): JSX.Element => {
                                 src='/icons/bell-solid.svg'
                                 aria-label='bell'
                             />
-                            <span className={accountData.unseen_notifications && 'ml-10'}>
+                            <span className={accountData.unseenNotifications && 'ml-10'}>
                                 Notifications
                             </span>
-                            {accountData.unseen_notifications > 0 && (
+                            {accountData.unseenNotifications > 0 && (
                                 <div className={styles.notification}>
-                                    {accountData.unseen_notifications}
+                                    {accountData.unseenNotifications}
                                 </div>
                             )}
                         </Link>

@@ -20,17 +20,17 @@ const defaults = {
         urlDescription: null,
         createdAt: '',
         // todo: change account_ values to booleans
-        account_like: 0,
-        account_link: 0,
-        account_rating: 0,
-        account_repost: 0,
-        total_comments: 0,
-        total_likes: 0,
-        total_links: 0,
-        total_rating_points: 0,
-        total_ratings: 0,
-        total_reactions: 0,
-        total_reposts: 0,
+        accountLike: 0,
+        accountLink: 0,
+        accountRating: 0,
+        accountRepost: 0,
+        totalComments: 0,
+        totalLikes: 0,
+        totalLinks: 0,
+        totalRatingPoints: 0,
+        totalRatings: 0,
+        totalReactions: 0,
+        totalReposts: 0,
         creator: {
             id: null,
             handle: '',
@@ -118,22 +118,22 @@ export default PostContextProvider
 // postData.PollAnswers && postData.PollAnswers.map((a) => a).sort((a, b) => a.id - b.id)
 // let pollAnswersSortedByScore =
 // postData.PollAnswers &&
-// postData.PollAnswers.map((a) => a).sort((a, b) => b.total_votes - a.total_votes)
+// postData.PollAnswers.map((a) => a).sort((a, b) => b.totalVotes - a.totalVotes)
 // let totalPollVotes =
 // postData.PollAnswers &&
 // postData.PollAnswers.map((answer) => {
-//     return answer.total_votes
+//     return answer.totalVotes
 // }).reduce((a, b) => a + b, 0)
 
 // if (postData.subType === 'weighted-choice') {
 // totalPollVotes =
 //     postData.PollAnswers &&
 //     postData.PollAnswers.map((answer) => {
-//         return answer.total_score
+//         return answer.totalScore
 //     }).reduce((a, b) => a + b, 0)
 // pollAnswersSortedByScore =
 //     postData.PollAnswers &&
-//     postData.PollAnswers.map((a) => a).sort((a, b) => b.total_score - a.total_score)
+//     postData.PollAnswers.map((a) => a).sort((a, b) => b.totalScore - a.totalScore)
 // }
 
 // function getPostComments() {

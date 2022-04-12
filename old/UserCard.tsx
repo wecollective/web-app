@@ -14,8 +14,8 @@ const UserCard = (props: { index: number; user: IUser }): JSX.Element => {
         name,
         bio,
         flagImagePath,
-        total_posts,
-        total_comments,
+        totalPosts,
+        totalComments,
         createdAt,
     } = user
 
@@ -54,28 +54,28 @@ const UserCard = (props: { index: number; user: IUser }): JSX.Element => {
                 <span className={styles.text}>{bio}</span>
                 {/* <div className={styles.stat}>
                     <img className={styles.statIcon} src="/icons/users-solid.svg" alt=''/>
-                    <span>{ total_followers } Followers</span>
+                    <span>{ totalFollowers } Followers</span>
                 </div> */}
                 <div className={styles.stats}>
                     <div className={styles.stat}>
                         <img className={styles.statIcon} src='/icons/edit-solid.svg' alt='' />
-                        <span>{total_posts} Posts</span>
+                        <span>{totalPosts} Posts</span>
                     </div>
                     <div className={styles.stat}>
                         <img className={styles.statIcon} src='/icons/comment-solid.svg' alt='' />
-                        <span>{total_comments} Comments</span>
+                        <span>{totalComments} Comments</span>
                     </div>
                     {/* <div className={styles.stat}>
                         <img className={styles.statIcon} src="/icons/fire-alt-solid.svg" alt=''/>
-                        <span>{ total_reactions } Reactions</span>
+                        <span>{ totalReactions } Reactions</span>
                     </div> */}
                     {/* <div className={styles.stat}>
                         <img className={styles.statIcon} src="/icons/thumbs-up-solid.svg" alt=''/>
-                        <span>{ total_likes } Likes</span>
+                        <span>{ totalLikes } Likes</span>
                     </div>
                     <div className={styles.stat}>
                         <img className={styles.statIcon} src="/icons/star-solid.svg" alt=''/>
-                        <span>{ total_ratings } Ratings</span>
+                        <span>{ totalRatings } Ratings</span>
                     </div> */}
                 </div>
             </div>

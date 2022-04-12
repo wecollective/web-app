@@ -130,7 +130,7 @@ const SpacePageSideBarLeft = (): JSX.Element => {
                         url='spaces'
                         selected={selectedSpaceSubPage === 'spaces'}
                         marginBottom={5}
-                        total={spaceData.total_spaces}
+                        total={spaceData.totalSpaces}
                     /> */}
                 <SideBarButton
                     icon='users-solid.svg'
@@ -148,7 +148,7 @@ const SpacePageSideBarLeft = (): JSX.Element => {
                             url='users'
                             // selected={selectedSpaceSubPage === 'users'}
                             marginBottom={5}
-                            total={spaceData.total_users}
+                            total={spaceData.totalUsers}
                         />
                     </>
                 )} */}

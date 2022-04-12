@@ -136,8 +136,8 @@ const NotificationCard = (props: {
     //         .then((res) => {
     //             if (res.data === 'success') {
     //                 updateAccountData(
-    //                     'unseen_notifications',
-    //                     accountData.unseen_notifications + (data.seen ? -1 : 1)
+    //                     'unseenNotifications',
+    //                     accountData.unseenNotifications + (data.seen ? -1 : 1)
     //                 )
     //             }
     //         })
@@ -179,8 +179,8 @@ const NotificationCard = (props: {
                             // todo: remove updateNotification function when notifications fetched on component mount
                             updateNotification(id, 'seen', true)
                             updateAccountData(
-                                'unseen_notifications',
-                                accountData.unseen_notifications - 1
+                                'unseenNotifications',
+                                accountData.unseenNotifications - 1
                             )
                         }
                     } else {
@@ -216,8 +216,8 @@ const NotificationCard = (props: {
                             setSeen(true)
                             updateNotification(id, 'seen', true)
                             updateAccountData(
-                                'unseen_notifications',
-                                accountData.unseen_notifications - 1
+                                'unseenNotifications',
+                                accountData.unseenNotifications - 1
                             )
                         }
                     } else {

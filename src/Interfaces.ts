@@ -7,15 +7,14 @@ export interface ISpace {
     flagImagePath: string
     coverImagePath: string
     createdAt: string
-    total_spaces: number
-    total_posts: number
-    total_users: number
-    total_followers: number
-    total_comments: number
-    total_reactions: number
-    total_likes: number
-    total_hearts: number
-    total_ratings: number
+    totalSpaces: number
+    totalPosts: number
+    totalUsers: number
+    totalFollowers: number
+    totalComments: number
+    totalReactions: number
+    totalLikes: number
+    totalRatings: number
     // includes
     Creator: Partial<IUser>
     DirectChildHolons: Partial<ISpace[]>
@@ -34,17 +33,17 @@ export interface IPost {
     urlImage: string | null
     urlTitle: string | null
     createdAt: string
-    account_like: number
-    account_link: number
-    account_rating: number
-    account_repost: number
-    total_comments: number
-    total_likes: number
-    total_links: number
-    total_rating_points: number
-    total_ratings: number
-    total_reactions: number
-    total_reposts: number
+    accountLike: number
+    accountLink: number
+    accountRating: number
+    accountRepost: number
+    totalComments: number
+    totalLikes: number
+    totalLinks: number
+    totalRatingPoints: number
+    totalRatings: number
+    totalReactions: number
+    totalReposts: number
     // includes (todo: capitalise)
     creator: Partial<IUser>
     spaces: Partial<ISpace[]>
@@ -59,12 +58,12 @@ export interface IUser {
     handle: string
     name: string
     bio: string
-    unseen_notifications?: number
+    unseenNotifications?: number
     coverImagePath: string
     flagImagePath: string
     createdAt: string
-    total_posts: number
-    total_comments: number
+    totalPosts: number
+    totalComments: number
     // includes
     FollowedHolons: Partial<ISpace[]>
     ModeratedHolons: Partial<ISpace[]>
@@ -89,8 +88,8 @@ export interface IPrism {
 export interface IPollAnswer {
     id: number
     value: number
-    total_votes: number
-    total_score: number
+    totalVotes: number
+    totalScore: number
 }
 
 export interface ISpaceHighlights {

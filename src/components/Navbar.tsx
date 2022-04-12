@@ -109,9 +109,9 @@ const Navbar = (): JSX.Element => {
                         className={styles.accountButton}
                     >
                         <NotificationIconSVG />
-                        {accountData.unseen_notifications > 0 && (
+                        {accountData.unseenNotifications > 0 && (
                             <div className={styles.unseenItems}>
-                                {accountData.unseen_notifications}
+                                {accountData.unseenNotifications}
                             </div>
                         )}
                     </Link>

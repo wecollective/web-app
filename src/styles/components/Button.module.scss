@@ -50,6 +50,7 @@
     &.medium {
         font-size: 14px;
         height: 30px;
+        padding: 0 15px;
     }
     &.large {
         font-size: 14px;
@@ -63,6 +64,11 @@
     > svg {
         width: 20px;
         height: 20px;
+        &:not(:last-child) {
+            margin-right: 5px;
+            margin-left: -8px;
+            opacity: 0.5;
+        }
     }
     // loading wheel
     > div {

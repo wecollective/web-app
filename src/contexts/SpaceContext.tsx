@@ -123,7 +123,6 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 }&offset=${offset}`
             )
             .then((res) => {
-                // console.log('posts: ', res.data)
                 setSpacePosts(firstLoad ? res.data.posts : [...spacePosts, ...res.data.posts])
                 setTotalMatchingPosts(res.data.totalMatchingPosts)
                 // use total matching posts to work out if definitely more

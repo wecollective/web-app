@@ -15,9 +15,9 @@ const defaults = {
         flagImagePath: '',
         coverImagePath: '',
         createdAt: '',
-        total_posts: 0,
-        total_spaces: 0,
-        total_users: 0,
+        totalPosts: 0,
+        totalSpaces: 0,
+        totalUsers: 0,
         Creator: {
             id: null,
             handle: '',

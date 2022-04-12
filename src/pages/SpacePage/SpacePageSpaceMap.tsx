@@ -807,7 +807,7 @@ const SpacePageSpaceMap = (): JSX.Element => {
                     (enter) =>
                         enter
                             .filter((d) => {
-                                return d.data.total_results > 0 && d.depth > 0
+                                return d.data.totalResults > 0 && d.depth > 0
                             })
                             .append('svg:image')
                             .attr('xlink:href', (d) => {

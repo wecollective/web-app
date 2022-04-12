@@ -7,12 +7,12 @@ function PollResultsAnswer(props) {
     const { postData, totalPollVotes, colorScale } = useContext(PostContext)
 
     let color = colorScale(index)
-    let pollAnswerVotes = answer.total_votes
-    let pollAnswerScore = ((answer.total_votes / totalPollVotes) * 100).toFixed(1)
+    let pollAnswerVotes = answer.totalVotes
+    let pollAnswerScore = ((answer.totalVotes / totalPollVotes) * 100).toFixed(1)
 
     if (postData.subType === 'weighted-choice') {
-        if (answer.total_score != null) pollAnswerVotes = answer.total_score.toFixed(1)
-        pollAnswerScore = ((answer.total_score / totalPollVotes) * 100).toFixed(1)
+        if (answer.totalScore != null) pollAnswerVotes = answer.totalScore.toFixed(1)
+        pollAnswerScore = ((answer.totalScore / totalPollVotes) * 100).toFixed(1)
     }
 
     return (

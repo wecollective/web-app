@@ -26,14 +26,14 @@ const NavbarDropDownModal = (): JSX.Element => {
                             />
                             <span
                                 className={`${styles.linkText} ${
-                                    accountData.unseen_notifications && 'ml-10'
+                                    accountData.unseenNotifications && 'ml-10'
                                 }`}
                             >
                                 Notifications
                             </span>
-                            {accountData.unseen_notifications > 0 && (
+                            {accountData.unseenNotifications > 0 && (
                                 <div className={styles.notification}>
-                                    {accountData.unseen_notifications}
+                                    {accountData.unseenNotifications}
                                 </div>
                             )}
                         </Link>
