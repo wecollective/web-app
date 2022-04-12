@@ -435,10 +435,108 @@ const PostCard = (props: {
                                 )}
                             </Column>
                         </Row>
+                        {Event && (
+                            <Column>
+                                <Row centerY className={styles.eventTimes}>
+                                    <ClockIconSVG />
+                                    <p>{`${formatTimeMDYT(Event.eventStartTime)} ${
+                                        Event.eventEndTime
+                                            ? `→ ${formatTimeMDYT(Event.eventEndTime)}`
+                                            : ''
+                                    }`}</p>
+                                    {Event.eventEndTime && (
+                                        <p>{`(duration: ${formatTimeDHM(
+                                            (new Date(Event.eventEndTime).getTime() -
+                                                new Date(Event.eventStartTime).getTime()) /
+                                                1000
+                                        )})`}</p>
+                                    )}
+                                </Row>
+                                {(Event.Going.length > 0 || Event.Interested.length > 0) && (
+                                    <Row style={{ marginTop: 10 }}>
+                                        {Event.Going.length > 0 && (
+                                            <FlagImageHighlights
+                                                type='user'
+                                                imagePaths={goingToEventImages}
+                                                imageSize={30}
+                                                text={`${Event.Going.length} going`}
+                                                onClick={() => setEventGoingModalOpen(true)}
+                                                style={{ marginRight: 15 }}
+                                                outline
+                                            />
+                                        )}
+                                        {Event.Interested.length > 0 && (
+                                            <FlagImageHighlights
+                                                type='user'
+                                                imagePaths={interestedInEventImages}
+                                                imageSize={30}
+                                                text={`${Event.Interested.length} interested`}
+                                                onClick={() => setEventInterestedModalOpen(true)}
+                                                outline
+                                            />
+                                        )}
+                                    </Row>
+                                )}
+                                {eventGoingModalOpen && (
+                                    <Modal centered close={() => setEventGoingModalOpen(false)}>
+                                        <h1>Going to event</h1>
+                                        <Column>
+                                            {Event.Going.map((user) => (
+                                                <ImageTitle
+                                                    key={user.id}
+                                                    type='user'
+                                                    imagePath={user.flagImagePath}
+                                                    title={user.name}
+                                                    link={`/u/${user.handle}`}
+                                                    style={{ marginBottom: 10 }}
+                                                />
+                                            ))}
+                                        </Column>
+                                    </Modal>
+                                )}
+                                {eventInterestedModalOpen && (
+                                    <Modal
+                                        centered
+                                        close={() => setEventInterestedModalOpen(false)}
+                                    >
+                                        <h1>Interested in event</h1>
+                                        <Column>
+                                            {Event.Interested.map((user) => (
+                                                <ImageTitle
+                                                    key={user.id}
+                                                    type='user'
+                                                    imagePath={user.flagImagePath}
+                                                    title={user.name}
+                                                    link={`/u/${user.handle}`}
+                                                    style={{ marginBottom: 10 }}
+                                                />
+                                            ))}
+                                        </Column>
+                                    </Modal>
+                                )}
+                                <Row style={{ marginTop: 10 }}>
+                                    <Button
+                                        text='Going'
+                                        color='aqua'
+                                        size='medium'
+                                        icon={goingToEvent ? <SuccessIconSVG /> : undefined}
+                                        style={{ marginRight: 5 }}
+                                        onClick={() => respondToEvent('going')}
+                                    />
+                                    <Button
+                                        text='Interested'
+                                        color='aqua'
+                                        size='medium'
+                                        icon={interestedInEvent ? <SuccessIconSVG /> : undefined}
+                                        onClick={() => respondToEvent('interested')}
+                                    />
+                                </Row>
+                            </Column>
+                        )}
                         <Row style={{ marginTop: 10 }}>
                             <Button
                                 text='Open game room'
-                                color='aqua'
+                                color='purple'
                                 size='medium'
                                 onClick={() => history.push(`/p/${id}`)}
                             />
