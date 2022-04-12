@@ -14,8 +14,6 @@
         border-radius: 10px;
         padding: 20px;
 
-        h1 { margin: 0 }
-
         .header {
             width: 100%;
 
@@ -82,10 +80,17 @@
                     cursor: pointer;
                     display: flex;
                     width: calc(100% - 10px);
-                    background-color: $blue8;
                     margin-bottom: 5px;
                     padding: 5px;
                     border-radius: 5px;
+
+                    &.event {
+                        background-color: $blue8;
+                    }
+
+                    &.glass-bead-game {
+                        background-color: $purple2;
+                    }
 
                     > p {
                         font-size: 12px;

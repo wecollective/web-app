@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import axios from 'axios'
 import config from '@src/Config'
+import { v4 as uuidv4 } from 'uuid'
 import styles from '@styles/pages/SpacePage/SpacePageCalendar.module.scss'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
@@ -28,15 +29,16 @@ const SpacePageCalendar = ({
     const [monthText, setMonthText] = useState('')
     const [yearText, setYearText] = useState(0)
     const [squares, setSquares] = useState<any[]>([])
-    const [eventPosts, setEventPosts] = useState<any[]>([])
-    const [selectedEvent, setSelectedEvent] = useState<any>(null)
+    const [selectedPost, setSelectedPost] = useState<any>(null)
     const [eventModalOpen, setEventModalOpen] = useState(false)
     const [loading, setLoading] = useState(false)
 
-    function openEventModal(eventId) {
-        setSelectedEvent(eventPosts.find((p) => p.Event.id === eventId))
-        console.log(eventPosts.find((p) => p.Event.id === eventId))
+    function openEventModal(postId) {
+        setSelectedPost(null)
         setEventModalOpen(true)
+        axios
+            .get(`${config.apiURL}/post-data?accountId=${accountData.id}&postId=${postId}`)
+            .then((res) => setSelectedPost(res.data))
     }
 
     useEffect(() => {
@@ -45,59 +47,64 @@ const SpacePageCalendar = ({
     }, [accountDataLoading, spaceHandle])
 
     useEffect(() => {
-        setLoading(true)
-        setSquares([])
-        const date = new Date()
-        if (dateOffset !== 0) date.setMonth(new Date().getMonth() + dateOffset)
-        const day = date.getDate()
-        const month = date.getMonth()
-        const year = date.getFullYear()
-        setMonthText(monthNames[month])
-        setYearText(year)
-        // get events
-        axios
-            .get(
-                /* prettier-ignore */
-                `${config.apiURL}/space-events?accountId=${accountData.id
-                }&spaceHandle=${spaceHandle
-                }&year=${+year
-                }&month=${+month + 1}`
-            )
-            .then((res) => {
-                setEventPosts(res.data)
-                // calculate month data
-                const firstDayOfMonth = new Date(year, month, 1)
-                const daysInMonth = new Date(year, month + 1, 0).getDate()
-                const dateString = firstDayOfMonth.toLocaleDateString('en-GB', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'numeric',
-                    day: 'numeric',
-                })
-                const paddingDays = weekDays.indexOf(dateString.split(', ')[0])
-                // loop through days, add event data
-                for (let i = 1; i <= daysInMonth + paddingDays; i += 1) {
-                    if (i <= paddingDays) setSquares((s) => [...s, { type: 'padding' }])
-                    else {
-                        const dayNumber = i - paddingDays
-                        const dayEvents = [] as any[]
-                        res.data.forEach((post) => {
-                            const eventDate = new Date(post.Event.eventStartTime).getDate()
-                            if (eventDate === dayNumber) dayEvents.push(post.Event)
-                        })
-                        setSquares((s) => [
-                            ...s,
-                            {
-                                day: dayNumber,
-                                events: dayEvents,
-                                highlighted: dateOffset === 0 && dayNumber === day,
-                            },
-                        ])
+        if (!accountDataLoading) {
+            setLoading(true)
+            setSquares([])
+            const date = new Date()
+            if (dateOffset !== 0) date.setMonth(new Date().getMonth() + dateOffset)
+            const day = date.getDate()
+            const month = date.getMonth()
+            const year = date.getFullYear()
+            setMonthText(monthNames[month])
+            setYearText(year)
+            // get events
+            axios
+                .get(
+                    `${config.apiURL}/space-events?spaceHandle=${spaceHandle}&year=${+year}&month=${
+                        +month + 1
+                    }`
+                )
+                .then((res) => {
+                    // calculate month data
+                    const firstDayOfMonth = new Date(year, month, 1)
+                    const daysInMonth = new Date(year, month + 1, 0).getDate()
+                    const dateString = firstDayOfMonth.toLocaleDateString('en-GB', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'numeric',
+                        day: 'numeric',
+                    })
+                    const paddingDays = weekDays.indexOf(dateString.split(', ')[0])
+                    // loop through days, add event data
+                    for (let i = 1; i <= daysInMonth + paddingDays; i += 1) {
+                        if (i <= paddingDays) setSquares((s) => [...s, { type: 'padding' }])
+                        else {
+                            const dayNumber = i - paddingDays
+                            const dayEvents = [] as any[]
+                            res.data.forEach((post) => {
+                                const eventDate = new Date(post.Event.eventStartTime).getDate()
+                                if (eventDate === dayNumber)
+                                    dayEvents.push({
+                                        ...post.Event,
+                                        title: post.Event.title || post.GlassBeadGame.topic,
+                                        type: post.type,
+                                        postId: post.id,
+                                    })
+                            })
+                            setSquares((s) => [
+                                ...s,
+                                {
+                                    day: dayNumber,
+                                    events: dayEvents,
+                                    highlighted: dateOffset === 0 && dayNumber === day,
+                                },
+                            ])
+                        }
                     }
-                }
-                setLoading(false)
-            })
-    }, [spaceHandle, dateOffset])
+                    setLoading(false)
+                })
+        }
+    }, [accountDataLoading, spaceHandle, dateOffset])
 
     return (
         <Column className={styles.wrapper}>
@@ -116,7 +123,7 @@ const SpacePageCalendar = ({
                     </Row>
                     <Row className={styles.days}>
                         {weekDays.map((day) => (
-                            <p>{day}</p>
+                            <p key={day}>{day}</p>
                         ))}
                     </Row>
                 </Column>
@@ -128,6 +135,7 @@ const SpacePageCalendar = ({
                     <Row wrap className={styles.days}>
                         {squares.map((square) => (
                             <Column
+                                key={uuidv4()}
                                 className={`${
                                     square.type === 'padding' ? styles.padding : styles.day
                                 } ${square.highlighted && styles.highlighted}`}
@@ -144,9 +152,12 @@ const SpacePageCalendar = ({
                                             })
                                             .map((event) => (
                                                 <button
-                                                    className={styles.event}
+                                                    key={event.id}
+                                                    className={`${styles.event} ${
+                                                        styles[event.type]
+                                                    }`}
                                                     type='button'
-                                                    onClick={() => openEventModal(event.id)}
+                                                    onClick={() => openEventModal(event.postId)}
                                                 >
                                                     <p>{formatTimeHM(event.eventStartTime)}</p>
                                                     <p style={{ fontWeight: 800 }}>{event.title}</p>
@@ -160,7 +171,11 @@ const SpacePageCalendar = ({
                 )}
                 {eventModalOpen && (
                     <Modal close={() => setEventModalOpen(false)}>
-                        <PostCard location='post-page' post={selectedEvent} />
+                        {selectedPost ? (
+                            <PostCard location='post-page' post={selectedPost} />
+                        ) : (
+                            <LoadingWheel />
+                        )}
                     </Modal>
                 )}
             </Column>
