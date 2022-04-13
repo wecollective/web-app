@@ -13,7 +13,7 @@ import Button from '@components/Button'
 import ImageTitle from '@components/ImageTitle'
 import TextLink from '@src/components/TextLink'
 import Input from '@components/Input'
-import { pluralise, allValid, defaultErrorState } from '@src/Functions'
+import { pluralise, allValid, defaultErrorState } from '@src/Helpers'
 
 const PostCardLinkModal = (props: {
     close: () => void

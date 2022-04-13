@@ -35,7 +35,7 @@ import {
     statTitle,
     formatTimeDHM,
     formatTimeMDYT,
-} from '@src/Functions'
+} from '@src/Helpers'
 import { ReactComponent as LinkIconSVG } from '@svgs/link-solid.svg'
 import { ReactComponent as CommentIconSVG } from '@svgs/comment-solid.svg'
 import { ReactComponent as LikeIconSVG } from '@svgs/like.svg'

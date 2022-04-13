@@ -31,7 +31,7 @@ import {
     isValidUrl,
     formatTimeMMSS,
     formatTimeDHM,
-} from '@src/Functions'
+} from '@src/Helpers'
 import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import Scrollbars from '@components/Scrollbars'
 import { ReactComponent as PlayIconSVG } from '@svgs/play-solid.svg'
@@ -321,7 +321,7 @@ const CreatePostModal = (): JSX.Element => {
                     topic: selectedTopic ? selectedTopic.name : topic.value,
                     topicGroup: selectedTopic ? selectedTopicGroup : null,
                     topicImage: selectedTopic ? selectedTopic.imagePath : null,
-                    spaceHandles: [spaceData.handle, ...selectedSpaces.map((s) => s.handle)],
+                    spaceIds: [spaceData.id, ...selectedSpaces.map((s) => s.id)],
                 }
                 let fileData
                 let type

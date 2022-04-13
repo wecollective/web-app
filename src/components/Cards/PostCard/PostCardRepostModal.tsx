@@ -12,7 +12,7 @@ import Button from '@components/Button'
 import SearchSelector from '@components/SearchSelector'
 import ImageTitle from '@components/ImageTitle'
 import CloseButton from '@components/CloseButton'
-import { pluralise } from '@src/Functions'
+import { pluralise } from '@src/Helpers'
 
 const PostCardRepostModal = (props: {
     close: () => void

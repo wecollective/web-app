@@ -4,7 +4,7 @@ import styles from '@styles/components/cards/CommentCardComment.module.scss'
 import { AccountContext } from '@contexts/AccountContext'
 import FlagImage from '@components/FlagImage'
 import DeleteItemModal from '@src/components/modals/DeleteItemModal'
-import { timeSinceCreated, dateCreated } from '@src/Functions'
+import { timeSinceCreated, dateCreated } from '@src/Helpers'
 
 const CommentCardComment = (props: {
     comment: any

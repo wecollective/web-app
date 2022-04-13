@@ -4,7 +4,7 @@ import getBlobDuration from 'get-blob-duration'
 import styles from '@styles/components/AudioTimeSlider.module.scss'
 import Column from '@components/Column'
 import Row from '@components/Row'
-import { formatTimeMMSS } from '@src/Functions'
+import { formatTimeMMSS } from '@src/Helpers'
 
 const AudioTimeSlider = (props: {
     audioElementId: string

@@ -7,7 +7,7 @@ import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import CommentCard from '@components/Cards/CommentCard'
 import FlagImage from '@components/FlagImage'
-import { resizeTextArea } from '@src/Functions'
+import { resizeTextArea } from '@src/Helpers'
 
 const PostCardComments = (props: {
     postId: number | undefined

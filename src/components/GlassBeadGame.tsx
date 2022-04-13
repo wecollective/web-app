@@ -19,7 +19,7 @@ import {
     notNull,
     allValid,
     defaultErrorState,
-} from '@src/Functions'
+} from '@src/Helpers'
 import Modal from '@components/Modal'
 import ImageUploadModal from '@components/modals/ImageUploadModal'
 import Input from '@components/Input'

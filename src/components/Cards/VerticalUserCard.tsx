@@ -11,7 +11,7 @@ import { ReactComponent as UsersIconSVG } from '@svgs/users-solid.svg'
 import { ReactComponent as PostIconSVG } from '@svgs/edit-solid.svg'
 import { ReactComponent as CommentIconSVG } from '@svgs/comment-solid.svg'
 import { ReactComponent as ReactionIconSVG } from '@svgs/fire-alt-solid.svg'
-import { pluralise, statTitle } from '@src/Functions'
+import { pluralise, statTitle } from '@src/Helpers'
 
 const VerticalUserCard = (props: { user: any; style?: any }): JSX.Element => {
     const { user, style } = props

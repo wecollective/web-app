@@ -9,7 +9,7 @@ import Column from '@components/Column'
 import Row from '@components/Row'
 import Button from '@components/Button'
 import ImageTitle from '@components/ImageTitle'
-import { pluralise } from '@src/Functions'
+import { pluralise } from '@src/Helpers'
 
 const PostCardLikeModal = (props: {
     close: () => void

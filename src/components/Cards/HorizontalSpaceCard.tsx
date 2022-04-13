@@ -11,7 +11,7 @@ import { ReactComponent as UsersIconSVG } from '@svgs/users-solid.svg'
 import { ReactComponent as PostIconSVG } from '@svgs/edit-solid.svg'
 import { ReactComponent as CommentIconSVG } from '@svgs/comment-solid.svg'
 import { ReactComponent as ReactionIconSVG } from '@svgs/fire-alt-solid.svg'
-import { statTitle } from '@src/Functions'
+import { statTitle } from '@src/Helpers'
 
 const HorizontalSpaceCard = (props: { space: any; style?: any }): JSX.Element => {
     const { space, style } = props

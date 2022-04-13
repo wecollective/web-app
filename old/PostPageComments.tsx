@@ -5,7 +5,7 @@ import { PostContext } from '@contexts/PostContext'
 // import CommentCard from '../Cards/CommentCard'
 import SearchBar from '@components/SearchBar'
 import PostPageCommentFilters from '@components/PostPage/PostPageCommentFilters'
-import { onPageBottomReached } from '@src/Functions'
+import { onPageBottomReached } from '@src/Helpers'
 
 const PostPageComments = (): JSX.Element => {
     const {

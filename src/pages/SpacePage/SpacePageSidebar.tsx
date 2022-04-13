@@ -20,7 +20,7 @@ import { ReactComponent as EyeIconSVG } from '@svgs/eye-solid.svg'
 import { ReactComponent as EyeSlashIconSVG } from '@svgs/eye-slash-solid.svg'
 import { ReactComponent as PlusIconSVG } from '@svgs/plus.svg'
 import { ReactComponent as MinusIconSVG } from '@svgs/minus-solid.svg'
-import { isPlural } from '@src/Functions'
+import { isPlural } from '@src/Helpers'
 
 const SpacePageSidebar = (): JSX.Element => {
     const { loggedIn, accountData, updateAccountData } = useContext(AccountContext)

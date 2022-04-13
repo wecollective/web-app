@@ -6,7 +6,7 @@ import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import FlagImage from '@components/FlagImage'
 import CommentCardComment from '@components/Cards/CommentCardComment'
-import { resizeTextArea } from '@src/Functions'
+import { resizeTextArea } from '@src/Helpers'
 
 const CommentCard = (props: {
     comment: any

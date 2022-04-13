@@ -10,7 +10,7 @@ import { ReactComponent as HandshakeIconSVG } from '@svgs/handshake-solid.svg'
 import { ReactComponent as PollIconSVG } from '@svgs/poll-solid.svg'
 import { ReactComponent as OSIconSVG } from '@svgs/osi-brands.svg'
 import { ReactComponent as ToolsIconSVG } from '@svgs/tools-solid.svg'
-import { pluralise, isPlural } from '@src/Functions'
+import { pluralise, isPlural } from '@src/Helpers'
 // todo: import logo and background images as SVG components
 // import { ReactComponent as BackgroundImageSVG } from '@svgs/earth.svg'
 

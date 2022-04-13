@@ -11,7 +11,7 @@ import Row from '@components/Row'
 import Button from '@components/Button'
 import ImageTitle from '@components/ImageTitle'
 import Input from '@components/Input'
-import { pluralise } from '@src/Functions'
+import { pluralise } from '@src/Helpers'
 
 const PostCardRatingModal = (props: {
     close: () => void
