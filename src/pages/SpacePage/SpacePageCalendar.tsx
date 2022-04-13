@@ -82,7 +82,7 @@ const SpacePageCalendar = ({
                             const dayNumber = i - paddingDays
                             const dayEvents = [] as any[]
                             res.data.forEach((post) => {
-                                const eventDate = new Date(post.Event.eventStartTime).getDate()
+                                const eventDate = new Date(post.Event.startTime).getDate()
                                 if (eventDate === dayNumber)
                                     dayEvents.push({
                                         ...post.Event,
@@ -146,8 +146,8 @@ const SpacePageCalendar = ({
                                         {square.events
                                             .sort((a, b) => {
                                                 return (
-                                                    new Date(a.eventStartTime).getTime() -
-                                                    new Date(b.eventStartTime).getTime()
+                                                    new Date(a.startTime).getTime() -
+                                                    new Date(b.startTime).getTime()
                                                 )
                                             })
                                             .map((event) => (
@@ -159,7 +159,7 @@ const SpacePageCalendar = ({
                                                     type='button'
                                                     onClick={() => openEventModal(event.postId)}
                                                 >
-                                                    <p>{formatTimeHM(event.eventStartTime)}</p>
+                                                    <p>{formatTimeHM(event.startTime)}</p>
                                                     <p style={{ fontWeight: 800 }}>{event.title}</p>
                                                 </button>
                                             ))}

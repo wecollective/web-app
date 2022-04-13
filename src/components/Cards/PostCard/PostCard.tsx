@@ -318,13 +318,13 @@ const PostCard = (props: {
                         </Row>
                         <Row centerY className={styles.eventTimes}>
                             <ClockIconSVG />
-                            <p>{`${formatTimeMDYT(Event.eventStartTime)} ${
-                                Event.eventEndTime ? `→ ${formatTimeMDYT(Event.eventEndTime)}` : ''
+                            <p>{`${formatTimeMDYT(Event.startTime)} ${
+                                Event.endTime ? `→ ${formatTimeMDYT(Event.endTime)}` : ''
                             }`}</p>
-                            {Event.eventEndTime && (
+                            {Event.endTime && (
                                 <p>{`(duration: ${formatTimeDHM(
-                                    (new Date(Event.eventEndTime).getTime() -
-                                        new Date(Event.eventStartTime).getTime()) /
+                                    (new Date(Event.endTime).getTime() -
+                                        new Date(Event.startTime).getTime()) /
                                         1000
                                 )})`}</p>
                             )}
@@ -435,15 +435,13 @@ const PostCard = (props: {
                             <Column>
                                 <Row centerY className={styles.eventTimes}>
                                     <ClockIconSVG />
-                                    <p>{`${formatTimeMDYT(Event.eventStartTime)} ${
-                                        Event.eventEndTime
-                                            ? `→ ${formatTimeMDYT(Event.eventEndTime)}`
-                                            : ''
+                                    <p>{`${formatTimeMDYT(Event.startTime)} ${
+                                        Event.endTime ? `→ ${formatTimeMDYT(Event.endTime)}` : ''
                                     }`}</p>
-                                    {Event.eventEndTime && (
+                                    {Event.endTime && (
                                         <p>{`(duration: ${formatTimeDHM(
-                                            (new Date(Event.eventEndTime).getTime() -
-                                                new Date(Event.eventStartTime).getTime()) /
+                                            (new Date(Event.endTime).getTime() -
+                                                new Date(Event.startTime).getTime()) /
                                                 1000
                                         )})`}</p>
                                     )}

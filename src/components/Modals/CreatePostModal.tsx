@@ -298,11 +298,11 @@ const CreatePostModal = (): JSX.Element => {
                 const options = { headers: { Authorization: `Bearer ${accessToken}` } }
                 const postData = {
                     type: postType.value.replace(/\s+/g, '-').toLowerCase(),
-                    text: text.value, // || null,
+                    text: text.value,
                     title: title.value,
-                    eventStartTime: eventStartTime.value,
-                    eventEndTime: eventEndTime.value,
-                    url: url.value, // || null,
+                    startTime: eventStartTime.value || null,
+                    endTime: eventEndTime.value || null,
+                    url: url.value,
                     urlImage: urlData ? urlData.image : null,
                     urlDomain: urlData ? urlData.domain : null,
                     urlTitle: urlData ? urlData.title : null,
@@ -363,8 +363,8 @@ const CreatePostModal = (): JSX.Element => {
                             },
                             Event: {
                                 title: title.value,
-                                eventStartTime: eventStartTime.value,
-                                eventEndTime: eventEndTime.value,
+                                startTime: eventStartTime.value,
+                                endTime: eventEndTime.value,
                                 Going: [],
                                 Interested: [],
                             },
