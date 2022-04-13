@@ -1,3 +1,4 @@
+// constants
 export const weekDays = [
     'Monday',
     'Tuesday',
@@ -23,6 +24,13 @@ export const monthNames = [
     'December',
 ]
 
+export const defaultErrorState = {
+    required: true,
+    errors: [] as string[],
+    state: 'default' as 'default' | 'valid' | 'invalid',
+}
+
+// functions
 export function isPlural(value: number): boolean {
     return value < 1 || value > 1
 }
@@ -156,24 +164,20 @@ export function allValid(items: any, setItems: (newItems: any) => void): boolean
     return valid
 }
 
-export const notNull = (value: number | null): number | false => (value !== null ? value : false)
-
-export const defaultErrorState = {
-    required: true,
-    errors: [] as string[],
-    state: 'default' as 'default' | 'valid' | 'invalid',
+export function notNull(value: number | null): number | false {
+    return value !== null ? value : false
 }
 
 export function statTitle(text: string, value: number): string {
     return `${value} ${text}${pluralise(value)}`
 }
 
-// todo: create custom regex check
-export function isValidUrl(url: string): boolean {
+export function isValidUrl(urlString: string): boolean {
+    let url
     try {
-        new URL(url)
+        url = new URL(urlString)
     } catch (_) {
         return false
     }
-    return true
+    return url.protocol === 'http:' || url.protocol === 'https:'
 }

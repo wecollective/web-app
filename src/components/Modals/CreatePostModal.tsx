@@ -24,7 +24,7 @@ import ImageTitle from '@components/ImageTitle'
 import CloseButton from '@components/CloseButton'
 import AudioVisualiser from '@src/components/AudioVisualiser'
 import AudioTimeSlider from '@src/components/AudioTimeSlider'
-import PostCard from '@components/Cards/PostCard/PostCard'
+import PostCardUrlPreview from '@components/Cards/PostCard/PostCardUrlPreview'
 import {
     allValid,
     defaultErrorState,
@@ -93,10 +93,8 @@ const CreatePostModal = (): JSX.Element => {
     const [spaceOptions, setSpaceOptions] = useState<any[]>([])
     const [selectedSpaces, setSelectedSpaces] = useState<any[]>([])
     const [urlLoading, setUrlLoading] = useState(false)
-    const [urlImage, setUrlImage] = useState(null)
-    const [urlDomain, setUrlDomain] = useState(null)
-    const [urlTitle, setUrlTitle] = useState(null)
-    const [urlDescription, setUrlDescription] = useState(null)
+    const [urlInvalid, setUrlInvalid] = useState(false)
+    const [urlData, setUrlData] = useState<any>(null)
     const [selectedTopicGroup, setSelectedTopicGroup] = useState('archetopics')
     const [selectedTopic, setSelectedTopic] = useState<any>(null)
     const [audioFile, setAudioFile] = useState<File>()
@@ -111,7 +109,6 @@ const CreatePostModal = (): JSX.Element => {
     const [duration, setDuration] = useState<string | number>('Undefined')
     const [loading, setLoading] = useState(false)
     const [saved, setSaved] = useState(false)
-    const [previewRenderKey, setPreviewRenderKey] = useState(0)
     const audioRecorderRef = useRef<any>(null)
     const audioChunksRef = useRef<any>([])
     const recordingIntervalRef = useRef<any>(null)
@@ -119,7 +116,6 @@ const CreatePostModal = (): JSX.Element => {
     const audioMBLimit = 5
 
     function updateValue(name, value) {
-        // console.log('updateValue: ', name, value)
         let resetState = {}
         if (name === 'postType') {
             resetState = {
@@ -132,10 +128,8 @@ const CreatePostModal = (): JSX.Element => {
                 topicGroup: { ...formData.topicGroup, value: '', state: 'default' },
                 topicImage: { ...formData.topicImage, value: '', state: 'default' },
             }
-            setUrlImage(null)
-            setUrlDomain(null)
-            setUrlTitle(null)
-            setUrlDescription(null)
+            setUrlData(null)
+            setUrlInvalid(false)
             setDuration('Undefined')
             setStartTime('')
             setEndTime('')
@@ -145,7 +139,6 @@ const CreatePostModal = (): JSX.Element => {
             [name]: { ...formData[name], value, state: 'default' },
             ...resetState,
         })
-        setPreviewRenderKey((k) => k + 1)
     }
 
     function findSpaces(query) {
@@ -163,7 +156,6 @@ const CreatePostModal = (): JSX.Element => {
     function addSpace(space) {
         setSpaceOptions([])
         setSelectedSpaces((s) => [...s, space])
-        setPreviewRenderKey((k) => k + 1)
     }
 
     function removeSpace(spaceId) {
@@ -172,21 +164,18 @@ const CreatePostModal = (): JSX.Element => {
 
     const scrapeURL = (urlString: string): void => {
         if (isValidUrl(urlString)) {
+            setUrlData(null)
+            setUrlInvalid(false)
             setUrlLoading(true)
             axios
                 .get(`${config.apiURL}/scrape-url?url=${urlString}`)
                 .then((res) => {
-                    setUrlDescription(res.data.description)
-                    setUrlDomain(res.data.domain)
-                    setUrlImage(res.data.image)
-                    setUrlTitle(res.data.title)
+                    setUrlData(res.data)
                     setUrlLoading(false)
-                    setPreviewRenderKey((k) => k + 1)
                 })
                 .catch((error) => console.log(error))
         } else {
-            console.log('invalid Url')
-            // setUrlFlashMessage('invalid Url')
+            setUrlInvalid(!!urlString)
         }
     }
 
@@ -314,10 +303,10 @@ const CreatePostModal = (): JSX.Element => {
                     eventStartTime: eventStartTime.value,
                     eventEndTime: eventEndTime.value,
                     url: url.value, // || null,
-                    urlImage,
-                    urlDomain,
-                    urlTitle,
-                    urlDescription,
+                    urlImage: urlData ? urlData.image : null,
+                    urlDomain: urlData ? urlData.domain : null,
+                    urlTitle: urlData ? urlData.title : null,
+                    urlDescription: urlData ? urlData.description : null,
                     topic: selectedTopic ? selectedTopic.name : topic.value,
                     topicGroup: selectedTopic ? selectedTopicGroup : null,
                     topicImage: selectedTopic ? selectedTopic.imagePath : null,
@@ -507,7 +496,7 @@ const CreatePostModal = (): JSX.Element => {
                                 <div id='date-time-start-wrapper'>
                                     <Input
                                         id='date-time-start'
-                                        title='Start time'
+                                        title='Start time (optional)'
                                         type='text'
                                         placeholder='select start time...'
                                         state={eventStartTime.state}
@@ -599,20 +588,34 @@ const CreatePostModal = (): JSX.Element => {
                         </Column>
                     )}
                     {postType.value === 'Url' && (
-                        <Input
-                            title='Url'
-                            type='text'
-                            placeholder='url...'
-                            style={{ marginBottom: 15 }}
-                            loading={urlLoading}
-                            state={url.state}
-                            errors={url.errors}
-                            value={url.value}
-                            onChange={(value) => {
-                                updateValue('url', value)
-                                scrapeURL(value)
-                            }}
-                        />
+                        <Column>
+                            <Input
+                                title='Url'
+                                type='text'
+                                placeholder='url...'
+                                style={{ marginBottom: 15 }}
+                                loading={urlLoading}
+                                state={url.state}
+                                errors={url.errors}
+                                value={url.value}
+                                onChange={(value) => {
+                                    updateValue('url', value)
+                                    scrapeURL(value)
+                                }}
+                            />
+                            {urlInvalid && <p className={styles.invalidUrl}>Invalid URL</p>}
+                            {urlData && (
+                                <Column className={styles.urlPreviewWrapper}>
+                                    <PostCardUrlPreview
+                                        url={url.value}
+                                        image={urlData.image}
+                                        domain={urlData.domain}
+                                        title={urlData.title}
+                                        description={urlData.description}
+                                    />
+                                </Column>
+                            )}
+                        </Column>
                     )}
                     {postType.value === 'Audio' && (
                         <Column>
@@ -772,55 +775,6 @@ const CreatePostModal = (): JSX.Element => {
                                 </Row>
                             ))}
                         </Row>
-                    )}
-                    {postType.value === 'Url' && (
-                        <Column style={{ margin: '20px 0 10px 0' }}>
-                            <h2>Post preview</h2>
-                            <PostCard
-                                key={previewRenderKey}
-                                location='preview'
-                                post={{
-                                    text:
-                                        postType.value === 'Url'
-                                            ? text.value
-                                            : text.value || '*sample text*',
-                                    type: postType.value.toLowerCase().split(' ').join('-'),
-                                    url: url.value,
-                                    urlImage,
-                                    urlDomain,
-                                    urlTitle,
-                                    urlDescription,
-                                    totalComments: 0,
-                                    totalLikes: 0,
-                                    totalRatings: 0,
-                                    totalReposts: 0,
-                                    totalLinks: 0,
-                                    Creator: {
-                                        handle: accountData.handle,
-                                        name: accountData.name,
-                                        flagImagePath: accountData.flagImagePath,
-                                    },
-                                    DirectSpaces: [
-                                        {
-                                            ...spaceData,
-                                            type: 'post',
-                                            state: 'active',
-                                        },
-                                        ...selectedSpaces.map((s) => {
-                                            return {
-                                                ...s,
-                                                type: 'post',
-                                                state: 'active',
-                                            }
-                                        }),
-                                    ],
-                                    GlassBeadGame: {
-                                        topic: topic.value,
-                                        GlassBeads: [],
-                                    },
-                                }}
-                            />
-                        </Column>
                     )}
                 </Column>
                 <Row style={{ marginTop: 40 }}>

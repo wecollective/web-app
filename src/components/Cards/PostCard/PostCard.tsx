@@ -47,7 +47,6 @@ import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
 import { ReactComponent as ClockIconSVG } from '@svgs/clock-solid.svg'
 import { ReactComponent as CalendarIconSVG } from '@svgs/calendar-days-solid.svg'
 import { ReactComponent as SuccessIconSVG } from '@svgs/check-circle-solid.svg'
-import { ReactComponent as FailIconSVG } from '@svgs/times-circle-regular.svg'
 
 const PostCard = (props: {
     post: any
@@ -97,7 +96,6 @@ const PostCard = (props: {
     const history = useHistory()
     const cookies = new Cookies()
     const isOwnPost = accountData && Creator && accountData.id === Creator.id
-    const urlPreview = urlImage || urlDomain || urlTitle || urlDescription
     const postSpaces = DirectSpaces.filter((space) => space.type === 'post' && space.id !== 1) // vs. 'repost'. todo: apply filter on backend
     const otherSpacesTitle = postSpaces
         .map((s) => s.handle)
@@ -268,15 +266,13 @@ const PostCard = (props: {
                                 </ShowMoreLess>
                             </Column>
                         )}
-                        {urlPreview && (
-                            <PostCardUrlPreview
-                                url={url}
-                                urlImage={urlImage}
-                                urlDomain={urlDomain}
-                                urlTitle={urlTitle}
-                                urlDescription={urlDescription}
-                            />
-                        )}
+                        <PostCardUrlPreview
+                            url={url}
+                            image={urlImage}
+                            domain={urlDomain}
+                            title={urlTitle}
+                            description={urlDescription}
+                        />
                     </Column>
                 )}
                 {type === 'audio' && (
