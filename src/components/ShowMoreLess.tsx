@@ -2,8 +2,12 @@ import React, { useEffect, useState, useRef } from 'react'
 import styles from '../styles/components/ShowMoreLess.module.scss'
 import { ReactComponent as ChevronIconSVG } from '../svgs/chevron-down-solid.svg'
 
-const ShowMoreLess = (props: { height: number; children: any }): JSX.Element => {
-    const { height, children } = props
+const ShowMoreLess = (props: {
+    height: number
+    gradientColor?: 'white' | 'grey'
+    children: any
+}): JSX.Element => {
+    const { height, gradientColor, children } = props
 
     const [overflow, setOverflow] = useState(false)
     const [expanded, setExpanded] = useState(false)
@@ -40,7 +44,9 @@ const ShowMoreLess = (props: { height: number; children: any }): JSX.Element => 
                 }}
             >
                 {children}
-                {overflow && !expanded && <div className={styles.gradient} />}
+                {overflow && !expanded && (
+                    <div className={`${styles.gradient} ${styles[gradientColor || 'white']}`} />
+                )}
             </div>
             {overflow && (
                 <div
@@ -56,6 +62,10 @@ const ShowMoreLess = (props: { height: number; children: any }): JSX.Element => 
             )}
         </div>
     )
+}
+
+ShowMoreLess.defaultProps = {
+    gradientColor: 'white',
 }
 
 export default ShowMoreLess

@@ -27,10 +27,8 @@ const DeletePostModal = (props: { postId: number; close: () => void }): JSX.Elem
                 .then(() => {
                     setLoading(false)
                     setSuccess(true)
-                    setTimeout(() => {
-                        setSpacePosts([...spacePosts.filter((p) => p.id !== postId)])
-                        close()
-                    }, 1000)
+                    setSpacePosts([...spacePosts.filter((p) => p.id !== postId)])
+                    setTimeout(() => close(), 1000)
                 })
                 .catch((error) => console.log(error))
         } else close()

@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useRef } from 'react'
-import { OverlayScrollbarsComponent as OverlayScrollbars } from 'overlayscrollbars-react'
 import { useLocation } from 'react-router-dom'
 import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
@@ -8,6 +7,7 @@ import SearchBar from '@components/SearchBar'
 import UserPagePostsFilters from '@pages/UserPage/UserPagePostsFilters'
 import PostCard from '@components/Cards/PostCard/PostCard'
 import SpacePagePostsPlaceholder from '@pages/SpacePage/SpacePagePostsPlaceholder'
+import Scrollbars from '@src/components/Scrollbars'
 import Row from '@components/Row'
 import Column from '@components/Column'
 import LoadingWheel from '@components/LoadingWheel'
@@ -34,19 +34,24 @@ const UserPagePosts = ({ match }: { match: { params: { userHandle: string } } })
         updateUserPostsFilter,
     } = useContext(UserContext)
     const location = useLocation()
-    const OSRef = useRef<OverlayScrollbars>(null)
-    const OSOptions = {
-        className: 'os-theme-none',
-        callbacks: {
-            onScroll: () => {
-                // load next spaces when scroll bottom reached
-                const instance = OSRef!.current!.osInstance()
-                const scrollInfo = instance!.scroll()
-                if (scrollInfo.ratio.y > 0.999 && userPostsPaginationHasMore) {
-                    getUserPosts(userData.id, userPostsPaginationOffset)
-                }
-            },
-        },
+    // const OSRef = useRef<OverlayScrollbars>(null)
+    // const OSOptions = {
+    //     className: 'os-theme-none',
+    //     callbacks: {
+    //         onScroll: () => {
+    //             // load next spaces when scroll bottom reached
+    //             const instance = OSRef!.current!.osInstance()
+    //             const scrollInfo = instance!.scroll()
+    //             if (scrollInfo.ratio.y > 0.999 && userPostsPaginationHasMore) {
+    //                 getUserPosts(userData.id, userPostsPaginationOffset)
+    //             }
+    //         },
+    //     },
+    // }
+
+    function onScrollBottom() {
+        if (!userPostsLoading && !nextUserPostsLoading && userPostsPaginationHasMore)
+            getUserPosts(userData.id, userPostsPaginationOffset)
     }
 
     useEffect(() => {
@@ -73,10 +78,10 @@ const UserPagePosts = ({ match }: { match: { params: { userHandle: string } } })
                 <UserPagePostsFilters />
             </Row>
             <Row className={styles.content}>
-                <OverlayScrollbars
-                    className={`${styles.posts} os-host-flexbox scrollbar-theme`}
-                    options={OSOptions}
-                    ref={OSRef}
+                <Scrollbars
+                    id='user-posts-scrollbars'
+                    className={styles.posts}
+                    onScrollBottom={onScrollBottom}
                 >
                     {userPostsLoading ? (
                         <SpacePagePostsPlaceholder />
@@ -88,7 +93,7 @@ const UserPagePosts = ({ match }: { match: { params: { userHandle: string } } })
                                         <PostCard
                                             post={post}
                                             key={post.id}
-                                            location='space-posts'
+                                            location='user-posts'
                                             style={{ marginBottom: 15 }}
                                         />
                                     ))}
@@ -105,7 +110,7 @@ const UserPagePosts = ({ match }: { match: { params: { userHandle: string } } })
                             )}
                         </>
                     )}
-                </OverlayScrollbars>
+                </Scrollbars>
             </Row>
         </Column>
     )

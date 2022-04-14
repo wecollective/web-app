@@ -4,8 +4,8 @@ import gfm from 'remark-gfm'
 import { v4 as uuidv4 } from 'uuid'
 import styles from '@styles/components/Markdown.module.scss'
 
-const Markdown = (props: { text: string }): JSX.Element => {
-    const { text } = props
+const Markdown = (props: { text: string; fontSize?: number; lineHeight?: string }): JSX.Element => {
+    const { text, fontSize, lineHeight } = props
     const id = uuidv4()
     useEffect(() => {
         const markdown = document.getElementById(id)
@@ -18,10 +18,15 @@ const Markdown = (props: { text: string }): JSX.Element => {
         }
     }, [])
     return (
-        <div className={styles.markdown} id={id}>
+        <div className={styles.markdown} id={id} style={{ fontSize, lineHeight }}>
             <ReactMarkdown plugins={[gfm]}>{text}</ReactMarkdown>
         </div>
     )
+}
+
+Markdown.defaultProps = {
+    fontSize: 16,
+    lineHeight: '25px',
 }
 
 export default Markdown

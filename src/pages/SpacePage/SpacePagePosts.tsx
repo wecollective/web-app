@@ -161,7 +161,11 @@ const SpacePagePosts = ({ match }: { match: { params: { spaceHandle: string } } 
             )}
             <Row className={styles.content}>
                 {showPostList && (
-                    <Scrollbars className={styles.posts} onScrollBottom={onScrollBottom}>
+                    <Scrollbars
+                        id='space-posts-scrollbars'
+                        className={styles.posts}
+                        onScrollBottom={onScrollBottom}
+                    >
                         {accountDataLoading || spaceDataLoading || spacePostsLoading ? (
                             <SpacePagePostsPlaceholder />
                         ) : (

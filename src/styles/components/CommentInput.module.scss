@@ -1,0 +1,26 @@
+@import '@styles/Variables';
+
+.wrapper {
+    margin-top: 15px;
+
+    textarea {
+        outline: none;
+        border: none;
+        width: 100%;
+        margin: 0 8px;
+        padding: 10px 15px;
+        border-radius: 20px;
+        font-size: 14px;
+        line-height: 20px;
+        background-color: $grey1;
+        transition-property: box-shadow, background-color;
+        transition-duration: 0.3s, 1s;
+
+        &.error { box-shadow: 0 0 0 3px $red }
+
+        &:hover {
+            box-shadow: 0 0 0 3px $blue9;
+            background-color: white;
+        }
+    }
+}

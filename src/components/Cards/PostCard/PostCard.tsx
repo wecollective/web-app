@@ -27,7 +27,7 @@ import PostCardLikeModal from '@components/Cards/PostCard/PostCardLikeModal'
 import PostCardRepostModal from '@components/Cards/PostCard/PostCardRepostModal'
 import PostCardRatingModal from '@components/Cards/PostCard/PostCardRatingModal'
 import PostCardLinkModal from '@components/Cards/PostCard/PostCardLinkModal'
-import DeletePostModal from '@components/Cards/PostCard/DeletePostModal'
+import DeletePostModal from '@components/modals/DeletePostModal'
 import {
     timeSinceCreated,
     dateCreated,
@@ -639,8 +639,10 @@ const PostCard = (props: {
                 {commentsOpen && (
                     <PostCardComments
                         postId={postData.id}
-                        totalComments={totalComments}
-                        setTotalComments={() => null}
+                        location={location}
+                        incrementTotalComments={(value) =>
+                            setPostData({ ...postData, totalComments: totalComments + value })
+                        }
                     />
                 )}
                 {deletePostModalOpen && (

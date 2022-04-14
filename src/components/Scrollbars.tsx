@@ -2,14 +2,23 @@ import React, { useEffect, useRef } from 'react'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
 
 const Scrollbars = (props: {
-    children: any
+    id?: string
     className?: string
     onScrollBottom?: () => void
     onScrollTop?: () => void
     autoScrollToBottom?: boolean
     style?: any
+    children: any
 }): JSX.Element => {
-    const { children, className, onScrollBottom, onScrollTop, autoScrollToBottom, style } = props
+    const {
+        id,
+        className,
+        onScrollBottom,
+        onScrollTop,
+        autoScrollToBottom,
+        style,
+        children,
+    } = props
     const ref = useRef<OverlayScrollbarsComponent>(null)
     const OSOptions = {
         className: 'os-theme-none',
@@ -32,6 +41,7 @@ const Scrollbars = (props: {
 
     return (
         <OverlayScrollbarsComponent
+            id={id}
             className={`${className} os-host-flexbox scrollbar-theme`}
             options={OSOptions}
             ref={ref}
@@ -43,6 +53,7 @@ const Scrollbars = (props: {
 }
 
 Scrollbars.defaultProps = {
+    id: null,
     className: null,
     onScrollBottom: null,
     onScrollTop: null,

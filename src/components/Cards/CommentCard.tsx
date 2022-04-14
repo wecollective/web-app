@@ -1,114 +1,138 @@
-import React, { useContext, useState, useRef } from 'react'
-import axios from 'axios'
-import config from '@src/Config'
+import React, { useContext, useState } from 'react'
 import styles from '@styles/components/cards/CommentCard.module.scss'
+import { Link } from 'react-router-dom'
+import { timeSinceCreated, dateCreated, resizeTextArea } from '@src/Helpers'
 import { AccountContext } from '@contexts/AccountContext'
-import { SpaceContext } from '@contexts/SpaceContext'
+import Column from '@src/components/Column'
+import Row from '@src/components/Row'
 import FlagImage from '@components/FlagImage'
-import CommentCardComment from '@components/Cards/CommentCardComment'
-import { resizeTextArea } from '@src/Helpers'
+import ShowMoreLess from '@components/ShowMoreLess'
+import Markdown from '@components/Markdown'
+import CommentInput from '@components/CommentInput'
+import DeleteCommentModal from '@components/modals/DeleteCommentModal'
+
+const Comment = (props: {
+    comment: any
+    parentCommentId?: number | null
+    toggleReplyInput: () => void
+    removeComment: (commentId: number, parentCommentId: number | null) => void
+}): JSX.Element => {
+    const { comment, parentCommentId, toggleReplyInput, removeComment } = props
+    const { id, text, createdAt, Creator } = comment
+    const { loggedIn, accountData } = useContext(AccountContext)
+    const [deleteCommentModalOpen, setDeleteCommentModalOpen] = useState(false)
+    const isOwnComment = Creator.id === accountData.id
+
+    return (
+        <Column className={styles.comment}>
+            <Row>
+                <Link to={`/u/${Creator.handle}`}>
+                    <FlagImage type='user' size={30} imagePath={Creator.flagImagePath} />
+                </Link>
+                <Column className={styles.text}>
+                    <Row style={{ marginBottom: 2 }}>
+                        <Link to={`/u/${Creator.handle}`} style={{ marginRight: 5 }}>
+                            <p style={{ fontWeight: 600 }}>{Creator.name}</p>
+                        </Link>
+                        <p className='grey' title={dateCreated(createdAt)}>
+                            {`• ${timeSinceCreated(createdAt)}`}
+                        </p>
+                    </Row>
+                    <ShowMoreLess height={150} gradientColor='grey'>
+                        <Markdown text={text} fontSize={14} lineHeight='22px' />
+                    </ShowMoreLess>
+                </Column>
+            </Row>
+            {loggedIn && (
+                <Row className={styles.buttons}>
+                    <button type='button' onClick={toggleReplyInput}>
+                        Reply
+                    </button>
+                    {isOwnComment && (
+                        <button type='button' onClick={() => setDeleteCommentModalOpen(true)}>
+                            Delete
+                        </button>
+                    )}
+                </Row>
+            )}
+            {deleteCommentModalOpen && (
+                <DeleteCommentModal
+                    commentId={id}
+                    parentCommentId={parentCommentId || null}
+                    removeComment={removeComment}
+                    close={() => setDeleteCommentModalOpen(false)}
+                />
+            )}
+        </Column>
+    )
+}
+
+Comment.defaultProps = {
+    parentCommentId: null,
+}
 
 const CommentCard = (props: {
     comment: any
-    totalComments: number | undefined
-    setTotalComments: (payload: number) => void
-    getPostComments: () => void
+    scrollToInput: (input: any) => void
+    submit: (text: string, parentCommentId?: number) => void
+    removeComment: (commentId: number, parentCommentId: number | null) => void
 }): JSX.Element => {
-    const { comment, totalComments, setTotalComments, getPostComments } = props
-    const { accountData, loggedIn, setAlertModalOpen, setAlertMessage } = useContext(AccountContext)
-    const { spaceData } = useContext(SpaceContext)
-
+    const { comment, scrollToInput, submit, removeComment } = props
     const [replyInputOpen, setReplyInputOpen] = useState(false)
     const [newReply, setNewReply] = useState('')
-    const [newReplyError, setNewReplyError] = useState(false)
+    const [replyError, setReplyError] = useState(false)
 
-    const replyInput = useRef<HTMLTextAreaElement>(null)
-
-    function openReplyInput() {
-        if (loggedIn) {
-            Promise.all([setReplyInputOpen(!replyInputOpen)]).then(() => {
-                const { current } = replyInput
-                if (current && !replyInputOpen) {
-                    const yOffset = window.screen.height / 2.3
-                    const top = current.getBoundingClientRect().top + window.pageYOffset - yOffset
-                    window.scrollTo({ top, behavior: 'smooth' })
-                }
-            })
-        } else {
-            setAlertModalOpen(true)
-            setAlertMessage('Log in to reply')
+    function validateComment(text) {
+        const invalid = text.length < 1 || text.length > 10000
+        if (invalid) {
+            setReplyError(true)
+            return false
         }
+        return true
     }
 
-    function submitReply(e) {
-        e.preventDefault()
-        const invalidReply = newReply.length < 1 || newReply.length > 10000
-        if (invalidReply) setNewReplyError(true)
-        else {
-            axios
-                .post(`${config.apiURL}/submit-reply`, {
-                    accountId: accountData.id,
-                    accountHandle: accountData.handle,
-                    accountName: accountData.name,
-                    holonId: window.location.pathname.includes('/s/') ? spaceData.id : null,
-                    postId: comment.postId,
-                    parentCommentId: comment.id,
-                    text: newReply,
-                })
-                .then((res) => {
-                    if (res.data === 'success' && totalComments) {
-                        setTotalComments(totalComments + 1)
-                        setReplyInputOpen(false)
-                        setNewReply('')
-                        setTimeout(() => {
-                            getPostComments()
-                        }, 300)
-                    }
-                })
-        }
+    function toggleReplyInput() {
+        Promise.all([setReplyInputOpen(!replyInputOpen)]).then(() => {
+            if (!replyInputOpen) {
+                const replyInput = document.getElementById(`reply-input-${comment.id}`)
+                if (replyInput) scrollToInput(replyInput)
+            }
+        })
     }
 
     return (
         <div className={styles.wrapper}>
-            <CommentCardComment
+            <Comment
                 comment={comment}
-                totalComments={totalComments || 0}
-                setTotalComments={setTotalComments}
-                getPostComments={getPostComments}
-                openReplyInput={openReplyInput}
+                toggleReplyInput={toggleReplyInput}
+                removeComment={removeComment}
             />
-            {comment.Replies.map((reply) => (
-                <CommentCardComment
-                    key={reply.id}
-                    comment={reply}
-                    totalComments={totalComments || 0}
-                    setTotalComments={setTotalComments}
-                    getPostComments={getPostComments}
-                    openReplyInput={openReplyInput}
-                />
-            ))}
-            {replyInputOpen && (
-                <div className={styles.replyInput}>
-                    <FlagImage type='user' size={35} imagePath={accountData.flagImagePath} />
-                    <form className={styles.inputWrapper} onSubmit={submitReply}>
-                        <textarea
-                            ref={replyInput}
-                            className={`${styles.input} ${newReplyError && styles.error}`}
-                            rows={1}
-                            value={newReply}
-                            placeholder='Write a reply...'
-                            onChange={(e) => {
-                                setNewReply(e.target.value)
-                                setNewReplyError(false)
-                                resizeTextArea(e.target)
-                            }}
-                        />
-                        <button className={styles.button} type='submit'>
-                            Reply
-                        </button>
-                    </form>
-                </div>
-            )}
+            <Column style={{ marginLeft: 36 }}>
+                {comment.Replies.map((reply) => (
+                    <Comment
+                        key={reply.id}
+                        comment={reply}
+                        parentCommentId={comment.id}
+                        toggleReplyInput={toggleReplyInput}
+                        removeComment={removeComment}
+                    />
+                ))}
+                {replyInputOpen && (
+                    <CommentInput
+                        id={`reply-input-${comment.id}`}
+                        value={newReply}
+                        placeholder='new reply...'
+                        error={replyError}
+                        onChange={(e) => {
+                            setNewReply(e.target.value)
+                            setReplyError(false)
+                            resizeTextArea(e.target)
+                        }}
+                        submit={() => validateComment(newReply) && submit(newReply, comment.id)}
+                        style={{ marginBottom: 10 }}
+                    />
+                )}
+            </Column>
         </div>
     )
 }
