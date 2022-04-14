@@ -19,7 +19,7 @@ const CommentInput = (props: {
 
     return (
         <Row id={id} className={styles.wrapper} style={style}>
-            <FlagImage type='user' size={40} imagePath={accountData.flagImagePath} />
+            <FlagImage type='user' size={35} imagePath={accountData.flagImagePath} />
             <Row style={{ width: '100%' }}>
                 <textarea
                     className={error ? styles.error : ''}
@@ -28,7 +28,7 @@ const CommentInput = (props: {
                     value={value}
                     onChange={(e) => onChange(e)}
                 />
-                <Button color='blue' size='medium' text='Post' onClick={submit} />
+                <Button color='blue' size='medium-large' text='Post' onClick={submit} />
             </Row>
         </Row>
     )

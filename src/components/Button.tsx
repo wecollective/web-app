@@ -6,7 +6,7 @@ const Button = (props: {
     text?: string
     icon?: JSX.Element
     color: 'blue' | 'aqua' | 'red' | 'purple' | 'grey' | 'light-green'
-    size?: 'small' | 'medium' | 'large'
+    size?: 'small' | 'medium' | 'medium-large' | 'large'
     style?: any
     disabled?: boolean
     loading?: boolean

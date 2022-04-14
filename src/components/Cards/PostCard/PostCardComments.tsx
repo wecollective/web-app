@@ -112,6 +112,7 @@ const PostCardComments = (props: {
                         resizeTextArea(e.target)
                     }}
                     submit={() => validateComment(newComment) && submitComment(newComment)}
+                    style={{ marginTop: 15 }}
                 />
             )}
             {loading && (
