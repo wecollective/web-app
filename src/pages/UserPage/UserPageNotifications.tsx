@@ -16,7 +16,7 @@ const UserPageNotifications = ({
 }): JSX.Element => {
     const { params } = match
     const { userHandle } = params
-    const { accountData, accountDataLoading } = useContext(AccountContext)
+    const { accountData, accountDataLoading, setAccountData } = useContext(AccountContext)
     const { userData, getUserData, setSelectedUserSubPage, isOwnAccount } = useContext(UserContext)
     const cookies = new Cookies()
 
@@ -35,7 +35,8 @@ const UserPageNotifications = ({
                 .then((res) => {
                     setNotifications(res.data)
                     setNotificationsLoading(false)
-                    // mark notifications as seen in db
+                    // mark notifications as seen
+                    setAccountData({ ...accountData, unseenNotifications: 0 })
                     const ids = res.data.map((notification) => notification.id)
                     axios.post(`${config.apiURL}/mark-notifications-seen`, ids, authHeader)
                 })
