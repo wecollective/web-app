@@ -11,7 +11,7 @@ import config from '@src/Config'
 import { IPost } from '@src/Interfaces'
 
 const SpacePagePostMap = (): JSX.Element => {
-    const { accountData, loggedIn } = useContext(AccountContext)
+    const { accountData, accountDataLoading, loggedIn } = useContext(AccountContext)
     const { spaceData, spacePostsFilters, fullScreen } = useContext(SpaceContext)
     const { sortBy, sortOrder, timeRange, type, depth, searchQuery } = spacePostsFilters
     const [postMapData, setPostMapData] = useState([])
@@ -33,7 +33,7 @@ const SpacePagePostMap = (): JSX.Element => {
         axios
             .get(
                 /* prettier-ignore */
-                `${config.apiURL}/space-posts?accountId=${loggedIn ? accountData.id : null
+                `${config.apiURL}/posts-map-data?accountId=${loggedIn ? accountData.id : null
                 }&spaceId=${spaceData.id
                 }&sortBy=${sortBy
                 }&sortOrder=${sortOrder
@@ -586,13 +586,13 @@ const SpacePagePostMap = (): JSX.Element => {
         }
     }
 
-    useEffect(() => {
-        createCanvas()
-    }, [])
+    useEffect(() => createCanvas(), [])
 
     useEffect(() => {
-        getPostMapData(postMapPaginationLimit)
-    }, [spaceData.id, spacePostsFilters])
+        if (!accountDataLoading && spaceData.id) {
+            getPostMapData(postMapPaginationLimit)
+        }
+    }, [accountDataLoading, spaceData.id, spacePostsFilters])
 
     useEffect(() => {
         if (postMapData) updateMap(postMapData)

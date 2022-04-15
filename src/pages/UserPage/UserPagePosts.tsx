@@ -34,20 +34,6 @@ const UserPagePosts = ({ match }: { match: { params: { userHandle: string } } })
         updateUserPostsFilter,
     } = useContext(UserContext)
     const location = useLocation()
-    // const OSRef = useRef<OverlayScrollbars>(null)
-    // const OSOptions = {
-    //     className: 'os-theme-none',
-    //     callbacks: {
-    //         onScroll: () => {
-    //             // load next spaces when scroll bottom reached
-    //             const instance = OSRef!.current!.osInstance()
-    //             const scrollInfo = instance!.scroll()
-    //             if (scrollInfo.ratio.y > 0.999 && userPostsPaginationHasMore) {
-    //                 getUserPosts(userData.id, userPostsPaginationOffset)
-    //             }
-    //         },
-    //     },
-    // }
 
     function onScrollBottom() {
         if (!userPostsLoading && !nextUserPostsLoading && userPostsPaginationHasMore)
