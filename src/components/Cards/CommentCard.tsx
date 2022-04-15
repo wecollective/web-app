@@ -96,7 +96,7 @@ const CommentCard = (props: {
             if (!replyInputOpen) {
                 const replyInput = document.getElementById(`reply-input-${comment.id}`)
                 if (replyInput) scrollToInput(replyInput)
-            }
+            } else setReplyError(false)
         })
     }
 
@@ -128,7 +128,12 @@ const CommentCard = (props: {
                             setReplyError(false)
                             resizeTextArea(e.target)
                         }}
-                        submit={() => validateComment(newReply) && submit(newReply, comment.id)}
+                        submit={() => {
+                            if (validateComment(newReply)) {
+                                submit(newReply, comment.id)
+                                setNewReply('')
+                            }
+                        }}
                         style={{ marginBottom: 10 }}
                     />
                 )}
