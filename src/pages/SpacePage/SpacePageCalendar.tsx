@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import axios from 'axios'
 import config from '@src/Config'
 import { v4 as uuidv4 } from 'uuid'
@@ -12,26 +13,22 @@ import Scrollbars from '@components/Scrollbars'
 import Modal from '@components/Modal'
 import PostCard from '@components/Cards/PostCard/PostCard'
 import LoadingWheel from '@components/LoadingWheel'
+import SpaceNotFound from '@pages/SpaceNotFound'
 import { ReactComponent as LeftChevronSVG } from '@svgs/chevron-left-solid.svg'
 import { ReactComponent as RightChevronSVG } from '@svgs/chevron-right-solid.svg'
 
-const SpacePageCalendar = ({
-    match,
-}: {
-    match: { params: { spaceHandle: string } }
-}): JSX.Element => {
-    const { params } = match
-    const { spaceHandle } = params
-    const { accountData, accountDataLoading } = useContext(AccountContext)
-    const { spaceData, getSpaceData, setSelectedSpaceSubPage } = useContext(SpaceContext)
-    const { handle } = spaceData
+const SpacePageCalendar = (): JSX.Element => {
+    const { accountData } = useContext(AccountContext)
+    const { spaceData, spaceNotFound } = useContext(SpaceContext)
     const [dateOffset, setDateOffset] = useState(0)
     const [monthText, setMonthText] = useState('')
     const [yearText, setYearText] = useState(0)
     const [squares, setSquares] = useState<any[]>([])
     const [selectedPost, setSelectedPost] = useState<any>(null)
     const [eventModalOpen, setEventModalOpen] = useState(false)
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
+    const location = useLocation()
+    const spaceHandle = location.pathname.split('/')[2]
 
     function openEventModal(postId) {
         setSelectedPost(null)
@@ -42,26 +39,20 @@ const SpacePageCalendar = ({
     }
 
     useEffect(() => {
-        setSelectedSpaceSubPage('calendar')
-        if (!accountDataLoading && spaceHandle !== handle) getSpaceData(spaceHandle, false)
-    }, [accountDataLoading, spaceHandle])
-
-    useEffect(() => {
-        if (!accountDataLoading) {
-            setLoading(true)
-            setSquares([])
-            const date = new Date()
-            if (dateOffset !== 0) date.setMonth(new Date().getMonth() + dateOffset)
-            const day = date.getDate()
-            const month = date.getMonth()
-            const year = date.getFullYear()
-            setMonthText(monthNames[month])
-            setYearText(year)
-            // get events
+        setLoading(true)
+        setSquares([])
+        const date = new Date()
+        if (dateOffset !== 0) date.setMonth(new Date().getMonth() + dateOffset)
+        const day = date.getDate()
+        const month = date.getMonth()
+        const year = date.getFullYear()
+        setMonthText(monthNames[month])
+        setYearText(year)
+        if (spaceData.handle === spaceHandle) {
             axios
                 .get(
-                    `${config.apiURL}/space-events?spaceHandle=${spaceHandle}&year=${+year}&month=${
-                        +month + 1
+                    `${config.apiURL}/space-events?spaceHandle=${spaceHandle}&year=${year}&month=${
+                        month + 1
                     }`
                 )
                 .then((res) => {
@@ -104,8 +95,9 @@ const SpacePageCalendar = ({
                     setLoading(false)
                 })
         }
-    }, [accountDataLoading, spaceHandle, dateOffset])
+    }, [spaceData.handle, dateOffset])
 
+    if (spaceNotFound) return <SpaceNotFound />
     return (
         <Column className={styles.wrapper}>
             <Column centerX className={styles.content}>

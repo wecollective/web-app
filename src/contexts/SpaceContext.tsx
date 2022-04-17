@@ -65,12 +65,12 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     const [fullScreen, setFullScreen] = useState(true)
 
     // loading state
-    const [spaceDataLoading, setSpaceDataLoading] = useState(false)
-    const [spacePostsLoading, setSpacePostsLoading] = useState(false)
+    const [spaceNotFound, setSpaceNotFound] = useState(false)
+    const [spacePostsLoading, setSpacePostsLoading] = useState(true)
     const [nextSpacePostsLoading, setNextSpacePostsLoading] = useState(false)
-    const [spaceSpacesLoading, setSpaceSpacesLoading] = useState(false)
+    const [spaceSpacesLoading, setSpaceSpacesLoading] = useState(true)
     const [nextSpaceSpacesLoading, setNextSpaceSpacesLoading] = useState(false)
-    const [spacePeopleLoading, setSpacePeopleLoading] = useState(false)
+    const [spacePeopleLoading, setSpacePeopleLoading] = useState(true)
     const [nextSpacePeopleLoading, setNextSpacePeopleLoading] = useState(false)
 
     const [spacePosts, setSpacePosts] = useState<any[]>([])
@@ -93,14 +93,21 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     const [spacePeoplePaginationOffset, setSpacePeoplePaginationOffset] = useState(0)
     const [spacePeoplePaginationHasMore, setSpacePeoplePaginationHasMore] = useState(true)
 
-    function getSpaceData(handle, returnFunction) {
+    function getSpaceData(handle: string) {
         console.log(`SpaceContext: getSpaceData (${handle})`)
-        setSpaceDataLoading(true)
-        axios.get(`${config.apiURL}/space-data?handle=${handle}`).then((res) => {
-            setSpaceData(res.data || defaults.spaceData)
-            setSpaceDataLoading(false)
-            if (returnFunction) returnFunction(res.data.id)
-        })
+        setSpaceNotFound(false)
+        axios
+            .get(`${config.apiURL}/space-data?handle=${handle}`)
+            .then((res) => {
+                if (loggedIn) {
+                    setIsFollowing(accountData.FollowedHolons.some((s) => s.id === res.data.id))
+                    setIsModerator(accountData.ModeratedHolons.some((s) => s.id === res.data.id))
+                }
+                setSpaceData(res.data || defaults.spaceData)
+            })
+            .catch((error) => {
+                if (error.response.status === 404) setSpaceNotFound(true)
+            })
     }
 
     function getSpacePosts(spaceId, offset, limit) {
@@ -244,13 +251,6 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         setSpacePeoplePaginationHasMore(true)
     }
 
-    useEffect(() => {
-        const following = accountData.FollowedHolons.some((s) => s.handle === spaceData.handle)
-        const moderator = accountData.ModeratedHolons.some((s) => s.handle === spaceData.handle)
-        setIsFollowing(following)
-        setIsModerator(moderator)
-    }, [loggedIn, spaceData.id])
-
     return (
         <SpaceContext.Provider
             value={{
@@ -264,13 +264,15 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 fullScreen,
                 setFullScreen,
 
-                spaceDataLoading,
+                spaceNotFound,
                 spacePostsLoading,
                 setSpacePostsLoading,
                 nextSpacePostsLoading,
                 spaceSpacesLoading,
+                setSpaceSpacesLoading,
                 nextSpaceSpacesLoading,
                 spacePeopleLoading,
+                setSpacePeopleLoading,
                 nextSpacePeopleLoading,
 
                 spacePosts,

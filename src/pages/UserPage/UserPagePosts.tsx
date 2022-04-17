@@ -6,7 +6,7 @@ import styles from '@styles/pages/UserPage/UserPagePosts.module.scss'
 import SearchBar from '@components/SearchBar'
 import UserPagePostsFilters from '@pages/UserPage/UserPagePostsFilters'
 import PostCard from '@components/Cards/PostCard/PostCard'
-import SpacePagePostsPlaceholder from '@pages/SpacePage/SpacePagePostsPlaceholder'
+import PostListPlaceholder from '@components/PostListPlaceholder'
 import Scrollbars from '@src/components/Scrollbars'
 import Row from '@components/Row'
 import Column from '@components/Column'
@@ -70,7 +70,7 @@ const UserPagePosts = ({ match }: { match: { params: { userHandle: string } } })
                     onScrollBottom={onScrollBottom}
                 >
                     {userPostsLoading ? (
-                        <SpacePagePostsPlaceholder />
+                        <PostListPlaceholder />
                     ) : (
                         <>
                             {userPosts.length ? (

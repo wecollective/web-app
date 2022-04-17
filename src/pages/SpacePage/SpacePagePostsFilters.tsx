@@ -1,5 +1,6 @@
 import React, { useContext } from 'react'
 import { SpaceContext } from '@contexts/SpaceContext'
+import styles from '@styles/pages/SpacePage/SpacePageFilters.module.scss'
 import DropDownMenu from '@components/DropDown'
 import Row from '@components/Row'
 
@@ -7,7 +8,7 @@ const SpacePagePostsFilters = (): JSX.Element => {
     const { spacePostsFilters, updateSpacePostsFilter } = useContext(SpaceContext)
     const { type, sortBy, sortOrder, timeRange, depth, view } = spacePostsFilters
     return (
-        <Row style={{ width: '100%' }}>
+        <Row className={styles.wrapper}>
             <DropDownMenu
                 title='Type'
                 options={['All Types', 'Text', 'Url', 'Audio', 'Event', 'Glass Bead Game']} // 'Prism'

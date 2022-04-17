@@ -1,5 +1,6 @@
 import React, { useContext } from 'react'
 import { SpaceContext } from '@contexts/SpaceContext'
+import styles from '@styles/pages/SpacePage/SpacePageFilters.module.scss'
 import DropDownMenu from '@components/DropDown'
 import Row from '@components/Row'
 
@@ -8,7 +9,7 @@ const SpacePagePeopleFilters = (): JSX.Element => {
     const { sortBy, sortOrder, timeRange } = spacePeopleFilters
 
     return (
-        <Row style={{ width: '100%' }}>
+        <Row className={styles.wrapper}>
             <DropDownMenu
                 title='Sort By'
                 options={['Posts', 'Comments', 'Date']}

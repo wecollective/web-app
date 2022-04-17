@@ -1,11 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
-import axios from 'axios'
-import { AccountContext } from '@contexts/AccountContext'
+import { useLocation } from 'react-router-dom'
 import { SpaceContext } from '@contexts/SpaceContext'
-import config from '@src/Config'
 import styles from '@styles/pages/SpacePage/SpacePageSettings.module.scss'
-import NotificationCard from '@components/Cards/NotificationCard'
-// import SpaceNotificationCard from '@components/Cards/SpaceNotificationCard'
 import Button from '@components/Button'
 import ShowMoreLess from '@components/ShowMoreLess'
 import Markdown from '@components/Markdown'
@@ -20,36 +16,15 @@ import ParentSpaceRequestModal from '@src/components/modals/ParentSpaceRequestMo
 import RemoveParentSpaceModal from '@src/components/modals/RemoveParentSpaceModal'
 import RemoveChildSpaceModal from '@src/components/modals/RemoveChildSpaceModal'
 import DeleteSpaceModal from '@src/components/modals/DeleteSpaceModal'
+import SpaceNotFound from '@pages/SpaceNotFound'
 
-const SpacePageSettings = ({
-    match,
-}: {
-    match: { params: { spaceHandle: string } }
-}): JSX.Element => {
-    const { params } = match
-    const { spaceHandle } = params
-    const {
-        // accountData,
-        accountDataLoading,
-        // setSettingModalType,
-        // setSettingModalOpen,
-    } = useContext(AccountContext)
-    const {
-        spaceData,
-        getSpaceData,
-        spaceDataLoading,
-        // setSpaceData,
-        isModerator,
-        setSelectedSpaceSubPage,
-    } = useContext(SpaceContext)
-
-    const [selectedSection, setSelectedSection] = useState('settings')
-    const [requests, setRequests] = useState([])
-
-    // modals
-    const [updateSpaceHandleModalOpen, setUpdateSpaceHandleModalOpen] = useState(false)
-    const [updateSpaceNameModalOpen, setUpdateSpaceNameModalOpen] = useState(false)
-    const [updateSpaceDescriptionModalOpen, setUpdateSpaceDescriptionModalOpen] = useState(false)
+const SpacePageSettings = ({ history }): JSX.Element => {
+    const { spaceData, spaceNotFound, isModerator } = useContext(SpaceContext)
+    const location = useLocation()
+    const spaceHandle = location.pathname.split('/')[2]
+    const [spaceHandleModalOpen, setSpaceHandleModalOpen] = useState(false)
+    const [spaceNameModalOpen, setSpaceNameModalOpen] = useState(false)
+    const [spaceDescriptionModalOpen, setSpaceDescriptionModalOpen] = useState(false)
     const [inviteSpaceModeratorModalOpen, setInviteSpaceModeratorModalOpen] = useState(false)
     const [removeSpaceModeratorModalOpen, setRemoveSpaceModeratorModalOpen] = useState(false)
     const [parentSpaceRequestModalOpen, setParentSpaceRequestModalOpen] = useState(false)
@@ -57,209 +32,142 @@ const SpacePageSettings = ({
     const [removeChildSpaceModalOpen, setRemoveChildSpaceModalOpen] = useState(false)
     const [deleteSpaceModalOpen, setDeleteSpaceModalOpen] = useState(false)
 
-    // function getRequestsData() {
-    //     axios
-    //         .get(`${config.apiURL}/holon-requests?holonId=${spaceData.id}`)
-    //         .then((res) => setRequests(res.data))
-    // }
-
     useEffect(() => {
-        setSelectedSpaceSubPage('settings')
-        if (!accountDataLoading && spaceHandle !== spaceData.handle) {
-            getSpaceData(spaceHandle, false)
-        }
-    }, [accountDataLoading, isModerator, spaceHandle])
+        if (spaceData.handle === spaceHandle && !isModerator)
+            history.push(`/s/${spaceHandle}/posts`)
+    }, [spaceData.handle])
 
-    // useEffect(() => {
-    //     if (selectedSection === 'requests') getRequestsData()
-    // }, [selectedSection])
-
+    if (spaceNotFound) return <SpaceNotFound />
     return (
         <Column className={styles.wrapper}>
-            <Column className={styles.content}>
-                <Row centerY>
-                    <h1>Handle:</h1>
-                    <p>{spaceData.handle}</p>
-                    <Button
-                        text='Edit'
-                        color='blue'
-                        size='medium'
-                        onClick={() => setUpdateSpaceHandleModalOpen(true)}
-                    />
-                    {updateSpaceHandleModalOpen && (
-                        <UpdateSpaceHandleModal
-                            close={() => setUpdateSpaceHandleModalOpen(false)}
+            {spaceData.handle !== spaceHandle || !isModerator ? (
+                <p>Space data loading... </p>
+            ) : (
+                <Column className={styles.content}>
+                    <Row centerY>
+                        <h1>Handle:</h1>
+                        <p>{spaceData.handle}</p>
+                        <Button
+                            text='Edit'
+                            color='blue'
+                            size='medium'
+                            onClick={() => setSpaceHandleModalOpen(true)}
                         />
-                    )}
-                </Row>
-                <Row centerY>
-                    <h1>Name:</h1>
-                    <p>{spaceData.name}</p>
-                    <Button
-                        text='Edit'
-                        color='blue'
-                        size='medium'
-                        onClick={() => setUpdateSpaceNameModalOpen(true)}
-                    />
-                    {updateSpaceNameModalOpen && (
-                        <UpdateSpaceNameModal close={() => setUpdateSpaceNameModalOpen(false)} />
-                    )}
-                </Row>
-                <Column style={{ alignItems: 'start' }}>
-                    <h1>Description:</h1>
-                    <ShowMoreLess height={75}>
-                        <Markdown text={spaceData.description || ''} />
-                    </ShowMoreLess>
-                    <Button
-                        text='Edit'
-                        color='blue'
-                        size='medium'
-                        style={{ marginTop: 10 }}
-                        onClick={() => setUpdateSpaceDescriptionModalOpen(true)}
-                    />
-                    {updateSpaceDescriptionModalOpen && (
-                        <UpdateSpaceDescriptionModal
-                            close={() => setUpdateSpaceDescriptionModalOpen(false)}
+                        {spaceHandleModalOpen && (
+                            <UpdateSpaceHandleModal close={() => setSpaceHandleModalOpen(false)} />
+                        )}
+                    </Row>
+                    <Row centerY>
+                        <h1>Name:</h1>
+                        <p>{spaceData.name}</p>
+                        <Button
+                            text='Edit'
+                            color='blue'
+                            size='medium'
+                            onClick={() => setSpaceNameModalOpen(true)}
                         />
+                        {spaceNameModalOpen && (
+                            <UpdateSpaceNameModal close={() => setSpaceNameModalOpen(false)} />
+                        )}
+                    </Row>
+                    <Column style={{ alignItems: 'start' }}>
+                        <h1>Description:</h1>
+                        <ShowMoreLess height={75}>
+                            <Markdown text={spaceData.description || ''} />
+                        </ShowMoreLess>
+                        <Button
+                            text='Edit'
+                            color='blue'
+                            size='medium'
+                            style={{ marginTop: 10 }}
+                            onClick={() => setSpaceDescriptionModalOpen(true)}
+                        />
+                        {spaceDescriptionModalOpen && (
+                            <UpdateSpaceDescriptionModal
+                                close={() => setSpaceDescriptionModalOpen(false)}
+                            />
+                        )}
+                    </Column>
+                    <Row>
+                        <Button
+                            text='Invite moderator'
+                            color='blue'
+                            onClick={() => setInviteSpaceModeratorModalOpen(true)}
+                        />
+                        {inviteSpaceModeratorModalOpen && (
+                            <InviteSpaceModeratorModal
+                                close={() => setInviteSpaceModeratorModalOpen(false)}
+                            />
+                        )}
+                    </Row>
+                    <Row>
+                        <Button
+                            text='Remove moderator'
+                            color='blue'
+                            onClick={() => setRemoveSpaceModeratorModalOpen(true)}
+                        />
+                        {removeSpaceModeratorModalOpen && (
+                            <RemoveSpaceModeratorModal
+                                close={() => setRemoveSpaceModeratorModalOpen(false)}
+                            />
+                        )}
+                    </Row>
+                    {spaceData.id !== 1 && (
+                        <>
+                            <Row>
+                                <Button
+                                    text='Add parent space'
+                                    color='blue'
+                                    onClick={() => setParentSpaceRequestModalOpen(true)}
+                                />
+                                {parentSpaceRequestModalOpen && (
+                                    <ParentSpaceRequestModal
+                                        close={() => setParentSpaceRequestModalOpen(false)}
+                                    />
+                                )}
+                            </Row>
+                            <Row>
+                                <Button
+                                    text='Remove parent space'
+                                    color='blue'
+                                    onClick={() => setRemoveParentSpaceModalOpen(true)}
+                                />
+                                {removeParentSpaceModalOpen && (
+                                    <RemoveParentSpaceModal
+                                        close={() => setRemoveParentSpaceModalOpen(false)}
+                                    />
+                                )}
+                            </Row>
+                            <Row>
+                                <Button
+                                    text='Remove child space'
+                                    color='blue'
+                                    onClick={() => setRemoveChildSpaceModalOpen(true)}
+                                />
+                                {removeChildSpaceModalOpen && (
+                                    <RemoveChildSpaceModal
+                                        close={() => setRemoveChildSpaceModalOpen(false)}
+                                    />
+                                )}
+                            </Row>
+                            <Row>
+                                <Button
+                                    text='Delete'
+                                    color='red'
+                                    onClick={() => setDeleteSpaceModalOpen(true)}
+                                />
+                                {deleteSpaceModalOpen && (
+                                    <DeleteSpaceModal
+                                        close={() => setDeleteSpaceModalOpen(false)}
+                                    />
+                                )}
+                            </Row>
+                        </>
                     )}
                 </Column>
-                <Row>
-                    <Button
-                        text='Invite moderator'
-                        color='blue'
-                        onClick={() => setInviteSpaceModeratorModalOpen(true)}
-                    />
-                    {inviteSpaceModeratorModalOpen && (
-                        <InviteSpaceModeratorModal
-                            close={() => setInviteSpaceModeratorModalOpen(false)}
-                        />
-                    )}
-                </Row>
-                <Row>
-                    <Button
-                        text='Remove moderator'
-                        color='blue'
-                        onClick={() => setRemoveSpaceModeratorModalOpen(true)}
-                    />
-                    {removeSpaceModeratorModalOpen && (
-                        <RemoveSpaceModeratorModal
-                            close={() => setRemoveSpaceModeratorModalOpen(false)}
-                        />
-                    )}
-                </Row>
-                {spaceData.id !== 1 && (
-                    <>
-                        <Row>
-                            <Button
-                                text='Add parent space'
-                                color='blue'
-                                onClick={() => setParentSpaceRequestModalOpen(true)}
-                            />
-                            {parentSpaceRequestModalOpen && (
-                                <ParentSpaceRequestModal
-                                    close={() => setParentSpaceRequestModalOpen(false)}
-                                />
-                            )}
-                        </Row>
-                        <Row>
-                            <Button
-                                text='Remove parent space'
-                                color='blue'
-                                onClick={() => setRemoveParentSpaceModalOpen(true)}
-                            />
-                            {removeParentSpaceModalOpen && (
-                                <RemoveParentSpaceModal
-                                    close={() => setRemoveParentSpaceModalOpen(false)}
-                                />
-                            )}
-                        </Row>
-                        <Row>
-                            <Button
-                                text='Remove child space'
-                                color='blue'
-                                onClick={() => setRemoveChildSpaceModalOpen(true)}
-                            />
-                            {removeChildSpaceModalOpen && (
-                                <RemoveChildSpaceModal
-                                    close={() => setRemoveChildSpaceModalOpen(false)}
-                                />
-                            )}
-                        </Row>
-                        <Row>
-                            <Button
-                                text='Delete'
-                                color='red'
-                                onClick={() => setDeleteSpaceModalOpen(true)}
-                            />
-                            {deleteSpaceModalOpen && (
-                                <DeleteSpaceModal close={() => setDeleteSpaceModalOpen(false)} />
-                            )}
-                        </Row>
-                    </>
-                )}
-            </Column>
+            )}
         </Column>
     )
 }
 
 export default SpacePageSettings
-
-// function updateNotification(id, key, payload)
-//     // const newNotifications = [...notifications]
-//     // const notification = newNotifications.find((n) => n.id === id)
-//     // notification[key] = payload
-//     // setNotifications(newNotifications)
-//     // console.log('newNotifications: ', newNotifications)
-//
-
-// {selectedSection === 'requests' &&
-//     requests.map((notification: any) => (
-//         <NotificationCard
-//             notification={notification}
-//             location='space'
-//             key={notification.id}
-//             updateNotification={updateNotification}
-//         />
-//     ))}
-
-/* <div className={styles.header}>
-    <div
-        className={`${styles.headerItem} ${
-            selectedSection === 'settings' && styles.selected
-        }`}
-        role='button'
-        tabIndex={0}
-        onClick={() => setSelectedSection('settings')}
-        onKeyDown={() => setSelectedSection('settings')}
-    >
-        General
-    </div>
-    <div
-        className={`${styles.headerItem} ${
-            selectedSection === 'requests' && styles.selected
-        }`}
-        role='button'
-        tabIndex={0}
-        onClick={() => setSelectedSection('requests')}
-        onKeyDown={() => setSelectedSection('requests')}
-    >
-        Requests
-    </div>
-    <div
-        className={`${styles.headerItem} ${
-            selectedSection === 'flags' && styles.selected
-        }`}
-        role='button'
-        tabIndex={0}
-        onClick={() => setSelectedSection('flags')}
-        onKeyDown={() => setSelectedSection('flags')}
-    >
-        Flags
-    </div>
-</div> */
-
-// {accountDataLoading || spaceDataLoading ? (
-//     <p>Loading...</p>
-// ) : (
-//     <p>Not moderator</p>
-// )}

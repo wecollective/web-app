@@ -2,22 +2,21 @@ import React from 'react'
 import { BrowserRouter, Route, Switch } from 'react-router-dom'
 import { createBrowserHistory } from 'history'
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3'
-import SidebarSmall from '@components/SidebarSmall'
+import config from '@src/Config'
 import AccountContextProvider from '@contexts/AccountContext'
 import SpaceContextProvider from '@contexts/SpaceContext'
 import UserContextProvider from '@contexts/UserContext'
 import PostContextProvider from '@contexts/PostContext'
-import config from '@src/Config'
+import SidebarSmall from '@components/SidebarSmall'
 import HomePage from '@pages/HomePage'
 import FeaturesPage from '@pages/FeaturesPage'
 import CoopPage from '@pages/CoopPage'
 import SpacePage from '@pages/SpacePage/SpacePage'
 import PostPage from '@pages/PostPage/PostPage'
 import UserPage from '@pages/UserPage/UserPage'
-import EmptyPage from '@pages/EmptyPage'
+import PageNotFound from '@pages/PageNotFound'
 import Navbar from '@components/Navbar'
 import Modals from '@components/Modals'
-import Row from '@components/Row'
 import styles from '@styles/App.module.scss'
 
 const App = (): JSX.Element => {
@@ -43,9 +42,8 @@ const App = (): JSX.Element => {
                                         <Route path='/s/:spaceHandle' component={SpacePage} />
                                         <Route path='/p/:postId' component={PostPage} />
                                         <Route path='/u/:userHandle' component={UserPage} />
-                                        <Route component={EmptyPage} />
+                                        <Route component={PageNotFound} />
                                     </Switch>
-                                    {/* </Row> */}
                                 </GoogleReCaptchaProvider>
                             </PostContextProvider>
                         </UserContextProvider>

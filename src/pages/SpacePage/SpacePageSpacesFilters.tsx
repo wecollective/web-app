@@ -1,5 +1,6 @@
 import React, { useContext } from 'react'
 import { SpaceContext } from '@contexts/SpaceContext'
+import styles from '@styles/pages/SpacePage/SpacePageFilters.module.scss'
 import DropDownMenu from '@components/DropDown'
 import Row from '@components/Row'
 
@@ -7,7 +8,7 @@ const SpacePageSpacesFilters = (): JSX.Element => {
     const { spaceSpacesFilters, updateSpaceSpacesFilter } = useContext(SpaceContext)
     const { sortBy, sortOrder, timeRange, depth } = spaceSpacesFilters
     return (
-        <Row style={{ width: '100%' }}>
+        <Row className={styles.wrapper}>
             <DropDownMenu
                 title='Sort By'
                 options={[
@@ -22,8 +23,6 @@ const SpacePageSpacesFilters = (): JSX.Element => {
                 selectedOption={sortBy}
                 setSelectedOption={(payload) => updateSpaceSpacesFilter('sortBy', payload)}
                 style={{ marginRight: 10 }}
-                // orientation='vertical'
-                // style={{ margin: '0 20px 10px 0' }}
             />
             <DropDownMenu
                 title='Sort Order'
@@ -31,8 +30,6 @@ const SpacePageSpacesFilters = (): JSX.Element => {
                 selectedOption={sortOrder}
                 setSelectedOption={(payload) => updateSpaceSpacesFilter('sortOrder', payload)}
                 style={{ marginRight: 10 }}
-                // orientation='vertical'
-                // style={{ margin: '0 20px 10px 0' }}
             />
             <DropDownMenu
                 title='Time Range'
@@ -47,8 +44,6 @@ const SpacePageSpacesFilters = (): JSX.Element => {
                 selectedOption={timeRange}
                 setSelectedOption={(payload) => updateSpaceSpacesFilter('timeRange', payload)}
                 style={{ marginRight: 10 }}
-                // orientation='vertical'
-                // style={{ margin: '0 20px 10px 0' }}
             />
             <DropDownMenu
                 title='Depth'
@@ -56,8 +51,6 @@ const SpacePageSpacesFilters = (): JSX.Element => {
                 selectedOption={depth}
                 setSelectedOption={(payload) => updateSpaceSpacesFilter('depth', payload)}
                 style={{ marginRight: 10 }}
-                // orientation='vertical'
-                // style={{ margin: '0 20px 10px 0' }}
             />
         </Row>
     )

@@ -2,6 +2,7 @@ import React from 'react'
 import styles from '@styles/components/cards/PostCard/PostCardPlaceholder.module.scss'
 
 const PostCardPlaceholder = (): JSX.Element => {
+    // todo: re-write
     return (
         <div className={styles.PHPost}>
             <div className='PHPostShine' />
@@ -11,7 +12,6 @@ const PostCardPlaceholder = (): JSX.Element => {
             <div className={styles.PHPostBody}>
                 <div className={styles.PHPostTags}>
                     <div className={styles.PHPostUserImage} />{' '}
-                    {/* src="/icons/user-image-00.jpg" */}
                     <span className={styles.PHPostTagsBlock1} />
                     <span className={styles.PHPostTagsBlock2} />
                 </div>

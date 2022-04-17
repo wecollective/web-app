@@ -168,13 +168,15 @@ export interface ISpaceContext {
     fullScreen: boolean
     setFullScreen: (payload: boolean) => void
 
-    spaceDataLoading: boolean
+    spaceNotFound: boolean
     spacePostsLoading: boolean
     setSpacePostsLoading: (payload: boolean) => void
     nextSpacePostsLoading: boolean
     spaceSpacesLoading: boolean
+    setSpaceSpacesLoading: (payload: boolean) => void
     nextSpaceSpacesLoading: boolean
     spacePeopleLoading: boolean
+    setSpacePeopleLoading: (payload: boolean) => void
     nextSpacePeopleLoading: boolean
 
     spacePosts: any[]
@@ -200,7 +202,7 @@ export interface ISpaceContext {
     spacePeoplePaginationOffset: number
     spacePeoplePaginationHasMore: boolean
 
-    getSpaceData: (handle: string, returnFunction: any) => void
+    getSpaceData: (handle: string, callback?: any) => void
     getSpacePosts: (handle: string, offset: number, limit: number) => void
     getSpaceSpaces: (handle: string, offset: number, limit: number) => void
     getSpacePeople: (handle: string, offset: number, limit: number) => void

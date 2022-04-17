@@ -40,7 +40,6 @@ const SpacePageSidebar = (): JSX.Element => {
     } = spaceData
 
     const [imageUploadModalOpen, setImageUploadModalOpen] = useState(false)
-    // const loading = accountDataLoading || spaceDataLoading
     const history = useHistory()
     const imagePaths = (users || []).map((user) => user.flagImagePath)
 

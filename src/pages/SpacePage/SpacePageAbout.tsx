@@ -1,48 +1,44 @@
-import React, { useContext, useEffect } from 'react'
-import { AccountContext } from '@contexts/AccountContext'
+import React, { useContext } from 'react'
+import { useLocation } from 'react-router-dom'
 import { SpaceContext } from '@contexts/SpaceContext'
 import styles from '@styles/pages/SpacePage/SpacePageAbout.module.scss'
 import { timeSinceCreated, dateCreated } from '@src/Helpers'
-import Markdown from '@components/Markdown'
-import ImageTitle from '@components/ImageTitle'
 import Column from '@components/Column'
 import Row from '@components/Row'
+import Markdown from '@components/Markdown'
+import ImageTitle from '@components/ImageTitle'
+import SpaceNotFound from '@pages/SpaceNotFound'
 
-const SpacePageAbout = ({ match }: { match: { params: { spaceHandle: string } } }): JSX.Element => {
-    const { params } = match
-    const { spaceHandle } = params
-    const { accountDataLoading } = useContext(AccountContext)
-    const { spaceData, getSpaceData, setSelectedSpaceSubPage } = useContext(SpaceContext)
-    const { handle, description, createdAt, Creator } = spaceData
+const SpacePageAbout = (): JSX.Element => {
+    const { spaceData, spaceNotFound } = useContext(SpaceContext)
+    const { description, createdAt, Creator } = spaceData
+    const location = useLocation()
+    const spaceHandle = location.pathname.split('/')[2]
 
-    useEffect(() => {
-        setSelectedSpaceSubPage('about')
-        if (!accountDataLoading && spaceHandle !== handle) {
-            getSpaceData(spaceHandle, false)
-        }
-    }, [accountDataLoading, spaceHandle])
-
+    if (spaceNotFound) return <SpaceNotFound />
     return (
         <Column className={styles.wrapper}>
-            <Column className={styles.content}>
-                <Row centerY style={{ marginBottom: 30 }}>
-                    <p>
-                        Created{' '}
-                        <span title={dateCreated(createdAt)}>{timeSinceCreated(createdAt)}</span> by
-                    </p>
-                    <ImageTitle
-                        type='user'
-                        imagePath={Creator.flagImagePath}
-                        imageSize={32}
-                        title={Creator.name}
-                        fontSize={16}
-                        link={`/u/${Creator.handle}`}
-                        style={{ marginLeft: 10 }}
-                        shadow
-                    />
-                </Row>
-                <Markdown text={description} />
-            </Column>
+            {spaceData.handle !== spaceHandle ? (
+                <p>Space data loading... </p>
+            ) : (
+                <Column className={styles.content}>
+                    <Row centerY className={styles.creation}>
+                        <p>Created</p>
+                        <p title={dateCreated(createdAt)}>{timeSinceCreated(createdAt)}</p>
+                        <p>by</p>
+                        <ImageTitle
+                            type='user'
+                            imagePath={Creator.flagImagePath}
+                            imageSize={32}
+                            title={Creator.name}
+                            fontSize={16}
+                            link={`/u/${Creator.handle}`}
+                            shadow
+                        />
+                    </Row>
+                    <Markdown text={description} />
+                </Column>
+            )}
         </Column>
     )
 }

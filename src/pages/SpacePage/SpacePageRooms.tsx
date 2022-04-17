@@ -1,35 +1,31 @@
-import React, { useContext, useEffect } from 'react'
-import { AccountContext } from '@contexts/AccountContext'
+import React, { useContext } from 'react'
+import { useLocation } from 'react-router-dom'
 import { SpaceContext } from '@contexts/SpaceContext'
 import styles from '@styles/pages/SpacePage/SpacePageAbout.module.scss'
 import Column from '@components/Column'
-import Row from '@components/Row'
+import SpaceNotFound from '@pages/SpaceNotFound'
 
-const SpacePageRooms = ({ match }: { match: { params: { spaceHandle: string } } }): JSX.Element => {
-    const { params } = match
-    const { spaceHandle } = params
-    const { accountDataLoading } = useContext(AccountContext)
-    const { spaceData, getSpaceData, setSelectedSpaceSubPage } = useContext(SpaceContext)
-    const { handle } = spaceData
+const SpacePageRooms = (): JSX.Element => {
+    const { spaceData, spaceNotFound } = useContext(SpaceContext)
+    const location = useLocation()
+    const spaceHandle = location.pathname.split('/')[2]
 
-    useEffect(() => {
-        setSelectedSpaceSubPage('rooms')
-        if (!accountDataLoading && spaceHandle !== handle) {
-            getSpaceData(spaceHandle, false)
-        }
-    }, [accountDataLoading, spaceHandle])
-
+    if (spaceNotFound) return <SpaceNotFound />
     return (
         <Column className={styles.wrapper}>
-            <Column className={styles.content}>
-                <h2>Still to be developed...</h2>
-                <p>
-                    This section will allow users to create and join live video chat rooms with
-                    similar features to those devloped for Glass Bead Game posts.
-                </p>
-                <br />
-                <p>Estimate start date: Unknown</p>
-            </Column>
+            {spaceData.handle !== spaceHandle ? (
+                <p>Space data loading... </p>
+            ) : (
+                <Column className={styles.content}>
+                    <h2>Still to be developed...</h2>
+                    <p>
+                        This section will allow users to create and join live video chat rooms with
+                        similar features to those devloped for Glass Bead Game posts.
+                    </p>
+                    <br />
+                    <p>Estimate start date: Unknown</p>
+                </Column>
+            )}
         </Column>
     )
 }

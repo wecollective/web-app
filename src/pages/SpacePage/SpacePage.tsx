@@ -1,5 +1,6 @@
 import React, { useContext, useEffect } from 'react'
 import { Route, Switch, Redirect, useLocation } from 'react-router-dom'
+import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import styles from '@styles/pages/SpacePage/SpacePage.module.scss'
 import Column from '@components/Column'
@@ -16,24 +17,28 @@ import SpacePageCalendar from '@pages/SpacePage/SpacePageCalendar'
 import SpacePageRooms from '@pages/SpacePage/SpacePageRooms'
 import SpacePageGovernance from '@pages/SpacePage/SpacePageGovernance'
 import { ReactComponent as SettingsIconSVG } from '@svgs/cog-solid.svg'
-// import EmptyPage from './EmptyPage'
+import PageNotFound from '@pages/PageNotFound'
 
-const SpacePage = ({ match }: { match: { url: string } }): JSX.Element => {
-    const { url } = match
-    const { spaceData, resetSpaceData, isModerator } = useContext(SpaceContext)
+const SpacePage = (): JSX.Element => {
+    const { accountDataLoading } = useContext(AccountContext)
+    const {
+        spaceData,
+        isModerator,
+        getSpaceData,
+        resetSpaceData,
+        setSelectedSpaceSubPage,
+    } = useContext(SpaceContext)
+
     const location = useLocation()
+    const spaceHandle = location.pathname.split('/')[2]
     const subpage = location.pathname.split('/')[3]
     const tabs = {
         baseRoute: `/s/${spaceData.handle}`,
-        left: [
-            { text: 'About', visible: true, selected: subpage === 'about' },
-            { text: 'Posts', visible: true, selected: subpage === 'posts' },
-            { text: 'Spaces', visible: true, selected: subpage === 'spaces' },
-            { text: 'People', visible: true, selected: subpage === 'people' },
-            { text: 'Calendar', visible: true, selected: subpage === 'calendar' },
-            { text: 'Rooms', visible: true, selected: subpage === 'rooms' },
-            { text: 'Governance', visible: true, selected: subpage === 'governance' },
-        ],
+        left: ['About', 'Posts', 'Spaces', 'People', 'Calendar', 'Rooms', 'Governance'].map(
+            (value) => {
+                return { text: value, visible: true, selected: subpage === value.toLowerCase() }
+            }
+        ),
         right: [
             {
                 text: 'Settings',
@@ -43,6 +48,12 @@ const SpacePage = ({ match }: { match: { url: string } }): JSX.Element => {
             },
         ],
     }
+
+    useEffect(() => {
+        if (!accountDataLoading && spaceHandle !== spaceData.handle) getSpaceData(spaceHandle)
+    }, [accountDataLoading, spaceHandle])
+
+    useEffect(() => setSelectedSpaceSubPage(subpage), [location])
 
     useEffect(() => () => resetSpaceData(), [])
 
@@ -54,7 +65,7 @@ const SpacePage = ({ match }: { match: { url: string } }): JSX.Element => {
                 <PageTabs tabs={tabs} />
                 <Column className={styles.centerPanel}>
                     <Switch>
-                        <Redirect from={url} to={`${url}/posts`} exact />
+                        <Redirect from='/s/:spaceHandle/' to='/s/:spaceHandle/posts' exact />
                         <Route path='/s/:spaceHandle/about' component={SpacePageAbout} exact />
                         <Route path='/s/:spaceHandle/posts' component={SpacePagePosts} exact />
                         <Route path='/s/:spaceHandle/spaces' component={SpacePageSpaces} exact />
@@ -75,9 +86,7 @@ const SpacePage = ({ match }: { match: { url: string } }): JSX.Element => {
                             component={SpacePageSettings}
                             exact
                         />
-                        {/* Todo: conditionally display private pages or auto redirect to public posts */}
-                        {/* like on user notifications page: if (!isOwnAccount) history.push(`/u/${userData.handle}/about`) */}
-                        {/* <Route component={ EmptyPage }/> TODO: Check if this needs to be doubled up on the App.js component */}
+                        <Route component={PageNotFound} />
                     </Switch>
                 </Column>
             </Column>
@@ -86,33 +95,3 @@ const SpacePage = ({ match }: { match: { url: string } }): JSX.Element => {
 }
 
 export default SpacePage
-
-/* <div className={`${styles.SpacePage} ${showAccountSideBar && styles.showAccountSideBar}`}>
-    <CoverImage
-        coverImagePath={spaceData.coverImagePath}
-        imageUploadType='holon-cover-image'
-        canEdit={isModerator}
-    />
-    <div className={`${styles.SpacePageContent} ${fullScreen && styles.fullScreen}`}>
-        <SpacePageSideBarLeft />
-        <div className={styles.SpacePageCenterPanel}>
-            <Switch>
-                <Redirect from={url} to={`${url}/posts`} exact />
-                <Route
-                    path='/s/:spaceHandle/settings'
-                    component={SpacePageSettings}
-                    exact
-                />
-                <Route path='/s/:spaceHandle/about' component={SpacePageAbout} exact />
-                <Route path='/s/:spaceHandle/posts' component={SpacePagePosts} exact />
-                <Route path='/s/:spaceHandle/spaces' component={SpacePageSpaces} exact />
-                <Route path='/s/:spaceHandle/users' component={SpacePagePeople} exact />
-                <Route component={ EmptyPage }/>
-            </Switch>
-        </div>
-        {!(subpage === 'spaces' && spaceSpacesFilters.view === 'Map') && (
-            <SpacePageSideBarRight />
-        )}
-    </div>
-    <AccountSideBar />
-</div> */
