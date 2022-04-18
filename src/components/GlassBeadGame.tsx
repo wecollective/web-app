@@ -1113,7 +1113,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                         playButton.attr('display', 'none')
                         pauseButton.attr('display', 'flex')
                         const audio = d3
-                            .select(`#gbg-bead-${postData.id}-${liveBeadIndexRef.current}`)
+                            .select(`#gbg-bead-${postData.id}-${liveBeadIndexRef.current}-gbg`)
                             .select('audio')
                             .node()
                         if (audio) audio.play()
@@ -1138,7 +1138,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                         pauseButton.attr('display', 'none')
                         playButton.attr('display', 'flex')
                         const audio = d3
-                            .select(`#gbg-bead-${postData.id}-${liveBeadIndexRef.current}`)
+                            .select(`#gbg-bead-${postData.id}-${liveBeadIndexRef.current}-gbg`)
                             .select('audio')
                             .node()
                         if (audio) audio.pause()
@@ -1148,7 +1148,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     }
 
     function addEventListenersToBead(beadIndex) {
-        d3.select(`#gbg-bead-${postData.id}-${beadIndex}`)
+        d3.select(`#gbg-bead-${postData.id}-${beadIndex}-gbg`)
             .select('audio')
             .on('play', () => {
                 liveBeadIndexRef.current = beadIndex
@@ -2017,6 +2017,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     >
                         <BeadCard
                             postId={postData.id}
+                            location='gbg'
                             bead={bead}
                             index={beadIndex + 1}
                             className={styles.bead}

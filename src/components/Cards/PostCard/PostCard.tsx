@@ -541,6 +541,7 @@ const PostCard = (props: {
                                     <BeadCard
                                         key={bead.id}
                                         postId={id}
+                                        location={location}
                                         bead={bead}
                                         index={beadIndex + 1}
                                         style={{ marginRight: 12 }}

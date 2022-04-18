@@ -13,18 +13,19 @@ import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
 
 const BeadCard = (props: {
     postId: number
+    location: string
     index: number
     bead: any
     style?: any
     className?: string
 }): JSX.Element => {
-    const { postId, index, bead, style, className } = props
+    const { postId, location, index, bead, style, className } = props
     const { accountData } = useContext(AccountContext)
     const [audioPlaying, setAudioPlaying] = useState(false)
-    const audioId = `gbg-bead-audio-${postId}-${index}`
+    const audioId = `gbg-bead-audio-${postId}-${index}-${location}`
 
     function toggleBeadAudio(beadIndex: number, reset?: boolean): void {
-        const beadAudio = d3.select(`#gbg-bead-audio-${postId}-${beadIndex}`).node()
+        const beadAudio = d3.select(`#gbg-bead-audio-${postId}-${beadIndex}-${location}`).node()
         if (beadAudio) {
             if (!beadAudio.paused) beadAudio.pause()
             else {
@@ -41,7 +42,7 @@ const BeadCard = (props: {
 
     return (
         <Column
-            id={`gbg-bead-${postId}-${index}`}
+            id={`gbg-bead-${postId}-${index}-${location}`}
             className={`gbg-bead ${styles.bead} ${audioPlaying && styles.focused} ${className}`}
             style={style}
         >
