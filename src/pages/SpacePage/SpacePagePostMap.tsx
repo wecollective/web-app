@@ -6,7 +6,9 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import { AccountContext } from '@contexts/AccountContext'
 import styles from '@styles/pages/SpacePage/SpacePagePostMap.module.scss'
 import colors from '@styles/Colors.module.scss'
+import Modal from '@components/Modal'
 import PostCard from '@components/Cards/PostCard/PostCard'
+import LoadingWheel from '@components/LoadingWheel'
 import config from '@src/Config'
 import { IPost } from '@src/Interfaces'
 
@@ -15,7 +17,8 @@ const SpacePagePostMap = (): JSX.Element => {
     const { spaceData, spacePostsFilters, fullScreen } = useContext(SpaceContext)
     const { sortBy, sortOrder, timeRange, type, depth, searchQuery } = spacePostsFilters
     const [postMapData, setPostMapData] = useState([])
-    const [selectedPost, setSelectedPost] = useState({ id: null })
+    const [selectedPost, setSelectedPost] = useState<any>(null)
+    const [postModalOpen, setPostModalOpen] = useState(false)
     const defaultGravity = 30
     const [gravity, setGravity] = useState(defaultGravity)
     const [showKey, setShowKey] = useState(false)
@@ -83,6 +86,14 @@ const SpacePagePostMap = (): JSX.Element => {
                 setPostMapData(res.data.posts)
                 setTotalMatchingPosts(res.data.totalMatchingPosts)
             })
+    }
+
+    function openPostModal(postId) {
+        setSelectedPost(null)
+        setPostModalOpen(true)
+        axios
+            .get(`${config.apiURL}/post-data?accountId=${accountData.id}&postId=${postId}`)
+            .then((res) => setSelectedPost(res.data))
     }
 
     function findDomain() {
@@ -339,6 +350,11 @@ const SpacePagePostMap = (): JSX.Element => {
         repositionMap(postMapData)
     }
 
+    function trimText(text) {
+        const t = text.substring(0, 20)
+        return text.length > 20 ? t.concat('...') : t
+    }
+
     function updateMap(data) {
         setGravity(defaultGravity)
         repositionMap(data)
@@ -460,7 +476,7 @@ const SpacePagePostMap = (): JSX.Element => {
                         .attr('opacity', 0)
                         .on('click', (e) => {
                             simulation.alpha(1)
-                            setSelectedPost(data.find((post) => post.id === e.id))
+                            openPostModal(e.id)
                             d3.selectAll('.post-map-node')
                                 .transition()
                                 .duration(200)
@@ -508,11 +524,8 @@ const SpacePagePostMap = (): JSX.Element => {
                         .append('text')
                         .classed('post-map-node-text', true)
                         .text((d) => {
-                            if (d.text) {
-                                let text = d.text.substring(0, 20)
-                                if (d.text.length > 20) text = text.concat('...')
-                                return text
-                            }
+                            if (d.text) return trimText(d.text)
+                            if (d.type === 'url' && !d.urlImage) return trimText(d.urlTitle)
                             return null
                         })
                         .attr('opacity', 0)
@@ -556,34 +569,6 @@ const SpacePagePostMap = (): JSX.Element => {
                         node.transition().duration(1000).attr('opacity', 0).remove()
                     )
             )
-
-        // // create turn links
-        // d3.select('#post-map-link-group')
-        //     .selectAll('.post-map-turn-link')
-        //     .data(turnLinkData)
-        //     .join(
-        //         (enter) =>
-        //             enter
-        //                 .append('line')
-        //                 .classed('post-map-turn-link', true)
-        //                 .attr('stroke', 'black')
-        //                 .attr('stroke-width', '3px')
-        //                 .attr('stroke-dasharray', 3)
-        //                 .attr('marker-end', 'url(#turn-link-arrow)')
-        //                 .attr('opacity', 0)
-        //                 .call((node) => node.transition().duration(1000).attr('opacity', 0.3)),
-        //         (update) => update.call((node) => node.transition().duration(1000)),
-        //         (exit) =>
-        //             exit.call((node) =>
-        //                 node.transition().duration(1000).attr('opacity', 0).remove()
-        //             )
-        //     )
-
-        // if no selected post and posts present, select top post
-        if (!selectedPost.id && data[0]) {
-            setSelectedPost(data[0])
-            d3.select(`#post-map-node-${data[0].id}`).style('stroke-width', 6)
-        }
     }
 
     useEffect(() => createCanvas(), [])
@@ -734,11 +719,15 @@ const SpacePagePostMap = (): JSX.Element => {
                 </div>
             </div>
             <div id='canvas' />
-            {/* {selectedPost.id && (
-                <div className={styles.selectedPostWrapper}>
-                    <PostCard post={selectedPost} location='space-post-map' key={selectedPost.id} />
-                </div>
-            )} */}
+            {postModalOpen && (
+                <Modal close={() => setPostModalOpen(false)}>
+                    {selectedPost ? (
+                        <PostCard location='post-page' post={selectedPost} />
+                    ) : (
+                        <LoadingWheel />
+                    )}
+                </Modal>
+            )}
         </div>
     )
 }
