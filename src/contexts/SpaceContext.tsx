@@ -103,7 +103,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                     setIsFollowing(accountData.FollowedHolons.some((s) => s.id === res.data.id))
                     setIsModerator(accountData.ModeratedHolons.some((s) => s.id === res.data.id))
                 }
-                setSpaceData(res.data || defaults.spaceData)
+                setSpaceData(res.data)
             })
             .catch((error) => {
                 if (error.response.status === 404) setSpaceNotFound(true)

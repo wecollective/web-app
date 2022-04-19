@@ -1,26 +1,26 @@
 import React, { useContext, useState } from 'react'
 import axios from 'axios'
 import config from '@src/Config'
-import { useHistory } from 'react-router-dom'
+import { useHistory, useLocation } from 'react-router-dom'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import styles from '@styles/pages/SpacePage/SpacePageSidebar.module.scss'
+import { isPlural } from '@src/Helpers'
 import Column from '@components/Column'
 import Row from '@components/Row'
 import ImageTitle from '@components/ImageTitle'
 import ImageFade from '@components/ImageFade'
 import Scrollbars from '@src/components/Scrollbars'
 import ImageUploadModal from '@components/modals/ImageUploadModal'
-// import SpacePageSideBarLeftPlaceholder from './SpacePageSideBarLeftPlaceholder'
 import FlagImageHighlights from '@components/FlagImageHighlights'
 import FlagImagePlaceholder from '@components/FlagImagePlaceholder'
+// import SpacePageSideBarLeftPlaceholder from './SpacePageSideBarLeftPlaceholder'
 import { ReactComponent as ArrowUpIconSVG } from '@svgs/arrow-up-solid.svg' // chevron-up-solid.svg'
 import { ReactComponent as ArrowDownIconSVG } from '@svgs/arrow-down-solid.svg' // chevron-down-solid.svg'
 import { ReactComponent as EyeIconSVG } from '@svgs/eye-solid.svg'
 import { ReactComponent as EyeSlashIconSVG } from '@svgs/eye-slash-solid.svg'
 import { ReactComponent as PlusIconSVG } from '@svgs/plus.svg'
 import { ReactComponent as MinusIconSVG } from '@svgs/minus-solid.svg'
-import { isPlural } from '@src/Helpers'
 
 const SpacePageSidebar = (): JSX.Element => {
     const { loggedIn, accountData, updateAccountData } = useContext(AccountContext)
@@ -33,15 +33,16 @@ const SpacePageSidebar = (): JSX.Element => {
         selectedSpaceSubPage,
     } = useContext(SpaceContext)
     const {
-        HolonUsers: users,
         DirectParentHolons: parentSpaces,
         DirectChildHolons: childSpaces,
+        LatestUsers,
         totalUsers,
     } = spaceData
 
     const [imageUploadModalOpen, setImageUploadModalOpen] = useState(false)
     const history = useHistory()
-    const imagePaths = (users || []).map((user) => user.flagImagePath)
+    const location = useLocation()
+    const spaceHandle = location.pathname.split('/')[2]
 
     function followSpace() {
         // todo: merge into single request
@@ -137,126 +138,55 @@ const SpacePageSidebar = (): JSX.Element => {
                         id={spaceData.id}
                         title='Add a new flag image'
                         mbLimit={2}
-                        onSaved={(imageURL) =>
-                            setSpaceData({ ...spaceData, flagImagePath: imageURL })
-                        }
+                        onSaved={(v) => setSpaceData({ ...spaceData, flagImagePath: v })}
                         close={() => setImageUploadModalOpen(false)}
                     />
                 )}
             </div>
-            <Column className={styles.content}>
-                <h1>{spaceData.name}</h1>
-                <p className='grey'>{`s/${spaceData.handle}`}</p>
-                {/* <p className={styles.description}>{spaceData.description}</p> */}
-                <FlagImageHighlights
-                    type='user'
-                    imagePaths={imagePaths}
-                    text={`${totalUsers} ${isPlural(totalUsers) ? 'People' : 'Person'}`}
-                    style={{ marginBottom: 20 }}
-                    onClick={() => history.push(`/s/${spaceData.handle}/people`)}
-                    outline
-                />
-                {loggedIn && spaceData.handle !== 'all' && (
-                    <button className={styles.followButton} type='button' onClick={followSpace}>
-                        {isFollowing ? <EyeIconSVG /> : <EyeSlashIconSVG />}
-                        <p>{isFollowing ? 'Following' : 'Not Following'}</p>
-                    </button>
-                )}
-                {/* Todo: reorganise space expansion and make recursive */}
-                {parentSpaces.length > 0 && (
-                    <Column className={styles.spacesWrapper}>
-                        <Row>
-                            <ArrowUpIconSVG />
-                            <p>Parent spaces</p>
-                        </Row>
-                        <Scrollbars className={styles.spaces}>
-                            {parentSpaces.map((space) => (
-                                <Column key={space.id}>
-                                    <Row centerY style={{ marginBottom: 10 }}>
-                                        <ImageTitle
-                                            type='space'
-                                            imagePath={space.flagImagePath}
-                                            title={space.name}
-                                            link={`/s/${space.handle}/${selectedSpaceSubPage}`}
-                                            fontSize={14}
-                                            imageSize={35}
-                                            wrapText
-                                        />
-                                        <button
-                                            className={styles.expandSpaceButton}
-                                            type='button'
-                                            onClick={() => expandSpace('Parent', space.id)}
-                                        >
-                                            {space.expanded ? <MinusIconSVG /> : <PlusIconSVG />}
-                                        </button>
-                                    </Row>
-                                    {space.expanded && (
-                                        <Column
-                                            scroll
-                                            className={styles.spaces}
-                                            style={{ marginLeft: 15 }}
-                                        >
-                                            {(space.DirectParentHolons || []).map((s) => (
-                                                <Column key={s.id}>
-                                                    <Row centerY style={{ marginBottom: 10 }}>
-                                                        <ImageTitle
-                                                            type='space'
-                                                            imagePath={s.flagImagePath}
-                                                            title={s.name}
-                                                            link={`/s/${s.handle}/${selectedSpaceSubPage}`}
-                                                            fontSize={14}
-                                                            imageSize={30}
-                                                            wrapText
-                                                        />
-                                                        {/* {space.totalChildren > 0 && (
-                                                            <button
-                                                                className={styles.expandSpaceButton}
-                                                                type='button'
-                                                                onClick={() =>
-                                                                    expandSpace('Parent', s.id)
-                                                                }
-                                                            >
-                                                                {s.expanded ? (
-                                                                    <MinusIconSVG />
-                                                                ) : (
-                                                                    <PlusIconSVG />
-                                                                )}
-                                                            </button>
-                                                        )} */}
-                                                    </Row>
-                                                </Column>
-                                            ))}
-                                        </Column>
-                                    )}
-                                </Column>
-                            ))}
-                        </Scrollbars>
-                    </Column>
-                )}
-                {childSpaces.length > 0 && (
-                    <Column className={styles.spacesWrapper}>
-                        <Row>
-                            <ArrowDownIconSVG />
-                            <p>Child spaces</p>
-                        </Row>
-                        <Scrollbars className={styles.spaces}>
-                            {childSpaces.map((space) => (
-                                <Column key={space.id}>
-                                    <Row centerY style={{ marginBottom: 10 }}>
-                                        <ImageTitle
-                                            type='space'
-                                            imagePath={space.flagImagePath}
-                                            title={space.name}
-                                            link={`/s/${space.handle}/${selectedSpaceSubPage}`}
-                                            fontSize={14}
-                                            imageSize={35}
-                                            wrapText
-                                        />
-                                        {space.totalChildren > 0 && (
+            {spaceData.handle !== spaceHandle ? (
+                <p style={{ padding: 15 }}>Space data loading...</p>
+            ) : (
+                <Column className={styles.content}>
+                    <h1>{spaceData.name}</h1>
+                    <p className='grey'>{`s/${spaceData.handle}`}</p>
+                    <FlagImageHighlights
+                        type='user'
+                        imagePaths={LatestUsers.map((user) => user.flagImagePath)}
+                        text={`${totalUsers} ${isPlural(totalUsers) ? 'People' : 'Person'}`}
+                        style={{ marginBottom: 20 }}
+                        onClick={() => history.push(`/s/${spaceData.handle}/people`)}
+                        outline
+                    />
+                    {loggedIn && spaceData.handle !== 'all' && (
+                        <button className={styles.followButton} type='button' onClick={followSpace}>
+                            {isFollowing ? <EyeIconSVG /> : <EyeSlashIconSVG />}
+                            <p>{isFollowing ? 'Following' : 'Not Following'}</p>
+                        </button>
+                    )}
+                    {/* Todo: reorganise space expansion and make recursive */}
+                    {parentSpaces.length > 0 && (
+                        <Column className={styles.spacesWrapper}>
+                            <Row>
+                                <ArrowUpIconSVG />
+                                <p>Parent spaces</p>
+                            </Row>
+                            <Scrollbars className={styles.spaces}>
+                                {parentSpaces.map((space) => (
+                                    <Column key={space.id}>
+                                        <Row centerY style={{ marginBottom: 10 }}>
+                                            <ImageTitle
+                                                type='space'
+                                                imagePath={space.flagImagePath}
+                                                title={space.name}
+                                                link={`/s/${space.handle}/${selectedSpaceSubPage}`}
+                                                fontSize={14}
+                                                imageSize={35}
+                                                wrapText
+                                            />
                                             <button
                                                 className={styles.expandSpaceButton}
                                                 type='button'
-                                                onClick={() => expandSpace('Child', space.id)}
+                                                onClick={() => expandSpace('Parent', space.id)}
                                             >
                                                 {space.expanded ? (
                                                     <MinusIconSVG />
@@ -264,27 +194,26 @@ const SpacePageSidebar = (): JSX.Element => {
                                                     <PlusIconSVG />
                                                 )}
                                             </button>
-                                        )}
-                                    </Row>
-                                    {space.expanded && (
-                                        <Column
-                                            scroll
-                                            className={styles.spaces}
-                                            style={{ marginLeft: 15 }}
-                                        >
-                                            {(space.DirectChildHolons || []).map((s) => (
-                                                <Column key={s.id}>
-                                                    <Row centerY style={{ marginBottom: 10 }}>
-                                                        <ImageTitle
-                                                            type='space'
-                                                            imagePath={s.flagImagePath}
-                                                            title={s.name}
-                                                            link={`/s/${s.handle}/${selectedSpaceSubPage}`}
-                                                            fontSize={14}
-                                                            imageSize={30}
-                                                            wrapText
-                                                        />
-                                                        {/* {space.totalChildren > 0 && (
+                                        </Row>
+                                        {space.expanded && (
+                                            <Column
+                                                scroll
+                                                className={styles.spaces}
+                                                style={{ marginLeft: 15 }}
+                                            >
+                                                {(space.DirectParentHolons || []).map((s) => (
+                                                    <Column key={s.id}>
+                                                        <Row centerY style={{ marginBottom: 10 }}>
+                                                            <ImageTitle
+                                                                type='space'
+                                                                imagePath={s.flagImagePath}
+                                                                title={s.name}
+                                                                link={`/s/${s.handle}/${selectedSpaceSubPage}`}
+                                                                fontSize={14}
+                                                                imageSize={30}
+                                                                wrapText
+                                                            />
+                                                            {/* {space.totalChildren > 0 && (
                                                             <button
                                                                 className={styles.expandSpaceButton}
                                                                 type='button'
@@ -299,22 +228,96 @@ const SpacePageSidebar = (): JSX.Element => {
                                                                 )}
                                                             </button>
                                                         )} */}
-                                                    </Row>
-                                                </Column>
-                                            ))}
-                                        </Column>
-                                    )}
-                                </Column>
-                            ))}
-                        </Scrollbars>
-                    </Column>
-                )}
-            </Column>
-            {/* <div className={styles.description}>{spaceData.description}</div> */}
+                                                        </Row>
+                                                    </Column>
+                                                ))}
+                                            </Column>
+                                        )}
+                                    </Column>
+                                ))}
+                            </Scrollbars>
+                        </Column>
+                    )}
+                    {childSpaces.length > 0 && (
+                        <Column className={styles.spacesWrapper}>
+                            <Row>
+                                <ArrowDownIconSVG />
+                                <p>Child spaces</p>
+                            </Row>
+                            <Scrollbars className={styles.spaces}>
+                                {childSpaces.map((space) => (
+                                    <Column key={space.id}>
+                                        <Row centerY style={{ marginBottom: 10 }}>
+                                            <ImageTitle
+                                                type='space'
+                                                imagePath={space.flagImagePath}
+                                                title={space.name}
+                                                link={`/s/${space.handle}/${selectedSpaceSubPage}`}
+                                                fontSize={14}
+                                                imageSize={35}
+                                                wrapText
+                                            />
+                                            {space.totalChildren > 0 && (
+                                                <button
+                                                    className={styles.expandSpaceButton}
+                                                    type='button'
+                                                    onClick={() => expandSpace('Child', space.id)}
+                                                >
+                                                    {space.expanded ? (
+                                                        <MinusIconSVG />
+                                                    ) : (
+                                                        <PlusIconSVG />
+                                                    )}
+                                                </button>
+                                            )}
+                                        </Row>
+                                        {space.expanded && (
+                                            <Column
+                                                scroll
+                                                className={styles.spaces}
+                                                style={{ marginLeft: 15 }}
+                                            >
+                                                {(space.DirectChildHolons || []).map((s) => (
+                                                    <Column key={s.id}>
+                                                        <Row centerY style={{ marginBottom: 10 }}>
+                                                            <ImageTitle
+                                                                type='space'
+                                                                imagePath={s.flagImagePath}
+                                                                title={s.name}
+                                                                link={`/s/${s.handle}/${selectedSpaceSubPage}`}
+                                                                fontSize={14}
+                                                                imageSize={30}
+                                                                wrapText
+                                                            />
+                                                            {/* {space.totalChildren > 0 && (
+                                                            <button
+                                                                className={styles.expandSpaceButton}
+                                                                type='button'
+                                                                onClick={() =>
+                                                                    expandSpace('Parent', s.id)
+                                                                }
+                                                            >
+                                                                {s.expanded ? (
+                                                                    <MinusIconSVG />
+                                                                ) : (
+                                                                    <PlusIconSVG />
+                                                                )}
+                                                            </button>
+                                                        )} */}
+                                                        </Row>
+                                                    </Column>
+                                                ))}
+                                            </Column>
+                                        )}
+                                    </Column>
+                                ))}
+                            </Scrollbars>
+                        </Column>
+                    )}
+                </Column>
+            )}
         </Column>
     )
-    // }
-    // return null // add side bar placeholder here? {/* <SpacePageSideBarLeftPlaceholder/> */}
 }
 
 export default SpacePageSidebar

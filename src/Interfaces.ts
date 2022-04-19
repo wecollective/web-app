@@ -19,7 +19,7 @@ export interface ISpace {
     Creator: Partial<IUser>
     DirectChildHolons: Partial<ISpace[]>
     DirectParentHolons: Partial<ISpace[]>
-    HolonHandles: { handle: string; name: string }[]
+    HolonHandles: { handle: string }[]
 }
 
 export interface IPost {
@@ -234,6 +234,7 @@ export interface IUserContext {
     setUserData: (payload: any) => void
     userDataLoading: boolean
     userPosts: IPost[]
+    setUserPosts: (payload: any) => void
     userPostsLoading: boolean
     nextUserPostsLoading: boolean
     userPostsFilters: any
