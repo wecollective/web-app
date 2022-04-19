@@ -3,15 +3,21 @@ import Cookies from 'universal-cookie'
 import axios from 'axios'
 import config from '@src/Config'
 import { SpaceContext } from '@contexts/SpaceContext'
+import { UserContext } from '@contexts/UserContext'
 import Modal from '@components/Modal'
 import Column from '@components/Column'
 import Row from '@components/Row'
 import Button from '@components/Button'
 import SuccessMessage from '@components/SuccessMessage'
 
-const DeletePostModal = (props: { postId: number; close: () => void }): JSX.Element => {
-    const { postId, close } = props
+const DeletePostModal = (props: {
+    postId: number
+    location: 'post-page' | 'space-posts' | 'space-post-map' | 'user-posts' | 'preview'
+    close: () => void
+}): JSX.Element => {
+    const { postId, location, close } = props
     const { spacePosts, setSpacePosts } = useContext(SpaceContext)
+    const { userPosts, setUserPosts } = useContext(UserContext)
     const [loading, setLoading] = useState(false)
     const [success, setSuccess] = useState(false)
     const cookies = new Cookies()
@@ -27,7 +33,10 @@ const DeletePostModal = (props: { postId: number; close: () => void }): JSX.Elem
                 .then(() => {
                     setLoading(false)
                     setSuccess(true)
-                    setSpacePosts([...spacePosts.filter((p) => p.id !== postId)])
+                    if (location === 'space-posts')
+                        setSpacePosts([...spacePosts.filter((p) => p.id !== postId)])
+                    if (location === 'user-posts')
+                        setUserPosts([...userPosts.filter((p) => p.id !== postId)])
                     setTimeout(() => close(), 1000)
                 })
                 .catch((error) => console.log(error))

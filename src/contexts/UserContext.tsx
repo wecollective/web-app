@@ -115,6 +115,7 @@ function UserContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
                 setUserData,
                 userDataLoading,
                 userPosts,
+                setUserPosts,
                 userPostsLoading,
                 nextUserPostsLoading,
                 userPostsFilters,
