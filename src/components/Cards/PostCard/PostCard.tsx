@@ -129,7 +129,14 @@ const PostCard = (props: {
         } else {
             const accessToken = cookies.get('accessToken')
             const options = { headers: { Authorization: `Bearer ${accessToken}` } }
-            const data = { eventId: Event.id, response }
+            const data = {
+                userName: accountData.name,
+                userEmail: accountData.email,
+                postId: id,
+                eventId: Event.id,
+                startTime: Event.startTime,
+                response,
+            }
             axios.post(`${config.apiURL}/respond-to-event`, data, options).then((res) => {
                 if (res.data.message === 'UserEvent added') {
                     if (response === 'going') {
@@ -649,6 +656,7 @@ const PostCard = (props: {
                 {deletePostModalOpen && (
                     <DeletePostModal
                         postId={postData.id}
+                        location={location}
                         close={() => setDeletePostModalOpen(false)}
                     />
                 )}

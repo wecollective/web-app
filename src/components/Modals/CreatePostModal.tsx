@@ -343,7 +343,7 @@ const CreatePostModal = (): JSX.Element => {
                             s.state = 'active'
                         })
                         const newPost = {
-                            ...res.data,
+                            ...res.data.post,
                             totalLikes: 0,
                             totalComments: 0,
                             totalReposts: 0,
@@ -362,9 +362,7 @@ const CreatePostModal = (): JSX.Element => {
                                 GlassBeads: [],
                             },
                             Event: {
-                                title: title.value,
-                                startTime: eventStartTime.value,
-                                endTime: eventEndTime.value,
+                                ...res.data.event,
                                 Going: [],
                                 Interested: [],
                             },
