@@ -9,8 +9,6 @@ import TextLink from '@components/TextLink'
 import Button from '@components/Button'
 import config from '@src/Config'
 import { timeSinceCreated, dateCreated } from '@src/Helpers'
-import { ReactComponent as EyeOpenIconSVG } from '@svgs/eye-solid.svg'
-import { ReactComponent as EyeClosedIconSVG } from '@svgs/eye-slash-solid.svg'
 import { ReactComponent as SuccessIconSVG } from '@svgs/check-circle-solid.svg'
 import { ReactComponent as FailIconSVG } from '@svgs/times-circle-regular.svg'
 import { ReactComponent as OverlappingCirclesIconSVG } from '@svgs/overlapping-circles-thick.svg'
@@ -21,6 +19,7 @@ import { ReactComponent as BabyIconSVG } from '@svgs/baby-solid.svg'
 import { ReactComponent as EnvelopeIconSVG } from '@svgs/envelope-solid.svg'
 import { ReactComponent as ThumbsUpIconSVG } from '@svgs/thumbs-up-solid.svg'
 import { ReactComponent as RetweetIconSVG } from '@svgs/retweet-solid.svg'
+import { ReactComponent as BellIconSVG } from '@svgs/bell-solid.svg'
 
 const Content = (props: { typeIcon: JSX.Element; children: any }): JSX.Element => {
     const { typeIcon, children } = props
@@ -126,25 +125,6 @@ const NotificationCard = (props: {
     const cookies = new Cookies()
     const accessToken = cookies.get('accessToken')
     const you = triggerUser && accountData.id === triggerUser.id
-
-    // function toggleSeen() {
-    //     const data = { notificationId: id, seen: !seen }
-    //     const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
-    //     setSeen(!seen)
-    //     axios
-    //         .post(`${config.apiURL}/toggle-notification-seen`, data, authHeader)
-    //         .then((res) => {
-    //             if (res.data === 'success') {
-    //                 updateAccountData(
-    //                     'unseenNotifications',
-    //                     accountData.unseenNotifications + (data.seen ? -1 : 1)
-    //                 )
-    //             }
-    //         })
-    //         .catch((error) => {
-    //             console.log('POST toggle-notification-seen error: ', error)
-    //         })
-    // }
 
     function respondToModInvite(response) {
         if (!accessToken) {
@@ -377,13 +357,23 @@ const NotificationCard = (props: {
                         </Content>
                     )}
 
-                    {/* <button
-                        className={styles.seenButton}
-                        type='button'
-                        onClick={() => toggleSeen()}
-                    >
-                        {seen ? <EyeOpenIconSVG /> : <EyeClosedIconSVG />}
-                    </button> */}
+                    {type === 'event-going-reminder' && (
+                        <Content typeIcon={<BellIconSVG />}>
+                            <p>An</p>
+                            <TextLink text='event' link={`/p/${postId}`} />
+                            <p>you marked yourself as going to is starting in 15 minutes</p>
+                            <CreatedAt date={createdAt} />
+                        </Content>
+                    )}
+
+                    {type === 'event-interested-reminder' && (
+                        <Content typeIcon={<BellIconSVG />}>
+                            <p>An</p>
+                            <TextLink text='event' link={`/p/${postId}`} />
+                            <p>you marked yourself as interested in is starting in 15 minutes</p>
+                            <CreatedAt date={createdAt} />
+                        </Content>
+                    )}
                 </>
             )}
 
