@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-param-reassign */
 import React, { useContext, useState, useRef, useEffect } from 'react'
@@ -36,14 +37,15 @@ import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import Scrollbars from '@components/Scrollbars'
 import { ReactComponent as PlayIconSVG } from '@svgs/play-solid.svg'
 import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
+import { ReactComponent as PlusIconSVG } from '@svgs/plus.svg'
 
-const CreatePostModal = (): JSX.Element => {
-    // todo: set create post modal open in page instead of account context
-    const { accountData, setCreatePostModalOpen, createPostModalType } = useContext(AccountContext)
+const CreatePostModal = (props: { type: string; close: () => void }): JSX.Element => {
+    const { type, close } = props
+    const { accountData } = useContext(AccountContext)
     const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
     const [formData, setFormData] = useState({
         postType: {
-            value: createPostModalType,
+            value: type,
             ...defaultErrorState,
         },
         text: {
@@ -92,11 +94,18 @@ const CreatePostModal = (): JSX.Element => {
     } = formData
     const [spaceOptions, setSpaceOptions] = useState<any[]>([])
     const [selectedSpaces, setSelectedSpaces] = useState<any[]>([])
+    const [loading, setLoading] = useState(false)
+    const [saved, setSaved] = useState(false)
+    // url
     const [urlLoading, setUrlLoading] = useState(false)
     const [urlInvalid, setUrlInvalid] = useState(false)
     const [urlData, setUrlData] = useState<any>(null)
-    const [selectedTopicGroup, setSelectedTopicGroup] = useState('archetopics')
-    const [selectedTopic, setSelectedTopic] = useState<any>(null)
+    // image
+    const [images, setImages] = useState<any[]>([])
+    const [imageURL, setImageURL] = useState('')
+    const [imageSizeError, setImageSizeError] = useState(false)
+    const imageMBLimit = 2
+    // audio
     const [audioFile, setAudioFile] = useState<File>()
     const [audioSizeError, setAudioSizeError] = useState(false)
     const [audioPlaying, setAudioPlaying] = useState(false)
@@ -104,16 +113,19 @@ const CreatePostModal = (): JSX.Element => {
     const [recording, setRecording] = useState(false)
     const [recordingTime, setRecordingTime] = useState(0)
     const [audioPostError, setAudioPostError] = useState(false)
-    const [startTime, setStartTime] = useState('')
-    const [endTime, setEndTime] = useState('')
-    const [duration, setDuration] = useState<string | number>('Undefined')
-    const [loading, setLoading] = useState(false)
-    const [saved, setSaved] = useState(false)
     const audioRecorderRef = useRef<any>(null)
     const audioChunksRef = useRef<any>([])
     const recordingIntervalRef = useRef<any>(null)
-    const cookies = new Cookies()
     const audioMBLimit = 5
+    // event
+    const [startTime, setStartTime] = useState('')
+    const [endTime, setEndTime] = useState('')
+    const [duration, setDuration] = useState<string | number>('Undefined')
+    // glass bead game
+    const [selectedTopicGroup, setSelectedTopicGroup] = useState('archetopics')
+    const [selectedTopic, setSelectedTopic] = useState<any>(null)
+
+    const cookies = new Cookies()
 
     function updateValue(name, value) {
         let resetState = {}
@@ -177,6 +189,40 @@ const CreatePostModal = (): JSX.Element => {
         } else {
             setUrlInvalid(!!urlString)
         }
+    }
+
+    function addImageFiles() {
+        setImageSizeError(false)
+        const input = document.getElementById('image-post-file-input') as HTMLInputElement
+        if (input && input.files && input.files.length) {
+            for (let i = 0; i < input.files.length; i += 1) {
+                if (input.files[i].size > imageMBLimit * 1024 * 1024) setImageSizeError(true)
+                else setImages((img) => [...img, { file: input && input.files && input.files[i] }])
+            }
+        }
+    }
+
+    function addImageURL() {
+        setImages([...images, { url: imageURL }])
+        setImageURL('')
+        setImageSizeError(false)
+    }
+
+    function removeImage(index) {
+        setImages([...images.filter((image, i) => i !== index)])
+    }
+
+    function updateNewCaption(index, value) {
+        const newImages = [...images]
+        newImages[index].newCaption = value
+        setImages(newImages)
+    }
+
+    function updateCaption(index) {
+        const newImages = [...images]
+        newImages[index].caption = newImages[index].newCaption
+        newImages[index].newCaption = ''
+        setImages(newImages)
     }
 
     function resetAudioState() {
@@ -313,7 +359,7 @@ const CreatePostModal = (): JSX.Element => {
                     spaceIds: [spaceData.id, ...selectedSpaces.map((s) => s.id)],
                 }
                 let fileData
-                let type
+                let audioType
                 if (postType.value === 'Audio') {
                     fileData = new FormData()
                     const isBlob = audioFile && !audioFile.name
@@ -324,12 +370,12 @@ const CreatePostModal = (): JSX.Element => {
                             : audioFile
                     )
                     fileData.append('postData', JSON.stringify(postData))
-                    type = isBlob ? 'audio-blob' : 'audio-file'
+                    audioType = isBlob ? 'audio-blob' : 'audio-file'
                     options.headers['Content-Type'] = 'multipart/form-data'
                 }
                 axios
                     .post(
-                        `${config.apiURL}/create-post?type=${type}`,
+                        `${config.apiURL}/create-post?type=${audioType}`,
                         fileData || postData,
                         options
                     )
@@ -371,7 +417,7 @@ const CreatePostModal = (): JSX.Element => {
                             OutgoingLinks: [],
                         }
                         setSpacePosts([newPost, ...spacePosts])
-                        setTimeout(() => setCreatePostModalOpen(false), 1000)
+                        setTimeout(() => close(), 1000)
                     })
                     .catch((error) => {
                         const { message } = error.response.data
@@ -414,7 +460,7 @@ const CreatePostModal = (): JSX.Element => {
         }
     }
 
-    const postTypeName = ['Text', 'Url', 'Audio', 'Event'].includes(postType.value)
+    const postTypeName = ['Text', 'Url', 'Image', 'Audio', 'Event'].includes(postType.value)
         ? `${postType.value.toLowerCase()} post`
         : postType.value
 
@@ -428,7 +474,7 @@ const CreatePostModal = (): JSX.Element => {
     }
 
     useEffect(() => {
-        if (postType.value === 'Event' || postType.value === 'Glass Bead Game') {
+        if (['Event', 'Glass Bead Game'].includes(postType.value)) {
             flatpickr('#date-time-start', {
                 ...dateTimeOptions,
                 appendTo: document.getElementById('date-time-start-wrapper') || undefined,
@@ -469,121 +515,24 @@ const CreatePostModal = (): JSX.Element => {
     }, [endTime])
 
     return (
-        <Modal close={() => setCreatePostModalOpen(false)} centered>
+        <Modal close={close} centered>
             <h1>
                 Create a new {postTypeName} in{' '}
-                <Link to={`/s/${spaceData.handle}`} onClick={() => setCreatePostModalOpen(false)}>
+                <Link to={`/s/${spaceData.handle}`} onClick={close}>
                     {spaceData.name}
                 </Link>
             </h1>
             <form onSubmit={createPost}>
                 <Column style={{ width: 700 }}>
-                    {createPostModalType !== 'Glass Bead Game' && (
+                    {type !== 'Glass Bead Game' && (
                         <DropDownMenu
                             title='Post Type'
-                            options={['Text', 'Url', 'Audio', 'Event', 'Glass Bead Game']}
+                            options={['Text', 'Url', 'Image', 'Audio', 'Event', 'Glass Bead Game']}
                             selectedOption={postType.value}
                             setSelectedOption={(value) => updateValue('postType', value)}
                             orientation='horizontal'
                             style={{ marginBottom: 10 }}
                         />
-                    )}
-                    {postType.value === 'Glass Bead Game' && (
-                        <Column style={{ marginTop: 5 }}>
-                            <div className={styles.dateTimePicker}>
-                                <div id='date-time-start-wrapper'>
-                                    <Input
-                                        id='date-time-start'
-                                        title='Start time (optional)'
-                                        type='text'
-                                        placeholder='select start time...'
-                                        state={eventStartTime.state}
-                                        errors={eventStartTime.errors}
-                                    />
-                                </div>
-                                <div id='date-time-end-wrapper'>
-                                    <Input
-                                        id='date-time-end'
-                                        title='End time (optional)'
-                                        type='text'
-                                        placeholder='select end time...'
-                                        state={eventEndTime.state}
-                                        errors={eventEndTime.errors}
-                                    />
-                                </div>
-                                <Input
-                                    title='Duration'
-                                    type='text'
-                                    placeholder='Undefined'
-                                    value={duration}
-                                    disabled
-                                    style={{ width: 'auto' }}
-                                />
-                            </div>
-                            <Input
-                                title='Create a custom topic for the game'
-                                type='text'
-                                placeholder={selectedTopic ? 'topic selected' : 'custom topic...'}
-                                state={topic.state}
-                                errors={topic.errors}
-                                value={topic.value}
-                                disabled={selectedTopic}
-                                onChange={(value) => updateValue('topic', value)}
-                                style={{ marginBottom: 15 }}
-                            />
-                            <p>Or select a topic from one of the topic groups below</p>
-                            <Row style={{ margin: '10px 0' }}>
-                                <Button
-                                    text='Archetopics'
-                                    color={selectedTopicGroup === 'archetopics' ? 'blue' : 'grey'}
-                                    onClick={() => setSelectedTopicGroup('archetopics')}
-                                    style={{ marginRight: 10 }}
-                                />
-                                <Button
-                                    text='Liminal'
-                                    color={selectedTopicGroup === 'liminal' ? 'blue' : 'grey'}
-                                    onClick={() => setSelectedTopicGroup('liminal')}
-                                />
-                            </Row>
-                            <Scrollbars className={styles.topics}>
-                                <Row wrap>
-                                    {GlassBeadGameTopics[selectedTopicGroup].map((t) => (
-                                        <Row className={styles.topicWrapper} key={t.name}>
-                                            <ImageTitle
-                                                type='space'
-                                                imagePath={t.imagePath}
-                                                imageSize={25}
-                                                title={t.name}
-                                                fontSize={12}
-                                                onClick={() => {
-                                                    setSelectedTopic(t)
-                                                    updateValue('topic', '')
-                                                }}
-                                            />
-                                        </Row>
-                                    ))}
-                                </Row>
-                            </Scrollbars>
-                            {selectedTopic && (
-                                <Column className={styles.selectedTopic}>
-                                    <p>Selected topic:</p>
-                                    <Row centerY className={styles.selectedTopicWrapper}>
-                                        <ImageTitle
-                                            type='space'
-                                            imagePath={selectedTopic.imagePath}
-                                            imageSize={25}
-                                            title={selectedTopic.name}
-                                            fontSize={12}
-                                            style={{ marginRight: 10 }}
-                                        />
-                                        <CloseButton
-                                            size={17}
-                                            onClick={() => setSelectedTopic(null)}
-                                        />
-                                    </Row>
-                                </Column>
-                            )}
-                        </Column>
                     )}
                     {postType.value === 'Url' && (
                         <Column>
@@ -613,6 +562,82 @@ const CreatePostModal = (): JSX.Element => {
                                     />
                                 </Column>
                             )}
+                        </Column>
+                    )}
+                    {postType.value === 'Image' && (
+                        <Column style={{ marginTop: 10 }}>
+                            <Row centerX>
+                                {images.length > 0 && (
+                                    <Scrollbars className={`${styles.images} row`}>
+                                        {images.map((image, index) => (
+                                            <Column centerX className={styles.image} key={index}>
+                                                <CloseButton
+                                                    size={20}
+                                                    onClick={() => removeImage(index)}
+                                                />
+                                                <img
+                                                    src={
+                                                        image.url || URL.createObjectURL(image.file)
+                                                    }
+                                                    alt=''
+                                                />
+                                                {image.caption && <p>{image.caption}</p>}
+                                                <Row centerY style={{ width: 220 }}>
+                                                    <Input
+                                                        type='text'
+                                                        placeholder={`${
+                                                            image.caption ? 'change' : 'add'
+                                                        } caption...`}
+                                                        value={image.newCaption}
+                                                        onChange={(v) => updateNewCaption(index, v)}
+                                                        style={{ marginRight: 5 }}
+                                                    />
+                                                    <Button
+                                                        icon={<PlusIconSVG />}
+                                                        color='grey'
+                                                        onClick={() => updateCaption(index)}
+                                                        style={{ padding: '0 10px' }}
+                                                    />
+                                                </Row>
+                                            </Column>
+                                        ))}
+                                    </Scrollbars>
+                                )}
+                            </Row>
+                            {imageSizeError && (
+                                <p className='danger' style={{ marginBottom: 10 }}>
+                                    Max file size: {imageMBLimit}MB
+                                </p>
+                            )}
+                            <Row className={styles.fileUploadInput}>
+                                <label htmlFor='image-post-file-input'>
+                                    Upload images
+                                    <input
+                                        type='file'
+                                        id='image-post-file-input'
+                                        accept='.png, .jpg, .jpeg, .gif'
+                                        onChange={addImageFiles}
+                                        multiple
+                                        hidden
+                                    />
+                                </label>
+                            </Row>
+                            <p>or paste an image URL:</p>
+                            <Row style={{ marginTop: 5 }}>
+                                <Input
+                                    type='text'
+                                    placeholder='image url...'
+                                    value={imageURL}
+                                    onChange={(v) => setImageURL(v)}
+                                    style={{ margin: '0 10px 10px 0' }}
+                                />
+                                <Button
+                                    text='Add'
+                                    color='aqua'
+                                    disabled={imageURL === ''}
+                                    onClick={addImageURL}
+                                />
+                            </Row>
                         </Column>
                     )}
                     {postType.value === 'Audio' && (
@@ -736,6 +761,103 @@ const CreatePostModal = (): JSX.Element => {
                                 value={title.value}
                                 onChange={(value) => updateValue('title', value)}
                             />
+                        </Column>
+                    )}
+                    {postType.value === 'Glass Bead Game' && (
+                        <Column style={{ marginTop: 5 }}>
+                            <div className={styles.dateTimePicker}>
+                                <div id='date-time-start-wrapper'>
+                                    <Input
+                                        id='date-time-start'
+                                        title='Start time (optional)'
+                                        type='text'
+                                        placeholder='select start time...'
+                                        state={eventStartTime.state}
+                                        errors={eventStartTime.errors}
+                                    />
+                                </div>
+                                <div id='date-time-end-wrapper'>
+                                    <Input
+                                        id='date-time-end'
+                                        title='End time (optional)'
+                                        type='text'
+                                        placeholder='select end time...'
+                                        state={eventEndTime.state}
+                                        errors={eventEndTime.errors}
+                                    />
+                                </div>
+                                <Input
+                                    title='Duration'
+                                    type='text'
+                                    placeholder='Undefined'
+                                    value={duration}
+                                    disabled
+                                    style={{ width: 'auto' }}
+                                />
+                            </div>
+                            <Input
+                                title='Create a custom topic for the game'
+                                type='text'
+                                placeholder={selectedTopic ? 'topic selected' : 'custom topic...'}
+                                state={topic.state}
+                                errors={topic.errors}
+                                value={topic.value}
+                                disabled={selectedTopic}
+                                onChange={(value) => updateValue('topic', value)}
+                                style={{ marginBottom: 15 }}
+                            />
+                            <p>Or select a topic from one of the topic groups below</p>
+                            <Row style={{ margin: '10px 0' }}>
+                                <Button
+                                    text='Archetopics'
+                                    color={selectedTopicGroup === 'archetopics' ? 'blue' : 'grey'}
+                                    onClick={() => setSelectedTopicGroup('archetopics')}
+                                    style={{ marginRight: 10 }}
+                                />
+                                <Button
+                                    text='Liminal'
+                                    color={selectedTopicGroup === 'liminal' ? 'blue' : 'grey'}
+                                    onClick={() => setSelectedTopicGroup('liminal')}
+                                />
+                            </Row>
+                            <Scrollbars className={styles.topics}>
+                                <Row wrap>
+                                    {GlassBeadGameTopics[selectedTopicGroup].map((t) => (
+                                        <Row className={styles.topicWrapper} key={t.name}>
+                                            <ImageTitle
+                                                type='space'
+                                                imagePath={t.imagePath}
+                                                imageSize={25}
+                                                title={t.name}
+                                                fontSize={12}
+                                                onClick={() => {
+                                                    setSelectedTopic(t)
+                                                    updateValue('topic', '')
+                                                }}
+                                            />
+                                        </Row>
+                                    ))}
+                                </Row>
+                            </Scrollbars>
+                            {selectedTopic && (
+                                <Column className={styles.selectedTopic}>
+                                    <p>Selected topic:</p>
+                                    <Row centerY className={styles.selectedTopicWrapper}>
+                                        <ImageTitle
+                                            type='space'
+                                            imagePath={selectedTopic.imagePath}
+                                            imageSize={25}
+                                            title={selectedTopic.name}
+                                            fontSize={12}
+                                            style={{ marginRight: 10 }}
+                                        />
+                                        <CloseButton
+                                            size={17}
+                                            onClick={() => setSelectedTopic(null)}
+                                        />
+                                    </Row>
+                                </Column>
+                            )}
                         </Column>
                     )}
                     <Input

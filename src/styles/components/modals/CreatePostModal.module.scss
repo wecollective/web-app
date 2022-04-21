@@ -29,7 +29,37 @@
     }
 }
 
+.images {
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+
+    .image {
+        position: relative;
+        &:not(:last-child) {  margin-right: 10px }
+
+        > button {
+            position: absolute;
+            right: 0;
+        }
+
+        > img {
+            width: 220px;
+            height: 220px;
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+
+        > p {
+            width: 220px;
+            text-align: center;
+            overflow-wrap: break-word;
+            margin-bottom: 10px;
+        }
+    }
+}
+
 .fileUploadInput {
+    margin-bottom: 10px;
     label {
         height: 40px;
         border-radius: 20px;
