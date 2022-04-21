@@ -50,9 +50,6 @@ const SpacePageSpacesHeader = (props: {
                 onClick={openCreateSpaceModal}
                 style={{ marginRight: 10 }}
             />
-            {createSpaceModalOpen && (
-                <CreateSpaceModal close={() => setCreateSpaceModalOpen(false)} />
-            )}
             <SearchBar
                 setSearchFilter={(payload) => updateSpaceSpacesFilter('searchQuery', payload)}
                 placeholder='Search spaces...'
@@ -65,6 +62,9 @@ const SpacePageSpacesHeader = (props: {
                 onClick={() => setFiltersOpen(!filtersOpen)}
             />
             <Button icon={<EyeIconSVG />} color='grey' onClick={() => setViewModalOpen(true)} />
+            {createSpaceModalOpen && (
+                <CreateSpaceModal close={() => setCreateSpaceModalOpen(false)} />
+            )}
             {viewModalOpen && (
                 <Modal centered close={() => setViewModalOpen(false)}>
                     <h1>Views</h1>

@@ -8,6 +8,7 @@ import Button from '@components/Button'
 import Row from '@components/Row'
 import Column from '@components/Column'
 import Modal from '@components/Modal'
+import CreatePostModal from '@src/components/modals/CreatePostModal'
 import { ReactComponent as SlidersIconSVG } from '@svgs/sliders-h-solid.svg'
 import { ReactComponent as EyeIconSVG } from '@svgs/eye-solid.svg'
 
@@ -27,14 +28,10 @@ const SpacePagePostsHeader = (props: {
         showPostMap,
         setShowPostMap,
     } = props
-    const {
-        loggedIn,
-        setCreatePostModalOpen,
-        setCreatePostModalType,
-        setAlertModalOpen,
-        setAlertMessage,
-    } = useContext(AccountContext)
+    const { loggedIn, setAlertModalOpen, setAlertMessage } = useContext(AccountContext)
     const { spaceData, updateSpacePostsFilter } = useContext(SpaceContext)
+    const [createPostModalType, setCreatePostModalType] = useState('Text')
+    const [createPostModalOpen, setCreatePostModalOpen] = useState(false)
     const [viewModalOpen, setViewModalOpen] = useState(false)
     const { innerWidth } = window
 
@@ -76,6 +73,12 @@ const SpacePagePostsHeader = (props: {
                 onClick={() => setFiltersOpen(!filtersOpen)}
             />
             <Button icon={<EyeIconSVG />} color='grey' onClick={() => setViewModalOpen(true)} />
+            {createPostModalOpen && (
+                <CreatePostModal
+                    type={createPostModalType}
+                    close={() => setCreatePostModalOpen(false)}
+                />
+            )}
             {viewModalOpen && (
                 <Modal centered close={() => setViewModalOpen(false)}>
                     <h1>Views</h1>
