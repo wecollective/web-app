@@ -19,6 +19,7 @@ const Input = (props: {
     style?: any
     disabled?: boolean
     loading?: boolean
+    autoFill?: boolean
 }): JSX.Element => {
     const {
         type,
@@ -34,6 +35,7 @@ const Input = (props: {
         style,
         disabled,
         loading,
+        autoFill,
     } = props
 
     return (
@@ -53,6 +55,7 @@ const Input = (props: {
                             resizeTextArea(e.target)
                         }}
                         disabled={disabled}
+                        data-lpignore={!autoFill}
                     />
                 ) : (
                     <input
@@ -62,6 +65,7 @@ const Input = (props: {
                         value={value}
                         onChange={(e) => onChange && onChange(e.target.value)}
                         disabled={disabled}
+                        data-lpignore={!autoFill}
                     />
                 )}
                 {state === 'invalid' && <DangerIconSVG />}
@@ -85,6 +89,7 @@ Input.defaultProps = {
     style: null,
     disabled: false,
     loading: false,
+    autoFill: false,
 }
 
 export default Input

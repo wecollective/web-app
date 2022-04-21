@@ -123,6 +123,7 @@ const LogInModal = (props: { close: () => void }): JSX.Element => {
                             setEmailOrHandleState('default')
                             setEmailOrHandle(newValue)
                         }}
+                        autoFill
                     />
                     <Input
                         type='password'
@@ -136,6 +137,7 @@ const LogInModal = (props: { close: () => void }): JSX.Element => {
                             setPasswordState('default')
                             setPassword(newValue)
                         }}
+                        autoFill
                     />
                 </Column>
                 {logInFlashMessage.length > 0 && <p className='danger'>{logInFlashMessage}</p>}
