@@ -104,6 +104,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
     const [images, setImages] = useState<any[]>([])
     const [imageURL, setImageURL] = useState('')
     const [imageSizeError, setImageSizeError] = useState(false)
+    const [imagePostError, setImagePostError] = useState(false)
     const imageMBLimit = 2
     // audio
     const [audioFile, setAudioFile] = useState<File>()
@@ -193,6 +194,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
 
     function addImageFiles() {
         setImageSizeError(false)
+        setImagePostError(false)
         const input = document.getElementById('image-post-file-input') as HTMLInputElement
         if (input && input.files && input.files.length) {
             for (let i = 0; i < input.files.length; i += 1) {
@@ -206,6 +208,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
         setImages([...images, { url: imageURL }])
         setImageURL('')
         setImageSizeError(false)
+        setImagePostError(false)
     }
 
     function removeImage(index) {
@@ -293,7 +296,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
             },
             text: {
                 ...text,
-                required: !['Url', 'Audio'].includes(postType.value),
+                required: !['Url', 'Image', 'Audio'].includes(postType.value),
                 validate: (v) => {
                     const errors: string[] = []
                     if (!v) errors.push('Required')
@@ -336,7 +339,8 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
         }
 
         if (allValid(newFormData, setFormData)) {
-            if (postType.value === 'Audio' && !audioFile) {
+            if (postType.value === 'Image' && !images.length) setImagePostError(true)
+            else if (postType.value === 'Audio' && !audioFile) {
                 if (!audioSizeError) setAudioPostError(true)
             } else {
                 setLoading(true)
@@ -359,7 +363,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                     spaceIds: [spaceData.id, ...selectedSpaces.map((s) => s.id)],
                 }
                 let fileData
-                let audioType
+                let uploadType
                 if (postType.value === 'Audio') {
                     fileData = new FormData()
                     const isBlob = audioFile && !audioFile.name
@@ -370,12 +374,22 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                             : audioFile
                     )
                     fileData.append('postData', JSON.stringify(postData))
-                    audioType = isBlob ? 'audio-blob' : 'audio-file'
+                    uploadType = isBlob ? 'audio-blob' : 'audio-file'
                     options.headers['Content-Type'] = 'multipart/form-data'
+                }
+                if (postType.value === 'Image') {
+                    uploadType = images.find((image) => image.file) ? 'image-files' : null
+                    fileData = new FormData()
+                    images.forEach((image, index) => {
+                        // originalname set as index for use on backend
+                        if (image.file) fileData.append('file', image.file, index)
+                    })
+                    fileData.append('imageData', JSON.stringify(images))
+                    fileData.append('postData', JSON.stringify(postData))
                 }
                 axios
                     .post(
-                        `${config.apiURL}/create-post?type=${audioType}`,
+                        `${config.apiURL}/create-post?uploadType=${uploadType}`,
                         fileData || postData,
                         options
                     )
@@ -401,20 +415,20 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                                 flagImagePath: accountData.flagImagePath,
                             },
                             DirectSpaces,
+                            Reactions: [],
+                            IncomingLinks: [],
+                            OutgoingLinks: [],
+                            Event: {
+                                ...res.data.event,
+                                Going: [],
+                                Interested: [],
+                            },
                             GlassBeadGame: {
                                 topic: selectedTopic ? selectedTopic.name : topic.value,
                                 topicGroup: selectedTopic ? selectedTopicGroup : null,
                                 topicImage: selectedTopic ? selectedTopic.imagePath : null,
                                 GlassBeads: [],
                             },
-                            Event: {
-                                ...res.data.event,
-                                Going: [],
-                                Interested: [],
-                            },
-                            Reactions: [],
-                            IncomingLinks: [],
-                            OutgoingLinks: [],
                         }
                         setSpacePosts([newPost, ...spacePosts])
                         setTimeout(() => close(), 1000)
@@ -438,6 +452,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
     function textTitle() {
         switch (postType.value) {
             case 'Url':
+            case 'Image':
             case 'Audio':
                 return 'Text (optional)'
             case 'Event':
@@ -567,6 +582,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                     {postType.value === 'Image' && (
                         <Column style={{ marginTop: 10 }}>
                             <Row centerX>
+                                {imagePostError && <p className='danger'>No images added yet</p>}
                                 {images.length > 0 && (
                                     <Scrollbars className={`${styles.images} row`}>
                                         {images.map((image, index) => (
