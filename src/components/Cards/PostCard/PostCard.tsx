@@ -47,6 +47,8 @@ import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
 import { ReactComponent as ClockIconSVG } from '@svgs/clock-solid.svg'
 import { ReactComponent as CalendarIconSVG } from '@svgs/calendar-days-solid.svg'
 import { ReactComponent as SuccessIconSVG } from '@svgs/check-circle-solid.svg'
+import { ReactComponent as ChevronLeftSVG } from '@svgs/chevron-left-solid.svg'
+import { ReactComponent as ChevronRightSVG } from '@svgs/chevron-right-solid.svg'
 
 const PostCard = (props: {
     post: any
@@ -80,18 +82,22 @@ const PostCard = (props: {
         DirectSpaces,
         GlassBeadGame,
         Event,
+        PostImages,
     } = postData
 
     const [likeModalOpen, setLikeModalOpen] = useState(false)
     const [repostModalOpen, setRepostModalOpen] = useState(false)
     const [ratingModalOpen, setRatingModalOpen] = useState(false)
     const [linkModalOpen, setLinkModalOpen] = useState(false)
+    const [imageModalOpen, setImageModalOpen] = useState(false)
+    const [selectedImage, setSelectedImage] = useState<any>(null)
     const [eventGoingModalOpen, setEventGoingModalOpen] = useState(false)
     const [eventInterestedModalOpen, setEventInterestedModalOpen] = useState(false)
     const [commentsOpen, setCommentsOpen] = useState(false)
     const [deletePostModalOpen, setDeletePostModalOpen] = useState(false)
     const [audioPlaying, setAudioPlaying] = useState(false)
     const beads = GlassBeadGame ? GlassBeadGame.GlassBeads.sort((a, b) => a.index - b.index) : []
+    const images = PostImages.sort((a, b) => a.index - b.index)
 
     const history = useHistory()
     const cookies = new Cookies()
@@ -108,6 +114,16 @@ const PostCard = (props: {
     const goingToEventImages = Event && Event.Going.map((u) => u.flagImagePath)
     const interestedInEvent = Event && Event.Interested.map((u) => u.id).includes(accountData.id)
     const interestedInEventImages = Event && Event.Interested.map((u) => u.flagImagePath)
+
+    function openImageModal(imageId) {
+        setSelectedImage(images.find((image) => image.id === imageId))
+        setImageModalOpen(true)
+    }
+
+    function toggleImage(increment) {
+        const imageIndex = selectedImage.index + increment
+        setSelectedImage(images[imageIndex])
+    }
 
     function toggleAudio() {
         const audio = d3.select(`#post-audio-${id}`).node()
@@ -280,6 +296,58 @@ const PostCard = (props: {
                             title={urlTitle}
                             description={urlDescription}
                         />
+                    </Column>
+                )}
+                {type === 'image' && (
+                    <Column>
+                        <Column>
+                            {text && (
+                                <ShowMoreLess height={150}>
+                                    <Markdown text={text} />
+                                </ShowMoreLess>
+                            )}
+                            {images.length > 0 && (
+                                <Scrollbars className={`${styles.images} row`}>
+                                    {images.map((image) => (
+                                        <Column centerX className={styles.image} key={index}>
+                                            <button
+                                                type='button'
+                                                onClick={() => openImageModal(image.id)}
+                                            >
+                                                <img src={image.url} alt='' />
+                                            </button>
+                                            {image.caption && <p>{image.caption}</p>}
+                                        </Column>
+                                    ))}
+                                </Scrollbars>
+                            )}
+                            {imageModalOpen && (
+                                <Modal close={() => setImageModalOpen(false)}>
+                                    <Row centerY className={styles.selectedImage}>
+                                        {selectedImage.index !== 0 && (
+                                            <button type='button' onClick={() => toggleImage(-1)}>
+                                                <ChevronLeftSVG />
+                                            </button>
+                                        )}
+                                        <Column centerX>
+                                            <img
+                                                className={styles.selectedImage}
+                                                src={selectedImage.url}
+                                                alt=''
+                                            />
+                                            {selectedImage.caption && (
+                                                <p>{selectedImage.caption}</p>
+                                            )}
+                                        </Column>
+                                        {selectedImage.index !== images.length - 1 && (
+                                            <button type='button' onClick={() => toggleImage(1)}>
+                                                <ChevronRightSVG />
+                                            </button>
+                                        )}
+                                    </Row>
+                                </Modal>
+                            )}
+                        </Column>
                     </Column>
                 )}
                 {type === 'audio' && (
