@@ -68,6 +68,10 @@
                 color: $postTypeUrl;
                 border: 2px solid $postTypeUrl;
             }
+            &.image {
+                color: $postTypeImage;
+                border: 2px solid $postTypeImage;
+            }
             &.audio {
                 color: $postTypeAudio;
                 border: 2px solid $postTypeAudio;
@@ -97,6 +101,59 @@
     .content {
         width: 100%;
         margin-bottom: 15px;
+
+        // image posts
+        .images {
+            padding-bottom: 10px;
+            margin-top: 10px;
+        
+            .image {
+                position: relative;
+                &:not(:last-child) {  margin-right: 10px }
+
+                > button {
+                    all: unset;
+                    cursor: pointer;
+
+                    > img {
+                        width: 220px;
+                        height: 220px;
+                        object-fit: cover;
+                        margin-bottom: 10px;
+                    }
+                }
+        
+                > p {
+                    width: 220px;
+                    text-align: center;
+                    overflow-wrap: break-word;
+                }
+            }
+        }
+
+        .selectedImage {
+            > button {
+                all: unset;
+                cursor: pointer;
+                > svg {
+                    color: $grey3;
+                    width: 25px;
+                    height: 25px;
+                    &:hover {
+                        color: $grey4;
+                    }
+                    transition: color 0.5s;
+                }
+            }
+            > div {
+                margin: 0 10px;
+                > img {
+                    max-width: calc(100vw - 200px);
+                    max-height: calc(100vh - 200px);
+                    margin-bottom: 20px;
+                }
+            }
+        }
 
         // event posts
         .eventTitle {
