@@ -418,6 +418,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                             Reactions: [],
                             IncomingLinks: [],
                             OutgoingLinks: [],
+                            PostImages: [...res.data.images],
                             Event: {
                                 ...res.data.event,
                                 Going: [],
