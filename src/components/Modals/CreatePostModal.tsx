@@ -418,7 +418,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                             Reactions: [],
                             IncomingLinks: [],
                             OutgoingLinks: [],
-                            PostImages: [...res.data.images],
+                            PostImages: res.data.images ? [...res.data.images] : [],
                             Event: {
                                 ...res.data.event,
                                 Going: [],
@@ -435,14 +435,16 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                         setTimeout(() => close(), 1000)
                     })
                     .catch((error) => {
-                        const { message } = error.response.data
-                        switch (message) {
-                            case 'File size too large':
-                                setAudioSizeError(true)
-                                break
-                            default:
-                                console.log('error: ', error)
-                                break
+                        if (!error.response) console.log(error)
+                        else {
+                            const { message } = error.response.data
+                            switch (message) {
+                                case 'File size too large':
+                                    setAudioSizeError(true)
+                                    break
+                                default:
+                                    break
+                            }
                         }
                         setLoading(false)
                     })
