@@ -48,7 +48,6 @@ const SpacePagePostMap = (): JSX.Element => {
                 }&offset=0`
             )
             .then((res) => {
-                // console.log('res: ', res)
                 // store previous node positions
                 interface INodePosition {
                     id: number
@@ -140,7 +139,7 @@ const SpacePagePostMap = (): JSX.Element => {
     }
 
     function findFill(d) {
-        if (d.urlImage) {
+        if (d.urlImage || d.type === 'image') {
             const existingImage = d3.select(`#image-${d.id}`)
             if (existingImage.node()) {
                 // scale and reposition existing image
@@ -161,12 +160,15 @@ const SpacePagePostMap = (): JSX.Element => {
                     .append('image')
                     .attr('id', `image-${d.id}`)
                     .attr('height', findRadius(d) * 2)
-                    .attr('xlink:href', d.urlImage)
+                    .attr('xlink:href', d.urlImage || d.PostImages[0].url)
                     .on('error', () => {
                         const newImage = d3.select(`#image-${d.id}`)
                         // try image proxy
                         if (!newImage.attr('xlink:href').includes('//images.weserv.nl/')) {
-                            newImage.attr('xlink:href', `//images.weserv.nl/?url=${d.urlImage}`)
+                            newImage.attr(
+                                'xlink:href',
+                                `//images.weserv.nl/?url=${d.urlImage || d.PostImages[0].url}`
+                            )
                         } else {
                             // fall back on placeholder
                             newImage.attr(
