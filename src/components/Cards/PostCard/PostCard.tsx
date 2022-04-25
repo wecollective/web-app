@@ -121,8 +121,7 @@ const PostCard = (props: {
     }
 
     function toggleImage(increment) {
-        const imageIndex = selectedImage.index + increment
-        setSelectedImage(images[imageIndex])
+        setSelectedImage(images[selectedImage.index + increment])
     }
 
     function toggleAudio() {
@@ -197,6 +196,12 @@ const PostCard = (props: {
                 }
             })
         }
+    }
+
+    function findImageSize() {
+        if (images.length === 1) return 'large'
+        if (images.length === 2) return 'medium'
+        return 'small'
     }
 
     return (
@@ -306,21 +311,29 @@ const PostCard = (props: {
                                     <Markdown text={text} />
                                 </ShowMoreLess>
                             )}
-                            {images.length > 0 && (
-                                <Scrollbars className={`${styles.images} row`}>
-                                    {images.map((image) => (
-                                        <Column centerX className={styles.image} key={image.index}>
-                                            <button
-                                                type='button'
-                                                onClick={() => openImageModal(image.id)}
+                            <Row centerX>
+                                {images.length > 0 && (
+                                    <Scrollbars className={`${styles.images} row`}>
+                                        {images.map((image) => (
+                                            <Column
+                                                centerX
+                                                className={`${styles.image} ${
+                                                    styles[findImageSize()]
+                                                }`}
+                                                key={image.index}
                                             >
-                                                <img src={image.url} alt='' />
-                                            </button>
-                                            {image.caption && <p>{image.caption}</p>}
-                                        </Column>
-                                    ))}
-                                </Scrollbars>
-                            )}
+                                                <button
+                                                    type='button'
+                                                    onClick={() => openImageModal(image.id)}
+                                                >
+                                                    <img src={image.url} alt='' />
+                                                </button>
+                                                {image.caption && <p>{image.caption}</p>}
+                                            </Column>
+                                        ))}
+                                    </Scrollbars>
+                                )}
+                            </Row>
                             {imageModalOpen && (
                                 <Modal close={() => setImageModalOpen(false)}>
                                     <Row centerY className={styles.selectedImage}>
