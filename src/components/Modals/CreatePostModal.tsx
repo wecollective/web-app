@@ -365,8 +365,9 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                 let fileData
                 let uploadType
                 if (postType.value === 'Audio') {
-                    fileData = new FormData()
                     const isBlob = audioFile && !audioFile.name
+                    uploadType = isBlob ? 'audio-blob' : 'audio-file'
+                    fileData = new FormData()
                     fileData.append(
                         'file',
                         isBlob
@@ -374,11 +375,10 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                             : audioFile
                     )
                     fileData.append('postData', JSON.stringify(postData))
-                    uploadType = isBlob ? 'audio-blob' : 'audio-file'
                     options.headers['Content-Type'] = 'multipart/form-data'
                 }
                 if (postType.value === 'Image') {
-                    uploadType = images.find((image) => image.file) ? 'image-files' : null
+                    uploadType = 'image-post'
                     fileData = new FormData()
                     images.forEach((image, index) => {
                         // originalname set as index for use on backend
