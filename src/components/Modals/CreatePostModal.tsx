@@ -26,6 +26,7 @@ import CloseButton from '@components/CloseButton'
 import AudioVisualiser from '@src/components/AudioVisualiser'
 import AudioTimeSlider from '@src/components/AudioTimeSlider'
 import PostCardUrlPreview from '@components/Cards/PostCard/PostCardUrlPreview'
+import Markdown from '@components/Markdown'
 import {
     allValid,
     defaultErrorState,
@@ -38,6 +39,12 @@ import Scrollbars from '@components/Scrollbars'
 import { ReactComponent as PlayIconSVG } from '@svgs/play-solid.svg'
 import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
 import { ReactComponent as PlusIconSVG } from '@svgs/plus.svg'
+import { ReactComponent as TextIconSVG } from '@svgs/font-solid.svg'
+import { ReactComponent as LinkIconSVG } from '@svgs/link-solid.svg'
+import { ReactComponent as AudioIconSVG } from '@svgs/volume-high-solid.svg'
+import { ReactComponent as ImageIconSVG } from '@svgs/image-solid.svg'
+import { ReactComponent as ChevronLeftSVG } from '@svgs/chevron-left-solid.svg'
+import { ReactComponent as ChevronRightSVG } from '@svgs/chevron-right-solid.svg'
 
 const CreatePostModal = (props: { type: string; close: () => void }): JSX.Element => {
     const { type, close } = props
@@ -125,8 +132,70 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
     // glass bead game
     const [selectedTopicGroup, setSelectedTopicGroup] = useState('archetopics')
     const [selectedTopic, setSelectedTopic] = useState<any>(null)
+    // string
+    const [newBead, setNewBead] = useState({
+        type: {
+            value: 'text',
+            ...defaultErrorState,
+        },
+        text: {
+            value: '',
+            ...defaultErrorState,
+        },
+        url: {
+            value: '',
+            ...defaultErrorState,
+        },
+        audio: {
+            value: null,
+            ...defaultErrorState,
+        },
+        images: {
+            value: [],
+            ...defaultErrorState,
+        },
+    })
+    const [string, setString] = useState<any[]>([])
 
     const cookies = new Cookies()
+
+    function updateNewBead(name, value) {
+        setNewBead({
+            ...newBead,
+            [name]: { ...newBead[name], value, state: 'default' },
+        })
+    }
+
+    function addNewBeadToString() {
+        setString([...string, newBead])
+    }
+
+    function findBeadIcon(beadType) {
+        switch (beadType) {
+            case 'text':
+                return <TextIconSVG />
+            case 'url':
+                return <LinkIconSVG />
+            case 'audio':
+                return <AudioIconSVG />
+            case 'image':
+                return <ImageIconSVG />
+            default:
+                return null
+        }
+    }
+
+    function removeBead(index) {
+        setString([...string.filter((bead, i) => i !== index)])
+    }
+
+    function moveBead(index, increment) {
+        const newString = [...string]
+        const bead = newString[index]
+        newString.splice(index, 1)
+        newString.splice(index + increment, 0, bead)
+        setString(newString)
+    }
 
     function updateValue(name, value) {
         let resetState = {}
@@ -545,7 +614,15 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                     {type !== 'Glass Bead Game' && (
                         <DropDownMenu
                             title='Post Type'
-                            options={['Text', 'Url', 'Image', 'Audio', 'Event', 'Glass Bead Game']}
+                            options={[
+                                'Text',
+                                'Url',
+                                'Image',
+                                'Audio',
+                                'Event',
+                                'Glass Bead Game',
+                                'String',
+                            ]}
                             selectedOption={postType.value}
                             setSelectedOption={(value) => updateValue('postType', value)}
                             orientation='horizontal'
@@ -879,17 +956,123 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                             )}
                         </Column>
                     )}
-                    <Input
-                        title={textTitle()}
-                        type='text-area'
-                        placeholder={textPlaceholder()}
-                        style={{ marginBottom: 15 }}
-                        rows={3}
-                        state={text.state}
-                        errors={text.errors}
-                        value={text.value}
-                        onChange={(value) => updateValue('text', value)}
-                    />
+                    {postType.value === 'String' && (
+                        <Column>
+                            <Row centerX className={styles.beadTypeButtons}>
+                                <button
+                                    type='button'
+                                    className={`${
+                                        newBead.type.value === 'text' && styles.selected
+                                    }`}
+                                    onClick={() => updateNewBead('type', 'text')}
+                                >
+                                    <TextIconSVG />
+                                </button>
+                                <button
+                                    type='button'
+                                    className={`${newBead.type.value === 'url' && styles.selected}`}
+                                    onClick={() => updateNewBead('type', 'url')}
+                                >
+                                    <LinkIconSVG />
+                                </button>
+                                <button
+                                    type='button'
+                                    className={`${
+                                        newBead.type.value === 'audio' && styles.selected
+                                    }`}
+                                    onClick={() => updateNewBead('type', 'audio')}
+                                >
+                                    <AudioIconSVG />
+                                </button>
+                                <button
+                                    type='button'
+                                    className={`${
+                                        newBead.type.value === 'image' && styles.selected
+                                    }`}
+                                    onClick={() => updateNewBead('type', 'image')}
+                                >
+                                    <ImageIconSVG />
+                                </button>
+                            </Row>
+                            <Column centerX className={styles.newBead}>
+                                {newBead.type.value === 'text' && (
+                                    <Input
+                                        type='text-area'
+                                        placeholder='text...'
+                                        rows={3}
+                                        state={newBead.text.state}
+                                        errors={newBead.text.errors}
+                                        value={newBead.text.value}
+                                        onChange={(value) => updateNewBead('text', value)}
+                                        style={{ width: 300 }}
+                                    />
+                                )}
+                                <Button
+                                    text='Add bead'
+                                    color='aqua'
+                                    onClick={addNewBeadToString}
+                                    style={{ margin: '20px 0' }}
+                                />
+                            </Column>
+                            <Scrollbars className={`${styles.beadDraw} row`}>
+                                {string.map((bead, index) => (
+                                    <Column spaceBetween className={styles.bead} key={index}>
+                                        <Row spaceBetween className={styles.beadHeader}>
+                                            {findBeadIcon(bead.type.value)}
+                                            <CloseButton
+                                                size={20}
+                                                onClick={() => removeBead(index)}
+                                            />
+                                        </Row>
+                                        <Column className={styles.beadContent}>
+                                            {bead.type.value === 'text' && (
+                                                <Scrollbars style={{ justifyContent: 'center' }}>
+                                                    <Markdown
+                                                        text={bead.text.value}
+                                                        fontSize={10}
+                                                        lineHeight='12px'
+                                                    />
+                                                </Scrollbars>
+                                            )}
+                                        </Column>
+                                        <Row className={styles.beadFooter}>
+                                            {index !== 0 && (
+                                                <button
+                                                    type='button'
+                                                    onClick={() => moveBead(index, -1)}
+                                                    style={{ left: 0 }}
+                                                >
+                                                    <ChevronLeftSVG />
+                                                </button>
+                                            )}
+                                            {index < string.length - 1 && (
+                                                <button
+                                                    type='button'
+                                                    onClick={() => moveBead(index, 1)}
+                                                    style={{ right: 0 }}
+                                                >
+                                                    <ChevronRightSVG />
+                                                </button>
+                                            )}
+                                        </Row>
+                                    </Column>
+                                ))}
+                            </Scrollbars>
+                        </Column>
+                    )}
+                    {postType.value !== 'String' && (
+                        <Input
+                            title={textTitle()}
+                            type='text-area'
+                            placeholder={textPlaceholder()}
+                            style={{ marginBottom: 15 }}
+                            rows={3}
+                            state={text.state}
+                            errors={text.errors}
+                            value={text.value}
+                            onChange={(value) => updateValue('text', value)}
+                        />
+                    )}
                     <SearchSelector
                         type='space'
                         title='Add any other spaces you want the post to appear in'
