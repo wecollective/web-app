@@ -125,7 +125,7 @@ const PostCard = (props: {
     }
 
     function toggleAudio() {
-        const audio = d3.select(`#post-audio-${id}`).node()
+        const audio = d3.select(`#post-audio-${id}-${location}`).node()
         if (audio) {
             if (audio.paused) {
                 // pause all playing audio
@@ -371,7 +371,7 @@ const PostCard = (props: {
                             </ShowMoreLess>
                         )}
                         <AudioVisualiser
-                            audioElementId={`post-audio-${id}`}
+                            audioElementId={`post-audio-${id}-${location}`}
                             audioURL={url}
                             staticBars={1200}
                             staticColor={colors.audioVisualiserColor}
@@ -389,7 +389,7 @@ const PostCard = (props: {
                                 {audioPlaying ? <PauseIconSVG /> : <PlayIconSVG />}
                             </button>
                             <AudioTimeSlider
-                                audioElementId={`post-audio-${id}`}
+                                audioElementId={`post-audio-${id}-${location}`}
                                 audioURL={url}
                                 onPlay={() => setAudioPlaying(true)}
                                 onPause={() => setAudioPlaying(false)}
