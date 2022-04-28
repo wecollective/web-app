@@ -111,8 +111,13 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
     const [images, setImages] = useState<any[]>([])
     const [imageURL, setImageURL] = useState('')
     const [imageSizeError, setImageSizeError] = useState(false)
+    const [toalImageSizeError, setTotalImageSizeError] = useState(false)
     const [imagePostError, setImagePostError] = useState(false)
     const imageMBLimit = 2
+    const totalImageMBLimit = 20
+    const totalImageSize =
+        images.map((image) => (image.file ? image.file.size : 0)).reduce((a, b) => a + b, 0) /
+        (1024 * 1024)
     // audio
     const [audioFile, setAudioFile] = useState<File>()
     const [audioSizeError, setAudioSizeError] = useState(false)
@@ -409,9 +414,11 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
 
         if (allValid(newFormData, setFormData)) {
             if (postType.value === 'Image' && !images.length) setImagePostError(true)
-            else if (postType.value === 'Audio' && !audioFile) {
-                if (!audioSizeError) setAudioPostError(true)
-            } else {
+            else if (postType.value === 'Image' && totalImageSize >= totalImageMBLimit)
+                setTotalImageSizeError(true)
+            else if (postType.value === 'Audio' && !audioFile && !audioSizeError)
+                setAudioPostError(true)
+            else {
                 setLoading(true)
                 const accessToken = cookies.get('accessToken')
                 const options = { headers: { Authorization: `Bearer ${accessToken}` } }
@@ -661,8 +668,12 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                     )}
                     {postType.value === 'Image' && (
                         <Column style={{ marginTop: 10 }}>
+                            {imagePostError && (
+                                <p className='danger' style={{ marginBottom: 10 }}>
+                                    No images added yet
+                                </p>
+                            )}
                             <Row centerX>
-                                {imagePostError && <p className='danger'>No images added yet</p>}
                                 {images.length > 0 && (
                                     <Scrollbars className={`${styles.images} row`}>
                                         {images.map((image, index) => (
@@ -703,6 +714,12 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                             {imageSizeError && (
                                 <p className='danger' style={{ marginBottom: 10 }}>
                                     Max file size: {imageMBLimit}MB
+                                </p>
+                            )}
+                            {toalImageSizeError && (
+                                <p className='danger' style={{ marginBottom: 10 }}>
+                                    Total image upload size must be less than {totalImageMBLimit}MB.
+                                    (Current size: {totalImageSize.toFixed(2)}MB)
                                 </p>
                             )}
                             <Row className={styles.fileUploadInput}>
