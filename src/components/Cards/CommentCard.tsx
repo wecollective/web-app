@@ -39,7 +39,7 @@ const Comment = (props: {
                         </p>
                     </Row>
                     <ShowMoreLess height={150} gradientColor='grey'>
-                        <Markdown text={text} fontSize={14} lineHeight='22px' />
+                        <Markdown text={text} style={{ fontSize: 14, lineHeight: '22px' }} />
                     </ShowMoreLess>
                 </Column>
             </Row>
