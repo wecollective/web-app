@@ -1,0 +1,53 @@
+@import '@styles/Variables';
+
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border-radius: 5px;
+    background-color: $grey1;
+
+    > img {
+        width: 100%;
+        height: 50px;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+
+    .metaData {
+        padding: 5px;
+        text-align: center;
+    
+        h1 {
+            font-size: 10px;
+            font-weight: 600;
+            line-height: 12px;
+            overflow: hidden;
+            margin-bottom: 5px;
+            // text-align: center;
+        }
+    
+        p {
+            font-size: 10px;
+            line-height: 12px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .domain {
+            > svg {
+                width: 10px;
+                height: 10px;
+                opacity: 0.3;
+                margin-right: 5px;
+            }
+
+            > p {
+                margin: 0;
+                opacity: 0.5;
+            }
+        }
+    }
+}
