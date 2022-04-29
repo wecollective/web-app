@@ -8,6 +8,13 @@ import axios from 'axios'
 import Cookies from 'universal-cookie'
 import flatpickr from 'flatpickr'
 import 'flatpickr/dist/themes/material_green.css'
+import {
+    allValid,
+    defaultErrorState,
+    isValidUrl,
+    formatTimeMMSS,
+    formatTimeDHM,
+} from '@src/Helpers'
 import { SpaceContext } from '@contexts/SpaceContext'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
@@ -26,16 +33,9 @@ import CloseButton from '@components/CloseButton'
 import AudioVisualiser from '@src/components/AudioVisualiser'
 import AudioTimeSlider from '@src/components/AudioTimeSlider'
 import PostCardUrlPreview from '@components/Cards/PostCard/PostCardUrlPreview'
-import Markdown from '@components/Markdown'
-import {
-    allValid,
-    defaultErrorState,
-    isValidUrl,
-    formatTimeMMSS,
-    formatTimeDHM,
-} from '@src/Helpers'
 import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import Scrollbars from '@components/Scrollbars'
+import StringBeadCard from '@components/Cards/StringBeadCard'
 import { ReactComponent as PlayIconSVG } from '@svgs/play-solid.svg'
 import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
 import { ReactComponent as PlusIconSVG } from '@svgs/plus.svg'
@@ -43,8 +43,6 @@ import { ReactComponent as TextIconSVG } from '@svgs/font-solid.svg'
 import { ReactComponent as LinkIconSVG } from '@svgs/link-solid.svg'
 import { ReactComponent as AudioIconSVG } from '@svgs/volume-high-solid.svg'
 import { ReactComponent as ImageIconSVG } from '@svgs/image-solid.svg'
-import { ReactComponent as ChevronLeftSVG } from '@svgs/chevron-left-solid.svg'
-import { ReactComponent as ChevronRightSVG } from '@svgs/chevron-right-solid.svg'
 
 const CreatePostModal = (props: { type: string; close: () => void }): JSX.Element => {
     const { type, close } = props
@@ -138,56 +136,31 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
     const [selectedTopicGroup, setSelectedTopicGroup] = useState('archetopics')
     const [selectedTopic, setSelectedTopic] = useState<any>(null)
     // string
-    const [newBead, setNewBead] = useState({
-        type: {
-            value: 'text',
-            ...defaultErrorState,
-        },
-        text: {
-            value: '',
-            ...defaultErrorState,
-        },
-        url: {
-            value: '',
-            ...defaultErrorState,
-        },
-        audio: {
-            value: null,
-            ...defaultErrorState,
-        },
-        images: {
-            value: [],
-            ...defaultErrorState,
-        },
-    })
+    const defaultBead = {
+        type: 'text',
+        text: '',
+        url: '',
+        urlData: null,
+        audioFile: null,
+        images: [],
+    }
+    const [newBead, setNewBead] = useState<any>(defaultBead)
     const [string, setString] = useState<any[]>([])
 
     const cookies = new Cookies()
 
-    function updateNewBead(name, value) {
-        setNewBead({
-            ...newBead,
-            [name]: { ...newBead[name], value, state: 'default' },
-        })
-    }
-
-    function addNewBeadToString() {
+    function addBeadToString() {
+        console.log('newBead: ', newBead)
+        // todo: validate new bead
         setString([...string, newBead])
-    }
-
-    function findBeadIcon(beadType) {
-        switch (beadType) {
-            case 'text':
-                return <TextIconSVG />
-            case 'url':
-                return <LinkIconSVG />
-            case 'audio':
-                return <AudioIconSVG />
-            case 'image':
-                return <ImageIconSVG />
-            default:
-                return null
-        }
+        setNewBead({
+            ...defaultBead,
+            type: newBead.type,
+        })
+        // reset state
+        // todo: reset audio state
+        const input = document.getElementById('new-bead-text')
+        if (input) input.style.height = ''
     }
 
     function removeBead(index) {
@@ -249,7 +222,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
         setSelectedSpaces((s) => [...s.filter((space) => space.id !== spaceId)])
     }
 
-    const scrapeURL = (urlString: string): void => {
+    function scrapeURL(urlString) {
         if (isValidUrl(urlString)) {
             setUrlData(null)
             setUrlInvalid(false)
@@ -257,7 +230,13 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
             axios
                 .get(`${config.apiURL}/scrape-url?url=${urlString}`)
                 .then((res) => {
-                    setUrlData(res.data)
+                    if (postType.value === 'String') {
+                        setNewBead({
+                            ...newBead,
+                            url: urlString,
+                            urlData: res.data,
+                        })
+                    } else setUrlData(res.data)
                     setUrlLoading(false)
                 })
                 .catch((error) => console.log(error))
@@ -313,7 +292,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
 
     function selectAudioFile() {
         setShowRecordControls(false)
-        const input = d3.select('#file-input').node()
+        const input = d3.select('#audio-file-input').node()
         if (input && input.files && input.files[0]) {
             if (input.files[0].size > audioMBLimit * 1024 * 1024) {
                 setAudioSizeError(true)
@@ -321,7 +300,12 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
             } else {
                 setAudioSizeError(false)
                 setAudioPostError(false)
-                setAudioFile(input.files[0])
+                if (postType.value === 'String') {
+                    setNewBead({
+                        ...newBead,
+                        audioFile: input.files[0],
+                    })
+                } else setAudioFile(input.files[0])
             }
         }
     }
@@ -345,7 +329,12 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                 audioRecorderRef.current.onstop = () => {
                     clearInterval(recordingIntervalRef.current)
                     const blob = new Blob(audioChunksRef.current, { type: 'audio/mpeg-3' })
-                    setAudioFile(new File([blob], ''))
+                    if (postType.value === 'String') {
+                        setNewBead({
+                            ...newBead,
+                            audioFile: new File([blob], ''),
+                        })
+                    } else setAudioFile(new File([blob], ''))
                 }
                 audioRecorderRef.current.start()
                 setRecording(true)
@@ -773,11 +762,11 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                                     }}
                                 />
                                 <Row className={styles.fileUploadInput}>
-                                    <label htmlFor='file-input'>
+                                    <label htmlFor='audio-file-input'>
                                         Upload audio
                                         <input
                                             type='file'
-                                            id='file-input'
+                                            id='audio-file-input'
                                             accept='.mp3'
                                             onChange={selectAudioFile}
                                             hidden
@@ -978,101 +967,179 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                             <Row centerX className={styles.beadTypeButtons}>
                                 <button
                                     type='button'
-                                    className={`${
-                                        newBead.type.value === 'text' && styles.selected
-                                    }`}
-                                    onClick={() => updateNewBead('type', 'text')}
+                                    className={`${newBead.type === 'text' && styles.selected}`}
+                                    onClick={() => setNewBead({ ...newBead, type: 'text' })}
                                 >
                                     <TextIconSVG />
                                 </button>
                                 <button
                                     type='button'
-                                    className={`${newBead.type.value === 'url' && styles.selected}`}
-                                    onClick={() => updateNewBead('type', 'url')}
+                                    className={`${newBead.type === 'url' && styles.selected}`}
+                                    onClick={() => setNewBead({ ...newBead, type: 'url' })}
                                 >
                                     <LinkIconSVG />
                                 </button>
                                 <button
                                     type='button'
-                                    className={`${
-                                        newBead.type.value === 'audio' && styles.selected
-                                    }`}
-                                    onClick={() => updateNewBead('type', 'audio')}
+                                    className={`${newBead.type === 'audio' && styles.selected}`}
+                                    onClick={() => setNewBead({ ...newBead, type: 'audio' })}
                                 >
                                     <AudioIconSVG />
                                 </button>
                                 <button
                                     type='button'
-                                    className={`${
-                                        newBead.type.value === 'image' && styles.selected
-                                    }`}
-                                    onClick={() => updateNewBead('type', 'image')}
+                                    className={`${newBead.type === 'image' && styles.selected}`}
+                                    onClick={() => setNewBead({ ...newBead, type: 'image' })}
                                 >
                                     <ImageIconSVG />
                                 </button>
                             </Row>
                             <Column centerX className={styles.newBead}>
-                                {newBead.type.value === 'text' && (
+                                {newBead.type === 'text' && (
                                     <Input
+                                        id='new-bead-text'
                                         type='text-area'
                                         placeholder='text...'
-                                        rows={3}
-                                        state={newBead.text.state}
-                                        errors={newBead.text.errors}
-                                        value={newBead.text.value}
-                                        onChange={(value) => updateNewBead('text', value)}
-                                        style={{ width: 300 }}
+                                        rows={1}
+                                        // state={newBead.text.state}
+                                        // errors={newBead.text.errors}
+                                        value={newBead.text}
+                                        onChange={(v) => setNewBead({ ...newBead, text: v })}
+                                        style={{ width: 400 }}
                                     />
+                                )}
+                                {newBead.type === 'url' && (
+                                    <Column centerX>
+                                        <Input
+                                            type='text'
+                                            placeholder='url...'
+                                            // state={newBead.url.state}
+                                            // errors={newBead.url.errors}
+                                            value={newBead.url}
+                                            loading={urlLoading}
+                                            onChange={(value) => {
+                                                setNewBead({ ...newBead, url: value })
+                                                scrapeURL(value)
+                                            }}
+                                            style={{ width: 400 }}
+                                        />
+                                        {urlInvalid && (
+                                            <p className={styles.invalidUrl}>Invalid URL</p>
+                                        )}
+                                        {newBead.urlData && (
+                                            <PostCardUrlPreview
+                                                url={newBead.url}
+                                                image={newBead.urlData.image}
+                                                domain={newBead.urlData.domain}
+                                                title={newBead.urlData.title}
+                                                description={newBead.urlData.description}
+                                                style={{ marginTop: 10 }}
+                                            />
+                                        )}
+                                    </Column>
+                                )}
+                                {newBead.type === 'audio' && (
+                                    <Column centerX>
+                                        <Row style={{ marginBottom: 10 }}>
+                                            <Button
+                                                text='Record audio'
+                                                color='grey'
+                                                style={{ marginRight: 10 }}
+                                                onClick={() => {
+                                                    resetAudioState()
+                                                    setAudioSizeError(false)
+                                                    setShowRecordControls(true)
+                                                }}
+                                            />
+                                            <Row className={styles.beadAudioUploadInput}>
+                                                <label htmlFor='audio-file-input'>
+                                                    Upload audio
+                                                    <input
+                                                        type='file'
+                                                        id='audio-file-input'
+                                                        accept='.mp3'
+                                                        onChange={selectAudioFile}
+                                                        hidden
+                                                    />
+                                                </label>
+                                            </Row>
+                                        </Row>
+                                        {newBead.audioFile && (
+                                            <Column
+                                                key={newBead.audioFile.lastModified}
+                                                style={{ marginBottom: 20, width: 400 }}
+                                            >
+                                                <p>{newBead.audioFile.name}</p>
+                                                <AudioVisualiser
+                                                    audioElementId='new-post-audio'
+                                                    audioURL={URL.createObjectURL(
+                                                        newBead.audioFile
+                                                    )}
+                                                    staticBars={1200}
+                                                    staticColor={colors.audioVisualiserColor}
+                                                    dynamicBars={160}
+                                                    dynamicColor={colors.audioVisualiserColor}
+                                                    style={{ width: '100%', height: 80 }}
+                                                />
+                                                <Row centerY>
+                                                    <button
+                                                        className={styles.playButton}
+                                                        type='button'
+                                                        aria-label='toggle-audio'
+                                                        onClick={toggleAudio}
+                                                    >
+                                                        {audioPlaying ? (
+                                                            <PauseIconSVG />
+                                                        ) : (
+                                                            <PlayIconSVG />
+                                                        )}
+                                                    </button>
+                                                    <AudioTimeSlider
+                                                        audioElementId='new-post-audio'
+                                                        audioURL={URL.createObjectURL(
+                                                            newBead.audioFile
+                                                        )}
+                                                        onPlay={() => setAudioPlaying(true)}
+                                                        onPause={() => setAudioPlaying(false)}
+                                                        onEnded={() => setAudioPlaying(false)}
+                                                    />
+                                                </Row>
+                                            </Column>
+                                        )}
+                                        {showRecordControls && (
+                                            <Column centerX style={{ marginBottom: 20 }}>
+                                                <h2>{formatTimeMMSS(recordingTime)}</h2>
+                                                <Button
+                                                    text={`${
+                                                        recording
+                                                            ? 'Stop'
+                                                            : `${audioFile ? 'Restart' : 'Start'}`
+                                                    } recording`}
+                                                    color={recording ? 'red' : 'blue'}
+                                                    onClick={toggleAudioRecording}
+                                                />
+                                            </Column>
+                                        )}
+                                    </Column>
                                 )}
                                 <Button
                                     text='Add bead'
                                     color='aqua'
-                                    onClick={addNewBeadToString}
+                                    disabled={urlLoading}
+                                    onClick={addBeadToString}
                                     style={{ margin: '20px 0' }}
                                 />
                             </Column>
                             <Scrollbars className={`${styles.beadDraw} row`}>
                                 {string.map((bead, index) => (
-                                    <Column spaceBetween className={styles.bead} key={index}>
-                                        <Row spaceBetween className={styles.beadHeader}>
-                                            {findBeadIcon(bead.type.value)}
-                                            <CloseButton
-                                                size={20}
-                                                onClick={() => removeBead(index)}
-                                            />
-                                        </Row>
-                                        <Column className={styles.beadContent}>
-                                            {bead.type.value === 'text' && (
-                                                <Scrollbars style={{ justifyContent: 'center' }}>
-                                                    <Markdown
-                                                        text={bead.text.value}
-                                                        fontSize={10}
-                                                        lineHeight='12px'
-                                                    />
-                                                </Scrollbars>
-                                            )}
-                                        </Column>
-                                        <Row className={styles.beadFooter}>
-                                            {index !== 0 && (
-                                                <button
-                                                    type='button'
-                                                    onClick={() => moveBead(index, -1)}
-                                                    style={{ left: 0 }}
-                                                >
-                                                    <ChevronLeftSVG />
-                                                </button>
-                                            )}
-                                            {index < string.length - 1 && (
-                                                <button
-                                                    type='button'
-                                                    onClick={() => moveBead(index, 1)}
-                                                    style={{ right: 0 }}
-                                                >
-                                                    <ChevronRightSVG />
-                                                </button>
-                                            )}
-                                        </Row>
-                                    </Column>
+                                    <StringBeadCard
+                                        key={index}
+                                        bead={bead}
+                                        index={index}
+                                        stringLength={string.length}
+                                        removeBead={removeBead}
+                                        moveBead={moveBead}
+                                    />
                                 ))}
                             </Scrollbars>
                         </Column>
