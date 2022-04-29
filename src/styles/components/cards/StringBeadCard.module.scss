@@ -1,0 +1,44 @@
+@import '@styles/Variables';
+
+.wrapper {
+    padding: 10px;
+    width: 150px;
+    height: 150px;
+    flex-shrink: 0;
+    background-color: white;
+    border-radius: 10px;
+    &:not(:last-child) { margin-right: 10px }
+
+    .beadHeader {
+        > svg {
+            opacity: 0.8;
+            width: 20px;
+            height: 20px;
+        }
+    }
+
+    .beadContent {
+        max-height: 90px;
+        padding: 5px 0;
+    }
+
+    .beadFooter {
+        width: 100%;
+        height: 20px;
+        position: relative;
+
+        > button {
+            all: unset;
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+            position: absolute;
+
+            > svg {
+                opacity: 0.15;
+                width: 20px;
+                height: 20px;
+            }
+        }
+    }
+}
