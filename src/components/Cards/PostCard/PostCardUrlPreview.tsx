@@ -10,8 +10,9 @@ const PostCardUrlPreview = (props: {
     domain: string | null
     title: string | null
     description: string | null
+    style?: any
 }): JSX.Element => {
-    const { url, image, domain, title, description } = props
+    const { url, image, domain, title, description, style } = props
 
     const availableMetaData = image || domain || title || description
 
@@ -25,7 +26,7 @@ const PostCardUrlPreview = (props: {
     }
 
     return (
-        <a className={styles.wrapper} href={url} target='_blank' rel='noreferrer'>
+        <a className={styles.wrapper} style={style} href={url} target='_blank' rel='noreferrer'>
             {image && (
                 <img src={image} onError={(e) => handleImageError(e)} aria-label='URL image' />
             )}
@@ -49,6 +50,10 @@ const PostCardUrlPreview = (props: {
             </Column>
         </a>
     )
+}
+
+PostCardUrlPreview.defaultProps = {
+    style: null,
 }
 
 export default PostCardUrlPreview
