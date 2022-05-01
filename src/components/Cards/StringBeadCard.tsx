@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 import React, { useState } from 'react'
 import * as d3 from 'd3'
 import styles from '@styles/components/cards/StringBeadCard.module.scss'
@@ -8,6 +9,7 @@ import BeadCardUrlPreview from '@components/Cards/BeadCardUrlPreview'
 import Markdown from '@components/Markdown'
 import Scrollbars from '@components/Scrollbars'
 import CloseButton from '@components/CloseButton'
+import Modal from '@components/Modal'
 import AudioVisualiser from '@src/components/AudioVisualiser'
 import AudioTimeSlider from '@src/components/AudioTimeSlider'
 import { ReactComponent as TextIconSVG } from '@svgs/font-solid.svg'
@@ -28,6 +30,8 @@ const StringBeadCard = (props: {
 }): JSX.Element => {
     const { bead, index, stringLength, removeBead, moveBead } = props
     const [audioPlaying, setAudioPlaying] = useState(false)
+    const [imageModalOpen, setImageModalOpen] = useState(false)
+    const [selectedImage, setSelectedImage] = useState<any>(null)
 
     function findBeadIcon(beadType) {
         switch (beadType) {
@@ -59,8 +63,17 @@ const StringBeadCard = (props: {
         }
     }
 
+    function openImageModal(imageId) {
+        setSelectedImage(bead.images.find((image) => image.id === imageId))
+        setImageModalOpen(true)
+    }
+
+    function toggleImage(increment) {
+        setSelectedImage(bead.images[selectedImage.index + increment])
+    }
+
     return (
-        <Column spaceBetween className={styles.wrapper} key={index}>
+        <Column spaceBetween className={styles.wrapper}>
             <Row spaceBetween className={styles.beadHeader}>
                 {findBeadIcon(bead.type)}
                 <CloseButton size={20} onClick={() => removeBead(index)} />
@@ -92,16 +105,15 @@ const StringBeadCard = (props: {
                     </Scrollbars>
                 )}
                 {bead.type === 'audio' && (
-                    <Column style={{ marginBottom: 20, width: 400 }}>
-                        <p>{bead.audioFile.name}</p>
+                    <Column style={{ width: 130 }} key={index}>
                         <AudioVisualiser
                             audioElementId={`string-bead-audio-${index}`}
                             audioURL={URL.createObjectURL(bead.audioFile)}
-                            staticBars={1200}
+                            staticBars={400}
                             staticColor={colors.audioVisualiserColor}
-                            dynamicBars={160}
+                            dynamicBars={60}
                             dynamicColor={colors.audioVisualiserColor}
-                            style={{ width: '100%', height: 80 }}
+                            style={{ width: '100%', height: 40 }}
                         />
                         <Row centerY>
                             <button
@@ -122,6 +134,20 @@ const StringBeadCard = (props: {
                         </Row>
                     </Column>
                 )}
+                {bead.type === 'image' && (
+                    <Scrollbars>
+                        {bead.images.map((image, i) => (
+                            <button
+                                className={styles.image}
+                                key={i}
+                                type='button'
+                                onClick={() => openImageModal(image.id)}
+                            >
+                                <img src={image.url || URL.createObjectURL(image.file)} alt='' />
+                            </button>
+                        ))}
+                    </Scrollbars>
+                )}
             </Column>
             <Row className={styles.beadFooter}>
                 {index !== 0 && (
@@ -135,6 +161,31 @@ const StringBeadCard = (props: {
                     </button>
                 )}
             </Row>
+            {/* todo: create image modal component */}
+            {imageModalOpen && (
+                <Modal close={() => setImageModalOpen(false)}>
+                    <Row centerY className={styles.selectedImage}>
+                        {selectedImage.index !== 0 && (
+                            <button type='button' onClick={() => toggleImage(-1)}>
+                                <ChevronLeftSVG />
+                            </button>
+                        )}
+                        <Column centerX>
+                            <img
+                                className={styles.selectedImage}
+                                src={selectedImage.url || URL.createObjectURL(selectedImage.file)}
+                                alt=''
+                            />
+                            {selectedImage.caption && <p>{selectedImage.caption}</p>}
+                        </Column>
+                        {selectedImage.index !== bead.images.length - 1 && (
+                            <button type='button' onClick={() => toggleImage(1)}>
+                                <ChevronRightSVG />
+                            </button>
+                        )}
+                    </Row>
+                </Modal>
+            )}
         </Column>
     )
 }

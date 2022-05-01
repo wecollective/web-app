@@ -8,6 +8,7 @@ import axios from 'axios'
 import Cookies from 'universal-cookie'
 import flatpickr from 'flatpickr'
 import 'flatpickr/dist/themes/material_green.css'
+import { v4 as uuidv4 } from 'uuid'
 import {
     allValid,
     defaultErrorState,
@@ -137,6 +138,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
     const [selectedTopic, setSelectedTopic] = useState<any>(null)
     // string
     const defaultBead = {
+        id: uuidv4(),
         type: 'text',
         text: '',
         url: '',
@@ -150,8 +152,13 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
     const cookies = new Cookies()
 
     function addBeadToString() {
-        console.log('newBead: ', newBead)
         // todo: validate new bead
+        if (newBead.type === 'image') {
+            newBead.images = images.map((image, index) => {
+                return { index, ...image }
+            })
+            setImages([])
+        }
         setString([...string, newBead])
         setNewBead({
             ...defaultBead,
@@ -252,13 +259,17 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
         if (input && input.files && input.files.length) {
             for (let i = 0; i < input.files.length; i += 1) {
                 if (input.files[i].size > imageMBLimit * 1024 * 1024) setImageSizeError(true)
-                else setImages((img) => [...img, { file: input && input.files && input.files[i] }])
+                else
+                    setImages((img) => [
+                        ...img,
+                        { id: uuidv4(), file: input && input.files && input.files[i] },
+                    ])
             }
         }
     }
 
     function addImageURL() {
-        setImages([...images, { url: imageURL }])
+        setImages([...images, { id: uuidv4(), url: imageURL }])
         setImageURL('')
         setImageSizeError(false)
         setImagePostError(false)
@@ -1122,6 +1133,106 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                                         )}
                                     </Column>
                                 )}
+                                {newBead.type === 'image' && (
+                                    <Column centerX>
+                                        {imagePostError && (
+                                            <p className='danger' style={{ marginBottom: 10 }}>
+                                                No images added yet
+                                            </p>
+                                        )}
+                                        <Row centerX style={{ width: 600 }}>
+                                            {images.length > 0 && (
+                                                <Scrollbars className={`${styles.beadImages} row`}>
+                                                    {images.map((image, index) => (
+                                                        <Column
+                                                            className={styles.image}
+                                                            key={index}
+                                                        >
+                                                            <CloseButton
+                                                                size={20}
+                                                                onClick={() => removeImage(index)}
+                                                            />
+                                                            <img
+                                                                src={
+                                                                    image.url ||
+                                                                    URL.createObjectURL(image.file)
+                                                                }
+                                                                alt=''
+                                                            />
+                                                            {image.caption && (
+                                                                <p>{image.caption}</p>
+                                                            )}
+                                                            <Row centerY style={{ width: 180 }}>
+                                                                <Input
+                                                                    type='text'
+                                                                    placeholder={`${
+                                                                        image.caption
+                                                                            ? 'change'
+                                                                            : 'add'
+                                                                    } caption...`}
+                                                                    value={image.newCaption}
+                                                                    onChange={(v) =>
+                                                                        updateNewCaption(index, v)
+                                                                    }
+                                                                    style={{ marginRight: 5 }}
+                                                                />
+                                                                <Button
+                                                                    icon={<PlusIconSVG />}
+                                                                    color='grey'
+                                                                    onClick={() =>
+                                                                        updateCaption(index)
+                                                                    }
+                                                                    style={{ padding: '0 10px' }}
+                                                                />
+                                                            </Row>
+                                                        </Column>
+                                                    ))}
+                                                </Scrollbars>
+                                            )}
+                                        </Row>
+                                        {imageSizeError && (
+                                            <p className='danger' style={{ marginBottom: 10 }}>
+                                                Max file size: {imageMBLimit}MB
+                                            </p>
+                                        )}
+                                        {toalImageSizeError && (
+                                            <p className='danger' style={{ marginBottom: 10 }}>
+                                                Total image upload size must be less than{' '}
+                                                {totalImageMBLimit}MB. (Current size:{' '}
+                                                {totalImageSize.toFixed(2)}MB)
+                                            </p>
+                                        )}
+                                        <Row className={styles.fileUploadInput}>
+                                            <label htmlFor='image-post-file-input'>
+                                                Upload images
+                                                <input
+                                                    type='file'
+                                                    id='image-post-file-input'
+                                                    accept='.png, .jpg, .jpeg, .gif'
+                                                    onChange={addImageFiles}
+                                                    multiple
+                                                    hidden
+                                                />
+                                            </label>
+                                        </Row>
+                                        <p>or paste an image URL:</p>
+                                        <Row style={{ width: 400, marginTop: 5 }}>
+                                            <Input
+                                                type='text'
+                                                placeholder='image url...'
+                                                value={imageURL}
+                                                onChange={(v) => setImageURL(v)}
+                                                style={{ margin: '0 10px 10px 0' }}
+                                            />
+                                            <Button
+                                                text='Add'
+                                                color='aqua'
+                                                disabled={imageURL === ''}
+                                                onClick={addImageURL}
+                                            />
+                                        </Row>
+                                    </Column>
+                                )}
                                 <Button
                                     text='Add bead'
                                     color='aqua'
@@ -1130,18 +1241,20 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                                     style={{ margin: '20px 0' }}
                                 />
                             </Column>
-                            <Scrollbars className={`${styles.beadDraw} row`}>
-                                {string.map((bead, index) => (
-                                    <StringBeadCard
-                                        key={index}
-                                        bead={bead}
-                                        index={index}
-                                        stringLength={string.length}
-                                        removeBead={removeBead}
-                                        moveBead={moveBead}
-                                    />
-                                ))}
-                            </Scrollbars>
+                            {string.length > 0 && (
+                                <Scrollbars className={`${styles.beadDraw} row`}>
+                                    {string.map((bead, index) => (
+                                        <StringBeadCard
+                                            key={bead.id}
+                                            bead={bead}
+                                            index={index}
+                                            stringLength={string.length}
+                                            removeBead={removeBead}
+                                            moveBead={moveBead}
+                                        />
+                                    ))}
+                                </Scrollbars>
+                            )}
                         </Column>
                     )}
                     {postType.value !== 'String' && (

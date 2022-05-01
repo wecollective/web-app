@@ -20,6 +20,26 @@
     .beadContent {
         max-height: 90px;
         padding: 5px 0;
+
+        .playButton {
+            all: unset;
+            cursor: pointer;
+            display: flex;
+            width: 18px;
+            height: 18px;
+            color: $blue5;
+            margin-right: 5px;
+            flex-shrink: 0;
+        }
+
+        .image {
+            all: unset;
+            cursor: pointer;
+            > img {
+                width: 50px;
+                height: 50px;
+            }
+        }
     }
 
     .beadFooter {
@@ -38,6 +58,30 @@
                 opacity: 0.15;
                 width: 20px;
                 height: 20px;
+            }
+        }
+    }
+
+    .selectedImage {
+        > button {
+            all: unset;
+            cursor: pointer;
+            > svg {
+                color: $grey3;
+                width: 25px;
+                height: 25px;
+                &:hover {
+                    color: $grey4;
+                }
+                transition: color 0.5s;
+            }
+        }
+        > div {
+            margin: 0 10px;
+            > img {
+                max-width: calc(100vw - 200px);
+                max-height: calc(100vh - 200px);
+                margin-bottom: 20px;
             }
         }
     }
