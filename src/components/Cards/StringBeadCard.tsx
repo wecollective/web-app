@@ -24,11 +24,9 @@ import { ReactComponent as ChevronRightSVG } from '@svgs/chevron-right-solid.svg
 const StringBeadCard = (props: {
     bead: any
     index: number
-    stringLength: number
     removeBead: (index: number) => void
-    moveBead: (index: number, increment: number) => void
 }): JSX.Element => {
-    const { bead, index, stringLength, removeBead, moveBead } = props
+    const { bead, index, removeBead } = props
     const [audioPlaying, setAudioPlaying] = useState(false)
     const [imageModalOpen, setImageModalOpen] = useState(false)
     const [selectedImage, setSelectedImage] = useState<any>(null)
@@ -73,12 +71,12 @@ const StringBeadCard = (props: {
     }
 
     return (
-        <Column spaceBetween className={styles.wrapper}>
+        <Column className={styles.wrapper}>
             <Row spaceBetween className={styles.beadHeader}>
                 {findBeadIcon(bead.type)}
                 <CloseButton size={20} onClick={() => removeBead(index)} />
             </Row>
-            <Column className={styles.beadContent}>
+            <Column centerY className={styles.beadContent}>
                 {bead.type === 'text' && (
                     <Scrollbars>
                         <Markdown
@@ -113,7 +111,7 @@ const StringBeadCard = (props: {
                             staticColor={colors.audioVisualiserColor}
                             dynamicBars={60}
                             dynamicColor={colors.audioVisualiserColor}
-                            style={{ width: '100%', height: 40 }}
+                            style={{ width: '100%', height: 80 }}
                         />
                         <Row centerY>
                             <button
@@ -135,32 +133,25 @@ const StringBeadCard = (props: {
                     </Column>
                 )}
                 {bead.type === 'image' && (
-                    <Scrollbars>
-                        {bead.images.map((image, i) => (
-                            <button
-                                className={styles.image}
-                                key={i}
-                                type='button'
-                                onClick={() => openImageModal(image.id)}
-                            >
-                                <img src={image.url || URL.createObjectURL(image.file)} alt='' />
-                            </button>
-                        ))}
-                    </Scrollbars>
+                    <Row centerX>
+                        <Scrollbars style={{ paddingBottom: 5 }}>
+                            {bead.images.map((image, i) => (
+                                <button
+                                    className={styles.image}
+                                    key={i}
+                                    type='button'
+                                    onClick={() => openImageModal(image.id)}
+                                >
+                                    <img
+                                        src={image.url || URL.createObjectURL(image.file)}
+                                        alt=''
+                                    />
+                                </button>
+                            ))}
+                        </Scrollbars>
+                    </Row>
                 )}
             </Column>
-            <Row className={styles.beadFooter}>
-                {index !== 0 && (
-                    <button type='button' onClick={() => moveBead(index, -1)} style={{ left: 0 }}>
-                        <ChevronLeftSVG />
-                    </button>
-                )}
-                {index < stringLength - 1 && (
-                    <button type='button' onClick={() => moveBead(index, 1)} style={{ right: 0 }}>
-                        <ChevronRightSVG />
-                    </button>
-                )}
-            </Row>
             {/* todo: create image modal component */}
             {imageModalOpen && (
                 <Modal close={() => setImageModalOpen(false)}>

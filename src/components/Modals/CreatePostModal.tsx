@@ -44,6 +44,8 @@ import { ReactComponent as TextIconSVG } from '@svgs/font-solid.svg'
 import { ReactComponent as LinkIconSVG } from '@svgs/link-solid.svg'
 import { ReactComponent as AudioIconSVG } from '@svgs/volume-high-solid.svg'
 import { ReactComponent as ImageIconSVG } from '@svgs/image-solid.svg'
+import { ReactComponent as ChevronLeftSVG } from '@svgs/chevron-left-solid.svg'
+import { ReactComponent as ChevronRightSVG } from '@svgs/chevron-right-solid.svg'
 
 const CreatePostModal = (props: { type: string; close: () => void }): JSX.Element => {
     const { type, close } = props
@@ -444,6 +446,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                     const isBlob = audioFile && !audioFile.name
                     uploadType = isBlob ? 'audio-blob' : 'audio-file'
                     fileData = new FormData()
+                    // isBlob check not required as audio file already converted to blob
                     fileData.append(
                         'file',
                         isBlob
@@ -1062,7 +1065,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                                                     setShowRecordControls(true)
                                                 }}
                                             />
-                                            <Row className={styles.beadAudioUploadInput}>
+                                            <Row className={styles.beadUploadInput}>
                                                 <label htmlFor='audio-file-input'>
                                                     Upload audio
                                                     <input
@@ -1202,7 +1205,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                                                 {totalImageSize.toFixed(2)}MB)
                                             </p>
                                         )}
-                                        <Row className={styles.fileUploadInput}>
+                                        <Row className={styles.beadUploadInput}>
                                             <label htmlFor='image-post-file-input'>
                                                 Upload images
                                                 <input
@@ -1226,7 +1229,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                                             />
                                             <Button
                                                 text='Add'
-                                                color='aqua'
+                                                color='grey'
                                                 disabled={imageURL === ''}
                                                 onClick={addImageURL}
                                             />
@@ -1244,15 +1247,34 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                             {string.length > 0 && (
                                 <Scrollbars className={`${styles.beadDraw} row`}>
                                     {string.map((bead, index) => (
-                                        <StringBeadCard
-                                            key={bead.id}
-                                            bead={bead}
-                                            index={index}
-                                            stringLength={string.length}
-                                            removeBead={removeBead}
-                                            moveBead={moveBead}
-                                        />
+                                        <Column>
+                                            <StringBeadCard
+                                                key={bead.id}
+                                                bead={bead}
+                                                index={index}
+                                                removeBead={removeBead}
+                                            />
+                                            <Row centerX className={styles.beadFooter}>
+                                                {index !== 0 && (
+                                                    <button
+                                                        type='button'
+                                                        onClick={() => moveBead(index, -1)}
+                                                    >
+                                                        <ChevronLeftSVG />
+                                                    </button>
+                                                )}
+                                                {index < string.length - 1 && (
+                                                    <button
+                                                        type='button'
+                                                        onClick={() => moveBead(index, 1)}
+                                                    >
+                                                        <ChevronRightSVG />
+                                                    </button>
+                                                )}
+                                            </Row>
+                                        </Column>
                                     ))}
+                                    <span style={{ marginLeft: -7, width: 7, flexShrink: 0 }} />
                                 </Scrollbars>
                             )}
                         </Column>

@@ -158,7 +158,7 @@
     margin-bottom: 20px;
 }
 
-.beadAudioUploadInput {
+.beadUploadInput {
     margin-bottom: 10px;
     label {
         height: 40px;
@@ -213,7 +213,27 @@
     }
 }
 
+.beadFooter {
+    height: 20px;
+    margin: 7px 10px 5px 0;
+
+    > button {
+        all: unset;
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+        margin: 0 10px;
+
+        > svg {
+            opacity: 0.15;
+            width: 20px;
+            height: 20px;
+        }
+    }
+}
+
 .beadDraw {
     padding-bottom: 15px;
     margin-bottom: 40px;
+    padding: 7px;
 }
