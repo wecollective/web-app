@@ -146,30 +146,46 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
         url: '',
         urlData: null,
         audioFile: null,
+        audioBlob: null,
+        audioType: '',
         images: [],
     }
+    type errorState = 'default' | 'valid' | 'invalid'
     const [newBead, setNewBead] = useState<any>(defaultBead)
     const [string, setString] = useState<any[]>([])
+    const [stringTextState, setStringTextState] = useState<errorState>('default')
+    const [stringTextErrors, setStringTextErrors] = useState<string[]>([])
 
     const cookies = new Cookies()
 
     function addBeadToString() {
-        // todo: validate new bead
-        if (newBead.type === 'image') {
-            newBead.images = images.map((image, index) => {
-                return { index, ...image }
+        // validate bead
+        let valid = false
+        if (newBead.type === 'text') {
+            valid = newBead.text.length < 5000
+            setStringTextErrors(valid ? [] : ['Must be less than 5K characters'])
+            setStringTextState(valid ? 'default' : 'invalid')
+        } else if (newBead.type === 'image' && totalImageSize >= totalImageMBLimit) {
+            setTotalImageSizeError(true)
+        } else valid = true
+        if (valid) {
+            if (newBead.type === 'image') {
+                newBead.images = images.map((image, index) => {
+                    return { index, ...image }
+                })
+            }
+            setString([...string, newBead])
+            setNewBead({
+                ...defaultBead,
+                type: newBead.type,
             })
+            // reset state
             setImages([])
+            setTotalImageSizeError(false)
+            resetAudioState()
+            const input = document.getElementById('new-bead-text')
+            if (input) input.style.height = ''
         }
-        setString([...string, newBead])
-        setNewBead({
-            ...defaultBead,
-            type: newBead.type,
-        })
-        // reset state
-        // todo: reset audio state
-        const input = document.getElementById('new-bead-text')
-        if (input) input.style.height = ''
     }
 
     function removeBead(index) {
@@ -299,7 +315,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
         setAudioPostError(false)
         setRecordingTime(0)
         audioChunksRef.current = []
-        const input = d3.select('#file-input').node()
+        const input = d3.select('#audio-file-input').node()
         if (input) input.value = ''
     }
 
@@ -311,12 +327,14 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                 setAudioSizeError(true)
                 resetAudioState()
             } else {
+                // todo: move to add bead function
                 setAudioSizeError(false)
                 setAudioPostError(false)
                 if (postType.value === 'String') {
                     setNewBead({
                         ...newBead,
                         audioFile: input.files[0],
+                        audioType: 'file',
                     })
                 } else setAudioFile(input.files[0])
             }
@@ -346,6 +364,8 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                         setNewBead({
                             ...newBead,
                             audioFile: new File([blob], ''),
+                            audioBlob: blob,
+                            audioType: 'recording',
                         })
                     } else setAudioFile(new File([blob], ''))
                 }
@@ -372,7 +392,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
             },
             text: {
                 ...text,
-                required: !['Url', 'Image', 'Audio'].includes(postType.value),
+                required: !['Url', 'Image', 'Audio', 'String'].includes(postType.value),
                 validate: (v) => {
                     const errors: string[] = []
                     if (!v) errors.push('Required')
@@ -421,6 +441,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
             else if (postType.value === 'Audio' && !audioFile && !audioSizeError)
                 setAudioPostError(true)
             else {
+                // todo: check total string size less than 20MB
                 setLoading(true)
                 const accessToken = cookies.get('accessToken')
                 const options = { headers: { Authorization: `Bearer ${accessToken}` } }
@@ -464,6 +485,24 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                         if (image.file) fileData.append('file', image.file, index)
                     })
                     fileData.append('imageData', JSON.stringify(images))
+                    fileData.append('postData', JSON.stringify(postData))
+                }
+                if (postType.value === 'String') {
+                    uploadType = 'string'
+                    fileData = new FormData()
+                    string.forEach((bead, index) => {
+                        if (bead.type === 'audio') {
+                            if (bead.audioType === 'file')
+                                fileData.append('audioFile', bead.audioFile, index)
+                            else fileData.append('audioRecording', bead.audioBlob, index)
+                        } else if (bead.type === 'image') {
+                            bead.images.forEach((image, i) => {
+                                if (image.file)
+                                    fileData.append('image', image.file, `${index}-${i}`)
+                            })
+                        }
+                    })
+                    fileData.append('stringData', JSON.stringify(string))
                     fileData.append('postData', JSON.stringify(postData))
                 }
                 axios
@@ -1015,10 +1054,14 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                                         type='text-area'
                                         placeholder='text...'
                                         rows={1}
-                                        // state={newBead.text.state}
-                                        // errors={newBead.text.errors}
+                                        state={stringTextState}
+                                        errors={stringTextErrors}
                                         value={newBead.text}
-                                        onChange={(v) => setNewBead({ ...newBead, text: v })}
+                                        onChange={(v) => {
+                                            setStringTextErrors([])
+                                            setStringTextState('default')
+                                            setNewBead({ ...newBead, text: v })
+                                        }}
                                         style={{ width: 400 }}
                                     />
                                 )}
@@ -1239,7 +1282,13 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                                 <Button
                                     text='Add bead'
                                     color='aqua'
-                                    disabled={urlLoading}
+                                    disabled={
+                                        (newBead.type === 'text' && !newBead.text) ||
+                                        (newBead.type === 'url' &&
+                                            (newBead.urlData === null || urlLoading)) ||
+                                        (newBead.type === 'audio' && newBead.audioFile === null) ||
+                                        (newBead.type === 'image' && !images.length)
+                                    }
                                     onClick={addBeadToString}
                                     style={{ margin: '20px 0' }}
                                 />
@@ -1247,9 +1296,8 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                             {string.length > 0 && (
                                 <Scrollbars className={`${styles.beadDraw} row`}>
                                     {string.map((bead, index) => (
-                                        <Column>
+                                        <Column key={bead.id}>
                                             <StringBeadCard
-                                                key={bead.id}
                                                 bead={bead}
                                                 index={index}
                                                 removeBead={removeBead}
