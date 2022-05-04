@@ -2,6 +2,7 @@ import React, { useEffect, useContext } from 'react'
 import { Route, Switch } from 'react-router-dom' // Redirect
 // import AccountSideBar from '@components/AccountSideBar'
 import styles from '@styles/pages/PostPage/PostPage.module.scss'
+import { AccountContext } from '@contexts/AccountContext'
 import { PostContext } from '@contexts/PostContext'
 // import EmptyPage from './EmptyPage'
 import PostCard from '@components/Cards/PostCard/PostCard'
@@ -26,12 +27,15 @@ const PostPage = ({
     const { url } = match
     const { postId } = match.params
     const { pathname } = location
+    const { accountDataLoading } = useContext(AccountContext)
     const { getPostData, postData, resetPostContext } = useContext(PostContext)
 
     useEffect(() => {
-        if (postData.id) resetPostContext()
-        getPostData(postId)
-    }, [postId])
+        if (!accountDataLoading) {
+            if (postData.id) resetPostContext()
+            getPostData(postId)
+        }
+    }, [accountDataLoading, postId])
 
     useEffect(() => () => resetPostContext(), [])
 
