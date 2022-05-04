@@ -8,6 +8,14 @@ import { useHistory, Link } from 'react-router-dom'
 import { AccountContext } from '@contexts/AccountContext'
 import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
 import colors from '@styles/Colors.module.scss'
+import {
+    timeSinceCreated,
+    dateCreated,
+    pluralise,
+    statTitle,
+    formatTimeDHM,
+    formatTimeMDYT,
+} from '@src/Helpers'
 import Column from '@src/components/Column'
 import Row from '@src/components/Row'
 import PostCardUrlPreview from '@components/Cards/PostCard/PostCardUrlPreview'
@@ -28,14 +36,7 @@ import PostCardRepostModal from '@components/Cards/PostCard/PostCardRepostModal'
 import PostCardRatingModal from '@components/Cards/PostCard/PostCardRatingModal'
 import PostCardLinkModal from '@components/Cards/PostCard/PostCardLinkModal'
 import DeletePostModal from '@components/modals/DeletePostModal'
-import {
-    timeSinceCreated,
-    dateCreated,
-    pluralise,
-    statTitle,
-    formatTimeDHM,
-    formatTimeMDYT,
-} from '@src/Helpers'
+import StringBeadCard from '@components/Cards/PostCard/StringBeadCard2'
 import { ReactComponent as LinkIconSVG } from '@svgs/link-solid.svg'
 import { ReactComponent as CommentIconSVG } from '@svgs/comment-solid.svg'
 import { ReactComponent as LikeIconSVG } from '@svgs/like.svg'
@@ -83,6 +84,7 @@ const PostCard = (props: {
         GlassBeadGame,
         Event,
         PostImages,
+        StringPosts,
     } = postData
 
     const [likeModalOpen, setLikeModalOpen] = useState(false)
@@ -98,6 +100,7 @@ const PostCard = (props: {
     const [audioPlaying, setAudioPlaying] = useState(false)
     const beads = GlassBeadGame ? GlassBeadGame.GlassBeads.sort((a, b) => a.index - b.index) : []
     const images = PostImages.sort((a, b) => a.index - b.index)
+    const stringPosts = StringPosts.sort((a, b) => a.Link.index - b.Link.index)
 
     const history = useHistory()
     const cookies = new Cookies()
@@ -639,6 +642,19 @@ const PostCard = (props: {
                         )}
                     </Column>
                 )}
+                {type === 'string' && (
+                    <Scrollbars className={`${styles.stringBeads} row`}>
+                        {stringPosts.map((bead, i) => (
+                            <StringBeadCard
+                                key={bead.id}
+                                bead={bead}
+                                postId={id}
+                                beadIndex={i}
+                                location={location}
+                            />
+                        ))}
+                    </Scrollbars>
+                )}
             </Column>
             <Column className={styles.footer}>
                 <div className={styles.statButtons}>
@@ -658,7 +674,7 @@ const PostCard = (props: {
                         title={statTitle('Comment', totalComments)}
                         // color={accountComment && 'blue'}
                         disabled={location === 'preview'}
-                        onClick={() => setCommentsOpen(!commentsOpen)}
+                        onClick={() => totalComments && setCommentsOpen(!commentsOpen)}
                     />
                     <StatButton
                         icon={<RepostIconSVG />}

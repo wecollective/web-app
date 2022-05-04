@@ -19,6 +19,7 @@ const SpacePagePostsFilters = (): JSX.Element => {
                     'Audio',
                     'Event',
                     'Glass Bead Game',
+                    'String',
                     'Prism',
                 ]}
                 selectedOption={type}

@@ -12,7 +12,17 @@ const UserPagePostsFilters = (): JSX.Element => {
         <Row style={{ width: '100%' }}>
             <DropDownMenu
                 title='Post Type'
-                options={['All Types', 'Text', 'Url', 'Audio', 'Event', 'Glass Bead Game']} // 'Prism'
+                options={[
+                    'All Types',
+                    'Text',
+                    'Image',
+                    'Url',
+                    'Audio',
+                    'Event',
+                    'Glass Bead Game',
+                    'String',
+                    'Prism',
+                ]}
                 selectedOption={type}
                 setSelectedOption={(value) => updateUserPostsFilter('type', value)}
                 style={{ marginRight: 10 }}

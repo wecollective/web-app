@@ -84,6 +84,10 @@
                 color: $postTypeGlassBeadGame;
                 border: 2px solid $postTypeGlassBeadGame;
             }
+            &.string {
+                color: $postTypeString;
+                border: 2px solid $postTypeString;
+            }
             &.prism {
                 color: $postTypePrism;
                 border: 2px solid $postTypePrism;
@@ -243,6 +247,12 @@
         .playAllButton {
             all: unset;
             cursor: pointer;
+        }
+
+        // string posts
+        .stringBeads {
+            display: flex;
+            padding: 7px;
         }
 
     }

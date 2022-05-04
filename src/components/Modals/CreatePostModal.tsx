@@ -514,6 +514,13 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                     .then((res) => {
                         setLoading(false)
                         setSaved(true)
+                        const stringData = res.data.string.map((bead, i) => {
+                            return {
+                                ...bead.stringPost,
+                                Link: { index: i },
+                                PostImages: bead.imageData || [],
+                            }
+                        })
                         // todo: update direct spaces
                         const DirectSpaces = [spaceData, ...selectedSpaces]
                         DirectSpaces.forEach((s) => {
@@ -536,7 +543,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                             Reactions: [],
                             IncomingLinks: [],
                             OutgoingLinks: [],
-                            PostImages: res.data.images ? [...res.data.images] : [],
+                            PostImages: res.data.images || [],
                             Event: {
                                 ...res.data.event,
                                 Going: [],
@@ -548,6 +555,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                                 topicImage: selectedTopic ? selectedTopic.imagePath : null,
                                 GlassBeads: [],
                             },
+                            StringPosts: res.data.string ? stringData : [],
                         }
                         setSpacePosts([newPost, ...spacePosts])
                         setTimeout(() => close(), 1000)

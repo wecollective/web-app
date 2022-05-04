@@ -191,6 +191,9 @@ const SpacePagePostMap = (): JSX.Element => {
         if (d.type === 'event') {
             return colors.red
         }
+        if (d.type === 'string') {
+            return colors.lightBlue
+        }
         // if (d.type === 'poll') {
         //     return colors.red
         // }
