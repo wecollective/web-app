@@ -68,6 +68,11 @@ const LogInModal = (props: { close: () => void }): JSX.Element => {
                                 setEmailOrHandleState('invalid')
                                 setEmailOrHandleErrors(['User not found'])
                                 break
+                            case 'Spam account':
+                                setLogInFlashMessage(
+                                    'Sorry, your account has been marked as spam. Email admin@weco.io if you think this is a mistake.'
+                                )
+                                break
                             case 'Incorrect password':
                                 setPasswordState('invalid')
                                 setPasswordErrors(['Incorrect password'])
@@ -140,7 +145,11 @@ const LogInModal = (props: { close: () => void }): JSX.Element => {
                         autoFill
                     />
                 </Column>
-                {logInFlashMessage.length > 0 && <p className='danger'>{logInFlashMessage}</p>}
+                {logInFlashMessage.length > 0 && (
+                    <p className='danger' style={{ marginBottom: 20 }}>
+                        {logInFlashMessage}
+                    </p>
+                )}
                 {displayResendVerificationEmailLink && (
                     <Button
                         text='Resend verification email'
