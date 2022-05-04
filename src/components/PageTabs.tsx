@@ -3,11 +3,26 @@ import { Link, useLocation } from 'react-router-dom'
 import styles from '@styles/components/PageTabs.module.scss'
 import Row from '@components/Row'
 
-const PageTabs = (props: { tabs: any }): JSX.Element => {
-    const { tabs } = props
+const Tab = (props: { baseRoute: string; tab: any }): JSX.Element => {
+    const { baseRoute, tab } = props
     const location = useLocation()
     const subpage = location.pathname.split('/')[3]
+    return (
+        <Link
+            className={`${styles.tab} ${subpage === tab.text.toLowerCase() && styles.selected}`}
+            to={`${baseRoute}/${tab.text.toLowerCase()}`}
+        >
+            <Row style={{ margin: '0 5px' }}>
+                {tab.icon}
+                <p>{tab.text}</p>
+            </Row>
+            <div className={styles.underline} />
+        </Link>
+    )
+}
 
+const PageTabs = (props: { tabs: any }): JSX.Element => {
+    const { tabs } = props
     return (
         <Row spaceBetween className={styles.wrapper}>
             {tabs.left.length > 0 && (
@@ -15,13 +30,7 @@ const PageTabs = (props: { tabs: any }): JSX.Element => {
                     {tabs.left
                         .filter((t) => t.visible)
                         .map((tab) => (
-                            <Link
-                                key={tab.text}
-                                to={`${tabs.baseRoute}/${tab.text.toLowerCase()}`}
-                                className={`${styles.tab} ${tab.selected && styles.selected}`}
-                            >
-                                <p>{tab.text}</p>
-                            </Link>
+                            <Tab key={tab.text} baseRoute={tabs.baseRoute} tab={tab} />
                         ))}
                 </Row>
             )}
@@ -30,16 +39,7 @@ const PageTabs = (props: { tabs: any }): JSX.Element => {
                     {tabs.right
                         .filter((t) => t.visible)
                         .map((tab) => (
-                            <Link
-                                key={tab.text}
-                                to={`${tabs.baseRoute}/${tab.text.toLowerCase()}`}
-                                className={`${styles.tab} ${
-                                    subpage === tab.text.toLowerCase() && styles.selected
-                                }`}
-                            >
-                                {tab.icon}
-                                <p>{tab.text}</p>
-                            </Link>
+                            <Tab key={tab.text} baseRoute={tabs.baseRoute} tab={tab} />
                         ))}
                 </Row>
             )}

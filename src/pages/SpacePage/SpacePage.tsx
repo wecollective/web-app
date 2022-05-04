@@ -16,8 +16,13 @@ import SpacePagePeople from '@pages/SpacePage/SpacePagePeople'
 import SpacePageCalendar from '@pages/SpacePage/SpacePageCalendar'
 import SpacePageRooms from '@pages/SpacePage/SpacePageRooms'
 import SpacePageGovernance from '@pages/SpacePage/SpacePageGovernance'
-import { ReactComponent as SettingsIconSVG } from '@svgs/cog-solid.svg'
 import PageNotFound from '@pages/PageNotFound'
+import { ReactComponent as AboutIcon } from '@svgs/book-open-solid.svg'
+import { ReactComponent as PostsIcon } from '@svgs/edit-solid.svg'
+import { ReactComponent as SpacesIcon } from '@svgs/overlapping-circles-thick.svg'
+import { ReactComponent as PeopleIcon } from '@svgs/users-solid.svg'
+import { ReactComponent as CalendarIcon } from '@svgs/calendar-days-solid.svg'
+import { ReactComponent as SettingsIconSVG } from '@svgs/cog-solid.svg'
 
 const SpacePage = (): JSX.Element => {
     const { accountDataLoading } = useContext(AccountContext)
@@ -34,19 +39,16 @@ const SpacePage = (): JSX.Element => {
     const subpage = location.pathname.split('/')[3]
     const tabs = {
         baseRoute: `/s/${spaceData.handle}`,
-        left: ['About', 'Posts', 'Spaces', 'People', 'Calendar', 'Rooms', 'Governance'].map(
-            (value) => {
-                return { text: value, visible: true, selected: subpage === value.toLowerCase() }
-            }
-        ),
-        right: [
-            {
-                text: 'Settings',
-                visible: isModerator,
-                selected: subpage === 'settings',
-                icon: <SettingsIconSVG />,
-            },
+        left: [
+            { text: 'About', visible: true, icon: <AboutIcon /> },
+            { text: 'Posts', visible: true, icon: <PostsIcon /> },
+            { text: 'Spaces', visible: true, icon: <SpacesIcon /> },
+            { text: 'People', visible: true, icon: <PeopleIcon /> },
+            { text: 'Calendar', visible: true, icon: <CalendarIcon /> },
+            { text: 'Rooms', visible: true },
+            { text: 'Governance', visible: true },
         ],
+        right: [{ text: 'Settings', visible: isModerator, icon: <SettingsIconSVG /> }],
     }
 
     useEffect(() => {
