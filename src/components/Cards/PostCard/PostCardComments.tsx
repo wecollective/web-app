@@ -15,9 +15,10 @@ import LoadingWheel from '@components/LoadingWheel'
 const PostCardComments = (props: {
     postId: number | undefined
     location: string
+    totalComments: number
     incrementTotalComments: (value: number) => void
 }): JSX.Element => {
-    const { postId, location, incrementTotalComments } = props
+    const { postId, location, totalComments, incrementTotalComments } = props
     const { accountData, loggedIn } = useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
     const [comments, setComments] = useState<any[]>([])
@@ -97,7 +98,9 @@ const PostCardComments = (props: {
         }
     }
 
-    useEffect(() => getComments(), [])
+    useEffect(() => {
+        if (totalComments) getComments()
+    }, [])
 
     return (
         <Column>

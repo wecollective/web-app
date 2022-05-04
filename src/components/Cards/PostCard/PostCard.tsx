@@ -683,7 +683,7 @@ const PostCard = (props: {
                         title={statTitle('Comment', totalComments)}
                         // color={accountComment && 'blue'}
                         disabled={location === 'preview'}
-                        onClick={() => totalComments && setCommentsOpen(!commentsOpen)}
+                        onClick={() => setCommentsOpen(!commentsOpen)}
                     />
                     <StatButton
                         icon={<RepostIconSVG />}
@@ -754,6 +754,7 @@ const PostCard = (props: {
                     <PostCardComments
                         postId={postData.id}
                         location={location}
+                        totalComments={totalComments}
                         incrementTotalComments={(value) =>
                             setPostData({ ...postData, totalComments: totalComments + value })
                         }
