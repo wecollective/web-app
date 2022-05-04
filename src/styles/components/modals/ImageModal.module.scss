@@ -1,0 +1,25 @@
+@import '@styles/Variables';
+
+.selectedImage {
+    > button {
+        all: unset;
+        cursor: pointer;
+        > svg {
+            color: $grey3;
+            width: 25px;
+            height: 25px;
+            &:hover {
+                color: $grey4;
+            }
+            transition: color 0.5s;
+        }
+    }
+    > div {
+        margin: 0 10px;
+        > img {
+            max-width: calc(100vw - 200px);
+            max-height: calc(100vh - 200px);
+            margin-bottom: 20px;
+        }
+    }
+}

@@ -147,8 +147,8 @@ const AudioVisualiser = (props: {
     }, [])
 
     return (
-        <Column style={{ width: '100%' }}>
-            <div id={`${audioElementId}-visualiser`} style={style} />
+        <Column style={style}>
+            <div id={`${audioElementId}-visualiser`} style={{ width: '100%', height: '100%' }} />
             <div id={`${audioElementId}-static-visualiser`} style={{ position: 'absolute' }} />
         </Column>
     )

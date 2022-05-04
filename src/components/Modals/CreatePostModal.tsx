@@ -863,7 +863,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                                         staticColor={colors.audioVisualiserColor}
                                         dynamicBars={160}
                                         dynamicColor={colors.audioVisualiserColor}
-                                        style={{ width: '100%', height: 80 }}
+                                        style={{ height: 80, margin: '20px 0 10px 0' }}
                                     />
                                     <Row centerY>
                                         <button
@@ -1098,7 +1098,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                                     <ImageIconSVG />
                                 </button>
                             </Row>
-                            <Column centerX className={styles.newBead}>
+                            <Column centerX>
                                 {newBead.type === 'text' && (
                                     <Input
                                         id='new-bead-text'
@@ -1187,7 +1187,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                                                     staticColor={colors.audioVisualiserColor}
                                                     dynamicBars={160}
                                                     dynamicColor={colors.audioVisualiserColor}
-                                                    style={{ width: '100%', height: 80 }}
+                                                    style={{ height: 80, margin: '20px 0 10px 0' }}
                                                 />
                                                 <Row centerY>
                                                     <button

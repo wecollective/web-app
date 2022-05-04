@@ -1,5 +1,5 @@
 import React from 'react'
-import styles from '@styles/components/cards/StringBeadCard.module.scss'
+import styles from '@styles/components/modals/ImageModal.module.scss'
 import Column from '@src/components/Column'
 import Row from '@src/components/Row'
 import ShowMoreLess from '@components/ShowMoreLess'
@@ -32,7 +32,10 @@ const ImageModal = (props: {
                     <img className={styles.selectedImage} src={selectedImage.url} alt='' />
                     {selectedImage.caption && (
                         <ShowMoreLess height={150}>
-                            <Markdown text={selectedImage.caption} />
+                            <Markdown
+                                text={selectedImage.caption}
+                                style={{ textAlign: 'center' }}
+                            />
                         </ShowMoreLess>
                     )}
                 </Column>

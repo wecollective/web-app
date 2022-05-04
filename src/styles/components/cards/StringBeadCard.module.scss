@@ -2,25 +2,25 @@
 
 .wrapper {
     padding: 10px;
-    width: 150px;
-    height: 150px;
+    width: 220px;
+    height: 220px;
     flex-shrink: 0;
     background-color: white;
-    border-radius: 10px;
+    border-radius: 15px;
     box-shadow: 0 0 7px 0 rgba(10, 8, 72, 0.1);
-    margin-right: 10px;
+    margin-right: 15px;
 
     .beadHeader {
         > svg {
-            opacity: 0.8;
+            opacity: 0.3;
             width: 20px;
             height: 20px;
         }
     }
 
     .beadContent {
-        height: calc(100% - 20px);
-        padding: 5px 0;
+        height: calc(100% - 25px);
+        margin: 5px 0;
 
         .playButton {
             all: unset;
@@ -36,37 +36,14 @@
         .image {
             all: unset;
             cursor: pointer;
-            width: 90px;
-            height: 90px;
-            &:not(:last-child) { margin-right: 5px }
+            width: 160px;
+            height: 160px;
+            &:not(:last-child) { margin-right: 7px }
             > img {
-                width: 90px;
-                height: 90px;
+                width: 160px;
+                height: 160px;
+                border-radius: 5px;
                 object-fit: cover;
-            }
-        }
-    }
-
-    .selectedImage {
-        > button {
-            all: unset;
-            cursor: pointer;
-            > svg {
-                color: $grey3;
-                width: 25px;
-                height: 25px;
-                &:hover {
-                    color: $grey4;
-                }
-                transition: color 0.5s;
-            }
-        }
-        > div {
-            margin: 0 10px;
-            > img {
-                max-width: calc(100vw - 200px);
-                max-height: calc(100vh - 200px);
-                margin-bottom: 20px;
             }
         }
     }

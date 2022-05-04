@@ -357,7 +357,7 @@ const PostCard = (props: {
                             staticColor={colors.audioVisualiserColor}
                             dynamicBars={160}
                             dynamicColor={colors.audioVisualiserColor}
-                            style={{ width: '100%', height: 80 }}
+                            style={{ height: 80, margin: '20px 0 10px 0' }}
                         />
                         <Row centerY>
                             <button
@@ -638,6 +638,7 @@ const PostCard = (props: {
                                     location={location}
                                 />
                             ))}
+                            <span style={{ marginLeft: -7, width: 7, flexShrink: 0 }} />
                         </Scrollbars>
                     </Column>
                 )}

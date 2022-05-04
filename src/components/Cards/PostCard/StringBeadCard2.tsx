@@ -76,9 +76,9 @@ const StringBeadCard = (props: {
                         <Markdown
                             text={bead.text}
                             style={{
-                                padding: '0 5px',
-                                fontSize: 10,
-                                lineHeight: '13px',
+                                padding: '0 10px 2px 10px',
+                                fontSize: 14,
+                                lineHeight: '18px',
                                 width: '100%',
                                 textAlign: 'center',
                             }}
@@ -97,7 +97,7 @@ const StringBeadCard = (props: {
                     </Scrollbars>
                 )}
                 {bead.type === 'string-audio' && (
-                    <Column style={{ width: 130 }} key={beadIndex}>
+                    <Column key={beadIndex} spaceBetween style={{ height: '100%' }}>
                         <AudioVisualiser
                             audioElementId={`string-bead-audio-${postId}-${beadIndex}-${location}`}
                             audioURL={bead.url}
@@ -105,7 +105,7 @@ const StringBeadCard = (props: {
                             staticColor={colors.audioVisualiserColor}
                             dynamicBars={60}
                             dynamicColor={colors.audioVisualiserColor}
-                            style={{ width: '100%', height: 80 }}
+                            style={{ width: '100%', height: 100, marginTop: 20 }}
                         />
                         <Row centerY>
                             <button
