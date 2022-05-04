@@ -29,6 +29,7 @@ import BeadCard from '@src/components/Cards/BeadCard'
 import Scrollbars from '@src/components/Scrollbars'
 import FlagImageHighlights from '@components/FlagImageHighlights'
 import Modal from '@components/Modal'
+import ImageModal from '@components/modals/ImageModal'
 import AudioVisualiser from '@src/components/AudioVisualiser'
 import AudioTimeSlider from '@src/components/AudioTimeSlider'
 import PostCardLikeModal from '@components/Cards/PostCard/PostCardLikeModal'
@@ -48,8 +49,6 @@ import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
 import { ReactComponent as ClockIconSVG } from '@svgs/clock-solid.svg'
 import { ReactComponent as CalendarIconSVG } from '@svgs/calendar-days-solid.svg'
 import { ReactComponent as SuccessIconSVG } from '@svgs/check-circle-solid.svg'
-import { ReactComponent as ChevronLeftSVG } from '@svgs/chevron-left-solid.svg'
-import { ReactComponent as ChevronRightSVG } from '@svgs/chevron-right-solid.svg'
 
 const PostCard = (props: {
     post: any
@@ -121,10 +120,6 @@ const PostCard = (props: {
     function openImageModal(imageId) {
         setSelectedImage(images.find((image) => image.id === imageId))
         setImageModalOpen(true)
-    }
-
-    function toggleImage(increment) {
-        setSelectedImage(images[selectedImage.index + increment])
     }
 
     function toggleAudio() {
@@ -338,30 +333,12 @@ const PostCard = (props: {
                                 )}
                             </Row>
                             {imageModalOpen && (
-                                <Modal close={() => setImageModalOpen(false)}>
-                                    <Row centerY className={styles.selectedImage}>
-                                        {selectedImage.index !== 0 && (
-                                            <button type='button' onClick={() => toggleImage(-1)}>
-                                                <ChevronLeftSVG />
-                                            </button>
-                                        )}
-                                        <Column centerX>
-                                            <img
-                                                className={styles.selectedImage}
-                                                src={selectedImage.url}
-                                                alt=''
-                                            />
-                                            {selectedImage.caption && (
-                                                <p>{selectedImage.caption}</p>
-                                            )}
-                                        </Column>
-                                        {selectedImage.index !== images.length - 1 && (
-                                            <button type='button' onClick={() => toggleImage(1)}>
-                                                <ChevronRightSVG />
-                                            </button>
-                                        )}
-                                    </Row>
-                                </Modal>
+                                <ImageModal
+                                    images={images}
+                                    selectedImage={selectedImage}
+                                    setSelectedImage={setSelectedImage}
+                                    close={() => setImageModalOpen(false)}
+                                />
                             )}
                         </Column>
                     </Column>
