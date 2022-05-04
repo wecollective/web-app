@@ -104,6 +104,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
     const [selectedSpaces, setSelectedSpaces] = useState<any[]>([])
     const [loading, setLoading] = useState(false)
     const [saved, setSaved] = useState(false)
+    const totalMBUploadLimit = 20
     // url
     const [urlLoading, setUrlLoading] = useState(false)
     const [urlInvalid, setUrlInvalid] = useState(false)
@@ -115,7 +116,6 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
     const [toalImageSizeError, setTotalImageSizeError] = useState(false)
     const [imagePostError, setImagePostError] = useState(false)
     const imageMBLimit = 2
-    const totalImageMBLimit = 20
     const totalImageSize =
         images.map((image) => (image.file ? image.file.size : 0)).reduce((a, b) => a + b, 0) /
         (1024 * 1024)
@@ -155,50 +155,10 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
     const [string, setString] = useState<any[]>([])
     const [stringTextState, setStringTextState] = useState<errorState>('default')
     const [stringTextErrors, setStringTextErrors] = useState<string[]>([])
+    const [stringPostError, setStringPostError] = useState(false)
+    const [stringSizeError, setStringSizeError] = useState(false)
 
     const cookies = new Cookies()
-
-    function addBeadToString() {
-        // validate bead
-        let valid = false
-        if (newBead.type === 'text') {
-            valid = newBead.text.length < 5000
-            setStringTextErrors(valid ? [] : ['Must be less than 5K characters'])
-            setStringTextState(valid ? 'default' : 'invalid')
-        } else if (newBead.type === 'image' && totalImageSize >= totalImageMBLimit) {
-            setTotalImageSizeError(true)
-        } else valid = true
-        if (valid) {
-            if (newBead.type === 'image') {
-                newBead.images = images.map((image, index) => {
-                    return { index, ...image }
-                })
-            }
-            setString([...string, newBead])
-            setNewBead({
-                ...defaultBead,
-                type: newBead.type,
-            })
-            // reset state
-            setImages([])
-            setTotalImageSizeError(false)
-            resetAudioState()
-            const input = document.getElementById('new-bead-text')
-            if (input) input.style.height = ''
-        }
-    }
-
-    function removeBead(index) {
-        setString([...string.filter((bead, i) => i !== index)])
-    }
-
-    function moveBead(index, increment) {
-        const newString = [...string]
-        const bead = newString[index]
-        newString.splice(index, 1)
-        newString.splice(index + increment, 0, bead)
-        setString(newString)
-    }
 
     function updateValue(name, value) {
         let resetState = {}
@@ -383,6 +343,63 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
         }
     }
 
+    function addBeadToString() {
+        // validate bead
+        let valid = false
+        if (newBead.type === 'text') {
+            valid = newBead.text.length < 5000
+            setStringTextErrors(valid ? [] : ['Must be less than 5K characters'])
+            setStringTextState(valid ? 'default' : 'invalid')
+        } else if (newBead.type === 'image' && totalImageSize >= totalMBUploadLimit) {
+            setTotalImageSizeError(true)
+        } else valid = true
+        if (valid) {
+            if (newBead.type === 'image') {
+                newBead.images = images.map((image, index) => {
+                    return { index, ...image }
+                })
+            }
+            setString([...string, newBead])
+            setNewBead({
+                ...defaultBead,
+                type: newBead.type,
+            })
+            // reset state
+            setStringPostError(false)
+            setImages([])
+            setTotalImageSizeError(false)
+            resetAudioState()
+            const input = document.getElementById('new-bead-text')
+            if (input) input.style.height = ''
+        }
+    }
+
+    function removeBead(index) {
+        setString([...string.filter((bead, i) => i !== index)])
+        setStringSizeError(false)
+    }
+
+    function moveBead(index, increment) {
+        const newString = [...string]
+        const bead = newString[index]
+        newString.splice(index, 1)
+        newString.splice(index + increment, 0, bead)
+        setString(newString)
+    }
+
+    function totalStringSize() {
+        const filesSizes = [] as number[]
+        string.forEach((bead) => {
+            if (bead.type === 'audio') filesSizes.push(bead.audioFile.size)
+            if (bead.type === 'image') {
+                bead.images.forEach((image) => {
+                    if (image.file) filesSizes.push(image.file.size)
+                })
+            }
+        })
+        return filesSizes.reduce((a, b) => a + b, 0) / (1024 * 1024)
+    }
+
     function createPost() {
         // add validation with latest values to form data (todo: avoid this set using refs?)
         const newFormData = {
@@ -436,10 +453,13 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
 
         if (allValid(newFormData, setFormData)) {
             if (postType.value === 'Image' && !images.length) setImagePostError(true)
-            else if (postType.value === 'Image' && totalImageSize >= totalImageMBLimit)
+            else if (postType.value === 'Image' && totalImageSize >= totalMBUploadLimit)
                 setTotalImageSizeError(true)
             else if (postType.value === 'Audio' && !audioFile && !audioSizeError)
                 setAudioPostError(true)
+            else if (postType.value === 'String' && !string.length) setStringPostError(true)
+            else if (postType.value === 'String' && totalStringSize() >= totalMBUploadLimit)
+                setStringSizeError(true)
             else {
                 // todo: check total string size less than 20MB
                 setLoading(true)
@@ -467,7 +487,6 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                     const isBlob = audioFile && !audioFile.name
                     uploadType = isBlob ? 'audio-blob' : 'audio-file'
                     fileData = new FormData()
-                    // isBlob check not required as audio file already converted to blob
                     fileData.append(
                         'file',
                         isBlob
@@ -481,7 +500,6 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                     uploadType = 'image-post'
                     fileData = new FormData()
                     images.forEach((image, index) => {
-                        // originalname set as index for use on backend
                         if (image.file) fileData.append('file', image.file, index)
                     })
                     fileData.append('imageData', JSON.stringify(images))
@@ -514,19 +532,6 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                     .then((res) => {
                         setLoading(false)
                         setSaved(true)
-                        const stringData = res.data.string.map((bead, i) => {
-                            return {
-                                ...bead.stringPost,
-                                Link: { index: i },
-                                PostImages: bead.imageData || [],
-                            }
-                        })
-                        // todo: update direct spaces
-                        const DirectSpaces = [spaceData, ...selectedSpaces]
-                        DirectSpaces.forEach((s) => {
-                            s.type = 'post'
-                            s.state = 'active'
-                        })
                         const newPost = {
                             ...res.data.post,
                             totalLikes: 0,
@@ -539,7 +544,12 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                                 name: accountData.name,
                                 flagImagePath: accountData.flagImagePath,
                             },
-                            DirectSpaces,
+                            DirectSpaces: [
+                                { ...spaceData, type: 'post', state: 'active' },
+                                ...selectedSpaces.map((space) => {
+                                    return { ...space, type: 'post', state: 'active' }
+                                }),
+                            ],
                             Reactions: [],
                             IncomingLinks: [],
                             OutgoingLinks: [],
@@ -555,7 +565,15 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                                 topicImage: selectedTopic ? selectedTopic.imagePath : null,
                                 GlassBeads: [],
                             },
-                            StringPosts: res.data.string ? stringData : [],
+                            StringPosts: res.data.string
+                                ? res.data.string.map((bead, i) => {
+                                      return {
+                                          ...bead.stringPost,
+                                          Link: { index: i },
+                                          PostImages: bead.imageData || [],
+                                      }
+                                  })
+                                : [],
                         }
                         setSpacePosts([newPost, ...spacePosts])
                         setTimeout(() => close(), 1000)
@@ -768,8 +786,8 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                             )}
                             {toalImageSizeError && (
                                 <p className='danger' style={{ marginBottom: 10 }}>
-                                    Total image upload size must be less than {totalImageMBLimit}MB.
-                                    (Current size: {totalImageSize.toFixed(2)}MB)
+                                    Total image upload size must be less than {totalMBUploadLimit}
+                                    MB. (Current size: {totalImageSize.toFixed(2)}MB)
                                 </p>
                             )}
                             <Row className={styles.fileUploadInput}>
@@ -1025,6 +1043,31 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                     )}
                     {postType.value === 'String' && (
                         <Column>
+                            <Input
+                                title='String description (optional)'
+                                type='text-area'
+                                placeholder='description...'
+                                style={{ marginBottom: 15 }}
+                                rows={1}
+                                state={text.state}
+                                errors={text.errors}
+                                value={text.value}
+                                onChange={(value) => updateValue('text', value)}
+                            />
+                            <Column centerX>
+                                {stringPostError && (
+                                    <p className='danger' style={{ marginBottom: 20 }}>
+                                        No beads added to string
+                                    </p>
+                                )}
+                                {stringSizeError && (
+                                    <p className='danger' style={{ marginBottom: 20 }}>
+                                        Total string upload size must be less than{' '}
+                                        {totalMBUploadLimit}
+                                        MB. (Current size: {totalStringSize().toFixed(2)}MB)
+                                    </p>
+                                )}
+                            </Column>
                             <Row centerX className={styles.beadTypeButtons}>
                                 <button
                                     type='button'
@@ -1252,7 +1295,7 @@ const CreatePostModal = (props: { type: string; close: () => void }): JSX.Elemen
                                         {toalImageSizeError && (
                                             <p className='danger' style={{ marginBottom: 10 }}>
                                                 Total image upload size must be less than{' '}
-                                                {totalImageMBLimit}MB. (Current size:{' '}
+                                                {totalMBUploadLimit}MB. (Current size:{' '}
                                                 {totalImageSize.toFixed(2)}MB)
                                             </p>
                                         )}

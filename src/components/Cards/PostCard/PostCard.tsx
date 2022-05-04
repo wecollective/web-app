@@ -643,17 +643,26 @@ const PostCard = (props: {
                     </Column>
                 )}
                 {type === 'string' && (
-                    <Scrollbars className={`${styles.stringBeads} row`}>
-                        {stringPosts.map((bead, i) => (
-                            <StringBeadCard
-                                key={bead.id}
-                                bead={bead}
-                                postId={id}
-                                beadIndex={i}
-                                location={location}
-                            />
-                        ))}
-                    </Scrollbars>
+                    <Column>
+                        {text && (
+                            <Column style={{ marginBottom: 10 }}>
+                                <ShowMoreLess height={150}>
+                                    <Markdown text={text} />
+                                </ShowMoreLess>
+                            </Column>
+                        )}
+                        <Scrollbars className={`${styles.stringBeads} row`}>
+                            {stringPosts.map((bead, i) => (
+                                <StringBeadCard
+                                    key={bead.id}
+                                    bead={bead}
+                                    postId={id}
+                                    beadIndex={i}
+                                    location={location}
+                                />
+                            ))}
+                        </Scrollbars>
+                    </Column>
                 )}
             </Column>
             <Column className={styles.footer}>
