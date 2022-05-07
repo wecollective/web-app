@@ -647,7 +647,7 @@ const PostCard = (props: {
                 <div className={styles.statButtons}>
                     <StatButton
                         icon={<LikeIconSVG />}
-                        iconSize={18}
+                        iconSize={20}
                         text={totalLikes}
                         title={statTitle('Like', totalLikes)}
                         color={accountLike && 'blue'}
@@ -656,7 +656,7 @@ const PostCard = (props: {
                     />
                     <StatButton
                         icon={<CommentIconSVG />}
-                        iconSize={18}
+                        iconSize={20}
                         text={totalComments}
                         title={statTitle('Comment', totalComments)}
                         // color={accountComment && 'blue'}
@@ -665,7 +665,7 @@ const PostCard = (props: {
                     />
                     <StatButton
                         icon={<RepostIconSVG />}
-                        iconSize={18}
+                        iconSize={20}
                         text={totalReposts}
                         title={statTitle('Repost', totalReposts)}
                         color={accountRepost && 'blue'}
@@ -674,7 +674,7 @@ const PostCard = (props: {
                     />
                     <StatButton
                         icon={<RatingIconSVG />}
-                        iconSize={18}
+                        iconSize={20}
                         text={totalRatings}
                         title={statTitle('Rating', totalRatings)}
                         color={accountRating && 'blue'}
@@ -683,7 +683,7 @@ const PostCard = (props: {
                     />
                     <StatButton
                         icon={<LinkIconSVG />}
-                        iconSize={18}
+                        iconSize={20}
                         text={totalLinks}
                         title={statTitle('Link', totalLinks)}
                         color={accountLink && 'blue'}
@@ -693,7 +693,7 @@ const PostCard = (props: {
                     {['prism', 'decision-tree'].includes(type) && ( // 'glass-bead-game'
                         <StatButton
                             icon={<ArrowRightIconSVG />}
-                            iconSize={18}
+                            iconSize={20}
                             text='Open game room'
                             disabled={location === 'preview'}
                             onClick={() => history.push(`/p/${id}`)}
