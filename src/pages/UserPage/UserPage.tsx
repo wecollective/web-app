@@ -40,6 +40,11 @@ const UserPage = ({
         ],
     }
 
+    useEffect(() => {
+        window.scrollTo(0, 200)
+        window.onunload = () => window.scrollTo(0, 200)
+    }, [])
+
     useEffect(() => () => resetUserData(), [])
 
     return (

@@ -57,6 +57,11 @@ const SpacePage = (): JSX.Element => {
 
     useEffect(() => setSelectedSpaceSubPage(subpage), [location])
 
+    useEffect(() => {
+        window.scrollTo(0, 200)
+        window.onunload = () => window.scrollTo(0, 200)
+    }, [])
+
     useEffect(() => () => resetSpaceData(), [])
 
     return (

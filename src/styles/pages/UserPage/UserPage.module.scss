@@ -13,6 +13,8 @@
             width: calc(100% - 270px);
         }
 
-        .centerPanel {}
+        .centerPanel {
+            height: calc(100vh - 158px);
+        }
     }
 }
