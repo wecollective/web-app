@@ -22,7 +22,8 @@ const SpacePagePeopleHeader = (props: {
             />
             <Button
                 icon={<SlidersIconSVG />}
-                color='grey'
+                text='Filters'
+                color='aqua'
                 style={{ marginRight: 10 }}
                 onClick={() => setFiltersOpen(!filtersOpen)}
             />

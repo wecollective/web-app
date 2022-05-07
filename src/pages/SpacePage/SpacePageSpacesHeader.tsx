@@ -57,11 +57,17 @@ const SpacePageSpacesHeader = (props: {
             />
             <Button
                 icon={<SlidersIconSVG />}
-                color='grey'
+                text='Filters'
+                color='aqua'
                 style={{ marginRight: 10 }}
                 onClick={() => setFiltersOpen(!filtersOpen)}
             />
-            <Button icon={<EyeIconSVG />} color='grey' onClick={() => setViewModalOpen(true)} />
+            <Button
+                icon={<EyeIconSVG />}
+                text='View'
+                color='purple'
+                onClick={() => setViewModalOpen(true)}
+            />
             {createSpaceModalOpen && (
                 <CreateSpaceModal close={() => setCreateSpaceModalOpen(false)} />
             )}
