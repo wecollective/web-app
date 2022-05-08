@@ -415,6 +415,7 @@ const SpacePageSpaceMap = (): JSX.Element => {
                                             .select(`#${isParent ? 'parent-' : ''}link-group`)
                                             .append('path')
                                             .attr('id', `arrow-${d.data.id}`)
+                                            .attr('opacity', 0)
                                             .attr('transform', () => {
                                                 if (isParent)
                                                     return 'translate(0, 5),rotate(180,0,0)'
@@ -422,6 +423,8 @@ const SpacePageSpaceMap = (): JSX.Element => {
                                             })
                                             .attr('d', 'M 0 0 L 10 5 L 0 10 z')
                                             .style('fill', '#ccc')
+                                        // fade in arrows
+                                        arrow.transition().duration(duration).attr('opacity', 1)
                                         // position arrow at half way point along line
                                         arrow
                                             .append('animateMotion')
@@ -452,12 +455,18 @@ const SpacePageSpaceMap = (): JSX.Element => {
                                 .on('end', (d) => {
                                     // add arrow to links
                                     const arrow = d3
-                                        .select('#link-group')
+                                        .select(`#${isParent ? 'parent-' : ''}link-group`)
                                         .append('path')
                                         .attr('id', `arrow-${d.data.id}`)
-                                        .attr('transform', 'translate(0, -5)')
+                                        .attr('opacity', 0)
+                                        .attr('transform', () => {
+                                            if (isParent) return 'translate(0, 5),rotate(180,0,0)'
+                                            return 'translate(0, -5)'
+                                        })
                                         .attr('d', 'M 0 0 L 10 5 L 0 10 z')
                                         .style('fill', '#ccc')
+                                    // fade in arrows
+                                    arrow.transition().duration(duration).attr('opacity', 1)
                                     // position arrow at half way point along line
                                     arrow
                                         .append('animateMotion')
@@ -465,7 +474,10 @@ const SpacePageSpaceMap = (): JSX.Element => {
                                         .attr('dur', 'infinite')
                                         .attr('repeatCount', 'infinite')
                                         .attr('rotate', 'auto')
-                                        .attr('keyPoints', '0.5;0.5')
+                                        .attr('keyPoints', () => {
+                                            if (isParent) return '0.35;0.35'
+                                            return '0.5;0.5'
+                                        })
                                         .attr('keyTimes', '0.0;1.0')
                                         .append('mpath')
                                         .attr('xlink:href', `#line-${d.data.id}`)
