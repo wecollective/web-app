@@ -230,6 +230,7 @@ const SpacePageSpaceMap = (): JSX.Element => {
         const newWidth = parseInt(svg.style('width'), 10)
 
         svg.append('defs').attr('id', 'imgdefs')
+
         const masterGroup = svg.append('g').attr('id', 'space-map-master-group')
 
         masterGroup.append('g').attr('id', 'link-group')
@@ -386,6 +387,7 @@ const SpacePageSpaceMap = (): JSX.Element => {
         //     .attr('transform', parentTransform)
 
         function createLinks(linkGroup, linkData) {
+            const isParent = linkGroup === '#parent-link-group'
             d3.select(linkGroup)
                 .selectAll('.link')
                 .data(linkData, (d) => findTransitonId(d))
@@ -394,6 +396,7 @@ const SpacePageSpaceMap = (): JSX.Element => {
                         enter
                             .append('path')
                             .classed('link', true)
+                            .attr('id', (d) => `line-${d.data.id}`)
                             .attr('stroke', 'black')
                             .attr('fill', 'none')
                             .attr('opacity', 0)
@@ -402,9 +405,39 @@ const SpacePageSpaceMap = (): JSX.Element => {
                                     d.parent.x
                                 },${(d.y + d.parent.y) / 2} ${d.parent.x},${d.parent.y}`
                             })
-                            .call((node) =>
-                                node.transition().duration(duration).attr('opacity', 0.2)
-                            ),
+                            .call((node) => {
+                                node.transition()
+                                    .duration(duration)
+                                    .attr('opacity', 0.2)
+                                    .on('end', (d) => {
+                                        // add arrow to links
+                                        const arrow = d3
+                                            .select(`#${isParent ? 'parent-' : ''}link-group`)
+                                            .append('path')
+                                            .attr('id', `arrow-${d.data.id}`)
+                                            .attr('transform', () => {
+                                                if (isParent)
+                                                    return 'translate(0, 5),rotate(180,0,0)'
+                                                return 'translate(0, -5)'
+                                            })
+                                            .attr('d', 'M 0 0 L 10 5 L 0 10 z')
+                                            .style('fill', '#ccc')
+                                        // position arrow at half way point along line
+                                        arrow
+                                            .append('animateMotion')
+                                            .attr('calcMode', 'linear')
+                                            .attr('dur', 'infinite')
+                                            .attr('repeatCount', 'infinite')
+                                            .attr('rotate', 'auto')
+                                            .attr('keyPoints', () => {
+                                                if (isParent) return '0.35;0.35'
+                                                return '0.5;0.5'
+                                            })
+                                            .attr('keyTimes', '0.0;1.0')
+                                            .append('mpath')
+                                            .attr('xlink:href', `#line-${d.data.id}`)
+                                    })
+                            }),
                     (update) =>
                         update.call((node) =>
                             node
@@ -415,6 +448,28 @@ const SpacePageSpaceMap = (): JSX.Element => {
                                         d.parent.x
                                     },${(d.y + d.parent.y) / 2} ${d.parent.x},${d.parent.y}`
                                 })
+                                .on('start', (d) => d3.select(`#arrow-${d.data.id}`).remove())
+                                .on('end', (d) => {
+                                    // add arrow to links
+                                    const arrow = d3
+                                        .select('#link-group')
+                                        .append('path')
+                                        .attr('id', `arrow-${d.data.id}`)
+                                        .attr('transform', 'translate(0, -5)')
+                                        .attr('d', 'M 0 0 L 10 5 L 0 10 z')
+                                        .style('fill', '#ccc')
+                                    // position arrow at half way point along line
+                                    arrow
+                                        .append('animateMotion')
+                                        .attr('calcMode', 'linear')
+                                        .attr('dur', 'infinite')
+                                        .attr('repeatCount', 'infinite')
+                                        .attr('rotate', 'auto')
+                                        .attr('keyPoints', '0.5;0.5')
+                                        .attr('keyTimes', '0.0;1.0')
+                                        .append('mpath')
+                                        .attr('xlink:href', `#line-${d.data.id}`)
+                                })
                         ),
                     (exit) =>
                         exit.call((node) =>
@@ -422,13 +477,7 @@ const SpacePageSpaceMap = (): JSX.Element => {
                                 .transition()
                                 .duration(duration / 2)
                                 .attr('opacity', 0)
-                                // .attr("d", d => {
-                                //     console.log('d: ', d)
-                                //     return "M" + d.x + "," + d.y
-                                //     + "C" + d.x + "," + (d.y + d.parent.y) / 2
-                                //     + " " + d.parent.x + "," +  (d.y + d.parent.y) / 2
-                                //     + " " + d.parent.x + "," + d.parent.y;
-                                // })
+                                .on('start', (d) => d3.select(`#arrow-${d.data.id}`).remove())
                                 .remove()
                         )
                 )
