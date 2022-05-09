@@ -1,135 +1,132 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useContext, useState } from 'react'
+import { Link, useHistory } from 'react-router-dom'
 import { AccountContext } from '@contexts/AccountContext'
 import styles from '@styles/components/Navbar.module.scss'
-import config from '@src/Config'
 import FlagImage from '@components/FlagImage'
 import Row from '@components/Row'
 import Button from '@components/Button'
-import { ReactComponent as NotificationIconSVG } from '@svgs/bell-solid.svg'
-// import { ReactComponent as MessageIconSVG } from '@svgs/envelope-solid.svg'
-import { ReactComponent as SettingsIconSVG } from '@svgs/cog-solid.svg'
+import GlobalSearchBar from '@components/GlobalSearchBar'
+import { ReactComponent as WecoLogo } from '@svgs/weco-logo.svg'
+import { ReactComponent as ChevronDownIcon } from '@svgs/chevron-down-solid.svg'
+import { ReactComponent as SpacesIcon } from '@svgs/overlapping-circles-thick.svg'
+import { ReactComponent as PostsIcon } from '@svgs/edit-solid.svg'
+import { ReactComponent as UsersIcon } from '@svgs/users-solid.svg'
+import { ReactComponent as EventsIcon } from '@svgs/calendar-days-solid.svg'
+import { ReactComponent as BellIcon } from '@svgs/bell-solid.svg'
+import { ReactComponent as SettingsIcon } from '@svgs/cog-solid.svg'
+import { ReactComponent as UserIcon } from '@svgs/user-solid.svg'
 
 const Navbar = (): JSX.Element => {
-    const {
-        loggedIn,
-        accountData,
-        setLogInModalOpen,
-        navBarDropDownModalOpen,
-        setNavbarDropDownModalOpen,
-        setDonateModalOpen,
-    } = useContext(AccountContext)
-
+    const { loggedIn, accountData, setLogInModalOpen, setDonateModalOpen, logOut } = useContext(
+        AccountContext
+    )
     const [exploreDropDownOpen, setExploreDropDownOpen] = useState(false)
-    const [selectedNavbarItem, setSelectedNavbarItem] = useState('')
+    const [profileDropDownOpen, setProfileDropDownOpen] = useState(false)
+    const history = useHistory()
 
-    useEffect(() => {
-        const url = window.location.href
-        if (url === `${config.appURL}/` || url.includes(`${config.appURL}?alert`))
-            setSelectedNavbarItem('home')
-        else if (url === `${config.appURL}/s/all/posts`) setSelectedNavbarItem('posts')
-        else if (url === `${config.appURL}/s/all/spaces`) setSelectedNavbarItem('spaces')
-        else if (url === `${config.appURL}/s/all/users`) setSelectedNavbarItem('users')
-        else setSelectedNavbarItem('')
-    }, [window.location.pathname])
+    function rotateButton() {
+        const homeButton = document.getElementById('home-button')
+        if (homeButton) {
+            if (!homeButton.style.transform) homeButton.style.transform = 'rotate(-360deg)'
+            else {
+                const degrees = homeButton.style.transform.split('-')[1].split('d')[0]
+                homeButton.style.transform = `rotate(-${+degrees + 360}deg)`
+            }
+        }
+    }
 
     return (
-        <div className={styles.wrapper}>
-            <div className={styles.navBarLinks}>
-                {/* <HamburgerIconSVG width={40} height={40} color='red'/> */}
-                <Link to='/' className={styles.navBarLink}>
-                    {/* <img className={styles.navBarIcon} src='/icons/home-solid.svg' alt='' /> */}
-                    <div
-                        className={`${styles.navBarText} ${
-                            selectedNavbarItem === 'home' && styles.selected
-                        }`}
-                    >
-                        Home
-                    </div>
-                </Link>
-
-                <Link to='/features' className={styles.navBarLink}>
-                    <div className={styles.navBarText}>Features</div>
-                </Link>
-                <Link to='/coop' className={styles.navBarLink}>
-                    <div className={styles.navBarText}>Coop</div>
-                </Link>
+        <Row spaceBetween className={styles.wrapper}>
+            <Row centerY>
+                <button
+                    type='button'
+                    id='home-button'
+                    className={styles.homeButton}
+                    onClick={() => {
+                        rotateButton()
+                        history.push('/')
+                    }}
+                >
+                    <WecoLogo />
+                </button>
                 <div
-                    className={styles.navBarLink}
+                    className={styles.exploreButton}
                     onMouseEnter={() => setExploreDropDownOpen(true)}
                     onMouseLeave={() => setExploreDropDownOpen(false)}
                 >
-                    <div className={styles.navBarText}>Explore</div>
-                    <img
-                        className={styles.exploreDropDownIcon}
-                        src='/icons/chevron-down-solid.svg'
-                        alt=''
-                    />
+                    <Link to='/s/all/spaces'>Explore</Link>
+                    <ChevronDownIcon />
                     {exploreDropDownOpen && (
                         <div className={styles.exploreDropDown}>
-                            <Link to='/s/all/posts' className={styles.exploreDropDownItem}>
-                                <img
-                                    className={styles.navBarIcon}
-                                    src='/icons/edit-solid.svg'
-                                    alt=''
-                                />
-                                <div className={styles.dropDownText}>Posts</div>
+                            <Link to='/s/all/spaces'>
+                                <SpacesIcon />
+                                <p>Spaces</p>
                             </Link>
-                            <Link to='/s/all/spaces' className={styles.exploreDropDownItem}>
-                                <img
-                                    className={styles.navBarIcon}
-                                    src='/icons/overlapping-circles-thick.svg'
-                                    alt=''
-                                />
-                                <div className={styles.dropDownText}>Spaces</div>
+                            <Link to='/s/all/posts'>
+                                <PostsIcon />
+                                <p>Posts</p>
                             </Link>
-                            <Link to='/s/all/people' className={styles.exploreDropDownItem}>
-                                <img
-                                    className={styles.navBarIcon}
-                                    src='/icons/users-solid.svg'
-                                    alt=''
-                                />
-                                <div className={styles.dropDownText}>People</div>
+                            <Link to='/s/all/people'>
+                                <UsersIcon />
+                                <p>People</p>
+                            </Link>
+                            <Link to='/s/all/calendar'>
+                                <EventsIcon />
+                                <p>Events</p>
                             </Link>
                         </div>
                     )}
                 </div>
-            </div>
-            {/* <div className={styles.searchBarWrapper}>Search bar</div> */}
+            </Row>
+            <Row centerY>
+                <GlobalSearchBar />
+            </Row>
             {loggedIn ? (
-                <div className={styles.accountButtons}>
-                    {/* <Link to={`/u/${accountData.handle}/messages`} className={styles.accountButton}>
-                        <MessageIconSVG />
-                        {accountData.unseen_messages > 0 && (
-                            <div className={styles.unseenItems}>{accountData.unseen_messages}</div>
-                        )}
-                    </Link> */}
-                    <Link
-                        to={`/u/${accountData.handle}/notifications`}
-                        className={styles.accountButton}
+                <Row centerY className={styles.accountButtons}>
+                    <div
+                        className={styles.profileButton}
+                        onMouseEnter={() => setProfileDropDownOpen(true)}
+                        onMouseLeave={() => setProfileDropDownOpen(false)}
                     >
-                        <NotificationIconSVG />
+                        <p>{accountData.name}</p>
+                        <FlagImage type='user' size={40} imagePath={accountData.flagImagePath} />
                         {accountData.unseenNotifications > 0 && (
-                            <div className={styles.unseenItems}>
-                                {accountData.unseenNotifications}
+                            <div className={styles.totalUnseenItems}>
+                                <p>{accountData.unseenNotifications}</p>
                             </div>
                         )}
-                    </Link>
-                    <Link to={`/u/${accountData.handle}/settings`} className={styles.accountButton}>
-                        <SettingsIconSVG />
-                    </Link>
-                    <button
-                        type='button'
-                        className={styles.profileButton}
-                        onClick={() => setNavbarDropDownModalOpen(!navBarDropDownModalOpen)}
-                    >
-                        <FlagImage type='user' size={40} imagePath={accountData.flagImagePath} />
-                        {/* <span className={styles.userName}>{accountData.name}</span> */}
-                    </button>
-                    <Button text='Donate' color='purple' onClick={() => setDonateModalOpen(true)} />
-                </div>
+                        {profileDropDownOpen && (
+                            <div className={styles.profileDropDown}>
+                                <Link to={`/u/${accountData.handle}/about`}>
+                                    <UserIcon />
+                                    <p>Profile</p>
+                                </Link>
+                                <Link to={`/u/${accountData.handle}/posts`}>
+                                    <PostsIcon />
+                                    <p>Posts</p>
+                                </Link>
+                                <Link to={`/u/${accountData.handle}/notifications`}>
+                                    <BellIcon />
+                                    <p>Notifications</p>
+                                    {accountData.unseenNotifications > 0 && (
+                                        <div className={styles.unseenItems}>
+                                            <p>{accountData.unseenNotifications}</p>
+                                        </div>
+                                    )}
+                                </Link>
+                                <Link to={`/u/${accountData.handle}/settings`}>
+                                    <SettingsIcon />
+                                    <p>Settings</p>
+                                </Link>
+                                <Row centerX style={{ marginTop: 15 }}>
+                                    <Button text='Log out' color='blue' onClick={logOut} />
+                                </Row>
+                            </div>
+                        )}
+                    </div>
+                </Row>
             ) : (
-                <Row>
+                <Row centerY>
                     <Button
                         text='Log in'
                         color='blue'
@@ -139,80 +136,8 @@ const Navbar = (): JSX.Element => {
                     <Button text='Donate' color='purple' onClick={() => setDonateModalOpen(true)} />
                 </Row>
             )}
-        </div>
+        </Row>
     )
 }
 
 export default Navbar
-
-// function toggleDarkMode() {
-//     document.body.classList.toggle("dark-mode"); // look into useRef
-// }
-/* <div 
-    style={{marginLeft: 20}}
-    className="button"
-    onClick={() => setSpaceContextLoading(!spaceContextLoading)}>
-    Toggle loading
-</div> */
-
-/* <div 
-    style={{ marginLeft: 20 }}
-    className="button"
-    onClick={ toggleDarkMode }>
-    Dark mode
-</div> */
-
-/* <div className="navBar-text" 
-        onClick={() => redirectTo('/s/all', 'all')}>
-        SpacePagePosts
-    </div> |
-    <div className="navBar-text"
-        onClick={() => redirectTo('/s/all/spaces', 'all')}>
-        Child-holons
-    </div> */
-
-// function redirect(path) {
-//     setSpaceContextLoading(true)
-//     //updateSpaceContext('all')
-//     setTimeout(function() {
-//         history.push(path)
-//         updateSpaceContext('all')
-//     }, 500)
-//     // updateContext()
-//     // setTimeout(function() { history.push(path); updateSpaceContext('all') }, 500)
-//     // history.push(path)
-// }
-
-// function navigate() {
-//     updateSpaceContext('all')
-// }
-
-// function delayedRedirect() {
-// history.push('/');
-// props.context.router.history.push("/some/Path");
-// browserHistory.push('/')
-// }
-
-// function delayRedirect(event) {
-//     const { history: { push } } = this.props;
-//     event.preventDefault();
-//     setTimeout(()=>push(to), 1000);
-// }
-// const delay = new Promise((resolve, reject) => {
-//     setTimeout(resolve, 3000, 'success');
-// });
-
-/* <div
-    className={styles.expandButtonWrapper}
-    role='button'
-    tabIndex={0}
-    onClick={() => setFullScreen(!fullScreen)}
-    onKeyDown={() => setFullScreen(!fullScreen)}
->
-    <img
-        className={styles.expandButton}
-        title='Toggle full screen'
-        src={fullScreen ? '/icons/compress-solid.svg' : '/icons/expand-solid.svg'}
-        aria-label='test'
-    />
-</div> */

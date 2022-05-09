@@ -3,18 +3,18 @@ import { useHistory } from 'react-router-dom'
 import styles from '@styles/components/GlobalSearchBar.module.scss'
 import DropDownMenu from '@components/DropDownMenu'
 import { ReactComponent as SearchIcon } from '@svgs/search.svg'
-// import { ReactComponent as PostsIcon } from '@svgs/edit-solid.svg'
-// import { ReactComponent as SpacesIcon } from '@svgs/overlapping-circles-thick.svg'
-// import { ReactComponent as PeopleIcon } from '@svgs/users-solid.svg'
 
 const GlobalSearchBar = (): JSX.Element => {
     const [searchQuery, setSearchQuery] = useState('')
-    const [searchType, setSearchType] = useState('Posts')
+    const [searchType, setSearchType] = useState('Spaces')
     const history = useHistory()
 
     function search(e) {
         e.preventDefault()
-        history.push(`/s/all/${searchType.toLowerCase()}?searchQuery=${searchQuery}`)
+        history.push({
+            pathname: `/s/all/${searchType.toLowerCase()}`,
+            search: searchQuery ? `?searchQuery=${searchQuery}` : '',
+        })
     }
 
     return (
@@ -31,7 +31,7 @@ const GlobalSearchBar = (): JSX.Element => {
             <DropDownMenu
                 title=''
                 orientation='horizontal'
-                options={['Posts', 'Spaces', 'People']}
+                options={['Spaces', 'Posts', 'People']}
                 selectedOption={searchType}
                 setSelectedOption={(payload) => setSearchType(payload)}
             />

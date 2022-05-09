@@ -1,7 +1,6 @@
 import React, { useContext } from 'react'
 import { AccountContext } from '@contexts/AccountContext'
 import AlertModal from '@src/components/modals/AlertModal'
-import NavbarDropDownModal from '@src/components/modals/NavbarDropDownModal'
 import ResetPasswordModal from '@src/components/modals/ResetPasswordModal'
 import LogInModal from '@src/components/modals/LogInModal'
 import RegisterModal from '@src/components/modals/RegisterModal'
@@ -17,7 +16,6 @@ const Modals = (): JSX.Element => {
         setRegisterModalOpen,
         forgotPasswordModalOpen,
         setForgotPasswordModalOpen,
-        navBarDropDownModalOpen,
         donateModalOpen,
         setDonateModalOpen,
         resetPasswordModalOpen,
@@ -32,7 +30,6 @@ const Modals = (): JSX.Element => {
                 <ForgotPasswordModal close={() => setForgotPasswordModalOpen(false)} />
             )}
             {donateModalOpen && <DonateModal close={() => setDonateModalOpen(false)} />}
-            {navBarDropDownModalOpen && <NavbarDropDownModal />}
             {resetPasswordModalOpen && <ResetPasswordModal />}
         </>
     )

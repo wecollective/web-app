@@ -32,7 +32,6 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
     const [logInModalOpen, setLogInModalOpen] = useState(false)
     const [registerModalOpen, setRegisterModalOpen] = useState(false)
     const [forgotPasswordModalOpen, setForgotPasswordModalOpen] = useState(false)
-    const [navBarDropDownModalOpen, setNavbarDropDownModalOpen] = useState(false)
     // const [createSpaceModalOpen, setCreateSpaceModalOpen] = useState(false)
     const [createCommentModalOpen, setCreateCommentModalOpen] = useState(false)
     const [settingModalOpen, setSettingModalOpen] = useState(false)
@@ -124,8 +123,6 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                 setRegisterModalOpen,
                 forgotPasswordModalOpen,
                 setForgotPasswordModalOpen,
-                navBarDropDownModalOpen,
-                setNavbarDropDownModalOpen,
                 createCommentModalOpen,
                 setCreateCommentModalOpen,
                 settingModalOpen,

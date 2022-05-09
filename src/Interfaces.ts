@@ -125,8 +125,6 @@ export interface IAccountContext {
     setRegisterModalOpen: (payload: boolean) => void
     forgotPasswordModalOpen: boolean
     setForgotPasswordModalOpen: (payload: boolean) => void
-    navBarDropDownModalOpen: boolean
-    setNavbarDropDownModalOpen: (payload: boolean) => void
     createCommentModalOpen: boolean
     setCreateCommentModalOpen: (payload: boolean) => void
     settingModalOpen: boolean
@@ -199,7 +197,7 @@ export interface ISpaceContext {
     getSpaceData: (handle: string, callback?: any) => void
     getSpacePosts: (handle: string, offset: number, limit: number) => void
     getSpaceSpaces: (handle: string, offset: number, limit: number) => void
-    getSpacePeople: (handle: string, offset: number, limit: number) => void
+    getSpacePeople: (handle: string, offset: number, limit: number, params: any) => void
 
     updateSpacePostsFilter: (key: string, payload: string) => void
     updateSpaceSpacesFilter: (key: string, payload: string) => void
