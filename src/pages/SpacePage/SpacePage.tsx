@@ -41,8 +41,8 @@ const SpacePage = (): JSX.Element => {
         baseRoute: `/s/${spaceData.handle}`,
         left: [
             { text: 'About', visible: true, icon: <AboutIcon /> },
-            { text: 'Posts', visible: true, icon: <PostsIcon /> },
             { text: 'Spaces', visible: true, icon: <SpacesIcon /> },
+            { text: 'Posts', visible: true, icon: <PostsIcon /> },
             { text: 'People', visible: true, icon: <PeopleIcon /> },
             { text: 'Calendar', visible: true, icon: <CalendarIcon /> },
             { text: 'Rooms', visible: true },

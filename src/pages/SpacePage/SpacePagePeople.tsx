@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useHistory } from 'react-router-dom'
 import styles from '@styles/pages/SpacePage/SpacePagePeople.module.scss'
+import { getNewParams } from '@src/Helpers'
 import { SpaceContext } from '@contexts/SpaceContext'
 import SpacePagePeopleFilters from '@pages/SpacePage/SpacePagePeopleFilters'
 import Row from '@components/Row'
@@ -15,7 +16,7 @@ const SpacePagePeople = (): JSX.Element => {
         spaceNotFound,
         spacePeople,
         getSpacePeople,
-        spacePeopleFilters,
+        defaultPeopleFilters,
         spacePeoplePaginationOffset,
         spacePeoplePaginationLimit,
         spacePeopleLoading,
@@ -24,27 +25,51 @@ const SpacePagePeople = (): JSX.Element => {
         resetSpacePeople,
         spacePeoplePaginationHasMore,
     } = useContext(SpaceContext)
-    const location = useLocation()
-    const spaceHandle = location.pathname.split('/')[2]
     const [filtersOpen, setFiltersOpen] = useState(false)
+    const location = useLocation()
+    const history = useHistory()
+    const spaceHandle = location.pathname.split('/')[2]
+
+    // calculate params
+    const urlParams = Object.fromEntries(new URLSearchParams(location.search))
+    const params = { ...defaultPeopleFilters }
+    Object.keys(urlParams).forEach((param) => {
+        params[param] = urlParams[param]
+    })
+
+    function applyParam(type, value) {
+        history.push({
+            pathname: location.pathname,
+            search: getNewParams(params, type, value),
+        })
+    }
 
     function onScrollBottom() {
         if (!spacePeopleLoading && !nextSpacePeopleLoading && spacePeoplePaginationHasMore)
-            getSpacePeople(spaceData.id, spacePeoplePaginationOffset, spacePeoplePaginationLimit)
+            getSpacePeople(
+                spaceData.id,
+                spacePeoplePaginationOffset,
+                spacePeoplePaginationLimit,
+                params
+            )
     }
 
     useEffect(() => {
         if (spaceData.handle !== spaceHandle) setSpacePeopleLoading(true)
-        else getSpacePeople(spaceData.id, 0, spacePeoplePaginationLimit)
-    }, [spaceData.handle, spacePeopleFilters])
+        else getSpacePeople(spaceData.id, 0, spacePeoplePaginationLimit, params)
+    }, [spaceData.handle, location])
 
     useEffect(() => () => resetSpacePeople(), [])
 
     if (spaceNotFound) return <SpaceNotFound />
     return (
         <Column className={styles.wrapper}>
-            <SpacePagePeopleHeader filtersOpen={filtersOpen} setFiltersOpen={setFiltersOpen} />
-            {filtersOpen && <SpacePagePeopleFilters />}
+            <SpacePagePeopleHeader
+                applyParam={applyParam}
+                filtersOpen={filtersOpen}
+                setFiltersOpen={setFiltersOpen}
+            />
+            {filtersOpen && <SpacePagePeopleFilters params={params} applyParam={applyParam} />}
             <Row className={styles.content}>
                 <PeopleList
                     location='space-people' // todo: switch to 'space-page'

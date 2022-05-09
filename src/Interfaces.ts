@@ -187,9 +187,7 @@ export interface ISpaceContext {
     spaceSpacesPaginationHasMore: boolean
 
     spacePeople: any[]
-    spacePeopleFilters: any
-    spacePeopleFiltersOpen: boolean
-    setSpacePeopleFiltersOpen: (payload: boolean) => void
+    defaultPeopleFilters: any
     spacePeoplePaginationLimit: number
     spacePeoplePaginationOffset: number
     spacePeoplePaginationHasMore: boolean
@@ -201,7 +199,6 @@ export interface ISpaceContext {
 
     updateSpacePostsFilter: (key: string, payload: string) => void
     updateSpaceSpacesFilter: (key: string, payload: string) => void
-    updateSpacePeopleFilter: (key: string, payload: string) => void
     resetSpaceData: () => void
     resetSpacePosts: () => void
     resetSpaceSpaces: () => void

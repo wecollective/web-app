@@ -46,12 +46,10 @@ const defaults = {
         searchQuery: '',
         view: 'List',
     },
-    userFilters: {
-        type: 'All Types',
+    peopleFilters: {
         sortBy: 'Date',
         sortOrder: 'Descending',
         timeRange: 'All Time',
-        searchQuery: '',
     },
 }
 
@@ -87,9 +85,8 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     const [spaceSpacesPaginationHasMore, setSpaceSpacesPaginationHasMore] = useState(true)
 
     const [spacePeople, setSpacePeople] = useState<any[]>([])
-    const [spacePeopleFiltersOpen, setSpacePeopleFiltersOpen] = useState(false)
-    const [spacePeopleFilters, setSpacePeopleFilters] = useState(defaults.userFilters)
-    const [spacePeoplePaginationLimit, setSpacePeoplePaginationLimit] = useState(10)
+    const [defaultPeopleFilters, setDefaultPeopleFilters] = useState(defaults.peopleFilters)
+    const [spacePeoplePaginationLimit, setSpacePeoplePaginationLimit] = useState(20)
     const [spacePeoplePaginationOffset, setSpacePeoplePaginationOffset] = useState(0)
     const [spacePeoplePaginationHasMore, setSpacePeoplePaginationHasMore] = useState(true)
 
@@ -103,6 +100,8 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                     setIsFollowing(accountData.FollowedHolons.some((s) => s.id === res.data.id))
                     setIsModerator(accountData.ModeratedHolons.some((s) => s.id === res.data.id))
                 }
+                // todo: apply default people filters when set up
+                // if () setDefaultPeopleFilters()
                 setSpaceData(res.data)
             })
             .catch((error) => {
@@ -168,7 +167,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
             })
     }
 
-    function getSpacePeople(spaceId, offset, limit) {
+    function getSpacePeople(spaceId, offset, limit, params) {
         console.log(`SpaceContext: getSpacePeople (${offset + 1} to ${offset + limit})`)
         const firstLoad = offset === 0
         if (firstLoad) setSpacePeopleLoading(true)
@@ -180,11 +179,10 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 `${config.apiURL}/${isRootSpace ? 'all-users' : 'space-users'
                 }?accountId=${accountData.id
                 }&spaceId=${spaceId
-                }&timeRange=${spacePeopleFilters.timeRange
-                }&spaceType=${spacePeopleFilters.type
-                }&sortBy=${spacePeopleFilters.sortBy
-                }&sortOrder=${spacePeopleFilters.sortOrder
-                }&searchQuery=${spacePeopleFilters.searchQuery
+                }&sortBy=${params.sortBy
+                }&sortOrder=${params.sortOrder
+                }&timeRange=${params.timeRange
+                }&searchQuery=${params.searchQuery || ''
                 }&limit=${limit
                 }&offset=${offset}`
             )
@@ -217,11 +215,6 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         setSpaceSpacesFilters({ ...spaceSpacesFilters, [key]: payload })
     }
 
-    function updateSpacePeopleFilter(key, payload) {
-        console.log(`SpaceContext: updateSpacePeopleFilter (${key}: ${payload})`)
-        setSpacePeopleFilters({ ...spacePeopleFilters, [key]: payload })
-    }
-
     function resetSpaceData() {
         console.log('SpaceContext: resetSpaceData')
         setSpaceData(defaults.spaceData)
@@ -246,7 +239,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     function resetSpacePeople() {
         console.log('SpaceContext: resetSpacePeople')
         setSpacePeople([])
-        setSpacePeoplePaginationLimit(10)
+        setSpacePeoplePaginationLimit(20)
         setSpacePeoplePaginationOffset(0)
         setSpacePeoplePaginationHasMore(true)
     }
@@ -291,9 +284,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 spaceSpacesPaginationHasMore,
 
                 spacePeople,
-                spacePeopleFilters,
-                spacePeopleFiltersOpen,
-                setSpacePeopleFiltersOpen,
+                defaultPeopleFilters,
                 spacePeoplePaginationLimit,
                 spacePeoplePaginationOffset,
                 spacePeoplePaginationHasMore,
@@ -305,7 +296,6 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
 
                 updateSpacePostsFilter,
                 updateSpaceSpacesFilter,
-                updateSpacePeopleFilter,
                 resetSpaceData,
                 resetSpacePosts,
                 resetSpaceSpaces,

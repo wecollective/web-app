@@ -1,5 +1,4 @@
-import React, { useContext } from 'react'
-import { SpaceContext } from '@contexts/SpaceContext'
+import React from 'react'
 import styles from '@styles/pages/SpacePage/SpacePageHeader.module.scss'
 import SearchBar from '@components/SearchBar'
 import Button from '@components/Button'
@@ -7,16 +6,16 @@ import Row from '@components/Row'
 import { ReactComponent as SlidersIconSVG } from '@svgs/sliders-h-solid.svg'
 
 const SpacePagePeopleHeader = (props: {
+    applyParam: (param: string, value: string) => void
     filtersOpen: boolean
     setFiltersOpen: (payload: boolean) => void
 }): JSX.Element => {
-    const { filtersOpen, setFiltersOpen } = props
-    const { updateSpacePeopleFilter } = useContext(SpaceContext)
+    const { applyParam, filtersOpen, setFiltersOpen } = props
 
     return (
         <Row centerY className={styles.wrapper}>
             <SearchBar
-                setSearchFilter={(payload) => updateSpacePeopleFilter('searchQuery', payload)}
+                setSearchFilter={(value) => applyParam('searchQuery', value)}
                 placeholder='Search people...'
                 style={{ marginRight: 10 }}
             />

@@ -1,27 +1,28 @@
-import React, { useContext } from 'react'
-import { SpaceContext } from '@contexts/SpaceContext'
+import React from 'react'
 import styles from '@styles/pages/SpacePage/SpacePageFilters.module.scss'
 import DropDownMenu from '@components/DropDown'
 import Row from '@components/Row'
 
-const SpacePagePeopleFilters = (): JSX.Element => {
-    const { spacePeopleFilters, updateSpacePeopleFilter } = useContext(SpaceContext)
-    const { sortBy, sortOrder, timeRange } = spacePeopleFilters
+const SpacePagePeopleFilters = (props: {
+    params: any
+    applyParam: (param: string, value: string) => void
+}): JSX.Element => {
+    const { params, applyParam } = props
 
     return (
         <Row className={styles.wrapper}>
             <DropDownMenu
                 title='Sort By'
                 options={['Posts', 'Comments', 'Date']}
-                selectedOption={sortBy}
-                setSelectedOption={(payload) => updateSpacePeopleFilter('sortBy', payload)}
+                selectedOption={params.sortBy}
+                setSelectedOption={(value) => applyParam('sortBy', value)}
                 style={{ marginRight: 10 }}
             />
             <DropDownMenu
                 title='Sort Order'
                 options={['Descending', 'Ascending']}
-                selectedOption={sortOrder}
-                setSelectedOption={(payload) => updateSpacePeopleFilter('sortOrder', payload)}
+                selectedOption={params.sortOrder}
+                setSelectedOption={(value) => applyParam('sortOrder', value)}
                 style={{ marginRight: 10 }}
             />
             <DropDownMenu
@@ -34,9 +35,8 @@ const SpacePagePeopleFilters = (): JSX.Element => {
                     'Last 24 Hours',
                     'Last Hour',
                 ]}
-                selectedOption={timeRange}
-                setSelectedOption={(payload) => updateSpacePeopleFilter('timeRange', payload)}
-                style={{ marginRight: 10 }}
+                selectedOption={params.timeRange}
+                setSelectedOption={(value) => applyParam('timeRange', value)}
             />
         </Row>
     )
