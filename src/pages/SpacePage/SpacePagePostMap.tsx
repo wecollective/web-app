@@ -43,7 +43,7 @@ const SpacePagePostMap = (): JSX.Element => {
                 }&timeRange=${timeRange
                 }&postType=${type
                 }&depth=${depth
-                }&searchQuery=${searchQuery
+                }&searchQuery=${searchQuery || ''
                 }&limit=${limit
                 }&offset=0`
             )

@@ -4,9 +4,13 @@ import styles from '@styles/pages/SpacePage/SpacePageFilters.module.scss'
 import DropDownMenu from '@components/DropDown'
 import Row from '@components/Row'
 
-const SpacePagePostsFilters = (): JSX.Element => {
-    const { spacePostsFilters, updateSpacePostsFilter } = useContext(SpaceContext)
-    const { type, sortBy, sortOrder, timeRange, depth, view } = spacePostsFilters
+const SpacePagePostsFilters = (props: {
+    params: any
+    applyParam: (param: string, value: string) => void
+}): JSX.Element => {
+    const { params, applyParam } = props
+    const { spacePostsFilters } = useContext(SpaceContext)
+    const { view } = spacePostsFilters
     return (
         <Row className={styles.wrapper}>
             <DropDownMenu
@@ -22,22 +26,22 @@ const SpacePagePostsFilters = (): JSX.Element => {
                     'String',
                     'Prism',
                 ]}
-                selectedOption={type}
-                setSelectedOption={(payload) => updateSpacePostsFilter('type', payload)}
+                selectedOption={params.type}
+                setSelectedOption={(payload) => applyParam('type', payload)}
                 style={{ marginRight: 10 }}
             />
             <DropDownMenu
                 title={view === 'Map' ? 'Size By' : 'Sort By'}
                 options={['Likes', 'Comments', 'Reposts', 'Ratings', 'Date']}
-                selectedOption={sortBy}
-                setSelectedOption={(payload) => updateSpacePostsFilter('sortBy', payload)}
+                selectedOption={params.sortBy}
+                setSelectedOption={(payload) => applyParam('sortBy', payload)}
                 style={{ marginRight: 10 }}
             />
             <DropDownMenu
                 title={view === 'Map' ? 'Size Order' : 'Order'}
                 options={['Descending', 'Ascending']}
-                selectedOption={sortOrder}
-                setSelectedOption={(payload) => updateSpacePostsFilter('sortOrder', payload)}
+                selectedOption={params.sortOrder}
+                setSelectedOption={(payload) => applyParam('sortOrder', payload)}
                 style={{ marginRight: 10 }}
             />
             <DropDownMenu
@@ -50,16 +54,15 @@ const SpacePagePostsFilters = (): JSX.Element => {
                     'Last 24 Hours',
                     'Last Hour',
                 ]}
-                selectedOption={timeRange}
-                setSelectedOption={(payload) => updateSpacePostsFilter('timeRange', payload)}
+                selectedOption={params.timeRange}
+                setSelectedOption={(payload) => applyParam('timeRange', payload)}
                 style={{ marginRight: 10 }}
             />
             <DropDownMenu
                 title='Depth'
                 options={['All Contained Posts', 'Only Direct Posts']}
-                selectedOption={depth}
-                setSelectedOption={(payload) => updateSpacePostsFilter('depth', payload)}
-                style={{ marginRight: 10 }}
+                selectedOption={params.depth}
+                setSelectedOption={(payload) => applyParam('depth', payload)}
             />
         </Row>
     )

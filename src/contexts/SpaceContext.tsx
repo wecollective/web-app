@@ -34,7 +34,6 @@ const defaults = {
         sortOrder: 'Descending',
         timeRange: 'All Time',
         depth: 'All Contained Posts',
-        searchQuery: '',
         view: 'List',
     },
     spaceFilters: {
@@ -43,8 +42,7 @@ const defaults = {
         sortOrder: 'Descending',
         timeRange: 'All Time',
         depth: 'Only Direct Descendants',
-        searchQuery: '',
-        view: 'List',
+        view: 'Map',
     },
     peopleFilters: {
         sortBy: 'Date',
@@ -83,6 +81,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     const [spaceSpacesPaginationLimit, setSpaceSpacesPaginationLimit] = useState(10)
     const [spaceSpacesPaginationOffset, setSpaceSpacesPaginationOffset] = useState(0)
     const [spaceSpacesPaginationHasMore, setSpaceSpacesPaginationHasMore] = useState(true)
+    const [spaceMapData, setSpaceMapData] = useState<any>({})
 
     const [spacePeople, setSpacePeople] = useState<any[]>([])
     const [defaultPeopleFilters, setDefaultPeopleFilters] = useState(defaults.peopleFilters)
@@ -101,7 +100,8 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                     setIsModerator(accountData.ModeratedHolons.some((s) => s.id === res.data.id))
                 }
                 // todo: apply default people filters when set up
-                // if () setDefaultPeopleFilters()
+                // setSpacePostsFilters()
+                // setDefaultPeopleFilters()
                 setSpaceData(res.data)
             })
             .catch((error) => {
@@ -109,7 +109,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
             })
     }
 
-    function getSpacePosts(spaceId, offset, limit) {
+    function getSpacePosts(spaceId, offset, limit, params) {
         console.log(`SpaceContext: getSpacePosts (${offset + 1} to ${offset + limit})`)
         const firstLoad = offset === 0
         if (firstLoad) setSpacePostsLoading(true)
@@ -119,12 +119,12 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 /* prettier-ignore */
                 `${config.apiURL}/space-posts?accountId=${accountData.id
                 }&spaceId=${spaceId
-                }&timeRange=${spacePostsFilters.timeRange
-                }&postType=${spacePostsFilters.type
-                }&sortBy=${spacePostsFilters.sortBy
-                }&sortOrder=${spacePostsFilters.sortOrder
-                }&depth=${spacePostsFilters.depth
-                }&searchQuery=${spacePostsFilters.searchQuery
+                }&postType=${params.type
+                }&sortBy=${params.sortBy
+                }&sortOrder=${params.sortOrder
+                }&timeRange=${params.timeRange
+                }&depth=${params.depth
+                }&searchQuery=${params.searchQuery || ''
                 }&limit=${limit
                 }&offset=${offset}`
             )
@@ -139,7 +139,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
             })
     }
 
-    function getSpaceSpaces(spaceId, offset, limit) {
+    function getSpaceSpaces(spaceId, offset, limit, params) {
         console.log(`SpaceContext: getSpaceSpaces (${offset + 1} to ${offset + limit})`)
         const firstLoad = offset === 0
         if (firstLoad) setSpaceSpacesLoading(true)
@@ -149,12 +149,11 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 /* prettier-ignore */
                 `${config.apiURL}/space-spaces?accountId=${accountData.id
                 }&spaceId=${spaceId
-                }&timeRange=${spaceSpacesFilters.timeRange
-                }&spaceType=${spaceSpacesFilters.type
-                }&sortBy=${spaceSpacesFilters.sortBy
-                }&sortOrder=${spaceSpacesFilters.sortOrder
-                }&depth=${spaceSpacesFilters.depth
-                }&searchQuery=${spaceSpacesFilters.searchQuery
+                }&timeRange=${params.timeRange
+                }&sortBy=${params.sortBy
+                }&sortOrder=${params.sortOrder
+                }&depth=${params.depth
+                }&searchQuery=${params.searchQuery || ''
                 }&limit=${limit
                 }&offset=${offset}`
             )
@@ -165,6 +164,22 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 if (firstLoad) setSpaceSpacesLoading(false)
                 else setNextSpaceSpacesLoading(false)
             })
+    }
+
+    function getSpaceMapData(spaceId, params) {
+        console.log(`SpaceContext: getSpaceMapData`, params)
+        axios
+            .get(
+                /* prettier-ignore */
+                `${config.apiURL}/space-map-data?spaceId=${spaceId
+                }&offset=${0
+                }&sortBy=${params.sortBy
+                }&sortOrder=${params.sortOrder
+                }&timeRange=${params.timeRange
+                }&depth=${params.depth
+                }&searchQuery=${params.searchQuery || ''}`
+            )
+            .then((res) => setSpaceMapData(res.data))
     }
 
     function getSpacePeople(spaceId, offset, limit, params) {
@@ -187,32 +202,12 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 }&offset=${offset}`
             )
             .then((res) => {
-                // console.log('res.data: ', res.data)
                 setSpacePeople(firstLoad ? res.data : [...spacePeople, ...res.data])
                 setSpacePeoplePaginationHasMore(res.data.length === spacePeoplePaginationLimit)
                 setSpacePeoplePaginationOffset(offset + spacePeoplePaginationLimit)
                 if (firstLoad) setSpacePeopleLoading(false)
                 else setNextSpacePeopleLoading(false)
             })
-    }
-
-    function updateSpacePostsFilter(key, payload) {
-        console.log(`SpaceContext: updateSpacePostsFilter (${key}: ${payload})`)
-        setSpacePostsFilters({ ...spacePostsFilters, [key]: payload })
-    }
-
-    function updateSpaceSpacesFilter(key, payload) {
-        console.log(`SpaceContext: updateSpaceSpacesFilter (${key}: ${payload})`)
-        // if search query set, change depth to all contained spaces and vice versa
-        if (key === 'searchQuery') {
-            setSpaceSpacesFilters({
-                ...spaceSpacesFilters,
-                [key]: payload,
-                depth: payload.length ? 'All Contained Spaces' : 'Only Direct Descendants',
-            })
-            return
-        }
-        setSpaceSpacesFilters({ ...spaceSpacesFilters, [key]: payload })
     }
 
     function resetSpaceData() {
@@ -282,6 +277,8 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 spaceSpacesPaginationLimit,
                 spaceSpacesPaginationOffset,
                 spaceSpacesPaginationHasMore,
+                spaceMapData,
+                setSpaceMapData,
 
                 spacePeople,
                 defaultPeopleFilters,
@@ -292,10 +289,9 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 getSpaceData,
                 getSpacePosts,
                 getSpaceSpaces,
+                getSpaceMapData,
                 getSpacePeople,
 
-                updateSpacePostsFilter,
-                updateSpaceSpacesFilter,
                 resetSpaceData,
                 resetSpacePosts,
                 resetSpaceSpaces,

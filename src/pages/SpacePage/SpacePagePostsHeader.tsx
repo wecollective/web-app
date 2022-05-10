@@ -19,6 +19,7 @@ const SpacePagePostsHeader = (props: {
     setShowPostList: (payload: boolean) => void
     showPostMap: boolean
     setShowPostMap: (payload: boolean) => void
+    applyParam: (param: string, value: string) => void
 }): JSX.Element => {
     const {
         filtersOpen,
@@ -27,9 +28,10 @@ const SpacePagePostsHeader = (props: {
         setShowPostList,
         showPostMap,
         setShowPostMap,
+        applyParam,
     } = props
     const { loggedIn, setAlertModalOpen, setAlertMessage } = useContext(AccountContext)
-    const { spaceData, updateSpacePostsFilter } = useContext(SpaceContext)
+    const { spaceData } = useContext(SpaceContext)
     const [createPostModalType, setCreatePostModalType] = useState('Text')
     const [createPostModalOpen, setCreatePostModalOpen] = useState(false)
     const [viewModalOpen, setViewModalOpen] = useState(false)
@@ -62,7 +64,7 @@ const SpacePagePostsHeader = (props: {
                 />
             )}
             <SearchBar
-                setSearchFilter={(payload) => updateSpacePostsFilter('searchQuery', payload)}
+                setSearchFilter={(value) => applyParam('searchQuery', value)}
                 placeholder='Search posts...'
                 style={{ marginRight: 10 }}
             />

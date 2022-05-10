@@ -4,31 +4,11 @@ import axios from 'axios'
 import * as d3 from 'd3'
 import { useHistory } from 'react-router-dom'
 import config from '@src/Config'
-// import styles from '../../styles/components/SpacePageSpaceMap.module.scss'
 import { SpaceContext } from '@contexts/SpaceContext'
-import { ISpaceMapData } from '@src/Interfaces'
 
-const SpacePageSpaceMap = (): JSX.Element => {
-    const {
-        spaceData,
-        // setSpaceHandle,
-        // fullScreen,
-        spaceSpacesFilters,
-        updateSpaceSpacesFilter,
-        // spaceSpacesTypeFilter,
-        // spaceSpacesSortByFilter,
-        // spaceSpacesSortOrderFilter,
-        // spaceSpacesTimeRangeFilter,
-        // spaceSpacesDepthFilter,
-        // setSpaceSpacesDepthFilter,
-        // spaceSpacesSearchFilter,
-        // setSpaceSpacesSearchFilter,
-    } = useContext(SpaceContext)
-
-    const { type, sortBy, sortOrder, timeRange, depth, searchQuery } = spaceSpacesFilters
-    // console.log('spaceSpacesFilters: ', spaceSpacesFilters)
-
-    const [spaceMapData, setSpaceMapData] = useState<Partial<ISpaceMapData>>({})
+const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
+    const { spaceMapData, params } = props
+    const { spaceData } = useContext(SpaceContext)
     // const [width, setWidth] = useState<number | string>(700)
     const [firstRun, setFirstRun] = useState<boolean>(true)
     // const [spaceTransitioning, setSpaceTransitioning] = useState<boolean>(true)
@@ -43,29 +23,6 @@ const SpacePageSpaceMap = (): JSX.Element => {
     // const xOffset = 0
     // const yOffset = 180
     const duration = 1000
-
-    const getSpaceMapData = (): void => {
-        console.log('SpacePageSpaceMap: getSpaceMapData 1')
-        // console.log('searchQuery: ', searchQuery)
-        axios
-            .get(
-                /* prettier-ignore */
-                `${config.apiURL}/space-map-data?spaceId=${spaceData.id
-                }&offset=${0
-                }&spaceType=${type
-                }&sortBy=${sortBy
-                }&sortOrder=${sortOrder
-                }&timeRange=${timeRange
-                }&depth=${depth
-                }&searchQuery=${searchQuery}`
-            )
-            .then((res) => {
-                // if res.data.id
-                updateTree(res.data, true)
-                // setSpaceMapData(res.data)
-                // console.log('res.data: ', res.data)
-            })
-    }
 
     const findParent = (tree: any, itemId: string): any => {
         if (tree.uuid === itemId) {
@@ -293,8 +250,6 @@ const SpacePageSpaceMap = (): JSX.Element => {
     }
 
     function updateTree(data, resetPosition) {
-        // console.log('updateTree')
-
         if (resetPosition) resetTreePosition()
 
         setTimeout(() => {
@@ -341,12 +296,12 @@ const SpacePageSpaceMap = (): JSX.Element => {
                     /* prettier-ignore */
                     `${config.apiURL}/space-map-data?spaceId=${node.data.id
                     }&offset=${node.children.length - 1
-                    }&spaceType=${type
-                    }&sortBy=${sortBy
-                    }&sortOrder=${sortOrder
-                    }&timeRange=${timeRange
-                    }&depth=${depth
-                    }&searchQuery=${searchQuery}`
+                    }&spaceType=${params.type
+                    }&sortBy=${params.sortBy
+                    }&sortOrder=${params.sortOrder
+                    }&timeRange=${params.timeRange
+                    }&depth=${params.depth
+                    }&searchQuery=${params.searchQuery || ''}`
                 )
                 .then((res) => {
                     // console.log(res)
@@ -940,30 +895,15 @@ const SpacePageSpaceMap = (): JSX.Element => {
         createText('#parent-node-group', parentNodes)
     }
 
-    useEffect(() => {
-        createCanvas()
-    }, [])
+    useEffect(() => createCanvas(), [])
 
-    // first run
     useEffect(() => {
-        if (spaceData.id) {
+        if (spaceMapData.id) {
             if (firstRun) setFirstRun(false)
-            // if (searchQuery) {
-            //     updateSpaceSpacesFilter('searchQuery', '')
-            //     // todo: get this to update search in search bar
-            // }
-            // else getData()
-            getSpaceMapData()
+            else spaceTransitioning.current = true
+            updateTree(spaceMapData, true)
         }
-    }, [spaceData.id])
-
-    // filter updates
-    useEffect(() => {
-        if (!firstRun) {
-            spaceTransitioning.current = true
-            getSpaceMapData()
-        }
-    }, [type, sortBy, sortOrder, depth, searchQuery, timeRange])
+    }, [spaceMapData])
 
     // useEffect(() => {
     //     setWidth(fullScreen ? '100%' : 700)

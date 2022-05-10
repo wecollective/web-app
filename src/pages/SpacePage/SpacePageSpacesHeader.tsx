@@ -1,6 +1,5 @@
 import React, { useContext, useState } from 'react'
 import { AccountContext } from '@contexts/AccountContext'
-import { SpaceContext } from '@contexts/SpaceContext'
 import styles from '@styles/pages/SpacePage/SpacePageHeader.module.scss'
 import SearchBar from '@components/SearchBar'
 import Toggle from '@components/Toggle'
@@ -19,6 +18,7 @@ const SpacePageSpacesHeader = (props: {
     setShowSpaceList: (payload: boolean) => void
     showSpaceMap: boolean
     setShowSpaceMap: (payload: boolean) => void
+    applyParam: (param: string, value: string) => void
 }): JSX.Element => {
     const {
         filtersOpen,
@@ -27,9 +27,9 @@ const SpacePageSpacesHeader = (props: {
         setShowSpaceList,
         showSpaceMap,
         setShowSpaceMap,
+        applyParam,
     } = props
     const { loggedIn, setAlertModalOpen, setAlertMessage } = useContext(AccountContext)
-    const { updateSpaceSpacesFilter } = useContext(SpaceContext)
     const [createSpaceModalOpen, setCreateSpaceModalOpen] = useState(false)
     const [viewModalOpen, setViewModalOpen] = useState(false)
     const { innerWidth } = window
@@ -51,7 +51,7 @@ const SpacePageSpacesHeader = (props: {
                 style={{ marginRight: 10 }}
             />
             <SearchBar
-                setSearchFilter={(payload) => updateSpaceSpacesFilter('searchQuery', payload)}
+                setSearchFilter={(value) => applyParam('searchQuery', value)}
                 placeholder='Search spaces...'
                 style={{ marginRight: 10 }}
             />

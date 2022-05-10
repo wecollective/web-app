@@ -13,7 +13,11 @@ const GlobalSearchBar = (): JSX.Element => {
         e.preventDefault()
         history.push({
             pathname: `/s/all/${searchType.toLowerCase()}`,
-            search: searchQuery ? `?searchQuery=${searchQuery}` : '',
+            search: searchQuery
+                ? `?searchQuery=${searchQuery}${
+                      searchType === 'Spaces' ? '&depth=All Contained Spaces' : ''
+                  }`
+                : '',
         })
     }
 
@@ -23,6 +27,7 @@ const GlobalSearchBar = (): JSX.Element => {
                 type='text'
                 placeholder='search all...'
                 value={searchQuery}
+                data-lpignore='true'
                 onChange={(e) => setSearchQuery(e.target.value)}
             />
             <button type='submit' aria-label='search button'>

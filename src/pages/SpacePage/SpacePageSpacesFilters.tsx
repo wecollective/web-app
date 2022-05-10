@@ -1,12 +1,13 @@
-import React, { useContext } from 'react'
-import { SpaceContext } from '@contexts/SpaceContext'
+import React from 'react'
 import styles from '@styles/pages/SpacePage/SpacePageFilters.module.scss'
 import DropDownMenu from '@components/DropDown'
 import Row from '@components/Row'
 
-const SpacePageSpacesFilters = (): JSX.Element => {
-    const { spaceSpacesFilters, updateSpaceSpacesFilter } = useContext(SpaceContext)
-    const { sortBy, sortOrder, timeRange, depth } = spaceSpacesFilters
+const SpacePageSpacesFilters = (props: {
+    params: any
+    applyParam: (param: string, value: string) => void
+}): JSX.Element => {
+    const { params, applyParam } = props
     return (
         <Row className={styles.wrapper}>
             <DropDownMenu
@@ -20,15 +21,15 @@ const SpacePageSpacesFilters = (): JSX.Element => {
                     'Likes',
                     'Ratings',
                 ]}
-                selectedOption={sortBy}
-                setSelectedOption={(payload) => updateSpaceSpacesFilter('sortBy', payload)}
+                selectedOption={params.sortBy}
+                setSelectedOption={(value) => applyParam('sortBy', value)}
                 style={{ marginRight: 10 }}
             />
             <DropDownMenu
                 title='Sort Order'
                 options={['Descending', 'Ascending']}
-                selectedOption={sortOrder}
-                setSelectedOption={(payload) => updateSpaceSpacesFilter('sortOrder', payload)}
+                selectedOption={params.sortOrder}
+                setSelectedOption={(value) => applyParam('sortOrder', value)}
                 style={{ marginRight: 10 }}
             />
             <DropDownMenu
@@ -41,15 +42,15 @@ const SpacePageSpacesFilters = (): JSX.Element => {
                     'Last 24 Hours',
                     'Last Hour',
                 ]}
-                selectedOption={timeRange}
-                setSelectedOption={(payload) => updateSpaceSpacesFilter('timeRange', payload)}
+                selectedOption={params.timeRange}
+                setSelectedOption={(value) => applyParam('timeRange', value)}
                 style={{ marginRight: 10 }}
             />
             <DropDownMenu
                 title='Depth'
                 options={['All Contained Spaces', 'Only Direct Descendants']}
-                selectedOption={depth}
-                setSelectedOption={(payload) => updateSpaceSpacesFilter('depth', payload)}
+                selectedOption={params.depth}
+                setSelectedOption={(value) => applyParam('depth', value)}
                 style={{ marginRight: 10 }}
             />
         </Row>
