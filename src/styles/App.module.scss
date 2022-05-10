@@ -10,6 +10,7 @@
         position: fixed;
         left: 0;
         top: $navbarHeight;
-        height: 100%; // calc(100vh - $navbarHeight);
+        height: 100%;
+        z-index: $sidebarSmallZIndex;
     }
 }

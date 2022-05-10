@@ -131,7 +131,7 @@ export function formatTimeHM(isoDate: Date): string {
     const date = new Date(isoDate)
     const hours = date.getHours()
     const mins = date.getMinutes()
-    return `${hours}:${mins}`
+    return `${hours}:${mins < 10 ? `0${mins}` : mins}`
 }
 
 export function onPageBottomReached(set: (payload: boolean) => void): void {
