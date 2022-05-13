@@ -13,7 +13,7 @@ const SpacePagePeopleHeader = (props: {
     const { applyParam, filtersOpen, setFiltersOpen } = props
 
     return (
-        <Row centerY className={styles.wrapper}>
+        <Row centerY centerX className={styles.wrapper}>
             <SearchBar
                 setSearchFilter={(value) => applyParam('searchQuery', value)}
                 placeholder='Search people...'

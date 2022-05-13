@@ -67,7 +67,7 @@ const SpacePagePosts = (): JSX.Element => {
 
     if (spaceNotFound) return <SpaceNotFound />
     return (
-        <Column className={styles.wrapper}>
+        <Column centerX className={styles.wrapper}>
             <SpacePagePostsHeader
                 filtersOpen={filtersOpen}
                 setFiltersOpen={setFiltersOpen}
@@ -90,11 +90,11 @@ const SpacePagePosts = (): JSX.Element => {
                         />
                     </Column>
                 )}
-                {showPostMap && (
+                {/* {showPostMap && (
                     <Column className={styles.postMap}>
                         <SpacePagePostMap />
                     </Column>
-                )}
+                )} */}
             </Row>
         </Column>
     )

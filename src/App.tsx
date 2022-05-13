@@ -7,7 +7,7 @@ import AccountContextProvider from '@contexts/AccountContext'
 import SpaceContextProvider from '@contexts/SpaceContext'
 import UserContextProvider from '@contexts/UserContext'
 import PostContextProvider from '@contexts/PostContext'
-import SidebarSmall from '@components/SidebarSmall'
+// import SidebarSmall from '@components/SidebarSmall'
 import HomePage from '@pages/HomePage'
 import FeaturesPage from '@pages/FeaturesPage'
 import CoopPage from '@pages/CoopPage'
@@ -32,9 +32,9 @@ const App = (): JSX.Element => {
                                 <GoogleReCaptchaProvider reCaptchaKey={config.recaptchaSiteKey}>
                                     <Modals />
                                     <Navbar />
-                                    <div className={styles.sidebarSmallWrapper}>
+                                    {/* <div className={styles.sidebarSmallWrapper}>
                                         <SidebarSmall />
-                                    </div>
+                                    </div> */}
                                     <Switch>
                                         <Route path='/' exact component={HomePage} />
                                         <Route path='/features' exact component={FeaturesPage} />

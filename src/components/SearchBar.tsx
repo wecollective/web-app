@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import styles from '@styles/components/SearchBar.module.scss'
+import { ReactComponent as SearchIcon } from '@svgs/search.svg'
 
 const SearchBar = (props: {
     setSearchFilter: (payload: string) => void
@@ -17,13 +18,14 @@ const SearchBar = (props: {
     return (
         <form className={styles.searchBar} onSubmit={applySearch} style={style}>
             <input
-                className={styles.input}
                 type='text'
                 placeholder={placeholder}
                 value={newSearch}
                 onChange={(e) => setNewSearch(e.target.value)}
             />
-            <button className={styles.button} type='submit' aria-label='search button' />
+            <button type='submit' aria-label='search button'>
+                <SearchIcon />
+            </button>
         </form>
     )
 }

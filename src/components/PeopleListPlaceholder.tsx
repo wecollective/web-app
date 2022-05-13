@@ -6,12 +6,12 @@ import SpaceCardPlaceholder from '@components/Cards/SpaceCardPlaceholder'
 const PeopleListPlaceholder = (): JSX.Element => {
     return (
         <Column>
-            <div className={styles.gradient} />
+            {/* <div className={styles.gradient} />
             <SpaceCardPlaceholder />
             <SpaceCardPlaceholder />
             <SpaceCardPlaceholder />
             <SpaceCardPlaceholder />
-            <SpaceCardPlaceholder />
+            <SpaceCardPlaceholder /> */}
         </Column>
     )
 }

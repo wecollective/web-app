@@ -22,7 +22,7 @@ const SpacePageAbout = (): JSX.Element => {
                 <p>Space data loading... </p>
             ) : (
                 <Column className={styles.content}>
-                    <Row centerY className={styles.creation}>
+                    <Row centerY centerX className={styles.creation}>
                         <p>Created</p>
                         <p title={dateCreated(createdAt)}>{timeSinceCreated(createdAt)}</p>
                         <p>by</p>
@@ -34,9 +34,10 @@ const SpacePageAbout = (): JSX.Element => {
                             fontSize={16}
                             link={`/u/${Creator.handle}`}
                             shadow
+                            style={{ marginLeft: 5 }}
                         />
                     </Row>
-                    <Markdown text={description} />
+                    <Markdown text={description} style={{ textAlign: 'center' }} />
                 </Column>
             )}
         </Column>

@@ -2,10 +2,8 @@
 
 .wrapper {
     width: 100%;
-    padding: 0 $pageContentHorizontalPadding;
     margin-bottom: 10px;
-    // todo: update on smaller screens
-    height: calc(100vh - 170px);
+    height: calc(100vh - 250px);
 
     .content {
         width: 100%;
@@ -22,11 +20,7 @@
         }
 
         .spaceMap {
-            padding: 0 $pageContentHorizontalPadding;
-
-            @include for-tablet-portrait-up { width: 100% }
-            @include for-desktop-medium-up { width: 50% }
-            @include for-desktop-large-up { width: 100% }
+            width: calc(100vw - 40px);
         }
     }
 }

@@ -341,6 +341,38 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
         //     .duration(duration)
         //     .attr('transform', parentTransform)
 
+        function createLinkArrows(nodeData, isParent) {
+            const { id } = nodeData.data
+            // add arrow to links
+            const arrow = d3
+                .select(`#${isParent ? 'parent-' : ''}link-group`)
+                .append('path')
+                .attr('id', `arrow-${id}`)
+                .attr('opacity', 0)
+                .attr('transform', () => {
+                    if (isParent) return 'translate(0, 2.5),rotate(180,0,0)'
+                    return 'translate(0, -2.5)'
+                })
+                .attr('d', 'M 0 0 L 5 2.5 L 0 5 z')
+                .style('fill', '#ccc')
+            // position arrow at half way point along line
+            arrow
+                .append('animateMotion')
+                .attr('calcMode', 'linear')
+                .attr('dur', 'infinite')
+                .attr('repeatCount', 'infinite')
+                .attr('rotate', 'auto')
+                .attr('keyPoints', () => {
+                    if (isParent) return '0.35;0.35'
+                    return '0.5;0.5'
+                })
+                .attr('keyTimes', '0.0;1.0')
+                .append('mpath')
+                .attr('xlink:href', `#line-${id}`)
+            // fade in arrows
+            arrow.transition().duration(duration).attr('opacity', 1)
+        }
+
         function createLinks(linkGroup, linkData) {
             const isParent = linkGroup === '#parent-link-group'
             d3.select(linkGroup)
@@ -364,37 +396,7 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
                                 node.transition()
                                     .duration(duration)
                                     .attr('opacity', 0.2)
-                                    .on('end', (d) => {
-                                        // add arrow to links
-                                        const arrow = d3
-                                            .select(`#${isParent ? 'parent-' : ''}link-group`)
-                                            .append('path')
-                                            .attr('id', `arrow-${d.data.id}`)
-                                            .attr('opacity', 0)
-                                            .attr('transform', () => {
-                                                if (isParent)
-                                                    return 'translate(0, 5),rotate(180,0,0)'
-                                                return 'translate(0, -5)'
-                                            })
-                                            .attr('d', 'M 0 0 L 10 5 L 0 10 z')
-                                            .style('fill', '#ccc')
-                                        // fade in arrows
-                                        arrow.transition().duration(duration).attr('opacity', 1)
-                                        // position arrow at half way point along line
-                                        arrow
-                                            .append('animateMotion')
-                                            .attr('calcMode', 'linear')
-                                            .attr('dur', 'infinite')
-                                            .attr('repeatCount', 'infinite')
-                                            .attr('rotate', 'auto')
-                                            .attr('keyPoints', () => {
-                                                if (isParent) return '0.35;0.35'
-                                                return '0.5;0.5'
-                                            })
-                                            .attr('keyTimes', '0.0;1.0')
-                                            .append('mpath')
-                                            .attr('xlink:href', `#line-${d.data.id}`)
-                                    })
+                                    .on('end', (d) => createLinkArrows(d, isParent))
                             }),
                     (update) =>
                         update.call((node) =>
@@ -407,36 +409,7 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
                                     },${(d.y + d.parent.y) / 2} ${d.parent.x},${d.parent.y}`
                                 })
                                 .on('start', (d) => d3.select(`#arrow-${d.data.id}`).remove())
-                                .on('end', (d) => {
-                                    // add arrow to links
-                                    const arrow = d3
-                                        .select(`#${isParent ? 'parent-' : ''}link-group`)
-                                        .append('path')
-                                        .attr('id', `arrow-${d.data.id}`)
-                                        .attr('opacity', 0)
-                                        .attr('transform', () => {
-                                            if (isParent) return 'translate(0, 5),rotate(180,0,0)'
-                                            return 'translate(0, -5)'
-                                        })
-                                        .attr('d', 'M 0 0 L 10 5 L 0 10 z')
-                                        .style('fill', '#ccc')
-                                    // fade in arrows
-                                    arrow.transition().duration(duration).attr('opacity', 1)
-                                    // position arrow at half way point along line
-                                    arrow
-                                        .append('animateMotion')
-                                        .attr('calcMode', 'linear')
-                                        .attr('dur', 'infinite')
-                                        .attr('repeatCount', 'infinite')
-                                        .attr('rotate', 'auto')
-                                        .attr('keyPoints', () => {
-                                            if (isParent) return '0.35;0.35'
-                                            return '0.5;0.5'
-                                        })
-                                        .attr('keyTimes', '0.0;1.0')
-                                        .append('mpath')
-                                        .attr('xlink:href', `#line-${d.data.id}`)
-                                })
+                                .on('end', (d) => createLinkArrows(d, isParent))
                         ),
                     (exit) =>
                         exit.call((node) =>

@@ -1,24 +1,16 @@
 @import '@styles/Variables';
 
 .wrapper {
-    width: 100%;
-    padding: 0 $pageContentHorizontalPadding;
     margin-bottom: 10px;
-    // todo: update on smaller screens
-    height: calc(100vh - 170px);
+    height: calc(100vh - 250px);
 
     .content {
-        width: 100%;
         height: 100%;
         overflow: hidden;
 
         .postList {
-            @include for-tablet-portrait-up { width: 100% }
-            @include for-desktop-medium-up { width: 50% }
-            @include for-desktop-large-up {
-                width: 820px;
-                flex-shrink: 0;
-            }
+            width: 900px;
+            align-items: center;
         }
         
         .postMap {

@@ -18,14 +18,6 @@ const SidebarSmall = (): JSX.Element => {
 
     return (
         <div className={`${styles.wrapper} hide-scrollbars`}>
-            <Link to={`/s/all/${selectedSpaceSubPage || 'posts'}`}>
-                <FlagImage
-                    type='space'
-                    size={50}
-                    imagePath='https://weco-prod-space-flag-images.s3.eu-west-1.amazonaws.com/1614556880362'
-                />
-            </Link>
-            <div className={styles.divider} />
             <Column className={`${styles.section} hide-scrollbars`}>
                 {followedSpaces.map((space) => (
                     <Link

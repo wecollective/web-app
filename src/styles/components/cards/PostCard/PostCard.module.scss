@@ -1,16 +1,16 @@
 @import '@styles/Variables';
 
 .post {
-    max-width: 800px;
+    width: 100%;
     border-radius: 10px;
     background-color: white;
     box-shadow: 0 7px 10px 0 rgba(10, 8, 72, 0.04);
     position: relative;
     opacity: 1;
     padding: 25px 35px 15px 35px;
-    &.post-page {
-        width: 900px;
-    }
+    // &.post-page {
+    //     width: 900px;
+    // }
 
     .index {
         width: 10px;

@@ -9,6 +9,7 @@ import Row from '@components/Row'
 import Column from '@components/Column'
 import Modal from '@components/Modal'
 import CreatePostModal from '@src/components/modals/CreatePostModal'
+import { ReactComponent as PlusIconSVG } from '@svgs/plus.svg'
 import { ReactComponent as SlidersIconSVG } from '@svgs/sliders-h-solid.svg'
 import { ReactComponent as EyeIconSVG } from '@svgs/eye-solid.svg'
 
@@ -48,8 +49,9 @@ const SpacePagePostsHeader = (props: {
     }
 
     return (
-        <Row centerY className={styles.wrapper}>
+        <Row centerY centerX className={styles.wrapper}>
             <Button
+                // icon={<PlusIconSVG />}
                 text='New post'
                 color='blue'
                 onClick={() => openCreatePostModal('Text')}
@@ -66,7 +68,7 @@ const SpacePagePostsHeader = (props: {
             <SearchBar
                 setSearchFilter={(value) => applyParam('searchQuery', value)}
                 placeholder='Search posts...'
-                style={{ marginRight: 10 }}
+                style={{ width: 250, marginRight: 10 }}
             />
             <Button
                 icon={<SlidersIconSVG />}

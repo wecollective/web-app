@@ -2,11 +2,14 @@
 
 .wrapper {
     width: 100%;
-    padding-left: $pageContentHorizontalPadding;
+    // padding-left: $pageContentHorizontalPadding;
     margin-bottom: 10px;
+    height: calc(100vh - 250px);
 
     .content {
-        width: 100%;
-        height: calc(100vh - 230px);
+        width: calc(100vw - 20px);
+        padding-left: 20px;
+        // padding: 0 5px 0 15px;
+        height: calc(100vh - 320px);;
     }
 }

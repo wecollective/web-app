@@ -24,7 +24,7 @@ const Tab = (props: { baseRoute: string; tab: any }): JSX.Element => {
 const PageTabs = (props: { tabs: any }): JSX.Element => {
     const { tabs } = props
     return (
-        <Row spaceBetween className={styles.wrapper}>
+        <Row className={styles.wrapper}>
             {tabs.left.length > 0 && (
                 <Row>
                     {tabs.left

@@ -2,7 +2,7 @@
 import React from 'react'
 import styles from '@styles/components/PeopleList.module.scss'
 import VerticalUserCard from '@components/Cards/VerticalUserCard'
-import PeopleListPlaceholder from '@components/PostListPlaceholder'
+import PeopleListPlaceholder from '@components/PeopleListPlaceholder'
 import Row from '@components/Row'
 import Column from '@components/Column'
 import LoadingWheel from '@components/LoadingWheel'
@@ -27,7 +27,7 @@ const PeopleList = (props: {
                 <PeopleListPlaceholder />
             ) : people.length ? (
                 <Column>
-                    <Row wrap>
+                    <Row wrap centerX>
                         {people.map((person) => (
                             <VerticalUserCard
                                 key={person.id}

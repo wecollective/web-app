@@ -43,7 +43,7 @@ const SpacePageSpacesHeader = (props: {
     }
 
     return (
-        <Row centerY className={styles.wrapper}>
+        <Row centerY centerX className={styles.wrapper}>
             <Button
                 text='New space'
                 color='blue'
