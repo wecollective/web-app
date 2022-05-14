@@ -1,101 +1,92 @@
 @import '@styles/App.scss';
 
 .wrapper {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 15px $pageContentHorizontalPadding;
+    width: 100vw;
+    min-height: 800px;
+    background-color: white;
+    padding: 20px;
 
-    .content {
+    .header {
         width: 100%;
-        min-height: 800px;
-        background-color: white;
-        border-radius: 10px;
-        padding: 20px;
 
-        .header {
-            width: 100%;
+        .month {
+            width: 280px;
+            margin-bottom: 10px;
 
-            .month {
-                width: 280px;
-                margin-bottom: 10px;
+            > h1 {
+                margin: 0 10px;
+                line-height: 26px;
+            }
 
-                > h1 {
-                    margin: 0 10px;
-                    line-height: 26px;
-                }
+            > button {
+                all: unset;
+                cursor: pointer;
+                width: 20px;
+                height: 20px;
 
-                > button {
-                    all: unset;
-                    cursor: pointer;
+                > svg {
                     width: 20px;
                     height: 20px;
-    
-                    > svg {
-                        width: 20px;
-                        height: 20px;
-                        color: $grey3;
-                    }
-                }
-            }
-            .days {
-                > p {
-                    width: calc(100% / 7);
-                    text-align: center;
+                    color: $grey3;
                 }
             }
         }
-
         .days {
-            width: 100%;
+            > p {
+                width: calc(100% / 7);
+                text-align: center;
+            }
+        }
+    }
 
-            .padding, .day {
-                width: calc(100% / 7 - 10px);
-                height: 150px;
-                margin: 5px;
+    .days {
+        width: 100%;
+
+        .padding, .day {
+            width: calc(100% / 7 - 10px);
+            height: 150px;
+            margin: 5px;
+            border-radius: 5px;
+        }
+
+        .padding {
+            background-color: $grey1;
+        }
+
+        .day {
+            border: 1px solid $grey2;
+            padding: 10px;
+
+            &.highlighted {
+                border: 2px solid $blue2;
+            }
+
+            > p {
+                font-size: 12px;
+                line-height: 12px;
+                margin-bottom: 8px;
+            }
+
+            .event {
+                all: unset;
+                cursor: pointer;
+                display: flex;
+                width: calc(100% - 10px);
+                margin-bottom: 5px;
+                padding: 5px;
                 border-radius: 5px;
-            }
 
-            .padding {
-                background-color: $grey1;
-            }
+                &.event {
+                    background-color: $blue8;
+                }
 
-            .day {
-                border: 1px solid $grey2;
-                padding: 10px;
-
-                &.highlighted {
-                    border: 2px solid $blue2;
+                &.glass-bead-game {
+                    background-color: $purple2;
                 }
 
                 > p {
                     font-size: 12px;
-                    line-height: 12px;
-                    margin-bottom: 8px;
-                }
-
-                .event {
-                    all: unset;
-                    cursor: pointer;
-                    display: flex;
-                    width: calc(100% - 10px);
-                    margin-bottom: 5px;
-                    padding: 5px;
-                    border-radius: 5px;
-
-                    &.event {
-                        background-color: $blue8;
-                    }
-
-                    &.glass-bead-game {
-                        background-color: $purple2;
-                    }
-
-                    > p {
-                        font-size: 12px;
-                        margin-right: 5px;
-                    }
+                    margin-right: 5px;
                 }
             }
         }

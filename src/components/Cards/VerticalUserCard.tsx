@@ -28,7 +28,7 @@ const VerticalUserCard = (props: { user: any; style?: any }): JSX.Element => {
                 <Link to={`/u/${handle}`}>
                     <FlagImage
                         className={styles.flagImage}
-                        size={120}
+                        size={110}
                         type='user'
                         imagePath={flagImagePath}
                         outline
@@ -41,7 +41,7 @@ const VerticalUserCard = (props: { user: any; style?: any }): JSX.Element => {
                         <h2>{`u/${handle}`}</h2>
                     </Link>
                     <ShowMoreLess height={75}>
-                        <Markdown text={bio} />
+                        <Markdown text={bio} style={{ fontSize: 14, lineHeight: '20px' }} />
                     </ShowMoreLess>
                 </Column>
             </Column>

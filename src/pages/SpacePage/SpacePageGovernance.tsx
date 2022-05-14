@@ -17,7 +17,7 @@ const SpacePageGovernance = (): JSX.Element => {
                 <p>Space data loading... </p>
             ) : (
                 <Column className={styles.content}>
-                    <h2>Still to be developed...</h2>
+                    <h1>Still to be developed...</h1>
                     <p>
                         This section will contain polls and customisable governance modules to help
                         the community self govern.

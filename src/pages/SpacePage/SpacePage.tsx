@@ -33,7 +33,9 @@ import { ReactComponent as CalendarIcon } from '@svgs/calendar-days-solid.svg'
 import { ReactComponent as GovernanceIcon } from '@svgs/building-columns-solid.svg'
 
 const SpacePage = (): JSX.Element => {
-    const { accountData, accountDataLoading, updateAccountData } = useContext(AccountContext)
+    const { accountData, accountDataLoading, updateAccountData, loggedIn } = useContext(
+        AccountContext
+    )
     const {
         spaceData,
         getSpaceData,
@@ -133,7 +135,7 @@ const SpacePage = (): JSX.Element => {
                         <h1>{spaceData.name}</h1>
                         <p className='grey'>s/{spaceData.handle}</p>
                     </Column>
-                    {spaceHandle !== 'all' && (
+                    {spaceHandle !== 'all' && loggedIn && (
                         <Button
                             icon={isFollowing ? <SuccessIconSVG /> : undefined}
                             text={isFollowing ? 'Joined' : 'Join'}

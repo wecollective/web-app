@@ -43,7 +43,7 @@ const SpacePageSettings = ({ history }): JSX.Element => {
             {spaceData.handle !== spaceHandle || !isModerator ? (
                 <p>Space data loading... </p>
             ) : (
-                <Column className={styles.content}>
+                <Column centerX className={styles.content}>
                     <Row centerY>
                         <h1>Handle:</h1>
                         <p>{spaceData.handle}</p>

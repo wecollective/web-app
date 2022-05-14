@@ -213,21 +213,6 @@ const SpacePageSidebar = (): JSX.Element => {
                                                                 imageSize={30}
                                                                 wrapText
                                                             />
-                                                            {/* {space.totalChildren > 0 && (
-                                                            <button
-                                                                className={styles.expandSpaceButton}
-                                                                type='button'
-                                                                onClick={() =>
-                                                                    expandSpace('Parent', s.id)
-                                                                }
-                                                            >
-                                                                {s.expanded ? (
-                                                                    <MinusIconSVG />
-                                                                ) : (
-                                                                    <PlusIconSVG />
-                                                                )}
-                                                            </button>
-                                                        )} */}
                                                         </Row>
                                                     </Column>
                                                 ))}

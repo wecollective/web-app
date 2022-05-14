@@ -78,7 +78,7 @@ const Navbar = (): JSX.Element => {
                     )}
                 </div>
             </Row>
-            <Row centerY>
+            <Row centerY className={styles.searchBar}>
                 <GlobalSearchBar />
             </Row>
             {loggedIn ? (

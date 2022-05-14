@@ -76,11 +76,7 @@ const SpaceNavigationList = (): JSX.Element => {
                                     </button>
                                 </Row>
                                 {space.expanded && (
-                                    <Column
-                                        scroll
-                                        className={styles.spaces}
-                                        style={{ marginLeft: 15 }}
-                                    >
+                                    <Column scroll className={styles.childSpaces}>
                                         {(space.DirectParentHolons || []).map((s) => (
                                             <Column key={s.id}>
                                                 <Row centerY style={{ marginBottom: 10 }}>
@@ -133,11 +129,7 @@ const SpaceNavigationList = (): JSX.Element => {
                                     )}
                                 </Row>
                                 {space.expanded && (
-                                    <Column
-                                        scroll
-                                        className={styles.spaces}
-                                        style={{ marginLeft: 15 }}
-                                    >
+                                    <Column scroll className={styles.childSpaces}>
                                         {(space.DirectChildHolons || []).map((s) => (
                                             <Column key={s.id}>
                                                 <Row centerY style={{ marginBottom: 10 }}>

@@ -99,78 +99,74 @@ const SpacePageCalendar = (): JSX.Element => {
 
     if (spaceNotFound) return <SpaceNotFound />
     return (
-        <Column className={styles.wrapper}>
-            <Column centerX className={styles.content}>
-                <Column centerX className={styles.header}>
-                    <Row spaceBetween centerY className={styles.month}>
-                        <button type='button' onClick={() => setDateOffset(dateOffset - 1)}>
-                            <LeftChevronSVG />
-                        </button>
-                        <h1>
-                            {monthText} {yearText}
-                        </h1>
-                        <button type='button' onClick={() => setDateOffset(dateOffset + 1)}>
-                            <RightChevronSVG />
-                        </button>
-                    </Row>
-                    <Row className={styles.days}>
-                        {weekDays.map((day) => (
-                            <p key={day}>{day}</p>
-                        ))}
-                    </Row>
-                </Column>
-                {loading ? (
-                    <Column centerY style={{ height: 400 }}>
-                        <LoadingWheel />
-                    </Column>
-                ) : (
-                    <Row wrap className={styles.days}>
-                        {squares.map((square) => (
-                            <Column
-                                key={uuidv4()}
-                                className={`${
-                                    square.type === 'padding' ? styles.padding : styles.day
-                                } ${square.highlighted && styles.highlighted}`}
-                            >
-                                <p style={{ fontWeight: 800 }}>{square.day}</p>
-                                {square.events && (
-                                    <Scrollbars>
-                                        {square.events
-                                            .sort((a, b) => {
-                                                return (
-                                                    new Date(a.startTime).getTime() -
-                                                    new Date(b.startTime).getTime()
-                                                )
-                                            })
-                                            .map((event) => (
-                                                <button
-                                                    key={event.id}
-                                                    className={`${styles.event} ${
-                                                        styles[event.type]
-                                                    }`}
-                                                    type='button'
-                                                    onClick={() => openEventModal(event.postId)}
-                                                >
-                                                    <p>{formatTimeHM(event.startTime)}</p>
-                                                    <p style={{ fontWeight: 800 }}>{event.title}</p>
-                                                </button>
-                                            ))}
-                                    </Scrollbars>
-                                )}
-                            </Column>
-                        ))}
-                    </Row>
-                )}
-                {eventModalOpen && (
-                    <Modal close={() => setEventModalOpen(false)}>
-                        {selectedPost ? (
-                            <PostCard location='post-page' post={selectedPost} />
-                        ) : (
-                            <LoadingWheel />
-                        )}
-                    </Modal>
-                )}
+        <Column centerX className={styles.wrapper}>
+            <Column centerX className={styles.header}>
+                <Row spaceBetween centerY className={styles.month}>
+                    <button type='button' onClick={() => setDateOffset(dateOffset - 1)}>
+                        <LeftChevronSVG />
+                    </button>
+                    <h1>
+                        {monthText} {yearText}
+                    </h1>
+                    <button type='button' onClick={() => setDateOffset(dateOffset + 1)}>
+                        <RightChevronSVG />
+                    </button>
+                </Row>
+                <Row className={styles.days}>
+                    {weekDays.map((day) => (
+                        <p key={day}>{day}</p>
+                    ))}
+                </Row>
             </Column>
+            {loading ? (
+                <Column centerY style={{ height: 400 }}>
+                    <LoadingWheel />
+                </Column>
+            ) : (
+                <Row wrap className={styles.days}>
+                    {squares.map((square) => (
+                        <Column
+                            key={uuidv4()}
+                            className={`${
+                                square.type === 'padding' ? styles.padding : styles.day
+                            } ${square.highlighted && styles.highlighted}`}
+                        >
+                            <p style={{ fontWeight: 800 }}>{square.day}</p>
+                            {square.events && (
+                                <Scrollbars>
+                                    {square.events
+                                        .sort((a, b) => {
+                                            return (
+                                                new Date(a.startTime).getTime() -
+                                                new Date(b.startTime).getTime()
+                                            )
+                                        })
+                                        .map((event) => (
+                                            <button
+                                                key={event.id}
+                                                className={`${styles.event} ${styles[event.type]}`}
+                                                type='button'
+                                                onClick={() => openEventModal(event.postId)}
+                                            >
+                                                <p>{formatTimeHM(event.startTime)}</p>
+                                                <p style={{ fontWeight: 800 }}>{event.title}</p>
+                                            </button>
+                                        ))}
+                                </Scrollbars>
+                            )}
+                        </Column>
+                    ))}
+                </Row>
+            )}
+            {eventModalOpen && (
+                <Modal close={() => setEventModalOpen(false)} style={{ width: 900 }}>
+                    {selectedPost ? (
+                        <PostCard location='post-page' post={selectedPost} />
+                    ) : (
+                        <LoadingWheel />
+                    )}
+                </Modal>
+            )}
         </Column>
     )
 }
