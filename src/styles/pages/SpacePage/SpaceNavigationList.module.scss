@@ -1,0 +1,47 @@
+@import '@styles/Variables';
+
+.wrapper {
+    width: 200px;
+    margin-right: 15px;
+    flex-shrink: 0;
+
+    .spaces {
+        margin-bottom: 20px;
+        padding-right: 10px;
+
+        > div {
+            > svg {
+                width: 20px;
+                height: 20px;
+                margin-right: 10px;
+                color: $grey4;
+            }
+            
+            > p {
+                color: $grey5;
+                margin-bottom: 10px;
+            }
+        }
+
+        .expandSpaceButton {
+            all: unset;
+            cursor: pointer;
+            color: $grey4;
+            width: 20px;
+            height: 20px;
+            margin-left: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            > svg {
+                width: 10px;
+                height: 10px;
+            }
+
+            &:hover {
+                color: $grey6;
+            }
+        }
+    }
+}
