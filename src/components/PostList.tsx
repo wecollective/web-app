@@ -1,5 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import React from 'react'
+import React, { useEffect, useContext } from 'react'
 import styles from '@styles/components/PostList.module.scss'
 import PostCard from '@components/Cards/PostCard/PostCard'
 import PostListPlaceholder from '@components/PostListPlaceholder'
@@ -7,6 +7,7 @@ import Row from '@components/Row'
 import Column from '@components/Column'
 import LoadingWheel from '@components/LoadingWheel'
 import Scrollbars from '@src/components/Scrollbars'
+import { SpaceContext } from '@contexts/SpaceContext'
 
 const PostList = (props: {
     location: 'space-posts'
@@ -16,6 +17,9 @@ const PostList = (props: {
     onScrollBottom: () => void
 }): JSX.Element => {
     const { location, posts, firstPostsloading, nextPostsLoading, onScrollBottom } = props
+    const { resetSpacePosts } = useContext(SpaceContext)
+
+    useEffect(() => () => resetSpacePosts(), [])
 
     return (
         <Scrollbars

@@ -1,9 +1,7 @@
 @import '@styles/Variables';
 
 .wrapper {
-    //width: 100%;
-    max-width: 800px;
-    //height: 180px;
+    width: 100%;
     min-height: 180px;
     border-radius: 10px;
     background-color: white;
@@ -54,49 +52,4 @@
             }
         }
     }
-
 }
-// .content {
-//     position: relative;
-//     width: 100%;
-//     height: 100%;
-//     display: flex;
-//     flex-direction: column;
-//     align-items: center;
-// }
-// .coverImage {
-//     width: 100%;
-//     height: 110px;
-//     background-size: cover;
-//     background-position: center;
-//     border-top-left-radius: 10px;
-//     border-top-right-radius: 10px;
-//     flex-shrink: 0;
-// }
-// .flagImageWrapper {
-//     width: 100%;
-//     height: 130px;
-//     margin-top: -65px;
-//     display: flex;
-//     justify-content: center;
-// }
-// .text {
-//     width: 250px;
-//     margin-bottom: 10px;
-//     display: flex;
-//     flex-direction: column;
-//     align-items: center;
-// }
-// .title {
-//     font-size: 30px;
-//     line-height: 30px;
-//     margin-top: 10px;
-//     margin-bottom: 5px;
-// }
-// .subTitle {
-//     opacity: 0.6;
-//     margin-bottom: 10px;
-// }
-// .footer {
-//     margin-bottom: 5px;
-//}

@@ -8,7 +8,7 @@ import { SpaceContext } from '@contexts/SpaceContext'
 
 const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
     const { spaceMapData, params } = props
-    const { spaceData } = useContext(SpaceContext)
+    const { spaceData, setSpaceMapData } = useContext(SpaceContext)
     // const [width, setWidth] = useState<number | string>(700)
     const [firstRun, setFirstRun] = useState<boolean>(true)
     // const [spaceTransitioning, setSpaceTransitioning] = useState<boolean>(true)
@@ -877,6 +877,8 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
             updateTree(spaceMapData, true)
         }
     }, [spaceMapData])
+
+    useEffect(() => () => setSpaceMapData({}), [])
 
     // useEffect(() => {
     //     setWidth(fullScreen ? '100%' : 700)

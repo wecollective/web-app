@@ -26,7 +26,7 @@ const SpacePagePostMap = (): JSX.Element => {
     const postMapPaginationLimit = 50
     const [totalMatchingPosts, setTotalMatchingPosts] = useState(0)
     const [width, setWidth] = useState<number | string>(700)
-    const height = 600
+    const height = 800
     const arrowPoints = 'M 0 0 6 3 0 6 1.5 3'
     const gravitySlider = useRef<HTMLInputElement>(null)
     const gravityInput = useRef<HTMLInputElement>(null)
@@ -725,7 +725,7 @@ const SpacePagePostMap = (): JSX.Element => {
             </div>
             <div id='canvas' />
             {postModalOpen && (
-                <Modal close={() => setPostModalOpen(false)}>
+                <Modal close={() => setPostModalOpen(false)} style={{ width: 900 }}>
                     {selectedPost ? (
                         <PostCard location='post-page' post={selectedPost} />
                     ) : (

@@ -14,9 +14,10 @@
 .controlsWrapper {
     display: flex;
     justify-content: space-between;
-    width: 100%;
+    width: 900px;
     margin-top: 5px;
     height: 70px;
+    position: absolute;
 }
 .controls {
     display: flex;

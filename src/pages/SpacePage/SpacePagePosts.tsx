@@ -8,6 +8,7 @@ import Row from '@components/Row'
 import Column from '@components/Column'
 import SpacePagePostsHeader from '@pages/SpacePage/SpacePagePostsHeader'
 import SpacePagePostMap from '@pages/SpacePage/SpacePagePostMap'
+import SpaceNavigationList from '@pages/SpacePage/SpaceNavigationList'
 import PostList from '@components/PostList'
 import SpaceNotFound from '@pages/SpaceNotFound'
 
@@ -17,7 +18,6 @@ const SpacePagePosts = (): JSX.Element => {
         spaceNotFound,
         spacePosts,
         getSpacePosts,
-        resetSpacePosts,
         spacePostsLoading,
         setSpacePostsLoading,
         nextSpacePostsLoading,
@@ -26,13 +26,10 @@ const SpacePagePosts = (): JSX.Element => {
         spacePostsPaginationLimit,
         spacePostsPaginationHasMore,
     } = useContext(SpaceContext)
-    const { innerWidth } = window
     const location = useLocation()
     const history = useHistory()
     const spaceHandle = location.pathname.split('/')[2]
     const [filtersOpen, setFiltersOpen] = useState(false)
-    const [showPostList, setShowPostList] = useState(true)
-    const [showPostMap, setShowPostMap] = useState(innerWidth > 1500)
 
     // calculate params
     const urlParams = Object.fromEntries(new URLSearchParams(location.search))
@@ -60,10 +57,14 @@ const SpacePagePosts = (): JSX.Element => {
 
     useEffect(() => {
         if (spaceData.handle !== spaceHandle) setSpacePostsLoading(true)
-        else getSpacePosts(spaceData.id, 0, spacePostsPaginationLimit, params)
+        else {
+            if (params.view === 'List')
+                getSpacePosts(spaceData.id, 0, spacePostsPaginationLimit, params)
+            if (params.view === 'Map') {
+                // getPostMapData(spaceData.id, params)
+            }
+        }
     }, [spaceData.handle, location])
-
-    useEffect(() => () => resetSpacePosts(), [])
 
     if (spaceNotFound) return <SpaceNotFound />
     return (
@@ -71,31 +72,31 @@ const SpacePagePosts = (): JSX.Element => {
             <SpacePagePostsHeader
                 filtersOpen={filtersOpen}
                 setFiltersOpen={setFiltersOpen}
-                showPostList={showPostList}
-                setShowPostList={setShowPostList}
-                showPostMap={showPostMap}
-                setShowPostMap={setShowPostMap}
+                params={params}
                 applyParam={applyParam}
             />
             {filtersOpen && <SpacePagePostsFilters params={params} applyParam={applyParam} />}
-            <Row className={styles.content}>
-                {showPostList && (
-                    <Column className={styles.postList}>
-                        <PostList
-                            location='space-posts'
-                            posts={spacePosts}
-                            firstPostsloading={spacePostsLoading}
-                            nextPostsLoading={nextSpacePostsLoading}
-                            onScrollBottom={onScrollBottom}
-                        />
-                    </Column>
+            <Column className={styles.content}>
+                {params.view === 'List' && (
+                    <Row className={styles.postListView}>
+                        <SpaceNavigationList />
+                        <Column style={{ width: '100%' }}>
+                            <PostList
+                                location='space-posts'
+                                posts={spacePosts}
+                                firstPostsloading={spacePostsLoading}
+                                nextPostsLoading={nextSpacePostsLoading}
+                                onScrollBottom={onScrollBottom}
+                            />
+                        </Column>
+                    </Row>
                 )}
-                {/* {showPostMap && (
-                    <Column className={styles.postMap}>
+                {params.view === 'Map' && (
+                    <Column className={styles.postMapView}>
                         <SpacePagePostMap />
                     </Column>
-                )} */}
-            </Row>
+                )}
+            </Column>
         </Column>
     )
 }

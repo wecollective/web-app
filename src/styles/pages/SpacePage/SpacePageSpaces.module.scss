@@ -10,16 +10,9 @@
         height: 100%;
         overflow: hidden;
 
-        .spaceList {
-            @include for-tablet-portrait-up { width: 100% }
-            @include for-desktop-medium-up { width: 50% }
-            @include for-desktop-large-up {
-                width: 820px;
-                flex-shrink: 0;
-            }
-        }
+        .spaceListView {}
 
-        .spaceMap {
+        .spaceMapView {
             width: calc(100vw - 40px);
         }
     }

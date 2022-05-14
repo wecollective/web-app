@@ -6,7 +6,6 @@ import SearchBar from '@components/SearchBar'
 import Toggle from '@components/Toggle'
 import Button from '@components/Button'
 import Row from '@components/Row'
-import Column from '@components/Column'
 import Modal from '@components/Modal'
 import CreatePostModal from '@src/components/modals/CreatePostModal'
 import { ReactComponent as PlusIconSVG } from '@svgs/plus.svg'
@@ -16,27 +15,15 @@ import { ReactComponent as EyeIconSVG } from '@svgs/eye-solid.svg'
 const SpacePagePostsHeader = (props: {
     filtersOpen: boolean
     setFiltersOpen: (payload: boolean) => void
-    showPostList: boolean
-    setShowPostList: (payload: boolean) => void
-    showPostMap: boolean
-    setShowPostMap: (payload: boolean) => void
+    params: any
     applyParam: (param: string, value: string) => void
 }): JSX.Element => {
-    const {
-        filtersOpen,
-        setFiltersOpen,
-        showPostList,
-        setShowPostList,
-        showPostMap,
-        setShowPostMap,
-        applyParam,
-    } = props
+    const { filtersOpen, setFiltersOpen, params, applyParam } = props
     const { loggedIn, setAlertModalOpen, setAlertMessage } = useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
     const [createPostModalType, setCreatePostModalType] = useState('Text')
     const [createPostModalOpen, setCreatePostModalOpen] = useState(false)
     const [viewModalOpen, setViewModalOpen] = useState(false)
-    const { innerWidth } = window
 
     function openCreatePostModal(type) {
         if (loggedIn) {
@@ -93,38 +80,12 @@ const SpacePagePostsHeader = (props: {
                 <Modal centered close={() => setViewModalOpen(false)}>
                     <h1>Views</h1>
                     <p>Choose how to display the posts</p>
-                    {innerWidth > 1600 ? (
-                        <Column centerX>
-                            <Row style={{ marginBottom: 20 }}>
-                                <Toggle
-                                    leftText='List'
-                                    rightColor='blue'
-                                    positionLeft={!showPostList}
-                                    onClick={() => setShowPostList(!showPostList)}
-                                />
-                            </Row>
-                            <Row>
-                                <Toggle
-                                    leftText='Map'
-                                    rightColor='blue'
-                                    positionLeft={!showPostMap}
-                                    onClick={() => setShowPostMap(!showPostMap)}
-                                />
-                            </Row>
-                        </Column>
-                    ) : (
-                        <Row>
-                            <Toggle
-                                leftText='List'
-                                rightText='Map'
-                                positionLeft={showPostList}
-                                onClick={() => {
-                                    setShowPostList(!showPostList)
-                                    setShowPostMap(!showPostMap)
-                                }}
-                            />
-                        </Row>
-                    )}
+                    <Toggle
+                        leftText='List'
+                        rightText='Map'
+                        positionLeft={params.view === 'List'}
+                        onClick={() => applyParam('view', params.view === 'Map' ? 'List' : 'Map')}
+                    />
                 </Modal>
             )}
         </Row>

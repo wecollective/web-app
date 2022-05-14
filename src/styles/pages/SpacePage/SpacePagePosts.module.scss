@@ -8,16 +8,13 @@
         height: 100%;
         overflow: hidden;
 
-        .postList {
-            width: 900px;
-            align-items: center;
+        .postListView {
+            width: 1015px;
+            height: 100%;
         }
         
-        .postMap {
-            padding: 0 $pageContentHorizontalPadding;
-            @include for-tablet-portrait-up { width: 100% }
-            @include for-desktop-medium-up { width: 50% }
-            @include for-desktop-large-up { width: 100% }
+        .postMapView {
+            width: calc(100vw - 40px);
         }
     }
 }

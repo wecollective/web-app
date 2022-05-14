@@ -17,25 +17,20 @@ const SpacePageSpaces = (): JSX.Element => {
         spaceNotFound,
         spaceSpaces,
         getSpaceSpaces,
-        resetSpaceSpaces,
         spaceSpacesLoading,
         setSpaceSpacesLoading,
         nextSpaceSpacesLoading,
         spaceMapData,
         getSpaceMapData,
-        setSpaceMapData,
         spaceSpacesFilters,
         spaceSpacesPaginationOffset,
         spaceSpacesPaginationHasMore,
         spaceSpacesPaginationLimit,
     } = useContext(SpaceContext)
-    // const { innerWidth } = window
     const location = useLocation()
     const history = useHistory()
     const spaceHandle = location.pathname.split('/')[2]
     const [filtersOpen, setFiltersOpen] = useState(false)
-    const [showSpaceList, setShowSpaceList] = useState(false)
-    const [showSpaceMap, setShowSpaceMap] = useState(true) // innerWidth > 1500)
 
     // calculate params
     const urlParams = Object.fromEntries(new URLSearchParams(location.search))
@@ -65,18 +60,11 @@ const SpacePageSpaces = (): JSX.Element => {
     useEffect(() => {
         if (spaceData.handle !== spaceHandle) setSpaceSpacesLoading(true)
         else {
-            if (showSpaceList) getSpaceSpaces(spaceData.id, 0, spaceSpacesPaginationLimit, params)
-            if (showSpaceMap) getSpaceMapData(spaceData.id, params)
+            if (params.view === 'List')
+                getSpaceSpaces(spaceData.id, 0, spaceSpacesPaginationLimit, params)
+            if (params.view === 'Map') getSpaceMapData(spaceData.id, params)
         }
     }, [spaceData.handle, location])
-
-    useEffect(
-        () => () => {
-            resetSpaceSpaces()
-            setSpaceMapData({})
-        },
-        []
-    )
 
     if (spaceNotFound) return <SpaceNotFound />
     return (
@@ -84,16 +72,13 @@ const SpacePageSpaces = (): JSX.Element => {
             <SpacePageSpacesHeader
                 filtersOpen={filtersOpen}
                 setFiltersOpen={setFiltersOpen}
-                showSpaceList={showSpaceList}
-                setShowSpaceList={setShowSpaceList}
-                showSpaceMap={showSpaceMap}
-                setShowSpaceMap={setShowSpaceMap}
+                params={params}
                 applyParam={applyParam}
             />
             {filtersOpen && <SpacePageSpacesFilters params={params} applyParam={applyParam} />}
             <Row className={styles.content}>
-                {showSpaceList && (
-                    <Column className={styles.spaceList}>
+                {params.view === 'List' && (
+                    <Column className={styles.spaceListView}>
                         <SpaceList
                             location='space-spaces'
                             spaces={spaceSpaces}
@@ -103,8 +88,8 @@ const SpacePageSpaces = (): JSX.Element => {
                         />
                     </Column>
                 )}
-                {showSpaceMap && (
-                    <Column className={styles.spaceMap}>
+                {params.view === 'Map' && (
+                    <Column className={styles.spaceMapView}>
                         <SpacePageSpaceMap spaceMapData={spaceMapData} params={params} />
                     </Column>
                 )}
