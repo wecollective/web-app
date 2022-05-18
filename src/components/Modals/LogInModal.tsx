@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react'
 import axios from 'axios'
+import { useLocation, useHistory } from 'react-router-dom'
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3'
 import config from '@src/Config'
 import styles from '@styles/components/Modal.module.scss'
@@ -40,6 +41,9 @@ const LogInModal = (props: { close: () => void }): JSX.Element => {
     )
     const [verificationEmailUserId, setVerificationEmailUserId] = useState(null)
 
+    const location = useLocation()
+    const history = useHistory()
+
     function logIn(e) {
         e.preventDefault()
         const invalidEmailOrHandle = emailOrHandle.length < 1
@@ -59,7 +63,10 @@ const LogInModal = (props: { close: () => void }): JSX.Element => {
                         document.cookie = `accessToken=${res.data}; path=/`
                         setAccountDataLoading(true)
                         getAccountData()
-                        setTimeout(() => close(), 1000)
+                        setTimeout(() => {
+                            if (location.pathname === '/') history.push('/s/all')
+                            close()
+                        }, 1000)
                     })
                     .catch((error) => {
                         setLoading(false)

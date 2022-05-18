@@ -1,34 +1,105 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import axios from 'axios'
+import config from '@src/Config'
+import { pluralise, isPlural } from '@src/Helpers'
 import styles from '@styles/pages/HomePage.module.scss'
 import { AccountContext } from '@contexts/AccountContext'
 import Button from '@components/Button'
+import Column from '@components/Column'
+import Row from '@components/Row'
+import CollapsibleCards from '@components/CollapsibleCards'
 import FlagImageHighlights from '@components/FlagImageHighlights'
-import config from '@src/Config'
-import { ReactComponent as HandshakeIconSVG } from '@svgs/handshake-solid.svg'
-import { ReactComponent as PollIconSVG } from '@svgs/poll-solid.svg'
-import { ReactComponent as OSIconSVG } from '@svgs/osi-brands.svg'
-import { ReactComponent as ToolsIconSVG } from '@svgs/tools-solid.svg'
-import { pluralise, isPlural } from '@src/Helpers'
+import { ReactComponent as DoorIcon } from '@svgs/door-open-solid.svg'
+import { ReactComponent as CastaliaIcon } from '@svgs/castalia-logo.svg'
+import { ReactComponent as HandshakeIcon } from '@svgs/handshake-solid.svg'
+import { ReactComponent as PollIcon } from '@svgs/poll-solid.svg'
+import { ReactComponent as OSIcon } from '@svgs/osi-brands.svg'
 // todo: import logo and background images as SVG components
 // import { ReactComponent as BackgroundImageSVG } from '@svgs/earth.svg'
 
 const Homepage = (): JSX.Element => {
     const {
+        loggedIn,
         setAlertMessage,
         setAlertModalOpen,
-        setRegisterModalOpen,
         setLogInModalOpen,
         setResetPasswordModalOpen,
         setResetPasswordModalToken,
-        setDonateModalOpen,
     } = useContext(AccountContext)
     const urlParams = new URLSearchParams(window.location.search)
     const alert = urlParams.get('alert')
     const history = useHistory()
 
     const [highlights, setHighlights] = useState<any>(null)
+    const cardData = [
+        {
+            text: 'New ways of organising information',
+            imagePath: '/images/information.jpg',
+            children: [
+                {
+                    text: 'Nest spaces holonically',
+                    imagePath: '/images/holarchy.jpg',
+                    children: [],
+                },
+                {
+                    text: 'Navigate spaces visually',
+                    imagePath: '/images/tree.jpg',
+                    children: [],
+                },
+                {
+                    text: 'Link posts together',
+                    imagePath: '/images/string.jpg',
+                    children: [],
+                },
+            ],
+        },
+        {
+            text: 'New ways of creating together',
+            svg: <CastaliaIcon />,
+            children: [
+                {
+                    text: 'Play with time',
+                    imagePath: '/images/time.jpg',
+                    children: [],
+                },
+                {
+                    text: 'Process ideas collectively (Soon TM)',
+                    imagePath: '/images/process.jpg',
+                    children: [],
+                },
+                {
+                    text: 'Design beautfiul information (Soon TM)',
+                    imagePath: '/images/design.jpg',
+                    children: [],
+                },
+            ],
+        },
+        {
+            text: 'New ways of being together',
+            imagePath: '/images/being.jpg',
+            children: [
+                {
+                    text: 'Cooperatively owned (Soon TM)',
+                    svg: <HandshakeIcon />,
+                    smallIcon: true,
+                    children: [],
+                },
+                {
+                    text: 'Democratically governed (Soon TM)',
+                    svg: <PollIcon />,
+                    smallIcon: true,
+                    children: [],
+                },
+                {
+                    text: 'Open source',
+                    svg: <OSIcon />,
+                    smallIcon: true,
+                    children: [],
+                },
+            ],
+        },
+    ]
 
     function showRedirectAlerts() {
         if (alert === 'verify-email') {
@@ -55,17 +126,30 @@ const Homepage = (): JSX.Element => {
 
     function getHomepageHighlights() {
         axios.get(`${config.apiURL}/homepage-highlights`).then((res) => {
-            // console.log(res.data)
             setHighlights(res.data)
         })
     }
 
-    useEffect(() => showRedirectAlerts(), [])
-    useEffect(() => getHomepageHighlights(), [])
+    function enter() {
+        if (loggedIn) history.push('/s/all')
+        else setLogInModalOpen(true)
+    }
+
+    useEffect(() => {
+        window.scrollTo(0, 0)
+        showRedirectAlerts()
+        getHomepageHighlights()
+    }, [])
 
     return (
-        <div className={styles.wrapper}>
-            <div className={styles.top}>
+        <Column className={styles.wrapper}>
+            <Column className={styles.background}>
+                <div className={styles.sky} />
+                <div className={styles.earthImage}>
+                    <img src='/images/homepage-earth.svg' alt='background wave svg' />
+                </div>
+            </Column>
+            <Column centerX className={styles.content}>
                 <img className={styles.logo} src='/images/new-logo.svg' alt='weco logo' />
                 <h1>
                     we
@@ -73,46 +157,11 @@ const Homepage = (): JSX.Element => {
                     <span className={styles.colored}>collective</span>
                     <span className='roboto'>{`}`}</span>
                 </h1>
-                {/* <h2>self-organising collective intelligence</h2> */}
-                {/* <h2>holonic social media coop</h2> */}
-                <h2>our world, our network</h2>
-                {/* <h2>holonic social media by the people</h2> */}
-                {/* <h2>holonic social media</h2> */}
-                <div className={styles.features}>
-                    <HandshakeIconSVG width={30} height={30} />
-                    <p>cooperatively owned</p>
-                    <p>•</p>
-                    <PollIconSVG width={25} height={25} />
-                    <p>democratically governed</p>
-                    <p>•</p>
-                    <OSIconSVG width={25} height={25} />
-                    <p>open source</p>
-                </div>
-                <div className={styles.currentState}>
-                    <p>PRE-ALPHA</p>
-                    <div>
-                        <p>under construction...</p>
-                        <ToolsIconSVG />
-                    </div>
-                </div>
-                <div className={styles.authButtons}>
-                    <Button
-                        text='Log in'
-                        color='blue'
-                        onClick={() => setLogInModalOpen(true)}
-                        style={{ marginRight: 10 }}
-                    />
-                    <Button
-                        text='Create new account'
-                        color='aqua'
-                        onClick={() => setRegisterModalOpen(true)}
-                        style={{ marginRight: 10 }}
-                    />
-                    <Button text='Donate' color='purple' onClick={() => setDonateModalOpen(true)} />
-                </div>
-
+                <h2>play together</h2>
+                <Button text='Enter' icon={<DoorIcon />} color='blue' onClick={enter} />
+                <CollapsibleCards data={cardData} style={{ marginTop: 40, marginBottom: 40 }} />
                 {highlights && (
-                    <div className={styles.highlights}>
+                    <Row spaceBetween className={styles.highlights}>
                         <FlagImageHighlights
                             type='post'
                             imagePaths={highlights.posts}
@@ -145,63 +194,10 @@ const Homepage = (): JSX.Element => {
                             onClick={() => history.push('/s/all/people')}
                             outline
                         />
-                    </div>
+                    </Row>
                 )}
-            </div>
-            <div className={styles.backgroundImage}>
-                {/* <BackgroundImageSVG /> */}
-                <img src='/images/homepage-earth.svg' alt='background wave svg' />
-            </div>
-            <div className={styles.bottom}>
-                <div className={styles.introText}>
-                    {/* comes from a beleif that collective intelligence technologies hold the key to solving the worlds problems.
-                    cooperative ownership, democratic governance, transparency etc putting power into the peoples hands */}
-                    {/* <h1>
-                        <b>we</b>
-                        {'{'}collective{'} '}
-                        is an evolving open source experiment in collective intelligence, social
-                        media design, and cooperative ownership.
-                    </h1>
-                    <p>
-                        The platform is based around a nested{' '}
-                        <a href='https://en.wikipedia.org/wiki/Holon_(philosophy)'>holonic</a>{' '}
-                        community framework designed to help users organise, filter, and explore
-                        social media content more intuitively. Learn more about how it works [here].
-                    </p>
-                    <img
-                        src='https://miro.medium.com/max/1400/1*dJltVFtaVwh4CIPBXNOV1A.jpeg'
-                        alt=''
-                    />
-                    <p>
-                        Within this framework a range of post types and community modules are being
-                        developed to meet different collaborative needs for communities.
-                    </p> */}
-                    {/* <p>
-                        The common theme running through these features is the goal of
-                        exploring and facilitating new forms of collective intelligence amongst the user
-                        base.
-                    </p> */}
-                    {/* <p>
-                        Once enough of the platform has been developed and enough active users are
-                        involved we’ll be transitioning into a platform cooperative, owned and
-                        governed by its members. Members of the coop will then be able to propose
-                        and vote on new features they’d like built into the platform, as well as how
-                        surplus profits generated by the site are spent. Learn more about our plans
-                        for the coop and its governance [here].
-                    </p>
-                    <p>
-                        The website is currently being developed primarily as a passion project by
-                        James Weir. If enough funding can be raised, a dedicated development team
-                        will be established to work full time on the project in conjunction with
-                        open source collaborators. If you'd like to get involved or have any other
-                        queries, please contact us [here].
-                    </p> */}
-                </div>
-                <div className={styles.credits}>
-                    Some icons created by FontAwesome https://fontawesome.com/license
-                </div>
-            </div>
-        </div>
+            </Column>
+        </Column>
     )
 }
 
@@ -276,4 +272,51 @@ export default Homepage
         <li>Zoomable circle packing view for spaces</li>
         <li>Responsive UI for small screens</li>
     </ul> 
+</div> */
+
+/* <div className={styles.bottom}>
+    <div className={styles.introText}>
+        comes from a beleif that collective intelligence technologies hold the key to solving the worlds problems.
+        cooperative ownership, democratic governance, transparency etc putting power into the peoples hands
+        <h1>
+            <b>we</b>
+            {'{'}collective{'} '}
+            is an evolving open source experiment in collective intelligence, social
+            media design, and cooperative ownership.
+        </h1>
+        <p>
+            The platform is based around a nested{' '}
+            <a href='https://en.wikipedia.org/wiki/Holon_(philosophy)'>holonic</a>{' '}
+            community framework designed to help users organise, filter, and explore
+            social media content more intuitively. Learn more about how it works [here].
+        </p>
+        <img
+            src='https://miro.medium.com/max/1400/1*dJltVFtaVwh4CIPBXNOV1A.jpeg'
+            alt=''
+        />
+        <p>
+            Within this framework a range of post types and community modules are being
+            developed to meet different collaborative needs for communities.
+        </p>
+        <p>
+            The common theme running through these features is the goal of
+            exploring and facilitating new forms of collective intelligence amongst the user
+            base.
+        </p>
+        <p>
+            Once enough of the platform has been developed and enough active users are
+            involved we’ll be transitioning into a platform cooperative, owned and
+            governed by its members. Members of the coop will then be able to propose
+            and vote on new features they’d like built into the platform, as well as how
+            surplus profits generated by the site are spent. Learn more about our plans
+            for the coop and its governance [here].
+        </p>
+        <p>
+            The website is currently being developed primarily as a passion project by
+            James Weir. If enough funding can be raised, a dedicated development team
+            will be established to work full time on the project in conjunction with
+            open source collaborators. If you'd like to get involved or have any other
+            queries, please contact us [here].
+        </p>
+    </div>
 </div> */
