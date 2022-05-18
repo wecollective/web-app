@@ -1,0 +1,110 @@
+@import '@styles/Variables';
+
+.wrapper {
+    .row {
+        width: 1000px;
+        height: 300px;
+        transition: width 1s;
+        margin-bottom: 40px;
+        position: relative;
+
+        .card1 { left: 0; position: absolute; }
+        .card3 { right: 0; position: absolute; }
+
+        .card {
+            width: 300px;
+            height: 300px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 20px 0 rgba(10, 8, 72, 0.1);
+            z-index: 2;
+
+            transition: all 1s;
+
+            &.hidden {
+                opacity: 0;
+                z-index: 1;
+            }
+
+            .content {
+                height: 100%;
+
+                > img, > svg {
+                    transition: all 1s;
+                    height: 140px;
+                    margin-bottom: 20px;
+                }
+
+                > h1 {
+                    transition: all 1s;
+                    font-size: 18px;
+                    text-align: center;
+                    margin: 0;
+                    max-width: 200px;
+                }
+
+                &.smallIcon {
+                    > svg {
+                        opacity: 0.3;
+                        height: 60px;
+                    }
+                }
+            }
+
+            .footer {
+                width: 100%;
+                height: 40px;
+                border-top: 1px solid #000;
+                flex-shrink: 0;
+
+                > button {
+                    all: unset;
+                    cursor: pointer;
+                    border: 2px solid rgba(black, 0.2);
+                    border-radius: 50%;
+                    width: 25px;
+                    height: 25px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+
+                    &.rotate {
+                        transform: rotate(180deg);
+                    }
+
+                    > svg {
+                        opacity: 0.2;
+                        margin-top: 2px;
+                        width: 18px;
+                        height: 18px;
+                    }
+                }
+            }
+
+        }
+
+        &.collapsed {
+            width: 180px;
+            height: 180px;
+
+            .card {
+                width: 180px;
+                height: 180px;
+
+                > .content {
+                    > img, > svg {
+                        height: 80px;
+                        margin-bottom: 5px;
+                    }
+
+                    > h1 {
+                        font-size: 14px;
+                        max-width: 180px;
+                    }
+                }
+            }
+        }
+        
+        &.hidden { display: none }
+    }
+}
