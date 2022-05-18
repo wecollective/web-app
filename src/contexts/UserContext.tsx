@@ -24,6 +24,7 @@ const defaults = {
         sortOrder: 'Descending',
         timeRange: 'All Time',
         searchQuery: '',
+        view: 'List',
     },
 }
 
@@ -33,7 +34,7 @@ function UserContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
     const [isOwnAccount, setIsOwnAccount] = useState(false)
     const [selectedUserSubPage, setSelectedUserSubPage] = useState('')
     const [userData, setUserData] = useState(defaults.userData)
-    const [userDataLoading, setUserDataLoading] = useState(true)
+    const [userNotFound, setUserNotFound] = useState(false)
     const [userPosts, setUserPosts] = useState<IPost[]>([])
     const [userPostsLoading, setUserPostsLoading] = useState(true)
     const [nextUserPostsLoading, setNextUserPostsLoading] = useState(false)
@@ -45,18 +46,19 @@ function UserContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
 
     function getUserData(userHandle, returnFunction) {
         console.log('UserContext: getUserData')
-        setUserDataLoading(true)
         axios
             .get(`${config.apiURL}/user-data?userHandle=${userHandle}`)
             .then((res) => {
                 setUserData(res.data || defaults.userData)
-                setUserDataLoading(false)
                 if (returnFunction) returnFunction(res.data)
             })
-            .catch((error) => console.log('GET user-data error: ', error))
+            .catch((error) => {
+                if (error.response.status === 404) setUserNotFound(true)
+                else console.log('GET user-data error: ', error)
+            })
     }
 
-    function getUserPosts(userId, offset) {
+    function getUserPosts(userId, offset, limit, params) {
         console.log(`UserContext: getUserPosts (${offset} to ${offset + userPostsPaginationLimit})`)
         const firstLoad = offset === 0
         if (firstLoad) setUserPostsLoading(true)
@@ -66,12 +68,12 @@ function UserContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
                 // prettier-ignore
                 `${config.apiURL}/user-posts?accountId=${accountData.id
                 }&userId=${userId
-                }&postType=${userPostsFilters.type
-                }&sortBy=${userPostsFilters.sortBy
-                }&sortOrder=${userPostsFilters.sortOrder
-                }&timeRange=${userPostsFilters.timeRange
-                }&searchQuery=${userPostsFilters.searchQuery
-                }&limit=${userPostsPaginationLimit
+                }&postType=${params.type
+                }&sortBy=${params.sortBy
+                }&sortOrder=${params.sortOrder
+                }&timeRange=${params.timeRange
+                }&searchQuery=${params.searchQuery || ''
+                }&limit=${limit
                 }&offset=${offset}`
             )
             .then((res) => {
@@ -113,10 +115,11 @@ function UserContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
                 setSelectedUserSubPage,
                 userData,
                 setUserData,
-                userDataLoading,
+                userNotFound,
                 userPosts,
                 setUserPosts,
                 userPostsLoading,
+                setUserPostsLoading,
                 nextUserPostsLoading,
                 userPostsFilters,
                 userPostsFiltersOpen,

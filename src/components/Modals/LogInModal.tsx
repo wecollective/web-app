@@ -112,11 +112,11 @@ const LogInModal = (props: { close: () => void }): JSX.Element => {
     useEffect(() => {
         // make recaptcha flag visible
         const recaptchaBadge = document.getElementsByClassName('grecaptcha-badge')[0] as HTMLElement
-        recaptchaBadge.style.visibility = 'visible'
+        if (recaptchaBadge) recaptchaBadge.style.visibility = 'visible'
         return () => {
-            recaptchaBadge.style.visibility = 'hidden'
+            if (recaptchaBadge) recaptchaBadge.style.visibility = 'hidden'
         }
-    })
+    }, [])
 
     return (
         <Modal close={close} style={{ minWidth: 350 }} centered>

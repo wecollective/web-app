@@ -38,7 +38,7 @@ const Homepage = (): JSX.Element => {
             imagePath: '/images/information.jpg',
             children: [
                 {
-                    text: 'Nest spaces holonically',
+                    text: 'Organise spaces holonically',
                     imagePath: '/images/holarchy.jpg',
                     children: [],
                 },

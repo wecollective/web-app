@@ -1,15 +1,14 @@
-import React, { useContext } from 'react'
-import { UserContext } from '@contexts/UserContext'
+import React from 'react'
 import DropDownMenu from '@components/DropDown'
 import Row from '@components/Row'
 
-const UserPagePostsFilters = (): JSX.Element => {
-    const { userPostsFilters, updateUserPostsFilter } = useContext(UserContext)
-    const { type, sortBy, sortOrder, timeRange } = userPostsFilters
-    // const margin = { margin: '0 20px 10px 0' }
-
+const UserPagePostsFilters = (props: {
+    params: any
+    applyParam: (param: string, value: string) => void
+}): JSX.Element => {
+    const { params, applyParam } = props
     return (
-        <Row style={{ width: '100%' }}>
+        <Row centerX style={{ width: '100%', marginBottom: 15 }}>
             <DropDownMenu
                 title='Post Type'
                 options={[
@@ -23,22 +22,22 @@ const UserPagePostsFilters = (): JSX.Element => {
                     'String',
                     'Prism',
                 ]}
-                selectedOption={type}
-                setSelectedOption={(value) => updateUserPostsFilter('type', value)}
+                selectedOption={params.type}
+                setSelectedOption={(value) => applyParam('type', value)}
                 style={{ marginRight: 10 }}
             />
             <DropDownMenu
-                title='Sort By'
+                title={params.view === 'Map' ? 'Size By' : 'Sort By'}
                 options={['Reactions', 'Likes', 'Reposts', 'Ratings', 'Comments', 'Date']}
-                selectedOption={sortBy}
-                setSelectedOption={(value) => updateUserPostsFilter('sortBy', value)}
+                selectedOption={params.sortBy}
+                setSelectedOption={(value) => applyParam('sortBy', value)}
                 style={{ marginRight: 10 }}
             />
             <DropDownMenu
-                title='Sort Order'
+                title={params.view === 'Map' ? 'Size Order' : 'Sort Order'}
                 options={['Descending', 'Ascending']}
-                selectedOption={sortOrder}
-                setSelectedOption={(value) => updateUserPostsFilter('sortOrder', value)}
+                selectedOption={params.sortOrder}
+                setSelectedOption={(value) => applyParam('sortOrder', value)}
                 style={{ marginRight: 10 }}
             />
             <DropDownMenu
@@ -51,9 +50,8 @@ const UserPagePostsFilters = (): JSX.Element => {
                     'Last 24 Hours',
                     'Last Hour',
                 ]}
-                selectedOption={timeRange}
-                setSelectedOption={(value) => updateUserPostsFilter('timeRange', value)}
-                style={{ marginRight: 10 }}
+                selectedOption={params.timeRange}
+                setSelectedOption={(value) => applyParam('timeRange', value)}
             />
         </Row>
     )

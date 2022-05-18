@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import React, { useContext, useEffect, useState } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 import axios from 'axios'
@@ -9,16 +10,13 @@ import NotificationCard from '@components/Cards/NotificationCard'
 import Column from '@components/Column'
 import config from '@src/Config'
 
-const UserPageNotifications = ({
-    match,
-}: {
-    match: { params: { userHandle: string } }
-}): JSX.Element => {
-    const { params } = match
-    const { userHandle } = params
+const UserPageNotifications = (): JSX.Element => {
     const { accountData, accountDataLoading, setAccountData } = useContext(AccountContext)
     const { userData, getUserData, setSelectedUserSubPage, isOwnAccount } = useContext(UserContext)
     const cookies = new Cookies()
+    const history = useHistory()
+    const location = useLocation()
+    const userHandle = location.pathname.split('/')[2]
 
     const [notifications, setNotifications] = useState<any[]>([])
     const [notificationsLoading, setNotificationsLoading] = useState(true)
@@ -51,9 +49,6 @@ const UserPageNotifications = ({
         setNotifications(newNotifications)
     }
 
-    const history = useHistory()
-    const location = useLocation()
-
     function getFirstNotifications(res) {
         if (res.handle === accountData.handle) getNotifications()
         else history.push(`/u/${res.handle}/about`)
@@ -72,7 +67,7 @@ const UserPageNotifications = ({
     return (
         <Column className={styles.wrapper}>
             {isOwnAccount && (
-                <Column className={styles.notifications}>
+                <Column centerX className={styles.notifications}>
                     {notifications.length > 0 ? (
                         notifications.map((notification) => (
                             <NotificationCard
@@ -82,6 +77,8 @@ const UserPageNotifications = ({
                                 updateNotification={updateNotification}
                             />
                         ))
+                    ) : notificationsLoading ? (
+                        <p>Notifications loading...</p>
                     ) : (
                         <p>No notifications yet</p>
                     )}

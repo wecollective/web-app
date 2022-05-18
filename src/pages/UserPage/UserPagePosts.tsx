@@ -1,103 +1,94 @@
-import React, { useContext, useEffect, useRef } from 'react'
-import { useLocation } from 'react-router-dom'
-import { AccountContext } from '@contexts/AccountContext'
+import React, { useContext, useEffect, useState } from 'react'
+import { useLocation, useHistory } from 'react-router-dom'
 import { UserContext } from '@contexts/UserContext'
+import { getNewParams } from '@src/Helpers'
 import styles from '@styles/pages/UserPage/UserPagePosts.module.scss'
-import SearchBar from '@components/SearchBar'
 import UserPagePostsFilters from '@pages/UserPage/UserPagePostsFilters'
-import PostCard from '@components/Cards/PostCard/PostCard'
-import PostListPlaceholder from '@components/PostListPlaceholder'
-import Scrollbars from '@src/components/Scrollbars'
 import Row from '@components/Row'
 import Column from '@components/Column'
-import LoadingWheel from '@components/LoadingWheel'
-import { ReactComponent as SlidersIconSVG } from '@svgs/sliders-h-solid.svg'
+import PostList from '@components/PostList'
+import UserPagePostsHeader from '@pages/UserPage/UserPagePostsHeader'
+import UserNotFound from '@pages/SpaceNotFound'
 
-const UserPagePosts = ({ match }: { match: { params: { userHandle: string } } }): JSX.Element => {
-    const { params } = match
-    const { userHandle } = params
-    const { accountDataLoading } = useContext(AccountContext)
+const UserPagePosts = (): JSX.Element => {
     const {
         userData,
-        getUserData,
+        userNotFound,
         userPosts,
         userPostsLoading,
+        setUserPostsLoading,
         nextUserPostsLoading,
         userPostsFilters,
-        userPostsFiltersOpen,
+        userPostsPaginationLimit,
         userPostsPaginationOffset,
         userPostsPaginationHasMore,
-        setSelectedUserSubPage,
-        setUserPostsFiltersOpen,
         getUserPosts,
-        resetUserPosts,
-        updateUserPostsFilter,
     } = useContext(UserContext)
     const location = useLocation()
+    const history = useHistory()
+    const userHandle = location.pathname.split('/')[2]
+    const [filtersOpen, setFiltersOpen] = useState(false)
+
+    // calculate params
+    const urlParams = Object.fromEntries(new URLSearchParams(location.search))
+    const params = { ...userPostsFilters }
+    Object.keys(urlParams).forEach((param) => {
+        params[param] = urlParams[param]
+    })
+
+    function applyParam(type, value) {
+        history.push({
+            pathname: location.pathname,
+            search: getNewParams(params, type, value),
+        })
+    }
 
     function onScrollBottom() {
         if (!userPostsLoading && !nextUserPostsLoading && userPostsPaginationHasMore)
-            getUserPosts(userData.id, userPostsPaginationOffset)
+            getUserPosts(userData.id, userPostsPaginationOffset, userPostsPaginationLimit, params)
     }
 
     useEffect(() => {
-        if (!accountDataLoading) {
-            if (userHandle !== userData.handle) {
-                getUserData(userHandle, (user) => getUserPosts(user.id, 0))
-            } else getUserPosts(userData.id, 0)
+        if (userData.handle !== userHandle) setUserPostsLoading(true)
+        else {
+            if (params.view === 'List')
+                getUserPosts(userData.id, 0, userPostsPaginationLimit, params)
+            if (params.view === 'Map') {
+                // getPostMapData(spaceData.id, params)
+            }
         }
-    }, [accountDataLoading, location, userPostsFilters])
+    }, [userData.handle, location])
 
-    useEffect(() => {
-        setSelectedUserSubPage('posts')
-        return () => resetUserPosts()
-    }, [])
-
+    if (userNotFound) return <UserNotFound />
     return (
-        <Column className={styles.wrapper}>
-            <Row centerY className={styles.header}>
-                <SearchBar
-                    setSearchFilter={(payload) => updateUserPostsFilter('searchQuery', payload)}
-                    placeholder='Search posts...'
-                    style={{ marginRight: 10 }}
-                />
-                <UserPagePostsFilters />
-            </Row>
-            <Row className={styles.content}>
-                <Scrollbars
-                    id='user-posts-scrollbars'
-                    className={styles.posts}
-                    onScrollBottom={onScrollBottom}
-                >
-                    {userPostsLoading ? (
-                        <PostListPlaceholder />
-                    ) : (
-                        <>
-                            {userPosts.length ? (
-                                <>
-                                    {userPosts.map((post) => (
-                                        <PostCard
-                                            post={post}
-                                            key={post.id}
-                                            location='user-posts'
-                                            style={{ marginBottom: 15 }}
-                                        />
-                                    ))}
-                                    {nextUserPostsLoading && (
-                                        <Row centerX>
-                                            <LoadingWheel />
-                                        </Row>
-                                    )}
-                                </>
-                            ) : (
-                                <div className='wecoNoContentPlaceholder'>
-                                    No posts yet that match those settings...
-                                </div>
-                            )}
-                        </>
-                    )}
-                </Scrollbars>
-            </Row>
+        <Column centerX className={styles.wrapper}>
+            <UserPagePostsHeader
+                filtersOpen={filtersOpen}
+                setFiltersOpen={setFiltersOpen}
+                params={params}
+                applyParam={applyParam}
+            />
+            {filtersOpen && <UserPagePostsFilters params={params} applyParam={applyParam} />}
+            <Column className={styles.content}>
+                {params.view === 'List' && (
+                    <Row className={styles.postListView}>
+                        <Column style={{ width: '100%' }}>
+                            <PostList
+                                location='user-posts'
+                                posts={userPosts}
+                                firstPostsloading={userPostsLoading}
+                                nextPostsLoading={nextUserPostsLoading}
+                                onScrollBottom={onScrollBottom}
+                            />
+                        </Column>
+                    </Row>
+                )}
+                {/* {params.view === 'Map' && (
+                    <Column className={styles.postMapView}>
+                        <UserPagePostMap />
+                    </Column>
+                )} */}
+            </Column>
         </Column>
     )
 }

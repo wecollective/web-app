@@ -109,9 +109,6 @@ export interface IAccountContext {
     setAccountData: (payload: any) => void
     accountDataLoading: boolean
     setAccountDataLoading: (payload: boolean) => void
-    // notifications: any[]
-    // setNotifications: (payload: any[]) => void
-    // notificationsLoading: boolean
     // modals (todo: most to be removed...)
     alertModalOpen: boolean
     setAlertModalOpen: (payload: boolean) => void
@@ -144,8 +141,6 @@ export interface IAccountContext {
     // functions
     getAccountData: () => void
     updateAccountData: (key: string, payload: any) => void
-    // getNotifications: () => void
-    // updateAccountNotification: (id: number, key: string, payload: any) => void
     logOut: () => void
 }
 
@@ -222,10 +217,11 @@ export interface IUserContext {
     setSelectedUserSubPage: (payload: string) => void
     userData: any // Partial<IUser>
     setUserData: (payload: any) => void
-    userDataLoading: boolean
+    userNotFound: boolean
     userPosts: IPost[]
     setUserPosts: (payload: any) => void
     userPostsLoading: boolean
+    setUserPostsLoading: (payload: boolean) => void
     nextUserPostsLoading: boolean
     userPostsFilters: any
     userPostsFiltersOpen: boolean
@@ -235,7 +231,7 @@ export interface IUserContext {
     userPostsPaginationHasMore: boolean
     // functions
     getUserData: (handle: string, returnFunction?: any) => void
-    getUserPosts: (userId: number, offset: number) => void
+    getUserPosts: (userId: number, offset: number, limit: number, params: any) => void
     updateUserPostsFilter: (key: string, payload: string) => void
     resetUserData: () => void
     resetUserPosts: () => void

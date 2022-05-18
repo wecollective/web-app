@@ -39,7 +39,7 @@ const SpacePageSettings = ({ history }): JSX.Element => {
 
     if (spaceNotFound) return <SpaceNotFound />
     return (
-        <Column className={styles.wrapper}>
+        <Column centerX className={styles.wrapper}>
             {spaceData.handle !== spaceHandle || !isModerator ? (
                 <p>Space data loading... </p>
             ) : (
@@ -70,7 +70,7 @@ const SpacePageSettings = ({ history }): JSX.Element => {
                             <UpdateSpaceNameModal close={() => setSpaceNameModalOpen(false)} />
                         )}
                     </Row>
-                    <Column style={{ alignItems: 'start' }}>
+                    <Column centerX>
                         <h1>Description:</h1>
                         <ShowMoreLess height={75}>
                             <Markdown text={spaceData.description || ''} />

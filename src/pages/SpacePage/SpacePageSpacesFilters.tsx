@@ -1,5 +1,4 @@
 import React from 'react'
-import styles from '@styles/pages/SpacePage/SpacePageFilters.module.scss'
 import DropDownMenu from '@components/DropDown'
 import Row from '@components/Row'
 
@@ -9,7 +8,7 @@ const SpacePageSpacesFilters = (props: {
 }): JSX.Element => {
     const { params, applyParam } = props
     return (
-        <Row className={styles.wrapper}>
+        <Row centerX style={{ width: '100%', marginBottom: 15 }}>
             <DropDownMenu
                 title='Sort By'
                 options={[

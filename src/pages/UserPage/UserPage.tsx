@@ -1,61 +1,109 @@
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Route, Switch, Redirect, useLocation } from 'react-router-dom'
+import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
 import styles from '@styles/pages/UserPage/UserPage.module.scss'
 import Column from '@components/Column'
 import Row from '@components/Row'
-import UserPageSidebar from '@pages/UserPage/UserPageSidebar'
 import CoverImage from '@components/CoverImage'
+import ImageFade from '@components/ImageFade'
+import FlagImagePlaceholder from '@components/FlagImagePlaceholder'
+import ImageUploadModal from '@components/modals/ImageUploadModal'
 import PageTabs from '@components/PageTabs'
 import UserPageAbout from '@pages/UserPage/UserPageAbout'
 import UserPageSettings from '@pages/UserPage/UserPageSettings'
 import UserPageNotifications from '@pages/UserPage/UserPageNotifications'
-// import UserPageMessages from '@pages/UserPage/UserPageMessages'
 import UserPagePosts from '@pages/UserPage/UserPagePosts'
-import { ReactComponent as SettingsIconSVG } from '@svgs/cog-solid.svg'
+import { ReactComponent as AboutIcon } from '@svgs/book-open-solid.svg'
+import { ReactComponent as PostsIcon } from '@svgs/edit-solid.svg'
+import { ReactComponent as BellIcon } from '@svgs/bell-solid.svg'
+import { ReactComponent as SettingsIcon } from '@svgs/cog-solid.svg'
 
-const UserPage = ({
-    match,
-}: {
-    match: { url: string; params: { userHandle: string } }
-}): JSX.Element => {
-    const { url } = match
-    const { userData, isOwnAccount, resetUserData } = useContext(UserContext)
+const UserPage = (): JSX.Element => {
+    const { accountDataLoading, loggedIn } = useContext(AccountContext)
+    const {
+        userData,
+        getUserData,
+        setUserData,
+        resetUserData,
+        isOwnAccount,
+        setSelectedUserSubPage,
+    } = useContext(UserContext)
     const location = useLocation()
+    const userHandle = location.pathname.split('/')[2]
     const subpage = location.pathname.split('/')[3]
     const tabs = {
         baseRoute: `/u/${userData.handle}`,
         left: [
-            { text: 'About', visible: true, selected: subpage === 'about' },
-            { text: 'Posts', visible: true, selected: subpage === 'posts' },
-            { text: 'Notifications', visible: isOwnAccount, selected: subpage === 'notifications' },
+            { text: 'About', visible: true, icon: <AboutIcon /> },
+            { text: 'Posts', visible: true, icon: <PostsIcon /> },
+            { text: 'Notifications', visible: isOwnAccount, icon: <BellIcon /> },
         ],
         right: [
             {
                 text: 'Settings',
                 visible: isOwnAccount,
-                selected: subpage === 'settings',
-                icon: <SettingsIconSVG />,
+                icon: <SettingsIcon />,
             },
         ],
     }
 
+    const [imageUploadModalOpen, setImageUploadModalOpen] = useState(false)
+
     useEffect(() => {
-        window.scrollTo(0, 200)
-        window.onunload = () => window.scrollTo(0, 200)
-    }, [])
+        if (!accountDataLoading && userHandle !== userData.handle) getUserData(userHandle)
+    }, [accountDataLoading, userHandle])
+
+    useEffect(() => setSelectedUserSubPage(subpage), [location])
 
     useEffect(() => () => resetUserData(), [])
 
     return (
-        <Row className={styles.wrapper}>
-            <UserPageSidebar />
-            <Column className={styles.content}>
-                <CoverImage type='user' image={userData.coverImagePath} canEdit={isOwnAccount} />
+        <Column centerX className={styles.wrapper}>
+            <CoverImage type='user' image={userData.coverImagePath} canEdit={isOwnAccount} />
+            <Column centerX className={styles.header}>
+                <Row centerY className={styles.userData}>
+                    <div className={styles.flagImage}>
+                        <ImageFade imagePath={userData.flagImagePath} speed={1000}>
+                            <FlagImagePlaceholder type='space' />
+                        </ImageFade>
+                        {isOwnAccount && (
+                            <button type='button' onClick={() => setImageUploadModalOpen(true)}>
+                                Add a new <br /> flag image
+                            </button>
+                        )}
+                        {imageUploadModalOpen && (
+                            <ImageUploadModal
+                                type='space-flag'
+                                shape='square'
+                                id={userData.id}
+                                title='Add a new flag image'
+                                mbLimit={2}
+                                onSaved={(v) => setUserData({ ...userData, flagImagePath: v })}
+                                close={() => setImageUploadModalOpen(false)}
+                            />
+                        )}
+                    </div>
+                    <Column className={styles.userName}>
+                        <h1>{userData.name}</h1>
+                        <p className='grey'>u/{userData.handle}</p>
+                    </Column>
+                    {/* {loggedIn && (
+                        <Button
+                            icon={isFollowing ? <SuccessIconSVG /> : undefined}
+                            text={isFollowing ? 'Following' : 'Follow'}
+                            color='blue'
+                            disabled={userHandle !== userData.handle}
+                            onClick={followUser}
+                        />
+                    )} */}
+                </Row>
                 <PageTabs tabs={tabs} />
+            </Column>
+            <Column className={styles.content}>
                 <Column className={styles.centerPanel}>
                     <Switch>
-                        <Redirect from={`${url}`} to={`${url}/about`} exact />
+                        <Redirect from='/u/:userHandle/' to='/u/:userHandle/about' exact />
                         <Route path='/u/:userHandle/about' component={UserPageAbout} exact />
                         <Route path='/u/:userHandle/posts' component={UserPagePosts} exact />
                         <Route
@@ -67,7 +115,7 @@ const UserPage = ({
                     </Switch>
                 </Column>
             </Column>
-        </Row>
+        </Column>
     )
 }
 

@@ -58,13 +58,13 @@ const Navbar = (): JSX.Element => {
                     <ChevronDownIcon />
                     {exploreDropDownOpen && (
                         <div className={styles.exploreDropDown}>
-                            <Link to='/s/all/spaces'>
-                                <SpacesIcon />
-                                <p>Spaces</p>
-                            </Link>
                             <Link to='/s/all/posts'>
                                 <PostsIcon />
                                 <p>Posts</p>
+                            </Link>
+                            <Link to='/s/all/spaces'>
+                                <SpacesIcon />
+                                <p>Spaces</p>
                             </Link>
                             <Link to='/s/all/people'>
                                 <UsersIcon />

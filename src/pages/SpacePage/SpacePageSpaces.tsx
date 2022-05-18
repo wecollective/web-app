@@ -76,7 +76,7 @@ const SpacePageSpaces = (): JSX.Element => {
                 applyParam={applyParam}
             />
             {filtersOpen && <SpacePageSpacesFilters params={params} applyParam={applyParam} />}
-            <Row className={styles.content}>
+            <Row centerX className={styles.content}>
                 {params.view === 'List' && (
                     <Column className={styles.spaceListView}>
                         <SpaceList

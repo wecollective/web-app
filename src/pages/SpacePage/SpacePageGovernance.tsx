@@ -12,7 +12,7 @@ const SpacePageGovernance = (): JSX.Element => {
 
     if (spaceNotFound) return <SpaceNotFound />
     return (
-        <Column className={styles.wrapper}>
+        <Column centerX className={styles.wrapper}>
             {spaceData.handle !== spaceHandle ? (
                 <p>Space data loading... </p>
             ) : (

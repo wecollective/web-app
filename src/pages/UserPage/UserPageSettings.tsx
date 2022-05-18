@@ -11,13 +11,7 @@ import Row from '@components/Row'
 import UpdateUserNameModal from '@src/components/modals/UpdateUserNameModal'
 import UpdateUserBioModal from '@src/components/modals/UpdateUserBioModal'
 
-const UserPageSettings = ({
-    match,
-}: {
-    match: { params: { userHandle: string } }
-}): JSX.Element => {
-    const { params } = match
-    const { userHandle } = params
+const UserPageSettings = (): JSX.Element => {
     const { accountData, accountDataLoading } = useContext(AccountContext)
     const { setSelectedUserSubPage, userData, getUserData, isOwnAccount } = useContext(UserContext)
     const { handle, name, bio } = accountData
@@ -27,6 +21,7 @@ const UserPageSettings = ({
 
     const history = useHistory()
     const location = useLocation()
+    const userHandle = location.pathname.split('/')[2]
 
     function redirect(res) {
         if (res.handle !== handle) history.push(`/u/${res.handle}/about`)
@@ -43,9 +38,9 @@ const UserPageSettings = ({
     useEffect(() => setSelectedUserSubPage('settings'), [])
 
     return (
-        <Column className={styles.wrapper}>
+        <Column centerX className={styles.wrapper}>
             {isOwnAccount && (
-                <Column className={styles.content}>
+                <Column centerX className={styles.content}>
                     <Row centerY>
                         <h1>Name:</h1>
                         <p>{name}</p>
@@ -59,7 +54,7 @@ const UserPageSettings = ({
                             <UpdateUserNameModal close={() => setUpdateUserNameModalOpen(false)} />
                         )}
                     </Row>
-                    <Column style={{ alignItems: 'start' }}>
+                    <Column centerX>
                         <h1>Bio:</h1>
                         <ShowMoreLess height={75}>
                             <Markdown text={bio} />

@@ -1,6 +1,4 @@
-import React, { useContext } from 'react'
-import { SpaceContext } from '@contexts/SpaceContext'
-import styles from '@styles/pages/SpacePage/SpacePageFilters.module.scss'
+import React from 'react'
 import DropDownMenu from '@components/DropDown'
 import Row from '@components/Row'
 
@@ -9,10 +7,8 @@ const SpacePagePostsFilters = (props: {
     applyParam: (param: string, value: string) => void
 }): JSX.Element => {
     const { params, applyParam } = props
-    const { spacePostsFilters } = useContext(SpaceContext)
-    const { view } = spacePostsFilters
     return (
-        <Row className={styles.wrapper}>
+        <Row centerX style={{ width: '100%', marginBottom: 15 }}>
             <DropDownMenu
                 title='Type'
                 options={[
@@ -31,14 +27,14 @@ const SpacePagePostsFilters = (props: {
                 style={{ marginRight: 10 }}
             />
             <DropDownMenu
-                title={view === 'Map' ? 'Size By' : 'Sort By'}
+                title={params.view === 'Map' ? 'Size By' : 'Sort By'}
                 options={['Likes', 'Comments', 'Reposts', 'Ratings', 'Date']}
                 selectedOption={params.sortBy}
                 setSelectedOption={(payload) => applyParam('sortBy', payload)}
                 style={{ marginRight: 10 }}
             />
             <DropDownMenu
-                title={view === 'Map' ? 'Size Order' : 'Order'}
+                title={params.view === 'Map' ? 'Size Order' : 'Sort Order'}
                 options={['Descending', 'Ascending']}
                 selectedOption={params.sortOrder}
                 setSelectedOption={(payload) => applyParam('sortOrder', payload)}
