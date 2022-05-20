@@ -21,7 +21,7 @@ const ProgressBarSteps = (props: {
                 }}
             >
                 {steps.map((step, index) => (
-                    <>
+                    <React.Fragment key={step}>
                         <Column
                             centerX
                             centerY
@@ -41,12 +41,12 @@ const ProgressBarSteps = (props: {
                                 <div />
                             </Column>
                         )}
-                    </>
+                    </React.Fragment>
                 ))}
             </Row>
             <Row className={styles.text}>
                 {steps.map((step, index) => (
-                    <Row centerX style={{ width: '100%' }}>
+                    <Row key={step} centerX style={{ width: '100%' }}>
                         <p className={`${index > currentStep - 1 && styles.todo}`}>{step}</p>
                     </Row>
                 ))}
