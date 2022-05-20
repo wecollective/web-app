@@ -68,8 +68,10 @@ const Input = (props: {
                         data-lpignore={!autoFill}
                     />
                 )}
-                {state === 'invalid' && <DangerIconSVG />}
-                {state === 'valid' && <SuccessIconSVG />}
+                <div className={styles.stateIcon}>
+                    {state === 'invalid' && <DangerIconSVG />}
+                    {state === 'valid' && <SuccessIconSVG />}
+                </div>
                 {loading && <LoadingWheel size={30} />}
             </div>
         </div>
