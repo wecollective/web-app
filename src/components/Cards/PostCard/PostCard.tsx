@@ -264,7 +264,7 @@ const PostCard = (props: {
                         {type.toLowerCase().split('-').join(' ')}
                     </div>
                     {/* todo: move to corner drop down button */}
-                    {isOwnPost && (
+                    {location !== 'preview' && isOwnPost && (
                         <div
                             className={styles.delete}
                             role='button'

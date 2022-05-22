@@ -1,7 +1,7 @@
 /* eslint-disable react/no-array-index-key */
 import React, { useState } from 'react'
 import * as d3 from 'd3'
-import styles from '@styles/components/cards/StringBeadCard.module.scss'
+import styles from '@styles/components/cards/PostCard/StringBeadCard2.module.scss'
 import colors from '@styles/Colors.module.scss'
 import Column from '@src/components/Column'
 import Row from '@src/components/Row'

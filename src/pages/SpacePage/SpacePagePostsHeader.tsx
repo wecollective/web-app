@@ -72,7 +72,7 @@ const SpacePagePostsHeader = (props: {
             />
             {createPostModalOpen && (
                 <CreatePostModal
-                    type={createPostModalType}
+                    initialType={createPostModalType}
                     close={() => setCreatePostModalOpen(false)}
                 />
             )}

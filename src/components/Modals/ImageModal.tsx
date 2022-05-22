@@ -29,7 +29,11 @@ const ImageModal = (props: {
                     </button>
                 )}
                 <Column centerX>
-                    <img className={styles.selectedImage} src={selectedImage.url} alt='' />
+                    <img
+                        className={styles.selectedImage}
+                        src={selectedImage.url || URL.createObjectURL(selectedImage.file)}
+                        alt=''
+                    />
                     {selectedImage.caption && (
                         <ShowMoreLess height={150}>
                             <Markdown

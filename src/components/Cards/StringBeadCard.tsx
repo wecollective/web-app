@@ -9,7 +9,7 @@ import BeadCardUrlPreview from '@components/Cards/BeadCardUrlPreview'
 import Markdown from '@components/Markdown'
 import Scrollbars from '@components/Scrollbars'
 import CloseButton from '@components/CloseButton'
-import Modal from '@components/Modal'
+import ImageModal from '@components/modals/ImageModal'
 import AudioVisualiser from '@src/components/AudioVisualiser'
 import AudioTimeSlider from '@src/components/AudioTimeSlider'
 import { ReactComponent as TextIconSVG } from '@svgs/font-solid.svg'
@@ -152,30 +152,13 @@ const StringBeadCard = (props: {
                     </Row>
                 )}
             </Column>
-            {/* todo: create image modal component */}
             {imageModalOpen && (
-                <Modal close={() => setImageModalOpen(false)}>
-                    <Row centerY className={styles.selectedImage}>
-                        {selectedImage.index !== 0 && (
-                            <button type='button' onClick={() => toggleImage(-1)}>
-                                <ChevronLeftSVG />
-                            </button>
-                        )}
-                        <Column centerX>
-                            <img
-                                className={styles.selectedImage}
-                                src={selectedImage.url || URL.createObjectURL(selectedImage.file)}
-                                alt=''
-                            />
-                            {selectedImage.caption && <p>{selectedImage.caption}</p>}
-                        </Column>
-                        {selectedImage.index !== bead.images.length - 1 && (
-                            <button type='button' onClick={() => toggleImage(1)}>
-                                <ChevronRightSVG />
-                            </button>
-                        )}
-                    </Row>
-                </Modal>
+                <ImageModal
+                    images={bead.images}
+                    selectedImage={selectedImage}
+                    setSelectedImage={setSelectedImage}
+                    close={() => setImageModalOpen(false)}
+                />
             )}
         </Column>
     )
