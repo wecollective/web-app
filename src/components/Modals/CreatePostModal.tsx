@@ -66,19 +66,19 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             name: 'Url',
             steps: ['Post Type: URL', 'URL', 'Text (optional)', 'Spaces', 'Create'],
             icon: <UrlIcon />,
-            description: `**Url**: Url description`,
+            description: `**Url**: Add a URL and we'll scrape its meta-data to display on the post.`,
         },
         {
             name: 'Image',
             steps: ['Post Type: Image', 'Images', 'Text (optional)', 'Spaces', 'Create'],
             icon: <ImageIcon />,
-            description: `**Image**: Image description`,
+            description: `**Image**: Upload images from your device or via URL, include captions if you want, and re-order them how you like to create an album.`,
         },
         {
             name: 'Audio',
             steps: ['Post Type: Audio', 'Audio', 'Text (optional)', 'Spaces', 'Create'],
             icon: <AudioIcon />,
-            description: `**Audio**: Audio description`,
+            description: `**Audio**: Upload an audio clip from your device or record your own audio file.`,
         },
         {
             name: 'Event',
@@ -91,7 +91,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                 'Create',
             ],
             icon: <EventIcon />,
-            description: `**Event**: Event description`,
+            description: `**Event**: Schedule an event with a start and end time to be displayed in your spaces calendar. Mark yourself as 'going' or 'interested' to receive a notification just before the event starts.`,
         },
         {
             name: 'Glass Bead Game',
@@ -104,13 +104,13 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                 'Create',
             ],
             icon: <GBGIcon />,
-            description: `**Glass Bead Game**: Glass Bead Game description`,
+            description: `**Glass Bead Game**: Create your own Glass Bead Game and connect to other users with realtime audio-video streaming and chat functionality.`,
         },
         {
             name: 'String',
             steps: ['Post Type: String', 'String', 'Text', 'Spaces', 'Create'],
             icon: <StringIcon />,
-            description: `**String**: String description`,
+            description: `**String**: Create a string of connected items (text, URL, audio, or image) in one post.`,
         },
     ]
     const [postType, setPostType] = useState(initialType)
