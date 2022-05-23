@@ -1,19 +1,96 @@
 @import '@styles/Variables';
 
-.topics {
-    max-height: 135px;
-    margin-bottom: 10px;
+.header {
+    margin-bottom: 20px;
+    > h1 { margin: 0 }
+}
 
-    .topicWrapper {
-        margin: 0 10px 10px 0;
-        padding: 5px 3px;
-        border-radius: 20px;
-        background-color: $grey2;
-        transition: background-color 0.3s;
+.spaces {
+    margin-bottom: 20px;
+    width: 400px;
+}
+
+.title {
+    margin-bottom: 40px;
+
+    > h1 { margin: 0 }
+
+    > div {
+        width: 50px;
+        height: 50px;
+        background-color: white;
+        border-radius: 50%;
+        margin-left: 10px;
+
+        > svg {
+            width: 25px;
+            height: 25px;
+            opacity: 0.8;
+        }
+    }
+}
+
+.postTypeButton {
+    padding: 10px;
+    width: 110px;
+
+    > button {
+        all: unset;
         cursor: pointer;
+        margin-bottom: 10px;
+        width: 90px;
+        height: 90px;
+        background-color: white;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        &.selected { background-color: $blue8 }
 
-        &:hover {
-            background-color: $grey3;
+        > svg {
+            width: 40px;
+            height: 40px;
+            opacity: 0.8;
+        }
+    }
+
+    > p {
+        text-align: center;
+    }
+}
+
+.topicGroupButtons {
+    margin: 20px 0;
+    > button {
+        &:not(:last-child) { margin-right: 10px }
+    }
+}
+
+.topics {
+    margin-bottom: 20px;
+
+    .topic {
+        margin: 10px;
+        > button {
+            all: unset;
+            cursor: pointer;
+            background-color: white;
+            border-radius: 50%;
+            width: 90px;
+            height: 90px;
+            margin-bottom: 10px;
+
+            > img {
+                width: 90px;
+                height: 90px;
+                border-radius: 50%;
+            }
+        }
+        > p {
+            font-size: 14px;
+            width: 90px;
+            text-align: center;
+            word-wrap: break-word;
         }
     }
 }
@@ -24,8 +101,8 @@
     .selectedTopicWrapper {
         margin-top: 10px;
         padding: 5px;
-        border-radius: 20px;
-        background-color: $blue5;
+        border-radius: 30px;
+        background-color: $aqua;
     }
 }
 
@@ -107,13 +184,10 @@
 .dateTimePicker {
     position: relative;
     margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
     > div {
         position: relative;
-        input {
-            cursor: pointer;
-        }
+        &:not(:last-child) { margin-right: 30px }
+        input { cursor: pointer }
     }
 }
 
