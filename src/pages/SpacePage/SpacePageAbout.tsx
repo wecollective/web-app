@@ -8,6 +8,7 @@ import Row from '@components/Row'
 import Markdown from '@components/Markdown'
 import ImageTitle from '@components/ImageTitle'
 import SpaceNotFound from '@pages/SpaceNotFound'
+import Scrollbars from '@components/Scrollbars'
 
 const SpacePageAbout = (): JSX.Element => {
     const { spaceData, spaceNotFound } = useContext(SpaceContext)
@@ -21,24 +22,26 @@ const SpacePageAbout = (): JSX.Element => {
             {spaceData.handle !== spaceHandle ? (
                 <p>Space data loading... </p>
             ) : (
-                <Column className={styles.content}>
-                    <Row centerY centerX className={styles.creation}>
-                        <p>Created</p>
-                        <p title={dateCreated(createdAt)}>{timeSinceCreated(createdAt)}</p>
-                        <p>by</p>
-                        <ImageTitle
-                            type='user'
-                            imagePath={Creator.flagImagePath}
-                            imageSize={32}
-                            title={Creator.name}
-                            fontSize={16}
-                            link={`/u/${Creator.handle}`}
-                            shadow
-                            style={{ marginLeft: 5 }}
-                        />
-                    </Row>
-                    <Markdown text={description} style={{ textAlign: 'center' }} />
-                </Column>
+                <Scrollbars className={styles.contentWrapper}>
+                    <Column className={styles.content}>
+                        <Markdown text={description} style={{ textAlign: 'center' }} />
+                        <Row centerY centerX className={styles.creation}>
+                            <p>Created</p>
+                            <p title={dateCreated(createdAt)}>{timeSinceCreated(createdAt)}</p>
+                            <p>by</p>
+                            <ImageTitle
+                                type='user'
+                                imagePath={Creator.flagImagePath}
+                                imageSize={32}
+                                title={Creator.name}
+                                fontSize={16}
+                                link={`/u/${Creator.handle}`}
+                                shadow
+                                style={{ marginLeft: 5 }}
+                            />
+                        </Row>
+                    </Column>
+                </Scrollbars>
             )}
         </Column>
     )
