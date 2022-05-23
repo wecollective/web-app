@@ -386,6 +386,14 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
         setImages([...images.filter((image, i) => i !== index)])
     }
 
+    function moveImage(index, increment) {
+        const newImages = [...images]
+        const image = newImages[index]
+        newImages.splice(index, 1)
+        newImages.splice(index + increment, 0, image)
+        setImages(newImages)
+    }
+
     function updateNewCaption(index, value) {
         const newImages = [...images]
         newImages[index].newCaption = value
@@ -1113,6 +1121,24 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                                 style={{ padding: '0 10px' }}
                                             />
                                         </Row>
+                                        <Row centerX className={styles.itemFooter}>
+                                            {index !== 0 && (
+                                                <button
+                                                    type='button'
+                                                    onClick={() => moveImage(index, -1)}
+                                                >
+                                                    <ChevronLeftIcon />
+                                                </button>
+                                            )}
+                                            {index < images.length - 1 && (
+                                                <button
+                                                    type='button'
+                                                    onClick={() => moveImage(index, 1)}
+                                                >
+                                                    <ChevronRightIcon />
+                                                </button>
+                                            )}
+                                        </Row>
                                     </Column>
                                 ))}
                             </Scrollbars>
@@ -1809,7 +1835,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                         index={index}
                                         removeBead={removeBead}
                                     />
-                                    <Row centerX className={styles.beadFooter}>
+                                    <Row centerX className={styles.itemFooter}>
                                         {index !== 0 && (
                                             <button
                                                 type='button'
