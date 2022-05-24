@@ -302,7 +302,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             const blacklist = [...selectedSpaces.map((s) => s.id)]
             const data = { query, blacklist }
             axios
-                .post(`${config.apiURL}/viable-post-spaces`, data)
+                .post(`${config.apiURL}/find-spaces`, data)
                 .then((res) => setSpaceOptions(res.data))
                 .catch((error) => console.log(error))
         }

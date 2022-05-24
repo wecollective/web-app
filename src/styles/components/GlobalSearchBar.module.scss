@@ -38,4 +38,32 @@
             opacity: 0.3;
         }
     }
+
+    .searchOptions {
+        position: absolute;
+        top: 50px;
+        left: -2px;
+        background-color: $black2;
+        border-bottom-left-radius: 5px;
+        border-bottom-right-radius: 5px;
+        padding: 10px 15px;
+        box-shadow: 0 0 10px 0 rgba(10, 8, 72, 0.05);
+        width: max-content;
+
+        > button {
+            all: unset;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            margin-bottom: 7px;
+            font-size: 14px;
+            > p {
+                color: white;
+                margin: 0 5px;
+            }
+            > span {
+                color: rgb(160, 160, 160);
+            }
+        }
+    }
 }
