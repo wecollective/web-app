@@ -299,7 +299,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
     function findSpaces(query) {
         if (!query) setSpaceOptions([])
         else {
-            const blacklist = [0, ...selectedSpaces.map((s) => s.id)]
+            const blacklist = [...selectedSpaces.map((s) => s.id)]
             const data = { query, blacklist }
             axios
                 .post(`${config.apiURL}/viable-post-spaces`, data)
@@ -1915,7 +1915,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             )}
 
             {currentStep === steps.length && (
-                <Column centerX style={{ width: 800, marginBottom: 60 }}>
+                <Column centerX style={{ width: 600, marginBottom: 60 }}>
                     <h3 style={{ marginBottom: 30 }}>Create</h3>
                     <p style={{ marginBottom: 30 }}>
                         Here's a preview of what your post will look like to other users:

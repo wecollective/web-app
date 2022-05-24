@@ -1,7 +1,7 @@
 import React from 'react'
 import { Route, Switch } from 'react-router-dom'
 import ContextProviders from '@contexts/ContextProviders'
-// import SidebarSmall from '@components/SidebarSmall'
+import SidebarSmall from '@components/SidebarSmall'
 import HomePage from '@pages/HomePage'
 import FeaturesPage from '@pages/FeaturesPage'
 import CoopPage from '@pages/CoopPage'
@@ -19,9 +19,7 @@ const App = (): JSX.Element => {
             <ContextProviders>
                 <Modals />
                 <Navbar />
-                {/* <div className={styles.sidebarSmallWrapper}>
-                        <SidebarSmall />
-                    </div> */}
+                <SidebarSmall />
                 <Switch>
                     <Route path='/' exact component={HomePage} />
                     <Route path='/features' exact component={FeaturesPage} />
