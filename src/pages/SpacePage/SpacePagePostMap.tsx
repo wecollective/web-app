@@ -12,80 +12,22 @@ import LoadingWheel from '@components/LoadingWheel'
 import config from '@src/Config'
 import { IPost } from '@src/Interfaces'
 
-const SpacePagePostMap = (): JSX.Element => {
-    const { accountData, accountDataLoading, loggedIn } = useContext(AccountContext)
-    const { spaceData, spacePostsFilters, fullScreen } = useContext(SpaceContext)
-    const { sortBy, sortOrder, timeRange, type, depth, searchQuery } = spacePostsFilters
-    const [postMapData, setPostMapData] = useState([])
+const SpacePagePostMap = (props: { postMapData: any; params: any }): JSX.Element => {
+    const { postMapData, params } = props
+    const { accountData } = useContext(AccountContext)
+    const { spaceData, setPostMapData, getPostMapData } = useContext(SpaceContext)
+    const { sortBy, sortOrder } = params
     const [selectedPost, setSelectedPost] = useState<any>(null)
     const [postModalOpen, setPostModalOpen] = useState(false)
     const defaultGravity = 30
     const [gravity, setGravity] = useState(defaultGravity)
     const [showKey, setShowKey] = useState(false)
-    // const [postMapPaginationLimit, setPostMapPaginationLimit] = useState(50)
-    const postMapPaginationLimit = 50
     const [totalMatchingPosts, setTotalMatchingPosts] = useState(0)
-    const [width, setWidth] = useState<number | string>(700)
+    const width = '100%'
     const height = 800
     const arrowPoints = 'M 0 0 6 3 0 6 1.5 3'
     const gravitySlider = useRef<HTMLInputElement>(null)
     const gravityInput = useRef<HTMLInputElement>(null)
-
-    function getPostMapData(limit) {
-        console.log(`getPostMapData (1 to ${postMapPaginationLimit})`)
-        axios
-            .get(
-                /* prettier-ignore */
-                `${config.apiURL}/posts-map-data?accountId=${loggedIn ? accountData.id : null
-                }&spaceId=${spaceData.id
-                }&sortBy=${sortBy
-                }&sortOrder=${sortOrder
-                }&timeRange=${timeRange
-                }&postType=${type
-                }&depth=${depth
-                }&searchQuery=${searchQuery || ''
-                }&limit=${limit
-                }&offset=0`
-            )
-            .then((res) => {
-                // store previous node positions
-                interface INodePosition {
-                    id: number
-                    x: number
-                    y: number
-                    vx: number
-                    vy: number
-                }
-                const previousNodePositions = [] as INodePosition[]
-                d3.selectAll('.post-map-node').each((d) => {
-                    previousNodePositions.push({
-                        id: d.id,
-                        x: d.x,
-                        y: d.y,
-                        vx: d.vx,
-                        vy: d.vy,
-                    })
-                })
-                // add previous positions to matching new nodes
-                res.data.posts.forEach((post) => {
-                    const match = previousNodePositions.find((node) => node.id === post.id)
-                    if (match) {
-                        post.x = match.x
-                        post.y = match.y
-                        post.vx = match.vx
-                        post.vy = match.vy
-                    } else {
-                        // if no match randomise starting position outside of viewport
-                        const randomX = (Math.random() - 0.5) * 5000
-                        const randomY = (Math.random() - 0.5) * 5000
-                        post.x = randomX > 0 ? randomX + 200 : randomX - 200
-                        post.y = randomY > 0 ? randomY + 200 : randomY - 200
-                    }
-                })
-                setPostMapData(res.data.posts)
-                setTotalMatchingPosts(res.data.totalMatchingPosts)
-            })
-    }
 
     function openPostModal(postId) {
         setSelectedPost(null)
@@ -99,14 +41,17 @@ const SpacePagePostMap = (): JSX.Element => {
         let dMin = 0
         let dMax
         if (sortBy === 'Reactions')
-            dMax = d3.max(postMapData.map((post: any) => post.totalReactions))
-        if (sortBy === 'Likes') dMax = d3.max(postMapData.map((post: any) => post.totalLikes))
-        if (sortBy === 'Reposts') dMax = d3.max(postMapData.map((post: any) => post.totalReposts))
-        if (sortBy === 'Ratings') dMax = d3.max(postMapData.map((post: any) => post.totalRatings))
-        if (sortBy === 'Comments') dMax = d3.max(postMapData.map((post: any) => post.totalComments))
+            dMax = d3.max(postMapData.posts.map((post: any) => post.totalReactions))
+        if (sortBy === 'Likes') dMax = d3.max(postMapData.posts.map((post: any) => post.totalLikes))
+        if (sortBy === 'Reposts')
+            dMax = d3.max(postMapData.posts.map((post: any) => post.totalReposts))
+        if (sortBy === 'Ratings')
+            dMax = d3.max(postMapData.posts.map((post: any) => post.totalRatings))
+        if (sortBy === 'Comments')
+            dMax = d3.max(postMapData.posts.map((post: any) => post.totalComments))
         if (sortBy === 'Date') {
-            dMin = d3.min(postMapData.map((post: IPost) => Date.parse(post.createdAt)))
-            dMax = d3.max(postMapData.map((post: IPost) => Date.parse(post.createdAt)))
+            dMin = d3.min(postMapData.posts.map((post: IPost) => Date.parse(post.createdAt)))
+            dMax = d3.max(postMapData.posts.map((post: IPost) => Date.parse(post.createdAt)))
         }
         let domainMin
         let domainMax
@@ -314,6 +259,18 @@ const SpacePagePostMap = (): JSX.Element => {
                 }
             }
         })
+
+        d3.select('#canvas').style('width', width)
+        d3.select('#post-map-svg').attr('width', width)
+        const newWidth = parseInt(d3.select('#post-map-svg').style('width'), 10)
+
+        // todo: smoothly transition size and scale
+        // d3.select('#post-map-svg').call(zoom.transform, d3.zoomIdentity.scale(scale).translate(newWidth/scale/2,height/scale/2))
+
+        d3.select('#post-map-svg').call(
+            zoom.transform,
+            d3.zoomIdentity.scale(1).translate(newWidth / 2, height / 2)
+        )
     }
 
     function repositionMap(data) {
@@ -338,21 +295,6 @@ const SpacePagePostMap = (): JSX.Element => {
                 zoom.transform,
                 d3.zoomIdentity.scale(scale).translate(svgWidth / scale / 2, height / scale / 2)
             )
-    }
-
-    function updateCanvasSize() {
-        d3.select('#canvas').style('width', width)
-        d3.select('#post-map-svg').attr('width', width)
-        const newWidth = parseInt(d3.select('#post-map-svg').style('width'), 10)
-
-        // todo: smoothly transition size and scale
-        // d3.select('#post-map-svg').call(zoom.transform, d3.zoomIdentity.scale(scale).translate(newWidth/scale/2,height/scale/2))
-
-        d3.select('#post-map-svg').call(
-            zoom.transform,
-            d3.zoomIdentity.scale(1).translate(newWidth / 2, height / 2)
-        )
-        repositionMap(postMapData)
     }
 
     function trimText(text) {
@@ -579,35 +521,62 @@ const SpacePagePostMap = (): JSX.Element => {
     useEffect(() => createCanvas(), [])
 
     useEffect(() => {
-        if (!accountDataLoading && spaceData.id) {
-            getPostMapData(postMapPaginationLimit)
+        if (postMapData.totalMatchingPosts) {
+            // store previous node positions
+            interface INodePosition {
+                id: number
+                x: number
+                y: number
+                vx: number
+                vy: number
+            }
+            const previousNodePositions = [] as INodePosition[]
+            d3.selectAll('.post-map-node').each((d) => {
+                previousNodePositions.push({
+                    id: d.id,
+                    x: d.x,
+                    y: d.y,
+                    vx: d.vx,
+                    vy: d.vy,
+                })
+            })
+            // add previous positions to matching new nodes
+            postMapData.posts.forEach((post) => {
+                const match = previousNodePositions.find((node) => node.id === post.id)
+                if (match) {
+                    post.x = match.x
+                    post.y = match.y
+                    post.vx = match.vx
+                    post.vy = match.vy
+                } else {
+                    // if no match randomise starting position outside of viewport
+                    const randomX = (Math.random() - 0.5) * 5000
+                    const randomY = (Math.random() - 0.5) * 5000
+                    post.x = randomX > 0 ? randomX + 200 : randomX - 200
+                    post.y = randomY > 0 ? randomY + 200 : randomY - 200
+                }
+            })
+            setTotalMatchingPosts(postMapData.totalMatchingPosts)
+            updateMap(postMapData.posts)
         }
-    }, [accountDataLoading, spaceData.id, spacePostsFilters])
-
-    useEffect(() => {
-        if (postMapData) updateMap(postMapData)
     }, [postMapData])
 
-    useEffect(() => {
-        setWidth(fullScreen ? '100%' : 700)
-    }, [fullScreen])
-
-    useEffect(() => {
-        updateCanvasSize()
-    }, [width])
+    useEffect(() => () => setPostMapData({}), [])
 
     return (
         <div className={styles.postMapWrapper}>
             <div className={styles.controlsWrapper}>
                 <div className={styles.controls}>
                     <div className={styles.item}>
-                        Showing {postMapData.length} of {totalMatchingPosts} posts
+                        Showing {postMapData.posts ? postMapData.posts.length : 0} of {totalMatchingPosts} posts
                         <div
                             className='blueText ml-10'
                             role='button'
                             tabIndex={0}
-                            onClick={() => getPostMapData(totalMatchingPosts)}
-                            onKeyDown={() => getPostMapData(totalMatchingPosts)}
+                            onClick={() => getPostMapData(spaceData.id, params, totalMatchingPosts)}
+                            onKeyDown={() =>
+                                getPostMapData(spaceData.id, params, totalMatchingPosts)
+                            }
                         >
                             load all
                         </div>

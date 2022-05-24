@@ -173,6 +173,8 @@ export interface ISpaceContext {
     spacePostsPaginationLimit: number
     spacePostsPaginationOffset: number
     spacePostsPaginationHasMore: boolean
+    postMapData: any
+    setPostMapData: (paylod: any) => void
 
     spaceSpaces: any[] // ISpace[]
     setSpaceSpaces: (payload: any[]) => void
@@ -191,6 +193,7 @@ export interface ISpaceContext {
 
     getSpaceData: (handle: string, callback?: any) => void
     getSpacePosts: (spaceId: number, offset: number, limit: number, params: any) => void
+    getPostMapData: (spaceId: number, params: any, limit: number) => void
     getSpaceSpaces: (spaceId: number, offset: number, limit: number, params: any) => void
     getSpaceMapData: (spaceId: number, params: any) => void
     getSpacePeople: (spaceId: number, offset: number, limit: number, params: any) => void

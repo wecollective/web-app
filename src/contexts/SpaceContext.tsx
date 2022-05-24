@@ -75,6 +75,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     const [spacePostsPaginationLimit, setSpacePostsPaginationLimit] = useState(10)
     const [spacePostsPaginationOffset, setSpacePostsPaginationOffset] = useState(0)
     const [spacePostsPaginationHasMore, setSpacePostsPaginationHasMore] = useState(true)
+    const [postMapData, setPostMapData] = useState<any>({})
 
     const [spaceSpaces, setSpaceSpaces] = useState<any[]>([])
     const [spaceSpacesFilters, setSpaceSpacesFilters] = useState(defaults.spaceFilters)
@@ -137,6 +138,25 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 if (firstLoad) setSpacePostsLoading(false)
                 else setNextSpacePostsLoading(false)
             })
+    }
+
+    function getPostMapData(spaceId, params, limit) {
+        console.log(`SpaceContext: getPostMapData`, spaceId, params, limit)
+        axios
+            .get(
+                /* prettier-ignore */
+                `${config.apiURL}/post-map-data?accountId=${accountData.id
+                }&spaceId=${spaceId
+                }&postType=${params.type
+                }&offset=${0
+                }&limit=${limit
+                }&sortBy=${params.sortBy
+                }&sortOrder=${params.sortOrder
+                }&timeRange=${params.timeRange
+                }&depth=${params.depth
+                }&searchQuery=${params.searchQuery || ''}`
+            )
+            .then((res) => setPostMapData(res.data))
     }
 
     function getSpaceSpaces(spaceId, offset, limit, params) {
@@ -270,6 +290,8 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 spacePostsPaginationLimit,
                 spacePostsPaginationOffset,
                 spacePostsPaginationHasMore,
+                postMapData,
+                setPostMapData,
 
                 spaceSpaces,
                 setSpaceSpaces,
@@ -288,6 +310,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
 
                 getSpaceData,
                 getSpacePosts,
+                getPostMapData,
                 getSpaceSpaces,
                 getSpaceMapData,
                 getSpacePeople,

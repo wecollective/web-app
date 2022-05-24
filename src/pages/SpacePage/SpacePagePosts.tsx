@@ -21,6 +21,8 @@ const SpacePagePosts = (): JSX.Element => {
         spacePostsLoading,
         setSpacePostsLoading,
         nextSpacePostsLoading,
+        postMapData,
+        getPostMapData,
         spacePostsFilters,
         spacePostsPaginationOffset,
         spacePostsPaginationLimit,
@@ -60,9 +62,7 @@ const SpacePagePosts = (): JSX.Element => {
         else {
             if (params.view === 'List')
                 getSpacePosts(spaceData.id, 0, spacePostsPaginationLimit, params)
-            if (params.view === 'Map') {
-                // getPostMapData(spaceData.id, params)
-            }
+            if (params.view === 'Map') getPostMapData(spaceData.id, params, 50)
         }
     }, [spaceData.handle, location])
 
@@ -80,20 +80,18 @@ const SpacePagePosts = (): JSX.Element => {
                 {params.view === 'List' && (
                     <Row className={styles.postListView}>
                         <SpaceNavigationList />
-                        <Column style={{ width: '100%' }}>
-                            <PostList
-                                location='space-posts'
-                                posts={spacePosts}
-                                firstPostsloading={spacePostsLoading}
-                                nextPostsLoading={nextSpacePostsLoading}
-                                onScrollBottom={onScrollBottom}
-                            />
-                        </Column>
+                        <PostList
+                            location='space-posts'
+                            posts={spacePosts}
+                            firstPostsloading={spacePostsLoading}
+                            nextPostsLoading={nextSpacePostsLoading}
+                            onScrollBottom={onScrollBottom}
+                        />
                     </Row>
                 )}
                 {params.view === 'Map' && (
                     <Column className={styles.postMapView}>
-                        <SpacePagePostMap />
+                        <SpacePagePostMap postMapData={postMapData} params={params} />
                     </Column>
                 )}
             </Column>
