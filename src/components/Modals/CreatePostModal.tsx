@@ -791,52 +791,54 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                 setLoading(false)
                 setSaved(true)
                 setCurrentStep(steps.length + 1)
-                const newPost = {
-                    ...res.data.post,
-                    totalLikes: 0,
-                    totalComments: 0,
-                    totalReposts: 0,
-                    totalRatings: 0,
-                    totalLinks: 0,
-                    Creator: {
-                        handle: accountData.handle,
-                        name: accountData.name,
-                        flagImagePath: accountData.flagImagePath,
-                    },
-                    DirectSpaces: [
-                        { ...spaceData, type: 'post', state: 'active' },
-                        ...selectedSpaces.map((space) => {
-                            return { ...space, type: 'post', state: 'active' }
-                        }),
-                    ],
-                    Reactions: [],
-                    IncomingLinks: [],
-                    OutgoingLinks: [],
-                    PostImages: res.data.images || [],
-                    Event: res.data.event
-                        ? {
-                              ...res.data.event,
-                              Going: [],
-                              Interested: [],
-                          }
-                        : null,
-                    GlassBeadGame: {
-                        topic: data.GlassBeadGame ? data.GlassBeadGame.topic : null,
-                        topicGroup: data.GlassBeadGame ? data.GlassBeadGame.topicGroup : null,
-                        topicImage: data.GlassBeadGame ? data.GlassBeadGame.topicImage : null,
-                        GlassBeads: [],
-                    },
-                    StringPosts: res.data.string
-                        ? res.data.string.map((bead, i) => {
-                              return {
-                                  ...bead.stringPost,
-                                  Link: { index: i },
-                                  PostImages: bead.imageData || [],
+                if (selectedSpaces.map((space) => space.id).includes(spaceData.id)) {
+                    const newPost = {
+                        ...res.data.post,
+                        totalLikes: 0,
+                        totalComments: 0,
+                        totalReposts: 0,
+                        totalRatings: 0,
+                        totalLinks: 0,
+                        Creator: {
+                            handle: accountData.handle,
+                            name: accountData.name,
+                            flagImagePath: accountData.flagImagePath,
+                        },
+                        DirectSpaces: [
+                            { ...spaceData, type: 'post', state: 'active' },
+                            ...selectedSpaces.map((space) => {
+                                return { ...space, type: 'post', state: 'active' }
+                            }),
+                        ],
+                        Reactions: [],
+                        IncomingLinks: [],
+                        OutgoingLinks: [],
+                        PostImages: res.data.images || [],
+                        Event: res.data.event
+                            ? {
+                                  ...res.data.event,
+                                  Going: [],
+                                  Interested: [],
                               }
-                          })
-                        : [],
+                            : null,
+                        GlassBeadGame: {
+                            topic: data.GlassBeadGame ? data.GlassBeadGame.topic : null,
+                            topicGroup: data.GlassBeadGame ? data.GlassBeadGame.topicGroup : null,
+                            topicImage: data.GlassBeadGame ? data.GlassBeadGame.topicImage : null,
+                            GlassBeads: [],
+                        },
+                        StringPosts: res.data.string
+                            ? res.data.string.map((bead, i) => {
+                                  return {
+                                      ...bead.stringPost,
+                                      Link: { index: i },
+                                      PostImages: bead.imageData || [],
+                                  }
+                              })
+                            : [],
+                    }
+                    setSpacePosts([newPost, ...spacePosts])
                 }
-                setSpacePosts([newPost, ...spacePosts])
                 setTimeout(() => close(), 1000)
             })
             .catch((error) => {
@@ -974,17 +976,22 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             {currentStep === 1 ? (
                 <h1>New post</h1>
             ) : (
-                <Row centerY className={styles.title}>
-                    <h1>New {postType.toLowerCase()} post</h1>
+                <Column centerX className={styles.newTitle}>
+                    <p>{postType}</p>
                     <Column centerX centerY>
                         {findPostTypeValue(postType, 'icon')}
                     </Column>
-                </Row>
+                </Column>
+                // <Row centerY className={styles.title}>
+                //     <h1>New {postType.toLowerCase()} post</h1>
+                //     <Column centerX centerY>
+                //         {findPostTypeValue(postType, 'icon')}
+                //     </Column>
+                // </Row>
             )}
 
             {currentStep === 1 && (
-                <Column centerX style={{ width: 500, marginBottom: 40 }}>
-                    {/* <h3>Post Type</h3> */}
+                <Column centerX style={{ width: 500, marginBottom: 20 }}>
                     <p>Choose a post type:</p>
                     <Row wrap centerX style={{ margin: '20px 0' }}>
                         {postTypes.map((type) => (
@@ -1008,8 +1015,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             )}
 
             {postType === 'Text' && currentStep === 2 && (
-                <Column centerX style={{ width: 400, marginBottom: 60 }}>
-                    <h3 style={{ marginBottom: 30 }}>Text</h3>
+                <Column centerX style={{ width: 400, marginBottom: 30 }}>
                     <Input
                         type='text-area'
                         placeholder='Add your text here...'
@@ -1030,8 +1036,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             {postType === 'Url' && (
                 <Column centerX>
                     {currentStep === 2 && (
-                        <Column centerX style={{ maxWidth: 600, marginBottom: 60 }}>
-                            <h3 style={{ marginBottom: 30 }}>URL</h3>
+                        <Column centerX style={{ maxWidth: 600, marginBottom: 30 }}>
                             <Input
                                 type='text'
                                 // prefix='https://'
@@ -1063,11 +1068,10 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                         </Column>
                     )}
                     {currentStep === 3 && (
-                        <Column centerX style={{ maxWidth: 600, marginBottom: 60 }}>
-                            <h3 style={{ marginBottom: 30 }}>Text (optional)</h3>
+                        <Column centerX style={{ maxWidth: 600, marginBottom: 30 }}>
                             <Input
                                 type='text-area'
-                                placeholder='Add a description for your URL here...'
+                                placeholder='Add a description for your URL here... (optional)'
                                 rows={4}
                                 value={urlForm2.text.value}
                                 state={urlForm2.text.state}
@@ -1078,7 +1082,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                         text: { ...urlForm2.text, value, state: 'default' },
                                     })
                                 }
-                                style={{ width: 400, marginBottom: 60 }}
+                                style={{ width: 400 }}
                             />
                         </Column>
                     )}
@@ -1086,8 +1090,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             )}
 
             {postType === 'Image' && currentStep === 2 && (
-                <Column centerX style={{ marginBottom: 60 }}>
-                    <h3 style={{ marginBottom: 30 }}>Images</h3>
+                <Column centerX style={{ marginBottom: 30 }}>
                     {imagePostError && (
                         <p className='danger' style={{ marginBottom: 10 }}>
                             No images added yet
@@ -1188,11 +1191,10 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             )}
 
             {postType === 'Image' && currentStep === 3 && (
-                <Column centerX style={{ maxWidth: 600, marginBottom: 60 }}>
-                    <h3 style={{ marginBottom: 30 }}>Text (optional)</h3>
+                <Column centerX style={{ maxWidth: 600, marginBottom: 30 }}>
                     <Input
                         type='text-area'
-                        placeholder='Add a description for your images here...'
+                        placeholder='Add a description for your images here... (optional)'
                         rows={4}
                         value={imageForm.text.value}
                         state={imageForm.text.state}
@@ -1203,14 +1205,13 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                 text: { ...imageForm.text, value, state: 'default' },
                             })
                         }
-                        style={{ width: 400, marginBottom: 60 }}
+                        style={{ width: 400 }}
                     />
                 </Column>
             )}
 
             {postType === 'Audio' && currentStep === 2 && (
                 <Column centerX>
-                    <h3 style={{ marginBottom: 30 }}>Audio</h3>
                     <Column className={styles.errors}>
                         {audioSizeError && <p>Audio too large. Max size: {audioMBLimit}MB</p>}
                         {audioPostError && <p>Audio recording or upload required</p>}
@@ -1289,11 +1290,10 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             )}
 
             {postType === 'Audio' && currentStep === 3 && (
-                <Column centerX style={{ maxWidth: 600, marginBottom: 60 }}>
-                    <h3 style={{ marginBottom: 30 }}>Text (optional)</h3>
+                <Column centerX style={{ maxWidth: 600, marginBottom: 30 }}>
                     <Input
                         type='text-area'
-                        placeholder='Add a description for your images here...'
+                        placeholder='Add a description for your images here... (optional)'
                         rows={4}
                         value={audioForm.text.value}
                         state={audioForm.text.state}
@@ -1304,14 +1304,13 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                 text: { ...audioForm.text, value, state: 'default' },
                             })
                         }
-                        style={{ width: 400, marginBottom: 60 }}
+                        style={{ width: 400 }}
                     />
                 </Column>
             )}
 
             {postType === 'Event' && currentStep === 2 && (
-                <Column centerX style={{ marginBottom: 60, width: 400 }}>
-                    <h3 style={{ marginBottom: 30 }}>Title</h3>
+                <Column centerX style={{ marginBottom: 30, width: 400 }}>
                     <Input
                         type='text'
                         placeholder='Add a title for your event...'
@@ -1329,11 +1328,10 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             )}
 
             {postType === 'Event' && currentStep === 3 && (
-                <Column centerX style={{ marginBottom: 60, width: 400 }}>
-                    <h3 style={{ marginBottom: 30 }}>Description (optional)</h3>
+                <Column centerX style={{ marginBottom: 30, width: 400 }}>
                     <Input
                         type='text-area'
-                        placeholder='Add a description for your event...'
+                        placeholder='Add a description for your event... (optional)'
                         rows={4}
                         value={eventForm2.description.value}
                         state={eventForm2.description.state}
@@ -1349,8 +1347,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             )}
 
             {postType === 'Event' && currentStep === 4 && (
-                <Column centerX style={{ marginBottom: 60, width: 600 }}>
-                    <h3 style={{ marginBottom: 30 }}>Time</h3>
+                <Column centerX style={{ marginBottom: 30, width: 600 }}>
                     <Row className={styles.dateTimePicker}>
                         <div id='date-time-start-wrapper'>
                             <Input
@@ -1378,7 +1375,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             )}
 
             {postType === 'Glass Bead Game' && currentStep === 2 && (
-                <Column centerX style={{ marginBottom: 40 }}>
+                <Column centerX style={{ marginBottom: 20 }}>
                     <h3 style={{ marginBottom: 10 }}>Choose a topic:</h3>
                     <Row className={styles.topicGroupButtons}>
                         <Button
@@ -1460,6 +1457,11 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                     <Column centerX className={styles.topic} key={topic.name}>
                                         <button
                                             type='button'
+                                            className={
+                                                selectedTopic && selectedTopic.name === topic.name
+                                                    ? styles.selected
+                                                    : ''
+                                            }
                                             onClick={() => {
                                                 setTopicError(false)
                                                 setSelectedTopic(topic)
@@ -1481,32 +1483,15 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                             </Row>
                         </Scrollbars>
                     )}
-                    {selectedTopic && topicGroup !== 'custom' && (
-                        <Column centerX className={styles.selectedTopic}>
-                            <p>Selected topic:</p>
-                            <Row centerY className={styles.selectedTopicWrapper}>
-                                <ImageTitle
-                                    type='space'
-                                    imagePath={selectedTopic.imagePath}
-                                    imageSize={40}
-                                    title={selectedTopic.name}
-                                    fontSize={14}
-                                    style={{ marginRight: 15 }}
-                                />
-                                <CloseButton size={17} onClick={() => setSelectedTopic(null)} />
-                            </Row>
-                        </Column>
-                    )}
                     {topicError && <p className='danger'>No topic selected</p>}
                 </Column>
             )}
 
             {postType === 'Glass Bead Game' && currentStep === 3 && (
-                <Column centerX style={{ marginBottom: 60, width: 400 }}>
-                    <h3 style={{ marginBottom: 30 }}>Description (optional)</h3>
+                <Column centerX style={{ marginBottom: 30, width: 400 }}>
                     <Input
                         type='text-area'
-                        placeholder='Add a description for your game...'
+                        placeholder='Add a description for your game... (optional)'
                         rows={4}
                         value={GBGForm2.description.value}
                         state={GBGForm2.description.state}
@@ -1522,8 +1507,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             )}
 
             {postType === 'Glass Bead Game' && currentStep === 4 && (
-                <Column centerX style={{ marginBottom: 60, width: 600 }}>
-                    <h3 style={{ marginBottom: 30 }}>Date (optional)</h3>
+                <Column centerX style={{ marginBottom: 30, width: 600 }}>
                     <Row className={styles.dateTimePicker}>
                         <div id='date-time-start-wrapper'>
                             <Input
@@ -1862,11 +1846,10 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             )}
 
             {postType === 'String' && currentStep === 3 && (
-                <Column centerX style={{ marginBottom: 60, width: 400 }}>
-                    <h3 style={{ marginBottom: 30 }}>Description (optional)</h3>
+                <Column centerX style={{ marginBottom: 30, width: 400 }}>
                     <Input
                         type='text-area'
-                        placeholder='Add a description for your game...'
+                        placeholder='Add a description for your game... (optional)'
                         rows={4}
                         value={stringForm.description.value}
                         state={stringForm.description.state}
@@ -1883,7 +1866,6 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
 
             {currentStep === steps.length - 1 && (
                 <Column centerX>
-                    <h3 style={{ marginBottom: 30 }}>Spaces</h3>
                     <p>Choose where you want the post to appear:</p>
                     <SearchSelector
                         type='space'
@@ -1915,8 +1897,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             )}
 
             {currentStep === steps.length && (
-                <Column centerX style={{ width: 600, marginBottom: 60 }}>
-                    <h3 style={{ marginBottom: 30 }}>Create</h3>
+                <Column centerX style={{ width: 600, marginBottom: 30 }}>
                     <p style={{ marginBottom: 30 }}>
                         Here's a preview of what your post will look like to other users:
                     </p>

@@ -461,6 +461,7 @@ const PostCard = (props: {
                                 text='Going'
                                 color='aqua'
                                 size='medium'
+                                disabled={location === 'preview'}
                                 icon={goingToEvent ? <SuccessIconSVG /> : undefined}
                                 style={{ marginRight: 5 }}
                                 onClick={() => respondToEvent('going')}
@@ -469,6 +470,7 @@ const PostCard = (props: {
                                 text='Interested'
                                 color='aqua'
                                 size='medium'
+                                disabled={location === 'preview'}
                                 icon={interestedInEvent ? <SuccessIconSVG /> : undefined}
                                 onClick={() => respondToEvent('interested')}
                             />
@@ -581,6 +583,7 @@ const PostCard = (props: {
                                         text='Going'
                                         color='aqua'
                                         size='medium'
+                                        disabled={location === 'preview'}
                                         icon={goingToEvent ? <SuccessIconSVG /> : undefined}
                                         style={{ marginRight: 5 }}
                                         onClick={() => respondToEvent('going')}
@@ -589,6 +592,7 @@ const PostCard = (props: {
                                         text='Interested'
                                         color='aqua'
                                         size='medium'
+                                        disabled={location === 'preview'}
                                         icon={interestedInEvent ? <SuccessIconSVG /> : undefined}
                                         onClick={() => respondToEvent('interested')}
                                     />
@@ -600,6 +604,7 @@ const PostCard = (props: {
                                 text='Open game room'
                                 color='purple'
                                 size='medium'
+                                disabled={location === 'preview'}
                                 onClick={() => history.push(`/p/${id}`)}
                             />
                         </Row>

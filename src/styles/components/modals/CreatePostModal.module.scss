@@ -30,6 +30,27 @@
     }
 }
 
+.newTitle {
+    margin-bottom: 30px;
+    > div {
+        width: 70px;
+        height: 70px;
+        background-color: white;
+        border: 1px solid black;
+
+        > svg {
+            width: 35px;
+            height: 35px;
+            opacity: 0.8;
+        }
+    }
+    > p {
+        font-weight: 800;
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+}
+
 .postTypeButton {
     padding: 10px;
     width: 110px;
@@ -37,15 +58,17 @@
     > button {
         all: unset;
         cursor: pointer;
-        margin-bottom: 10px;
+        margin-bottom: 7px;
         width: 90px;
         height: 90px;
         background-color: white;
-        border-radius: 50%;
+        border: 1px solid black;
         display: flex;
         justify-content: center;
         align-items: center;
-        &.selected { background-color: $blue8 }
+        &.selected {
+            background-color: $blue8;
+        }
 
         > svg {
             width: 40px;
@@ -75,10 +98,14 @@
             all: unset;
             cursor: pointer;
             background-color: white;
-            border-radius: 50%;
+            border: 1px solid black;
             width: 90px;
             height: 90px;
-            margin-bottom: 10px;
+            margin-bottom: 7px;
+
+            &.selected {
+                background-color: $blue8;
+            }
 
             > img {
                 width: 90px;
@@ -183,7 +210,8 @@
 
 .dateTimePicker {
     position: relative;
-    margin-bottom: 20px;
+    margin-top: 40px;
+    margin-bottom: 40px;
     > div {
         position: relative;
         &:not(:last-child) { margin-right: 30px }
