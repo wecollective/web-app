@@ -622,10 +622,10 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             type: postType.toLowerCase().split(' ').join('-'),
             text: '',
             url: '',
-            urlImage: '',
-            urlDomain: '',
-            urlTitle: '',
-            urlDescription: '',
+            urlImage: null,
+            urlDomain: null,
+            urlTitle: null,
+            urlDescription: null,
             Creator: accountData,
             DirectSpaces: selectedSpaces.map((space) => {
                 return { ...space, type: 'post', state: 'active' }
@@ -639,10 +639,10 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
         if (postType === 'Url') {
             data.text = urlForm2.text.value
             data.url = urlForm1.url.value
-            data.urlImage = urlData.image
-            data.urlDomain = urlData.domain
-            data.urlTitle = urlData.title
-            data.urlDescription = urlData.description
+            data.urlImage = urlData.image || null
+            data.urlDomain = urlData.domain || null
+            data.urlTitle = urlData.title || null
+            data.urlDescription = urlData.description || null
         }
         if (postType === 'Image') {
             data.text = imageForm.text.value
