@@ -2,7 +2,7 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useState, useEffect, useContext, useRef } from 'react'
-import { useHistory } from 'react-router-dom'
+import { useLocation, useHistory } from 'react-router-dom'
 import { io } from 'socket.io-client'
 import axios from 'axios'
 import Peer from 'simple-peer'
@@ -444,7 +444,9 @@ const GlassBeadGame = (): JSX.Element => {
     const [topicTextModalOpen, setTopicTextModalOpen] = useState(false)
     const [leaveRoomModalOpen, setLeaveRoomModalOpen] = useState(false)
     const [mobileTab, setMobileTab] = useState<'comments' | 'game' | 'videos'>('game')
-    // const [videoRenderKey, setVideoRenderKey] = useState(0)
+    const location = useLocation()
+    const urlParams = Object.fromEntries(new URLSearchParams(location.search))
+    // const postId = +location.pathname.split('/')[2]
 
     // state refs (used for up to date values between renders)
     const roomIdRef = useRef<number>()
@@ -461,11 +463,9 @@ const GlassBeadGame = (): JSX.Element => {
     const audioRef = useRef<any>(null)
     const videoRef = useRef<any>(null)
     const showVideoRef = useRef(showVideos)
-    const liveBeadIndexRef = useRef(1)
+    const liveBeadIndexRef = useRef(+urlParams.selectedBead || 1)
     const gameInProgressRef = useRef(false)
 
-    // const location = useLocation()
-    // const postId = +location.pathname.split('/')[2]
     const history = useHistory()
     const largeScreen = document.body.clientWidth >= 900
     const roomIntro = new Audio('/audio/room-intro.mp3')
@@ -2068,6 +2068,7 @@ const GlassBeadGame = (): JSX.Element => {
                             location='gbg'
                             bead={bead}
                             index={beadIndex + 1}
+                            highlight={liveBeadIndexRef.current === beadIndex + 1}
                             className={styles.bead}
                         />
                         {beads.length > beadIndex + 1 && (

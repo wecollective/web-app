@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import * as d3 from 'd3'
 import styles from '@styles/components/cards/BeadCard.module.scss'
 import colors from '@styles/Colors.module.scss'
@@ -16,12 +16,15 @@ const BeadCard = (props: {
     location: string
     index: number
     bead: any
+    highlight?: boolean
     style?: any
     className?: string
 }): JSX.Element => {
-    const { postId, location, index, bead, style, className } = props
+    const { postId, location, index, bead, highlight, style, className } = props
     const { accountData } = useContext(AccountContext)
+    const [firstRun, setFirstRun] = useState(true)
     const [audioPlaying, setAudioPlaying] = useState(false)
+    const [highlighted, setHighlighted] = useState(highlight)
     const audioId = `gbg-bead-audio-${postId}-${index}-${location}`
 
     function toggleBeadAudio(beadIndex: number, reset?: boolean): void {
@@ -40,10 +43,16 @@ const BeadCard = (props: {
         }
     }
 
+    useEffect(() => {
+        if (firstRun) setFirstRun(false)
+        else if (audioPlaying) setHighlighted(true)
+        else setHighlighted(false)
+    }, [audioPlaying])
+
     return (
         <Column
             id={`gbg-bead-${postId}-${index}-${location}`}
-            className={`gbg-bead ${styles.bead} ${audioPlaying && styles.focused} ${className}`}
+            className={`gbg-bead ${styles.bead} ${highlighted && styles.focused} ${className}`}
             style={style}
         >
             <ImageTitle
@@ -85,6 +94,7 @@ const BeadCard = (props: {
 }
 
 BeadCard.defaultProps = {
+    highlight: false,
     style: null,
     className: null,
 }
