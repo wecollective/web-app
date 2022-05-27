@@ -5,12 +5,23 @@ import * as d3 from 'd3'
 import { useHistory } from 'react-router-dom'
 import config from '@src/Config'
 import { SpaceContext } from '@contexts/SpaceContext'
+import styles from '@styles/pages/SpacePage/SpacePageSpaceMap.module.scss'
+import Column from '@components/Column'
+import Row from '@components/Row'
+import Markdown from '@components/Markdown'
+import StatButton from '@components/StatButton'
+import { ReactComponent as UsersIconSVG } from '@svgs/users-solid.svg'
+import { ReactComponent as PostIconSVG } from '@svgs/edit-solid.svg'
+import { ReactComponent as CommentIconSVG } from '@svgs/comment-solid.svg'
+import { ReactComponent as ReactionIconSVG } from '@svgs/fire-alt-solid.svg'
 
 const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
     const { spaceMapData, params } = props
     const { spaceData, setSpaceMapData } = useContext(SpaceContext)
     // const [width, setWidth] = useState<number | string>(700)
     const [firstRun, setFirstRun] = useState<boolean>(true)
+    const [highlightedSpace, setHighlightedSpace] = useState<any>(null)
+    const [highlightedSpacePosition, setHighlightedSpacePosition] = useState<any>({})
     // const [spaceTransitioning, setSpaceTransitioning] = useState<boolean>(true)
     const spaceTransitioning = useRef<boolean>(false)
 
@@ -494,10 +505,18 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
                                     `#${isParent ? 'parent-' : ''}background-circle-${d.data.id}`
                                 )
                                 if (!node.classed('transitioning')) {
+                                    // highlight node
                                     node.transition()
                                         .duration(duration / 5)
-                                        .attr('fill', '#8ad1ff')
+                                        .attr(
+                                            'fill',
+                                            d.data.id === spaceData.id ? '#61f287' : '#8ad1ff'
+                                        )
                                         .attr('r', findRadius(d) + 6)
+                                    // display space info
+                                    setHighlightedSpace(d.data)
+                                    const { top, left } = node.node().getBoundingClientRect()
+                                    setHighlightedSpacePosition({ top, left })
                                 }
                             })
                             .on('mouseout', (d) => {
@@ -509,9 +528,12 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
                                         .duration(duration / 2)
                                         .attr('fill', '#aaa')
                                         .attr('r', findRadius(d) + 2)
+                                    // hide space info
+                                    setHighlightedSpace(null)
                                 }
                             })
                             .on('mousedown', (d) => {
+                                setHighlightedSpace(null)
                                 if (!spaceTransitioning.current) {
                                     if (d.data.isExpander) {
                                         getChildren(d.parent)
@@ -522,6 +544,8 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
                                             'transitioning',
                                             true
                                         )
+                                    } else {
+                                        history.push(`/s/${d.data.handle}/posts`)
                                     }
                                 }
                             })
@@ -551,11 +575,19 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
                                         }`
                                     )
                                     if (node2.node() && !node2.classed('transitioning')) {
+                                        // highlight node
                                         node2
                                             .transition()
                                             .duration(duration / 5)
-                                            .attr('fill', '#8ad1ff')
+                                            .attr(
+                                                'fill',
+                                                d.data.id === spaceData.id ? '#61f287' : '#8ad1ff'
+                                            )
                                             .attr('r', findRadius(d) + 6)
+                                        // display space info
+                                        setHighlightedSpace(d.data)
+                                        const { top, left } = node2.node().getBoundingClientRect()
+                                        setHighlightedSpacePosition({ top, left })
                                     }
                                 })
                                 .on('mouseout', (d) => {
@@ -570,6 +602,8 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
                                             .duration(duration / 2)
                                             .attr('fill', '#aaa')
                                             .attr('r', findRadius(d) + 2)
+                                        // hide space info
+                                        setHighlightedSpace(null)
                                     }
                                 })
                                 .transition('background-circle-update')
@@ -880,16 +914,56 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
 
     useEffect(() => () => setSpaceMapData({}), [])
 
-    // useEffect(() => {
-    //     setWidth(fullScreen ? '100%' : 700)
-    // }, [fullScreen])
+    function findModalPosition() {
+        const { top, left } = highlightedSpacePosition
+        const zoomScale = d3.zoomTransform(d3.select('#space-map-master-group').node()).k
+        const isMainSpace = highlightedSpace.id === spaceData.id
+        const topOffset =
+            document.documentElement.scrollTop + ((isMainSpace ? 25 : 0) - 5) * zoomScale
+        const leftOffset = (75 + (isMainSpace ? 50 : 0)) * zoomScale
 
-    // useEffect(() => {
-    //     updateCanvasSize()
-    // }, [width])
+        return { top: top + topOffset, left: left + leftOffset }
+    }
 
-    return <div id='canvas' />
-    // style={{ width: '100%', height: '100%' }}
+    return (
+        <div id='canvas' className={styles.canvas}>
+            {highlightedSpace && (
+                <Column className={styles.spaceInfoModal} style={findModalPosition()}>
+                    <div className={styles.pointer} />
+                    <h1>{highlightedSpace.name}</h1>
+                    {highlightedSpace.handle ? (
+                        <>
+                            <h2>s/{highlightedSpace.handle}</h2>
+                            <Markdown
+                                text={highlightedSpace.description}
+                                className={styles.markdown}
+                            />
+                            <Row className={styles.stats}>
+                                <StatButton
+                                    icon={<UsersIconSVG />}
+                                    text={highlightedSpace.totalFollowers}
+                                />
+                                <StatButton
+                                    icon={<PostIconSVG />}
+                                    text={highlightedSpace.totalPosts}
+                                />
+                                <StatButton
+                                    icon={<CommentIconSVG />}
+                                    text={highlightedSpace.totalComments}
+                                />
+                                <StatButton
+                                    icon={<ReactionIconSVG />}
+                                    text={highlightedSpace.totalReactions}
+                                />
+                            </Row>
+                        </>
+                    ) : (
+                        <h2 style={{ marginTop: 5 }}>Click to expand</h2>
+                    )}
+                </Column>
+            )}
+        </div>
+    )
 }
 
 export default SpacePageSpaceMap

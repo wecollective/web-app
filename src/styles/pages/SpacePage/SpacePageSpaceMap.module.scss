@@ -1,0 +1,59 @@
+@import '@styles/Variables';
+
+.canvas {
+    .spaceInfoModal {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        max-width: 500px;
+        max-height: 400px;
+        background-color: $black2;
+        color: white;
+        padding: 20px;
+        border-radius: 5px;
+
+        .pointer {
+            width: 15px;
+            height: 15px;
+            background-color: $black2;
+            border-radius: 2px;
+            position: absolute;
+            left: -5px;
+            top: 25px;
+            transform: rotate(45deg);
+        }
+
+        > h1 {
+            font-size: 18px;
+            line-height: 18px;
+            margin: 0;
+        }
+        > h2 {
+            font-size: 16px;
+            margin: 0;
+            color: rgb(160, 160, 160);
+        }
+        > p {
+            font-size: 12px;
+        }
+
+        .markdown {
+            color: white;
+            font-size: 14px;
+            line-height: 18px;
+            overflow: hidden;
+            margin: 5px 0 10px 0;
+
+            img {
+                max-width: 200px;
+            }
+        }
+
+        .stats {
+            color: rgb(160, 160, 160);
+            > button {
+                margin-right: 15px;
+            }
+        }
+    }
+}
