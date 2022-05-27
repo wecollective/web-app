@@ -13,7 +13,7 @@ const Card = (props: {
     toggleCard: (row: number, index: number | null) => void
 }): JSX.Element => {
     const { data, index, row, selectedCard, toggleCard } = props
-    const { text, imagePath, svg, smallIcon, children } = data
+    const { text, link, imagePath, svg, smallIcon, children } = data
 
     return (
         <Column
@@ -23,15 +23,21 @@ const Card = (props: {
                 selectedCard && selectedCard !== index && styles.hidden
             }`}
         >
-            <Column
-                centerX
-                centerY
-                className={`${styles.content} ${smallIcon && styles.smallIcon}`}
+            <button
+                type='button'
+                className={`${styles.contentWrapper} ${link && styles.link}`}
+                onClick={() => link && window.open(link, '_blank')}
             >
-                {imagePath && <img src={imagePath} alt='card 1' />}
-                {svg && svg}
-                <h1>{text}</h1>
-            </Column>
+                <Column
+                    centerX
+                    centerY
+                    className={`${styles.content} ${smallIcon && styles.smallIcon}`}
+                >
+                    {imagePath && <img src={imagePath} alt='card 1' />}
+                    {svg && svg}
+                    <h1>{text}</h1>
+                </Column>
+            </button>
             {children.length > 0 && (
                 <Row centerX centerY className={styles.footer}>
                     <button

@@ -93,6 +93,7 @@ const Homepage = (): JSX.Element => {
                 },
                 {
                     text: 'Open source',
+                    link: 'https://github.com/wecollective',
                     svg: <OSIcon />,
                     smallIcon: true,
                     children: [],

@@ -26,27 +26,36 @@
                 z-index: 1;
             }
 
-            .content {
+            .contentWrapper {
+                all: unset;
                 height: 100%;
 
-                > img, > svg {
-                    transition: all 1s;
-                    height: 140px;
-                    margin-bottom: 20px;
+                &.link {
+                    cursor: pointer;
                 }
 
-                > h1 {
-                    transition: all 1s;
-                    font-size: 18px;
-                    text-align: center;
-                    margin: 0;
-                    max-width: 200px;
-                }
+                .content {
+                    height: 100%;
 
-                &.smallIcon {
-                    > svg {
-                        opacity: 0.3;
-                        height: 60px;
+                    > img, > svg {
+                        transition: all 1s;
+                        height: 140px;
+                        margin-bottom: 20px;
+                    }
+
+                    > h1 {
+                        transition: all 1s;
+                        font-size: 18px;
+                        text-align: center;
+                        margin: 0;
+                        max-width: 200px;
+                    }
+
+                    &.smallIcon {
+                        > svg {
+                            opacity: 0.3;
+                            height: 60px;
+                        }
                     }
                 }
             }
@@ -91,7 +100,7 @@
                 width: 180px;
                 height: 180px;
 
-                > .content {
+                > .contentWrapper > .content {
                     > img, > svg {
                         height: 80px;
                         margin-bottom: 5px;
