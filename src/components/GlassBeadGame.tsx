@@ -2,6 +2,7 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useState, useEffect, useContext, useRef } from 'react'
+import { useHistory } from 'react-router-dom'
 import { io } from 'socket.io-client'
 import axios from 'axios'
 import Peer from 'simple-peer'
@@ -128,7 +129,7 @@ const gameDefaults = {
     id: null,
     topic: null,
     locked: true,
-    introDuration: 30,
+    introDuration: 0,
     numberOfTurns: 3,
     moveDuration: 60,
     intervalDuration: 0,
@@ -146,6 +147,8 @@ const colors = {
     grey1: '#e9e9ea',
     grey2: '#d7d7d9',
     grey3: '#c6c6c7',
+    black: 'black',
+    white: 'white',
 }
 
 const Video = (props) => {
@@ -220,11 +223,10 @@ const Comment = (props) => {
 
 const GameSettingsModal = (props) => {
     const { close, gameData, socketId, players, setPlayers, signalStartGame } = props
-
     const [formData, setFormData] = useState({
         introDuration: {
             value: notNull(gameData.introDuration) || gameDefaults.introDuration,
-            validate: (v) => (v < 10 || v > 300 ? ['Must be between 10 seconds and 5 mins'] : []),
+            validate: (v) => (v > 300 ? ['Must be 5 mins or less'] : []),
             ...defaultErrorState,
         },
         numberOfTurns: {
@@ -394,7 +396,12 @@ const GameSettingsModal = (props) => {
                 </div>
                 <Row>
                     {!saved && (
-                        <Button text='Start game' color='blue' disabled={loading || saved} submit />
+                        <Button
+                            text='Start game'
+                            color='gbg-white'
+                            disabled={loading || saved}
+                            submit
+                        />
                     )}
                     {loading && <LoadingWheel />}
                     {saved && <SuccessMessage text='Saved' />}
@@ -404,7 +411,7 @@ const GameSettingsModal = (props) => {
     )
 }
 
-const GlassBeadGame = ({ history }): JSX.Element => {
+const GlassBeadGame = (): JSX.Element => {
     const {
         loggedIn,
         accountData,
@@ -421,7 +428,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     const [gameSettingsModalOpen, setGameSettingsModalOpen] = useState(false)
     const [beads, setBeads] = useState<any[]>([])
     const [comments, setComments] = useState<any[]>([])
-    const [showComments, setShowComments] = useState(false)
+    const [showComments, setShowComments] = useState(document.body.clientWidth >= 900)
     const [showVideos, setShowVideos] = useState(false)
     const [firstInteractionWithPage, setFirstInteractionWithPage] = useState(true)
     const [newComment, setNewComment] = useState('')
@@ -455,16 +462,18 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     const videoRef = useRef<any>(null)
     const showVideoRef = useRef(showVideos)
     const liveBeadIndexRef = useRef(1)
+    const gameInProgressRef = useRef(false)
 
     // const location = useLocation()
     // const postId = +location.pathname.split('/')[2]
+    const history = useHistory()
     const largeScreen = document.body.clientWidth >= 900
     const roomIntro = new Audio('/audio/room-intro.mp3')
     const highMetalTone = new Audio('/audio/hi-metal-tone.mp3')
     const lowMetalTone = new Audio('/audio/lo-metal-tone.mp3')
     const arcWidth = 20
-    const gameArcRadius = 210
-    const turnArcRadius = 180
+    const gameArcRadius = 180
+    // const turnArcRadius = 180
     const moveArcRadius = 150
     const arcs = {
         gameArc: d3
@@ -472,15 +481,25 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             .innerRadius(gameArcRadius - arcWidth)
             .outerRadius(gameArcRadius)
             .cornerRadius(5),
-        turnArc: d3
+        gameArc2: d3
             .arc()
-            .innerRadius(turnArcRadius - arcWidth)
-            .outerRadius(turnArcRadius)
+            .innerRadius(gameArcRadius - arcWidth + 0.5)
+            .outerRadius(gameArcRadius - 0.5)
             .cornerRadius(5),
+        // turnArc: d3
+        //     .arc()
+        //     .innerRadius(turnArcRadius - arcWidth)
+        //     .outerRadius(turnArcRadius)
+        //     .cornerRadius(5),
         moveArc: d3
             .arc()
             .innerRadius(moveArcRadius - arcWidth)
             .outerRadius(moveArcRadius)
+            .cornerRadius(5),
+        moveArc2: d3
+            .arc()
+            .innerRadius(moveArcRadius - arcWidth + 0.5)
+            .outerRadius(moveArcRadius - 0.5)
             .cornerRadius(5),
     }
     const iceConfig = {
@@ -742,8 +761,8 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             .datum({ startAngle: 0, endAngle: reverse ? -2 * Math.PI : 2 * Math.PI })
             .attr('id', `${type}-arc`)
             .style('fill', color)
-            .style('opacity', 0.8)
-            .attr('d', arcs[`${type}Arc`])
+            .style('opacity', 1)
+            .attr('d', arcs[`${type}Arc2`])
             .transition()
             .ease(d3.easeLinear)
             .duration(duration * 1000)
@@ -751,7 +770,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 const interpolate = d3.interpolate(d.endAngle, 0)
                 return (t) => {
                     d.endAngle = interpolate(t)
-                    return arcs[`${type}Arc`](d)
+                    return arcs[`${type}Arc2`](d)
                 }
             })
     }
@@ -811,20 +830,22 @@ const GlassBeadGame = ({ history }): JSX.Element => {
         setPlayers(data.players)
         setShowComments(false)
         updateShowVideos(false)
-        d3.select('#timer-move-state').text('Intro')
-        d3.select('#timer-seconds').text(data.introDuration)
         const firstPlayer = data.players[0]
         d3.select(`#player-${firstPlayer.socketId}`).text('(up next)')
-        startArc('move', data.introDuration, colors.yellow)
-        let timeLeft = data.introDuration
-        secondsTimerRef.current = setInterval(() => {
-            timeLeft -= 1
-            d3.select('#timer-seconds').text(timeLeft)
-            if (timeLeft < 1) {
-                clearInterval(secondsTimerRef.current)
-                startMove(1, 0, firstPlayer, data)
-            }
-        }, 1000)
+        if (data.introDuration > 0) {
+            d3.select('#timer-move-state').text('Intro')
+            d3.select('#timer-seconds').text(data.introDuration)
+            startArc('move', data.introDuration, colors.black)
+            let timeLeft = data.introDuration
+            secondsTimerRef.current = setInterval(() => {
+                timeLeft -= 1
+                d3.select('#timer-seconds').text(timeLeft)
+                if (timeLeft < 1) {
+                    clearInterval(secondsTimerRef.current)
+                    startMove(1, 0, firstPlayer, data)
+                }
+            }, 1000)
+        } else startMove(1, 0, firstPlayer, data)
     }
 
     function startMove(moveNumber, turnNumber, player, data) {
@@ -835,20 +856,20 @@ const GlassBeadGame = ({ history }): JSX.Element => {
         const turnDuration = data.players.length * (moveDuration + intervalDuration)
         const gameDuration = turnDuration * numberOfTurns - intervalDuration
         // if first move, start game arc
-        if (moveNumber === 1) startArc('game', gameDuration, colors.blue)
+        if (moveNumber === 1) startArc('game', gameDuration, colors.white)
         // if new turn, start turn arc
         const newTurnNumber = Math.ceil(moveNumber / data.players.length)
         if (turnNumber !== newTurnNumber) {
             setTurn(newTurnNumber)
-            startArc(
-                'turn',
-                // if final turn, remove interval duration from turn duration
-                newTurnNumber === numberOfTurns ? turnDuration - intervalDuration : turnDuration,
-                colors.aqua
-            )
+            // startArc(
+            //     'turn',
+            //     // if final turn, remove interval duration from turn duration
+            //     newTurnNumber === numberOfTurns ? turnDuration - intervalDuration : turnDuration,
+            //     colors.aqua
+            // )
         }
         // start move arc
-        startArc('move', moveDuration, colors.green)
+        startArc('move', moveDuration, colors.black)
         lowMetalTone.play()
         // update ui state
         d3.select('#timer-move-state').text('Move')
@@ -886,7 +907,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     function startInterval(moveNumber, turnNumber, nextPlayer, data) {
         const { intervalDuration } = data
         // start interval timer
-        startArc('move', intervalDuration, colors.yellow)
+        startArc('move', intervalDuration, colors.black)
         lowMetalTone.play()
         // update ui state
         d3.select('#timer-move-state').text('Interval')
@@ -910,7 +931,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
         d3.select('#timer-move-state').text('Outro')
         d3.select('#timer-seconds').text(data.outroDuration)
         d3.selectAll(`.${styles.playerState}`).text('')
-        startArc('move', data.outroDuration, colors.yellow, true)
+        startArc('move', data.outroDuration, colors.black, true)
         let timeLeft = data.outroDuration
         secondsTimerRef.current = setInterval(() => {
             timeLeft -= 1
@@ -925,6 +946,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     function endGame() {
         highMetalTone.play()
         setGameInProgress(false)
+        gameInProgressRef.current = false
         setTurn(0)
         d3.select('#timer-seconds').text('')
         d3.select('#timer-move-state').text('Move')
@@ -934,6 +956,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
         d3.selectAll(`.${styles.playerState}`).text('')
         pushComment('The game ended')
         addPlayButtonToCenterBead()
+        d3.select('#timer-bead-wave-form').transition(1000).style('opacity', 0)
         if (largeScreen) {
             setShowComments(true)
             updateShowVideos(true)
@@ -1034,7 +1057,6 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             .catch((error) => console.log(error))
     }
 
-    // // const history = useHistory()
     // useEffect(() => {
     //     console.log('history: ', history)
     //     const path = history.location.pathname
@@ -1091,7 +1113,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     .attr('height', 60)
                     .attr('x', -30)
                     .attr('y', -30)
-                    .style('color', '#8ad1ff')
+                    // .style('color', '#000')
                     .style('cursor', 'pointer')
 
                 const playButton = d3.select(timerBead.selectAll('svg').nodes()[0])
@@ -1103,11 +1125,11 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     .style('opacity', 0)
                     .on('mouseover', () => {
                         if (!playButton.classed('transitioning'))
-                            playButton.transition().duration(300).style('color', '#44b1f7')
+                            playButton.transition().duration(300).style('color', '#444')
                     })
                     .on('mouseout', () => {
                         if (!playButton.classed('transitioning'))
-                            playButton.transition().duration(300).style('color', '#8ad1ff')
+                            playButton.transition().duration(300).style('color', '#000')
                     })
                     .on('mousedown', () => {
                         playButton.attr('display', 'none')
@@ -1128,11 +1150,11 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     .classed('transitioning', false)
                     .on('mouseover', () => {
                         if (!pauseButton.classed('transitioning'))
-                            pauseButton.transition().duration(300).style('color', '#44b1f7')
+                            pauseButton.transition().duration(300).style('color', '#444')
                     })
                     .on('mouseout', () => {
                         if (!pauseButton.classed('transitioning'))
-                            pauseButton.transition().duration(300).style('color', '#8ad1ff')
+                            pauseButton.transition().duration(300).style('color', '#000')
                     })
                     .on('mousedown', () => {
                         pauseButton.attr('display', 'none')
@@ -1204,8 +1226,10 @@ const GlassBeadGame = ({ history }): JSX.Element => {
     // todo: flatten out userData into user object with socketId
     useEffect(() => {
         if (!accountDataLoading && !postDataLoading && postData.id) {
+            console.log('connect!')
             backendShim.getGameData(postData.id).then((res) => {
                 const { GlassBeadGameComments, GlassBeads } = res.data
+                if (GlassBeads.length) d3.select('#timer-bead-wave-form').style('opacity', 0)
                 // todo: move beads and comments into gamedata and set in one go?
                 setGameData(res.data)
                 setComments(GlassBeadGameComments)
@@ -1222,7 +1246,10 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     flagImagePath: accountData.flagImagePath,
                 }
                 // disconnect previous socket connections if present
-                if (socketRef.current) socketRef.current.disconnect()
+                if (socketRef.current) {
+                    console.log('previous socket connection')
+                    socketRef.current.disconnect()
+                }
                 // create new connection to socket
                 socketRef.current = io(config.apiWebSocketURL || '')
                 // join room
@@ -1329,7 +1356,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                                 signal: data,
                             })
                         })
-                        peer.on('connect', () => console.log('connect 2'))
+                        peer.on('connect', () => console.log('peer connect 2'))
                         peer.on('stream', (stream) => {
                             videosRef.current.push({
                                 socketId,
@@ -1380,6 +1407,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 socketRef.current.on('incoming-start-game', (data) => {
                     setGameSettingsModalOpen(false)
                     setGameInProgress(true)
+                    gameInProgressRef.current = true
                     setBeads([])
                     d3.select('#play-button')
                         .classed('transitioning', true)
@@ -1393,6 +1421,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                         .duration(1000)
                         .style('opacity', 0)
                         .remove()
+                    d3.select('#timer-bead-wave-form').transition(1000).style('opacity', 1)
                     liveBeadIndexRef.current = 1
                     pushComment(`${data.userSignaling.name} started the game`)
                     startGame(data.gameData)
@@ -1405,6 +1434,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     }
                     pushComment(`${data.userSignaling.name} stopped the game`)
                     setGameInProgress(false)
+                    gameInProgressRef.current = false
                     clearInterval(secondsTimerRef.current)
                     d3.selectAll(`.${styles.playerState}`).text('')
                     d3.select(`#game-arc`).remove()
@@ -1412,6 +1442,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                     d3.select(`#move-arc`).remove()
                     d3.select('#timer-seconds').text('')
                     addPlayButtonToCenterBead()
+                    d3.select('#timer-bead-wave-form').transition(1000).style('opacity', 0)
                     setTurn(0)
                     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording')
                         mediaRecorderRef.current.stop()
@@ -1425,6 +1456,10 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 socketRef.current.on('incoming-audio-bead', (data) => {
                     setBeads((previousBeads) => [...previousBeads, data])
                     addEventListenersToBead(data.index)
+                    // if (!gameInProgressRef.current) {
+                    //     d3.select('#timer-bead-wave-form').transition(1000).style('opacity', 0)
+                    //     // addPlayButtonToCenterBead()
+                    // }
                 })
                 // peer refresh request
                 socketRef.current.on('incoming-refresh-request', (data) => {
@@ -1538,6 +1573,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 })
         }
 
+        roomIntro.volume = 0.2
         roomIntro.play()
         animateCircle('left-top', circleOffset)
         animateCircle('left-bottom', circleOffset)
@@ -1550,7 +1586,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             if (loadingAnimation) loadingAnimation.style('opacity', 0)
             setTimeout(() => {
                 setShowLoadingAnimation(false)
-                if (largeScreen) setShowComments(true)
+                if (largeScreen) setShowComments(false)
             }, 1000)
         }, loadingAnimationDuration)
 
@@ -1583,7 +1619,9 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 .datum({ startAngle: 0, endAngle: 2 * Math.PI })
                 .attr('id', `${type}-arc-background`)
                 .style('fill', color)
-                .style('opacity', 0.8)
+                .style('opacity', 1)
+                .style('stroke', 'black')
+                .style('stroke-width', 1)
                 .attr('d', arcs[`${type}Arc`])
         }
 
@@ -1596,6 +1634,8 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 .attr('font-size', `${fontSize}px`)
                 .attr('x', 0)
                 .attr('y', yOffset)
+                .style('fill', 'black')
+                .style('text-shadow', '0px 0px 6px white')
                 .style('opacity', 0)
                 .transition()
                 .delay(loadingAnimationDuration)
@@ -1603,11 +1643,11 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                 .style('opacity', 1)
         }
 
-        createArcBarckground('game', colors.grey1)
-        createArcBarckground('turn', colors.grey2)
-        createArcBarckground('move', colors.grey3)
-        createArcTitle('Game', 16, -194)
-        createArcTitle('Turn', 16, -164)
+        createArcBarckground('game', colors.grey3)
+        // createArcBarckground('turn', colors.grey2)
+        createArcBarckground('move', colors.grey2)
+        createArcTitle('Game', 16, -164)
+        // createArcTitle('Turn', 16, -164)
         createArcTitle('Move', 16, -134, 'timer-move-state')
         createArcTitle('', 24, -98, 'timer-seconds')
 
@@ -1620,6 +1660,8 @@ const GlassBeadGame = ({ history }): JSX.Element => {
             .attr('rx', 10)
             .attr('ry', 10)
             .attr('fill', 'white')
+            .style('stroke', 'black')
+            .style('stroke-width', 1)
 
         imageDefs
             .append('pattern')
@@ -1633,10 +1675,12 @@ const GlassBeadGame = ({ history }): JSX.Element => {
 
         timerBead
             .append('rect')
+            .attr('id', 'timer-bead-wave-form')
             .attr('width', 120)
             .attr('height', 120)
             .attr('x', -60)
             .attr('y', -60)
+            .style('opacity', 1)
             .style('fill', 'url(#wave-form-pattern)')
     }, [])
 
@@ -1739,7 +1783,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                             onChange={(v) => setNewComment(v)}
                             style={{ marginRight: 10 }}
                         />
-                        <Button text='Send' color='blue' submit />
+                        <Button text='Send' color='gbg-white' submit />
                     </form>
                     <button
                         className={styles.closeCommentsButton}
@@ -1759,7 +1803,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                         <Column className={`${styles.gameControls} ${largeScreen && styles.large}`}>
                             <Button
                                 text='Stop game'
-                                color='red'
+                                color='gbg-black'
                                 size={largeScreen ? 'large' : 'small'}
                                 style={{ marginBottom: 10 }}
                                 onClick={signalStopGame}
@@ -1793,7 +1837,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                             )}
                             <Button
                                 text='Leave game room'
-                                color='purple'
+                                color='gbg-black'
                                 size={largeScreen ? 'large' : 'small'}
                                 style={{ marginBottom: 10 }}
                                 onClick={() => setLeaveRoomModalOpen(true)}
@@ -1804,13 +1848,13 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                                     <Row wrap>
                                         <Button
                                             text='Yes, leave room'
-                                            color='red'
+                                            color='gbg-black'
                                             style={{ marginRight: 10, marginBottom: 10 }}
                                             onClick={() => history.push('/s/all')}
                                         />
                                         <Button
                                             text='No, cancel'
-                                            color='blue'
+                                            color='gbg-white'
                                             style={{ marginBottom: 10 }}
                                             onClick={() => setLeaveRoomModalOpen(false)}
                                         />
@@ -1822,7 +1866,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                                     {userIsStreaming && (
                                         <Button
                                             text={`${beads.length ? 'Restart' : 'Start'} game`}
-                                            color={beads.length ? 'red' : 'blue'}
+                                            color={beads.length ? 'gbg-black' : 'gbg-white'}
                                             size={largeScreen ? 'large' : 'small'}
                                             style={{ marginBottom: 10 }}
                                             onClick={() =>
@@ -1834,7 +1878,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                                     {beads.length > 0 && (
                                         <Button
                                             text='Save game'
-                                            color='blue'
+                                            color='gbg-white'
                                             size={largeScreen ? 'large' : 'small'}
                                             style={{ marginBottom: 10 }}
                                             onClick={() => allowedTo('save-game') && saveGame()}
@@ -1848,7 +1892,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                                         ? 'Change'
                                         : 'Add'
                                 } background`}
-                                color='grey'
+                                color='gbg-white'
                                 size={largeScreen ? 'large' : 'small'}
                                 style={{ marginBottom: 10 }}
                                 onClick={() =>
@@ -1894,7 +1938,11 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                                 <p>Add a new topic image</p>
                             </button>
                         </Row>
-                        <Column className={styles.timerContainer}>
+                        <Column
+                            className={`${styles.timerContainer} ${
+                                beads.length && styles.beadDrawOpen
+                            }`}
+                        >
                             <div id='timer-canvas' className={styles.timer} />
                         </Column>
                     </Column>
@@ -1902,7 +1950,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                         <Column className={styles.people}>
                             <Button
                                 text={`${userIsStreaming ? 'Stop' : 'Start'} streaming`}
-                                color={userIsStreaming ? 'red' : 'aqua'}
+                                color={userIsStreaming ? 'gbg-black' : 'gbg-white'}
                                 style={{ marginBottom: 10, alignSelf: 'flex-start' }}
                                 loading={loadingStream}
                                 disabled={loadingStream}
@@ -1910,7 +1958,7 @@ const GlassBeadGame = ({ history }): JSX.Element => {
                             />
                             {videosRef.current.length + (userIsStreaming ? 1 : 0) > 0 && (
                                 <Button
-                                    color='blue'
+                                    color='gbg-white'
                                     text={`${showVideos ? 'Hide' : 'Show'} videos`}
                                     onClick={() =>
                                         showVideos ? updateShowVideos(false) : openVideoWall()

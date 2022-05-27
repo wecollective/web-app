@@ -28,7 +28,7 @@
         transition-property: background-color, filter, color;
         transition-duration: 0.3s;
         flex-shrink: 0;
-        background-color: $aqua;
+        background-color: black;
         color: white;
         &:hover {
             &:not(.disabled) {

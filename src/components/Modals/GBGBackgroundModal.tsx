@@ -157,7 +157,7 @@ const GBGBackgroundModal = (props: {
             </Row>
             <Button
                 text='Save background'
-                color='blue'
+                color='gbg-white'
                 disabled={!imageURL && !imageFile && !videoURL}
                 loading={loading}
                 onClick={saveBackground}

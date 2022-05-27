@@ -59,9 +59,9 @@ const BeadCard = (props: {
                     audioElementId={audioId}
                     audioURL={bead.beadUrl}
                     staticBars={400}
-                    staticColor={colors.audioVisualiserColor}
+                    staticColor='#666' // {colors.audioVisualiserColor}
                     dynamicBars={80}
-                    dynamicColor={colors.audioVisualiserColor}
+                    dynamicColor='#666' // {colors.audioVisualiserColor}
                     style={{ width: '100%', height: 50 }}
                 />
                 <button
