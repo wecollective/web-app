@@ -8,8 +8,10 @@ import Column from '@src/components/Column'
 import Row from '@src/components/Row'
 import AudioVisualiser from '@src/components/AudioVisualiser'
 import AudioTimeSlider from '@src/components/AudioTimeSlider'
+import Modal from '@components/Modal'
 import { ReactComponent as PlayIconSVG } from '@svgs/play-solid.svg'
 import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
+import { ReactComponent as ShareIcon } from '@svgs/share-from-square-solid.svg'
 
 const BeadCard = (props: {
     postId: number
@@ -26,6 +28,8 @@ const BeadCard = (props: {
     const [audioPlaying, setAudioPlaying] = useState(false)
     const [highlighted, setHighlighted] = useState(highlight)
     const audioId = `gbg-bead-audio-${postId}-${index}-${location}`
+
+    const [beadUrlModalOpen, setBeadUrlModalOpen] = useState(false)
 
     function toggleBeadAudio(beadIndex: number, reset?: boolean): void {
         const beadAudio = d3.select(`#gbg-bead-audio-${postId}-${beadIndex}-${location}`).node()
@@ -55,14 +59,29 @@ const BeadCard = (props: {
             className={`gbg-bead ${styles.bead} ${highlighted && styles.focused} ${className}`}
             style={style}
         >
-            <ImageTitle
-                type='user'
-                imagePath={bead.user.flagImagePath}
-                title={bead.user.id === accountData.id ? 'You' : bead.user.name}
-                fontSize={12}
-                imageSize={20}
-                style={{ marginRight: 10 }}
-            />
+            <Row spaceBetween>
+                <ImageTitle
+                    type='user'
+                    imagePath={bead.user.flagImagePath}
+                    title={bead.user.id === accountData.id ? 'You' : bead.user.name}
+                    fontSize={12}
+                    imageSize={20}
+                    style={{ marginRight: 10 }}
+                />
+                <button
+                    type='button'
+                    onClick={() => setBeadUrlModalOpen(true)}
+                    className={styles.shareButton}
+                >
+                    <ShareIcon />
+                </button>
+                {beadUrlModalOpen && (
+                    <Modal centered close={() => setBeadUrlModalOpen(false)}>
+                        <h1>Bead Url</h1>
+                        <p>{`https://weco.io/p/${postId}?selectedBead=${index}`}</p>
+                    </Modal>
+                )}
+            </Row>
             <Row centerX centerY className={styles.centerPanel}>
                 <AudioVisualiser
                     audioElementId={audioId}

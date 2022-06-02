@@ -24,6 +24,22 @@
         box-shadow: 0 1px 15px 0 rgba(56, 111, 212, 0.5);
     }
 
+    .shareButton {
+        all:unset;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+
+        > svg {
+            width: 20px;
+            height: 20px;
+            opacity: 0.3;
+            &:hover {
+                opacity: 0.5;
+            }
+        }
+    }
+
     .centerPanel {
         width: 100%;
         height: calc(100% - 50px);
