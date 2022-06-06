@@ -1,4 +1,5 @@
 .postMapWrapper {
+    position: relative;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -100,4 +101,8 @@
     //height: 400px;
     width: 700px;
     margin-bottom: 200px;
+}
+.noPostsMessage {
+    position: absolute;
+    top: 30%;
 }

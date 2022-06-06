@@ -6,6 +6,7 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import { AccountContext } from '@contexts/AccountContext'
 import styles from '@styles/pages/SpacePage/SpacePagePostMap.module.scss'
 import colors from '@styles/Colors.module.scss'
+import Column from '@components/Column'
 import Modal from '@components/Modal'
 import PostCard from '@components/Cards/PostCard/PostCard'
 import LoadingWheel from '@components/LoadingWheel'
@@ -23,6 +24,8 @@ const SpacePagePostMap = (props: { postMapData: any; params: any }): JSX.Element
     const [gravity, setGravity] = useState(defaultGravity)
     const [showKey, setShowKey] = useState(false)
     const [totalMatchingPosts, setTotalMatchingPosts] = useState(0)
+    const [firstRun, setFirstRun] = useState(true)
+    const [showNoPostsMessage, setShowNoPostsMessage] = useState(false)
     const width = '100%'
     const height = 800
     const arrowPoints = 'M 0 0 6 3 0 6 1.5 3'
@@ -472,7 +475,8 @@ const SpacePagePostMap = (props: { postMapData: any; params: any }): JSX.Element
                         .classed('post-map-node-text', true)
                         .text((d) => {
                             if (d.text) return trimText(d.text)
-                            if (d.type === 'url' && !d.urlImage) return trimText(d.urlTitle)
+                            if (d.type === 'url' && !d.urlImage)
+                                return trimText(d.text || d.urlTitle || d.urlDescription || '')
                             return null
                         })
                         .attr('opacity', 0)
@@ -521,7 +525,10 @@ const SpacePagePostMap = (props: { postMapData: any; params: any }): JSX.Element
     useEffect(() => createCanvas(), [])
 
     useEffect(() => {
-        if (postMapData.totalMatchingPosts) {
+        if (firstRun) setFirstRun(false)
+        else {
+            if (postMapData.posts.length) setShowNoPostsMessage(false)
+            else setShowNoPostsMessage(true)
             // store previous node positions
             interface INodePosition {
                 id: number
@@ -568,7 +575,8 @@ const SpacePagePostMap = (props: { postMapData: any; params: any }): JSX.Element
             <div className={styles.controlsWrapper}>
                 <div className={styles.controls}>
                     <div className={styles.item}>
-                        Showing {postMapData.posts ? postMapData.posts.length : 0} of {totalMatchingPosts} posts
+                        Showing {postMapData.posts ? postMapData.posts.length : 0} of{' '}
+                        {totalMatchingPosts} posts
                         <div
                             className='blueText ml-10'
                             role='button'
@@ -701,6 +709,11 @@ const SpacePagePostMap = (props: { postMapData: any; params: any }): JSX.Element
                         <LoadingWheel />
                     )}
                 </Modal>
+            )}
+            {showNoPostsMessage && (
+                <Column className={styles.noPostsMessage}>
+                    <p>No posts yet that match those setting...</p>
+                </Column>
             )}
         </div>
     )
