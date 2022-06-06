@@ -212,7 +212,7 @@
             display: flex;
             width: 20px;
             height: 20px;
-            color: $blue5;
+            color: #82bdff; // $blue5;
             margin-right: 10px;
             flex-shrink: 0;
         }
@@ -228,8 +228,7 @@
         }
     
         .gbgBeads {
-            display: flex;
-            padding: 10px;
+            padding: 7px 0px 15px 10px;
             margin: 5px 0 0 -10px;
         }
 

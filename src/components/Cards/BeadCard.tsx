@@ -95,7 +95,7 @@ const BeadCard = (props: {
                 />
                 <button
                     className={styles.playButton}
-                    style={{ color: location === 'gbg' ? '#000' : '#44b1f7' }}
+                    style={{ color: location === 'gbg' ? '#000' : '#82bdff' }}
                     type='button'
                     aria-label='toggle-audio'
                     onClick={() => toggleBeadAudio(index)}

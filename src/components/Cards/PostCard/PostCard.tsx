@@ -621,6 +621,7 @@ const PostCard = (props: {
                                         style={{ marginRight: 12 }}
                                     />
                                 ))}
+                                <span style={{ marginLeft: -5, width: 5, flexShrink: 0 }} />
                             </Scrollbars>
                         )}
                     </Column>

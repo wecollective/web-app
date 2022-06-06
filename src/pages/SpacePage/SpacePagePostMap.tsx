@@ -702,7 +702,7 @@ const SpacePagePostMap = (props: { postMapData: any; params: any }): JSX.Element
             </div>
             <div id='canvas' />
             {postModalOpen && (
-                <Modal close={() => setPostModalOpen(false)} style={{ width: 900 }}>
+                <Modal centered close={() => setPostModalOpen(false)} style={{ width: 900 }}>
                     {selectedPost ? (
                         <PostCard location='post-page' post={selectedPost} />
                     ) : (
