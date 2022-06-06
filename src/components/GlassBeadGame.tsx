@@ -112,9 +112,9 @@ const backendShim = {
         axios.post(`${config.apiURL}/save-glass-bead-game-settings`, data),
     saveComment: (data: NewCommentData): Promise<void> =>
         axios.post(`${config.apiURL}/glass-bead-game-comment`, data),
-    uploadBeadAudio: (formData: FormData): Promise<{ data: string }> =>
+    uploadBeadAudio: (postId: number, formData: FormData): Promise<{ data: string }> =>
         // returns bead audio url
-        axios.post(`${config.apiURL}/audio-upload`, formData, {
+        axios.post(`${config.apiURL}/audio-upload?postId=${postId}`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' },
         }),
     saveGame: (gameId: number, beads: Bead[]): Promise<void> =>
@@ -446,7 +446,7 @@ const GlassBeadGame = (): JSX.Element => {
     const [mobileTab, setMobileTab] = useState<'comments' | 'game' | 'videos'>('game')
     const location = useLocation()
     const urlParams = Object.fromEntries(new URLSearchParams(location.search))
-    // const postId = +location.pathname.split('/')[2]
+    const postId = +location.pathname.split('/')[2]
 
     // state refs (used for up to date values between renders)
     const roomIdRef = useRef<number>()
@@ -785,7 +785,7 @@ const GlassBeadGame = (): JSX.Element => {
             const formData = new FormData()
             formData.append('file', blob)
             backendShim
-                .uploadBeadAudio(formData)
+                .uploadBeadAudio(postId, formData)
                 .then((res) => {
                     chunksRef.current = []
                     const signalData = {
