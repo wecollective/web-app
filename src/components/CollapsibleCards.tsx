@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import styles from '@styles/components/CollapsibleCards.module.scss'
 import Column from '@components/Column'
 import Row from '@components/Row'
+import Markdown from '@components/Markdown'
 import { ReactComponent as ChevronDownIcon } from '@svgs/chevron-down-solid.svg'
 
 const Card = (props: {
@@ -35,7 +36,7 @@ const Card = (props: {
                 >
                     {imagePath && <img src={imagePath} alt='card 1' />}
                     {svg && svg}
-                    <h1>{text}</h1>
+                    <Markdown text={text} />
                 </Column>
             </button>
             {children.length > 0 && (

@@ -19,7 +19,7 @@ const Markdown = (props: { text: string; style?: any; className?: any }): JSX.El
     }, [])
     return (
         <div className={`${styles.markdown} ${className}`} id={id} style={style}>
-            <ReactMarkdown plugins={[gfm]}>{text}</ReactMarkdown>
+            <ReactMarkdown source={text} plugins={[gfm]} escapeHtml={false} />
         </div>
     )
 }

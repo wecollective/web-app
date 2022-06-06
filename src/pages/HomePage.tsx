@@ -34,65 +34,65 @@ const Homepage = (): JSX.Element => {
     const [highlights, setHighlights] = useState<any>(null)
     const cardData = [
         {
-            text: 'New ways of organising information',
+            text: '# New ways of organising information',
             imagePath: '/images/information.jpg',
             children: [
                 {
-                    text: 'Organise spaces holonically',
+                    text: '# Organise spaces holonically',
                     imagePath: '/images/holarchy.jpg',
                     children: [],
                 },
                 {
-                    text: 'Navigate spaces visually',
+                    text: '# Navigate spaces visually',
                     imagePath: '/images/tree.jpg',
                     children: [],
                 },
                 {
-                    text: 'Link posts together',
+                    text: '# Link posts together',
                     imagePath: '/images/string.jpg',
                     children: [],
                 },
             ],
         },
         {
-            text: 'New ways of creating together',
+            text: '# New ways of creating together',
             svg: <CastaliaIcon />,
             children: [
                 {
-                    text: 'Play with time',
+                    text: '# Play with time',
                     imagePath: '/images/time.jpg',
                     children: [],
                 },
                 {
-                    text: 'Process ideas collectively (Soon TM)',
+                    text: '# Process ideas collectively (Soon<sup>TM</sup>)',
                     imagePath: '/images/process.jpg',
                     children: [],
                 },
                 {
-                    text: 'Design beautfiul information (Soon TM)',
+                    text: '# Design beautiful information (Soon<sup>TM</sup>)',
                     imagePath: '/images/design.jpg',
                     children: [],
                 },
             ],
         },
         {
-            text: 'New ways of being together',
+            text: '# New ways of being together',
             imagePath: '/images/being.jpg',
             children: [
                 {
-                    text: 'Cooperatively owned (Soon TM)',
+                    text: '# Cooperatively owned (Soon<sup>TM</sup>)',
                     svg: <HandshakeIcon />,
                     smallIcon: true,
                     children: [],
                 },
                 {
-                    text: 'Democratically governed (Soon TM)',
+                    text: '# Democratically governed (Soon<sup>TM</sup>)',
                     svg: <PollIcon />,
                     smallIcon: true,
                     children: [],
                 },
                 {
-                    text: 'Open source',
+                    text: '# Open source',
                     link: 'https://github.com/wecollective',
                     svg: <OSIcon />,
                     smallIcon: true,
