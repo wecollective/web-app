@@ -805,7 +805,6 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                             flagImagePath: accountData.flagImagePath,
                         },
                         DirectSpaces: [
-                            { ...spaceData, type: 'post', state: 'active' },
                             ...selectedSpaces.map((space) => {
                                 return { ...space, type: 'post', state: 'active' }
                             }),
