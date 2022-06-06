@@ -206,7 +206,7 @@ const PostCard = (props: {
         <Column className={`${styles.post} ${styles[location]}`} key={id} style={style}>
             {!!index && <div className={styles.index}>{index! + 1}</div>}
             <Row spaceBetween className={styles.header}>
-                <Row centerY>
+                <Row centerY className={styles.postSpaces}>
                     <ImageTitle
                         type='user'
                         imagePath={Creator.flagImagePath}

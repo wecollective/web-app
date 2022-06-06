@@ -32,13 +32,7 @@
             margin-right: 5px;
         }
         .postSpaces {
-            display: flex;
-            flex-direction: row;
-            justify-content: flex-start;
-            align-items: center;
-            > p, > a {
-                margin-right: 5px;
-            }
+            > p { flex-shrink: 0 }
         }
         .link {
             display: flex;

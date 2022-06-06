@@ -1897,7 +1897,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             )}
 
             {currentStep === steps.length && (
-                <Column centerX style={{ width: 600, marginBottom: 30 }}>
+                <Column centerX style={{ maxWidth: 800, marginBottom: 30 }}>
                     <p style={{ marginBottom: 30 }}>
                         Here's a preview of what your post will look like to other users:
                     </p>
