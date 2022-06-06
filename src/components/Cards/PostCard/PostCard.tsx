@@ -371,6 +371,7 @@ const PostCard = (props: {
                             <AudioTimeSlider
                                 audioElementId={`post-audio-${id}-${location}`}
                                 audioURL={url}
+                                location={location}
                                 onPlay={() => setAudioPlaying(true)}
                                 onPause={() => setAudioPlaying(false)}
                                 onEnded={() => setAudioPlaying(false)}

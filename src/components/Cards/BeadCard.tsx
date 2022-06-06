@@ -15,7 +15,7 @@ import { ReactComponent as ShareIcon } from '@svgs/share-from-square-solid.svg'
 
 const BeadCard = (props: {
     postId: number
-    location: string
+    location: 'space-posts' | 'user-posts' | 'post-page' | 'space-post-map' | 'gbg' | 'preview'
     index: number
     bead: any
     highlight?: boolean
@@ -28,6 +28,7 @@ const BeadCard = (props: {
     const [audioPlaying, setAudioPlaying] = useState(false)
     const [highlighted, setHighlighted] = useState(highlight)
     const audioId = `gbg-bead-audio-${postId}-${index}-${location}`
+    console.log('location: ', location)
 
     const [beadUrlModalOpen, setBeadUrlModalOpen] = useState(false)
 
@@ -78,7 +79,7 @@ const BeadCard = (props: {
                 {beadUrlModalOpen && (
                     <Modal centered close={() => setBeadUrlModalOpen(false)}>
                         <h1>Bead Url</h1>
-                        <p>{`https://weco.io/p/${postId}?selectedBead=${index}`}</p>
+                        <p>{`https://weco.io/p/${postId}?bead=${index}`}</p>
                     </Modal>
                 )}
             </Row>
@@ -87,13 +88,14 @@ const BeadCard = (props: {
                     audioElementId={audioId}
                     audioURL={bead.beadUrl}
                     staticBars={400}
-                    staticColor='#666' // {colors.audioVisualiserColor}
+                    staticColor={location === 'gbg' ? '#666' : colors.audioVisualiserColor}
                     dynamicBars={80}
-                    dynamicColor='#666' // {colors.audioVisualiserColor}
+                    dynamicColor={location === 'gbg' ? '#666' : colors.audioVisualiserColor}
                     style={{ width: '100%', height: 50 }}
                 />
                 <button
                     className={styles.playButton}
+                    style={{ color: location === 'gbg' ? '#000' : '#44b1f7' }}
                     type='button'
                     aria-label='toggle-audio'
                     onClick={() => toggleBeadAudio(index)}
@@ -104,6 +106,7 @@ const BeadCard = (props: {
             <AudioTimeSlider
                 audioElementId={audioId}
                 audioURL={bead.beadUrl}
+                location={location}
                 onPlay={() => setAudioPlaying(true)}
                 onPause={() => setAudioPlaying(false)}
                 onEnded={() => toggleBeadAudio(index + 1, true)}

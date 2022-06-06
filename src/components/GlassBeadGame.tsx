@@ -463,7 +463,7 @@ const GlassBeadGame = (): JSX.Element => {
     const audioRef = useRef<any>(null)
     const videoRef = useRef<any>(null)
     const showVideoRef = useRef(showVideos)
-    const liveBeadIndexRef = useRef(+urlParams.selectedBead || 1)
+    const liveBeadIndexRef = useRef(+urlParams.bead || 1)
     const gameInProgressRef = useRef(false)
 
     const history = useHistory()

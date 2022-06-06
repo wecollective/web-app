@@ -119,6 +119,7 @@ const StringBeadCard = (props: {
                             <AudioTimeSlider
                                 audioElementId={`string-bead-audio-${postId}-${beadIndex}-${location}`}
                                 audioURL={bead.url}
+                                location='space-posts'
                                 onPlay={() => setAudioPlaying(true)}
                                 onPause={() => setAudioPlaying(false)}
                                 onEnded={() => setAudioPlaying(false)}

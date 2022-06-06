@@ -1266,6 +1266,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                 <AudioTimeSlider
                                     audioElementId='new-post-audio'
                                     audioURL={URL.createObjectURL(audioFile)}
+                                    location='preview'
                                     onPlay={() => setAudioPlaying(true)}
                                     onPause={() => setAudioPlaying(false)}
                                     onEnded={() => setAudioPlaying(false)}
@@ -1679,6 +1680,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                             <AudioTimeSlider
                                                 audioElementId='new-post-audio'
                                                 audioURL={URL.createObjectURL(newBead.audioFile)}
+                                                location='preview'
                                                 onPlay={() => setAudioPlaying(true)}
                                                 onPause={() => setAudioPlaying(false)}
                                                 onEnded={() => setAudioPlaying(false)}

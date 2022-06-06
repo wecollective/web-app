@@ -9,11 +9,12 @@ import { formatTimeMMSS } from '@src/Helpers'
 const AudioTimeSlider = (props: {
     audioElementId: string
     audioURL: string
+    location: 'space-posts' | 'user-posts' | 'post-page' | 'space-post-map' | 'gbg' | 'preview'
     onPlay?: () => void
     onPause?: () => void
     onEnded?: () => void
 }): JSX.Element => {
-    const { audioURL, audioElementId, onPlay, onPause, onEnded } = props
+    const { audioURL, audioElementId, location, onPlay, onPause, onEnded } = props
     const [duration, setDuration] = useState(0)
     const [currentTime, setCurrentTime] = useState(0)
     const [sliderPercent, setSliderPercent] = useState(0)
@@ -72,7 +73,7 @@ const AudioTimeSlider = (props: {
 
     return (
         <Column className={styles.wrapper}>
-            <Row centerY className={styles.slider}>
+            <Row centerY className={`${styles.slider} ${location === 'gbg' && styles.gbg}`}>
                 <div className={styles.progressBarBackground} />
                 <div className={styles.bufferedAmount} style={{ width: `${bufferPercent}%` }} />
                 <div className={styles.progressBar} style={{ width: `${sliderPercent}%` }} />
