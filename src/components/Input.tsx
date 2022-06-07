@@ -72,7 +72,7 @@ const Input = (props: {
                     {state === 'invalid' && <DangerIconSVG />}
                     {state === 'valid' && <SuccessIconSVG />}
                 </div>
-                {loading && <LoadingWheel size={30} />}
+                {loading && <LoadingWheel size={30} style={{ marginRight: 5 }} />}
             </div>
         </div>
     )
