@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react'
 import Cookies from 'universal-cookie'
 import axios from 'axios'
+import { v4 as uuidv4 } from 'uuid'
 import config from '@src/Config'
 import styles from '@styles/components/cards/PostCard/PostCardRepostModal.module.scss'
 import { AccountContext } from '@contexts/AccountContext'
@@ -76,7 +77,7 @@ const PostCardRepostModal = (props: {
             const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
             axios
                 .post(`${config.apiURL}/repost-post`, data, authHeader)
-                .then(() => {
+                .then((res) => {
                     setPostData({
                         ...postData,
                         totalReactions: postData.totalReactions + selectedSpaces.length,
@@ -86,6 +87,7 @@ const PostCardRepostModal = (props: {
                             ...postData.Reactions,
                             ...selectedSpaces.map((space) => {
                                 return {
+                                    id: uuidv4(),
                                     type: 'repost',
                                     Creator: {
                                         id: accountData.id,
@@ -101,6 +103,20 @@ const PostCardRepostModal = (props: {
                                     },
                                 }
                             }),
+                        ],
+                        DirectSpaces: [
+                            ...postData.DirectSpaces,
+                            ...selectedSpaces.map((space) => {
+                                return { id: space.id }
+                            }),
+                        ],
+                        IndirectSpaces: [
+                            ...postData.IndirectSpaces,
+                            ...res.data.indirectRelationships
+                                .filter((id) => id !== null)
+                                .map((id) => {
+                                    return { id }
+                                }),
                         ],
                     })
                     close()

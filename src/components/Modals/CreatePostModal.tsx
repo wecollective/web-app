@@ -809,6 +809,11 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                 return { ...space, type: 'post', state: 'active' }
                             }),
                         ],
+                        IndirectSpaces: [
+                            ...res.data.indirectRelationships.map((item) => {
+                                return { id: item.holonId }
+                            }),
+                        ],
                         Reactions: [],
                         IncomingLinks: [],
                         OutgoingLinks: [],
