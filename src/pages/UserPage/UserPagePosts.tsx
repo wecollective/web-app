@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useLocation, useHistory } from 'react-router-dom'
+import { AccountContext } from '@src/contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
 import { getNewParams } from '@src/Helpers'
 import styles from '@styles/pages/UserPage/UserPagePosts.module.scss'
@@ -11,6 +12,7 @@ import UserPagePostsHeader from '@pages/UserPage/UserPagePostsHeader'
 import UserNotFound from '@pages/SpaceNotFound'
 
 const UserPagePosts = (): JSX.Element => {
+    const { pageBottomReached } = useContext(AccountContext)
     const {
         userData,
         userNotFound,
@@ -43,11 +45,6 @@ const UserPagePosts = (): JSX.Element => {
         })
     }
 
-    function onScrollBottom() {
-        if (!userPostsLoading && !nextUserPostsLoading && userPostsPaginationHasMore)
-            getUserPosts(userData.id, userPostsPaginationOffset, userPostsPaginationLimit, params)
-    }
-
     useEffect(() => {
         if (userData.handle !== userHandle) setUserPostsLoading(true)
         else {
@@ -58,6 +55,11 @@ const UserPagePosts = (): JSX.Element => {
             }
         }
     }, [userData.handle, location])
+
+    useEffect(() => {
+        if (!userPostsLoading && !nextUserPostsLoading && userPostsPaginationHasMore)
+            getUserPosts(userData.id, userPostsPaginationOffset, userPostsPaginationLimit, params)
+    }, [pageBottomReached])
 
     if (userNotFound) return <UserNotFound />
     return (
@@ -78,7 +80,6 @@ const UserPagePosts = (): JSX.Element => {
                                 posts={userPosts}
                                 firstPostsloading={userPostsLoading}
                                 nextPostsLoading={nextUserPostsLoading}
-                                onScrollBottom={onScrollBottom}
                             />
                         </Column>
                     </Row>

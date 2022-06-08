@@ -23,6 +23,7 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
     const [loggedIn, setLoggedIn] = useState(false)
     const [accountData, setAccountData] = useState(defaults.accountData)
     const [accountDataLoading, setAccountDataLoading] = useState(true)
+    const [pageBottomReached, setPageBottomReached] = useState(false)
     // const [notifications, setNotifications] = useState<any[]>([])
     // const [notificationsLoading, setNotificationsLoading] = useState(true)
     // modals (todo: most to be removed...)
@@ -139,6 +140,8 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                 setResetPasswordModalToken,
                 donateModalOpen,
                 setDonateModalOpen,
+                pageBottomReached,
+                setPageBottomReached,
                 // functions
                 getAccountData,
                 updateAccountData,

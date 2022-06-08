@@ -8,16 +8,15 @@ import PostListPlaceholder from '@components/PostListPlaceholder'
 import Row from '@components/Row'
 import Column from '@components/Column'
 import LoadingWheel from '@components/LoadingWheel'
-import Scrollbars from '@src/components/Scrollbars'
 
 const PostList = (props: {
     location: 'space-posts' | 'user-posts'
     posts: any[]
     firstPostsloading: boolean
     nextPostsLoading: boolean
-    onScrollBottom: () => void
+    style?: any
 }): JSX.Element => {
-    const { location, posts, firstPostsloading, nextPostsLoading, onScrollBottom } = props
+    const { location, posts, firstPostsloading, nextPostsLoading, style } = props
     const { resetSpacePosts } = useContext(SpaceContext)
     const { resetUserPosts } = useContext(UserContext)
 
@@ -30,11 +29,7 @@ const PostList = (props: {
     )
 
     return (
-        <Scrollbars
-            id={`${location}-scrollbars`}
-            className={styles.wrapper}
-            onScrollBottom={onScrollBottom}
-        >
+        <Column id={`${location}-scrollbars`} className={styles.wrapper} style={style}>
             {firstPostsloading ? (
                 <PostListPlaceholder />
             ) : posts.length ? (
@@ -58,8 +53,12 @@ const PostList = (props: {
                     <p>No posts found that match those settings...</p>
                 </Row>
             )}
-        </Scrollbars>
+        </Column>
     )
+}
+
+PostList.defaultProps = {
+    style: null,
 }
 
 export default PostList

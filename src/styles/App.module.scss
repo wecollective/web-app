@@ -4,5 +4,6 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    overflow: hidden;
+    zoom: 0.9;
+    @include for-desktop-medium-up { zoom: 1 }
 }

@@ -11,14 +11,14 @@
     > p { margin-left: 10px }
 
     .item1 {
-        z-index: $sidebarZIndex + 2;
+        z-index: 3;
     }
     .item2 {
-        z-index: $sidebarZIndex + 1;
+        z-index: 2;
         margin-left: -10px;
     }
     .item3 {
-        z-index: $sidebarZIndex;
+        z-index: 1;
         margin-left: -10px;
     }
 }

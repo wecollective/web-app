@@ -138,6 +138,8 @@ export interface IAccountContext {
     setResetPasswordModalToken: (payload: string | null) => void
     donateModalOpen: boolean
     setDonateModalOpen: (payload: boolean) => void
+    pageBottomReached: boolean
+    setPageBottomReached: (payload: boolean) => void
     // functions
     getAccountData: () => void
     updateAccountData: (key: string, payload: any) => void

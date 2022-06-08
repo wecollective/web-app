@@ -3,6 +3,7 @@ import { Route, Switch, Redirect, useLocation } from 'react-router-dom'
 import axios from 'axios'
 import config from '@src/Config'
 import Cookies from 'universal-cookie'
+import { onPageBottomReached } from '@src/Helpers'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import styles from '@styles/pages/SpacePage/SpacePage.module.scss'
@@ -33,9 +34,13 @@ import { ReactComponent as CalendarIcon } from '@svgs/calendar-days-solid.svg'
 import { ReactComponent as GovernanceIcon } from '@svgs/building-columns-solid.svg'
 
 const SpacePage = (): JSX.Element => {
-    const { accountData, accountDataLoading, updateAccountData, loggedIn } = useContext(
-        AccountContext
-    )
+    const {
+        accountData,
+        accountDataLoading,
+        updateAccountData,
+        loggedIn,
+        setPageBottomReached,
+    } = useContext(AccountContext)
     const {
         spaceData,
         getSpaceData,
@@ -98,10 +103,11 @@ const SpacePage = (): JSX.Element => {
 
     useEffect(() => setSelectedSpaceSubPage(subpage), [location])
 
-    // useEffect(() => {
-    //     window.scrollTo(0, 300)
-    //     window.onunload = () => window.scrollTo(0, 300)
-    // }, [])
+    useEffect(() => {
+        document.addEventListener('scroll', () => onPageBottomReached(setPageBottomReached))
+        // window.scrollTo(0, 300)
+        // window.onunload = () => window.scrollTo(0, 300)
+    }, [])
 
     useEffect(() => () => resetSpaceData(), [])
 

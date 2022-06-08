@@ -3,6 +3,10 @@
 .wrapper {
     width: 200px;
     flex-shrink: 0;
+    position: sticky !important;
+    top: 313px;
+    align-self: flex-start;
+    max-height: 68vh;
 
     .spaces {
         margin-bottom: 20px;

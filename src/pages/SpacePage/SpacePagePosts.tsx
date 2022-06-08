@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useLocation, useHistory } from 'react-router-dom'
 import { getNewParams } from '@src/Helpers'
+import { AccountContext } from '@src/contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import styles from '@styles/pages/SpacePage/SpacePagePosts.module.scss'
 import SpacePagePostsFilters from '@pages/SpacePage/SpacePagePostsFilters'
@@ -13,6 +14,7 @@ import PostList from '@components/PostList'
 import SpaceNotFound from '@pages/SpaceNotFound'
 
 const SpacePagePosts = (): JSX.Element => {
+    const { pageBottomReached } = useContext(AccountContext)
     const {
         spaceData,
         spaceNotFound,
@@ -47,16 +49,6 @@ const SpacePagePosts = (): JSX.Element => {
         })
     }
 
-    function onScrollBottom() {
-        if (!spacePostsLoading && !nextSpacePostsLoading && spacePostsPaginationHasMore)
-            getSpacePosts(
-                spaceData.id,
-                spacePostsPaginationOffset,
-                spacePostsPaginationLimit,
-                params
-            )
-    }
-
     useEffect(() => {
         if (spaceData.handle !== spaceHandle) setSpacePostsLoading(true)
         else {
@@ -65,6 +57,17 @@ const SpacePagePosts = (): JSX.Element => {
             if (params.view === 'Map') getPostMapData(spaceData.id, params, 50)
         }
     }, [spaceData.handle, location])
+
+    useEffect(() => {
+        if (!spacePostsLoading && !nextSpacePostsLoading && spacePostsPaginationHasMore) {
+            getSpacePosts(
+                spaceData.id,
+                spacePostsPaginationOffset,
+                spacePostsPaginationLimit,
+                params
+            )
+        }
+    }, [pageBottomReached])
 
     if (spaceNotFound) return <SpaceNotFound />
     return (
@@ -85,7 +88,6 @@ const SpacePagePosts = (): JSX.Element => {
                             posts={spacePosts}
                             firstPostsloading={spacePostsLoading}
                             nextPostsLoading={nextSpacePostsLoading}
-                            onScrollBottom={onScrollBottom}
                         />
                     </Row>
                 )}

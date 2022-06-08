@@ -2,15 +2,12 @@
 
 .wrapper {
     margin-bottom: 10px;
-    height: calc(100vh - 250px);
 
     .content {
-        height: 100%;
-        overflow: hidden;
+        position: relative;
 
         .postListView {
             width: 1215px;
-            height: 100%;
         }
         
         .postMapView {

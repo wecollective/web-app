@@ -28,7 +28,6 @@ const BeadCard = (props: {
     const [audioPlaying, setAudioPlaying] = useState(false)
     const [highlighted, setHighlighted] = useState(highlight)
     const audioId = `gbg-bead-audio-${postId}-${index}-${location}`
-    console.log('location: ', location)
 
     const [beadUrlModalOpen, setBeadUrlModalOpen] = useState(false)
 

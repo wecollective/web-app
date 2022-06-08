@@ -4,8 +4,12 @@
     position: relative;
     width: 100%;
     height: $coverImageHeight;
+    position: sticky;
+    top: -100px;
+    z-index: 50;
     @media screen and (max-width: 1500px) {
         height: $coverImageHeight - 30px;
+        top: -70px;
     }
 }
 .placeholder {

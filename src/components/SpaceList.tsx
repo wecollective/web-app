@@ -6,7 +6,6 @@ import SpaceListPlaceholder from '@components/SpaceListPlaceholder'
 import Row from '@components/Row'
 import Column from '@components/Column'
 import LoadingWheel from '@components/LoadingWheel'
-import Scrollbars from '@src/components/Scrollbars'
 import { SpaceContext } from '@contexts/SpaceContext'
 
 const SpaceList = (props: {
@@ -14,19 +13,14 @@ const SpaceList = (props: {
     spaces: any[]
     firstSpacesloading: boolean
     nextSpacesLoading: boolean
-    onScrollBottom: () => void
 }): JSX.Element => {
-    const { location, spaces, firstSpacesloading, nextSpacesLoading, onScrollBottom } = props
+    const { location, spaces, firstSpacesloading, nextSpacesLoading } = props
     const { resetSpaceSpaces } = useContext(SpaceContext)
 
     useEffect(() => () => resetSpaceSpaces(), [])
 
     return (
-        <Scrollbars
-            id={`${location}-scrollbars`}
-            className={styles.wrapper}
-            onScrollBottom={onScrollBottom}
-        >
+        <Column id={`${location}-scrollbars`} className={styles.wrapper}>
             {firstSpacesloading ? (
                 <SpaceListPlaceholder />
             ) : spaces.length ? (
@@ -49,7 +43,7 @@ const SpaceList = (props: {
                     <p>No spaces found that match those settings...</p>
                 </Row>
             )}
-        </Scrollbars>
+        </Column>
     )
 }
 

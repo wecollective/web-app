@@ -231,12 +231,10 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     }
 
     function resetSpaceData() {
-        console.log('SpaceContext: resetSpaceData')
         setSpaceData(defaults.spaceData)
     }
 
     function resetSpacePosts() {
-        console.log('SpaceContext: resetSpacePosts')
         setSpacePosts([])
         setSpacePostsPaginationLimit(10)
         setSpacePostsPaginationOffset(0)
@@ -244,7 +242,6 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     }
 
     function resetSpaceSpaces() {
-        console.log('SpaceContext: resetSpaceSpaces')
         setSpaceSpaces([])
         setSpaceSpacesPaginationLimit(10)
         setSpaceSpacesPaginationOffset(0)
@@ -252,7 +249,6 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     }
 
     function resetSpacePeople() {
-        console.log('SpaceContext: resetSpacePeople')
         setSpacePeople([])
         setSpacePeoplePaginationLimit(20)
         setSpacePeoplePaginationOffset(0)

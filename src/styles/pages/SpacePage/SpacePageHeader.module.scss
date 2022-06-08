@@ -1,6 +1,10 @@
 @import '@styles/Variables';
 
 .wrapper {
-    margin: 15px 0;
+    width: 100%;
+    padding: 15px 0;
     background-color: $grey1;
+    z-index: 50;
+    position: sticky;
+    top: 244px;
 }

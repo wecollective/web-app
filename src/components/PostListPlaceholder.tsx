@@ -5,10 +5,8 @@ import PostCardPlaceholder from '@components/Cards/PostCard/PostCardPlaceholder'
 
 const PostListPlaceholder = (): JSX.Element => {
     return (
-        <Column style={{ width: 900 }}>
+        <Column>
             <div className={styles.gradient} />
-            <PostCardPlaceholder />
-            <PostCardPlaceholder />
             <PostCardPlaceholder />
             <PostCardPlaceholder />
             <PostCardPlaceholder />

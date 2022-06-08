@@ -1,14 +1,10 @@
 @import '@styles/Variables';
 
 .wrapper {
-    width: 100%;
     margin-bottom: 10px;
-    height: calc(100vh - 250px);
 
     .content {
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
+        position: relative;
 
         .spaceListView {}
 

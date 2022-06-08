@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { Route, Switch, Redirect, useLocation } from 'react-router-dom'
 import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
+import { onPageBottomReached } from '@src/Helpers'
 import styles from '@styles/pages/UserPage/UserPage.module.scss'
 import Column from '@components/Column'
 import Row from '@components/Row'
@@ -20,7 +21,7 @@ import { ReactComponent as BellIcon } from '@svgs/bell-solid.svg'
 import { ReactComponent as SettingsIcon } from '@svgs/cog-solid.svg'
 
 const UserPage = (): JSX.Element => {
-    const { accountDataLoading, loggedIn } = useContext(AccountContext)
+    const { accountDataLoading, setPageBottomReached, loggedIn, } = useContext(AccountContext)
     const {
         userData,
         getUserData,
@@ -55,6 +56,10 @@ const UserPage = (): JSX.Element => {
     }, [accountDataLoading, userHandle])
 
     useEffect(() => setSelectedUserSubPage(subpage), [location])
+
+    useEffect(() => {
+        document.addEventListener('scroll', () => onPageBottomReached(setPageBottomReached))
+    }, [])
 
     useEffect(() => () => resetUserData(), [])
 

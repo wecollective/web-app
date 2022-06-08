@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useLocation, useHistory } from 'react-router-dom'
 import { getNewParams } from '@src/Helpers'
+import { AccountContext } from '@src/contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import styles from '@styles/pages/SpacePage/SpacePageSpaces.module.scss'
 import Column from '@components/Column'
@@ -12,6 +13,7 @@ import SpacePageSpaceMap from '@pages/SpacePage/SpacePageSpaceMap'
 import SpaceNotFound from '@pages/SpaceNotFound'
 
 const SpacePageSpaces = (): JSX.Element => {
+    const { pageBottomReached } = useContext(AccountContext)
     const {
         spaceData,
         spaceNotFound,
@@ -47,16 +49,6 @@ const SpacePageSpaces = (): JSX.Element => {
         })
     }
 
-    function onScrollBottom() {
-        if (!spaceSpacesLoading && !nextSpaceSpacesLoading && spaceSpacesPaginationHasMore)
-            getSpaceSpaces(
-                spaceData.id,
-                spaceSpacesPaginationOffset,
-                spaceSpacesPaginationLimit,
-                params
-            )
-    }
-
     useEffect(() => {
         if (spaceData.handle !== spaceHandle) setSpaceSpacesLoading(true)
         else {
@@ -65,6 +57,16 @@ const SpacePageSpaces = (): JSX.Element => {
             if (params.view === 'Map') getSpaceMapData(spaceData.id, params)
         }
     }, [spaceData.handle, location])
+
+    useEffect(() => {
+        if (!spaceSpacesLoading && !nextSpaceSpacesLoading && spaceSpacesPaginationHasMore)
+            getSpaceSpaces(
+                spaceData.id,
+                spaceSpacesPaginationOffset,
+                spaceSpacesPaginationLimit,
+                params
+            )
+    }, [pageBottomReached])
 
     if (spaceNotFound) return <SpaceNotFound />
     return (
@@ -84,7 +86,6 @@ const SpacePageSpaces = (): JSX.Element => {
                             spaces={spaceSpaces}
                             firstSpacesloading={spaceSpacesLoading}
                             nextSpacesLoading={nextSpaceSpacesLoading}
-                            onScrollBottom={onScrollBottom}
                         />
                     </Column>
                 )}
