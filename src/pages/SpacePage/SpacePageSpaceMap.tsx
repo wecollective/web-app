@@ -916,13 +916,11 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
 
     function findModalPosition() {
         if (highlightedSpacePosition.left) {
-            const { top, left } = highlightedSpacePosition
             const zoomScale = d3.zoomTransform(d3.select('#space-map-master-group').node()).k
             const isMainSpace = highlightedSpace.id === spaceData.id
-            const topOffset =
-                document.documentElement.scrollTop + ((isMainSpace ? 25 : 0) - 5) * zoomScale
-            const leftOffset = (75 + (isMainSpace ? 50 : 0)) * zoomScale
-            return { top: top + topOffset, left: left + leftOffset }
+            const top = highlightedSpacePosition.top + zoomScale * (isMainSpace ? 52 : 26) - 30
+            const left = highlightedSpacePosition.left + zoomScale * (isMainSpace ? 115 : 65) + 10
+            return { top, left }
         }
         return null
     }

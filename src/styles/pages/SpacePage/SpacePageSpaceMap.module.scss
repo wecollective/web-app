@@ -2,9 +2,7 @@
 
 .canvas {
     .spaceInfoModal {
-        position: absolute;
-        top: 0;
-        left: 50%;
+        position: fixed;
         max-width: 500px;
         max-height: 400px;
         background-color: $black2;
