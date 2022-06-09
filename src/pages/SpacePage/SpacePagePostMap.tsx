@@ -27,7 +27,7 @@ const SpacePagePostMap = (props: { postMapData: any; params: any }): JSX.Element
     const [firstRun, setFirstRun] = useState(true)
     const [showNoPostsMessage, setShowNoPostsMessage] = useState(false)
     const width = '100%'
-    const height = 800
+    const height = window.innerHeight - (window.innerWidth < 1500 ? 250 : 330)
     const arrowPoints = 'M 0 0 6 3 0 6 1.5 3'
     const gravitySlider = useRef<HTMLInputElement>(null)
     const gravityInput = useRef<HTMLInputElement>(null)
@@ -181,6 +181,7 @@ const SpacePagePostMap = (props: { postMapData: any; params: any }): JSX.Element
                     const data = {
                         source: postIndex,
                         target: targetIndex,
+                        description: link.description,
                     }
                     linkData.push(data)
                 }
@@ -317,10 +318,13 @@ const SpacePagePostMap = (props: { postMapData: any; params: any }): JSX.Element
                 if (Number.isFinite(x)) return x
                 return 0
             }
-            link.attr('x1', (d) => fixna(d.source.x))
-                .attr('y1', (d) => fixna(d.source.y))
-                .attr('x2', (d) => fixna(d.target.x))
-                .attr('y2', (d) => fixna(d.target.y))
+            link.attr(
+                'd',
+                (d) =>
+                    `M${fixna(d.source.x)} ${fixna(d.source.y)} L${fixna(d.target.x)} ${fixna(
+                        d.target.y
+                    )}`
+            )
         }
 
         function updateSimulation() {
@@ -334,7 +338,6 @@ const SpacePagePostMap = (props: { postMapData: any; params: any }): JSX.Element
                 .attr('y', (d) => d.y)
 
             d3.selectAll('.post-map-text-link').call(updateLink)
-            d3.selectAll('.post-map-turn-link').call(updateLink)
         }
 
         const simulation = d3
@@ -500,20 +503,46 @@ const SpacePagePostMap = (props: { postMapData: any; params: any }): JSX.Element
                     )
             )
 
-        // create text links
+        // create links
         d3.select('#post-map-link-group')
             .selectAll('.post-map-text-link')
             .data(textLinkData)
             .join(
                 (enter) =>
                     enter
-                        .append('line')
+                        .append('path')
                         .classed('post-map-text-link', true)
+                        .attr('id', (d) => `link-${d.source.id}`)
                         .attr('stroke', 'black')
                         .attr('stroke-width', '3px')
                         .attr('marker-end', 'url(#text-link-arrow)')
                         .attr('opacity', 0)
-                        .call((node) => node.transition().duration(1000).attr('opacity', 0.3)),
+                        .call((node) => node.transition().duration(1000).attr('opacity', 1)),
+                (update) => update.call((node) => node.transition().duration(1000)),
+                (exit) =>
+                    exit.call((node) =>
+                        node.transition().duration(1000).attr('opacity', 0).remove()
+                    )
+            )
+
+        // create link text
+        d3.select('#post-map-link-group')
+            .selectAll('.post-map-link-text')
+            .data(textLinkData)
+            .join(
+                (enter) =>
+                    enter
+                        .append('text')
+                        .classed('post-map-link-text', true)
+                        .attr('dy', -5)
+                        .append('textPath')
+                        .classed('textPath', true)
+                        .text((d) => d.description)
+                        .attr('text-anchor', 'middle')
+                        .attr('startOffset', '50%')
+                        .attr('href', (d) => `#link-${d.source.id}`)
+                        .attr('opacity', 0)
+                        .call((node) => node.transition().duration(1000).attr('opacity', 1)),
                 (update) => update.call((node) => node.transition().duration(1000)),
                 (exit) =>
                     exit.call((node) =>
