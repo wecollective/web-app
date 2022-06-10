@@ -17,10 +17,10 @@ const GlobalSearchBar = (): JSX.Element => {
     function updateSearchQuery(query) {
         setSearchQuery(query)
         if (searchType === 'Posts') setOptions([])
-        if (searchType === 'Spaces' || searchType === 'People') {
+        if (['Spaces', 'People'].includes(searchType)) {
             if (!query) setOptions([])
             else {
-                const route = searchType === 'Spaces' ? 'find-spaces' : 'find-user'
+                const route = searchType === 'Spaces' ? 'find-spaces' : 'find-users'
                 const data = { query, blacklist: [] }
                 axios
                     .post(`${config.apiURL}/${route}`, data)

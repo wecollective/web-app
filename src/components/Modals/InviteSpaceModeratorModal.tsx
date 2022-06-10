@@ -28,9 +28,9 @@ const InviteSpaceModeratorModal = (props: { close: () => void }): JSX.Element =>
     function findUsers(query) {
         if (query.length < 1) setOptions([])
         else {
-            const data = { query, blacklist: spaceData.Moderators }
+            const data = { query, blacklist: spaceData.Moderators.map((user) => user.id) }
             axios
-                .post(`${config.apiURL}/find-user`, data)
+                .post(`${config.apiURL}/find-users`, data)
                 .then((res) => setOptions(res.data))
                 .catch((error) => console.log('error: ', error))
         }
