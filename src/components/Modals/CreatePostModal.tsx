@@ -47,6 +47,7 @@ import { ReactComponent as AudioIcon } from '@svgs/volume-high-solid.svg'
 import { ReactComponent as EventIcon } from '@svgs/calendar-days-solid.svg'
 import { ReactComponent as GBGIcon } from '@svgs/castalia-logo.svg'
 import { ReactComponent as StringIcon } from '@svgs/string-icon.svg'
+import { ReactComponent as MultiplayerStringIcon } from '@svgs/multiplayer-string-icon.svg'
 import { ReactComponent as ChevronLeftIcon } from '@svgs/chevron-left-solid.svg'
 import { ReactComponent as ChevronRightIcon } from '@svgs/chevron-right-solid.svg'
 import Markdown from '../Markdown'
@@ -111,6 +112,18 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             steps: ['Post Type: String', 'String', 'Text', 'Spaces', 'Create'],
             icon: <StringIcon />,
             description: `**String**: Create a string of connected items (text, URL, audio, or image) in one post.`,
+        },
+        {
+            name: 'Multiplayer String',
+            steps: [
+                'Post Type: Multiplayer String',
+                'Description (optional)',
+                'People',
+                'Spaces',
+                'Create',
+            ],
+            icon: <MultiplayerStringIcon />,
+            description: `**Multiplayer String**: Set up an asynchronous game where players take turns adding beads (text, URL, audio, or image) to a single string post.`,
         },
     ]
     const [postType, setPostType] = useState(initialType)
@@ -280,6 +293,19 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
         },
     })
 
+    // multiplayer string
+    const [multiplayerStringForm1, setMultiplayerStringForm1] = useState({
+        description: {
+            ...defaultErrorState,
+            value: '',
+            validate: (v) => (v.length > 5000 ? ['Must be less than 5K characters'] : []),
+        },
+    })
+    const [userOptions, setUserOptions] = useState<any[]>([])
+    const [selectedUsers, setSelectedUsers] = useState<any[]>([])
+    const [selectedUsersError, setSelectedUsersError] = useState(false)
+
+    // selected spaces
     const [spaceOptions, setSpaceOptions] = useState<any[]>([])
     const [selectedSpaces, setSelectedSpaces] = useState<any[]>([
         {
@@ -316,6 +342,27 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
 
     function removeSpace(spaceId) {
         setSelectedSpaces((s) => [...s.filter((space) => space.id !== spaceId)])
+    }
+
+    function findUsers(query) {
+        if (!query) setUserOptions([])
+        else {
+            const data = { query, blacklist: [accountData.id] }
+            axios
+                .post(`${config.apiURL}/find-users`, data)
+                .then((res) => setUserOptions(res.data))
+                .catch((error) => console.log(error))
+        }
+    }
+
+    function addUser(user) {
+        setUserOptions([])
+        setSelectedUsersError(false)
+        setSelectedUsers((u) => [...u, user])
+    }
+
+    function removeUser(userId) {
+        setSelectedUsers((u) => [...u.filter((user) => user.id !== userId)])
     }
 
     function scrapeURL(urlString) {
@@ -598,6 +645,15 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                 else setCurrentStep(3)
             }
             if (currentStep === 3 && allValid(stringForm, setStringForm)) setCurrentStep(4)
+        }
+
+        if (postType === 'Multiplayer String') {
+            if (currentStep === 2 && allValid(multiplayerStringForm1, setMultiplayerStringForm1))
+                setCurrentStep(3)
+            if (currentStep === 3) {
+                if (selectedUsers.length) setCurrentStep(4)
+                else setSelectedUsersError(true)
+            }
         }
 
         if (currentStep === steps.length - 1) {
@@ -1867,6 +1923,71 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                             })
                         }
                     />
+                </Column>
+            )}
+
+            {postType === 'Multiplayer String' && (
+                <Column centerX>
+                    {currentStep === 2 && (
+                        <Column centerX style={{ width: 400, marginBottom: 30 }}>
+                            <Input
+                                type='text-area'
+                                placeholder='Add a description for your game... (optional)'
+                                rows={4}
+                                value={multiplayerStringForm1.description.value}
+                                state={multiplayerStringForm1.description.state}
+                                errors={multiplayerStringForm1.description.errors}
+                                onChange={(value) =>
+                                    setMultiplayerStringForm1({
+                                        ...multiplayerStringForm1,
+                                        description: {
+                                            ...multiplayerStringForm1.description,
+                                            value,
+                                            state: 'default',
+                                        },
+                                    })
+                                }
+                            />
+                        </Column>
+                    )}
+                    {currentStep === 3 && (
+                        <Column centerX style={{ width: 500 }}>
+                            <p>Invite people to join the game and choose the player order:</p>
+                            <SearchSelector
+                                type='user'
+                                placeholder='Search for users...'
+                                onSearchQuery={(query) => findUsers(query)}
+                                onOptionSelected={(space) => addUser(space)}
+                                options={userOptions}
+                                style={{ width: 300, margin: '20px 0' }}
+                            />
+                            {selectedUsers.length > 0 && (
+                                <Row centerX wrap style={{ marginBottom: 20, maxWidth: 400 }}>
+                                    {selectedUsers.map((user) => (
+                                        <Row
+                                            key={user.id}
+                                            centerY
+                                            style={{ margin: '0 10px 10px 0' }}
+                                        >
+                                            <ImageTitle
+                                                type='space'
+                                                imagePath={user.flagImagePath}
+                                                title={`${user.name} (${user.handle})`}
+                                                imageSize={35}
+                                                fontSize={16}
+                                                style={{ marginRight: 5 }}
+                                            />
+                                            <CloseButton
+                                                size={17}
+                                                onClick={() => removeUser(user.id)}
+                                            />
+                                        </Row>
+                                    ))}
+                                </Row>
+                            )}
+                            {selectedUsersError && <p className='danger'>No users selected</p>}
+                        </Column>
+                    )}
                 </Column>
             )}
 
