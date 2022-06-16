@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { Route, Switch, Redirect, useLocation } from 'react-router-dom'
 import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
@@ -9,7 +9,6 @@ import Row from '@components/Row'
 import CoverImage from '@components/CoverImage'
 import ImageFade from '@components/ImageFade'
 import FlagImagePlaceholder from '@components/FlagImagePlaceholder'
-import ImageUploadModal from '@components/modals/ImageUploadModal'
 import PageTabs from '@components/PageTabs'
 import UserPageAbout from '@pages/UserPage/UserPageAbout'
 import UserPageSettings from '@pages/UserPage/UserPageSettings'
@@ -21,11 +20,16 @@ import { ReactComponent as BellIcon } from '@svgs/bell-solid.svg'
 import { ReactComponent as SettingsIcon } from '@svgs/cog-solid.svg'
 
 const UserPage = (): JSX.Element => {
-    const { accountDataLoading, setPageBottomReached, loggedIn, } = useContext(AccountContext)
+    const {
+        accountDataLoading,
+        setPageBottomReached,
+        setImageUploadType,
+        setImageUploadModalOpen,
+        loggedIn
+    } = useContext(AccountContext)
     const {
         userData,
         getUserData,
-        setUserData,
         resetUserData,
         isOwnAccount,
         setSelectedUserSubPage,
@@ -49,8 +53,6 @@ const UserPage = (): JSX.Element => {
         ],
     }
 
-    const [imageUploadModalOpen, setImageUploadModalOpen] = useState(false)
-
     useEffect(() => {
         if (!accountDataLoading && userHandle !== userData.handle) getUserData(userHandle)
     }, [accountDataLoading, userHandle])
@@ -73,20 +75,15 @@ const UserPage = (): JSX.Element => {
                             <FlagImagePlaceholder type='space' />
                         </ImageFade>
                         {isOwnAccount && (
-                            <button type='button' onClick={() => setImageUploadModalOpen(true)}>
+                            <button
+                                type='button'
+                                onClick={() => {
+                                    setImageUploadType('user-flag')
+                                    setImageUploadModalOpen(true)
+                                }}
+                            >
                                 Add a new <br /> flag image
                             </button>
-                        )}
-                        {imageUploadModalOpen && (
-                            <ImageUploadModal
-                                type='space-flag'
-                                shape='square'
-                                id={userData.id}
-                                title='Add a new flag image'
-                                mbLimit={2}
-                                onSaved={(v) => setUserData({ ...userData, flagImagePath: v })}
-                                close={() => setImageUploadModalOpen(false)}
-                            />
                         )}
                     </div>
                     <Column className={styles.userName}>

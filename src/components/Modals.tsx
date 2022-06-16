@@ -6,6 +6,7 @@ import LogInModal from '@src/components/modals/LogInModal'
 import RegisterModal from '@src/components/modals/RegisterModal'
 import ForgotPasswordModal from '@src/components/modals/ForgotPasswordModal'
 import DonateModal from '@src/components/modals/DonateModal'
+import GlobalImageUploadModal from '@components/modals/GlobalImageUploadModal'
 
 const Modals = (): JSX.Element => {
     const {
@@ -19,6 +20,7 @@ const Modals = (): JSX.Element => {
         donateModalOpen,
         setDonateModalOpen,
         resetPasswordModalOpen,
+        imageUploadModalOpen,
     } = useContext(AccountContext)
 
     return (
@@ -31,6 +33,7 @@ const Modals = (): JSX.Element => {
             )}
             {donateModalOpen && <DonateModal close={() => setDonateModalOpen(false)} />}
             {resetPasswordModalOpen && <ResetPasswordModal />}
+            {imageUploadModalOpen && <GlobalImageUploadModal />}
         </>
     )
 }

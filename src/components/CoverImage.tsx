@@ -1,9 +1,7 @@
-import React, { useContext, useState } from 'react'
-import { SpaceContext } from '@contexts/SpaceContext'
-import { UserContext } from '@contexts/UserContext'
+import React, { useContext } from 'react'
 import styles from '@styles/components/CoverImage.module.scss'
 import ImageFade from '@components/ImageFade'
-import ImageUploadModal from '@components/modals/ImageUploadModal'
+import { AccountContext } from '@src/contexts/AccountContext'
 
 const CoverImage = (props: {
     type: 'user' | 'space'
@@ -11,14 +9,7 @@ const CoverImage = (props: {
     canEdit: boolean
 }): JSX.Element => {
     const { type, image, canEdit } = props
-    const { userData, setUserData } = useContext(UserContext)
-    const { spaceData, setSpaceData } = useContext(SpaceContext)
-    const [imageUploadModalOpen, setImageUploadModalOpen] = useState(false)
-
-    function updateUI(imageURL) {
-        if (type === 'user') setUserData({ ...userData, coverImagePath: imageURL })
-        else setSpaceData({ ...spaceData, coverImagePath: imageURL })
-    }
+    const { setImageUploadType, setImageUploadModalOpen } = useContext(AccountContext)
 
     return (
         <div className={styles.wrapper}>
@@ -29,21 +20,13 @@ const CoverImage = (props: {
                 <button
                     type='button'
                     className={styles.uploadButton}
-                    onClick={() => setImageUploadModalOpen(true)}
+                    onClick={() => {
+                        setImageUploadType(`${type}-cover`)
+                        setImageUploadModalOpen(true)
+                    }}
                 >
                     Add a new cover image
                 </button>
-            )}
-            {imageUploadModalOpen && (
-                <ImageUploadModal
-                    type={type === 'user' ? 'user-cover' : 'space-cover'}
-                    shape='rectangle'
-                    id={type === 'user' ? userData.id : spaceData.id}
-                    title='Add a new cover image'
-                    mbLimit={2}
-                    onSaved={(imageURL) => updateUI(imageURL)}
-                    close={() => setImageUploadModalOpen(false)}
-                />
             )}
         </div>
     )

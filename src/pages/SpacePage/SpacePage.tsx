@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { Route, Switch, Redirect, useLocation } from 'react-router-dom'
 import axios from 'axios'
 import config from '@src/Config'
@@ -12,7 +12,6 @@ import Row from '@components/Row'
 import CoverImage from '@components/CoverImage'
 import ImageFade from '@components/ImageFade'
 import FlagImagePlaceholder from '@components/FlagImagePlaceholder'
-import ImageUploadModal from '@components/modals/ImageUploadModal'
 import PageTabs from '@components/PageTabs'
 import Button from '@components/Button'
 import SpacePageSettings from '@pages/SpacePage/SpacePageSettings'
@@ -40,19 +39,18 @@ const SpacePage = (): JSX.Element => {
         updateAccountData,
         loggedIn,
         setPageBottomReached,
+        setImageUploadType,
+        setImageUploadModalOpen,
     } = useContext(AccountContext)
     const {
         spaceData,
         getSpaceData,
-        setSpaceData,
         resetSpaceData,
         isModerator,
         isFollowing,
         setIsFollowing,
         setSelectedSpaceSubPage,
     } = useContext(SpaceContext)
-
-    const [imageUploadModalOpen, setImageUploadModalOpen] = useState(false)
 
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]
@@ -121,20 +119,15 @@ const SpacePage = (): JSX.Element => {
                             <FlagImagePlaceholder type='space' />
                         </ImageFade>
                         {isModerator && (
-                            <button type='button' onClick={() => setImageUploadModalOpen(true)}>
+                            <button
+                                type='button'
+                                onClick={() => {
+                                    setImageUploadType('space-flag')
+                                    setImageUploadModalOpen(true)
+                                }}
+                            >
                                 Add a new <br /> flag image
                             </button>
-                        )}
-                        {imageUploadModalOpen && (
-                            <ImageUploadModal
-                                type='space-flag'
-                                shape='square'
-                                id={spaceData.id}
-                                title='Add a new flag image'
-                                mbLimit={2}
-                                onSaved={(v) => setSpaceData({ ...spaceData, flagImagePath: v })}
-                                close={() => setImageUploadModalOpen(false)}
-                            />
                         )}
                     </div>
                     <Column className={styles.spaceName}>
