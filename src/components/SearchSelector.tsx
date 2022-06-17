@@ -20,6 +20,7 @@ const SearchSelector = (props: {
     state?: 'default' | 'valid' | 'invalid'
     errors?: string[]
     options: any[]
+    loading?: boolean
     onSearchQuery: (payload: string) => void
     onOptionSelected: (payload: any) => void
     // selectedOptions: any[]
@@ -34,6 +35,7 @@ const SearchSelector = (props: {
         state,
         errors,
         options,
+        loading,
         onSearchQuery,
         onOptionSelected,
     } = props
@@ -58,6 +60,7 @@ const SearchSelector = (props: {
                 disabled={disabled}
                 state={state || 'default'}
                 errors={errors}
+                loading={loading}
                 value={inputValue}
                 onChange={(newValue) => handleSearchQuery(newValue)}
             />
@@ -95,6 +98,7 @@ SearchSelector.defaultProps = {
     disabled: false,
     state: 'default',
     errors: null,
+    loading: false,
 }
 
 export default SearchSelector
