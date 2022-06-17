@@ -9,8 +9,9 @@ const Toggle = (props: {
     rightColor?: 'blue' | 'red'
     positionLeft?: boolean
     onClick: () => void
+    style?: any
 }): JSX.Element => {
-    const { leftText, rightText, leftColor, rightColor, positionLeft, onClick } = props
+    const { leftText, rightText, leftColor, rightColor, positionLeft, onClick, style } = props
     const [toggleLeft, setToggleLeft] = useState(positionLeft)
 
     function handleClick() {
@@ -19,7 +20,7 @@ const Toggle = (props: {
     }
 
     return (
-        <button type='button' className={styles.wrapper} onClick={handleClick}>
+        <button type='button' className={styles.wrapper} onClick={handleClick} style={style}>
             <p>{leftText}</p>
             <Row
                 className={`${styles.toggle} ${
@@ -39,6 +40,7 @@ Toggle.defaultProps = {
     leftColor: null,
     rightColor: null,
     positionLeft: true,
+    style: null,
 }
 
 export default Toggle
