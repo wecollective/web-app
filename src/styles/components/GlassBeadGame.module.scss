@@ -12,6 +12,7 @@ $transitionSpeed: 1s;
     height: 100vh;
     z-index: 90;
     background-color: white; //$grey1;
+    overflow: hidden;
 
     .loadingAnimation {
         position: absolute;

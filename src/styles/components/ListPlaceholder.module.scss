@@ -1,5 +1,10 @@
 @import '@styles/Variables';
 
+.wrapper {
+    position: relative;
+    width: 100%;
+}
+
 .gradient {
     position: absolute;
     top: 0;
