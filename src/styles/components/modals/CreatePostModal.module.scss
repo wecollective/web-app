@@ -335,3 +335,41 @@
     margin-bottom: 20px;
     padding: 7px;
 }
+
+.position {
+    width: 35px;
+    height: 35px;
+    background-color: $white;
+    border-radius: 50%;
+    margin-right: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.positionControls {
+    height: 35px;
+    margin-right: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    > button {
+        all: unset;
+        cursor: pointer;
+        display: flex;
+        color: $grey4;
+        &:hover {
+            color: $grey5;
+        }
+        &:disabled {
+            color: $grey3;
+            cursor: unset;
+        }
+        > svg {
+            width: 16px;
+            height: 16px;
+            
+        }
+    }
+    
+}

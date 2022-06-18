@@ -37,6 +37,8 @@ import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import Scrollbars from '@components/Scrollbars'
 import StringBeadCard from '@components/Cards/StringBeadCard'
 import PostCard from '@components/Cards/PostCard/PostCard'
+import Markdown from '@components/Markdown'
+import Toggle from '@components/Toggle'
 import { ReactComponent as PlayIcon } from '@svgs/play-solid.svg'
 import { ReactComponent as PauseIcon } from '@svgs/pause-solid.svg'
 import { ReactComponent as PlusIcon } from '@svgs/plus.svg'
@@ -50,7 +52,8 @@ import { ReactComponent as StringIcon } from '@svgs/string-icon.svg'
 import { ReactComponent as MultiplayerStringIcon } from '@svgs/multiplayer-string-icon.svg'
 import { ReactComponent as ChevronLeftIcon } from '@svgs/chevron-left-solid.svg'
 import { ReactComponent as ChevronRightIcon } from '@svgs/chevron-right-solid.svg'
-import Markdown from '../Markdown'
+import { ReactComponent as ChevronUpIcon } from '@svgs/chevron-up-solid.svg'
+import { ReactComponent as ChevronDownIcon } from '@svgs/chevron-down-solid.svg'
 
 const CreatePostModal = (props: { initialType: string; close: () => void }): JSX.Element => {
     const { initialType, close } = props
@@ -119,6 +122,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                 'Post Type: Multiplayer String',
                 'Description (optional)',
                 'People',
+                'Settings',
                 'Spaces',
                 'Create',
             ],
@@ -301,9 +305,25 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             validate: (v) => (v.length > 5000 ? ['Must be less than 5K characters'] : []),
         },
     })
+    const [allUsersAllowed, setAllUsersAllowed] = useState(true)
+    const [userSearchLoading, setUserSearchLoading] = useState(false)
     const [userOptions, setUserOptions] = useState<any[]>([])
-    const [selectedUsers, setSelectedUsers] = useState<any[]>([])
+    const [selectedUsers, setSelectedUsers] = useState<any[]>([
+        {
+            id: accountData.id,
+            handle: accountData.handle,
+            name: accountData.name,
+            flagImagePath: accountData.flagImagePath,
+        },
+    ])
     const [selectedUsersError, setSelectedUsersError] = useState(false)
+    const [multiplayerStringForm2, setMultiplayerStringForm2] = useState({
+        numberOfTurns: {
+            ...defaultErrorState,
+            value: 1,
+            validate: (v) => (+v < 1 || +v > 20 ? ['Must be between 1 and 20 turns'] : []),
+        },
+    })
 
     // selected spaces
     const [spaceOptions, setSpaceOptions] = useState<any[]>([])
@@ -347,10 +367,14 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
     function findUsers(query) {
         if (!query) setUserOptions([])
         else {
-            const data = { query, blacklist: [accountData.id] }
+            setUserSearchLoading(true)
+            const data = { query, blacklist: selectedUsers.map((u) => u.id) }
             axios
                 .post(`${config.apiURL}/find-users`, data)
-                .then((res) => setUserOptions(res.data))
+                .then((res) => {
+                    setUserOptions(res.data)
+                    setUserSearchLoading(false)
+                })
                 .catch((error) => console.log(error))
         }
     }
@@ -584,6 +608,14 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
         return filesSizes.reduce((a, b) => a + b, 0) / (1024 * 1024)
     }
 
+    function updatePlayerPosition(from, to) {
+        const newPlayers = [...selectedUsers]
+        const player = newPlayers[from]
+        newPlayers.splice(from, 1)
+        newPlayers.splice(to, 0, player)
+        setSelectedUsers(newPlayers)
+    }
+
     function moveForward() {
         if (currentStep === 1) setCurrentStep(2)
 
@@ -651,7 +683,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             if (currentStep === 2 && allValid(multiplayerStringForm1, setMultiplayerStringForm1))
                 setCurrentStep(3)
             if (currentStep === 3) {
-                if (selectedUsers.length) setCurrentStep(4)
+                if (allUsersAllowed || selectedUsers.length > 1) setCurrentStep(4)
                 else setSelectedUsersError(true)
             }
         }
@@ -1952,40 +1984,147 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                     )}
                     {currentStep === 3 && (
                         <Column centerX style={{ width: 500 }}>
-                            <p>Invite people to join the game and choose the player order:</p>
-                            <SearchSelector
-                                type='user'
-                                placeholder='Search for users...'
-                                onSearchQuery={(query) => findUsers(query)}
-                                onOptionSelected={(space) => addUser(space)}
-                                options={userOptions}
-                                style={{ width: 300, margin: '20px 0' }}
+                            <p>Choose who else you want to be able to join the game:</p>
+                            <Toggle
+                                leftText='Anyone'
+                                rightText='Only specified users'
+                                rightColor='blue'
+                                positionLeft={allUsersAllowed}
+                                onClick={() => {
+                                    if (!allUsersAllowed) {
+                                        setSelectedUsersError(false)
+                                        setSelectedUsers([
+                                            {
+                                                id: accountData.id,
+                                                handle: accountData.handle,
+                                                name: accountData.name,
+                                                flagImagePath: accountData.flagImagePath,
+                                            },
+                                        ])
+                                    }
+                                    setAllUsersAllowed(!allUsersAllowed)
+                                }}
+                                style={{ margin: '40px 0 20px 0' }}
                             />
-                            {selectedUsers.length > 0 && (
-                                <Row centerX wrap style={{ marginBottom: 20, maxWidth: 400 }}>
-                                    {selectedUsers.map((user) => (
-                                        <Row
-                                            key={user.id}
-                                            centerY
-                                            style={{ margin: '0 10px 10px 0' }}
-                                        >
-                                            <ImageTitle
-                                                type='space'
-                                                imagePath={user.flagImagePath}
-                                                title={`${user.name} (${user.handle})`}
-                                                imageSize={35}
-                                                fontSize={16}
-                                                style={{ marginRight: 5 }}
-                                            />
-                                            <CloseButton
-                                                size={17}
-                                                onClick={() => removeUser(user.id)}
-                                            />
-                                        </Row>
-                                    ))}
-                                </Row>
+                            {!allUsersAllowed && (
+                                <Column centerX>
+                                    <SearchSelector
+                                        type='user'
+                                        placeholder='Search for users...'
+                                        onSearchQuery={(query) => findUsers(query)}
+                                        onOptionSelected={(space) => addUser(space)}
+                                        options={userOptions}
+                                        loading={userSearchLoading}
+                                        style={{ width: 300, margin: '20px 0 30px 0' }}
+                                    />
+                                    {selectedUsers.length > 1 && (
+                                        <Column centerX style={{ marginBottom: 20 }}>
+                                            {selectedUsers
+                                                .filter((u) => u.id !== accountData.id)
+                                                .map((user) => (
+                                                    <Row
+                                                        key={user.id}
+                                                        centerY
+                                                        style={{ margin: '0 10px 10px 0' }}
+                                                    >
+                                                        <ImageTitle
+                                                            type='space'
+                                                            imagePath={user.flagImagePath}
+                                                            title={`${user.name} (${user.handle})`}
+                                                            imageSize={35}
+                                                            fontSize={16}
+                                                            style={{ marginRight: 5 }}
+                                                        />
+                                                        <CloseButton
+                                                            size={17}
+                                                            onClick={() => removeUser(user.id)}
+                                                        />
+                                                    </Row>
+                                                ))}
+                                        </Column>
+                                    )}
+                                    {selectedUsersError && (
+                                        <p className='danger'>Other users required</p>
+                                    )}
+                                </Column>
                             )}
-                            {selectedUsersError && <p className='danger'>No users selected</p>}
+                        </Column>
+                    )}
+                    {currentStep === 4 && (
+                        <Column centerX style={{ width: 500 }}>
+                            <p>Choose the game settings:</p>
+                            <Row centerY style={{ margin: '30px 0' }}>
+                                <p>Number of turns:</p>
+                                <Input
+                                    type='text'
+                                    value={multiplayerStringForm2.numberOfTurns.value}
+                                    state={multiplayerStringForm2.numberOfTurns.state}
+                                    errors={multiplayerStringForm2.numberOfTurns.errors}
+                                    onChange={(value) =>
+                                        setMultiplayerStringForm2({
+                                            ...multiplayerStringForm2,
+                                            numberOfTurns: {
+                                                ...multiplayerStringForm2.numberOfTurns,
+                                                value: +value,
+                                                state: 'default',
+                                            },
+                                        })
+                                    }
+                                    style={{ width: 80, marginLeft: 20 }}
+                                />
+                            </Row>
+                            {!allUsersAllowed && (
+                                <Column centerX>
+                                    <p>Player order:</p>
+                                    <Column style={{ margin: '20px 0' }}>
+                                        {selectedUsers.map((user, index) => (
+                                            <Row
+                                                key={user.id}
+                                                centerY
+                                                style={{ margin: '0 10px 10px 0' }}
+                                            >
+                                                <div className={styles.position}>{index + 1}</div>
+                                                <div className={styles.positionControls}>
+                                                    {index > 0 && (
+                                                        <button
+                                                            type='button'
+                                                            onClick={() =>
+                                                                updatePlayerPosition(
+                                                                    index,
+                                                                    index - 1
+                                                                )
+                                                            }
+                                                        >
+                                                            <ChevronUpIcon />
+                                                        </button>
+                                                    )}
+                                                    {index < selectedUsers.length - 1 && (
+                                                        <button
+                                                            type='button'
+                                                            onClick={() =>
+                                                                updatePlayerPosition(
+                                                                    index,
+                                                                    index + 1
+                                                                )
+                                                            }
+                                                        >
+                                                            <ChevronDownIcon />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                <ImageTitle
+                                                    type='space'
+                                                    imagePath={user.flagImagePath}
+                                                    title={`${user.name} (${user.handle})`}
+                                                    imageSize={35}
+                                                    fontSize={16}
+                                                    style={{ marginRight: 5 }}
+                                                />
+                                            </Row>
+                                        ))}
+                                    </Column>
+                                </Column>
+                            )}
                         </Column>
                     )}
                 </Column>
