@@ -686,6 +686,9 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                 if (allUsersAllowed || selectedUsers.length > 1) setCurrentStep(4)
                 else setSelectedUsersError(true)
             }
+            if (currentStep === 4) {
+                if (allValid(multiplayerStringForm2, setMultiplayerStringForm2)) setCurrentStep(5)
+            }
         }
 
         if (currentStep === steps.length - 1) {
@@ -722,6 +725,10 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             Event: null as any,
             GlassBeadGame: null as any,
             StringPosts: [] as any[],
+            MultiplayerString: null as any,
+            StringPlayers: [] as any[],
+            privacy: '',
+            numberOfTurns: 0,
         }
         if (postType === 'Text') data.text = textForm.text.value
         if (postType === 'Url') {
@@ -806,6 +813,24 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                 }
             })
         }
+        if (postType === 'Multiplayer String') {
+            data.text = multiplayerStringForm1.description.value
+            data.StringPlayers = selectedUsers.map((user, index) => {
+                return {
+                    ...user,
+                    UserPost: {
+                        index,
+                        state: user.id === accountData.id ? 'accepted' : 'pending',
+                    },
+                }
+            })
+            data.MultiplayerString = {
+                numberOfTurns: multiplayerStringForm2.numberOfTurns.value,
+                moveDuration: null,
+                allowedPostTypes: null,
+                privacy: allUsersAllowed ? 'all-users-allowed' : 'only-selected-users',
+            }
+        }
         return data
     }
 
@@ -815,20 +840,27 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
         const options = { headers: { Authorization: `Bearer ${accessToken}` } }
         const data = findPostData()
         const postData = {
+            spaceIds: selectedSpaces.map((s) => s.id),
             type: data.type,
             text: data.text,
-            title: data.Event ? data.Event.title : '',
-            startTime: data.Event ? data.Event.startTime : null,
-            endTime: data.Event ? data.Event.endTime : null,
             url: data.url,
+            // url posts
             urlImage: data.urlImage,
             urlDomain: data.urlDomain,
             urlTitle: data.urlTitle,
             urlDescription: data.urlDescription,
+            // event posts
+            title: data.Event ? data.Event.title : '',
+            startTime: data.Event ? data.Event.startTime : null,
+            endTime: data.Event ? data.Event.endTime : null,
+            // glass bead games
             topic: data.GlassBeadGame ? data.GlassBeadGame.topic : null,
             topicGroup: data.GlassBeadGame ? data.GlassBeadGame.topicGroup : null,
             topicImage: data.GlassBeadGame ? data.GlassBeadGame.topicImage : null,
-            spaceIds: selectedSpaces.map((s) => s.id),
+            // multiplayer-strings
+            privacy: data.MultiplayerString.privacy,
+            userIds: selectedUsers.map((s) => s.id),
+            numberOfTurns: data.MultiplayerString.numberOfTurns,
         }
         let fileData
         let uploadType
@@ -928,6 +960,8 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                   }
                               })
                             : [],
+                        MultiplayerString: data.MultiplayerString,
+                        StringPlayers: data.StringPlayers,
                     }
                     setSpacePosts([newPost, ...spacePosts])
                 }
@@ -2054,9 +2088,9 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                         <Column centerX style={{ width: 500 }}>
                             <p>Choose the game settings:</p>
                             <Row centerY style={{ margin: '30px 0' }}>
-                                <p>Number of turns:</p>
                                 <Input
                                     type='text'
+                                    title='Number of turns:'
                                     value={multiplayerStringForm2.numberOfTurns.value}
                                     state={multiplayerStringForm2.numberOfTurns.state}
                                     errors={multiplayerStringForm2.numberOfTurns.errors}
@@ -2070,7 +2104,6 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                             },
                                         })
                                     }
-                                    style={{ width: 80, marginLeft: 20 }}
                                 />
                             </Row>
                             {!allUsersAllowed && (
