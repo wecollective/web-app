@@ -82,6 +82,10 @@
                 color: $postTypeString;
                 border: 2px solid $postTypeString;
             }
+            &.multiplayer-string {
+                color: $postTypeMultiplayerString;
+                border: 2px solid $postTypeMultiplayerString;
+            }
             &.prism {
                 color: $postTypePrism;
                 border: 2px solid $postTypePrism;
@@ -190,6 +194,7 @@
                 line-height: 24px;
             }
         }
+
         .eventTimes {
             margin-top: 10px;
             svg {
@@ -246,6 +251,52 @@
         .stringBeads {
             padding: 7px 7px 15px 7px;
             margin-bottom: -5px;
+        }
+
+        // multiplayer-strings
+        .newBeadButton {
+            all: unset;
+            width: 220px;
+            height: 220px;
+            flex-shrink: 0;
+            background-color: $grey1;
+            border-radius: 15px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.3s;
+
+            &:hover {
+                background-color: $grey2;
+            }
+
+            > svg {
+                width: 40px;
+                height: 40px;
+                color: $grey6;
+                margin-bottom: 10px;
+            }
+
+            > p {
+                color: $grey6;
+                width: 150px;
+                text-align: center;
+            }
+        }
+
+        .pendingBead {
+            width: 220px;
+            height: 220px;
+            flex-shrink: 0;
+            background-color: $grey1;
+            border-radius: 15px;
+
+            > p {
+                color: $grey6;
+                margin-bottom: 10px;
+            }
         }
 
     }

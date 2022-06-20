@@ -18,8 +18,6 @@ import { ReactComponent as AudioIconSVG } from '@svgs/volume-high-solid.svg'
 import { ReactComponent as ImageIconSVG } from '@svgs/image-solid.svg'
 import { ReactComponent as PlayIconSVG } from '@svgs/play-solid.svg'
 import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
-import { ReactComponent as ChevronLeftSVG } from '@svgs/chevron-left-solid.svg'
-import { ReactComponent as ChevronRightSVG } from '@svgs/chevron-right-solid.svg'
 
 const StringBeadCard = (props: {
     bead: any
@@ -66,10 +64,6 @@ const StringBeadCard = (props: {
         setImageModalOpen(true)
     }
 
-    function toggleImage(increment) {
-        setSelectedImage(bead.images[selectedImage.index + increment])
-    }
-
     return (
         <Column className={styles.wrapper}>
             <Row spaceBetween className={styles.beadHeader}>
@@ -91,7 +85,7 @@ const StringBeadCard = (props: {
                         />
                     </Scrollbars>
                 )}
-                {bead.type === 'url' && (
+                {bead.type === 'url' && bead.urlData && (
                     <Scrollbars>
                         <BeadCardUrlPreview
                             url={bead.url}

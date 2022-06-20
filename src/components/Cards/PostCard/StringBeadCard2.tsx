@@ -23,8 +23,9 @@ const StringBeadCard = (props: {
     postId: number
     beadIndex: number
     location: string
+    style?: any
 }): JSX.Element => {
-    const { bead, postId, beadIndex, location } = props
+    const { bead, postId, beadIndex, location, style } = props
     const [audioPlaying, setAudioPlaying] = useState(false)
     const [imageModalOpen, setImageModalOpen] = useState(false)
     const [selectedImage, setSelectedImage] = useState<any>(null)
@@ -66,7 +67,7 @@ const StringBeadCard = (props: {
     }
 
     return (
-        <Column className={styles.wrapper}>
+        <Column className={styles.wrapper} style={style}>
             <Row spaceBetween className={styles.beadHeader}>
                 {findBeadIcon(bead.type)}
             </Row>
@@ -129,7 +130,7 @@ const StringBeadCard = (props: {
                 )}
                 {bead.type === 'string-image' && (
                     <Row centerX>
-                        <Scrollbars style={{ paddingBottom: 5 }}>
+                        <Scrollbars style={{ paddingBottom: 5 }} className='row'>
                             {images.map((image, i) => (
                                 <button
                                     className={styles.image}
@@ -154,6 +155,10 @@ const StringBeadCard = (props: {
             )}
         </Column>
     )
+}
+
+StringBeadCard.defaultProps = {
+    style: null,
 }
 
 export default StringBeadCard

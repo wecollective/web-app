@@ -38,6 +38,7 @@ import PostCardRatingModal from '@components/Cards/PostCard/PostCardRatingModal'
 import PostCardLinkModal from '@components/Cards/PostCard/PostCardLinkModal'
 import DeletePostModal from '@components/modals/DeletePostModal'
 import StringBeadCard from '@components/Cards/PostCard/StringBeadCard2'
+import NextBeadModal from '@components/Cards/PostCard/NextBeadModal'
 import { ReactComponent as LinkIconSVG } from '@svgs/link-solid.svg'
 import { ReactComponent as CommentIconSVG } from '@svgs/comment-solid.svg'
 import { ReactComponent as LikeIconSVG } from '@svgs/like.svg'
@@ -49,6 +50,8 @@ import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
 import { ReactComponent as ClockIconSVG } from '@svgs/clock-solid.svg'
 import { ReactComponent as CalendarIconSVG } from '@svgs/calendar-days-solid.svg'
 import { ReactComponent as SuccessIconSVG } from '@svgs/check-circle-solid.svg'
+import { ReactComponent as PlusIconSVG } from '@svgs/plus.svg'
+import { ReactComponent as UsersIconSVG } from '@svgs/users-solid.svg'
 
 const PostCard = (props: {
     post: any
@@ -84,6 +87,8 @@ const PostCard = (props: {
         Event,
         PostImages,
         StringPosts,
+        MultiplayerString,
+        StringPlayers,
     } = postData
 
     const [likeModalOpen, setLikeModalOpen] = useState(false)
@@ -97,9 +102,11 @@ const PostCard = (props: {
     const [commentsOpen, setCommentsOpen] = useState(false)
     const [deletePostModalOpen, setDeletePostModalOpen] = useState(false)
     const [audioPlaying, setAudioPlaying] = useState(false)
+    const [nextBeadModalOpen, setNextBeadModalOpen] = useState(false)
+    // todo: sort on load like StringPlayers and use main const
     const beads = GlassBeadGame ? GlassBeadGame.GlassBeads.sort((a, b) => a.index - b.index) : []
     const images = PostImages.sort((a, b) => a.index - b.index)
-    const stringPosts = StringPosts.sort((a, b) => a.Link.index - b.Link.index)
+    StringPosts.sort((a, b) => a.Link.index - b.Link.index)
 
     const history = useHistory()
     const cookies = new Cookies()
@@ -112,10 +119,24 @@ const PostCard = (props: {
     const otherSpacesText = `and ${postSpaces.length - 1} other space${pluralise(
         postSpaces.length - 1
     )}`
+
+    // events
     const goingToEvent = Event && Event.Going.map((u) => u.id).includes(accountData.id)
     const goingToEventImages = Event && Event.Going.map((u) => u.flagImagePath)
     const interestedInEvent = Event && Event.Interested.map((u) => u.id).includes(accountData.id)
     const interestedInEventImages = Event && Event.Interested.map((u) => u.flagImagePath)
+
+    // multipleyer strings
+    StringPlayers.sort((a, b) => a.UserPost.index - b.UserPost.index)
+    const pendingPlayers = StringPlayers.filter((p) => p.UserPost.state === 'pending')
+    function findCurrentPlayer() {
+        if (MultiplayerString && MultiplayerString.privacy === 'only-selected-users') {
+            const currentPlayerIndex = StringPosts.length % StringPlayers.length
+            return StringPlayers[currentPlayerIndex]
+        }
+        return null
+    }
+    const currentPlayer = findCurrentPlayer()
 
     function openImageModal(imageId) {
         setSelectedImage(images.find((image) => image.id === imageId))
@@ -636,7 +657,7 @@ const PostCard = (props: {
                             </Column>
                         )}
                         <Scrollbars className={`${styles.stringBeads} row`}>
-                            {stringPosts.map((bead, i) => (
+                            {StringPosts.map((bead, i) => (
                                 <StringBeadCard
                                     key={bead.id}
                                     bead={bead}
@@ -647,6 +668,107 @@ const PostCard = (props: {
                             ))}
                             <span style={{ marginLeft: -7, width: 7, flexShrink: 0 }} />
                         </Scrollbars>
+                    </Column>
+                )}
+                {type === 'multiplayer-string' && (
+                    <Column>
+                        {MultiplayerString.privacy === 'only-selected-users' ? (
+                            <Row spaceBetween style={{ marginBottom: 10, color: '#acacae' }}>
+                                <FlagImageHighlights
+                                    type='user'
+                                    imagePaths={StringPlayers.map((p) => p.flagImagePath)}
+                                    imageSize={30}
+                                    text={`${StringPlayers.length} players`}
+                                    // onClick={() => null}
+                                    style={{ marginRight: 15 }}
+                                    outline
+                                />
+                                {pendingPlayers.length ? (
+                                    <Row centerY>
+                                        <p>Waiting for {pendingPlayers.length} to accept</p>
+                                        <FlagImageHighlights
+                                            type='user'
+                                            imagePaths={pendingPlayers.map((p) => p.flagImagePath)}
+                                            imageSize={30}
+                                            style={{ marginLeft: 5 }}
+                                            outline
+                                        />
+                                    </Row>
+                                ) : (
+                                    <ImageTitle
+                                        type='user'
+                                        imagePath={currentPlayer.flagImagePath}
+                                        title={`${currentPlayer.name}'s move: ${
+                                            StringPosts.length + 1
+                                        }/${
+                                            MultiplayerString.numberOfTurns * StringPlayers.length
+                                        }`}
+                                        link={`/u/${currentPlayer.handle}`}
+                                    />
+                                )}
+                            </Row>
+                        ) : (
+                            <Row centerY style={{ color: '#acacae' }}>
+                                <UsersIconSVG style={{ width: 30, height: 30, marginRight: 5 }} />
+                                <p>Open to all users</p>
+                            </Row>
+                        )}
+                        {text && (
+                            <Column style={{ marginBottom: 10 }}>
+                                <ShowMoreLess height={150}>
+                                    <Markdown text={text} />
+                                </ShowMoreLess>
+                            </Column>
+                        )}
+                        {!pendingPlayers.length && (
+                            <Row centerX>
+                                <Scrollbars className={`${styles.stringBeads} row`}>
+                                    {StringPosts.map((bead, i) => (
+                                        <StringBeadCard
+                                            key={bead.id}
+                                            bead={bead}
+                                            postId={id}
+                                            beadIndex={i}
+                                            location={location}
+                                        />
+                                    ))}
+                                    {MultiplayerString.privacy === 'all-users-allowed' ||
+                                    currentPlayer.id === accountData.id ? (
+                                        <button
+                                            type='button'
+                                            className={styles.newBeadButton}
+                                            onClick={() => setNextBeadModalOpen(true)}
+                                        >
+                                            <PlusIconSVG />
+                                            <p>
+                                                Click to create the{' '}
+                                                {StringPosts.length ? 'next' : 'first'} bead
+                                            </p>
+                                        </button>
+                                    ) : (
+                                        <Column centerX centerY className={styles.pendingBead}>
+                                            <p>Waiting for</p>
+                                            <ImageTitle
+                                                type='user'
+                                                imagePath={currentPlayer.flagImagePath}
+                                                title={`${currentPlayer.name}...`}
+                                                link={`/u/${currentPlayer.handle}`}
+                                                style={{ margin: '0 5px' }}
+                                            />
+                                        </Column>
+                                    )}
+                                    <span style={{ marginLeft: -7, width: 7, flexShrink: 0 }} />
+                                </Scrollbars>
+                            </Row>
+                        )}
+                        {nextBeadModalOpen && (
+                            <NextBeadModal
+                                beadIndex={StringPosts.length + 1}
+                                postData={postData}
+                                setPostData={setPostData}
+                                close={() => setNextBeadModalOpen(false)}
+                            />
+                        )}
                     </Column>
                 )}
             </Column>
