@@ -49,7 +49,7 @@ import { ReactComponent as AudioIcon } from '@svgs/volume-high-solid.svg'
 import { ReactComponent as EventIcon } from '@svgs/calendar-days-solid.svg'
 import { ReactComponent as GBGIcon } from '@svgs/castalia-logo.svg'
 import { ReactComponent as StringIcon } from '@svgs/string-icon.svg'
-import { ReactComponent as MultiplayerStringIcon } from '@svgs/multiplayer-string-icon.svg'
+import { ReactComponent as WeaveIcon } from '@svgs/multiplayer-string-icon.svg'
 import { ReactComponent as ChevronLeftIcon } from '@svgs/chevron-left-solid.svg'
 import { ReactComponent as ChevronRightIcon } from '@svgs/chevron-right-solid.svg'
 import { ReactComponent as ChevronUpIcon } from '@svgs/chevron-up-solid.svg'
@@ -117,17 +117,17 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             description: `**String**: Create a string of connected items (text, URL, audio, or image) in one post.`,
         },
         {
-            name: 'Multiplayer String',
+            name: 'Weave',
             steps: [
-                'Post Type: Multiplayer String',
+                'Post Type: Weave',
                 'Description (optional)',
                 'People',
                 'Settings',
                 'Spaces',
                 'Create',
             ],
-            icon: <MultiplayerStringIcon />,
-            description: `**Multiplayer String**: Set up an asynchronous game where players take turns adding beads (text, URL, audio, or image) to a single string post.`,
+            icon: <WeaveIcon />,
+            description: `**Weave**: Set up an asynchronous game where players take turns adding beads (text, URL, audio, or image) to a single string post.`,
         },
     ]
     const [postType, setPostType] = useState(initialType)
@@ -679,7 +679,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             if (currentStep === 3 && allValid(stringForm, setStringForm)) setCurrentStep(4)
         }
 
-        if (postType === 'Multiplayer String') {
+        if (postType === 'Weave') {
             if (currentStep === 2 && allValid(multiplayerStringForm1, setMultiplayerStringForm1))
                 setCurrentStep(3)
             if (currentStep === 3) {
@@ -725,7 +725,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             Event: null as any,
             GlassBeadGame: null as any,
             StringPosts: [] as any[],
-            MultiplayerString: null as any,
+            Weave: null as any,
             StringPlayers: [] as any[],
             privacy: '',
             numberOfTurns: 0,
@@ -813,7 +813,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                 }
             })
         }
-        if (postType === 'Multiplayer String') {
+        if (postType === 'Weave') {
             data.text = multiplayerStringForm1.description.value
             data.StringPlayers = selectedUsers.map((user, index) => {
                 return {
@@ -824,7 +824,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                     },
                 }
             })
-            data.MultiplayerString = {
+            data.Weave = {
                 numberOfTurns: multiplayerStringForm2.numberOfTurns.value,
                 moveDuration: null,
                 allowedPostTypes: null,
@@ -857,10 +857,10 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             topic: data.GlassBeadGame ? data.GlassBeadGame.topic : null,
             topicGroup: data.GlassBeadGame ? data.GlassBeadGame.topicGroup : null,
             topicImage: data.GlassBeadGame ? data.GlassBeadGame.topicImage : null,
-            // multiplayer-strings
-            privacy: data.MultiplayerString.privacy,
+            // weaves
+            privacy: data.Weave.privacy,
             userIds: selectedUsers.map((s) => s.id),
-            numberOfTurns: data.MultiplayerString.numberOfTurns,
+            numberOfTurns: data.Weave.numberOfTurns,
         }
         let fileData
         let uploadType
@@ -960,7 +960,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                   }
                               })
                             : [],
-                        MultiplayerString: data.MultiplayerString,
+                        Weave: data.Weave,
                         StringPlayers: data.StringPlayers,
                     }
                     setSpacePosts([newPost, ...spacePosts])
@@ -1992,7 +1992,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                 </Column>
             )}
 
-            {postType === 'Multiplayer String' && (
+            {postType === 'Weave' && (
                 <Column centerX>
                     {currentStep === 2 && (
                         <Column centerX style={{ width: 400, marginBottom: 30 }}>

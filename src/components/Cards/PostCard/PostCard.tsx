@@ -87,7 +87,7 @@ const PostCard = (props: {
         Event,
         PostImages,
         StringPosts,
-        MultiplayerString,
+        Weave,
         StringPlayers,
     } = postData
 
@@ -130,7 +130,7 @@ const PostCard = (props: {
     StringPlayers.sort((a, b) => a.UserPost.index - b.UserPost.index)
     const pendingPlayers = StringPlayers.filter((p) => p.UserPost.state === 'pending')
     function findCurrentPlayer() {
-        if (MultiplayerString && MultiplayerString.privacy === 'only-selected-users') {
+        if (Weave && Weave.privacy === 'only-selected-users') {
             const currentPlayerIndex = StringPosts.length % StringPlayers.length
             return StringPlayers[currentPlayerIndex]
         }
@@ -670,20 +670,19 @@ const PostCard = (props: {
                         </Scrollbars>
                     </Column>
                 )}
-                {type === 'multiplayer-string' && (
+                {type === 'weave' && (
                     <Column>
-                        {MultiplayerString.privacy === 'only-selected-users' ? (
+                        {Weave.privacy === 'only-selected-users' ? (
                             <Row spaceBetween style={{ marginBottom: 10, color: '#acacae' }}>
                                 <FlagImageHighlights
                                     type='user'
                                     imagePaths={StringPlayers.map((p) => p.flagImagePath)}
                                     imageSize={30}
                                     text={`${StringPlayers.length} players`}
-                                    // onClick={() => null}
                                     style={{ marginRight: 15 }}
                                     outline
                                 />
-                                {pendingPlayers.length ? (
+                                {pendingPlayers.length > 0 ? (
                                     <Row centerY>
                                         <p>Waiting for {pendingPlayers.length} to accept</p>
                                         <FlagImageHighlights
@@ -695,16 +694,21 @@ const PostCard = (props: {
                                         />
                                     </Row>
                                 ) : (
-                                    <ImageTitle
-                                        type='user'
-                                        imagePath={currentPlayer.flagImagePath}
-                                        title={`${currentPlayer.name}'s move: ${
-                                            StringPosts.length + 1
-                                        }/${
-                                            MultiplayerString.numberOfTurns * StringPlayers.length
-                                        }`}
-                                        link={`/u/${currentPlayer.handle}`}
-                                    />
+                                    <>
+                                        {StringPosts.length <
+                                        Weave.numberOfTurns * StringPlayers.length ? (
+                                            <ImageTitle
+                                                type='user'
+                                                imagePath={currentPlayer.flagImagePath}
+                                                title={`${currentPlayer.name}'s move: ${
+                                                    StringPosts.length + 1
+                                                }/${Weave.numberOfTurns * StringPlayers.length}`}
+                                                link={`/u/${currentPlayer.handle}`}
+                                            />
+                                        ) : (
+                                            <p>Game finished</p>
+                                        )}
+                                    </>
                                 )}
                             </Row>
                         ) : (
@@ -732,8 +736,10 @@ const PostCard = (props: {
                                             location={location}
                                         />
                                     ))}
-                                    {MultiplayerString.privacy === 'all-users-allowed' ||
-                                    currentPlayer.id === accountData.id ? (
+                                    {Weave.privacy === 'all-users-allowed' ||
+                                    (StringPosts.length <
+                                        Weave.numberOfTurns * StringPlayers.length &&
+                                        currentPlayer.id === accountData.id) ? (
                                         <button
                                             type='button'
                                             className={styles.newBeadButton}
@@ -746,16 +752,26 @@ const PostCard = (props: {
                                             </p>
                                         </button>
                                     ) : (
-                                        <Column centerX centerY className={styles.pendingBead}>
-                                            <p>Waiting for</p>
-                                            <ImageTitle
-                                                type='user'
-                                                imagePath={currentPlayer.flagImagePath}
-                                                title={`${currentPlayer.name}...`}
-                                                link={`/u/${currentPlayer.handle}`}
-                                                style={{ margin: '0 5px' }}
-                                            />
-                                        </Column>
+                                        <>
+                                            {Weave.privacy === 'only-selected-users' &&
+                                                StringPosts.length <
+                                                    Weave.numberOfTurns * StringPlayers.length && (
+                                                    <Column
+                                                        centerX
+                                                        centerY
+                                                        className={styles.pendingBead}
+                                                    >
+                                                        <p>Waiting for</p>
+                                                        <ImageTitle
+                                                            type='user'
+                                                            imagePath={currentPlayer.flagImagePath}
+                                                            title={`${currentPlayer.name}...`}
+                                                            link={`/u/${currentPlayer.handle}`}
+                                                            style={{ margin: '0 5px' }}
+                                                        />
+                                                    </Column>
+                                                )}
+                                        </>
                                     )}
                                     <span style={{ marginLeft: -7, width: 7, flexShrink: 0 }} />
                                 </Scrollbars>

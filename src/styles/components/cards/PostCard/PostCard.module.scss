@@ -82,7 +82,7 @@
                 color: $postTypeString;
                 border: 2px solid $postTypeString;
             }
-            &.multiplayer-string {
+            &.weave {
                 color: $postTypeMultiplayerString;
                 border: 2px solid $postTypeMultiplayerString;
             }
@@ -253,7 +253,7 @@
             margin-bottom: -5px;
         }
 
-        // multiplayer-strings
+        // weaves
         .newBeadButton {
             all: unset;
             width: 220px;

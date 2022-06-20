@@ -49,6 +49,18 @@ const NextBeadModal = (props: {
     const [loading, setLoading] = useState(false)
     const [saved, setSaved] = useState(false)
 
+    function findNextPlayerId() {
+        if (
+            postData.StringPosts.length + 1 <
+            postData.StringPlayers.length * postData.Weave.numberOfTurns
+        ) {
+            return postData.StringPlayers[
+                (postData.StringPosts.length + 1) % postData.StringPlayers.length
+            ].id
+        }
+        return null
+    }
+
     // text
     const [stringTextState, setStringTextState] = useState<'default' | 'valid' | 'invalid'>(
         'default'
@@ -241,6 +253,8 @@ const NextBeadModal = (props: {
             const beadData = {
                 postId: postData.id,
                 beadIndex,
+                privacy: postData.Weave.privacy,
+                nextPlayerId: findNextPlayerId(),
                 type: newBead.type,
                 text: newBead.text,
                 url: newBead.url,

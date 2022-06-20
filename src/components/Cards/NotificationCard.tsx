@@ -20,7 +20,7 @@ import { ReactComponent as EnvelopeIconSVG } from '@svgs/envelope-solid.svg'
 import { ReactComponent as ThumbsUpIconSVG } from '@svgs/thumbs-up-solid.svg'
 import { ReactComponent as RetweetIconSVG } from '@svgs/retweet-solid.svg'
 import { ReactComponent as BellIconSVG } from '@svgs/bell-solid.svg'
-import { ReactComponent as MultiplayerStringIcon } from '@svgs/multiplayer-string-icon.svg'
+import { ReactComponent as WeaveIcon } from '@svgs/multiplayer-string-icon.svg'
 
 const Content = (props: { typeIcon: JSX.Element; children: any }): JSX.Element => {
     const { typeIcon, children } = props
@@ -215,7 +215,7 @@ const NotificationCard = (props: {
             const data = { postId, notificationId: id, response }
             const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
             axios
-                .post(`${config.apiURL}/respond-to-multiplayer-string-invite`, data, authHeader)
+                .post(`${config.apiURL}/respond-to-weave-invite`, data, authHeader)
                 .then(() => updateNotification(id, 'state', response))
                 .catch((error) => console.log(error))
         }
@@ -387,15 +387,23 @@ const NotificationCard = (props: {
                         </Content>
                     )}
 
-                    {type === 'multiplayer-string-invitation' && (
-                        <Content typeIcon={<MultiplayerStringIcon />}>
+                    {type === 'weave-invitation' && (
+                        <Content typeIcon={<WeaveIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>invited you to join a</p>
-                            <TextLink text='multiplayer string game' link={`/p/${postId}`} />
+                            <TextLink text='weave' link={`/p/${postId}`} />
                             <State
                                 state={state}
                                 respond={(response) => respondToMultiplayerStringInvite(response)}
                             />
+                            <CreatedAt date={createdAt} />
+                        </Content>
+                    )}
+
+                    {type === 'weave-move' && (
+                        <Content typeIcon={<WeaveIcon />}>
+                            <p>It's your move! Add the next bead to the</p>
+                            <TextLink text='weave' link={`/p/${postId}`} />
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}
