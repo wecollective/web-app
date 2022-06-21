@@ -568,6 +568,7 @@ const NextBeadModal = (props: {
                                     urlTitle: newBead.urlData ? newBead.urlData.title : null,
                                 }}
                                 postId={0}
+                                postType='weave'
                                 beadIndex={0}
                                 location='test'
                                 style={{ marginTop: 20 }}

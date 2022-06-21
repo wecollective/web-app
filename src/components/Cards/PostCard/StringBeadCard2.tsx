@@ -1,10 +1,12 @@
 /* eslint-disable react/no-array-index-key */
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import * as d3 from 'd3'
 import styles from '@styles/components/cards/PostCard/StringBeadCard2.module.scss'
 import colors from '@styles/Colors.module.scss'
+import { AccountContext } from '@src/contexts/AccountContext'
 import Column from '@src/components/Column'
 import Row from '@src/components/Row'
+import ImageTitle from '@components/ImageTitle'
 import BeadCardUrlPreview from '@components/Cards/BeadCardUrlPreview'
 import Markdown from '@components/Markdown'
 import Scrollbars from '@components/Scrollbars'
@@ -21,11 +23,13 @@ import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
 const StringBeadCard = (props: {
     bead: any
     postId: number
+    postType: string
     beadIndex: number
     location: string
     style?: any
 }): JSX.Element => {
-    const { bead, postId, beadIndex, location, style } = props
+    const { bead, postId, postType, beadIndex, location, style } = props
+    const { accountData } = useContext(AccountContext)
     const [audioPlaying, setAudioPlaying] = useState(false)
     const [imageModalOpen, setImageModalOpen] = useState(false)
     const [selectedImage, setSelectedImage] = useState<any>(null)
@@ -70,6 +74,16 @@ const StringBeadCard = (props: {
         <Column className={styles.wrapper} style={style}>
             <Row spaceBetween className={styles.beadHeader}>
                 {findBeadIcon(bead.type)}
+                {postType === 'weave' && (
+                    <ImageTitle
+                        type='user'
+                        imagePath={bead.Creator.flagImagePath}
+                        title={bead.Creator.id === accountData.id ? 'You' : bead.Creator.name}
+                        fontSize={12}
+                        imageSize={20}
+                        style={{ marginRight: 10 }}
+                    />
+                )}
             </Row>
             <Column centerY className={styles.beadContent}>
                 {bead.type === 'string-text' && (

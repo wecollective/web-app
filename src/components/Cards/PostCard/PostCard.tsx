@@ -662,6 +662,7 @@ const PostCard = (props: {
                                     key={bead.id}
                                     bead={bead}
                                     postId={id}
+                                    postType={postData.type}
                                     beadIndex={i}
                                     location={location}
                                 />
@@ -743,6 +744,7 @@ const PostCard = (props: {
                                             key={bead.id}
                                             bead={bead}
                                             postId={id}
+                                            postType={postData.type}
                                             beadIndex={i}
                                             location={location}
                                         />
