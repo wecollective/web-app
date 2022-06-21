@@ -20,6 +20,7 @@ const SpacePagePostsFilters = (props: {
                     'Event',
                     'Glass Bead Game',
                     'String',
+                    'Weave',
                     'Prism',
                 ]}
                 selectedOption={params.type}
