@@ -871,10 +871,10 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             topicGroup: data.GlassBeadGame ? data.GlassBeadGame.topicGroup : null,
             topicImage: data.GlassBeadGame ? data.GlassBeadGame.topicImage : null,
             // weaves
-            privacy: data.Weave.privacy,
+            privacy: data.Weave ? data.Weave.privacy : null,
             userIds: selectedUsers.map((s) => s.id),
-            numberOfMoves: data.Weave.numberOfMoves,
-            numberOfTurns: data.Weave.numberOfTurns,
+            numberOfMoves: data.Weave ? data.Weave.numberOfMoves : null,
+            numberOfTurns: data.Weave ? data.Weave.numberOfTurns : null,
         }
         let fileData
         let uploadType
