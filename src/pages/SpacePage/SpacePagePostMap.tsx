@@ -154,6 +154,9 @@ const SpacePagePostMap = (props: { postMapData: any; params: any }): JSX.Element
         if (d.type === 'glass-bead-game') {
             return colors.blue
         }
+        if (d.type === 'weave') {
+            return colors.aqua
+        }
         // if (d.type === 'plot-graph') {
         //     return colors.orange
         // }
