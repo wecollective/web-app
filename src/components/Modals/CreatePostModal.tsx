@@ -318,6 +318,13 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
     ])
     const [selectedUsersError, setSelectedUsersError] = useState(false)
     const [multiplayerStringForm2, setMultiplayerStringForm2] = useState({
+        numberOfMoves: {
+            ...defaultErrorState,
+            value: 10,
+            validate: (v) => (+v < 1 || +v > 50 ? ['Must be between 1 and 50 moves'] : []),
+        },
+    })
+    const [multiplayerStringForm3, setMultiplayerStringForm3] = useState({
         numberOfTurns: {
             ...defaultErrorState,
             value: 1,
@@ -687,7 +694,12 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                 else setSelectedUsersError(true)
             }
             if (currentStep === 4) {
-                if (allValid(multiplayerStringForm2, setMultiplayerStringForm2)) setCurrentStep(5)
+                if (
+                    allUsersAllowed
+                        ? allValid(multiplayerStringForm2, setMultiplayerStringForm2)
+                        : allValid(multiplayerStringForm3, setMultiplayerStringForm3)
+                )
+                    setCurrentStep(5)
             }
         }
 
@@ -825,7 +837,8 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                 }
             })
             data.Weave = {
-                numberOfTurns: multiplayerStringForm2.numberOfTurns.value,
+                numberOfMoves: allUsersAllowed ? multiplayerStringForm2.numberOfMoves.value : null,
+                numberOfTurns: allUsersAllowed ? null : multiplayerStringForm3.numberOfTurns.value,
                 moveDuration: null,
                 allowedPostTypes: null,
                 privacy: allUsersAllowed ? 'all-users-allowed' : 'only-selected-users',
@@ -860,6 +873,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             // weaves
             privacy: data.Weave.privacy,
             userIds: selectedUsers.map((s) => s.id),
+            numberOfMoves: data.Weave.numberOfMoves,
             numberOfTurns: data.Weave.numberOfTurns,
         }
         let fileData
@@ -2086,25 +2100,45 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                     )}
                     {currentStep === 4 && (
                         <Column centerX style={{ width: 500 }}>
-                            <p>Choose the game settings:</p>
+                            <p>Game settings</p>
                             <Row centerY style={{ margin: '30px 0' }}>
-                                <Input
-                                    type='text'
-                                    title='Number of turns:'
-                                    value={multiplayerStringForm2.numberOfTurns.value}
-                                    state={multiplayerStringForm2.numberOfTurns.state}
-                                    errors={multiplayerStringForm2.numberOfTurns.errors}
-                                    onChange={(value) =>
-                                        setMultiplayerStringForm2({
-                                            ...multiplayerStringForm2,
-                                            numberOfTurns: {
-                                                ...multiplayerStringForm2.numberOfTurns,
-                                                value: +value,
-                                                state: 'default',
-                                            },
-                                        })
-                                    }
-                                />
+                                {allUsersAllowed ? (
+                                    <Input
+                                        type='text'
+                                        title='Total moves:'
+                                        value={multiplayerStringForm2.numberOfMoves.value}
+                                        state={multiplayerStringForm2.numberOfMoves.state}
+                                        errors={multiplayerStringForm2.numberOfMoves.errors}
+                                        onChange={(value) =>
+                                            setMultiplayerStringForm2({
+                                                ...multiplayerStringForm2,
+                                                numberOfMoves: {
+                                                    ...multiplayerStringForm2.numberOfMoves,
+                                                    value: +value,
+                                                    state: 'default',
+                                                },
+                                            })
+                                        }
+                                    />
+                                ) : (
+                                    <Input
+                                        type='text'
+                                        title='Number of turns (moves per player):'
+                                        value={multiplayerStringForm3.numberOfTurns.value}
+                                        state={multiplayerStringForm3.numberOfTurns.state}
+                                        errors={multiplayerStringForm3.numberOfTurns.errors}
+                                        onChange={(value) =>
+                                            setMultiplayerStringForm3({
+                                                ...multiplayerStringForm3,
+                                                numberOfTurns: {
+                                                    ...multiplayerStringForm3.numberOfTurns,
+                                                    value: +value,
+                                                    state: 'default',
+                                                },
+                                            })
+                                        }
+                                    />
+                                )}
                             </Row>
                             {!allUsersAllowed && (
                                 <Column centerX>
