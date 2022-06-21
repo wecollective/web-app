@@ -1,5 +1,5 @@
 /* eslint-disable react/no-array-index-key */
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useContext } from 'react'
 import * as d3 from 'd3'
 import Cookies from 'universal-cookie'
 import axios from 'axios'
@@ -7,6 +7,7 @@ import config from '@src/Config'
 import { v4 as uuidv4 } from 'uuid'
 import { defaultErrorState, isValidUrl, formatTimeMMSS } from '@src/Helpers'
 import styles from '@styles/components/cards/PostCard/NextBeadModal.module.scss'
+import { AccountContext } from '@src/contexts/AccountContext'
 import Modal from '@components/Modal'
 import Column from '@components/Column'
 import Row from '@components/Row'
@@ -31,6 +32,7 @@ const NextBeadModal = (props: {
     close: () => void
 }): JSX.Element => {
     const { beadIndex, postData, setPostData, close } = props
+    const { accountData } = useContext(AccountContext)
 
     const defaultBead = {
         id: uuidv4(),
@@ -301,6 +303,11 @@ const NextBeadModal = (props: {
                                 ...res.data.bead,
                                 Link: { index: beadIndex },
                                 PostImages: res.data.imageData || [],
+                                Creator: {
+                                    id: accountData.id,
+                                    name: accountData.name,
+                                    flagImagePath: accountData.flagImagePath,
+                                },
                             },
                         ],
                     })
@@ -566,6 +573,11 @@ const NextBeadModal = (props: {
                                         ? newBead.urlData.description
                                         : null,
                                     urlTitle: newBead.urlData ? newBead.urlData.title : null,
+                                    Creator: {
+                                        id: accountData.id,
+                                        name: accountData.name,
+                                        flagImagePath: accountData.flagImagePath,
+                                    },
                                 }}
                                 postId={0}
                                 postType='weave'
