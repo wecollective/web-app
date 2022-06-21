@@ -712,9 +712,20 @@ const PostCard = (props: {
                                 )}
                             </Row>
                         ) : (
-                            <Row centerY style={{ color: '#acacae' }}>
-                                <UsersIconSVG style={{ width: 30, height: 30, marginRight: 5 }} />
-                                <p>Open to all users</p>
+                            <Row spaceBetween style={{ marginBottom: 10, color: '#acacae' }}>
+                                <Row centerY>
+                                    <UsersIconSVG
+                                        style={{ width: 30, height: 30, marginRight: 5 }}
+                                    />
+                                    <p>Open to all users</p>
+                                </Row>
+                                {StringPosts.length < Weave.numberOfMoves ? (
+                                    <p>
+                                        Move: {StringPosts.length + 1} / {Weave.numberOfMoves}
+                                    </p>
+                                ) : (
+                                    <p>Game finished</p>
+                                )}
                             </Row>
                         )}
                         {text && (
@@ -736,14 +747,17 @@ const PostCard = (props: {
                                             location={location}
                                         />
                                     ))}
-                                    {Weave.privacy === 'all-users-allowed' ||
+                                    {(Weave.privacy === 'all-users-allowed' &&
+                                        StringPosts.length < Weave.numberOfMoves) ||
                                     (StringPosts.length <
                                         Weave.numberOfTurns * StringPlayers.length &&
                                         currentPlayer.id === accountData.id) ? (
                                         <button
                                             type='button'
                                             className={styles.newBeadButton}
-                                            onClick={() => setNextBeadModalOpen(true)}
+                                            onClick={() =>
+                                                location !== 'preview' && setNextBeadModalOpen(true)
+                                            }
                                         >
                                             <PlusIconSVG />
                                             <p>
