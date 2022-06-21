@@ -758,7 +758,9 @@ const PostCard = (props: {
                                             type='button'
                                             className={styles.newBeadButton}
                                             onClick={() =>
-                                                location !== 'preview' && setNextBeadModalOpen(true)
+                                                loggedIn &&
+                                                location !== 'preview' &&
+                                                setNextBeadModalOpen(true)
                                             }
                                         >
                                             <PlusIconSVG />
