@@ -90,6 +90,7 @@ const StringBeadCard = (props: {
                     <Scrollbars>
                         <Markdown
                             text={bead.text}
+                            className={styles.markdown}
                             style={{
                                 padding: '0 10px 2px 10px',
                                 fontSize: 14,

@@ -22,6 +22,10 @@
         height: calc(100% - 25px);
         margin: 5px 0;
 
+        .markdown {
+            img { max-width: 100% }
+        }
+
         .playButton {
             all: unset;
             cursor: pointer;
