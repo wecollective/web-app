@@ -66,7 +66,7 @@ const BeadCard = (props: {
                     title={bead.user.id === accountData.id ? 'You' : bead.user.name}
                     fontSize={12}
                     imageSize={20}
-                    style={{ marginRight: 10 }}
+                    style={{ marginRight: 10, overflow: 'hidden' }}
                 />
                 <button
                     type='button'
