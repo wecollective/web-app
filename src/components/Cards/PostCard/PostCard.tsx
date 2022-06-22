@@ -129,6 +129,7 @@ const PostCard = (props: {
     // multipleyer strings
     StringPlayers.sort((a, b) => a.UserPost.index - b.UserPost.index)
     const pendingPlayers = StringPlayers.filter((p) => p.UserPost.state === 'pending')
+    const rejectedPlayers = StringPlayers.filter((p) => p.UserPost.state === 'rejected')
     function findCurrentPlayer() {
         if (Weave && Weave.privacy === 'only-selected-users') {
             const currentPlayerIndex = StringPosts.length % StringPlayers.length
@@ -683,7 +684,7 @@ const PostCard = (props: {
                                     style={{ marginRight: 15 }}
                                     outline
                                 />
-                                {pendingPlayers.length > 0 ? (
+                                {pendingPlayers.length > 0 && !rejectedPlayers.length && (
                                     <Row centerY>
                                         <p>Waiting for {pendingPlayers.length} to accept</p>
                                         <FlagImageHighlights
@@ -694,7 +695,23 @@ const PostCard = (props: {
                                             outline
                                         />
                                     </Row>
-                                ) : (
+                                )}
+                                {rejectedPlayers.length > 0 && (
+                                    <Row centerY>
+                                        <p>
+                                            {rejectedPlayers.length} player
+                                            {pluralise(rejectedPlayers.length)} rejected the game
+                                        </p>
+                                        <FlagImageHighlights
+                                            type='user'
+                                            imagePaths={rejectedPlayers.map((p) => p.flagImagePath)}
+                                            imageSize={30}
+                                            style={{ marginLeft: 5 }}
+                                            outline
+                                        />
+                                    </Row>
+                                )}
+                                {!pendingPlayers.length && !rejectedPlayers.length && (
                                     <>
                                         {StringPosts.length <
                                         Weave.numberOfTurns * StringPlayers.length ? (
@@ -736,7 +753,7 @@ const PostCard = (props: {
                                 </ShowMoreLess>
                             </Column>
                         )}
-                        {!pendingPlayers.length && (
+                        {!pendingPlayers.length && !rejectedPlayers.length && (
                             <Row centerX>
                                 <Scrollbars className={`${styles.stringBeads} row`}>
                                     {StringPosts.map((bead, i) => (
@@ -757,11 +774,13 @@ const PostCard = (props: {
                                         <button
                                             type='button'
                                             className={styles.newBeadButton}
-                                            onClick={() =>
-                                                loggedIn &&
-                                                location !== 'preview' &&
-                                                setNextBeadModalOpen(true)
-                                            }
+                                            onClick={() => {
+                                                if (!loggedIn) {
+                                                    setAlertMessage('Log in to create the bead')
+                                                    setAlertModalOpen(true)
+                                                } else if (location !== 'preview')
+                                                    setNextBeadModalOpen(true)
+                                            }}
                                         >
                                             <PlusIconSVG />
                                             <p>
