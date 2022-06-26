@@ -66,5 +66,9 @@
 
     .content {
         min-height: calc(100vh - 243px);
+        width: 100%;
+        @include for-post-width-up {
+            width: auto;
+        }
     }
 }

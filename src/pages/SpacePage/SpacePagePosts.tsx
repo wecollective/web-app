@@ -34,6 +34,7 @@ const SpacePagePosts = (): JSX.Element => {
     const history = useHistory()
     const spaceHandle = location.pathname.split('/')[2]
     const [filtersOpen, setFiltersOpen] = useState(false)
+    const [showNavList, setShowNavList] = useState(false)
 
     // calculate params
     const urlParams = Object.fromEntries(new URLSearchParams(location.search))
@@ -69,6 +70,13 @@ const SpacePagePosts = (): JSX.Element => {
         }
     }, [pageBottomReached])
 
+    useEffect(() => {
+        setShowNavList(document.documentElement.clientWidth >= 900)
+        window.addEventListener('resize', () =>
+            setShowNavList(document.documentElement.clientWidth >= 900)
+        )
+    }, [])
+
     if (spaceNotFound) return <SpaceNotFound />
     return (
         <Column centerX className={styles.wrapper}>
@@ -82,7 +90,7 @@ const SpacePagePosts = (): JSX.Element => {
             <Column className={styles.content}>
                 {params.view === 'List' && (
                     <Row className={styles.postListView}>
-                        <SpaceNavigationList />
+                        {showNavList && <SpaceNavigationList />}
                         <PostList
                             location='space-posts'
                             posts={spacePosts}

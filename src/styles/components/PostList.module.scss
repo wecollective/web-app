@@ -2,7 +2,11 @@
 
 .wrapper {
     padding: 0 10px;
-    width: 800px;
+    width: 100%;
+
+    @include for-post-width-up {
+        width: 800px;
+    }
     
     .noResults {
         

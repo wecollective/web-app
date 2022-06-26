@@ -4,6 +4,11 @@ $defaultColor: $grey7;
 $highlightColor: $blue5;
 
 .wrapper {
+    width: 100%;
+    @include for-tablet-landscape-up {
+        width: auto;
+    }
+    overflow: hidden;
 
     .tab {
         margin: 0 10px;

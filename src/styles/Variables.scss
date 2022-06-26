@@ -82,6 +82,9 @@ $scrollBarWidth: 6px;
 @mixin for-tablet-portrait-up {
     @media (min-width: 600px) { @content; }
 }
+@mixin for-post-width-up {
+    @media (min-width: 800px) { @content; }
+}
 @mixin for-tablet-landscape-up {
     @media (min-width: 900px) { @content; }
 }
