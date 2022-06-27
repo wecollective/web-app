@@ -44,91 +44,104 @@ const Navbar = (): JSX.Element => {
         }
     }
 
+    function toggleHamburgerMenu() {
+        const menu = document.getElementById('hamburger-button')
+        if (menu) {
+            if (hamburgerMenuOpen) {
+                menu.classList.remove(styles.entering)
+                menu.classList.add(styles.exiting)
+                setTimeout(() => setHamburgerMenuOpen(false), 500)
+            } else {
+                setHamburgerMenuOpen(true)
+                menu.classList.remove(styles.exiting)
+                setTimeout(() => menu.classList.add(styles.entering), 50)
+            }
+        }
+    }
+
     return (
         <Row spaceBetween className={styles.wrapper}>
-            <Row centerY className={styles.hamburgerButton}>
-                <button type='button' onClick={() => setHamburgerMenuOpen(!hamburgerMenuOpen)}>
+            <Row centerY id='hamburger-button' className={styles.hamburgerButton}>
+                <button type='button' onClick={() => toggleHamburgerMenu()}>
                     <HamburgerIcon />
                 </button>
                 {hamburgerMenuOpen && (
-                    <Row className={styles.hamburgerMenuWrapper}>
+                    <>
                         <button
-                            type='button'
                             className={styles.hamburgerMenuBackground}
-                            onClick={() => setHamburgerMenuOpen(false)}
+                            type='button'
+                            onClick={() => toggleHamburgerMenu()}
                         />
-                    </Row>
-                )}
-                <Column
-                    className={`${styles.hamburgerMenu} ${hamburgerMenuOpen && styles.visible}`}
-                >
-                    <Row centerY className={styles.hamburgerMenuHeader}>
-                        <FlagImage
-                            type='space'
-                            size={80}
-                            imagePath={spaceData.flagImagePath}
-                            style={{ marginRight: 10 }}
-                        />
-                        <Column>
-                            <h1>{spaceData.name}</h1>
-                            <p className='grey'>s/{spaceData.handle}</p>
+                        <Column className={styles.hamburgerMenu}>
+                            <Row centerY className={styles.hamburgerMenuHeader}>
+                                <FlagImage
+                                    type='space'
+                                    size={80}
+                                    imagePath={spaceData.flagImagePath}
+                                    style={{ marginRight: 10 }}
+                                />
+                                <Column>
+                                    <h1>{spaceData.name}</h1>
+                                    <p className='grey'>s/{spaceData.handle}</p>
+                                </Column>
+                            </Row>
+                            <Column className={styles.hamburgerMenuSpaceTabs}>
+                                <Link
+                                    to={`/s/${spaceData.handle}/about`}
+                                    onClick={() => toggleHamburgerMenu()}
+                                >
+                                    <AboutIcon />
+                                    <p>About</p>
+                                </Link>
+                                <Link
+                                    to={`/s/${spaceData.handle}/posts`}
+                                    onClick={() => toggleHamburgerMenu()}
+                                >
+                                    <PostsIcon />
+                                    <p>Posts</p>
+                                </Link>
+                                <Link
+                                    to={`/s/${spaceData.handle}/spaces`}
+                                    onClick={() => toggleHamburgerMenu()}
+                                >
+                                    <SpacesIcon />
+                                    <p>Spaces</p>
+                                </Link>
+                                <Link
+                                    to={`/s/${spaceData.handle}/people`}
+                                    onClick={() => toggleHamburgerMenu()}
+                                >
+                                    <PeopleIcon />
+                                    <p>People</p>
+                                </Link>
+                                <Link
+                                    to={`/s/${spaceData.handle}/calendar`}
+                                    onClick={() => toggleHamburgerMenu()}
+                                >
+                                    <CalendarIcon />
+                                    <p>Calendar</p>
+                                </Link>
+                                <Link
+                                    to={`/s/${spaceData.handle}/governance`}
+                                    onClick={() => toggleHamburgerMenu()}
+                                >
+                                    <GovernanceIcon />
+                                    <p>Governance</p>
+                                </Link>
+                                {isModerator && (
+                                    <Link
+                                        to={`/s/${spaceData.handle}/settings`}
+                                        onClick={() => toggleHamburgerMenu()}
+                                    >
+                                        <SettingsIcon />
+                                        <p>Settings</p>
+                                    </Link>
+                                )}
+                            </Column>
+                            <SpaceNavigationList onLocationChange={() => toggleHamburgerMenu()} />
                         </Column>
-                    </Row>
-                    <Column className={styles.hamburgerMenuSpaceTabs}>
-                        <Link
-                            to={`/s/${spaceData.handle}/about`}
-                            onClick={() => setHamburgerMenuOpen(false)}
-                        >
-                            <AboutIcon />
-                            <p>About</p>
-                        </Link>
-                        <Link
-                            to={`/s/${spaceData.handle}/posts`}
-                            onClick={() => setHamburgerMenuOpen(false)}
-                        >
-                            <PostsIcon />
-                            <p>Posts</p>
-                        </Link>
-                        <Link
-                            to={`/s/${spaceData.handle}/spaces`}
-                            onClick={() => setHamburgerMenuOpen(false)}
-                        >
-                            <SpacesIcon />
-                            <p>Spaces</p>
-                        </Link>
-                        <Link
-                            to={`/s/${spaceData.handle}/people`}
-                            onClick={() => setHamburgerMenuOpen(false)}
-                        >
-                            <PeopleIcon />
-                            <p>People</p>
-                        </Link>
-                        <Link
-                            to={`/s/${spaceData.handle}/calendar`}
-                            onClick={() => setHamburgerMenuOpen(false)}
-                        >
-                            <CalendarIcon />
-                            <p>Calendar</p>
-                        </Link>
-                        <Link
-                            to={`/s/${spaceData.handle}/governance`}
-                            onClick={() => setHamburgerMenuOpen(false)}
-                        >
-                            <GovernanceIcon />
-                            <p>Governance</p>
-                        </Link>
-                        {isModerator && (
-                            <Link
-                                to={`/s/${spaceData.handle}/settings`}
-                                onClick={() => setHamburgerMenuOpen(false)}
-                            >
-                                <SettingsIcon />
-                                <p>Settings</p>
-                            </Link>
-                        )}
-                    </Column>
-                    <SpaceNavigationList onLocationChange={() => setHamburgerMenuOpen(false)} />
-                </Column>
+                    </>
+                )}
             </Row>
             <Row centerY className={styles.homeAndExploreButtons}>
                 <button

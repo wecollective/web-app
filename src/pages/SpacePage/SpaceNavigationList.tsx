@@ -24,6 +24,7 @@ const SpaceNavigationList = (props: {
     const { DirectParentHolons: parentSpaces, DirectChildHolons: childSpaces } = spaceData
 
     function expandSpace(type, spaceId) {
+        // todo: use local space arrays instead of mutating spaceData in context
         const key = `Direct${type}Holons`
         const space = spaceData[key].find((s) => s.id === spaceId)
         const newSpaces = [...spaceData[key]]
