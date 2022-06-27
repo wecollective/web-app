@@ -20,10 +20,11 @@ const SpacePagePostsHeader = (props: {
 }): JSX.Element => {
     const { filtersOpen, setFiltersOpen, params, applyParam } = props
     const { loggedIn, setAlertModalOpen, setAlertMessage } = useContext(AccountContext)
-    const { spaceData } = useContext(SpaceContext)
+    // const { spaceData } = useContext(SpaceContext)
     const [createPostModalType, setCreatePostModalType] = useState('Text')
     const [createPostModalOpen, setCreatePostModalOpen] = useState(false)
     const [viewModalOpen, setViewModalOpen] = useState(false)
+    const mobileView = document.documentElement.clientWidth < 900
 
     function openCreatePostModal(type) {
         if (loggedIn) {
@@ -38,20 +39,21 @@ const SpacePagePostsHeader = (props: {
     return (
         <Row centerY centerX className={styles.wrapper}>
             <Button
-                // icon={<PlusIconSVG />}
+                // icon={mobileView ? <PlusIconSVG /> : undefined}
+                // text={mobileView ? '' : 'New post'}
                 text='New post'
                 color='blue'
                 onClick={() => openCreatePostModal('Text')}
                 style={{ marginRight: 10 }}
             />
-            {spaceData.HolonHandles.map((h) => h.handle).includes('castalia') && (
+            {/* {spaceData.HolonHandles.map((h) => h.handle).includes('castalia') && (
                 <Button
                     text='New game'
                     color='purple'
                     onClick={() => openCreatePostModal('Glass Bead Game')}
                     style={{ marginRight: 10 }}
                 />
-            )}
+            )} */}
             <SearchBar
                 setSearchFilter={(value) => applyParam('searchQuery', value)}
                 placeholder='Search posts...'
@@ -59,14 +61,14 @@ const SpacePagePostsHeader = (props: {
             />
             <Button
                 icon={<SlidersIconSVG />}
-                text='Filters'
+                text={mobileView ? '' : 'Filters'}
                 color='aqua'
                 style={{ marginRight: 10 }}
                 onClick={() => setFiltersOpen(!filtersOpen)}
             />
             <Button
                 icon={<EyeIconSVG />}
-                text='View'
+                text={mobileView ? '' : 'View'}
                 color='purple'
                 onClick={() => setViewModalOpen(true)}
             />

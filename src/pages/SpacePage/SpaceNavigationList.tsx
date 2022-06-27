@@ -14,8 +14,11 @@ import { ReactComponent as ArrowDownIconSVG } from '@svgs/arrow-down-solid.svg' 
 import { ReactComponent as PlusIconSVG } from '@svgs/plus.svg'
 import { ReactComponent as MinusIconSVG } from '@svgs/minus-solid.svg'
 
-const SpaceNavigationList = (props: { onLocationChange?: () => void }): JSX.Element => {
-    const { onLocationChange } = props
+const SpaceNavigationList = (props: {
+    onLocationChange?: () => void
+    style?: any
+}): JSX.Element => {
+    const { onLocationChange, style } = props
     const { accountData } = useContext(AccountContext)
     const { spaceData, setSpaceData, selectedSpaceSubPage } = useContext(SpaceContext)
     const { DirectParentHolons: parentSpaces, DirectChildHolons: childSpaces } = spaceData
@@ -52,7 +55,7 @@ const SpaceNavigationList = (props: { onLocationChange?: () => void }): JSX.Elem
     }
 
     return (
-        <Scrollbars className={styles.wrapper}>
+        <Scrollbars className={styles.wrapper} style={style}>
             {parentSpaces.length > 0 && (
                 <Column className={styles.spaces}>
                     <Row>
@@ -191,6 +194,7 @@ const SpaceNavigationList = (props: { onLocationChange?: () => void }): JSX.Elem
 
 SpaceNavigationList.defaultProps = {
     onLocationChange: null,
+    style: null,
 }
 
 export default SpaceNavigationList

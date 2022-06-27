@@ -2,14 +2,24 @@
 
 .wrapper {
     margin-bottom: 10px;
+    width: 100%;
 
     .content {
         position: relative;
+        width: 100%;
 
         .spaceListView {}
 
         .spaceMapView {
-            width: calc(100vw - 40px);
+            padding: 0 10px;
+            width: 100%;
+            height: calc(100vh - 195px);
+            @include for-tablet-landscape-up {
+                height: calc(100vh - 220px);
+            }
+            @include for-desktop-medium-up {
+                height: calc(100vh - 320px);
+            }
         }
     }
 }

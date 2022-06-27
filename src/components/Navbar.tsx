@@ -219,7 +219,7 @@ const Navbar = (): JSX.Element => {
                     </div>
                 </Row>
             ) : (
-                <Row centerY>
+                <Row centerY style={{ marginRight: 10 }}>
                     <Button
                         text='Log in'
                         color='blue'

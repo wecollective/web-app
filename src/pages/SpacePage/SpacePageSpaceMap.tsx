@@ -80,7 +80,7 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
         } else {
             // create new pattern
             const pattern = d3
-                .select('defs')
+                .select('#imgdefs')
                 .append('pattern')
                 .attr('id', `pattern-${d.data.id}`)
                 .attr('height', 1)
@@ -182,7 +182,7 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
 
     function createCanvas() {
         const width = '100%'
-        const height = window.innerHeight - (window.innerWidth < 1500 ? 250 : 330)
+        const height = '100%' // window.innerHeight - (window.innerWidth < 1500 ? 250 : 330)
         const yOffset = spaceData.DirectParentHolons.length ? 180 : 80
         const svg = d3
             .select('#canvas')
