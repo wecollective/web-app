@@ -90,7 +90,11 @@ const SpacePagePosts = (): JSX.Element => {
             <Column className={styles.content}>
                 {params.view === 'List' && (
                     <Row className={styles.postListView}>
-                        {showNavList && <SpaceNavigationList />}
+                        {showNavList && (
+                            <Column className={styles.spaceNavWrapper}>
+                                <SpaceNavigationList />
+                            </Column>
+                        )}
                         <PostList
                             location='space-posts'
                             posts={spacePosts}

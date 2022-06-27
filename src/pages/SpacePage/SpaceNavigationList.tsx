@@ -14,7 +14,8 @@ import { ReactComponent as ArrowDownIconSVG } from '@svgs/arrow-down-solid.svg' 
 import { ReactComponent as PlusIconSVG } from '@svgs/plus.svg'
 import { ReactComponent as MinusIconSVG } from '@svgs/minus-solid.svg'
 
-const SpaceNavigationList = (): JSX.Element => {
+const SpaceNavigationList = (props: { onLocationChange?: () => void }): JSX.Element => {
+    const { onLocationChange } = props
     const { accountData } = useContext(AccountContext)
     const { spaceData, setSpaceData, selectedSpaceSubPage } = useContext(SpaceContext)
     const { DirectParentHolons: parentSpaces, DirectChildHolons: childSpaces } = spaceData
@@ -69,6 +70,7 @@ const SpaceNavigationList = (): JSX.Element => {
                                         link={`/s/${space.handle}/${selectedSpaceSubPage}`}
                                         fontSize={14}
                                         imageSize={35}
+                                        onClick={() => onLocationChange && onLocationChange()}
                                         wrapText
                                     />
                                     <button
@@ -101,6 +103,9 @@ const SpaceNavigationList = (): JSX.Element => {
                                                         link={`/s/${s.handle}/${selectedSpaceSubPage}`}
                                                         fontSize={14}
                                                         imageSize={30}
+                                                        onClick={() =>
+                                                            onLocationChange && onLocationChange()
+                                                        }
                                                         wrapText
                                                     />
                                                 </Row>
@@ -130,6 +135,7 @@ const SpaceNavigationList = (): JSX.Element => {
                                         link={`/s/${space.handle}/${selectedSpaceSubPage}`}
                                         fontSize={14}
                                         imageSize={35}
+                                        onClick={() => onLocationChange && onLocationChange()}
                                         wrapText
                                     />
                                     {space.totalChildren > 0 && (
@@ -164,6 +170,9 @@ const SpaceNavigationList = (): JSX.Element => {
                                                         link={`/s/${s.handle}/${selectedSpaceSubPage}`}
                                                         fontSize={14}
                                                         imageSize={30}
+                                                        onClick={() =>
+                                                            onLocationChange && onLocationChange()
+                                                        }
                                                         wrapText
                                                     />
                                                 </Row>
@@ -178,6 +187,10 @@ const SpaceNavigationList = (): JSX.Element => {
             )}
         </Scrollbars>
     )
+}
+
+SpaceNavigationList.defaultProps = {
+    onLocationChange: null,
 }
 
 export default SpaceNavigationList

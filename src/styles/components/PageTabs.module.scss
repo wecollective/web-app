@@ -4,9 +4,9 @@ $defaultColor: $grey7;
 $highlightColor: $blue5;
 
 .wrapper {
-    width: 100%;
+    display: none;
     @include for-tablet-landscape-up {
-        width: auto;
+        display: flex;
     }
     overflow: hidden;
 

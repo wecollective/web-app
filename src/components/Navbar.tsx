@@ -1,25 +1,34 @@
+/* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useContext, useState } from 'react'
 import { Link, useHistory } from 'react-router-dom'
 import { AccountContext } from '@contexts/AccountContext'
+import { SpaceContext } from '@src/contexts/SpaceContext'
 import styles from '@styles/components/Navbar.module.scss'
 import FlagImage from '@components/FlagImage'
+import Column from '@components/Column'
 import Row from '@components/Row'
 import Button from '@components/Button'
+import SpaceNavigationList from '@pages/SpacePage/SpaceNavigationList'
 import GlobalSearchBar from '@components/GlobalSearchBar'
 import { ReactComponent as WecoLogo } from '@svgs/weco-logo.svg'
+import { ReactComponent as HamburgerIcon } from '@svgs/bars-solid.svg'
 import { ReactComponent as ChevronDownIcon } from '@svgs/chevron-down-solid.svg'
 import { ReactComponent as SpacesIcon } from '@svgs/overlapping-circles-thick.svg'
 import { ReactComponent as PostsIcon } from '@svgs/edit-solid.svg'
-import { ReactComponent as UsersIcon } from '@svgs/users-solid.svg'
-import { ReactComponent as EventsIcon } from '@svgs/calendar-days-solid.svg'
+import { ReactComponent as PeopleIcon } from '@svgs/users-solid.svg'
+import { ReactComponent as CalendarIcon } from '@svgs/calendar-days-solid.svg'
 import { ReactComponent as BellIcon } from '@svgs/bell-solid.svg'
 import { ReactComponent as SettingsIcon } from '@svgs/cog-solid.svg'
 import { ReactComponent as UserIcon } from '@svgs/user-solid.svg'
+import { ReactComponent as AboutIcon } from '@svgs/book-open-solid.svg'
+import { ReactComponent as GovernanceIcon } from '@svgs/building-columns-solid.svg'
 
 const Navbar = (): JSX.Element => {
     const { loggedIn, accountData, setLogInModalOpen, setDonateModalOpen, logOut } = useContext(
         AccountContext
     )
+    const { spaceData, isModerator } = useContext(SpaceContext)
+    const [hamburgerMenuOpen, setHamburgerMenuOpen] = useState(false)
     const [exploreDropDownOpen, setExploreDropDownOpen] = useState(false)
     const [profileDropDownOpen, setProfileDropDownOpen] = useState(false)
     const history = useHistory()
@@ -37,7 +46,91 @@ const Navbar = (): JSX.Element => {
 
     return (
         <Row spaceBetween className={styles.wrapper}>
-            <Row centerY>
+            <Row centerY className={styles.hamburgerButton}>
+                <button type='button' onClick={() => setHamburgerMenuOpen(!hamburgerMenuOpen)}>
+                    <HamburgerIcon />
+                </button>
+                {hamburgerMenuOpen && (
+                    <Row className={styles.hamburgerMenuWrapper}>
+                        <button
+                            type='button'
+                            className={styles.hamburgerMenuBackground}
+                            onClick={() => setHamburgerMenuOpen(false)}
+                        />
+                    </Row>
+                )}
+                <Column
+                    className={`${styles.hamburgerMenu} ${hamburgerMenuOpen && styles.visible}`}
+                >
+                    <Row centerY className={styles.hamburgerMenuHeader}>
+                        <FlagImage
+                            type='space'
+                            size={80}
+                            imagePath={spaceData.flagImagePath}
+                            style={{ marginRight: 10 }}
+                        />
+                        <Column>
+                            <h1>{spaceData.name}</h1>
+                            <p className='grey'>s/{spaceData.handle}</p>
+                        </Column>
+                    </Row>
+                    <Column className={styles.hamburgerMenuSpaceTabs}>
+                        <Link
+                            to={`/s/${spaceData.handle}/about`}
+                            onClick={() => setHamburgerMenuOpen(false)}
+                        >
+                            <AboutIcon />
+                            <p>About</p>
+                        </Link>
+                        <Link
+                            to={`/s/${spaceData.handle}/posts`}
+                            onClick={() => setHamburgerMenuOpen(false)}
+                        >
+                            <PostsIcon />
+                            <p>Posts</p>
+                        </Link>
+                        <Link
+                            to={`/s/${spaceData.handle}/spaces`}
+                            onClick={() => setHamburgerMenuOpen(false)}
+                        >
+                            <SpacesIcon />
+                            <p>Spaces</p>
+                        </Link>
+                        <Link
+                            to={`/s/${spaceData.handle}/people`}
+                            onClick={() => setHamburgerMenuOpen(false)}
+                        >
+                            <PeopleIcon />
+                            <p>People</p>
+                        </Link>
+                        <Link
+                            to={`/s/${spaceData.handle}/calendar`}
+                            onClick={() => setHamburgerMenuOpen(false)}
+                        >
+                            <CalendarIcon />
+                            <p>Calendar</p>
+                        </Link>
+                        <Link
+                            to={`/s/${spaceData.handle}/governance`}
+                            onClick={() => setHamburgerMenuOpen(false)}
+                        >
+                            <GovernanceIcon />
+                            <p>Governance</p>
+                        </Link>
+                        {isModerator && (
+                            <Link
+                                to={`/s/${spaceData.handle}/settings`}
+                                onClick={() => setHamburgerMenuOpen(false)}
+                            >
+                                <SettingsIcon />
+                                <p>Settings</p>
+                            </Link>
+                        )}
+                    </Column>
+                    <SpaceNavigationList onLocationChange={() => setHamburgerMenuOpen(false)} />
+                </Column>
+            </Row>
+            <Row centerY className={styles.homeAndExploreButtons}>
                 <button
                     type='button'
                     id='home-button'
@@ -67,11 +160,11 @@ const Navbar = (): JSX.Element => {
                                 <p>Spaces</p>
                             </Link>
                             <Link to='/s/all/people'>
-                                <UsersIcon />
+                                <PeopleIcon />
                                 <p>People</p>
                             </Link>
                             <Link to='/s/all/calendar'>
-                                <EventsIcon />
+                                <CalendarIcon />
                                 <p>Events</p>
                             </Link>
                         </div>

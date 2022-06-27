@@ -1,12 +1,8 @@
 @import '@styles/Variables';
 
 .wrapper {
-    width: 200px;
-    flex-shrink: 0;
-    position: sticky !important;
-    top: 313px;
-    align-self: flex-start;
-    max-height: 68vh;
+    width: 100%;
+    height: 100%;
 
     .spaces {
         margin-bottom: 20px;
