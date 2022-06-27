@@ -11,8 +11,9 @@ const FlagImage = (props: {
     outline?: boolean
     shadow?: boolean
     // canEdit?: boolean
+    style?: any
 }): JSX.Element => {
-    const { size, type, imagePath, className, outline, shadow } = props
+    const { size, type, imagePath, className, outline, shadow, style } = props
     // const { setImageUploadType, setImageUploadModalOpen } = useContext(AccountContext)
 
     const classes = [styles.wrapper]
@@ -27,7 +28,7 @@ const FlagImage = (props: {
     // }
 
     return (
-        <div className={classes.join(' ')} style={{ width: size, height: size }}>
+        <div className={classes.join(' ')} style={{ width: size, height: size, ...style }}>
             {imagePath ? (
                 <>
                     <div className={styles.background} />
@@ -50,6 +51,7 @@ FlagImage.defaultProps = {
     outline: false,
     shadow: false,
     // canEdit: false,
+    style: null,
 }
 
 export default FlagImage
