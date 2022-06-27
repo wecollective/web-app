@@ -8,6 +8,7 @@ import Column from '@components/Column'
 import Row from '@components/Row'
 import ImageTitle from '@components/ImageTitle'
 import Scrollbars from '@src/components/Scrollbars'
+import LoadingWheel from '@src/components/LoadingWheel'
 import { ReactComponent as ArrowUpIconSVG } from '@svgs/arrow-up-solid.svg' // chevron-up-solid.svg'
 import { ReactComponent as ArrowDownIconSVG } from '@svgs/arrow-down-solid.svg' // chevron-down-solid.svg'
 import { ReactComponent as PlusIconSVG } from '@svgs/plus.svg'
@@ -31,6 +32,8 @@ const SpaceNavigationList = (): JSX.Element => {
             newSpace.expanded = true
             setSpaceData({ ...spaceData, [key]: newSpaces })
         } else {
+            newSpace.loading = true
+            setSpaceData({ ...spaceData, [key]: newSpaces })
             const filters =
                 'timeRange=AllTime&sortBy=Likes&sortOrder=Descending&depth=Only Direct Descendants&offset=0'
             axios
@@ -40,6 +43,7 @@ const SpaceNavigationList = (): JSX.Element => {
                 .then((res) => {
                     newSpace[key] = res.data
                     newSpace.expanded = true
+                    newSpace.loading = false
                     setSpaceData({ ...spaceData, [key]: newSpaces })
                 })
                 .catch((error) => console.log(error))
@@ -72,7 +76,17 @@ const SpaceNavigationList = (): JSX.Element => {
                                         type='button'
                                         onClick={() => expandSpace('Parent', space.id)}
                                     >
-                                        {space.expanded ? <MinusIconSVG /> : <PlusIconSVG />}
+                                        {space.loading ? (
+                                            <LoadingWheel size={20} style={{ marginLeft: 7 }} />
+                                        ) : (
+                                            <>
+                                                {space.expanded ? (
+                                                    <MinusIconSVG />
+                                                ) : (
+                                                    <PlusIconSVG />
+                                                )}
+                                            </>
+                                        )}
                                     </button>
                                 </Row>
                                 {space.expanded && (
@@ -124,7 +138,17 @@ const SpaceNavigationList = (): JSX.Element => {
                                             type='button'
                                             onClick={() => expandSpace('Child', space.id)}
                                         >
-                                            {space.expanded ? <MinusIconSVG /> : <PlusIconSVG />}
+                                            {space.loading ? (
+                                                <LoadingWheel size={20} style={{ marginLeft: 7 }} />
+                                            ) : (
+                                                <>
+                                                    {space.expanded ? (
+                                                        <MinusIconSVG />
+                                                    ) : (
+                                                        <PlusIconSVG />
+                                                    )}
+                                                </>
+                                            )}
                                         </button>
                                     )}
                                 </Row>
