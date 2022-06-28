@@ -93,6 +93,46 @@ export function timeSinceCreated(createdAt: string | undefined): string | undefi
     return time
 }
 
+export function timeSinceCreatedShort(createdAt: string | undefined): string | undefined {
+    if (createdAt === undefined) return undefined
+    const now = Date.parse(new Date().toString())
+    const createdAtDate = Date.parse(createdAt)
+    const difference = now - createdAtDate
+    const second = 1000
+    const minute = second * 60
+    const hour = minute * 60
+    const day = hour * 24
+    const week = day * 7
+    const year = day * 365
+
+    let time
+    if (difference < minute) {
+        const number = Number((difference / second).toFixed(0))
+        time = `${number}s`
+    }
+    if (difference >= minute && difference < hour) {
+        const number = Number((difference / minute).toFixed(0))
+        time = `${number}min`
+    }
+    if (difference >= hour && difference < day) {
+        const number = Number((difference / hour).toFixed(0))
+        time = `${number}h`
+    }
+    if (difference >= day && difference < week) {
+        const number = Number((difference / day).toFixed(0))
+        time = `${number}w`
+    }
+    if (difference >= week && difference < year) {
+        const number = Number((difference / week).toFixed(0))
+        time = `${number}m`
+    }
+    if (difference >= year) {
+        const number = Number((difference / year).toFixed(0))
+        time = `${number}y`
+    }
+    return time
+}
+
 export function formatTimeMMSS(seconds: number): string {
     // output: '00m 00s'
     const s = Math.floor(seconds)
