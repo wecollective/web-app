@@ -10,6 +10,7 @@ import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
 import colors from '@styles/Colors.module.scss'
 import {
     timeSinceCreated,
+    timeSinceCreatedShort,
     dateCreated,
     pluralise,
     statTitle,
@@ -39,6 +40,7 @@ import PostCardLinkModal from '@components/Cards/PostCard/PostCardLinkModal'
 import DeletePostModal from '@components/modals/DeletePostModal'
 import StringBeadCard from '@components/Cards/PostCard/StringBeadCard2'
 import NextBeadModal from '@components/Cards/PostCard/NextBeadModal'
+import CloseOnClickOutside from '@src/components/CloseOnClickOutside'
 import { ReactComponent as LinkIconSVG } from '@svgs/link-solid.svg'
 import { ReactComponent as CommentIconSVG } from '@svgs/comment-solid.svg'
 import { ReactComponent as LikeIconSVG } from '@svgs/like.svg'
@@ -48,10 +50,20 @@ import { ReactComponent as ArrowRightIconSVG } from '@svgs/arrow-alt-circle-righ
 import { ReactComponent as PlayIconSVG } from '@svgs/play-solid.svg'
 import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
 import { ReactComponent as ClockIconSVG } from '@svgs/clock-solid.svg'
-import { ReactComponent as CalendarIconSVG } from '@svgs/calendar-days-solid.svg'
+import { ReactComponent as EventIcon } from '@svgs/calendar-days-solid.svg'
 import { ReactComponent as SuccessIconSVG } from '@svgs/check-circle-solid.svg'
 import { ReactComponent as PlusIconSVG } from '@svgs/plus.svg'
 import { ReactComponent as UsersIconSVG } from '@svgs/users-solid.svg'
+import { ReactComponent as ExpandIcon } from '@svgs/expand-icon.svg'
+import { ReactComponent as TextIcon } from '@svgs/font-solid.svg'
+import { ReactComponent as AudioIcon } from '@svgs/volume-high-solid.svg'
+import { ReactComponent as ImageIcon } from '@svgs/image-solid.svg'
+import { ReactComponent as GBGIcon } from '@svgs/castalia-logo.svg'
+import { ReactComponent as StringIcon } from '@svgs/string-icon.svg'
+import { ReactComponent as WeaveIcon } from '@svgs/multiplayer-string-icon.svg'
+import { ReactComponent as VerticalEllipsisIcon } from '@svgs/ellipsis-vertical-solid.svg'
+import { ReactComponent as PrismIcon } from '@svgs/prism-icon.svg'
+import { ReactComponent as DeleteIcon } from '@svgs/trash-can-solid.svg'
 
 const PostCard = (props: {
     post: any
@@ -83,6 +95,7 @@ const PostCard = (props: {
         accountLink,
         Creator,
         DirectSpaces,
+        // IndirectSpaces,
         GlassBeadGame,
         Event,
         PostImages,
@@ -91,6 +104,8 @@ const PostCard = (props: {
         StringPlayers,
     } = postData
 
+    const [menuOpen, setMenuOpen] = useState(false)
+    const [otherSpacesModalOpen, setOtherSpacesModalOpen] = useState(false)
     const [likeModalOpen, setLikeModalOpen] = useState(false)
     const [repostModalOpen, setRepostModalOpen] = useState(false)
     const [ratingModalOpen, setRatingModalOpen] = useState(false)
@@ -103,6 +118,8 @@ const PostCard = (props: {
     const [deletePostModalOpen, setDeletePostModalOpen] = useState(false)
     const [audioPlaying, setAudioPlaying] = useState(false)
     const [nextBeadModalOpen, setNextBeadModalOpen] = useState(false)
+
+    const mobileView = document.documentElement.clientWidth < 900
     // todo: sort on load like StringPlayers and use main const
     const beads = GlassBeadGame ? GlassBeadGame.GlassBeads.sort((a, b) => a.index - b.index) : []
     const images = PostImages.sort((a, b) => a.index - b.index)
@@ -116,9 +133,6 @@ const PostCard = (props: {
         .map((s) => s.handle)
         .filter((s, i) => i !== 0)
         .join(', ')
-    const otherSpacesText = `and ${postSpaces.length - 1} other space${pluralise(
-        postSpaces.length - 1
-    )}`
 
     // events
     const goingToEvent = Event && Event.Going.map((u) => u.id).includes(accountData.id)
@@ -224,6 +238,31 @@ const PostCard = (props: {
         return 'small'
     }
 
+    function postTypeIcon() {
+        switch (type) {
+            case 'text':
+                return <TextIcon />
+            case 'url':
+                return <LinkIconSVG />
+            case 'image':
+                return <ImageIcon />
+            case 'audio':
+                return <AudioIcon />
+            case 'event':
+                return <EventIcon />
+            case 'glass-bead-game':
+                return <GBGIcon />
+            case 'string':
+                return <StringIcon />
+            case 'weave':
+                return <WeaveIcon />
+            case 'prism':
+                return <PrismIcon />
+            default:
+                return null
+        }
+    }
+
     return (
         <Column className={`${styles.post} ${styles[location]}`} key={id} style={style}>
             {!!index && <div className={styles.index}>{index! + 1}</div>}
@@ -247,7 +286,7 @@ const PostCard = (props: {
                                     type='space'
                                     imagePath={postSpaces[0].flagImagePath}
                                     imageSize={32}
-                                    title={postSpaces[0].handle}
+                                    title={postSpaces[0].name}
                                     fontSize={15}
                                     link={`/s/${postSpaces[0].handle}/posts`}
                                     style={{ marginRight: 5 }}
@@ -259,43 +298,93 @@ const PostCard = (props: {
                         </Row>
                     )}
                     {postSpaces[1] && (
-                        <p className='grey' title={otherSpacesTitle}>
-                            {otherSpacesText}
-                        </p>
+                        <>
+                            <button
+                                type='button'
+                                className={styles.otherSpacesButton}
+                                title={otherSpacesTitle}
+                                onClick={() => setOtherSpacesModalOpen(true)}
+                            >
+                                <p>+{postSpaces.length - 1}</p>
+                            </button>
+                            {otherSpacesModalOpen && (
+                                <Modal centered close={() => setOtherSpacesModalOpen(false)}>
+                                    <h2>Posted to</h2>
+                                    {postSpaces.map((space) => (
+                                        <ImageTitle
+                                            type='space'
+                                            imagePath={space.flagImagePath}
+                                            imageSize={32}
+                                            title={space.name}
+                                            fontSize={15}
+                                            link={`/s/${space.handle}/posts`}
+                                            style={{ marginBottom: 10 }}
+                                            shadow
+                                        />
+                                    ))}
+                                    {/* {IndirectSpaces[0] && (
+                                        <Column centerX style={{ marginTop: 10 }}>
+                                            <h2>Indirect spaces</h2>
+                                            {IndirectSpaces.map((space) => (
+                                                <ImageTitle
+                                                    type='space'
+                                                    imagePath={space.flagImagePath}
+                                                    imageSize={32}
+                                                    title={space.name}
+                                                    fontSize={15}
+                                                    link={`/s/${space.handle}/posts`}
+                                                    style={{ marginBottom: 10 }}
+                                                    shadow
+                                                />
+                                            ))}
+                                        </Column>
+                                    )} */}
+                                </Modal>
+                            )}
+                        </>
                     )}
                     {location === 'preview' ? (
-                        <>
-                            <div className={styles.link}>
-                                <LinkIconSVG />
-                            </div>
-                            <p className='grey'>now</p>
-                        </>
+                        <p className='grey'>now</p>
                     ) : (
-                        <>
-                            <Link to={`/p/${id}`} className={styles.link}>
-                                <LinkIconSVG />
-                            </Link>
-                            <p className='grey' title={dateCreated(createdAt)}>
-                                {timeSinceCreated(createdAt)}
-                            </p>
-                        </>
+                        <p className='grey' title={dateCreated(createdAt)}>
+                            {mobileView
+                                ? timeSinceCreatedShort(createdAt)
+                                : timeSinceCreated(createdAt)}
+                        </p>
                     )}
                 </Row>
                 <Row>
-                    <div className={`${styles.postType} ${styles[type]}`}>
-                        {type.toLowerCase().split('-').join(' ')}
-                    </div>
-                    {/* todo: move to corner drop down button */}
+                    <Column
+                        centerX
+                        centerY
+                        className={`${styles.postType} ${styles[type]}`}
+                        title={type}
+                    >
+                        {postTypeIcon()}
+                    </Column>
                     {location !== 'preview' && isOwnPost && (
-                        <div
-                            className={styles.delete}
-                            role='button'
-                            tabIndex={0}
-                            onClick={() => setDeletePostModalOpen(true)}
-                            onKeyDown={() => setDeletePostModalOpen(true)}
-                        >
-                            Delete
-                        </div>
+                        <>
+                            <button
+                                type='button'
+                                className={styles.menuButton}
+                                onClick={() => setMenuOpen(!menuOpen)}
+                            >
+                                <VerticalEllipsisIcon />
+                            </button>
+                            {menuOpen && (
+                                <CloseOnClickOutside onClick={() => setMenuOpen(false)}>
+                                    <Column className={styles.menu}>
+                                        <button
+                                            type='button'
+                                            onClick={() => setDeletePostModalOpen(true)}
+                                        >
+                                            <DeleteIcon />
+                                            Delete post
+                                        </button>
+                                    </Column>
+                                </CloseOnClickOutside>
+                            )}
+                        </>
                     )}
                 </Row>
             </Row>
@@ -403,10 +492,7 @@ const PostCard = (props: {
                 )}
                 {type === 'event' && (
                     <Column>
-                        <Row centerY className={styles.eventTitle}>
-                            <CalendarIconSVG />
-                            <h1>{Event.title}</h1>
-                        </Row>
+                        <Markdown text={`# ${Event.title}`} className={styles.eventTitle} />
                         <Row centerY className={styles.eventTimes}>
                             <ClockIconSVG />
                             <p>{`${formatTimeMDYT(Event.startTime)} ${
@@ -826,90 +912,97 @@ const PostCard = (props: {
                 )}
             </Column>
             <Column className={styles.footer}>
-                <div className={styles.statButtons}>
-                    <StatButton
-                        icon={<LikeIconSVG />}
-                        iconSize={20}
-                        text={totalLikes}
-                        title={statTitle('Like', totalLikes)}
-                        color={accountLike && 'blue'}
-                        disabled={location === 'preview'}
-                        onClick={() => setLikeModalOpen(true)}
-                    />
-                    <StatButton
-                        icon={<CommentIconSVG />}
-                        iconSize={20}
-                        text={totalComments}
-                        title={statTitle('Comment', totalComments)}
-                        // color={accountComment && 'blue'}
-                        disabled={location === 'preview'}
-                        onClick={() => setCommentsOpen(!commentsOpen)}
-                    />
-                    <StatButton
-                        icon={<RepostIconSVG />}
-                        iconSize={20}
-                        text={totalReposts}
-                        title={statTitle('Repost', totalReposts)}
-                        color={accountRepost && 'blue'}
-                        disabled={location === 'preview'}
-                        onClick={() => setRepostModalOpen(true)}
-                    />
-                    <StatButton
-                        icon={<RatingIconSVG />}
-                        iconSize={20}
-                        text={totalRatings}
-                        title={statTitle('Rating', totalRatings)}
-                        color={accountRating && 'blue'}
-                        disabled={location === 'preview'}
-                        onClick={() => setRatingModalOpen(true)}
-                    />
-                    <StatButton
-                        icon={<LinkIconSVG />}
-                        iconSize={20}
-                        text={totalLinks}
-                        title={statTitle('Link', totalLinks)}
-                        color={accountLink && 'blue'}
-                        disabled={location === 'preview'}
-                        onClick={() => setLinkModalOpen(true)}
-                    />
-                    {['prism', 'decision-tree'].includes(type) && ( // 'glass-bead-game'
+                <Row spaceBetween>
+                    <Row className={styles.statButtons}>
                         <StatButton
-                            icon={<ArrowRightIconSVG />}
+                            icon={<LikeIconSVG />}
                             iconSize={20}
-                            text='Open game room'
+                            text={totalLikes}
+                            title={statTitle('Like', totalLikes)}
+                            color={accountLike && 'blue'}
                             disabled={location === 'preview'}
-                            onClick={() => history.push(`/p/${id}`)}
+                            onClick={() => setLikeModalOpen(true)}
                         />
-                    )}
-                    {likeModalOpen && (
-                        <PostCardLikeModal
-                            close={() => setLikeModalOpen(false)}
-                            postData={postData}
-                            setPostData={setPostData}
+                        <StatButton
+                            icon={<CommentIconSVG />}
+                            iconSize={20}
+                            text={totalComments}
+                            title={statTitle('Comment', totalComments)}
+                            // color={accountComment && 'blue'}
+                            disabled={location === 'preview'}
+                            onClick={() => setCommentsOpen(!commentsOpen)}
                         />
-                    )}
-                    {repostModalOpen && (
-                        <PostCardRepostModal
-                            close={() => setRepostModalOpen(false)}
-                            postData={postData}
-                            setPostData={setPostData}
+                        <StatButton
+                            icon={<RepostIconSVG />}
+                            iconSize={20}
+                            text={totalReposts}
+                            title={statTitle('Repost', totalReposts)}
+                            color={accountRepost && 'blue'}
+                            disabled={location === 'preview'}
+                            onClick={() => setRepostModalOpen(true)}
                         />
-                    )}
-                    {ratingModalOpen && (
-                        <PostCardRatingModal
-                            close={() => setRatingModalOpen(false)}
-                            postData={postData}
-                            setPostData={setPostData}
+                        <StatButton
+                            icon={<RatingIconSVG />}
+                            iconSize={20}
+                            text={totalRatings}
+                            title={statTitle('Rating', totalRatings)}
+                            color={accountRating && 'blue'}
+                            disabled={location === 'preview'}
+                            onClick={() => setRatingModalOpen(true)}
                         />
-                    )}
-                    {linkModalOpen && (
-                        <PostCardLinkModal
-                            close={() => setLinkModalOpen(false)}
-                            postData={postData}
-                            setPostData={setPostData}
+                        <StatButton
+                            icon={<LinkIconSVG />}
+                            iconSize={20}
+                            text={totalLinks}
+                            title={statTitle('Link', totalLinks)}
+                            color={accountLink && 'blue'}
+                            disabled={location === 'preview'}
+                            onClick={() => setLinkModalOpen(true)}
                         />
+                        {['prism', 'decision-tree'].includes(type) && ( // 'glass-bead-game'
+                            <StatButton
+                                icon={<ArrowRightIconSVG />}
+                                iconSize={20}
+                                text='Open game room'
+                                disabled={location === 'preview'}
+                                onClick={() => history.push(`/p/${id}`)}
+                            />
+                        )}
+                        {likeModalOpen && (
+                            <PostCardLikeModal
+                                close={() => setLikeModalOpen(false)}
+                                postData={postData}
+                                setPostData={setPostData}
+                            />
+                        )}
+                        {repostModalOpen && (
+                            <PostCardRepostModal
+                                close={() => setRepostModalOpen(false)}
+                                postData={postData}
+                                setPostData={setPostData}
+                            />
+                        )}
+                        {ratingModalOpen && (
+                            <PostCardRatingModal
+                                close={() => setRatingModalOpen(false)}
+                                postData={postData}
+                                setPostData={setPostData}
+                            />
+                        )}
+                        {linkModalOpen && (
+                            <PostCardLinkModal
+                                close={() => setLinkModalOpen(false)}
+                                postData={postData}
+                                setPostData={setPostData}
+                            />
+                        )}
+                    </Row>
+                    {location !== 'post-page' && (
+                        <Link to={`/p/${id}`} className={styles.link}>
+                            <ExpandIcon />
+                        </Link>
                     )}
-                </div>
+                </Row>
                 {commentsOpen && (
                     <PostCardComments
                         postId={postData.id}

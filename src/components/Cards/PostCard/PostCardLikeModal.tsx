@@ -109,7 +109,7 @@ const PostCardLikeModal = (props: {
             <Column centerX>
                 <h1>{headerText}</h1>
                 {likes.length > 0 && (
-                    <Column style={{ marginBottom: 10 }}>
+                    <Column centerX>
                         {likes.map((like) => (
                             <ImageTitle
                                 key={like.id}

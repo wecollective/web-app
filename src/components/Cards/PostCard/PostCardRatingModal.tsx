@@ -150,7 +150,7 @@ const PostCardRatingModal = (props: {
                         <Row centerY style={{ marginBottom: 20 }}>
                             <Input
                                 type='text'
-                                style={{ width: 60, marginRight: 10 }}
+                                style={{ width: 80, marginRight: 10 }}
                                 value={newRating}
                                 onChange={(v) => setNewRating(+v.replace(/\D/g, ''))}
                             />
