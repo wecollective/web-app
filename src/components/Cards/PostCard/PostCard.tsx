@@ -64,6 +64,7 @@ import { ReactComponent as WeaveIcon } from '@svgs/multiplayer-string-icon.svg'
 import { ReactComponent as VerticalEllipsisIcon } from '@svgs/ellipsis-vertical-solid.svg'
 import { ReactComponent as PrismIcon } from '@svgs/prism-icon.svg'
 import { ReactComponent as DeleteIcon } from '@svgs/trash-can-solid.svg'
+import { ReactComponent as DNAIcon } from '@svgs/dna.svg'
 
 const PostCard = (props: {
     post: any
@@ -140,18 +141,25 @@ const PostCard = (props: {
     const interestedInEvent = Event && Event.Interested.map((u) => u.id).includes(accountData.id)
     const interestedInEventImages = Event && Event.Interested.map((u) => u.flagImagePath)
 
-    // multipleyer strings
+    // multiplayer strings
     StringPlayers.sort((a, b) => a.UserPost.index - b.UserPost.index)
-    const pendingPlayers = StringPlayers.filter((p) => p.UserPost.state === 'pending')
-    const rejectedPlayers = StringPlayers.filter((p) => p.UserPost.state === 'rejected')
-    function findCurrentPlayer() {
-        if (Weave && Weave.privacy === 'only-selected-users') {
-            const currentPlayerIndex = StringPosts.length % StringPlayers.length
-            return StringPlayers[currentPlayerIndex]
-        }
-        return null
-    }
-    const currentPlayer = findCurrentPlayer()
+    const currentPlayer =
+        Weave && Weave.privacy === 'only-selected-users'
+            ? StringPlayers[StringPosts.length % StringPlayers.length] // calculates current player index
+            : null
+    const playersPending = StringPlayers.filter((p) => p.UserPost.state === 'pending')
+    const playersRejected = StringPlayers.filter((p) => p.UserPost.state === 'rejected')
+    const playersReady = !playersPending.length && !playersRejected.length
+    const totalMoves =
+        Weave && Weave.privacy === 'only-selected-users'
+            ? Weave && Weave.numberOfTurns * StringPlayers.length
+            : Weave && Weave.numberOfMoves
+    const movesLeft = StringPosts.length < totalMoves
+    const waitingForPlayer = Weave && Weave.privacy === 'only-selected-users' && movesLeft
+    const nextMoveAvailable =
+        Weave && Weave.privacy === 'all-users-allowed'
+            ? movesLeft
+            : movesLeft && currentPlayer.id === accountData.id
 
     function openImageModal(imageId) {
         setSelectedImage(images.find((image) => image.id === imageId))
@@ -743,19 +751,30 @@ const PostCard = (props: {
                                 </ShowMoreLess>
                             </Column>
                         )}
-                        <Scrollbars className={`${styles.stringBeads} row`}>
-                            {StringPosts.map((bead, i) => (
-                                <StringBeadCard
-                                    key={bead.id}
-                                    bead={bead}
-                                    postId={id}
-                                    postType={postData.type}
-                                    beadIndex={i}
-                                    location={location}
-                                />
-                            ))}
-                            <span style={{ marginLeft: -7, width: 7, flexShrink: 0 }} />
-                        </Scrollbars>
+                        <Row centerX>
+                            <Scrollbars className={`${styles.stringBeads} row`}>
+                                {StringPosts.map((bead, i) => (
+                                    <Row>
+                                        <StringBeadCard
+                                            key={bead.id}
+                                            bead={bead}
+                                            postId={id}
+                                            postType={postData.type}
+                                            beadIndex={i}
+                                            location={location}
+                                            style={{
+                                                marginRight: i === StringPosts.length - 1 ? 10 : 0,
+                                            }}
+                                        />
+                                        {(i < StringPosts.length - 1 || movesLeft) && (
+                                            <Row centerY className={styles.beadDivider}>
+                                                <DNAIcon />
+                                            </Row>
+                                        )}
+                                    </Row>
+                                ))}
+                            </Scrollbars>
+                        </Row>
                     </Column>
                 )}
                 {type === 'weave' && (
@@ -770,37 +789,36 @@ const PostCard = (props: {
                                     style={{ marginRight: 15 }}
                                     outline
                                 />
-                                {pendingPlayers.length > 0 && !rejectedPlayers.length && (
-                                    <Row centerY>
-                                        <p>Waiting for {pendingPlayers.length} to accept</p>
-                                        <FlagImageHighlights
-                                            type='user'
-                                            imagePaths={pendingPlayers.map((p) => p.flagImagePath)}
-                                            imageSize={30}
-                                            style={{ marginLeft: 5 }}
-                                            outline
-                                        />
-                                    </Row>
-                                )}
-                                {rejectedPlayers.length > 0 && (
+                                {playersRejected.length > 0 && (
                                     <Row centerY>
                                         <p>
-                                            {rejectedPlayers.length} player
-                                            {pluralise(rejectedPlayers.length)} rejected the game
+                                            {playersRejected.length} player
+                                            {pluralise(playersRejected.length)} rejected the game
                                         </p>
                                         <FlagImageHighlights
                                             type='user'
-                                            imagePaths={rejectedPlayers.map((p) => p.flagImagePath)}
+                                            imagePaths={playersRejected.map((p) => p.flagImagePath)}
                                             imageSize={30}
                                             style={{ marginLeft: 5 }}
                                             outline
                                         />
                                     </Row>
                                 )}
-                                {!pendingPlayers.length && !rejectedPlayers.length && (
-                                    <>
-                                        {StringPosts.length <
-                                        Weave.numberOfTurns * StringPlayers.length ? (
+                                {!playersRejected.length && playersPending.length > 0 && (
+                                    <Row centerY>
+                                        <p>Waiting for {playersPending.length} to accept</p>
+                                        <FlagImageHighlights
+                                            type='user'
+                                            imagePaths={playersPending.map((p) => p.flagImagePath)}
+                                            imageSize={30}
+                                            style={{ marginLeft: 5 }}
+                                            outline
+                                        />
+                                    </Row>
+                                )}
+                                {playersReady && (
+                                    <Row>
+                                        {movesLeft ? (
                                             <ImageTitle
                                                 type='user'
                                                 imagePath={currentPlayer.flagImagePath}
@@ -812,7 +830,7 @@ const PostCard = (props: {
                                         ) : (
                                             <p>Game finished</p>
                                         )}
-                                    </>
+                                    </Row>
                                 )}
                             </Row>
                         ) : (
@@ -823,7 +841,7 @@ const PostCard = (props: {
                                     />
                                     <p>Open to all users</p>
                                 </Row>
-                                {StringPosts.length < Weave.numberOfMoves ? (
+                                {movesLeft ? (
                                     <p>
                                         Move: {StringPosts.length + 1} / {Weave.numberOfMoves}
                                     </p>
@@ -839,24 +857,33 @@ const PostCard = (props: {
                                 </ShowMoreLess>
                             </Column>
                         )}
-                        {!pendingPlayers.length && !rejectedPlayers.length && (
+                        {playersReady && (
                             <Row centerX>
                                 <Scrollbars className={`${styles.stringBeads} row`}>
                                     {StringPosts.map((bead, i) => (
-                                        <StringBeadCard
-                                            key={bead.id}
-                                            bead={bead}
-                                            postId={id}
-                                            postType={postData.type}
-                                            beadIndex={i}
-                                            location={location}
-                                        />
+                                        <Row>
+                                            <StringBeadCard
+                                                key={bead.id}
+                                                bead={bead}
+                                                postId={id}
+                                                postType={postData.type}
+                                                beadIndex={i}
+                                                location={location}
+                                                style={{
+                                                    marginRight:
+                                                        i === StringPosts.length - 1 && !movesLeft
+                                                            ? 10
+                                                            : 0,
+                                                }}
+                                            />
+                                            {(i < StringPosts.length - 1 || movesLeft) && (
+                                                <Row centerY className={styles.beadDivider}>
+                                                    <DNAIcon />
+                                                </Row>
+                                            )}
+                                        </Row>
                                     ))}
-                                    {(Weave.privacy === 'all-users-allowed' &&
-                                        StringPosts.length < Weave.numberOfMoves) ||
-                                    (StringPosts.length <
-                                        Weave.numberOfTurns * StringPlayers.length &&
-                                        currentPlayer.id === accountData.id) ? (
+                                    {nextMoveAvailable ? (
                                         <button
                                             type='button'
                                             className={styles.newBeadButton}
@@ -875,26 +902,18 @@ const PostCard = (props: {
                                             </p>
                                         </button>
                                     ) : (
-                                        <>
-                                            {Weave.privacy === 'only-selected-users' &&
-                                                StringPosts.length <
-                                                    Weave.numberOfTurns * StringPlayers.length && (
-                                                    <Column
-                                                        centerX
-                                                        centerY
-                                                        className={styles.pendingBead}
-                                                    >
-                                                        <p>Waiting for</p>
-                                                        <ImageTitle
-                                                            type='user'
-                                                            imagePath={currentPlayer.flagImagePath}
-                                                            title={`${currentPlayer.name}...`}
-                                                            link={`/u/${currentPlayer.handle}`}
-                                                            style={{ margin: '0 5px' }}
-                                                        />
-                                                    </Column>
-                                                )}
-                                        </>
+                                        waitingForPlayer && (
+                                            <Column centerX centerY className={styles.pendingBead}>
+                                                <p>Waiting for</p>
+                                                <ImageTitle
+                                                    type='user'
+                                                    imagePath={currentPlayer.flagImagePath}
+                                                    title={`${currentPlayer.name}...`}
+                                                    link={`/u/${currentPlayer.handle}`}
+                                                    style={{ margin: '0 5px' }}
+                                                />
+                                            </Column>
+                                        )
                                     )}
                                     <span style={{ marginLeft: -7, width: 7, flexShrink: 0 }} />
                                 </Scrollbars>

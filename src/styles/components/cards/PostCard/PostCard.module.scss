@@ -315,6 +315,20 @@
         }
 
         // weaves
+        .beadDivider {
+            width: 35px;
+            opacity: 1;
+            animation-name: fadeInOpacity;
+            animation-timing-function: ease-in;
+            animation-duration: 2s;
+            
+            > svg {
+                transform: rotate(90deg);
+                height: 35px;
+                color: $grey4;
+            }
+        }
+    
         .newBeadButton {
             all: unset;
             width: 220px;
@@ -377,6 +391,8 @@
         }
 
         .link {
+            width: 20px;
+            height: 20px;
             > svg {
                 width: 20px;
                 height: 20px;
