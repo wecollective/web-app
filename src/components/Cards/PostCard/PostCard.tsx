@@ -507,7 +507,7 @@ const PostCard = (props: {
                             )}
                         </Row>
                         {(Event.Going.length > 0 || Event.Interested.length > 0) && (
-                            <Row style={{ marginTop: 10 }}>
+                            <Row>
                                 {Event.Going.length > 0 && (
                                     <FlagImageHighlights
                                         type='user'
@@ -711,7 +711,7 @@ const PostCard = (props: {
                         <Row style={{ marginTop: 10 }}>
                             <Button
                                 text='Open game room'
-                                color='purple'
+                                color='gbg-white'
                                 size='medium'
                                 disabled={location === 'preview'}
                                 onClick={() => history.push(`/p/${id}`)}
