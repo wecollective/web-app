@@ -6,12 +6,13 @@ const Column = (props: {
     style?: any
     className?: any
     id?: string
+    title?: string
     centerX?: boolean
     centerY?: boolean
     spaceBetween?: boolean
     scroll?: boolean
 }): JSX.Element => {
-    const { children, style, className, id, centerX, centerY, spaceBetween, scroll } = props
+    const { children, style, className, id, title, centerX, centerY, spaceBetween, scroll } = props
 
     const classes = [styles.wrapper]
     if (className) classes.unshift(className)
@@ -21,7 +22,7 @@ const Column = (props: {
     if (scroll) classes.push(styles.scroll)
 
     return (
-        <div className={classes.join(' ')} style={style} id={id}>
+        <div className={classes.join(' ')} style={style} id={id} title={title}>
             {children}
         </div>
     )
@@ -31,6 +32,7 @@ Column.defaultProps = {
     style: null,
     className: false,
     id: null,
+    title: null,
     centerX: false,
     centerY: false,
     spaceBetween: false,
