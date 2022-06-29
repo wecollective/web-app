@@ -320,6 +320,7 @@ const PostCard = (props: {
                                     <h2>Posted to</h2>
                                     {postSpaces.map((space) => (
                                         <ImageTitle
+                                            key={space.id}
                                             type='space'
                                             imagePath={space.flagImagePath}
                                             imageSize={32}
@@ -754,9 +755,8 @@ const PostCard = (props: {
                         <Row centerX>
                             <Scrollbars className={`${styles.stringBeads} row`}>
                                 {StringPosts.map((bead, i) => (
-                                    <Row>
+                                    <Row key={bead.id}>
                                         <StringBeadCard
-                                            key={bead.id}
                                             bead={bead}
                                             postId={id}
                                             postType={postData.type}
@@ -865,9 +865,8 @@ const PostCard = (props: {
                             <Row centerX>
                                 <Scrollbars className={`${styles.stringBeads} row`}>
                                     {StringPosts.map((bead, i) => (
-                                        <Row>
+                                        <Row key={bead.id}>
                                             <StringBeadCard
-                                                key={bead.id}
                                                 bead={bead}
                                                 postId={id}
                                                 postType={postData.type}

@@ -343,9 +343,13 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            transition: background-color 0.3s;
+            transition: box-shadow 0.3s;
             margin-right: 15px;
             box-shadow: 0 0 7px 0 rgba(10, 8, 72, 0.1);
+
+            &:hover {
+                box-shadow: 0 0 12px 0 rgba(31, 88, 163, 0.25);
+            }
 
             > svg {
                 width: 40px;
