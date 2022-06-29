@@ -310,8 +310,10 @@
 
         // string posts
         .stringBeads {
-            padding: 7px 7px 15px 7px;
+            padding: 15px 15px 10px 15px;
             margin-bottom: -5px;
+            background-color: $grey1;
+            border-radius: 20px;
         }
 
         // weaves
@@ -325,7 +327,7 @@
             > svg {
                 transform: rotate(90deg);
                 height: 35px;
-                color: $grey4;
+                color: $bluegrey2;
             }
         }
     
@@ -334,7 +336,7 @@
             width: 220px;
             height: 220px;
             flex-shrink: 0;
-            background-color: $grey1;
+            background-color: white;
             border-radius: 15px;
             cursor: pointer;
             display: flex;
@@ -342,10 +344,8 @@
             justify-content: center;
             align-items: center;
             transition: background-color 0.3s;
-
-            &:hover {
-                background-color: $grey2;
-            }
+            margin-right: 15px;
+            box-shadow: 0 0 7px 0 rgba(10, 8, 72, 0.1);
 
             > svg {
                 width: 40px;
@@ -365,8 +365,9 @@
             width: 220px;
             height: 220px;
             flex-shrink: 0;
-            background-color: $grey1;
+            background-color: white;
             border-radius: 15px;
+            box-shadow: 0 0 7px 0 rgba(10, 8, 72, 0.1);
 
             > p {
                 color: $grey6;

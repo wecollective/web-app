@@ -763,7 +763,11 @@ const PostCard = (props: {
                                             beadIndex={i}
                                             location={location}
                                             style={{
-                                                marginRight: i === StringPosts.length - 1 ? 10 : 0,
+                                                marginRight:
+                                                    StringPosts.length > 2 &&
+                                                    i === StringPosts.length - 1
+                                                        ? 15
+                                                        : 0,
                                             }}
                                         />
                                         {(i < StringPosts.length - 1 || movesLeft) && (
@@ -872,7 +876,7 @@ const PostCard = (props: {
                                                 style={{
                                                     marginRight:
                                                         i === StringPosts.length - 1 && !movesLeft
-                                                            ? 10
+                                                            ? 15
                                                             : 0,
                                                 }}
                                             />
@@ -903,7 +907,14 @@ const PostCard = (props: {
                                         </button>
                                     ) : (
                                         waitingForPlayer && (
-                                            <Column centerX centerY className={styles.pendingBead}>
+                                            <Column
+                                                centerX
+                                                centerY
+                                                className={styles.pendingBead}
+                                                style={{
+                                                    marginRight: StringPosts.length > 2 ? 15 : 0,
+                                                }}
+                                            >
                                                 <p>Waiting for</p>
                                                 <ImageTitle
                                                     type='user'
@@ -915,7 +926,9 @@ const PostCard = (props: {
                                             </Column>
                                         )
                                     )}
-                                    <span style={{ marginLeft: -7, width: 7, flexShrink: 0 }} />
+                                    {StringPosts.length > 2 && (
+                                        <span style={{ marginLeft: -7, width: 7, flexShrink: 0 }} />
+                                    )}
                                 </Scrollbars>
                             </Row>
                         )}
