@@ -14,6 +14,7 @@ import {
     dateCreated,
     pluralise,
     statTitle,
+    formatTimeHM,
     formatTimeDHM,
     formatTimeMDYT,
 } from '@src/Helpers'
@@ -137,9 +138,48 @@ const PostCard = (props: {
 
     // events
     const goingToEvent = Event && Event.Going.map((u) => u.id).includes(accountData.id)
-    const goingToEventImages = Event && Event.Going.map((u) => u.flagImagePath)
     const interestedInEvent = Event && Event.Interested.map((u) => u.id).includes(accountData.id)
-    const interestedInEventImages = Event && Event.Interested.map((u) => u.flagImagePath)
+
+    function findEventTimes() {
+        const startDate = new Date(Event.startTime)
+        const endDate = new Date(Event.endTime)
+        const sameDay =
+            Event.endTime &&
+            startDate.getFullYear() === endDate.getFullYear() &&
+            startDate.getMonth() === endDate.getMonth() &&
+            startDate.getDay() === endDate.getDay()
+        const sameTime =
+            sameDay &&
+            startDate.getHours() === endDate.getHours() &&
+            startDate.getMinutes() === endDate.getMinutes()
+        // format:
+        // spans two days or more days: June 29, 2022 at 22:00 → June 30, 2022 at 22:00
+        // spans one day: June 29, 2022 at 22:00 → 23:00
+        // no span: June 29, 2022 at 22:00
+        return `${formatTimeMDYT(Event.startTime)} ${
+            Event.endTime && !sameTime
+                ? `→ ${sameDay ? formatTimeHM(Event.endTime) : formatTimeMDYT(Event.endTime)}`
+                : ''
+        }`
+    }
+
+    function findEventDuration() {
+        const startDate = new Date(Event.startTime)
+        const endDate = new Date(Event.endTime)
+        const sameDay =
+            Event.endTime &&
+            startDate.getFullYear() === endDate.getFullYear() &&
+            startDate.getMonth() === endDate.getMonth() &&
+            startDate.getDay() === endDate.getDay()
+        const sameMinute =
+            sameDay &&
+            startDate.getHours() === endDate.getHours() &&
+            startDate.getMinutes() === endDate.getMinutes()
+        const difference = (endDate.getTime() - startDate.getTime()) / 1000
+        if (Event.endTime && !sameMinute)
+            return `(${formatTimeDHM(difference < 60 ? 60 : difference)})`
+        return null
+    }
 
     // multiplayer strings
     StringPlayers.sort((a, b) => a.UserPost.index - b.UserPost.index)
@@ -509,23 +549,15 @@ const PostCard = (props: {
                         )}
                         <Row centerY className={styles.eventTimes}>
                             <ClockIconSVG />
-                            <p>{`${formatTimeMDYT(Event.startTime)} ${
-                                Event.endTime ? `→ ${formatTimeMDYT(Event.endTime)}` : ''
-                            }`}</p>
-                            {Event.endTime && (
-                                <p>{`(duration: ${formatTimeDHM(
-                                    (new Date(Event.endTime).getTime() -
-                                        new Date(Event.startTime).getTime()) /
-                                        1000
-                                )})`}</p>
-                            )}
+                            <p>{findEventTimes()}</p>
+                            <p>{findEventDuration()}</p>
                         </Row>
                         {(Event.Going.length > 0 || Event.Interested.length > 0) && (
                             <Row>
                                 {Event.Going.length > 0 && (
                                     <FlagImageHighlights
                                         type='user'
-                                        imagePaths={goingToEventImages}
+                                        imagePaths={Event.Going.map((u) => u.flagImagePath)}
                                         imageSize={30}
                                         text={`${Event.Going.length} going`}
                                         onClick={() => setEventGoingModalOpen(true)}
@@ -536,7 +568,7 @@ const PostCard = (props: {
                                 {Event.Interested.length > 0 && (
                                     <FlagImageHighlights
                                         type='user'
-                                        imagePaths={interestedInEventImages}
+                                        imagePaths={Event.Interested.map((u) => u.flagImagePath)}
                                         imageSize={30}
                                         text={`${Event.Interested.length} interested`}
                                         onClick={() => setEventInterestedModalOpen(true)}
@@ -610,8 +642,11 @@ const PostCard = (props: {
                                     alt=''
                                 />
                             )}
-                            <Column>
-                                <b>{GlassBeadGame.topic}</b>
+                            <Column centerY>
+                                <Markdown
+                                    text={`# ${GlassBeadGame.topic}`}
+                                    className={styles.topicTitle}
+                                />
                                 {text && (
                                     <ShowMoreLess height={150}>
                                         <Markdown text={text} />
@@ -623,23 +658,15 @@ const PostCard = (props: {
                             <Column>
                                 <Row centerY className={styles.eventTimes}>
                                     <ClockIconSVG />
-                                    <p>{`${formatTimeMDYT(Event.startTime)} ${
-                                        Event.endTime ? `→ ${formatTimeMDYT(Event.endTime)}` : ''
-                                    }`}</p>
-                                    {Event.endTime && (
-                                        <p>{`(duration: ${formatTimeDHM(
-                                            (new Date(Event.endTime).getTime() -
-                                                new Date(Event.startTime).getTime()) /
-                                                1000
-                                        )})`}</p>
-                                    )}
+                                    <p>{findEventTimes()}</p>
+                                    <p>{findEventDuration()}</p>
                                 </Row>
                                 {(Event.Going.length > 0 || Event.Interested.length > 0) && (
-                                    <Row style={{ marginTop: 10 }}>
+                                    <Row style={{ marginBottom: 10 }}>
                                         {Event.Going.length > 0 && (
                                             <FlagImageHighlights
                                                 type='user'
-                                                imagePaths={goingToEventImages}
+                                                imagePaths={Event.Going.map((u) => u.flagImagePath)}
                                                 imageSize={30}
                                                 text={`${Event.Going.length} going`}
                                                 onClick={() => setEventGoingModalOpen(true)}
@@ -650,7 +677,9 @@ const PostCard = (props: {
                                         {Event.Interested.length > 0 && (
                                             <FlagImageHighlights
                                                 type='user'
-                                                imagePaths={interestedInEventImages}
+                                                imagePaths={Event.Interested.map(
+                                                    (u) => u.flagImagePath
+                                                )}
                                                 imageSize={30}
                                                 text={`${Event.Interested.length} interested`}
                                                 onClick={() => setEventInterestedModalOpen(true)}
@@ -696,7 +725,7 @@ const PostCard = (props: {
                                         </Column>
                                     </Modal>
                                 )}
-                                <Row style={{ marginTop: 10 }}>
+                                <Row>
                                     <Button
                                         text='Going'
                                         color='aqua'
@@ -874,7 +903,9 @@ const PostCard = (props: {
                                                 location={location}
                                                 style={{
                                                     marginRight:
-                                                        i === StringPosts.length - 1 && !movesLeft
+                                                        i === StringPosts.length - 1 &&
+                                                        !movesLeft &&
+                                                        StringPosts.length > 2
                                                             ? 15
                                                             : 0,
                                                 }}
@@ -897,6 +928,7 @@ const PostCard = (props: {
                                                 } else if (location !== 'preview')
                                                     setNextBeadModalOpen(true)
                                             }}
+                                            style={{ marginRight: StringPosts.length > 1 ? 15 : 0 }}
                                         >
                                             <PlusIconSVG />
                                             <p>
@@ -925,7 +957,8 @@ const PostCard = (props: {
                                             </Column>
                                         )
                                     )}
-                                    {StringPosts.length > 2 && (
+                                    {(StringPosts.length > 2 ||
+                                        (StringPosts.length > 1 && movesLeft)) && (
                                         <span style={{ marginLeft: -7, width: 7, flexShrink: 0 }} />
                                     )}
                                 </Scrollbars>
