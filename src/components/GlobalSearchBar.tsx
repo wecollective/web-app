@@ -6,12 +6,15 @@ import styles from '@styles/components/GlobalSearchBar.module.scss'
 import DropDownMenu from '@components/DropDownMenu'
 import Column from '@components/Column'
 import FlagImage from '@components/FlagImage'
+import LoadingWheel from '@components/LoadingWheel'
 import { ReactComponent as SearchIcon } from '@svgs/search.svg'
 
-const GlobalSearchBar = (): JSX.Element => {
+const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }): JSX.Element => {
+    const { onLocationChange, style } = props
     const [searchQuery, setSearchQuery] = useState('')
     const [searchType, setSearchType] = useState('Spaces')
     const [options, setOptions] = useState<any[]>([])
+    const [loading, setLoading] = useState(false)
     const history = useHistory()
 
     function updateSearchQuery(query) {
@@ -20,11 +23,15 @@ const GlobalSearchBar = (): JSX.Element => {
         if (['Spaces', 'People'].includes(searchType)) {
             if (!query) setOptions([])
             else {
+                setLoading(true)
                 const route = searchType === 'Spaces' ? 'find-spaces' : 'find-users'
                 const data = { query, blacklist: [] }
                 axios
                     .post(`${config.apiURL}/${route}`, data)
-                    .then((res) => setOptions(res.data))
+                    .then((res) => {
+                        setLoading(false)
+                        setOptions(res.data)
+                    })
                     .catch((error) => console.log(error))
             }
         }
@@ -40,6 +47,7 @@ const GlobalSearchBar = (): JSX.Element => {
                   }`
                 : '',
         })
+        if (onLocationChange) onLocationChange()
     }
 
     useEffect(() => {
@@ -47,7 +55,7 @@ const GlobalSearchBar = (): JSX.Element => {
     }, [searchType])
 
     return (
-        <form className={styles.searchBar} onSubmit={search}>
+        <form className={styles.searchBar} onSubmit={search} style={style}>
             <input
                 type='text'
                 placeholder='search all...'
@@ -66,6 +74,7 @@ const GlobalSearchBar = (): JSX.Element => {
                                     `/${searchType === 'Spaces' ? 's' : 'u'}/${option.handle}`
                                 )
                                 updateSearchQuery('')
+                                if (onLocationChange) onLocationChange()
                             }}
                         >
                             <FlagImage
@@ -81,6 +90,7 @@ const GlobalSearchBar = (): JSX.Element => {
                     ))}
                 </Column>
             )}
+            {loading && <LoadingWheel size={25} style={{ marginRight: 10 }} />}
             <button type='submit' aria-label='search button'>
                 <SearchIcon />
             </button>
@@ -96,6 +106,7 @@ const GlobalSearchBar = (): JSX.Element => {
 }
 
 GlobalSearchBar.defaultProps = {
+    onLocationChange: null,
     style: null,
 }
 

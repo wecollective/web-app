@@ -184,13 +184,87 @@
         }
     }
 
-    .searchBar {
+    .desktopSearch {
         position: absolute;
         top: 10px;
         left: calc(50% - 200px);
         display: none;
         @include for-tablet-landscape-up {
             display: flex;
+        }
+    }
+
+    .mobileSearch {
+
+        &.entering {
+            .mobileSearchBackground {
+                background-color: rgba(black, 0.5);
+            }
+            .mobileSearchDropDown {
+                height: 60px;
+                > form {
+                    opacity: 1;
+                }
+            }
+        }
+
+        &.exiting {
+            .mobileSearchBackground {
+                background-color: rgba(black, 0);
+            }
+            .mobileSearchDropDown {
+                height: 0px;
+                > form {
+                    opacity: 0;
+                }
+            }
+        }
+
+        > button {
+            all: unset;
+            cursor: pointer;
+            width: $navbarHeight;
+            height: $navbarHeight;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            > svg {
+                width: 40px;
+                height: 40px;
+                color: $grey5;
+                transition: color 0.5s;
+            }
+
+            &:hover > svg {
+                color: white;
+            }
+        }
+
+        .mobileSearchBackground {
+            all: unset;
+            position: fixed;
+            top: $navbarHeight;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(black, 0);
+            transition: background-color 0.5s;
+        }
+
+        .mobileSearchDropDown {
+            position: fixed;
+            top: $navbarHeight;
+            height: 0px;
+            width: 100%;
+            left: 0;
+            background-color: $black2;
+            transition: all 0.5s;
+
+            > form {
+                opacity: 0;
+                transition: all 0.5s;
+            }
         }
     }
 

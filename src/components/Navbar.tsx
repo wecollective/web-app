@@ -22,6 +22,7 @@ import { ReactComponent as SettingsIcon } from '@svgs/cog-solid.svg'
 import { ReactComponent as UserIcon } from '@svgs/user-solid.svg'
 import { ReactComponent as AboutIcon } from '@svgs/book-open-solid.svg'
 import { ReactComponent as GovernanceIcon } from '@svgs/building-columns-solid.svg'
+import { ReactComponent as SearchIcon } from '@svgs/search.svg'
 
 const Navbar = (): JSX.Element => {
     const { loggedIn, accountData, setLogInModalOpen, setDonateModalOpen, logOut } = useContext(
@@ -29,6 +30,7 @@ const Navbar = (): JSX.Element => {
     )
     const { spaceData, isModerator } = useContext(SpaceContext)
     const [hamburgerMenuOpen, setHamburgerMenuOpen] = useState(false)
+    const [searchDropDownOpen, setSearchDropDownOpen] = useState(false)
     const [exploreDropDownOpen, setExploreDropDownOpen] = useState(false)
     const [profileDropDownOpen, setProfileDropDownOpen] = useState(false)
     const history = useHistory()
@@ -53,6 +55,21 @@ const Navbar = (): JSX.Element => {
                 setTimeout(() => setHamburgerMenuOpen(false), 500)
             } else {
                 setHamburgerMenuOpen(true)
+                menu.classList.remove(styles.exiting)
+                setTimeout(() => menu.classList.add(styles.entering), 50)
+            }
+        }
+    }
+
+    function toggleSearchDropDown() {
+        const menu = document.getElementById('mobile-search')
+        if (menu) {
+            if (searchDropDownOpen) {
+                menu.classList.remove(styles.entering)
+                menu.classList.add(styles.exiting)
+                setTimeout(() => setSearchDropDownOpen(false), 500)
+            } else {
+                setSearchDropDownOpen(true)
                 menu.classList.remove(styles.exiting)
                 setTimeout(() => menu.classList.add(styles.entering), 50)
             }
@@ -184,8 +201,25 @@ const Navbar = (): JSX.Element => {
                     )}
                 </div>
             </Row>
-            <Row centerY className={styles.searchBar}>
+            <Row centerY className={styles.desktopSearch}>
                 <GlobalSearchBar />
+            </Row>
+            <Row centerY id='mobile-search' className={styles.mobileSearch}>
+                <button type='button' onClick={() => toggleSearchDropDown()}>
+                    <SearchIcon />
+                </button>
+                {searchDropDownOpen && (
+                    <>
+                        <button
+                            className={styles.mobileSearchBackground}
+                            type='button'
+                            onClick={() => toggleSearchDropDown()}
+                        />
+                        <Row centerY centerX className={styles.mobileSearchDropDown}>
+                            <GlobalSearchBar onLocationChange={() => toggleSearchDropDown()} />
+                        </Row>
+                    </>
+                )}
             </Row>
             {loggedIn ? (
                 <Row centerY className={styles.accountButtons}>
