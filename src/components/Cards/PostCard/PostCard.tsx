@@ -502,6 +502,11 @@ const PostCard = (props: {
                 {type === 'event' && (
                     <Column>
                         <Markdown text={`# ${Event.title}`} className={styles.eventTitle} />
+                        {text && (
+                            <ShowMoreLess height={150}>
+                                <Markdown text={text} />
+                            </ShowMoreLess>
+                        )}
                         <Row centerY className={styles.eventTimes}>
                             <ClockIconSVG />
                             <p>{`${formatTimeMDYT(Event.startTime)} ${
@@ -593,11 +598,6 @@ const PostCard = (props: {
                                 onClick={() => respondToEvent('interested')}
                             />
                         </Row>
-                        <Column style={{ marginTop: 10 }}>
-                            <ShowMoreLess height={150}>
-                                <Markdown text={text} />
-                            </ShowMoreLess>
-                        </Column>
                     </Column>
                 )}
                 {type === 'glass-bead-game' && (
