@@ -8,7 +8,7 @@
     top: 0;
     z-index: $navbarZIndex;
 
-    .hamburgerButton {
+    .mobileLeft {
         display: none;
         display: flex;
         @include for-tablet-landscape-up {
@@ -105,7 +105,7 @@
 
     }
 
-    .homeAndExploreButtons {
+    .desktopLeft {
         display: none;
         @include for-tablet-landscape-up {
             display: flex;
@@ -184,18 +184,7 @@
         }
     }
 
-    .desktopSearch {
-        position: absolute;
-        top: 10px;
-        left: calc(50% - 200px);
-        display: none;
-        @include for-tablet-landscape-up {
-            display: flex;
-        }
-    }
-
-    .mobileSearch {
-
+    .mobileCenter {
         &.entering {
             .mobileSearchBackground {
                 background-color: rgba(black, 0.5);
@@ -268,7 +257,17 @@
         }
     }
 
-    .accountButtons {
+    .desktopCenter {
+        position: absolute;
+        top: 10px;
+        left: calc(50% - 200px);
+        display: none;
+        @include for-tablet-landscape-up {
+            display: flex;
+        }
+    }
+
+    .desktopRight {
         > a {
             position: relative;
             display: flex;
@@ -281,6 +280,7 @@
                 height: 24px;
             }
         }
+
         .profileButton {
             display: flex;
             align-items: center;

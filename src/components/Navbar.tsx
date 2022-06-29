@@ -47,7 +47,7 @@ const Navbar = (): JSX.Element => {
     }
 
     function toggleHamburgerMenu() {
-        const menu = document.getElementById('hamburger-button')
+        const menu = document.getElementById('mobile-left')
         if (menu) {
             if (hamburgerMenuOpen) {
                 menu.classList.remove(styles.entering)
@@ -62,7 +62,7 @@ const Navbar = (): JSX.Element => {
     }
 
     function toggleSearchDropDown() {
-        const menu = document.getElementById('mobile-search')
+        const menu = document.getElementById('mobile-center')
         if (menu) {
             if (searchDropDownOpen) {
                 menu.classList.remove(styles.entering)
@@ -78,7 +78,7 @@ const Navbar = (): JSX.Element => {
 
     return (
         <Row spaceBetween className={styles.wrapper}>
-            <Row centerY id='hamburger-button' className={styles.hamburgerButton}>
+            <Row centerY id='mobile-left' className={styles.mobileLeft}>
                 <button type='button' onClick={() => toggleHamburgerMenu()}>
                     <HamburgerIcon />
                 </button>
@@ -160,7 +160,7 @@ const Navbar = (): JSX.Element => {
                     </>
                 )}
             </Row>
-            <Row centerY className={styles.homeAndExploreButtons}>
+            <Row centerY className={styles.desktopLeft}>
                 <button
                     type='button'
                     id='home-button'
@@ -201,10 +201,7 @@ const Navbar = (): JSX.Element => {
                     )}
                 </div>
             </Row>
-            <Row centerY className={styles.desktopSearch}>
-                <GlobalSearchBar />
-            </Row>
-            <Row centerY id='mobile-search' className={styles.mobileSearch}>
+            <Row centerY id='mobile-center' className={styles.mobileCenter}>
                 <button type='button' onClick={() => toggleSearchDropDown()}>
                     <SearchIcon />
                 </button>
@@ -221,8 +218,11 @@ const Navbar = (): JSX.Element => {
                     </>
                 )}
             </Row>
+            <Row centerY className={styles.desktopCenter}>
+                <GlobalSearchBar />
+            </Row>
             {loggedIn ? (
-                <Row centerY className={styles.accountButtons}>
+                <Row centerY className={styles.desktopRight}>
                     <div
                         className={styles.profileButton}
                         onMouseEnter={() => setProfileDropDownOpen(true)}
