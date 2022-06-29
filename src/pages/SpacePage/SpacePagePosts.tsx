@@ -60,7 +60,12 @@ const SpacePagePosts = (): JSX.Element => {
     }, [spaceData.handle, location])
 
     useEffect(() => {
-        if (!spacePostsLoading && !nextSpacePostsLoading && spacePostsPaginationHasMore) {
+        if (
+            !spacePostsLoading &&
+            !nextSpacePostsLoading &&
+            spacePostsPaginationHasMore &&
+            pageBottomReached
+        ) {
             getSpacePosts(
                 spaceData.id,
                 spacePostsPaginationOffset,
