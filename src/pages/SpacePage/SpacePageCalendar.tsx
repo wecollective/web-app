@@ -159,7 +159,7 @@ const SpacePageCalendar = (): JSX.Element => {
                 </Row>
             )}
             {eventModalOpen && (
-                <Modal close={() => setEventModalOpen(false)} style={{ width: 900 }}>
+                <Modal centered close={() => setEventModalOpen(false)} style={{ width: 900 }}>
                     {selectedPost ? (
                         <PostCard location='post-page' post={selectedPost} />
                     ) : (
