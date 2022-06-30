@@ -42,19 +42,19 @@ import DeletePostModal from '@components/modals/DeletePostModal'
 import StringBeadCard from '@components/Cards/PostCard/StringBeadCard2'
 import NextBeadModal from '@components/Cards/PostCard/NextBeadModal'
 import CloseOnClickOutside from '@src/components/CloseOnClickOutside'
-import { ReactComponent as LinkIconSVG } from '@svgs/link-solid.svg'
-import { ReactComponent as CommentIconSVG } from '@svgs/comment-solid.svg'
-import { ReactComponent as LikeIconSVG } from '@svgs/like.svg'
-import { ReactComponent as RepostIconSVG } from '@svgs/repost.svg'
-import { ReactComponent as RatingIconSVG } from '@svgs/star-solid.svg'
-import { ReactComponent as ArrowRightIconSVG } from '@svgs/arrow-alt-circle-right-solid.svg'
-import { ReactComponent as PlayIconSVG } from '@svgs/play-solid.svg'
-import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
-import { ReactComponent as ClockIconSVG } from '@svgs/clock-solid.svg'
+import { ReactComponent as LinkIcon } from '@svgs/link-solid.svg'
+import { ReactComponent as CommentIcon } from '@svgs/comment-solid.svg'
+import { ReactComponent as LikeIcon } from '@svgs/like.svg'
+import { ReactComponent as RepostIcon } from '@svgs/repost.svg'
+import { ReactComponent as RatingIcon } from '@svgs/star-solid.svg'
+import { ReactComponent as ArrowRightIcon } from '@svgs/arrow-alt-circle-right-solid.svg'
+import { ReactComponent as PlayIcon } from '@svgs/play-solid.svg'
+import { ReactComponent as PauseIcon } from '@svgs/pause-solid.svg'
+import { ReactComponent as ClockIcon } from '@svgs/clock-solid.svg'
 import { ReactComponent as EventIcon } from '@svgs/calendar-days-solid.svg'
-import { ReactComponent as SuccessIconSVG } from '@svgs/check-circle-solid.svg'
-import { ReactComponent as PlusIconSVG } from '@svgs/plus.svg'
-import { ReactComponent as UsersIconSVG } from '@svgs/users-solid.svg'
+import { ReactComponent as SuccessIcon } from '@svgs/check-circle-solid.svg'
+import { ReactComponent as PlusIcon } from '@svgs/plus.svg'
+import { ReactComponent as UsersIcon } from '@svgs/users-solid.svg'
 import { ReactComponent as ExpandIcon } from '@svgs/expand-icon.svg'
 import { ReactComponent as TextIcon } from '@svgs/font-solid.svg'
 import { ReactComponent as AudioIcon } from '@svgs/volume-high-solid.svg'
@@ -284,12 +284,12 @@ const PostCard = (props: {
         return 'small'
     }
 
-    function postTypeIcon() {
+    function findPostTypeIcon() {
         switch (type) {
             case 'text':
                 return <TextIcon />
             case 'url':
-                return <LinkIconSVG />
+                return <LinkIcon />
             case 'image':
                 return <ImageIcon />
             case 'audio':
@@ -407,7 +407,7 @@ const PostCard = (props: {
                         className={`${styles.postType} ${styles[type]}`}
                         title={type}
                     >
-                        {postTypeIcon()}
+                        {findPostTypeIcon()}
                     </Column>
                     {location !== 'preview' && isOwnPost && (
                         <>
@@ -524,7 +524,7 @@ const PostCard = (props: {
                                 aria-label='toggle-audio'
                                 onClick={toggleAudio}
                             >
-                                {audioPlaying ? <PauseIconSVG /> : <PlayIconSVG />}
+                                {audioPlaying ? <PauseIcon /> : <PlayIcon />}
                             </button>
                             <AudioTimeSlider
                                 audioElementId={`post-audio-${id}-${location}`}
@@ -546,7 +546,7 @@ const PostCard = (props: {
                             </ShowMoreLess>
                         )}
                         <Row centerY className={styles.eventTimes}>
-                            <ClockIconSVG />
+                            <ClockIcon />
                             <p>{findEventTimes()}</p>
                             <p>{findEventDuration()}</p>
                         </Row>
@@ -615,7 +615,7 @@ const PostCard = (props: {
                                 color='aqua'
                                 size='medium'
                                 disabled={location === 'preview'}
-                                icon={goingToEvent ? <SuccessIconSVG /> : undefined}
+                                icon={goingToEvent ? <SuccessIcon /> : undefined}
                                 style={{ marginRight: 5 }}
                                 onClick={() => respondToEvent('going')}
                             />
@@ -624,7 +624,7 @@ const PostCard = (props: {
                                 color='aqua'
                                 size='medium'
                                 disabled={location === 'preview'}
-                                icon={interestedInEvent ? <SuccessIconSVG /> : undefined}
+                                icon={interestedInEvent ? <SuccessIcon /> : undefined}
                                 onClick={() => respondToEvent('interested')}
                             />
                         </Row>
@@ -655,7 +655,7 @@ const PostCard = (props: {
                         {Event && (
                             <Column>
                                 <Row centerY className={styles.eventTimes}>
-                                    <ClockIconSVG />
+                                    <ClockIcon />
                                     <p>{findEventTimes()}</p>
                                     <p>{findEventDuration()}</p>
                                 </Row>
@@ -729,7 +729,7 @@ const PostCard = (props: {
                                         color='aqua'
                                         size='medium'
                                         disabled={location === 'preview'}
-                                        icon={goingToEvent ? <SuccessIconSVG /> : undefined}
+                                        icon={goingToEvent ? <SuccessIcon /> : undefined}
                                         style={{ marginRight: 5 }}
                                         onClick={() => respondToEvent('going')}
                                     />
@@ -738,7 +738,7 @@ const PostCard = (props: {
                                         color='aqua'
                                         size='medium'
                                         disabled={location === 'preview'}
-                                        icon={interestedInEvent ? <SuccessIconSVG /> : undefined}
+                                        icon={interestedInEvent ? <SuccessIcon /> : undefined}
                                         onClick={() => respondToEvent('interested')}
                                     />
                                 </Row>
@@ -867,9 +867,7 @@ const PostCard = (props: {
                         ) : (
                             <Row spaceBetween style={{ marginBottom: 10, color: '#acacae' }}>
                                 <Row centerY>
-                                    <UsersIconSVG
-                                        style={{ width: 30, height: 30, marginRight: 5 }}
-                                    />
+                                    <UsersIcon style={{ width: 30, height: 30, marginRight: 5 }} />
                                     <p>Open to all users</p>
                                 </Row>
                                 {movesLeft ? (
@@ -928,7 +926,7 @@ const PostCard = (props: {
                                             }}
                                             style={{ marginRight: StringPosts.length > 1 ? 15 : 0 }}
                                         >
-                                            <PlusIconSVG />
+                                            <PlusIcon />
                                             <p>
                                                 Click to create the{' '}
                                                 {StringPosts.length ? 'next' : 'first'} bead
@@ -977,7 +975,7 @@ const PostCard = (props: {
                 <Row spaceBetween>
                     <Row className={styles.statButtons}>
                         <StatButton
-                            icon={<LikeIconSVG />}
+                            icon={<LikeIcon />}
                             iconSize={20}
                             text={totalLikes}
                             title={statTitle('Like', totalLikes)}
@@ -986,7 +984,7 @@ const PostCard = (props: {
                             onClick={() => setLikeModalOpen(true)}
                         />
                         <StatButton
-                            icon={<CommentIconSVG />}
+                            icon={<CommentIcon />}
                             iconSize={20}
                             text={totalComments}
                             title={statTitle('Comment', totalComments)}
@@ -995,7 +993,7 @@ const PostCard = (props: {
                             onClick={() => setCommentsOpen(!commentsOpen)}
                         />
                         <StatButton
-                            icon={<RepostIconSVG />}
+                            icon={<RepostIcon />}
                             iconSize={20}
                             text={totalReposts}
                             title={statTitle('Repost', totalReposts)}
@@ -1004,7 +1002,7 @@ const PostCard = (props: {
                             onClick={() => setRepostModalOpen(true)}
                         />
                         <StatButton
-                            icon={<RatingIconSVG />}
+                            icon={<RatingIcon />}
                             iconSize={20}
                             text={totalRatings}
                             title={statTitle('Rating', totalRatings)}
@@ -1013,7 +1011,7 @@ const PostCard = (props: {
                             onClick={() => setRatingModalOpen(true)}
                         />
                         <StatButton
-                            icon={<LinkIconSVG />}
+                            icon={<LinkIcon />}
                             iconSize={20}
                             text={totalLinks}
                             title={statTitle('Link', totalLinks)}
@@ -1023,7 +1021,7 @@ const PostCard = (props: {
                         />
                         {['prism', 'decision-tree'].includes(type) && ( // 'glass-bead-game'
                             <StatButton
-                                icon={<ArrowRightIconSVG />}
+                                icon={<ArrowRightIcon />}
                                 iconSize={20}
                                 text='Open game room'
                                 disabled={location === 'preview'}
