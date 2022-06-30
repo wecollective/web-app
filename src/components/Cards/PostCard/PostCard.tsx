@@ -147,7 +147,7 @@ const PostCard = (props: {
             Event.endTime &&
             startDate.getFullYear() === endDate.getFullYear() &&
             startDate.getMonth() === endDate.getMonth() &&
-            startDate.getDay() === endDate.getDay()
+            startDate.getDate() === endDate.getDate()
         const sameTime =
             sameDay &&
             startDate.getHours() === endDate.getHours() &&
@@ -166,18 +166,16 @@ const PostCard = (props: {
     function findEventDuration() {
         const startDate = new Date(Event.startTime)
         const endDate = new Date(Event.endTime)
-        const sameDay =
-            Event.endTime &&
+        const sameMinute =
             startDate.getFullYear() === endDate.getFullYear() &&
             startDate.getMonth() === endDate.getMonth() &&
-            startDate.getDay() === endDate.getDay()
-        const sameMinute =
-            sameDay &&
+            startDate.getDate() === endDate.getDate() &&
             startDate.getHours() === endDate.getHours() &&
             startDate.getMinutes() === endDate.getMinutes()
         const difference = (endDate.getTime() - startDate.getTime()) / 1000
         if (Event.endTime && !sameMinute)
-            return `(${formatTimeDHM(difference < 60 ? 60 : difference)})`
+            // rounded up to nearest minute
+            return `(${formatTimeDHM(Math.ceil(difference / 60) * 60)})`
         return null
     }
 
