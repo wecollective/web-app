@@ -5,9 +5,10 @@ import { ReactComponent as ChevronIconSVG } from '../svgs/chevron-down-solid.svg
 const ShowMoreLess = (props: {
     height: number
     gradientColor?: 'white' | 'grey'
+    style?: any
     children: any
 }): JSX.Element => {
-    const { height, gradientColor, children } = props
+    const { height, gradientColor, style, children } = props
 
     const [overflow, setOverflow] = useState(false)
     const [expanded, setExpanded] = useState(false)
@@ -35,7 +36,7 @@ const ShowMoreLess = (props: {
     }
 
     return (
-        <div className={styles.wrapper}>
+        <div className={styles.wrapper} style={style}>
             <div
                 ref={contentRef}
                 className={styles.content}
@@ -66,6 +67,7 @@ const ShowMoreLess = (props: {
 
 ShowMoreLess.defaultProps = {
     gradientColor: 'white',
+    style: null,
 }
 
 export default ShowMoreLess

@@ -140,6 +140,7 @@ const PostCard = (props: {
     const goingToEvent = Event && Event.Going.map((u) => u.id).includes(accountData.id)
     const interestedInEvent = Event && Event.Interested.map((u) => u.id).includes(accountData.id)
 
+    // todo: add to helper functions (pass in start and end dates)
     function findEventTimes() {
         const startDate = new Date(Event.startTime)
         const endDate = new Date(Event.endTime)
@@ -148,16 +149,16 @@ const PostCard = (props: {
             startDate.getFullYear() === endDate.getFullYear() &&
             startDate.getMonth() === endDate.getMonth() &&
             startDate.getDate() === endDate.getDate()
-        const sameTime =
+        const sameMinute =
             sameDay &&
             startDate.getHours() === endDate.getHours() &&
             startDate.getMinutes() === endDate.getMinutes()
         // format:
-        // spans two days or more days: June 29, 2022 at 22:00 → June 30, 2022 at 22:00
-        // spans one day: June 29, 2022 at 22:00 → 23:00
-        // no span: June 29, 2022 at 22:00
+        // different day: June 29, 2022 at 22:00 → June 30, 2022 at 22:00
+        // same day: June 29, 2022 at 22:00 → 23:00
+        // same minute: June 29, 2022 at 22:00
         return `${formatTimeMDYT(Event.startTime)} ${
-            Event.endTime && !sameTime
+            Event.endTime && !sameMinute
                 ? `→ ${sameDay ? formatTimeHM(Event.endTime) : formatTimeMDYT(Event.endTime)}`
                 : ''
         }`
@@ -541,7 +542,7 @@ const PostCard = (props: {
                     <Column>
                         <Markdown text={`# ${Event.title}`} className={styles.eventTitle} />
                         {text && (
-                            <ShowMoreLess height={150}>
+                            <ShowMoreLess height={150} style={{ marginBottom: 10 }}>
                                 <Markdown text={text} />
                             </ShowMoreLess>
                         )}
@@ -560,7 +561,6 @@ const PostCard = (props: {
                                         text={`${Event.Going.length} going`}
                                         onClick={() => setEventGoingModalOpen(true)}
                                         style={{ marginRight: 15 }}
-                                        outline
                                     />
                                 )}
                                 {Event.Interested.length > 0 && (
@@ -570,7 +570,6 @@ const PostCard = (props: {
                                         imageSize={30}
                                         text={`${Event.Interested.length} interested`}
                                         onClick={() => setEventInterestedModalOpen(true)}
-                                        outline
                                     />
                                 )}
                             </Row>
@@ -609,30 +608,32 @@ const PostCard = (props: {
                                 </Column>
                             </Modal>
                         )}
-                        <Row style={{ marginTop: 10 }}>
-                            <Button
-                                text='Going'
-                                color='aqua'
-                                size='medium'
-                                disabled={location === 'preview'}
-                                icon={goingToEvent ? <SuccessIcon /> : undefined}
-                                style={{ marginRight: 5 }}
-                                onClick={() => respondToEvent('going')}
-                            />
-                            <Button
-                                text='Interested'
-                                color='aqua'
-                                size='medium'
-                                disabled={location === 'preview'}
-                                icon={interestedInEvent ? <SuccessIcon /> : undefined}
-                                onClick={() => respondToEvent('interested')}
-                            />
-                        </Row>
+                        {new Date(Event.startTime) > new Date() && (
+                            <Row style={{ marginTop: 10 }}>
+                                <Button
+                                    text='Going'
+                                    color='aqua'
+                                    size='medium'
+                                    disabled={location === 'preview'}
+                                    icon={goingToEvent ? <SuccessIcon /> : undefined}
+                                    style={{ marginRight: 5 }}
+                                    onClick={() => respondToEvent('going')}
+                                />
+                                <Button
+                                    text='Interested'
+                                    color='aqua'
+                                    size='medium'
+                                    disabled={location === 'preview'}
+                                    icon={interestedInEvent ? <SuccessIcon /> : undefined}
+                                    onClick={() => respondToEvent('interested')}
+                                />
+                            </Row>
+                        )}
                     </Column>
                 )}
                 {type === 'glass-bead-game' && (
                     <Column>
-                        <Row>
+                        <Row style={{ marginBottom: 10 }}>
                             {GlassBeadGame.topicImage && (
                                 <img
                                     className={styles.topicImage}
@@ -669,7 +670,6 @@ const PostCard = (props: {
                                                 text={`${Event.Going.length} going`}
                                                 onClick={() => setEventGoingModalOpen(true)}
                                                 style={{ marginRight: 15 }}
-                                                outline
                                             />
                                         )}
                                         {Event.Interested.length > 0 && (
@@ -681,7 +681,6 @@ const PostCard = (props: {
                                                 imageSize={30}
                                                 text={`${Event.Interested.length} interested`}
                                                 onClick={() => setEventInterestedModalOpen(true)}
-                                                outline
                                             />
                                         )}
                                     </Row>
@@ -723,28 +722,30 @@ const PostCard = (props: {
                                         </Column>
                                     </Modal>
                                 )}
-                                <Row>
-                                    <Button
-                                        text='Going'
-                                        color='aqua'
-                                        size='medium'
-                                        disabled={location === 'preview'}
-                                        icon={goingToEvent ? <SuccessIcon /> : undefined}
-                                        style={{ marginRight: 5 }}
-                                        onClick={() => respondToEvent('going')}
-                                    />
-                                    <Button
-                                        text='Interested'
-                                        color='aqua'
-                                        size='medium'
-                                        disabled={location === 'preview'}
-                                        icon={interestedInEvent ? <SuccessIcon /> : undefined}
-                                        onClick={() => respondToEvent('interested')}
-                                    />
-                                </Row>
+                                {new Date(Event.startTime) > new Date() && (
+                                    <Row style={{ marginBottom: 10 }}>
+                                        <Button
+                                            text='Going'
+                                            color='aqua'
+                                            size='medium'
+                                            disabled={location === 'preview'}
+                                            icon={goingToEvent ? <SuccessIcon /> : undefined}
+                                            style={{ marginRight: 5 }}
+                                            onClick={() => respondToEvent('going')}
+                                        />
+                                        <Button
+                                            text='Interested'
+                                            color='aqua'
+                                            size='medium'
+                                            disabled={location === 'preview'}
+                                            icon={interestedInEvent ? <SuccessIcon /> : undefined}
+                                            onClick={() => respondToEvent('interested')}
+                                        />
+                                    </Row>
+                                )}
                             </Column>
                         )}
-                        <Row style={{ marginTop: 10 }}>
+                        <Row>
                             <Button
                                 text='Open game room'
                                 color='gbg-white'
@@ -818,7 +819,6 @@ const PostCard = (props: {
                                     imageSize={30}
                                     text={`${StringPlayers.length} players`}
                                     style={{ marginRight: 15 }}
-                                    outline
                                 />
                                 {playersRejected.length > 0 && (
                                     <Row centerY>
@@ -831,7 +831,6 @@ const PostCard = (props: {
                                             imagePaths={playersRejected.map((p) => p.flagImagePath)}
                                             imageSize={30}
                                             style={{ marginLeft: 5 }}
-                                            outline
                                         />
                                     </Row>
                                 )}
@@ -843,7 +842,6 @@ const PostCard = (props: {
                                             imagePaths={playersPending.map((p) => p.flagImagePath)}
                                             imageSize={30}
                                             style={{ marginLeft: 5 }}
-                                            outline
                                         />
                                     </Row>
                                 )}
@@ -1058,7 +1056,7 @@ const PostCard = (props: {
                         )}
                     </Row>
                     {location !== 'post-page' && (
-                        <Link to={`/p/${id}`} className={styles.link}>
+                        <Link to={`/p/${id}`} className={styles.link} title='Open post page'>
                             <ExpandIcon />
                         </Link>
                     )}
