@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-param-reassign */
@@ -1008,42 +1009,64 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
 
     useEffect(() => {
         if (postType === 'Event' && currentStep === 4) {
+            const now = new Date()
+            const startTimePast = new Date(eventForm3.startTime.value) < now
+            const endTimePast = new Date(eventForm3.endTime.value) < now
+            const defaultStartDate = eventForm3.startTime.value
+                ? startTimePast
+                    ? now
+                    : new Date(eventForm3.startTime.value)
+                : undefined
+            const defaultEndDate = eventForm3.endTime.value
+                ? endTimePast
+                    ? now
+                    : new Date(eventForm3.endTime.value)
+                : undefined
             flatpickr('#date-time-start', {
                 ...dateTimeOptions,
-                defaultDate: eventForm3.startTime.value
-                    ? new Date(eventForm3.startTime.value)
-                    : undefined,
+                defaultDate: defaultStartDate,
                 appendTo: document.getElementById('date-time-start-wrapper') || undefined,
                 onChange: ([value]) => setStartTime(value.toString()),
             })
             flatpickr('#date-time-end', {
                 ...dateTimeOptions,
-                defaultDate: eventForm3.endTime.value
-                    ? new Date(eventForm3.endTime.value)
-                    : undefined,
-                minDate: eventForm3.startTime.value
-                    ? new Date(eventForm3.startTime.value)
-                    : undefined,
+                defaultDate: defaultEndDate,
+                minDate: defaultStartDate,
                 appendTo: document.getElementById('date-time-end-wrapper') || undefined,
                 onChange: ([value]) => setEndTime(value.toString()),
             })
+            if (startTimePast && defaultStartDate) setStartTime(defaultStartDate.toString())
+            if (endTimePast && defaultEndDate) setStartTime(defaultEndDate.toString())
         }
         if (postType === 'Glass Bead Game' && currentStep === 4) {
+            const now = new Date()
+            const startTimePast = new Date(GBGForm3.startTime.value) < now
+            const endTimePast = new Date(GBGForm3.endTime.value) < now
+            const defaultStartDate = GBGForm3.startTime.value
+                ? startTimePast
+                    ? now
+                    : new Date(GBGForm3.startTime.value)
+                : undefined
+            const defaultEndDate = GBGForm3.endTime.value
+                ? endTimePast
+                    ? now
+                    : new Date(GBGForm3.endTime.value)
+                : undefined
             flatpickr('#date-time-start', {
                 ...dateTimeOptions,
-                defaultDate: GBGForm3.startTime.value
-                    ? new Date(GBGForm3.startTime.value)
-                    : undefined,
+                defaultDate: defaultStartDate,
                 appendTo: document.getElementById('date-time-start-wrapper') || undefined,
                 onChange: ([value]) => setStartTime(value.toString()),
             })
             flatpickr('#date-time-end', {
                 ...dateTimeOptions,
-                defaultDate: GBGForm3.endTime.value ? new Date(GBGForm3.endTime.value) : undefined,
-                minDate: GBGForm3.startTime.value ? new Date(GBGForm3.startTime.value) : undefined,
+                defaultDate: defaultEndDate,
+                minDate: defaultStartDate,
                 appendTo: document.getElementById('date-time-end-wrapper') || undefined,
                 onChange: ([value]) => setEndTime(value.toString()),
             })
+            if (startTimePast && defaultStartDate) setStartTime(defaultStartDate.toString())
+            if (endTimePast && defaultEndDate) setStartTime(defaultEndDate.toString())
         }
     }, [currentStep])
 
