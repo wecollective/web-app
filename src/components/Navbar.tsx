@@ -128,6 +128,37 @@ const Navbar = (): JSX.Element => {
                             onClick={() => toggleHamburgerMenu()}
                         />
                         <Column className={styles.hamburgerMenu}>
+                            <Column centerY style={{ marginBottom: 15 }}>
+                                <Row centerY>
+                                    <button
+                                        type='button'
+                                        className={styles.homeButton}
+                                        onClick={() => {
+                                            toggleHamburgerMenu()
+                                            history.push('/')
+                                        }}
+                                    >
+                                        <WecoLogo />
+                                    </button>
+                                    <Link to='/' onClick={() => toggleHamburgerMenu()}>
+                                        <p>Home page</p>
+                                    </Link>
+                                </Row>
+                                {spaceData.id !== 1 &&
+                                    !spaceData.DirectParentHolons.map((s) => s.id).includes(1) && (
+                                        <ImageTitle
+                                            type='space'
+                                            imagePath='https://weco-prod-space-flag-images.s3.eu-west-1.amazonaws.com/1614556880362'
+                                            title='All'
+                                            link={`/s/all/${selectedSpaceSubPage}`}
+                                            fontSize={14}
+                                            imageSize={35}
+                                            onClick={() => toggleHamburgerMenu()}
+                                            wrapText
+                                            style={{ marginTop: 10 }}
+                                        />
+                                    )}
+                            </Column>
                             <Row centerY className={styles.hamburgerMenuHeader}>
                                 <FlagImage
                                     type='space'

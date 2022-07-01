@@ -134,7 +134,7 @@ const SpacePageCalendar = (): JSX.Element => {
                                 square.type === 'padding' ? styles.padding : styles.day
                             } ${square.highlighted && styles.highlighted}`}
                         >
-                            <Row style={{ marginBottom: 10 }}>
+                            <Row style={{ marginBottom: 5 }}>
                                 <p className={styles.dayNumber}>{square.dayNumber}</p>
                                 <p className={styles.dayName}>{square.dayName}</p>
                             </Row>

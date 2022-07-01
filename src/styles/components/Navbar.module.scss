@@ -59,6 +59,19 @@
             box-shadow: 0 1px 10px 0 rgba(black, 0.1);
             transition: left 0.5s;
 
+            .homeButton {
+                all: unset;
+                cursor: pointer;
+                width: 40px;
+                height: 40px;
+                margin-right: 5px;
+    
+                > svg {
+                    width: 40px;
+                    height: 40px;
+                }
+            }
+
             .hamburgerMenuHeader {
                 margin-bottom: 20px;
                 word-break: break-word;
