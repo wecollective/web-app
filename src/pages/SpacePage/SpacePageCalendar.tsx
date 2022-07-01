@@ -82,10 +82,13 @@ const SpacePageCalendar = (): JSX.Element => {
                                         postId: post.id,
                                     })
                             })
+                            const dayNameIndex =
+                                new Date(`${year}-${month}-${dayNumber}`).getDay() + 1
                             setSquares((s) => [
                                 ...s,
                                 {
-                                    day: dayNumber,
+                                    dayNumber,
+                                    dayName: weekDays[dayNameIndex === 7 ? 0 : dayNameIndex],
                                     events: dayEvents,
                                     highlighted: dateOffset === 0 && dayNumber === day,
                                 },
@@ -123,7 +126,7 @@ const SpacePageCalendar = (): JSX.Element => {
                     <LoadingWheel />
                 </Column>
             ) : (
-                <Row wrap className={styles.days}>
+                <div className={styles.days}>
                     {squares.map((square) => (
                         <Column
                             key={uuidv4()}
@@ -131,7 +134,10 @@ const SpacePageCalendar = (): JSX.Element => {
                                 square.type === 'padding' ? styles.padding : styles.day
                             } ${square.highlighted && styles.highlighted}`}
                         >
-                            <p style={{ fontWeight: 800 }}>{square.day}</p>
+                            <Row style={{ marginBottom: 10 }}>
+                                <p className={styles.dayNumber}>{square.dayNumber}</p>
+                                <p className={styles.dayName}>{square.dayName}</p>
+                            </Row>
                             {square.events && (
                                 <Scrollbars>
                                     {square.events
@@ -156,7 +162,7 @@ const SpacePageCalendar = (): JSX.Element => {
                             )}
                         </Column>
                     ))}
-                </Row>
+                </div>
             )}
             {eventModalOpen && (
                 <Modal centered close={() => setEventModalOpen(false)} style={{ width: 900 }}>
