@@ -74,14 +74,12 @@ const UserPagePosts = (): JSX.Element => {
             <Column className={styles.content}>
                 {params.view === 'List' && (
                     <Row className={styles.postListView}>
-                        <Column style={{ width: '100%' }}>
-                            <PostList
-                                location='user-posts'
-                                posts={userPosts}
-                                firstPostsloading={userPostsLoading}
-                                nextPostsLoading={nextUserPostsLoading}
-                            />
-                        </Column>
+                        <PostList
+                            location='user-posts'
+                            posts={userPosts}
+                            firstPostsloading={userPostsLoading}
+                            nextPostsLoading={nextUserPostsLoading}
+                        />
                     </Row>
                 )}
                 {/* {params.view === 'Map' && (

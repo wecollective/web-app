@@ -7,6 +7,7 @@ import Column from '@components/Column'
 import Row from '@components/Row'
 import UserNotFound from '@pages/SpaceNotFound'
 import Markdown from '@components/Markdown'
+import Scrollbars from '@components/Scrollbars'
 
 const UserPageAbout = (): JSX.Element => {
     const { userData, userNotFound } = useContext(UserContext)
@@ -20,13 +21,15 @@ const UserPageAbout = (): JSX.Element => {
             {handle !== userHandle ? (
                 <p>User data loading... </p>
             ) : (
-                <Column className={styles.content}>
-                    <Row centerY centerX className={styles.creation}>
-                        <p>Joined</p>
-                        <p title={dateCreated(createdAt)}>{timeSinceCreated(createdAt)}</p>
-                    </Row>
-                    <Markdown text={bio} style={{ textAlign: 'center' }} />
-                </Column>
+                <Scrollbars className={styles.contentWrapper}>
+                    <Column className={styles.content}>
+                        <Row centerY centerX className={styles.creation}>
+                            <p>Joined</p>
+                            <p title={dateCreated(createdAt)}>{timeSinceCreated(createdAt)}</p>
+                        </Row>
+                        <Markdown text={bio} style={{ textAlign: 'center' }} />
+                    </Column>
+                </Scrollbars>
             )}
         </Column>
     )

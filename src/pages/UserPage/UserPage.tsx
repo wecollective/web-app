@@ -102,20 +102,18 @@ const UserPage = (): JSX.Element => {
                 </Row>
                 <PageTabs tabs={tabs} />
             </Column>
-            <Column className={styles.content}>
-                <Column className={styles.centerPanel}>
-                    <Switch>
-                        <Redirect from='/u/:userHandle/' to='/u/:userHandle/about' exact />
-                        <Route path='/u/:userHandle/about' component={UserPageAbout} exact />
-                        <Route path='/u/:userHandle/posts' component={UserPagePosts} exact />
-                        <Route
-                            path='/u/:userHandle/notifications'
-                            component={UserPageNotifications}
-                            exact
-                        />
-                        <Route path='/u/:userHandle/settings' component={UserPageSettings} exact />
-                    </Switch>
-                </Column>
+            <Column centerX className={styles.content}>
+                <Switch>
+                    <Redirect from='/u/:userHandle/' to='/u/:userHandle/about' exact />
+                    <Route path='/u/:userHandle/about' component={UserPageAbout} exact />
+                    <Route path='/u/:userHandle/posts' component={UserPagePosts} exact />
+                    <Route
+                        path='/u/:userHandle/notifications'
+                        component={UserPageNotifications}
+                        exact
+                    />
+                    <Route path='/u/:userHandle/settings' component={UserPageSettings} exact />
+                </Switch>
             </Column>
         </Column>
     )

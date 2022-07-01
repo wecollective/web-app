@@ -2,11 +2,24 @@
 
 .wrapper {
     margin-bottom: 10px;
+    width: 100%;
+    @include for-post-width-up {
+        width: auto;
+    }
 
     .content {
-        height: 100%;
+        width: 100%;
+        @include for-post-width-up {
+            width: auto;
+        }
 
-        .postListView {}
+        .postListView {
+            width: 100%;
+            @include for-desktop-small-up {
+                width: auto;
+                min-width: 800px;
+            }
+        }
         
         .postMapView {
             width: calc(100vw - 40px);
