@@ -68,7 +68,7 @@ const SpacePagePostsHeader = (props: {
             />
             <Button
                 icon={<EyeIconSVG />}
-                text={mobileView ? '' : 'View'}
+                text={mobileView ? '' : 'Lenses'}
                 color='purple'
                 onClick={() => setViewModalOpen(true)}
             />

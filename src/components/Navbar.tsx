@@ -245,7 +245,10 @@ const Navbar = (): JSX.Element => {
                             onClick={() => toggleSearchDropDown()}
                         />
                         <Row centerY centerX className={styles.mobileSearchDropDown}>
-                            <GlobalSearchBar onLocationChange={() => toggleSearchDropDown()} />
+                            <GlobalSearchBar
+                                onLocationChange={() => toggleSearchDropDown()}
+                                style={{ width: '100%', margin: '0 10px' }}
+                            />
                         </Row>
                     </>
                 )}
@@ -388,7 +391,7 @@ const Navbar = (): JSX.Element => {
                         onClick={() => setLogInModalOpen(true)}
                         style={{ marginRight: 10 }}
                     />
-                    <Button text='Donate' color='purple' onClick={() => setDonateModalOpen(true)} />
+                    {/* <Button text='Donate' color='purple' onClick={() => setDonateModalOpen(true)} /> */}
                 </Row>
             )}
         </Row>

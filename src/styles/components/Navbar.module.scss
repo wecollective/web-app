@@ -9,7 +9,6 @@
     z-index: $navbarZIndex;
 
     .mobileLeft {
-        display: none;
         display: flex;
         @include for-tablet-landscape-up { display: none }
 
@@ -169,6 +168,8 @@
     }
 
     .mobileCenter {
+        display: flex;
+        @include for-tablet-landscape-up { display: none }
         z-index: 5;
 
         &.entering > .mobileSearchBackground { background-color: rgba(black, 0.5) }
@@ -200,8 +201,8 @@
             align-items: center;
 
             > svg {
-                width: 40px;
-                height: 40px;
+                width: 34px;
+                height: 34px;
                 color: $grey5;
                 transition: color 0.5s;
             }
@@ -268,8 +269,8 @@
             align-items: center;
 
             > svg {
-                width: 40px;
-                height: 40px;
+                width: 34px;
+                height: 34px;
                 color: $grey5;
                 transition: color 0.5s;
             }
