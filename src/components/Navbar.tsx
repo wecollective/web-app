@@ -28,10 +28,15 @@ import { ReactComponent as GovernanceIcon } from '@svgs/building-columns-solid.s
 import { ReactComponent as SearchIcon } from '@svgs/search.svg'
 
 const Navbar = (): JSX.Element => {
-    const { loggedIn, accountData, setLogInModalOpen, setDonateModalOpen, logOut } = useContext(
-        AccountContext
-    )
-    const { spaceData, isModerator, selectedSpaceSubPage } = useContext(SpaceContext)
+    const {
+        loggedIn,
+        accountData,
+        accountDataLoading,
+        setLogInModalOpen,
+        setDonateModalOpen,
+        logOut,
+    } = useContext(AccountContext)
+    const { spaceData, getSpaceData, isModerator, selectedSpaceSubPage } = useContext(SpaceContext)
     const [hamburgerMenuOpen, setHamburgerMenuOpen] = useState(false)
     const [accountMenuOpen, setAccountMenuOpen] = useState(false)
     const [searchDropDownOpen, setSearchDropDownOpen] = useState(false)
@@ -60,6 +65,7 @@ const Navbar = (): JSX.Element => {
                 setTimeout(() => setHamburgerMenuOpen(false), 500)
             } else {
                 // open
+                if (!accountDataLoading && !spaceData.id) getSpaceData('all')
                 if (searchDropDownOpen) toggleSearchDropDown()
                 if (accountMenuOpen) toggleAccountMenu()
                 setHamburgerMenuOpen(true)
