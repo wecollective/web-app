@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useContext, useState } from 'react'
 import { Link, useHistory } from 'react-router-dom'
@@ -8,10 +9,12 @@ import FlagImage from '@components/FlagImage'
 import Column from '@components/Column'
 import Row from '@components/Row'
 import Button from '@components/Button'
+import ImageTitle from '@components/ImageTitle'
 import SpaceNavigationList from '@pages/SpacePage/SpaceNavigationList'
 import GlobalSearchBar from '@components/GlobalSearchBar'
 import { ReactComponent as WecoLogo } from '@svgs/weco-logo.svg'
-import { ReactComponent as HamburgerIcon } from '@svgs/bars-solid.svg'
+import { ReactComponent as TreeIcon } from '@svgs/tree-icon.svg'
+// import { ReactComponent as HamburgerIcon } from '@svgs/bars-solid.svg'
 import { ReactComponent as ChevronDownIcon } from '@svgs/chevron-down-solid.svg'
 import { ReactComponent as SpacesIcon } from '@svgs/overlapping-circles-thick.svg'
 import { ReactComponent as PostsIcon } from '@svgs/edit-solid.svg'
@@ -28,8 +31,9 @@ const Navbar = (): JSX.Element => {
     const { loggedIn, accountData, setLogInModalOpen, setDonateModalOpen, logOut } = useContext(
         AccountContext
     )
-    const { spaceData, isModerator } = useContext(SpaceContext)
+    const { spaceData, isModerator, selectedSpaceSubPage } = useContext(SpaceContext)
     const [hamburgerMenuOpen, setHamburgerMenuOpen] = useState(false)
+    const [accountMenuOpen, setAccountMenuOpen] = useState(false)
     const [searchDropDownOpen, setSearchDropDownOpen] = useState(false)
     const [exploreDropDownOpen, setExploreDropDownOpen] = useState(false)
     const [profileDropDownOpen, setProfileDropDownOpen] = useState(false)
@@ -50,10 +54,14 @@ const Navbar = (): JSX.Element => {
         const menu = document.getElementById('mobile-left')
         if (menu) {
             if (hamburgerMenuOpen) {
+                // close
                 menu.classList.remove(styles.entering)
                 menu.classList.add(styles.exiting)
                 setTimeout(() => setHamburgerMenuOpen(false), 500)
             } else {
+                // open
+                if (searchDropDownOpen) toggleSearchDropDown()
+                if (accountMenuOpen) toggleAccountMenu()
                 setHamburgerMenuOpen(true)
                 menu.classList.remove(styles.exiting)
                 setTimeout(() => menu.classList.add(styles.entering), 50)
@@ -65,11 +73,34 @@ const Navbar = (): JSX.Element => {
         const menu = document.getElementById('mobile-center')
         if (menu) {
             if (searchDropDownOpen) {
+                // close
                 menu.classList.remove(styles.entering)
                 menu.classList.add(styles.exiting)
-                setTimeout(() => setSearchDropDownOpen(false), 500)
+                setTimeout(() => setSearchDropDownOpen(false), 800)
             } else {
+                // open
+                if (hamburgerMenuOpen) toggleHamburgerMenu()
+                if (accountMenuOpen) toggleAccountMenu()
                 setSearchDropDownOpen(true)
+                menu.classList.remove(styles.exiting)
+                setTimeout(() => menu.classList.add(styles.entering), 50)
+            }
+        }
+    }
+
+    function toggleAccountMenu() {
+        const menu = document.getElementById('mobile-right')
+        if (menu) {
+            if (accountMenuOpen) {
+                // close
+                menu.classList.remove(styles.entering)
+                menu.classList.add(styles.exiting)
+                setTimeout(() => setAccountMenuOpen(false), 500)
+            } else {
+                // open
+                if (hamburgerMenuOpen) toggleHamburgerMenu()
+                if (searchDropDownOpen) toggleSearchDropDown()
+                setAccountMenuOpen(true)
                 menu.classList.remove(styles.exiting)
                 setTimeout(() => menu.classList.add(styles.entering), 50)
             }
@@ -80,7 +111,8 @@ const Navbar = (): JSX.Element => {
         <Row spaceBetween className={styles.wrapper}>
             <Row centerY id='mobile-left' className={styles.mobileLeft}>
                 <button type='button' onClick={() => toggleHamburgerMenu()}>
-                    <HamburgerIcon />
+                    {/* <HamburgerIcon /> */}
+                    <TreeIcon />
                 </button>
                 {hamburgerMenuOpen && (
                     <>
@@ -222,49 +254,132 @@ const Navbar = (): JSX.Element => {
                 <GlobalSearchBar />
             </Row>
             {loggedIn ? (
-                <Row centerY className={styles.desktopRight}>
-                    <div
-                        className={styles.profileButton}
-                        onMouseEnter={() => setProfileDropDownOpen(true)}
-                        onMouseLeave={() => setProfileDropDownOpen(false)}
-                    >
-                        <p>{accountData.name}</p>
-                        <FlagImage type='user' size={40} imagePath={accountData.flagImagePath} />
-                        {accountData.unseenNotifications > 0 && (
-                            <div className={styles.totalUnseenItems}>
-                                <p>{accountData.unseenNotifications}</p>
-                            </div>
+                <>
+                    <Row centerY id='mobile-right' className={styles.mobileRight}>
+                        <button type='button' onClick={() => toggleAccountMenu()}>
+                            <UserIcon />
+                        </button>
+                        {accountMenuOpen && (
+                            <>
+                                <button
+                                    className={styles.accountMenuBackground}
+                                    type='button'
+                                    onClick={() => toggleAccountMenu()}
+                                />
+                                <Column className={styles.accountMenu}>
+                                    <Row centerY className={styles.accountMenuHeader}>
+                                        <FlagImage
+                                            type='user'
+                                            size={80}
+                                            imagePath={accountData.flagImagePath}
+                                            style={{ marginRight: 10 }}
+                                        />
+                                        <Column>
+                                            <h1>{accountData.name}</h1>
+                                            <p className='grey'>u/{accountData.handle}</p>
+                                        </Column>
+                                    </Row>
+                                    <Row style={{ marginBottom: 20 }}>
+                                        <Button text='Log out' color='blue' onClick={logOut} />
+                                    </Row>
+                                    <Column className={styles.accountMenuTabs}>
+                                        <Link
+                                            to={`/u/${accountData.handle}/about`}
+                                            onClick={() => toggleAccountMenu()}
+                                        >
+                                            <AboutIcon />
+                                            <p>About</p>
+                                        </Link>
+                                        <Link
+                                            to={`/u/${accountData.handle}/posts`}
+                                            onClick={() => toggleAccountMenu()}
+                                        >
+                                            <PostsIcon />
+                                            <p>Posts</p>
+                                        </Link>
+                                        <Link
+                                            to={`/u/${accountData.handle}/notifications`}
+                                            onClick={() => toggleAccountMenu()}
+                                        >
+                                            <BellIcon />
+                                            <p>Notifications</p>
+                                        </Link>
+                                        <Link
+                                            to={`/u/${accountData.handle}/settings`}
+                                            onClick={() => toggleAccountMenu()}
+                                        >
+                                            <SettingsIcon />
+                                            <p>Settings</p>
+                                        </Link>
+                                    </Column>
+                                    <Column>
+                                        <p className='grey'>Followed spaces</p>
+                                        {accountData.FollowedHolons.map((space) => (
+                                            <ImageTitle
+                                                key={space.id}
+                                                type='space'
+                                                imagePath={space.flagImagePath}
+                                                imageSize={35}
+                                                title={space.name}
+                                                fontSize={14}
+                                                link={`/s/${space.handle}/${selectedSpaceSubPage}`}
+                                                style={{ marginTop: 10 }}
+                                                onClick={() => toggleAccountMenu()}
+                                            />
+                                        ))}
+                                    </Column>
+                                </Column>
+                            </>
                         )}
-                        {profileDropDownOpen && (
-                            <div className={styles.profileDropDown}>
-                                <Link to={`/u/${accountData.handle}/about`}>
-                                    <UserIcon />
-                                    <p>Profile</p>
-                                </Link>
-                                <Link to={`/u/${accountData.handle}/posts`}>
-                                    <PostsIcon />
-                                    <p>Posts</p>
-                                </Link>
-                                <Link to={`/u/${accountData.handle}/notifications`}>
-                                    <BellIcon />
-                                    <p>Notifications</p>
-                                    {accountData.unseenNotifications > 0 && (
-                                        <div className={styles.unseenItems}>
-                                            <p>{accountData.unseenNotifications}</p>
-                                        </div>
-                                    )}
-                                </Link>
-                                <Link to={`/u/${accountData.handle}/settings`}>
-                                    <SettingsIcon />
-                                    <p>Settings</p>
-                                </Link>
-                                <Row centerX style={{ marginTop: 15 }}>
-                                    <Button text='Log out' color='blue' onClick={logOut} />
-                                </Row>
-                            </div>
-                        )}
-                    </div>
-                </Row>
+                    </Row>
+                    <Row centerY className={styles.desktopRight}>
+                        <div
+                            className={styles.profileButton}
+                            onMouseEnter={() => setProfileDropDownOpen(true)}
+                            onMouseLeave={() => setProfileDropDownOpen(false)}
+                        >
+                            <p>{accountData.name}</p>
+                            <FlagImage
+                                type='user'
+                                size={40}
+                                imagePath={accountData.flagImagePath}
+                            />
+                            {accountData.unseenNotifications > 0 && (
+                                <div className={styles.totalUnseenItems}>
+                                    <p>{accountData.unseenNotifications}</p>
+                                </div>
+                            )}
+                            {profileDropDownOpen && (
+                                <div className={styles.profileDropDown}>
+                                    <Link to={`/u/${accountData.handle}/about`}>
+                                        <UserIcon />
+                                        <p>Profile</p>
+                                    </Link>
+                                    <Link to={`/u/${accountData.handle}/posts`}>
+                                        <PostsIcon />
+                                        <p>Posts</p>
+                                    </Link>
+                                    <Link to={`/u/${accountData.handle}/notifications`}>
+                                        <BellIcon />
+                                        <p>Notifications</p>
+                                        {accountData.unseenNotifications > 0 && (
+                                            <div className={styles.unseenItems}>
+                                                <p>{accountData.unseenNotifications}</p>
+                                            </div>
+                                        )}
+                                    </Link>
+                                    <Link to={`/u/${accountData.handle}/settings`}>
+                                        <SettingsIcon />
+                                        <p>Settings</p>
+                                    </Link>
+                                    <Row centerX style={{ marginTop: 15 }}>
+                                        <Button text='Log out' color='blue' onClick={logOut} />
+                                    </Row>
+                                </div>
+                            )}
+                        </div>
+                    </Row>
+                </>
             ) : (
                 <Row centerY style={{ marginRight: 10 }}>
                     <Button

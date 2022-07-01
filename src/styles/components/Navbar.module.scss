@@ -11,27 +11,12 @@
     .mobileLeft {
         display: none;
         display: flex;
-        @include for-tablet-landscape-up {
-            display: none;
-        }
+        @include for-tablet-landscape-up { display: none }
 
-        &.entering {
-            .hamburgerMenuBackground {
-                background-color: rgba(black, 0.5);
-            }
-            .hamburgerMenu {
-                left: 0;
-            }
-        }
-
-        &.exiting {
-            .hamburgerMenuBackground {
-                background-color: rgba(black, 0);
-            }
-            .hamburgerMenu {
-                left: -302px;
-            }
-        }
+        &.entering > .hamburgerMenuBackground { background-color: rgba(black, 0.5) }
+        &.entering > .hamburgerMenu { left: 0 }
+        &.exiting > .hamburgerMenuBackground { background-color: rgba(black, 0) }
+        &.exiting > .hamburgerMenu { left: -302px }
 
         > button {
             all: unset;
@@ -49,9 +34,7 @@
                 transition: color 0.5s;
             }
 
-            &:hover > svg {
-                color: white;
-            }
+            &:hover > svg { color: white }
         }
 
 
@@ -78,8 +61,9 @@
             transition: left 0.5s;
 
             .hamburgerMenuHeader {
-                h1 { margin: 0 }
                 margin-bottom: 20px;
+                word-break: break-word;
+                h1 { margin: 0 }
             }
 
             .hamburgerMenuSpaceTabs {
@@ -185,27 +169,24 @@
     }
 
     .mobileCenter {
-        &.entering {
-            .mobileSearchBackground {
-                background-color: rgba(black, 0.5);
-            }
-            .mobileSearchDropDown {
-                height: 60px;
-                > form {
-                    opacity: 1;
-                }
+        z-index: 5;
+
+        &.entering > .mobileSearchBackground { background-color: rgba(black, 0.5) }
+        &.entering > .mobileSearchDropDown {
+            transition-delay: 0s;
+            height: 60px;
+            > form {
+                transition-delay: 0.3s;
+                opacity: 1;
             }
         }
-
-        &.exiting {
-            .mobileSearchBackground {
-                background-color: rgba(black, 0);
-            }
-            .mobileSearchDropDown {
-                height: 0px;
-                > form {
-                    opacity: 0;
-                }
+        &.exiting > .mobileSearchBackground { background-color: rgba(black, 0) }
+        &.exiting > .mobileSearchDropDown {
+            transition-delay: 0.3s;
+            height: 0px;
+            > form {
+                transition-delay: 0s;
+                opacity: 0;
             }
         }
 
@@ -248,11 +229,12 @@
             width: 100%;
             left: 0;
             background-color: $black2;
-            transition: all 0.5s;
+            transition: height 0.5s;
 
             > form {
                 opacity: 0;
-                transition: all 0.5s;
+                transition: opacity 0.5s;
+                transition-delay: 0.3s;
             }
         }
     }
@@ -267,7 +249,90 @@
         }
     }
 
+    .mobileRight {
+        display: flex;
+        @include for-tablet-landscape-up { display: none }
+
+        &.entering > .accountMenuBackground { background-color: rgba(black, 0.5) }
+        &.entering > .accountMenu { right: 0 }
+        &.exiting > .accountMenuBackground { background-color: rgba(black, 0) }
+        &.exiting > .accountMenu { right: -302px }
+
+        > button {
+            all: unset;
+            cursor: pointer;
+            width: $navbarHeight;
+            height: $navbarHeight;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            > svg {
+                width: 40px;
+                height: 40px;
+                color: $grey5;
+                transition: color 0.5s;
+            }
+
+            &:hover > svg { color: white }
+        }
+
+
+        .accountMenuBackground {
+            all: unset;
+            position: fixed;
+            top: $navbarHeight;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(black, 0);
+            transition: background-color 0.5s;
+        }
+
+        .accountMenu {
+            position: fixed;
+            top: $navbarHeight;
+            right: -302px;
+            width: 300px;
+            height: calc(100% - 60px);
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 1px 10px 0 rgba(black, 0.1);
+            transition: right 0.5s;
+
+            .accountMenuHeader {
+                margin-bottom: 20px;
+                word-break: break-word;
+                h1 { margin: 0 }
+            }
+
+            .accountMenuTabs {
+                margin-bottom: 20px;
+                
+                > a {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 10px;
+                    color: $grey7;
+                    transition: color 0.3s;
+
+                    &:hover { color: $blue5 }
+
+                    > svg {
+                        width: 30px;
+                        height: 30px;
+                        margin-right: 10px;
+                    }
+                }
+            }
+        }
+    }
+
     .desktopRight {
+        display: none;
+        @include for-tablet-landscape-up {
+            display: flex;
+        }
         > a {
             position: relative;
             display: flex;
