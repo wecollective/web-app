@@ -162,7 +162,7 @@ const Homepage = (): JSX.Element => {
                 <Button text='Enter' icon={<DoorIcon />} color='blue' onClick={enter} />
                 <CollapsibleCards data={cardData} style={{ marginTop: 40, marginBottom: 40 }} />
                 {highlights && (
-                    <Row spaceBetween className={styles.highlights}>
+                    <div className={styles.highlights}>
                         <FlagImageHighlights
                             type='post'
                             imagePaths={highlights.posts}
@@ -171,7 +171,6 @@ const Homepage = (): JSX.Element => {
                                 highlights.posts.length
                             )}`}
                             onClick={() => history.push('/s/all/posts')}
-                            style={{ marginRight: 30 }}
                             outline
                         />
                         <FlagImageHighlights
@@ -182,7 +181,6 @@ const Homepage = (): JSX.Element => {
                                 highlights.totals.totalSpaces
                             )}`}
                             onClick={() => history.push('/s/all/spaces')}
-                            style={{ marginRight: 30 }}
                             outline
                         />
                         <FlagImageHighlights
@@ -195,7 +193,7 @@ const Homepage = (): JSX.Element => {
                             onClick={() => history.push('/s/all/people')}
                             outline
                         />
-                    </Row>
+                    </div>
                 )}
             </Column>
         </Column>

@@ -35,7 +35,7 @@ const ImageFade = (props: {
         }
         // store imagePath for next transition
         setPreviousImage(imagePath)
-    }, [imagePath])
+    }, [imagePath, topImageRef.current])
 
     return (
         <div className={styles.wrapper}>

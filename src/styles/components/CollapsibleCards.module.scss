@@ -1,7 +1,10 @@
 @import '@styles/Variables';
 
 .wrapper {
+
     .row {
+        display: none;
+        @include for-tablet-landscape-up { display: flex }
         width: 1000px;
         height: 300px;
         transition: width 1s;
