@@ -976,7 +976,7 @@ const PostCard = (props: {
                             icon={<LikeIcon />}
                             iconSize={20}
                             text={totalLikes}
-                            title={statTitle('Like', totalLikes)}
+                            title={statTitle('Like', totalLikes || 0)}
                             color={accountLike && 'blue'}
                             disabled={location === 'preview'}
                             onClick={() => setLikeModalOpen(true)}
@@ -985,7 +985,7 @@ const PostCard = (props: {
                             icon={<CommentIcon />}
                             iconSize={20}
                             text={totalComments}
-                            title={statTitle('Comment', totalComments)}
+                            title={statTitle('Comment', totalComments || 0)}
                             // color={accountComment && 'blue'}
                             disabled={location === 'preview'}
                             onClick={() => setCommentsOpen(!commentsOpen)}
@@ -994,7 +994,7 @@ const PostCard = (props: {
                             icon={<RepostIcon />}
                             iconSize={20}
                             text={totalReposts}
-                            title={statTitle('Repost', totalReposts)}
+                            title={statTitle('Repost', totalReposts || 0)}
                             color={accountRepost && 'blue'}
                             disabled={location === 'preview'}
                             onClick={() => setRepostModalOpen(true)}
@@ -1003,7 +1003,7 @@ const PostCard = (props: {
                             icon={<RatingIcon />}
                             iconSize={20}
                             text={totalRatings}
-                            title={statTitle('Rating', totalRatings)}
+                            title={statTitle('Rating', totalRatings || 0)}
                             color={accountRating && 'blue'}
                             disabled={location === 'preview'}
                             onClick={() => setRatingModalOpen(true)}
@@ -1012,7 +1012,7 @@ const PostCard = (props: {
                             icon={<LinkIcon />}
                             iconSize={20}
                             text={totalLinks}
-                            title={statTitle('Link', totalLinks)}
+                            title={statTitle('Link', totalLinks || 0)}
                             color={accountLink && 'blue'}
                             disabled={location === 'preview'}
                             onClick={() => setLinkModalOpen(true)}
@@ -1056,7 +1056,12 @@ const PostCard = (props: {
                         )}
                     </Row>
                     {location !== 'post-page' && (
-                        <Link to={`/p/${id}`} className={styles.link} title='Open post page'>
+                        <Link
+                            to={`/p/${id}`}
+                            className={styles.link}
+                            title='Open post page'
+                            style={location === 'preview' ? { pointerEvents: 'none' } : null}
+                        >
                             <ExpandIcon />
                         </Link>
                     )}
