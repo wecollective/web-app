@@ -6,23 +6,16 @@ import PeopleListPlaceholder from '@components/PeopleListPlaceholder'
 import Row from '@components/Row'
 import Column from '@components/Column'
 import LoadingWheel from '@components/LoadingWheel'
-import Scrollbars from '@src/components/Scrollbars'
 
 const PeopleList = (props: {
-    location: 'space-people'
     people: any[]
     firstPeopleloading: boolean
     nextPeopleLoading: boolean
-    onScrollBottom: () => void
 }): JSX.Element => {
-    const { location, people, firstPeopleloading, nextPeopleLoading, onScrollBottom } = props
+    const { people, firstPeopleloading, nextPeopleLoading } = props
 
     return (
-        <Scrollbars
-            id={`${location}-scrollbars`}
-            className={styles.wrapper}
-            onScrollBottom={onScrollBottom}
-        >
+        <Row centerX className={styles.wrapper}>
             {firstPeopleloading ? (
                 <PeopleListPlaceholder />
             ) : people.length ? (
@@ -47,7 +40,7 @@ const PeopleList = (props: {
                     <p>No people found that match those settings...</p>
                 </Row>
             )}
-        </Scrollbars>
+        </Row>
     )
 }
 

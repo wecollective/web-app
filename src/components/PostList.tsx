@@ -29,7 +29,7 @@ const PostList = (props: {
     )
 
     return (
-        <Column id={`${location}-scrollbars`} className={styles.wrapper} style={style}>
+        <Column className={styles.wrapper} style={style}>
             {firstPostsloading ? (
                 <PostListPlaceholder />
             ) : posts.length ? (

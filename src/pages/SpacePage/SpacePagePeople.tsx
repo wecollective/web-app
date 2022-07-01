@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { useLocation, useHistory } from 'react-router-dom'
 import styles from '@styles/pages/SpacePage/SpacePagePeople.module.scss'
 import { getNewParams } from '@src/Helpers'
+import { AccountContext } from '@src/contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import SpacePagePeopleFilters from '@pages/SpacePage/SpacePagePeopleFilters'
 import Row from '@components/Row'
@@ -11,6 +12,7 @@ import PeopleList from '@components/PeopleList'
 import SpaceNotFound from '@pages/SpaceNotFound'
 
 const SpacePagePeople = (): JSX.Element => {
+    const { pageBottomReached } = useContext(AccountContext)
     const {
         spaceData,
         spaceNotFound,
@@ -44,20 +46,26 @@ const SpacePagePeople = (): JSX.Element => {
         })
     }
 
-    function onScrollBottom() {
-        if (!spacePeopleLoading && !nextSpacePeopleLoading && spacePeoplePaginationHasMore)
+    useEffect(() => {
+        if (spaceData.handle !== spaceHandle) setSpacePeopleLoading(true)
+        else getSpacePeople(spaceData.id, 0, spacePeoplePaginationLimit, params)
+    }, [spaceData.handle, location])
+
+    useEffect(() => {
+        if (
+            !spacePeopleLoading &&
+            !nextSpacePeopleLoading &&
+            spacePeoplePaginationHasMore &&
+            pageBottomReached
+        ) {
             getSpacePeople(
                 spaceData.id,
                 spacePeoplePaginationOffset,
                 spacePeoplePaginationLimit,
                 params
             )
-    }
-
-    useEffect(() => {
-        if (spaceData.handle !== spaceHandle) setSpacePeopleLoading(true)
-        else getSpacePeople(spaceData.id, 0, spacePeoplePaginationLimit, params)
-    }, [spaceData.handle, location])
+        }
+    }, [pageBottomReached])
 
     useEffect(() => () => resetSpacePeople(), [])
 
@@ -72,11 +80,9 @@ const SpacePagePeople = (): JSX.Element => {
             {filtersOpen && <SpacePagePeopleFilters params={params} applyParam={applyParam} />}
             <Row className={styles.content}>
                 <PeopleList
-                    location='space-people' // todo: switch to 'space-page'
                     people={spacePeople}
                     firstPeopleloading={spacePeopleLoading}
                     nextPeopleLoading={nextSpacePeopleLoading}
-                    onScrollBottom={onScrollBottom}
                 />
             </Row>
         </Column>
