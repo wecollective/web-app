@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useLocation, useHistory } from 'react-router-dom'
-import { getNewParams } from '@src/Helpers'
+import { getParamString } from '@src/Helpers'
 import { AccountContext } from '@src/contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import styles from '@styles/pages/SpacePage/SpacePageSpaces.module.scss'
@@ -45,7 +45,7 @@ const SpacePageSpaces = (): JSX.Element => {
         if (type === 'searchQuery') params.depth = 'All Contained Spaces'
         history.push({
             pathname: location.pathname,
-            search: getNewParams(params, type, value),
+            search: getParamString(params, type, value),
         })
     }
 

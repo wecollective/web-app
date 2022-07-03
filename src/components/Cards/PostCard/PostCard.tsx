@@ -116,7 +116,7 @@ const PostCard = (props: {
     const [selectedImage, setSelectedImage] = useState<any>(null)
     const [eventGoingModalOpen, setEventGoingModalOpen] = useState(false)
     const [eventInterestedModalOpen, setEventInterestedModalOpen] = useState(false)
-    const [commentsOpen, setCommentsOpen] = useState(false)
+    const [commentsOpen, setCommentsOpen] = useState(location === 'post-page')
     const [deletePostModalOpen, setDeletePostModalOpen] = useState(false)
     const [audioPlaying, setAudioPlaying] = useState(false)
     const [nextBeadModalOpen, setNextBeadModalOpen] = useState(false)

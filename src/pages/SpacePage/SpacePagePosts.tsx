@@ -1,10 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { useLocation, useHistory } from 'react-router-dom'
-import { getNewParams } from '@src/Helpers'
+import { useLocation } from 'react-router-dom'
 import { AccountContext } from '@src/contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import styles from '@styles/pages/SpacePage/SpacePagePosts.module.scss'
-import SpacePagePostsFilters from '@pages/SpacePage/SpacePagePostsFilters'
+// import SpacePagePostsFilters from '@pages/SpacePage/SpacePagePostsFilters'
 import Row from '@components/Row'
 import Column from '@components/Column'
 import SpacePagePostsHeader from '@pages/SpacePage/SpacePagePostsHeader'
@@ -31,9 +30,9 @@ const SpacePagePosts = (): JSX.Element => {
         spacePostsPaginationHasMore,
     } = useContext(SpaceContext)
     const location = useLocation()
-    const history = useHistory()
+    // const history = useHistory()
     const spaceHandle = location.pathname.split('/')[2]
-    const [filtersOpen, setFiltersOpen] = useState(false)
+    // const [filtersOpen, setFiltersOpen] = useState(false)
     const [showNavList, setShowNavList] = useState(false)
 
     // calculate params
@@ -42,13 +41,6 @@ const SpacePagePosts = (): JSX.Element => {
     Object.keys(urlParams).forEach((param) => {
         params[param] = urlParams[param]
     })
-
-    function applyParam(type, value) {
-        history.push({
-            pathname: location.pathname,
-            search: getNewParams(params, type, value),
-        })
-    }
 
     useEffect(() => {
         if (spaceData.handle !== spaceHandle) setSpacePostsLoading(true)
@@ -85,13 +77,7 @@ const SpacePagePosts = (): JSX.Element => {
     if (spaceNotFound) return <SpaceNotFound />
     return (
         <Column centerX className={styles.wrapper}>
-            <SpacePagePostsHeader
-                filtersOpen={filtersOpen}
-                setFiltersOpen={setFiltersOpen}
-                params={params}
-                applyParam={applyParam}
-            />
-            {filtersOpen && <SpacePagePostsFilters params={params} applyParam={applyParam} />}
+            <SpacePagePostsHeader params={params} />
             <Column className={styles.content}>
                 {params.view === 'List' && (
                     <Row className={styles.postListView}>

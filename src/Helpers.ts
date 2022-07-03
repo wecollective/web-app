@@ -222,9 +222,9 @@ export function isValidUrl(urlString: string): boolean {
     return url.protocol === 'http:' || url.protocol === 'https:'
 }
 
-export function getNewParams(currentParams: any, param: string, value: string): string {
-    const newParams = { ...currentParams }
-    newParams[param] = value
+export function getParamString(params: any, param?: string, value?: string): string {
+    const newParams = { ...params }
+    if (param) newParams[param] = value
     const queryString = [] as string[]
     Object.keys(newParams).forEach((p) => {
         queryString.push(`${p}=${newParams[p]}`)

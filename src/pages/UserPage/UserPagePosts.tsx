@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { useLocation, useHistory } from 'react-router-dom'
 import { AccountContext } from '@src/contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
-import { getNewParams } from '@src/Helpers'
+import { getParamString } from '@src/Helpers'
 import styles from '@styles/pages/UserPage/UserPagePosts.module.scss'
 import UserPagePostsFilters from '@pages/UserPage/UserPagePostsFilters'
 import Row from '@components/Row'
@@ -41,7 +41,7 @@ const UserPagePosts = (): JSX.Element => {
     function applyParam(type, value) {
         history.push({
             pathname: location.pathname,
-            search: getNewParams(params, type, value),
+            search: getParamString(params, type, value),
         })
     }
 

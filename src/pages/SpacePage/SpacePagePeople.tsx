@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useLocation, useHistory } from 'react-router-dom'
 import styles from '@styles/pages/SpacePage/SpacePagePeople.module.scss'
-import { getNewParams } from '@src/Helpers'
+import { getParamString } from '@src/Helpers'
 import { AccountContext } from '@src/contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import SpacePagePeopleFilters from '@pages/SpacePage/SpacePagePeopleFilters'
@@ -42,7 +42,7 @@ const SpacePagePeople = (): JSX.Element => {
     function applyParam(type, value) {
         history.push({
             pathname: location.pathname,
-            search: getNewParams(params, type, value),
+            search: getParamString(params, type, value),
         })
     }
 

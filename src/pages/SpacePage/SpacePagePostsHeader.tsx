@@ -1,7 +1,10 @@
 import React, { useContext, useState } from 'react'
+import { useLocation, useHistory } from 'react-router-dom'
 import { AccountContext } from '@contexts/AccountContext'
-import { SpaceContext } from '@contexts/SpaceContext'
+// import { SpaceContext } from '@contexts/SpaceContext'
+import { getParamString } from '@src/Helpers'
 import styles from '@styles/pages/SpacePage/SpacePageHeader.module.scss'
+import DropDownMenu from '@components/DropDown'
 import SearchBar from '@components/SearchBar'
 import Toggle from '@components/Toggle'
 import Button from '@components/Button'
@@ -12,18 +15,17 @@ import { ReactComponent as PlusIconSVG } from '@svgs/plus.svg'
 import { ReactComponent as SlidersIconSVG } from '@svgs/sliders-h-solid.svg'
 import { ReactComponent as EyeIconSVG } from '@svgs/eye-solid.svg'
 
-const SpacePagePostsHeader = (props: {
-    filtersOpen: boolean
-    setFiltersOpen: (payload: boolean) => void
-    params: any
-    applyParam: (param: string, value: string) => void
-}): JSX.Element => {
-    const { filtersOpen, setFiltersOpen, params, applyParam } = props
+const SpacePagePostsHeader = (props: { params: any }): JSX.Element => {
+    const { params } = props
     const { loggedIn, setAlertModalOpen, setAlertMessage } = useContext(AccountContext)
     // const { spaceData } = useContext(SpaceContext)
     const [createPostModalType, setCreatePostModalType] = useState('Text')
     const [createPostModalOpen, setCreatePostModalOpen] = useState(false)
+    const [filtersModalOpen, setFiltersModalOpen] = useState(false)
+    const [filterParams, setFilterParams] = useState(params)
     const [lensesModalOpen, setLensesModalOpen] = useState(false)
+    const location = useLocation()
+    const history = useHistory()
     const mobileView = document.documentElement.clientWidth < 900
     const smallMobileView = document.documentElement.clientWidth < 400
 
@@ -55,7 +57,12 @@ const SpacePagePostsHeader = (props: {
                 />
             )} */}
             <SearchBar
-                setSearchFilter={(value) => applyParam('searchQuery', value)}
+                setSearchFilter={(value) =>
+                    history.push({
+                        pathname: location.pathname,
+                        search: getParamString(params, 'searchQuery', value),
+                    })
+                }
                 placeholder='Search posts...'
                 style={{ width: 250, marginRight: 10 }}
             />
@@ -63,8 +70,8 @@ const SpacePagePostsHeader = (props: {
                 icon={<SlidersIconSVG />}
                 text={mobileView ? '' : 'Filters'}
                 color='aqua'
+                onClick={() => setFiltersModalOpen(true)}
                 style={{ marginRight: 10 }}
-                onClick={() => setFiltersOpen(!filtersOpen)}
             />
             <Button
                 icon={<EyeIconSVG />}
@@ -78,6 +85,86 @@ const SpacePagePostsHeader = (props: {
                     close={() => setCreatePostModalOpen(false)}
                 />
             )}
+            {filtersModalOpen && (
+                <Modal centered close={() => setFiltersModalOpen(false)}>
+                    <h1>Filters</h1>
+                    <p>Apply filters to the posts</p>
+                    <DropDownMenu
+                        title='Post Type'
+                        options={[
+                            'All Types',
+                            'Text',
+                            'Image',
+                            'Url',
+                            'Audio',
+                            'Event',
+                            'Glass Bead Game',
+                            'String',
+                            'Weave',
+                            'Prism',
+                        ]}
+                        selectedOption={filterParams.type}
+                        setSelectedOption={(payload) =>
+                            setFilterParams({ ...filterParams, type: payload })
+                        }
+                        style={{ marginBottom: 20 }}
+                    />
+                    <DropDownMenu
+                        title={filterParams.view === 'Map' ? 'Size By' : 'Sort By'}
+                        options={['Likes', 'Comments', 'Reposts', 'Ratings', 'Date']}
+                        selectedOption={filterParams.sortBy}
+                        setSelectedOption={(payload) =>
+                            setFilterParams({ ...filterParams, sortBy: payload })
+                        }
+                        style={{ marginBottom: 20 }}
+                    />
+                    <DropDownMenu
+                        title={filterParams.view === 'Map' ? 'Size Order' : 'Sort Order'}
+                        options={['Descending', 'Ascending']}
+                        selectedOption={filterParams.sortOrder}
+                        setSelectedOption={(payload) =>
+                            setFilterParams({ ...filterParams, sortOrder: payload })
+                        }
+                        style={{ marginBottom: 20 }}
+                    />
+                    <DropDownMenu
+                        title='Time Range'
+                        options={[
+                            'All Time',
+                            'Last Year',
+                            'Last Month',
+                            'Last Week',
+                            'Last 24 Hours',
+                            'Last Hour',
+                        ]}
+                        selectedOption={filterParams.timeRange}
+                        setSelectedOption={(payload) =>
+                            setFilterParams({ ...filterParams, timeRange: payload })
+                        }
+                        style={{ marginBottom: 20 }}
+                    />
+                    <DropDownMenu
+                        title='Depth'
+                        options={['All Contained Posts', 'Only Direct Posts']}
+                        selectedOption={filterParams.depth}
+                        setSelectedOption={(payload) =>
+                            setFilterParams({ ...filterParams, depth: payload })
+                        }
+                        style={{ marginBottom: 40 }}
+                    />
+                    <Button
+                        text='Apply filters'
+                        color='blue'
+                        onClick={() => {
+                            history.push({
+                                pathname: location.pathname,
+                                search: getParamString(filterParams),
+                            })
+                            setFiltersModalOpen(false)
+                        }}
+                    />
+                </Modal>
+            )}
             {lensesModalOpen && (
                 <Modal centered close={() => setLensesModalOpen(false)}>
                     <h1>Lenses</h1>
@@ -86,7 +173,17 @@ const SpacePagePostsHeader = (props: {
                         leftText='List'
                         rightText='Map'
                         positionLeft={params.view === 'List'}
-                        onClick={() => applyParam('view', params.view === 'Map' ? 'List' : 'Map')}
+                        onClick={() => {
+                            history.push({
+                                pathname: location.pathname,
+                                search: getParamString(
+                                    params,
+                                    'view',
+                                    params.view === 'Map' ? 'List' : 'Map'
+                                ),
+                            })
+                            setLensesModalOpen(false)
+                        }}
                     />
                 </Modal>
             )}
