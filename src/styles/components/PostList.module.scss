@@ -3,14 +3,14 @@
 .wrapper {
     width: 100%;
     max-width: 800px;
-    min-height: calc(100vh - 195px);
 
-    .posts > div { margin-bottom: 5px }
+    .posts > div, .spaces > div { margin-bottom: 2px }
 
     @include for-tablet-portrait-up {
         padding: 0 10px;
-        .posts > div { margin-bottom: 15px }
+        .posts > div, .spaces > div { margin-bottom: 15px }
     }
+
     @include for-tablet-landscape-up { min-height: calc(100vh - 220px) }
     @include for-desktop-medium-up { min-height: calc(100vh - 320px) }
     

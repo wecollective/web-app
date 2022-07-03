@@ -422,12 +422,7 @@ const Navbar = (): JSX.Element => {
                 </>
             ) : (
                 <Row centerY style={{ marginRight: 10 }}>
-                    <Button
-                        text='Log in'
-                        color='blue'
-                        onClick={() => setLogInModalOpen(true)}
-                        style={{ marginRight: 10 }}
-                    />
+                    <Button text='Log in' color='blue' onClick={() => setLogInModalOpen(true)} />
                     {/* <Button text='Donate' color='purple' onClick={() => setDonateModalOpen(true)} /> */}
                 </Row>
             )}

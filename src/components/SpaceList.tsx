@@ -24,13 +24,9 @@ const SpaceList = (props: {
             {firstSpacesloading ? (
                 <SpaceListPlaceholder />
             ) : spaces.length ? (
-                <Column>
+                <Column className={styles.spaces}>
                     {spaces.map((space) => (
-                        <HorizontalSpaceCard
-                            key={space.id}
-                            space={space}
-                            style={{ marginBottom: 15 }}
-                        />
+                        <HorizontalSpaceCard key={space.id} space={space} />
                     ))}
                     {nextSpacesLoading && (
                         <Row centerX>

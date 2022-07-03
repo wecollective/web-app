@@ -3,25 +3,29 @@
 .wrapper {
     width: 100%;
     min-height: 180px;
-    border-radius: 10px;
     background-color: white;
     box-shadow: 0 1px 10px 0 rgba(10, 8, 72, 0.05);
+    border: 1px solid $grey2;
     flex-shrink: 0;
     overflow: hidden;
     position: relative;
+
+    @include for-tablet-portrait-up { border-radius: 10px }
 
     .images {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 250px;
+        width: 150px;
         flex-shrink: 0;
+        @include for-tablet-portrait-up { width: 250px }
 
         .coverImage {
-            width: 250px;
+            width: 150px;
             height: 100%;
             background-size: cover;
             position: absolute;
+            @include for-tablet-portrait-up { width: 250px }
         }
 
         .flagImage {}
@@ -29,8 +33,10 @@
 
     .content {
         width: 100%;
-        padding: 15px 20px;
+        padding: 15px;
         justify-content: flex-start;
+        overflow: hidden;
+        @include for-tablet-portrait-up { padding: 15px 20px }
 
         h1 {
             font-size: 24px;
@@ -46,6 +52,7 @@
         .stats {
             margin-top: auto;
             color: $grey5;
+            overflow: hidden;
 
             > button {
                 margin-right: 15px;
