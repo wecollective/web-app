@@ -1,10 +1,8 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { useLocation, useHistory } from 'react-router-dom'
+import React, { useContext, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import { AccountContext } from '@src/contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
-import { getParamString } from '@src/Helpers'
 import styles from '@styles/pages/UserPage/UserPagePosts.module.scss'
-import UserPagePostsFilters from '@pages/UserPage/UserPagePostsFilters'
 import Row from '@components/Row'
 import Column from '@components/Column'
 import PostList from '@components/PostList'
@@ -27,9 +25,7 @@ const UserPagePosts = (): JSX.Element => {
         getUserPosts,
     } = useContext(UserContext)
     const location = useLocation()
-    const history = useHistory()
     const userHandle = location.pathname.split('/')[2]
-    const [filtersOpen, setFiltersOpen] = useState(false)
 
     // calculate params
     const urlParams = Object.fromEntries(new URLSearchParams(location.search))
@@ -37,13 +33,6 @@ const UserPagePosts = (): JSX.Element => {
     Object.keys(urlParams).forEach((param) => {
         params[param] = urlParams[param]
     })
-
-    function applyParam(type, value) {
-        history.push({
-            pathname: location.pathname,
-            search: getParamString(params, type, value),
-        })
-    }
 
     useEffect(() => {
         if (userData.handle !== userHandle) setUserPostsLoading(true)
@@ -64,13 +53,7 @@ const UserPagePosts = (): JSX.Element => {
     if (userNotFound) return <UserNotFound />
     return (
         <Column centerX className={styles.wrapper}>
-            <UserPagePostsHeader
-                filtersOpen={filtersOpen}
-                setFiltersOpen={setFiltersOpen}
-                params={params}
-                applyParam={applyParam}
-            />
-            {filtersOpen && <UserPagePostsFilters params={params} applyParam={applyParam} />}
+            <UserPagePostsHeader params={params} />
             <Column className={styles.content}>
                 {params.view === 'List' && (
                     <Row className={styles.postListView}>

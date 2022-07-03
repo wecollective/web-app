@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useLocation, useHistory } from 'react-router-dom'
 import styles from '@styles/pages/SpacePage/SpacePageHeader.module.scss'
 import { getParamString } from '@src/Helpers'
@@ -16,16 +16,18 @@ const SpacePagePeopleHeader = (props: { params: any }): JSX.Element => {
     const location = useLocation()
     const history = useHistory()
 
+    useEffect(() => setFilterParams(params), [params])
+
     return (
         <Row centerY centerX className={styles.wrapper}>
             <SearchBar
+                placeholder='Search people...'
                 setSearchFilter={(value) =>
                     history.push({
                         pathname: location.pathname,
                         search: getParamString(params, 'searchQuery', value),
                     })
                 }
-                placeholder='Search people...'
                 style={{ marginRight: 10 }}
             />
             <Button

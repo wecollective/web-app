@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import { useLocation, useHistory } from 'react-router-dom'
 import { AccountContext } from '@contexts/AccountContext'
 // import { SpaceContext } from '@contexts/SpaceContext'
@@ -39,6 +39,8 @@ const SpacePagePostsHeader = (props: { params: any }): JSX.Element => {
         }
     }
 
+    useEffect(() => setFilterParams(params), [params])
+
     return (
         <Row centerY centerX className={styles.wrapper}>
             <Button
@@ -57,13 +59,13 @@ const SpacePagePostsHeader = (props: { params: any }): JSX.Element => {
                 />
             )} */}
             <SearchBar
+                placeholder='Search posts...'
                 setSearchFilter={(value) =>
                     history.push({
                         pathname: location.pathname,
                         search: getParamString(params, 'searchQuery', value),
                     })
                 }
-                placeholder='Search posts...'
                 style={{ width: 250, marginRight: 10 }}
             />
             <Button
