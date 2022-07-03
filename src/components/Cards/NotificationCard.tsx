@@ -3,11 +3,12 @@ import axios from 'axios'
 import Cookies from 'universal-cookie'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
+import config from '@src/Config'
 import styles from '@styles/components/cards/NotificationCard.module.scss'
 import ImageNameLink from '@components/ImageNameLink'
 import TextLink from '@components/TextLink'
 import Button from '@components/Button'
-import config from '@src/Config'
+import Row from '@components/Row'
 import { timeSinceCreated, dateCreated } from '@src/Helpers'
 import { ReactComponent as SuccessIconSVG } from '@svgs/check-circle-solid.svg'
 import { ReactComponent as FailIconSVG } from '@svgs/times-circle-regular.svg'
@@ -224,7 +225,7 @@ const NotificationCard = (props: {
     // todo: use switch case to render different notification types
 
     return (
-        <div className={styles.wrapper}>
+        <Row centerX className={styles.wrapper}>
             {location === 'account' && (
                 <>
                     {type === 'welcome-message' && (
@@ -428,7 +429,7 @@ const NotificationCard = (props: {
                     )}
                 </>
             )}
-        </div>
+        </Row>
     )
 }
 
