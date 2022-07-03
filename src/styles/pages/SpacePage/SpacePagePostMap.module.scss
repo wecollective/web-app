@@ -15,7 +15,8 @@
 .controlsWrapper {
     display: flex;
     justify-content: space-between;
-    width: 900px;
+    width: 100%;
+    max-width: 900px;
     margin-top: 5px;
     height: 70px;
     position: absolute;

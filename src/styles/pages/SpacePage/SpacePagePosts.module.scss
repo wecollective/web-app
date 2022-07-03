@@ -30,7 +30,11 @@
         }
         
         .postMapView {
-            width: calc(100vw - 40px);
+            width: 100%;
+            min-width: calc(100vw - 20px);
+            padding: 0 10px;
+            
+            @include for-desktop-small-up { width: calc(100vw - 40px) }
         }
     }
 }
