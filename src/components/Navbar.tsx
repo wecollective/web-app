@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useContext, useState } from 'react'
-import { Link, useHistory } from 'react-router-dom'
+import { Link, useHistory, useLocation } from 'react-router-dom'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@src/contexts/SpaceContext'
+import { UserContext } from '@src/contexts/UserContext'
 import styles from '@styles/components/Navbar.module.scss'
 import FlagImage from '@components/FlagImage'
 import Column from '@components/Column'
@@ -37,12 +38,17 @@ const Navbar = (): JSX.Element => {
         logOut,
     } = useContext(AccountContext)
     const { spaceData, getSpaceData, isModerator, selectedSpaceSubPage } = useContext(SpaceContext)
+    const { userData } = useContext(UserContext)
     const [hamburgerMenuOpen, setHamburgerMenuOpen] = useState(false)
     const [accountMenuOpen, setAccountMenuOpen] = useState(false)
     const [searchDropDownOpen, setSearchDropDownOpen] = useState(false)
     const [exploreDropDownOpen, setExploreDropDownOpen] = useState(false)
     const [profileDropDownOpen, setProfileDropDownOpen] = useState(false)
     const history = useHistory()
+    const location = useLocation()
+    const otherUsersPage =
+        location.pathname.split('/')[1] === 'u' &&
+        location.pathname.split('/')[2] !== accountData.handle
 
     function rotateButton() {
         const homeButton = document.getElementById('home-button')
@@ -144,87 +150,121 @@ const Navbar = (): JSX.Element => {
                                         <p>Home page</p>
                                     </Link>
                                 </Row>
-                                {spaceData.id !== 1 &&
-                                    !spaceData.DirectParentHolons.map((s) => s.id).includes(1) && (
-                                        <ImageTitle
-                                            type='space'
-                                            imagePath='https://weco-prod-space-flag-images.s3.eu-west-1.amazonaws.com/1614556880362'
-                                            title='All'
-                                            link={`/s/all/${selectedSpaceSubPage}`}
-                                            fontSize={14}
-                                            imageSize={35}
-                                            onClick={() => toggleHamburgerMenu()}
-                                            wrapText
-                                            style={{ marginTop: 10 }}
-                                        />
-                                    )}
+                                {(otherUsersPage ||
+                                    (spaceData.id !== 1 &&
+                                        !spaceData.DirectParentHolons.map((s) => s.id).includes(
+                                            1
+                                        ))) && (
+                                    <ImageTitle
+                                        type='space'
+                                        imagePath='https://weco-prod-space-flag-images.s3.eu-west-1.amazonaws.com/1614556880362'
+                                        title='All'
+                                        link={`/s/all/${selectedSpaceSubPage}`}
+                                        fontSize={14}
+                                        imageSize={35}
+                                        onClick={() => toggleHamburgerMenu()}
+                                        wrapText
+                                        style={{ marginTop: 10 }}
+                                    />
+                                )}
                             </Column>
                             <Row centerY className={styles.hamburgerMenuHeader}>
                                 <FlagImage
-                                    type='space'
+                                    type={otherUsersPage ? 'user' : 'space'}
                                     size={80}
-                                    imagePath={spaceData.flagImagePath}
+                                    imagePath={
+                                        otherUsersPage
+                                            ? userData.flagImagePath
+                                            : spaceData.flagImagePath
+                                    }
                                     style={{ marginRight: 10 }}
                                 />
                                 <Column>
-                                    <h1>{spaceData.name}</h1>
-                                    <p className='grey'>s/{spaceData.handle}</p>
+                                    <h1>{otherUsersPage ? userData.name : spaceData.name}</h1>
+                                    <p className='grey'>
+                                        {otherUsersPage
+                                            ? `u/${userData.handle}`
+                                            : `s/${spaceData.handle}`}
+                                    </p>
                                 </Column>
                             </Row>
-                            <Column className={styles.hamburgerMenuSpaceTabs}>
-                                <Link
-                                    to={`/s/${spaceData.handle}/about`}
-                                    onClick={() => toggleHamburgerMenu()}
-                                >
-                                    <AboutIcon />
-                                    <p>About</p>
-                                </Link>
-                                <Link
-                                    to={`/s/${spaceData.handle}/posts`}
-                                    onClick={() => toggleHamburgerMenu()}
-                                >
-                                    <PostsIcon />
-                                    <p>Posts</p>
-                                </Link>
-                                <Link
-                                    to={`/s/${spaceData.handle}/spaces`}
-                                    onClick={() => toggleHamburgerMenu()}
-                                >
-                                    <SpacesIcon />
-                                    <p>Spaces</p>
-                                </Link>
-                                <Link
-                                    to={`/s/${spaceData.handle}/people`}
-                                    onClick={() => toggleHamburgerMenu()}
-                                >
-                                    <PeopleIcon />
-                                    <p>People</p>
-                                </Link>
-                                <Link
-                                    to={`/s/${spaceData.handle}/calendar`}
-                                    onClick={() => toggleHamburgerMenu()}
-                                >
-                                    <CalendarIcon />
-                                    <p>Calendar</p>
-                                </Link>
-                                <Link
-                                    to={`/s/${spaceData.handle}/governance`}
-                                    onClick={() => toggleHamburgerMenu()}
-                                >
-                                    <GovernanceIcon />
-                                    <p>Governance</p>
-                                </Link>
-                                {isModerator && (
+                            {otherUsersPage ? (
+                                <Column className={styles.hamburgerMenuTabs}>
                                     <Link
-                                        to={`/s/${spaceData.handle}/settings`}
+                                        to={`/u/${userData.handle}/about`}
                                         onClick={() => toggleHamburgerMenu()}
                                     >
-                                        <SettingsIcon />
-                                        <p>Settings</p>
+                                        <AboutIcon />
+                                        <p>About</p>
                                     </Link>
-                                )}
-                            </Column>
-                            <SpaceNavigationList onLocationChange={() => toggleHamburgerMenu()} />
+                                    <Link
+                                        to={`/u/${userData.handle}/posts`}
+                                        onClick={() => toggleHamburgerMenu()}
+                                    >
+                                        <PostsIcon />
+                                        <p>Posts</p>
+                                    </Link>
+                                </Column>
+                            ) : (
+                                <>
+                                    <Column className={styles.hamburgerMenuTabs}>
+                                        <Link
+                                            to={`/s/${spaceData.handle}/about`}
+                                            onClick={() => toggleHamburgerMenu()}
+                                        >
+                                            <AboutIcon />
+                                            <p>About</p>
+                                        </Link>
+                                        <Link
+                                            to={`/s/${spaceData.handle}/posts`}
+                                            onClick={() => toggleHamburgerMenu()}
+                                        >
+                                            <PostsIcon />
+                                            <p>Posts</p>
+                                        </Link>
+                                        <Link
+                                            to={`/s/${spaceData.handle}/spaces`}
+                                            onClick={() => toggleHamburgerMenu()}
+                                        >
+                                            <SpacesIcon />
+                                            <p>Spaces</p>
+                                        </Link>
+                                        <Link
+                                            to={`/s/${spaceData.handle}/people`}
+                                            onClick={() => toggleHamburgerMenu()}
+                                        >
+                                            <PeopleIcon />
+                                            <p>People</p>
+                                        </Link>
+                                        <Link
+                                            to={`/s/${spaceData.handle}/calendar`}
+                                            onClick={() => toggleHamburgerMenu()}
+                                        >
+                                            <CalendarIcon />
+                                            <p>Calendar</p>
+                                        </Link>
+                                        <Link
+                                            to={`/s/${spaceData.handle}/governance`}
+                                            onClick={() => toggleHamburgerMenu()}
+                                        >
+                                            <GovernanceIcon />
+                                            <p>Governance</p>
+                                        </Link>
+                                        {isModerator && (
+                                            <Link
+                                                to={`/s/${spaceData.handle}/settings`}
+                                                onClick={() => toggleHamburgerMenu()}
+                                            >
+                                                <SettingsIcon />
+                                                <p>Settings</p>
+                                            </Link>
+                                        )}
+                                    </Column>
+                                    <SpaceNavigationList
+                                        onLocationChange={() => toggleHamburgerMenu()}
+                                    />
+                                </>
+                            )}
                         </Column>
                     </>
                 )}
