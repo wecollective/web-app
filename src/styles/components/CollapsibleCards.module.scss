@@ -3,16 +3,21 @@
 .wrapper {
 
     .row {
-        display: none;
-        @include for-tablet-landscape-up { display: flex }
-        width: 1000px;
-        height: 300px;
         transition: width 1s;
         margin-bottom: 40px;
         position: relative;
+        display: flex;
+        flex-direction: column;
 
-        .card1 { left: 0; position: absolute; }
-        .card3 { right: 0; position: absolute; }
+        @include for-tablet-landscape-up {
+            flex-direction: row;
+            justify-content: center;
+            width: 1000px;
+            height: 300px;
+
+            .card1 { left: 0; position: absolute; }
+            .card3 { right: 0; position: absolute; }
+        }
 
         .card {
             width: 300px;
@@ -21,8 +26,10 @@
             border-radius: 10px;
             box-shadow: 0 20px 20px 0 rgba(10, 8, 72, 0.1);
             z-index: 2;
-
             transition: all 1s;
+
+            margin-bottom: 20px;
+            @include for-tablet-landscape-up { margin-bottom: 0 }
 
             &.hidden {
                 opacity: 0;
@@ -99,6 +106,10 @@
         &.collapsed {
             width: 180px;
             height: 180px;
+            flex-direction: row;
+            justify-content: center;
+            .card1 { left: 0; position: absolute; }
+            .card3 { right: 0; position: absolute; }
 
             .card {
                 width: 180px;

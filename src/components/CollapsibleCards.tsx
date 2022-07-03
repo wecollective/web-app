@@ -61,12 +61,13 @@ const CollapsibleCards = (props: { data: any; style?: any }): JSX.Element => {
     const [row2selectedCard, setRow2SelectedCard] = useState<null | number>(null)
     const [row1State, setRow1State] = useState<'visible' | 'hidden' | 'collapsed'>('visible')
     const [row2State, setRow2State] = useState<'visible' | 'hidden' | 'collapsed'>('hidden')
+    const mobileView = document.documentElement.clientWidth < 900
 
     function toggleCard(row, index) {
         if (row === 1) {
             setRow1SelectedCard(row1selectedCard ? null : index)
             setRow2State(row1selectedCard ? 'hidden' : 'visible')
-            if (!row1selectedCard) {
+            if (!row1selectedCard && !mobileView) {
                 setTimeout(() => {
                     window.scrollTo({ top: 2000, behavior: 'smooth' })
                 }, 200)
@@ -76,7 +77,7 @@ const CollapsibleCards = (props: { data: any; style?: any }): JSX.Element => {
 
     return (
         <Column centerX className={styles.wrapper} style={style}>
-            <Row centerX className={`${styles.row} ${row1selectedCard && styles.collapsed}`}>
+            <div className={`${styles.row} ${row1selectedCard && styles.collapsed}`}>
                 {data.map((card, index) => (
                     <Card
                         key={index}
@@ -87,9 +88,9 @@ const CollapsibleCards = (props: { data: any; style?: any }): JSX.Element => {
                         toggleCard={toggleCard}
                     />
                 ))}
-            </Row>
+            </div>
             {row1selectedCard && (
-                <Row centerX className={`${styles.row} ${styles[row2State]}`}>
+                <div className={`${styles.row} ${styles[row2State]}`}>
                     {data[(row1selectedCard || 0) - 1].children.map((card, index) => (
                         <Card
                             key={index}
@@ -100,7 +101,7 @@ const CollapsibleCards = (props: { data: any; style?: any }): JSX.Element => {
                             toggleCard={toggleCard}
                         />
                     ))}
-                </Row>
+                </div>
             )}
         </Column>
     )
