@@ -130,7 +130,7 @@ const SpacePage = (): JSX.Element => {
                             </button>
                         )}
                     </div>
-                    <div className={styles.info}>
+                    <Row centerY wrap>
                         <Column className={styles.spaceName}>
                             <h1>{spaceData.name}</h1>
                             <p className='grey'>s/{spaceData.handle}</p>
@@ -146,7 +146,7 @@ const SpacePage = (): JSX.Element => {
                                 />
                             </Row>
                         )}
-                    </div>
+                    </Row>
                 </Row>
                 <PageTabs tabs={tabs} />
             </Column>
