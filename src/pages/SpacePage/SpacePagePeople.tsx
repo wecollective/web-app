@@ -1,10 +1,8 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { useLocation, useHistory } from 'react-router-dom'
+import React, { useContext, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import styles from '@styles/pages/SpacePage/SpacePagePeople.module.scss'
-import { getParamString } from '@src/Helpers'
 import { AccountContext } from '@src/contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
-import SpacePagePeopleFilters from '@pages/SpacePage/SpacePagePeopleFilters'
 import Row from '@components/Row'
 import Column from '@components/Column'
 import SpacePagePeopleHeader from '@pages/SpacePage/SpacePagePeopleHeader'
@@ -27,9 +25,7 @@ const SpacePagePeople = (): JSX.Element => {
         resetSpacePeople,
         spacePeoplePaginationHasMore,
     } = useContext(SpaceContext)
-    const [filtersOpen, setFiltersOpen] = useState(false)
     const location = useLocation()
-    const history = useHistory()
     const spaceHandle = location.pathname.split('/')[2]
 
     // calculate params
@@ -38,13 +34,6 @@ const SpacePagePeople = (): JSX.Element => {
     Object.keys(urlParams).forEach((param) => {
         params[param] = urlParams[param]
     })
-
-    function applyParam(type, value) {
-        history.push({
-            pathname: location.pathname,
-            search: getParamString(params, type, value),
-        })
-    }
 
     useEffect(() => {
         if (spaceData.handle !== spaceHandle) setSpacePeopleLoading(true)
@@ -72,12 +61,7 @@ const SpacePagePeople = (): JSX.Element => {
     if (spaceNotFound) return <SpaceNotFound />
     return (
         <Column className={styles.wrapper}>
-            <SpacePagePeopleHeader
-                applyParam={applyParam}
-                filtersOpen={filtersOpen}
-                setFiltersOpen={setFiltersOpen}
-            />
-            {filtersOpen && <SpacePagePeopleFilters params={params} applyParam={applyParam} />}
+            <SpacePagePeopleHeader params={params} />
             <Row className={styles.content}>
                 <PeopleList
                     people={spacePeople}
