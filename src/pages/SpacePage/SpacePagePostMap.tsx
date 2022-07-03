@@ -649,7 +649,7 @@ const SpacePagePostMap = (props: { postMapData: any; params: any }): JSX.Element
                         />
                     </div>
                 </div>
-                <div className={styles.key}>
+                {/* <div className={styles.key}>
                     <div
                         role='button'
                         tabIndex={0}
@@ -730,7 +730,7 @@ const SpacePagePostMap = (props: { postMapData: any; params: any }): JSX.Element
                             </div>
                         </div>
                     )}
-                </div>
+                </div> */}
             </div>
             <div id='canvas' />
             {postModalOpen && (
