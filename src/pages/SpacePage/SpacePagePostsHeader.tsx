@@ -4,7 +4,7 @@ import { AccountContext } from '@contexts/AccountContext'
 // import { SpaceContext } from '@contexts/SpaceContext'
 import { getParamString } from '@src/Helpers'
 import styles from '@styles/pages/SpacePage/SpacePageHeader.module.scss'
-import DropDownMenu from '@components/DropDown'
+import DropDown from '@components/DropDown'
 import SearchBar from '@components/SearchBar'
 import Toggle from '@components/Toggle'
 import Button from '@components/Button'
@@ -87,9 +87,8 @@ const SpacePagePostsHeader = (props: { params: any }): JSX.Element => {
             )}
             {filtersModalOpen && (
                 <Modal centered close={() => setFiltersModalOpen(false)}>
-                    <h1>Filters</h1>
-                    <p>Apply filters to the posts</p>
-                    <DropDownMenu
+                    <h1>Post Filters</h1>
+                    <DropDown
                         title='Post Type'
                         options={[
                             'All Types',
@@ -109,7 +108,7 @@ const SpacePagePostsHeader = (props: { params: any }): JSX.Element => {
                         }
                         style={{ marginBottom: 20 }}
                     />
-                    <DropDownMenu
+                    <DropDown
                         title={filterParams.view === 'Map' ? 'Size By' : 'Sort By'}
                         options={['Likes', 'Comments', 'Reposts', 'Ratings', 'Date']}
                         selectedOption={filterParams.sortBy}
@@ -118,7 +117,7 @@ const SpacePagePostsHeader = (props: { params: any }): JSX.Element => {
                         }
                         style={{ marginBottom: 20 }}
                     />
-                    <DropDownMenu
+                    <DropDown
                         title={filterParams.view === 'Map' ? 'Size Order' : 'Sort Order'}
                         options={['Descending', 'Ascending']}
                         selectedOption={filterParams.sortOrder}
@@ -127,7 +126,7 @@ const SpacePagePostsHeader = (props: { params: any }): JSX.Element => {
                         }
                         style={{ marginBottom: 20 }}
                     />
-                    <DropDownMenu
+                    <DropDown
                         title='Time Range'
                         options={[
                             'All Time',
@@ -143,7 +142,7 @@ const SpacePagePostsHeader = (props: { params: any }): JSX.Element => {
                         }
                         style={{ marginBottom: 20 }}
                     />
-                    <DropDownMenu
+                    <DropDown
                         title='Depth'
                         options={['All Contained Posts', 'Only Direct Posts']}
                         selectedOption={filterParams.depth}
@@ -167,7 +166,7 @@ const SpacePagePostsHeader = (props: { params: any }): JSX.Element => {
             )}
             {lensesModalOpen && (
                 <Modal centered close={() => setLensesModalOpen(false)}>
-                    <h1>Lenses</h1>
+                    <h1>Post Lenses</h1>
                     <p>Choose how to display the posts</p>
                     <Toggle
                         leftText='List'

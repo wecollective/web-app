@@ -1,13 +1,11 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { useLocation, useHistory } from 'react-router-dom'
-import { getParamString } from '@src/Helpers'
+import React, { useContext, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import { AccountContext } from '@src/contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import styles from '@styles/pages/SpacePage/SpacePageSpaces.module.scss'
 import Column from '@components/Column'
 import Row from '@components/Row'
 import SpacePageSpacesHeader from '@pages/SpacePage/SpacePageSpacesHeader'
-import SpacePageSpacesFilters from '@pages/SpacePage/SpacePageSpacesFilters'
 import SpaceList from '@components/SpaceList'
 import SpacePageSpaceMap from '@pages/SpacePage/SpacePageSpaceMap'
 import SpaceNotFound from '@pages/SpaceNotFound'
@@ -30,9 +28,7 @@ const SpacePageSpaces = (): JSX.Element => {
         spaceSpacesPaginationLimit,
     } = useContext(SpaceContext)
     const location = useLocation()
-    const history = useHistory()
     const spaceHandle = location.pathname.split('/')[2]
-    const [filtersOpen, setFiltersOpen] = useState(false)
 
     // calculate params
     const urlParams = Object.fromEntries(new URLSearchParams(location.search))
@@ -40,14 +36,6 @@ const SpacePageSpaces = (): JSX.Element => {
     Object.keys(urlParams).forEach((param) => {
         params[param] = urlParams[param]
     })
-
-    function applyParam(type, value) {
-        if (type === 'searchQuery') params.depth = 'All Contained Spaces'
-        history.push({
-            pathname: location.pathname,
-            search: getParamString(params, type, value),
-        })
-    }
 
     useEffect(() => {
         if (spaceData.handle !== spaceHandle) setSpaceSpacesLoading(true)
@@ -71,13 +59,7 @@ const SpacePageSpaces = (): JSX.Element => {
     if (spaceNotFound) return <SpaceNotFound />
     return (
         <Column className={styles.wrapper}>
-            <SpacePageSpacesHeader
-                filtersOpen={filtersOpen}
-                setFiltersOpen={setFiltersOpen}
-                params={params}
-                applyParam={applyParam}
-            />
-            {filtersOpen && <SpacePageSpacesFilters params={params} applyParam={applyParam} />}
+            <SpacePageSpacesHeader params={params} />
             <Row centerX className={styles.content}>
                 {params.view === 'List' && (
                     <Column centerX className={styles.spaceListView}>

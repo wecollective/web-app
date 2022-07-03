@@ -3,7 +3,6 @@ import { useLocation } from 'react-router-dom'
 import { AccountContext } from '@src/contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import styles from '@styles/pages/SpacePage/SpacePagePosts.module.scss'
-// import SpacePagePostsFilters from '@pages/SpacePage/SpacePagePostsFilters'
 import Row from '@components/Row'
 import Column from '@components/Column'
 import SpacePagePostsHeader from '@pages/SpacePage/SpacePagePostsHeader'
@@ -30,9 +29,7 @@ const SpacePagePosts = (): JSX.Element => {
         spacePostsPaginationHasMore,
     } = useContext(SpaceContext)
     const location = useLocation()
-    // const history = useHistory()
     const spaceHandle = location.pathname.split('/')[2]
-    // const [filtersOpen, setFiltersOpen] = useState(false)
     const [showNavList, setShowNavList] = useState(false)
 
     // calculate params
