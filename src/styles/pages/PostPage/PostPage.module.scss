@@ -1,12 +1,10 @@
 @import '@styles/Variables';
 
 .wrapper {
-    min-height: calc(100vh - #{$navbarHeight});
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    width: 100%;
+    margin-top: 70px;
 }
 .postCardWrapper {
-    margin-top: 70px;
-    width: 800px;
+    width: calc(100% - 20px);
+    max-width: 800px;
 }

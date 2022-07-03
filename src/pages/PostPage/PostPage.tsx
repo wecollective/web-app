@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 import styles from '@styles/pages/PostPage/PostPage.module.scss'
 import { AccountContext } from '@contexts/AccountContext'
 import { PostContext } from '@contexts/PostContext'
+import Column from '@components/Column'
 import PostCard from '@components/Cards/PostCard/PostCard'
 import Prism from '@components/Prism'
 import PlotGraph from '@components/PlotGraph'
@@ -35,11 +36,11 @@ const PostPage = (): JSX.Element => {
     }
 
     return (
-        <div className={styles.wrapper}>
-            <div className={styles.postCardWrapper}>
+        <Column centerX className={styles.wrapper}>
+            <Column className={styles.postCardWrapper}>
                 {postData.id && <PostCard post={postData} location='post-page' />}
-            </div>
-        </div>
+            </Column>
+        </Column>
     )
 }
 
