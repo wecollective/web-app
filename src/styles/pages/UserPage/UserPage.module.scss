@@ -12,6 +12,7 @@
         z-index: 50;
         position: sticky;
         top: 130px;
+        padding: 0 20px;
 
         .userData {
             position: relative;
@@ -54,6 +55,7 @@
             }
 
             .userName {
+                word-break: break-word;
                 min-height: 50px;
                 margin-right: 20px;
                 > h1 {

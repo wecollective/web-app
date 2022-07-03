@@ -17,6 +17,7 @@ const UserPagePostsHeader = (props: { params: any }): JSX.Element => {
     const [filterParams, setFilterParams] = useState(params)
     const location = useLocation()
     const history = useHistory()
+    const mobileView = document.documentElement.clientWidth < 900
 
     useEffect(() => setFilterParams(params), [params])
 
@@ -34,7 +35,7 @@ const UserPagePostsHeader = (props: { params: any }): JSX.Element => {
             />
             <Button
                 icon={<SlidersIconSVG />}
-                text='Filters'
+                text={mobileView ? '' : 'Filters'}
                 color='aqua'
                 style={{ marginRight: 10 }}
                 onClick={() => setFiltersModalOpen(true)}

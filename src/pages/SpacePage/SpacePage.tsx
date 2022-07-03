@@ -130,19 +130,23 @@ const SpacePage = (): JSX.Element => {
                             </button>
                         )}
                     </div>
-                    <Column className={styles.spaceName}>
-                        <h1>{spaceData.name}</h1>
-                        <p className='grey'>s/{spaceData.handle}</p>
-                    </Column>
-                    {spaceHandle !== 'all' && loggedIn && (
-                        <Button
-                            icon={isFollowing ? <SuccessIconSVG /> : undefined}
-                            text={isFollowing ? 'Joined' : 'Join'}
-                            color='blue'
-                            disabled={spaceHandle !== spaceData.handle}
-                            onClick={joinSpace}
-                        />
-                    )}
+                    <div className={styles.info}>
+                        <Column className={styles.spaceName}>
+                            <h1>{spaceData.name}</h1>
+                            <p className='grey'>s/{spaceData.handle}</p>
+                        </Column>
+                        {spaceHandle !== 'all' && loggedIn && (
+                            <Row>
+                                <Button
+                                    icon={isFollowing ? <SuccessIconSVG /> : undefined}
+                                    text={isFollowing ? 'Joined' : 'Join'}
+                                    color='blue'
+                                    disabled={spaceHandle !== spaceData.handle}
+                                    onClick={joinSpace}
+                                />
+                            </Row>
+                        )}
+                    </div>
                 </Row>
                 <PageTabs tabs={tabs} />
             </Column>
