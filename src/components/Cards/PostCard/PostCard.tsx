@@ -462,44 +462,40 @@ const PostCard = (props: {
                 )}
                 {type === 'image' && (
                     <Column>
-                        <Column>
-                            {text && (
-                                <ShowMoreLess height={150}>
-                                    <Markdown text={text} />
-                                </ShowMoreLess>
-                            )}
-                            <Row centerX>
-                                {images.length > 0 && (
-                                    <Scrollbars className={`${styles.images} row`}>
-                                        {images.map((image) => (
-                                            <Column
-                                                centerX
-                                                className={`${styles.image} ${
-                                                    styles[findImageSize()]
-                                                }`}
-                                                key={image.index}
+                        {text && (
+                            <ShowMoreLess height={150}>
+                                <Markdown text={text} />
+                            </ShowMoreLess>
+                        )}
+                        <Row centerX>
+                            {images.length > 0 && (
+                                <Scrollbars className={`${styles.images} row`}>
+                                    {images.map((image) => (
+                                        <Column
+                                            centerX
+                                            className={`${styles.image} ${styles[findImageSize()]}`}
+                                            key={image.index}
+                                        >
+                                            <button
+                                                type='button'
+                                                onClick={() => openImageModal(image.id)}
                                             >
-                                                <button
-                                                    type='button'
-                                                    onClick={() => openImageModal(image.id)}
-                                                >
-                                                    <img src={image.url} alt='' />
-                                                </button>
-                                                {image.caption && <p>{image.caption}</p>}
-                                            </Column>
-                                        ))}
-                                    </Scrollbars>
-                                )}
-                            </Row>
-                            {imageModalOpen && (
-                                <ImageModal
-                                    images={images}
-                                    selectedImage={selectedImage}
-                                    setSelectedImage={setSelectedImage}
-                                    close={() => setImageModalOpen(false)}
-                                />
+                                                <img src={image.url} alt='' />
+                                            </button>
+                                            {image.caption && <p>{image.caption}</p>}
+                                        </Column>
+                                    ))}
+                                </Scrollbars>
                             )}
-                        </Column>
+                        </Row>
+                        {imageModalOpen && (
+                            <ImageModal
+                                images={images}
+                                selectedImage={selectedImage}
+                                setSelectedImage={setSelectedImage}
+                                close={() => setImageModalOpen(false)}
+                            />
+                        )}
                     </Column>
                 )}
                 {type === 'audio' && (

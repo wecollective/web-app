@@ -25,6 +25,7 @@ const SpacePagePostsHeader = (props: {
     const [createPostModalOpen, setCreatePostModalOpen] = useState(false)
     const [viewModalOpen, setViewModalOpen] = useState(false)
     const mobileView = document.documentElement.clientWidth < 900
+    const smallMobileView = document.documentElement.clientWidth < 400
 
     function openCreatePostModal(type) {
         if (loggedIn) {
@@ -39,9 +40,8 @@ const SpacePagePostsHeader = (props: {
     return (
         <Row centerY centerX className={styles.wrapper}>
             <Button
-                // icon={mobileView ? <PlusIconSVG /> : undefined}
-                // text={mobileView ? '' : 'New post'}
-                text='New post'
+                icon={smallMobileView ? <PlusIconSVG /> : undefined}
+                text={smallMobileView ? '' : 'New post'}
                 color='blue'
                 onClick={() => openCreatePostModal('Text')}
                 style={{ marginRight: 10 }}

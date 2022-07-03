@@ -5,6 +5,7 @@
     margin-top: 70px;
 }
 .postCardWrapper {
-    width: calc(100% - 20px);
+    width: 100%;
     max-width: 800px;
+    @include for-tablet-portrait-up { width: calc(100% - 20px) }
 }

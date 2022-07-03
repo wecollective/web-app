@@ -33,14 +33,9 @@ const PostList = (props: {
             {firstPostsloading ? (
                 <PostListPlaceholder />
             ) : posts.length ? (
-                <Column>
+                <Column className={styles.posts}>
                     {posts.map((post) => (
-                        <PostCard
-                            post={post}
-                            key={post.id}
-                            location={location}
-                            style={{ marginBottom: 15 }}
-                        />
+                        <PostCard post={post} key={post.id} location={location} />
                     ))}
                     {nextPostsLoading && (
                         <Row centerX>
