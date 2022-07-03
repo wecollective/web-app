@@ -7,6 +7,7 @@ import Button from '@components/Button'
 import Row from '@components/Row'
 import Modal from '@components/Modal'
 import CreateSpaceModal from '@src/components/modals/CreateSpaceModal'
+import { ReactComponent as PlusIconSVG } from '@svgs/plus.svg'
 import { ReactComponent as SlidersIconSVG } from '@svgs/sliders-h-solid.svg'
 import { ReactComponent as EyeIconSVG } from '@svgs/eye-solid.svg'
 
@@ -19,7 +20,9 @@ const SpacePageSpacesHeader = (props: {
     const { filtersOpen, setFiltersOpen, params, applyParam } = props
     const { loggedIn, setAlertModalOpen, setAlertMessage } = useContext(AccountContext)
     const [createSpaceModalOpen, setCreateSpaceModalOpen] = useState(false)
-    const [viewModalOpen, setViewModalOpen] = useState(false)
+    const [lensesModalOpen, setLensesModalOpen] = useState(false)
+    const mobileView = document.documentElement.clientWidth < 900
+    const smallMobileView = document.documentElement.clientWidth < 400
 
     function openCreateSpaceModal() {
         if (loggedIn) setCreateSpaceModalOpen(true)
@@ -32,7 +35,8 @@ const SpacePageSpacesHeader = (props: {
     return (
         <Row centerY centerX className={styles.wrapper}>
             <Button
-                text='New space'
+                icon={smallMobileView ? <PlusIconSVG /> : undefined}
+                text={smallMobileView ? '' : 'New space'}
                 color='blue'
                 onClick={openCreateSpaceModal}
                 style={{ marginRight: 10 }}
@@ -44,23 +48,23 @@ const SpacePageSpacesHeader = (props: {
             />
             <Button
                 icon={<SlidersIconSVG />}
-                text='Filters'
+                text={mobileView ? '' : 'Filters'}
                 color='aqua'
                 style={{ marginRight: 10 }}
                 onClick={() => setFiltersOpen(!filtersOpen)}
             />
             <Button
                 icon={<EyeIconSVG />}
-                text='View'
+                text={mobileView ? '' : 'Lenses'}
                 color='purple'
-                onClick={() => setViewModalOpen(true)}
+                onClick={() => setLensesModalOpen(true)}
             />
             {createSpaceModalOpen && (
                 <CreateSpaceModal close={() => setCreateSpaceModalOpen(false)} />
             )}
-            {viewModalOpen && (
-                <Modal centered close={() => setViewModalOpen(false)}>
-                    <h1>Views</h1>
+            {lensesModalOpen && (
+                <Modal centered close={() => setLensesModalOpen(false)}>
+                    <h1>Lenses</h1>
                     <p>Choose how to display the spaces</p>
                     <Toggle
                         leftText='List'

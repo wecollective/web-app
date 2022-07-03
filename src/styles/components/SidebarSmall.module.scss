@@ -7,11 +7,10 @@
     left: 0;
     top: $navbarHeight;
     z-index: $sidebarSmallZIndex;
+    display: none !important;
+    @include for-tablet-landscape-up { display: flex !important }
 
     .container {
-        display: none;
-        @include for-tablet-landscape-up { display: flex }
-
         background-color: rgba(black, 0.5);
         padding-top: 10px;
         width: 70px;

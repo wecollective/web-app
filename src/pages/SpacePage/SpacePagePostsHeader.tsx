@@ -23,7 +23,7 @@ const SpacePagePostsHeader = (props: {
     // const { spaceData } = useContext(SpaceContext)
     const [createPostModalType, setCreatePostModalType] = useState('Text')
     const [createPostModalOpen, setCreatePostModalOpen] = useState(false)
-    const [viewModalOpen, setViewModalOpen] = useState(false)
+    const [lensesModalOpen, setLensesModalOpen] = useState(false)
     const mobileView = document.documentElement.clientWidth < 900
     const smallMobileView = document.documentElement.clientWidth < 400
 
@@ -70,7 +70,7 @@ const SpacePagePostsHeader = (props: {
                 icon={<EyeIconSVG />}
                 text={mobileView ? '' : 'Lenses'}
                 color='purple'
-                onClick={() => setViewModalOpen(true)}
+                onClick={() => setLensesModalOpen(true)}
             />
             {createPostModalOpen && (
                 <CreatePostModal
@@ -78,9 +78,9 @@ const SpacePagePostsHeader = (props: {
                     close={() => setCreatePostModalOpen(false)}
                 />
             )}
-            {viewModalOpen && (
-                <Modal centered close={() => setViewModalOpen(false)}>
-                    <h1>Views</h1>
+            {lensesModalOpen && (
+                <Modal centered close={() => setLensesModalOpen(false)}>
+                    <h1>Lenses</h1>
                     <p>Choose how to display the posts</p>
                     <Toggle
                         leftText='List'
