@@ -36,8 +36,10 @@
         width: 100%;
 
         .logo {
-            width: 350px;
+            width: 300px;
             margin-top: 30px;
+
+            @include for-tablet-landscape-up { width: 350px }
         }
 
         > h1 {

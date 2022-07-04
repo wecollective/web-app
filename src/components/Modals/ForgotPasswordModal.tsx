@@ -68,7 +68,7 @@ const ForgotPasswordModal = (props: { close: () => void }): JSX.Element => {
     })
 
     return (
-        <Modal close={close} style={{ minWidth: 350 }} centered>
+        <Modal close={close} centered>
             <h1>Reset password</h1>
             <form onSubmit={sendResetLink}>
                 <Input

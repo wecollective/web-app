@@ -117,7 +117,7 @@ const RegisterModal = (props: { close: () => void }): JSX.Element => {
     })
 
     return (
-        <Modal close={close} style={{ minWidth: 350 }} centered>
+        <Modal close={close} centered>
             <h1>Create a new account</h1>
             <form onSubmit={register}>
                 <Input

@@ -1,7 +1,8 @@
 @import '@styles/Variables';
 
 .wrapper {
-
+    overflow: hidden;
+    
     .row {
         transition: width 1s;
         margin-bottom: 40px;

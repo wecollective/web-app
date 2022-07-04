@@ -119,7 +119,7 @@ const LogInModal = (props: { close: () => void }): JSX.Element => {
     }, [])
 
     return (
-        <Modal close={close} style={{ minWidth: 350 }} centered>
+        <Modal close={close} centered>
             <h1>Log in</h1>
             <form onSubmit={logIn}>
                 <Column style={{ marginBottom: 20, width: '100%' }}>

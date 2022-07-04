@@ -3,8 +3,7 @@ import axios from 'axios'
 import config from '@src/Config'
 import { AccountContext } from '@contexts/AccountContext'
 import styles from '@styles/components/modals/ResetPasswordModal.module.scss'
-import CloseButton from '../CloseButton'
-import CloseOnClickOutside from '../CloseOnClickOutside'
+import Modal from '@components/Modal'
 
 const ResetPasswordModal = (): JSX.Element => {
     const { setResetPasswordModalOpen, resetPasswordModalToken } = useContext(AccountContext)
@@ -37,48 +36,41 @@ const ResetPasswordModal = (): JSX.Element => {
     }
 
     return (
-        <div className={styles.modalWrapper}>
-            <CloseOnClickOutside onClick={() => setResetPasswordModalOpen(false)}>
-                <div className={styles.modal}>
-                    <CloseButton size={20} onClick={() => setResetPasswordModalOpen(false)} />
-                    <span className={styles.title}>Reset your password</span>
-                    {flashMessage.length > 0 && (
-                        <span className={styles.flashMessage}>{flashMessage}</span>
-                    )}
-                    <input
-                        className={`wecoInput mt-10 mb-10 ${newPasswordError && 'error'}`}
-                        placeholder='New password'
-                        type='password'
-                        value={newPassword}
-                        onChange={(e) => {
-                            setNewPassword(e.target.value)
-                            setNewPasswordError(false)
-                            setFlashMessage('')
-                        }}
-                    />
-                    <input
-                        className={`wecoInput mb-30 ${newPassword2Error && 'error'}`}
-                        placeholder='Confirm new password'
-                        type='password'
-                        value={newPassword2}
-                        onChange={(e) => {
-                            setNewPassword2(e.target.value)
-                            setNewPassword2Error(false)
-                            setFlashMessage('')
-                        }}
-                    />
-                    <div
-                        className='wecoButton'
-                        role='button'
-                        tabIndex={0}
-                        onClick={() => resetPassword()}
-                        onKeyDown={() => resetPassword()}
-                    >
-                        Reset password
-                    </div>
-                </div>
-            </CloseOnClickOutside>
-        </div>
+        <Modal centered close={() => setResetPasswordModalOpen(false)}>
+            <h1>Reset your password</h1>
+            {flashMessage.length > 0 && <span className={styles.flashMessage}>{flashMessage}</span>}
+            <input
+                className={`wecoInput mt-10 mb-10 ${newPasswordError && 'error'}`}
+                placeholder='New password'
+                type='password'
+                value={newPassword}
+                onChange={(e) => {
+                    setNewPassword(e.target.value)
+                    setNewPasswordError(false)
+                    setFlashMessage('')
+                }}
+            />
+            <input
+                className={`wecoInput mb-30 ${newPassword2Error && 'error'}`}
+                placeholder='Confirm new password'
+                type='password'
+                value={newPassword2}
+                onChange={(e) => {
+                    setNewPassword2(e.target.value)
+                    setNewPassword2Error(false)
+                    setFlashMessage('')
+                }}
+            />
+            <div
+                className='wecoButton'
+                role='button'
+                tabIndex={0}
+                onClick={() => resetPassword()}
+                onKeyDown={() => resetPassword()}
+            >
+                Reset password
+            </div>
+        </Modal>
     )
 }
 
