@@ -13,9 +13,9 @@ import Button from '@components/Button'
 import ImageTitle from '@components/ImageTitle'
 import SpaceNavigationList from '@pages/SpacePage/SpaceNavigationList'
 import GlobalSearchBar from '@components/GlobalSearchBar'
+import Scrollbars from '@components/Scrollbars'
 import { ReactComponent as WecoLogo } from '@svgs/weco-logo.svg'
 import { ReactComponent as TreeIcon } from '@svgs/tree-icon.svg'
-// import { ReactComponent as HamburgerIcon } from '@svgs/bars-solid.svg'
 import { ReactComponent as ChevronDownIcon } from '@svgs/chevron-down-solid.svg'
 import { ReactComponent as SpacesIcon } from '@svgs/overlapping-circles-thick.svg'
 import { ReactComponent as PostsIcon } from '@svgs/edit-solid.svg'
@@ -123,7 +123,6 @@ const Navbar = (): JSX.Element => {
         <Row spaceBetween className={styles.wrapper}>
             <Row centerY id='mobile-left' className={styles.mobileLeft}>
                 <button type='button' onClick={() => toggleHamburgerMenu()}>
-                    {/* <HamburgerIcon /> */}
                     <TreeIcon />
                 </button>
                 {hamburgerMenuOpen && (
@@ -392,22 +391,24 @@ const Navbar = (): JSX.Element => {
                                             <p>Settings</p>
                                         </Link>
                                     </Column>
-                                    <Column>
-                                        <p className='grey'>Followed spaces</p>
-                                        {accountData.FollowedHolons.map((space) => (
-                                            <ImageTitle
-                                                key={space.id}
-                                                type='space'
-                                                imagePath={space.flagImagePath}
-                                                imageSize={35}
-                                                title={space.name}
-                                                fontSize={14}
-                                                link={`/s/${space.handle}/${selectedSpaceSubPage}`}
-                                                style={{ marginTop: 10 }}
-                                                onClick={() => toggleAccountMenu()}
-                                            />
-                                        ))}
-                                    </Column>
+                                    <p className='grey'>Followed spaces</p>
+                                    <Scrollbars style={{ marginTop: 10 }}>
+                                        <Column>
+                                            {accountData.FollowedHolons.map((space) => (
+                                                <ImageTitle
+                                                    key={space.id}
+                                                    type='space'
+                                                    imagePath={space.flagImagePath}
+                                                    imageSize={35}
+                                                    title={space.name}
+                                                    fontSize={14}
+                                                    link={`/s/${space.handle}/${selectedSpaceSubPage}`}
+                                                    style={{ marginBottom: 10 }}
+                                                    onClick={() => toggleAccountMenu()}
+                                                />
+                                            ))}
+                                        </Column>
+                                    </Scrollbars>
                                 </Column>
                             </>
                         )}
