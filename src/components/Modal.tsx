@@ -5,18 +5,21 @@ import CloseButton from '@components/CloseButton'
 
 const Modal = (props: {
     close: () => void
-    children: any
-    style?: any
     centered?: boolean
+    className?: any
+    style?: any
+    children: any
 }): JSX.Element => {
-    const { close, children, style, centered } = props
+    const { close, centered, className, style, children } = props
+
+    const classes = [styles.modal]
+    if (className) classes.unshift(className)
+    if (centered) classes.push(styles.centered)
+
     return (
         <div className={`${styles.background} hide-scrollbars`}>
             <CloseOnClickOutside onClick={close}>
-                <div
-                    className={`${styles.modal} ${centered && styles.centered} hide-scrollbars`}
-                    style={style}
-                >
+                <div className={`${classes.join(' ')} hide-scrollbars`} style={style}>
                     <div className={styles.closeButtonWrapper}>
                         <CloseButton size={20} onClick={close} />
                     </div>
@@ -28,8 +31,9 @@ const Modal = (props: {
 }
 
 Modal.defaultProps = {
-    style: null,
     centered: false,
+    className: false,
+    style: null,
 }
 
 export default Modal
