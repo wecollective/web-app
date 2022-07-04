@@ -33,7 +33,7 @@ const StringBeadCard = (props: {
     const [audioPlaying, setAudioPlaying] = useState(false)
     const [imageModalOpen, setImageModalOpen] = useState(false)
     const [selectedImage, setSelectedImage] = useState<any>(null)
-    const images = bead.PostImages.sort((a, b) => a.index - b.index)
+    const images = bead.PostImages ? bead.PostImages.sort((a, b) => a.index - b.index) : []
 
     function findBeadIcon(beadType) {
         switch (beadType) {
@@ -73,8 +73,7 @@ const StringBeadCard = (props: {
     return (
         <Column className={styles.wrapper} style={style}>
             <Row spaceBetween className={styles.beadHeader}>
-                {findBeadIcon(bead.type)}
-                {postType === 'weave' && (
+                {['glass-bead-game', 'weave'].includes(postType) && (
                     <ImageTitle
                         type='user'
                         imagePath={bead.Creator.flagImagePath}
@@ -84,6 +83,7 @@ const StringBeadCard = (props: {
                         style={{ marginRight: 10 }}
                     />
                 )}
+                {findBeadIcon(bead.type)}
             </Row>
             <Column centerY className={styles.beadContent}>
                 {bead.type === 'string-text' && (

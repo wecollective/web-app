@@ -310,11 +310,6 @@
                 line-height: 24px;
             }
         }
-    
-        .gbgBeads {
-            padding: 7px 0px 15px 10px;
-            margin: 5px 0 0 -10px;
-        }
 
         .noSavedBeads {
             margin: 10px 0;
@@ -326,8 +321,8 @@
             cursor: pointer;
         }
 
-        // string posts
-        .stringBeads {
+        // gbgs, strings, and weaves
+        .beadDraw {
             padding: 15px 15px 10px 15px;
             margin-bottom: -5px;
             background-color: $grey1;

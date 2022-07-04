@@ -741,7 +741,7 @@ const PostCard = (props: {
                                 )}
                             </Column>
                         )}
-                        <Row>
+                        <Row style={{ marginBottom: beads.length ? 15 : 0 }}>
                             <Button
                                 text='Open game room'
                                 color='gbg-white'
@@ -750,21 +750,38 @@ const PostCard = (props: {
                                 onClick={() => history.push(`/p/${id}`)}
                             />
                         </Row>
-                        {beads.length > 0 && (
-                            <Scrollbars className={`${styles.gbgBeads} row`}>
-                                {beads.map((bead, beadIndex) => (
-                                    <BeadCard
-                                        key={bead.id}
-                                        postId={id}
-                                        location={location}
-                                        bead={bead}
-                                        index={beadIndex + 1}
-                                        style={{ marginRight: 12 }}
-                                    />
-                                ))}
-                                <span style={{ marginLeft: -5, width: 5, flexShrink: 0 }} />
-                            </Scrollbars>
-                        )}
+                        <Row centerX>
+                            {beads.length > 0 && (
+                                <Scrollbars className={`${styles.beadDraw} row`}>
+                                    {beads.map((bead, i) => (
+                                        <Row key={bead.id}>
+                                            <StringBeadCard
+                                                bead={{
+                                                    type: 'string-audio',
+                                                    Creator: bead.user,
+                                                    url: bead.beadUrl,
+                                                }}
+                                                postId={id}
+                                                postType={postData.type}
+                                                beadIndex={i}
+                                                location={location}
+                                                style={{
+                                                    marginRight:
+                                                        beads.length > 2 && i === beads.length - 1
+                                                            ? 15
+                                                            : 0,
+                                                }}
+                                            />
+                                            {i < beads.length - 1 && (
+                                                <Row centerY className={styles.beadDivider}>
+                                                    <DNAIcon />
+                                                </Row>
+                                            )}
+                                        </Row>
+                                    ))}
+                                </Scrollbars>
+                            )}
+                        </Row>
                     </Column>
                 )}
                 {type === 'string' && (
@@ -777,7 +794,7 @@ const PostCard = (props: {
                             </Column>
                         )}
                         <Row centerX>
-                            <Scrollbars className={`${styles.stringBeads} row`}>
+                            <Scrollbars className={`${styles.beadDraw} row`}>
                                 {StringPosts.map((bead, i) => (
                                     <Row key={bead.id}>
                                         <StringBeadCard
@@ -886,7 +903,7 @@ const PostCard = (props: {
                         )}
                         {playersReady && (
                             <Row centerX>
-                                <Scrollbars className={`${styles.stringBeads} row`}>
+                                <Scrollbars className={`${styles.beadDraw} row`}>
                                     {StringPosts.map((bead, i) => (
                                         <Row key={bead.id}>
                                             <StringBeadCard
