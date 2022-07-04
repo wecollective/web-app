@@ -542,7 +542,7 @@ const PostCard = (props: {
                                 <Markdown text={text} />
                             </ShowMoreLess>
                         )}
-                        <Row centerY className={styles.eventTimes}>
+                        <Row wrap centerY className={styles.eventTimes}>
                             <ClockIcon />
                             <p>{findEventTimes()}</p>
                             <p>{findEventDuration()}</p>
@@ -651,7 +651,7 @@ const PostCard = (props: {
                         </Row>
                         {Event && (
                             <Column>
-                                <Row centerY className={styles.eventTimes}>
+                                <Row wrap centerY className={styles.eventTimes}>
                                     <ClockIcon />
                                     <p>{findEventTimes()}</p>
                                     <p>{findEventDuration()}</p>
@@ -832,7 +832,7 @@ const PostCard = (props: {
                                 )}
                                 {!playersRejected.length && playersPending.length > 0 && (
                                     <Row centerY>
-                                        <p>Waiting for {playersPending.length} to accept</p>
+                                        <p>Waiting for {playersPending.length}</p>
                                         <FlagImageHighlights
                                             type='user'
                                             imagePaths={playersPending.map((p) => p.flagImagePath)}
@@ -859,7 +859,11 @@ const PostCard = (props: {
                                 )}
                             </Row>
                         ) : (
-                            <Row spaceBetween style={{ marginBottom: 10, color: '#acacae' }}>
+                            <Row
+                                spaceBetween
+                                centerY
+                                style={{ marginBottom: 10, color: '#acacae' }}
+                            >
                                 <Row centerY>
                                     <UsersIcon style={{ width: 30, height: 30, marginRight: 5 }} />
                                     <p>Open to all users</p>

@@ -1135,15 +1135,15 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
     }, [endTime])
 
     return (
-        <Modal close={close} centered>
+        <Modal centered close={close} className={styles.wrapper}>
             {saved ? (
                 <SuccessMessage text='Post created!' />
             ) : (
-                <Column centerX>
+                <Column centerX style={{ width: '100%' }}>
                     {currentStep === 1 ? (
                         <h1>New post</h1>
                     ) : (
-                        <Column centerX className={styles.newTitle}>
+                        <Column centerX className={styles.title}>
                             <p>{postType}</p>
                             <Column centerX centerY>
                                 {findPostTypeValue(postType, 'icon')}
@@ -1152,7 +1152,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                     )}
 
                     {currentStep === 1 && (
-                        <Column centerX style={{ width: 500, marginBottom: 20 }}>
+                        <Column centerX>
                             <p>Choose a post type:</p>
                             <Row wrap centerX style={{ margin: '20px 0' }}>
                                 {postTypes.map((type) => (
@@ -1182,7 +1182,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                     )}
 
                     {postType === 'Text' && currentStep === 2 && (
-                        <Column centerX style={{ width: 400, marginBottom: 30 }}>
+                        <Column centerX style={{ width: '100%', marginBottom: 30 }}>
                             <Input
                                 type='text-area'
                                 placeholder='Add your text here...'
@@ -1201,9 +1201,9 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                     )}
 
                     {postType === 'Url' && (
-                        <Column centerX>
+                        <Column centerX style={{ width: '100%' }}>
                             {currentStep === 2 && (
-                                <Column centerX style={{ maxWidth: 600, marginBottom: 30 }}>
+                                <Column centerX style={{ width: '100%', marginBottom: 30 }}>
                                     <Input
                                         type='text'
                                         // prefix='https://'
@@ -1219,7 +1219,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                             })
                                             scrapeURL(value)
                                         }}
-                                        style={{ width: 400, marginBottom: 15 }}
+                                        style={{ width: '100%', maxWidth: 400, marginBottom: 15 }}
                                     />
                                     {urlData && (
                                         <Column className={styles.urlPreviewWrapper}>
@@ -1235,7 +1235,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                 </Column>
                             )}
                             {currentStep === 3 && (
-                                <Column centerX style={{ maxWidth: 600, marginBottom: 30 }}>
+                                <Column centerX style={{ width: '100%', marginBottom: 30 }}>
                                     <Input
                                         type='text-area'
                                         placeholder='Add a description for your URL here... (optional)'
@@ -1249,838 +1249,931 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                                 text: { ...urlForm2.text, value, state: 'default' },
                                             })
                                         }
-                                        style={{ width: 400 }}
+                                        style={{ width: '100%', maxWidth: 400 }}
                                     />
                                 </Column>
                             )}
                         </Column>
                     )}
 
-                    {postType === 'Image' && currentStep === 2 && (
-                        <Column centerX style={{ marginBottom: 30 }}>
-                            {imagePostError && (
-                                <p className='danger' style={{ marginBottom: 10 }}>
-                                    No images added yet
-                                </p>
-                            )}
-                            <Row centerX style={{ maxWidth: 600 }}>
-                                {images.length > 0 && (
-                                    <Scrollbars className={`${styles.images} row`}>
-                                        {images.map((image, index) => (
-                                            <Column centerX className={styles.image} key={index}>
-                                                <CloseButton
-                                                    size={20}
-                                                    onClick={() => removeImage(index)}
-                                                />
-                                                <img
-                                                    src={
-                                                        image.url || URL.createObjectURL(image.file)
-                                                    }
-                                                    alt=''
-                                                />
-                                                {image.caption && <p>{image.caption}</p>}
-                                                <Row centerY style={{ width: 220 }}>
-                                                    <Input
-                                                        type='text'
-                                                        placeholder={`${
-                                                            image.caption ? 'change' : 'add'
-                                                        } caption...`}
-                                                        value={image.newCaption}
-                                                        onChange={(v) => updateNewCaption(index, v)}
-                                                        style={{ marginRight: 5 }}
-                                                    />
-                                                    <Button
-                                                        icon={<PlusIcon />}
-                                                        color='grey'
-                                                        onClick={() => updateCaption(index)}
-                                                        style={{ padding: '0 10px' }}
-                                                    />
-                                                </Row>
-                                                <Row centerX className={styles.itemFooter}>
-                                                    {index !== 0 && (
-                                                        <button
-                                                            type='button'
-                                                            onClick={() => moveImage(index, -1)}
-                                                        >
-                                                            <ChevronLeftIcon />
-                                                        </button>
-                                                    )}
-                                                    {index < images.length - 1 && (
-                                                        <button
-                                                            type='button'
-                                                            onClick={() => moveImage(index, 1)}
-                                                        >
-                                                            <ChevronRightIcon />
-                                                        </button>
-                                                    )}
-                                                </Row>
-                                            </Column>
-                                        ))}
-                                    </Scrollbars>
-                                )}
-                            </Row>
-                            {imageSizeError && (
-                                <p className='danger' style={{ marginBottom: 10 }}>
-                                    Max file size: {imageMBLimit}MB
-                                </p>
-                            )}
-                            {toalImageSizeError && (
-                                <p className='danger' style={{ marginBottom: 10 }}>
-                                    Total image upload size must be less than {totalMBUploadLimit}
-                                    MB. (Current size: {totalImageSize.toFixed(2)}MB)
-                                </p>
-                            )}
-                            <Row className={styles.fileUploadInput}>
-                                <label htmlFor='image-post-file-input'>
-                                    Upload images
-                                    <input
-                                        type='file'
-                                        id='image-post-file-input'
-                                        accept='.png, .jpg, .jpeg, .gif'
-                                        onChange={addImageFiles}
-                                        multiple
-                                        hidden
-                                    />
-                                </label>
-                            </Row>
-                            <p>or paste an image URL:</p>
-                            <Row style={{ marginTop: 5 }}>
-                                <Input
-                                    type='text'
-                                    placeholder='image url...'
-                                    value={imageURL}
-                                    onChange={(v) => setImageURL(v)}
-                                    style={{ margin: '0 10px 10px 0' }}
-                                />
-                                <Button
-                                    text='Add'
-                                    color='aqua'
-                                    disabled={imageURL === ''}
-                                    onClick={addImageURL}
-                                />
-                            </Row>
-                        </Column>
-                    )}
-
-                    {postType === 'Image' && currentStep === 3 && (
-                        <Column centerX style={{ maxWidth: 600, marginBottom: 30 }}>
-                            <Input
-                                type='text-area'
-                                placeholder='Add a description for your images here... (optional)'
-                                rows={4}
-                                value={imageForm.text.value}
-                                state={imageForm.text.state}
-                                errors={imageForm.text.errors}
-                                onChange={(value) =>
-                                    setImageForm({
-                                        ...imageForm,
-                                        text: { ...imageForm.text, value, state: 'default' },
-                                    })
-                                }
-                                style={{ width: 400 }}
-                            />
-                        </Column>
-                    )}
-
-                    {postType === 'Audio' && currentStep === 2 && (
-                        <Column centerX>
-                            <Column className={styles.errors}>
-                                {audioSizeError && (
-                                    <p>Audio too large. Max size: {audioMBLimit}MB</p>
-                                )}
-                                {audioPostError && <p>Audio recording or upload required</p>}
-                            </Column>
-                            <Row style={{ marginBottom: 20 }}>
-                                <Button
-                                    text='Record audio'
-                                    color='blue'
-                                    style={{ marginRight: 10 }}
-                                    onClick={() => {
-                                        resetAudioState()
-                                        setAudioSizeError(false)
-                                        setShowRecordControls(true)
-                                    }}
-                                />
-                                <Row className={styles.fileUploadInput}>
-                                    <label htmlFor='audio-file-input'>
-                                        Upload audio
-                                        <input
-                                            type='file'
-                                            id='audio-file-input'
-                                            accept='.mp3'
-                                            onChange={selectAudioFile}
-                                            hidden
-                                        />
-                                    </label>
-                                </Row>
-                            </Row>
-                            {audioFile && (
-                                <Column
-                                    key={audioFile.lastModified}
-                                    style={{ width: 500, marginBottom: 20 }}
-                                >
-                                    <p>{audioFile.name}</p>
-                                    <AudioVisualiser
-                                        audioElementId='new-post-audio'
-                                        audioURL={URL.createObjectURL(audioFile)}
-                                        staticBars={1200}
-                                        staticColor={colors.audioVisualiserColor}
-                                        dynamicBars={160}
-                                        dynamicColor={colors.audioVisualiserColor}
-                                        style={{ height: 80, margin: '20px 0 10px 0' }}
-                                    />
-                                    <Row centerY>
-                                        <button
-                                            className={styles.playButton}
-                                            type='button'
-                                            aria-label='toggle-audio'
-                                            onClick={toggleAudio}
-                                        >
-                                            {audioPlaying ? <PauseIcon /> : <PlayIcon />}
-                                        </button>
-                                        <AudioTimeSlider
-                                            audioElementId='new-post-audio'
-                                            audioURL={URL.createObjectURL(audioFile)}
-                                            location='preview'
-                                            onPlay={() => setAudioPlaying(true)}
-                                            onPause={() => setAudioPlaying(false)}
-                                            onEnded={() => setAudioPlaying(false)}
-                                        />
+                    {postType === 'Image' && (
+                        <Column centerX style={{ width: '100%' }}>
+                            {currentStep === 2 && (
+                                <Column centerX style={{ width: '100%', marginBottom: 30 }}>
+                                    {imagePostError && (
+                                        <p className='danger' style={{ marginBottom: 10 }}>
+                                            No images added yet
+                                        </p>
+                                    )}
+                                    <Row centerX style={{ width: '100%' }}>
+                                        {images.length > 0 && (
+                                            <Scrollbars className={`${styles.images} row`}>
+                                                {images.map((image, index) => (
+                                                    <Column
+                                                        centerX
+                                                        className={styles.image}
+                                                        key={index}
+                                                    >
+                                                        <CloseButton
+                                                            size={20}
+                                                            onClick={() => removeImage(index)}
+                                                        />
+                                                        <img
+                                                            src={
+                                                                image.url ||
+                                                                URL.createObjectURL(image.file)
+                                                            }
+                                                            alt=''
+                                                        />
+                                                        {image.caption && <p>{image.caption}</p>}
+                                                        <Row centerY style={{ width: 220 }}>
+                                                            <Input
+                                                                type='text'
+                                                                placeholder={`${
+                                                                    image.caption ? 'change' : 'add'
+                                                                } caption...`}
+                                                                value={image.newCaption}
+                                                                onChange={(v) =>
+                                                                    updateNewCaption(index, v)
+                                                                }
+                                                                style={{ marginRight: 5 }}
+                                                            />
+                                                            <Button
+                                                                icon={<PlusIcon />}
+                                                                color='grey'
+                                                                onClick={() => updateCaption(index)}
+                                                                style={{ padding: '0 10px' }}
+                                                            />
+                                                        </Row>
+                                                        <Row centerX className={styles.itemFooter}>
+                                                            {index !== 0 && (
+                                                                <button
+                                                                    type='button'
+                                                                    onClick={() =>
+                                                                        moveImage(index, -1)
+                                                                    }
+                                                                >
+                                                                    <ChevronLeftIcon />
+                                                                </button>
+                                                            )}
+                                                            {index < images.length - 1 && (
+                                                                <button
+                                                                    type='button'
+                                                                    onClick={() =>
+                                                                        moveImage(index, 1)
+                                                                    }
+                                                                >
+                                                                    <ChevronRightIcon />
+                                                                </button>
+                                                            )}
+                                                        </Row>
+                                                    </Column>
+                                                ))}
+                                            </Scrollbars>
+                                        )}
                                     </Row>
-                                </Column>
-                            )}
-                            {showRecordControls && (
-                                <Column centerX style={{ marginBottom: 20 }}>
-                                    <h2>{formatTimeMMSS(recordingTime)}</h2>
-                                    <Button
-                                        text={`${
-                                            recording
-                                                ? 'Stop'
-                                                : `${audioFile ? 'Restart' : 'Start'}`
-                                        } recording`}
-                                        color={recording ? 'red' : 'aqua'}
-                                        onClick={toggleAudioRecording}
-                                    />
-                                </Column>
-                            )}
-                        </Column>
-                    )}
-
-                    {postType === 'Audio' && currentStep === 3 && (
-                        <Column centerX style={{ maxWidth: 600, marginBottom: 30 }}>
-                            <Input
-                                type='text-area'
-                                placeholder='Add a description for your images here... (optional)'
-                                rows={4}
-                                value={audioForm.text.value}
-                                state={audioForm.text.state}
-                                errors={audioForm.text.errors}
-                                onChange={(value) =>
-                                    setAudioForm({
-                                        ...audioForm,
-                                        text: { ...audioForm.text, value, state: 'default' },
-                                    })
-                                }
-                                style={{ width: 400 }}
-                            />
-                        </Column>
-                    )}
-
-                    {postType === 'Event' && currentStep === 2 && (
-                        <Column centerX style={{ marginBottom: 30, width: 400 }}>
-                            <Input
-                                type='text'
-                                placeholder='Add a title for your event...'
-                                value={eventForm1.title.value}
-                                state={eventForm1.title.state}
-                                errors={eventForm1.title.errors}
-                                onChange={(value) =>
-                                    setEventForm1({
-                                        ...eventForm1,
-                                        title: { ...eventForm1.title, value, state: 'default' },
-                                    })
-                                }
-                            />
-                        </Column>
-                    )}
-
-                    {postType === 'Event' && currentStep === 3 && (
-                        <Column centerX style={{ marginBottom: 30, width: 400 }}>
-                            <Input
-                                type='text-area'
-                                placeholder='Add a description for your event... (optional)'
-                                rows={4}
-                                value={eventForm2.description.value}
-                                state={eventForm2.description.state}
-                                errors={eventForm2.description.errors}
-                                onChange={(value) =>
-                                    setEventForm2({
-                                        ...eventForm2,
-                                        description: {
-                                            ...eventForm2.description,
-                                            value,
-                                            state: 'default',
-                                        },
-                                    })
-                                }
-                            />
-                        </Column>
-                    )}
-
-                    {postType === 'Event' && currentStep === 4 && (
-                        <Column centerX style={{ marginBottom: 30, width: 600 }}>
-                            <Row className={styles.dateTimePicker}>
-                                <div id='date-time-start-wrapper'>
-                                    <Input
-                                        id='date-time-start'
-                                        title='Start time'
-                                        type='text'
-                                        placeholder='select start time...'
-                                        state={eventForm3.startTime.state}
-                                        errors={eventForm3.startTime.errors}
-                                    />
-                                </div>
-                                <div id='date-time-end-wrapper'>
-                                    <Input
-                                        id='date-time-end'
-                                        title='End time (optional)'
-                                        type='text'
-                                        placeholder='select end time...'
-                                        state={eventForm3.endTime.state}
-                                        errors={eventForm3.endTime.errors}
-                                    />
-                                </div>
-                            </Row>
-                            {duration && <p>Duration: {duration}</p>}
-                        </Column>
-                    )}
-
-                    {postType === 'Glass Bead Game' && currentStep === 2 && (
-                        <Column centerX style={{ marginBottom: 20 }}>
-                            <h3 style={{ marginBottom: 10 }}>Choose a topic:</h3>
-                            <Row className={styles.topicGroupButtons}>
-                                <Button
-                                    text='Archetopics'
-                                    color={topicGroup === 'archetopics' ? 'blue' : 'grey'}
-                                    onClick={() => {
-                                        setGBGForm1({
-                                            ...GBGForm1,
-                                            topic: {
-                                                ...GBGForm1.topic,
-                                                value: '',
-                                                state: 'default',
-                                            },
-                                        })
-                                        setSelectedTopic(null)
-                                        setTopicError(false)
-                                        setTopicGroup('archetopics')
-                                    }}
-                                />
-                                <Button
-                                    text='Liminal'
-                                    color={topicGroup === 'liminal' ? 'blue' : 'grey'}
-                                    onClick={() => {
-                                        setGBGForm1({
-                                            ...GBGForm1,
-                                            topic: {
-                                                ...GBGForm1.topic,
-                                                value: '',
-                                                state: 'default',
-                                            },
-                                        })
-                                        setSelectedTopic(null)
-                                        setTopicError(false)
-                                        setTopicGroup('liminal')
-                                    }}
-                                />
-                                <Button
-                                    text='Custom'
-                                    color={topicGroup === 'custom' ? 'blue' : 'grey'}
-                                    onClick={() => {
-                                        setGBGForm1({
-                                            ...GBGForm1,
-                                            topic: {
-                                                ...GBGForm1.topic,
-                                                value: '',
-                                                state: 'default',
-                                            },
-                                        })
-                                        setTopicError(false)
-                                        setSelectedTopic(null)
-                                        setTopicGroup('custom')
-                                    }}
-                                />
-                            </Row>
-
-                            {topicGroup === 'custom' ? (
-                                <Input
-                                    type='text'
-                                    placeholder='Custom topic...'
-                                    value={GBGForm1.topic.value}
-                                    state={GBGForm1.topic.state}
-                                    errors={GBGForm1.topic.errors}
-                                    onChange={(value) =>
-                                        setGBGForm1({
-                                            ...GBGForm1,
-                                            topic: {
-                                                ...GBGForm1.topic,
-                                                value,
-                                                state: 'default',
-                                            },
-                                        })
-                                    }
-                                    style={{ marginBottom: 15 }}
-                                />
-                            ) : (
-                                <Scrollbars className={styles.topics}>
-                                    <Row wrap centerX style={{ width: 500, height: 280 }}>
-                                        {GlassBeadGameTopics[topicGroup].map((topic) => (
-                                            <Column
-                                                centerX
-                                                className={styles.topic}
-                                                key={topic.name}
-                                            >
-                                                <button
-                                                    type='button'
-                                                    className={
-                                                        selectedTopic &&
-                                                        selectedTopic.name === topic.name
-                                                            ? styles.selected
-                                                            : ''
-                                                    }
-                                                    onClick={() => {
-                                                        setTopicError(false)
-                                                        setSelectedTopic(topic)
-                                                        setGBGForm1({
-                                                            ...GBGForm1,
-                                                            topic: {
-                                                                ...GBGForm1.topic,
-                                                                value: topic.name,
-                                                                state: 'default',
-                                                            },
-                                                        })
-                                                    }}
-                                                >
-                                                    <img src={topic.imagePath} alt='' />
-                                                </button>
-                                                <p>{topic.name}</p>
-                                            </Column>
-                                        ))}
+                                    {imageSizeError && (
+                                        <p className='danger' style={{ marginBottom: 10 }}>
+                                            Max file size: {imageMBLimit}MB
+                                        </p>
+                                    )}
+                                    {toalImageSizeError && (
+                                        <p className='danger' style={{ marginBottom: 10 }}>
+                                            Total image upload size must be less than{' '}
+                                            {totalMBUploadLimit}
+                                            MB. (Current size: {totalImageSize.toFixed(2)}MB)
+                                        </p>
+                                    )}
+                                    <Row className={styles.fileUploadInput}>
+                                        <label htmlFor='image-post-file-input'>
+                                            Upload images
+                                            <input
+                                                type='file'
+                                                id='image-post-file-input'
+                                                accept='.png, .jpg, .jpeg, .gif'
+                                                onChange={addImageFiles}
+                                                multiple
+                                                hidden
+                                            />
+                                        </label>
                                     </Row>
-                                </Scrollbars>
-                            )}
-                            {topicError && <p className='danger'>No topic selected</p>}
-                        </Column>
-                    )}
-
-                    {postType === 'Glass Bead Game' && currentStep === 3 && (
-                        <Column centerX style={{ marginBottom: 30, width: 400 }}>
-                            <Input
-                                type='text-area'
-                                placeholder='Add a description for your game... (optional)'
-                                rows={4}
-                                value={GBGForm2.description.value}
-                                state={GBGForm2.description.state}
-                                errors={GBGForm2.description.errors}
-                                onChange={(value) =>
-                                    setGBGForm2({
-                                        ...GBGForm2,
-                                        description: {
-                                            ...GBGForm2.description,
-                                            value,
-                                            state: 'default',
-                                        },
-                                    })
-                                }
-                            />
-                        </Column>
-                    )}
-
-                    {postType === 'Glass Bead Game' && currentStep === 4 && (
-                        <Column centerX style={{ marginBottom: 30, width: 600 }}>
-                            <Row className={styles.dateTimePicker}>
-                                <div id='date-time-start-wrapper'>
-                                    <Input
-                                        id='date-time-start'
-                                        title='Start time (optional)'
-                                        type='text'
-                                        placeholder='select start time...'
-                                        state={GBGForm3.startTime.state}
-                                        errors={GBGForm3.startTime.errors}
-                                    />
-                                </div>
-                                <div id='date-time-end-wrapper'>
-                                    <Input
-                                        id='date-time-end'
-                                        title='End time (optional)'
-                                        type='text'
-                                        placeholder='select end time...'
-                                        state={GBGForm3.endTime.state}
-                                        errors={GBGForm3.endTime.errors}
-                                    />
-                                </div>
-                            </Row>
-                            {duration && <p>Duration: {duration}</p>}
-                        </Column>
-                    )}
-
-                    {postType === 'String' && currentStep === 2 && (
-                        <Column style={{ maxWidth: 600 }}>
-                            <Column centerX>
-                                {stringPostError && (
-                                    <p className='danger' style={{ marginBottom: 20 }}>
-                                        No beads added to string
-                                    </p>
-                                )}
-                                {stringSizeError && (
-                                    <p className='danger' style={{ marginBottom: 20 }}>
-                                        Total string upload size must be less than{' '}
-                                        {totalMBUploadLimit}
-                                        MB. (Current size: {totalStringSize().toFixed(2)}MB)
-                                    </p>
-                                )}
-                            </Column>
-                            <Row centerX className={styles.beadTypeButtons}>
-                                <button
-                                    type='button'
-                                    className={`${newBead.type === 'text' && styles.selected}`}
-                                    onClick={() => setNewBead({ ...newBead, type: 'text' })}
-                                >
-                                    <TextIcon />
-                                </button>
-                                <button
-                                    type='button'
-                                    className={`${newBead.type === 'url' && styles.selected}`}
-                                    onClick={() => setNewBead({ ...newBead, type: 'url' })}
-                                >
-                                    <UrlIcon />
-                                </button>
-                                <button
-                                    type='button'
-                                    className={`${newBead.type === 'audio' && styles.selected}`}
-                                    onClick={() => setNewBead({ ...newBead, type: 'audio' })}
-                                >
-                                    <AudioIcon />
-                                </button>
-                                <button
-                                    type='button'
-                                    className={`${newBead.type === 'image' && styles.selected}`}
-                                    onClick={() => setNewBead({ ...newBead, type: 'image' })}
-                                >
-                                    <ImageIcon />
-                                </button>
-                            </Row>
-                            <Column centerX>
-                                {newBead.type === 'text' && (
-                                    <Input
-                                        id='new-bead-text'
-                                        type='text-area'
-                                        placeholder='text...'
-                                        rows={1}
-                                        state={stringTextState}
-                                        errors={stringTextErrors}
-                                        value={newBead.text}
-                                        onChange={(v) => {
-                                            setStringTextErrors([])
-                                            setStringTextState('default')
-                                            setNewBead({ ...newBead, text: v })
-                                        }}
-                                        style={{ width: 400 }}
-                                    />
-                                )}
-                                {newBead.type === 'url' && (
-                                    <Column centerX>
+                                    <p>or paste an image URL:</p>
+                                    <Row style={{ marginTop: 5 }}>
                                         <Input
                                             type='text'
-                                            placeholder='url...'
-                                            // state={newBead.url.state}
-                                            // errors={newBead.url.errors}
-                                            value={newBead.url}
-                                            loading={urlLoading}
-                                            onChange={(value) => {
-                                                setNewBead({ ...newBead, url: value })
-                                                scrapeURL(value)
-                                            }}
-                                            style={{ width: 400 }}
+                                            placeholder='image url...'
+                                            value={imageURL}
+                                            onChange={(v) => setImageURL(v)}
+                                            style={{ margin: '0 10px 10px 0' }}
                                         />
-                                        {newBead.urlData && (
-                                            <PostCardUrlPreview
-                                                url={newBead.url}
-                                                image={newBead.urlData.image}
-                                                domain={newBead.urlData.domain}
-                                                title={newBead.urlData.title}
-                                                description={newBead.urlData.description}
-                                                style={{ marginTop: 10 }}
-                                            />
+                                        <Button
+                                            text='Add'
+                                            color='aqua'
+                                            disabled={imageURL === ''}
+                                            onClick={addImageURL}
+                                        />
+                                    </Row>
+                                </Column>
+                            )}
+                            {currentStep === 3 && (
+                                <Column centerX style={{ width: '100%', marginBottom: 30 }}>
+                                    <Input
+                                        type='text-area'
+                                        placeholder='Add a description for your images here... (optional)'
+                                        rows={4}
+                                        value={imageForm.text.value}
+                                        state={imageForm.text.state}
+                                        errors={imageForm.text.errors}
+                                        onChange={(value) =>
+                                            setImageForm({
+                                                ...imageForm,
+                                                text: {
+                                                    ...imageForm.text,
+                                                    value,
+                                                    state: 'default',
+                                                },
+                                            })
+                                        }
+                                        style={{ width: '100%' }}
+                                    />
+                                </Column>
+                            )}
+                        </Column>
+                    )}
+
+                    {postType === 'Audio' && (
+                        <Column centerX style={{ width: '100%' }}>
+                            {currentStep === 2 && (
+                                <Column centerX style={{ width: '100%' }}>
+                                    <Column className={styles.errors}>
+                                        {audioSizeError && (
+                                            <p>Audio too large. Max size: {audioMBLimit}MB</p>
+                                        )}
+                                        {audioPostError && (
+                                            <p>Audio recording or upload required</p>
                                         )}
                                     </Column>
-                                )}
-                                {newBead.type === 'audio' && (
-                                    <Column centerX>
-                                        <Row style={{ marginBottom: 10 }}>
-                                            <Button
-                                                text='Record audio'
-                                                color='grey'
-                                                style={{ marginRight: 10 }}
-                                                onClick={() => {
-                                                    resetAudioState()
-                                                    setAudioSizeError(false)
-                                                    setShowRecordControls(true)
-                                                }}
-                                            />
-                                            <Row className={styles.beadUploadInput}>
-                                                <label htmlFor='audio-file-input'>
-                                                    Upload audio
-                                                    <input
-                                                        type='file'
-                                                        id='audio-file-input'
-                                                        accept='.mp3'
-                                                        onChange={selectAudioFile}
-                                                        hidden
-                                                    />
-                                                </label>
-                                            </Row>
-                                        </Row>
-                                        {newBead.audioFile && (
-                                            <Column
-                                                key={newBead.audioFile.lastModified}
-                                                style={{ marginBottom: 20, width: 400 }}
-                                            >
-                                                <p>{newBead.audioFile.name}</p>
-                                                <AudioVisualiser
-                                                    audioElementId='new-post-audio'
-                                                    audioURL={URL.createObjectURL(
-                                                        newBead.audioFile
-                                                    )}
-                                                    staticBars={1200}
-                                                    staticColor={colors.audioVisualiserColor}
-                                                    dynamicBars={160}
-                                                    dynamicColor={colors.audioVisualiserColor}
-                                                    style={{
-                                                        height: 80,
-                                                        margin: '20px 0 10px 0',
-                                                    }}
-                                                />
-                                                <Row centerY>
-                                                    <button
-                                                        className={styles.playButton}
-                                                        type='button'
-                                                        aria-label='toggle-audio'
-                                                        onClick={toggleAudio}
-                                                    >
-                                                        {audioPlaying ? (
-                                                            <PauseIcon />
-                                                        ) : (
-                                                            <PlayIcon />
-                                                        )}
-                                                    </button>
-                                                    <AudioTimeSlider
-                                                        audioElementId='new-post-audio'
-                                                        audioURL={URL.createObjectURL(
-                                                            newBead.audioFile
-                                                        )}
-                                                        location='preview'
-                                                        onPlay={() => setAudioPlaying(true)}
-                                                        onPause={() => setAudioPlaying(false)}
-                                                        onEnded={() => setAudioPlaying(false)}
-                                                    />
-                                                </Row>
-                                            </Column>
-                                        )}
-                                        {showRecordControls && (
-                                            <Column centerX style={{ marginBottom: 20 }}>
-                                                <h2>{formatTimeMMSS(recordingTime)}</h2>
-                                                <Button
-                                                    text={`${
-                                                        recording
-                                                            ? 'Stop'
-                                                            : `${audioFile ? 'Restart' : 'Start'}`
-                                                    } recording`}
-                                                    color={recording ? 'red' : 'blue'}
-                                                    onClick={toggleAudioRecording}
-                                                />
-                                            </Column>
-                                        )}
-                                    </Column>
-                                )}
-                                {newBead.type === 'image' && (
-                                    <Column centerX>
-                                        {imagePostError && (
-                                            <p className='danger' style={{ marginBottom: 10 }}>
-                                                No images added yet
-                                            </p>
-                                        )}
-                                        <Row centerX style={{ width: 550 }}>
-                                            {images.length > 0 && (
-                                                <Scrollbars className={`${styles.beadImages} row`}>
-                                                    {images.map((image, index) => (
-                                                        <Column
-                                                            className={styles.image}
-                                                            key={index}
-                                                        >
-                                                            <CloseButton
-                                                                size={20}
-                                                                onClick={() => removeImage(index)}
-                                                            />
-                                                            <img
-                                                                src={
-                                                                    image.url ||
-                                                                    URL.createObjectURL(image.file)
-                                                                }
-                                                                alt=''
-                                                            />
-                                                            {image.caption && (
-                                                                <p>{image.caption}</p>
-                                                            )}
-                                                            <Row centerY style={{ width: 180 }}>
-                                                                <Input
-                                                                    type='text'
-                                                                    placeholder={`${
-                                                                        image.caption
-                                                                            ? 'change'
-                                                                            : 'add'
-                                                                    } caption...`}
-                                                                    value={image.newCaption}
-                                                                    onChange={(v) =>
-                                                                        updateNewCaption(index, v)
-                                                                    }
-                                                                    style={{ marginRight: 5 }}
-                                                                />
-                                                                <Button
-                                                                    icon={<PlusIcon />}
-                                                                    color='grey'
-                                                                    onClick={() =>
-                                                                        updateCaption(index)
-                                                                    }
-                                                                    style={{
-                                                                        padding: '0 10px',
-                                                                    }}
-                                                                />
-                                                            </Row>
-                                                        </Column>
-                                                    ))}
-                                                </Scrollbars>
-                                            )}
-                                        </Row>
-                                        {imageSizeError && (
-                                            <p className='danger' style={{ marginBottom: 10 }}>
-                                                Max file size: {imageMBLimit}MB
-                                            </p>
-                                        )}
-                                        {toalImageSizeError && (
-                                            <p className='danger' style={{ marginBottom: 10 }}>
-                                                Total image upload size must be less than{' '}
-                                                {totalMBUploadLimit}MB. (Current size:{' '}
-                                                {totalImageSize.toFixed(2)}MB)
-                                            </p>
-                                        )}
-                                        <Row className={styles.beadUploadInput}>
-                                            <label htmlFor='image-post-file-input'>
-                                                Upload images
+                                    <Row style={{ marginBottom: 20 }}>
+                                        <Button
+                                            text='Record audio'
+                                            color='blue'
+                                            style={{ marginRight: 10 }}
+                                            onClick={() => {
+                                                resetAudioState()
+                                                setAudioSizeError(false)
+                                                setShowRecordControls(true)
+                                            }}
+                                        />
+                                        <Row className={styles.fileUploadInput}>
+                                            <label htmlFor='audio-file-input'>
+                                                Upload audio
                                                 <input
                                                     type='file'
-                                                    id='image-post-file-input'
-                                                    accept='.png, .jpg, .jpeg, .gif'
-                                                    onChange={addImageFiles}
-                                                    multiple
+                                                    id='audio-file-input'
+                                                    accept='.mp3'
+                                                    onChange={selectAudioFile}
                                                     hidden
                                                 />
                                             </label>
                                         </Row>
-                                        <p>or paste an image URL:</p>
-                                        <Row style={{ width: 400, marginTop: 5 }}>
-                                            <Input
-                                                type='text'
-                                                placeholder='image url...'
-                                                value={imageURL}
-                                                onChange={(v) => setImageURL(v)}
-                                                style={{ margin: '0 10px 10px 0' }}
+                                    </Row>
+                                    {audioFile && (
+                                        <Column
+                                            key={audioFile.lastModified}
+                                            style={{ width: '100%', marginBottom: 20 }}
+                                        >
+                                            <p>{audioFile.name}</p>
+                                            <AudioVisualiser
+                                                audioElementId='new-post-audio'
+                                                audioURL={URL.createObjectURL(audioFile)}
+                                                staticBars={1200}
+                                                staticColor={colors.audioVisualiserColor}
+                                                dynamicBars={160}
+                                                dynamicColor={colors.audioVisualiserColor}
+                                                style={{ height: 80, margin: '20px 0 10px 0' }}
                                             />
-                                            <Button
-                                                text='Add'
-                                                color='grey'
-                                                disabled={imageURL === ''}
-                                                onClick={addImageURL}
-                                            />
-                                        </Row>
-                                    </Column>
-                                )}
-                                <Button
-                                    text='Add bead'
-                                    color='aqua'
-                                    disabled={
-                                        (newBead.type === 'text' && !newBead.text) ||
-                                        (newBead.type === 'url' &&
-                                            (newBead.urlData === null || urlLoading)) ||
-                                        (newBead.type === 'audio' && newBead.audioFile === null) ||
-                                        (newBead.type === 'image' && !images.length)
-                                    }
-                                    onClick={addBeadToString}
-                                    style={{ margin: '20px 0' }}
-                                />
-                            </Column>
-                            {string.length > 0 && (
-                                <Scrollbars className={`${styles.beadDraw} row`}>
-                                    {string.map((bead, index) => (
-                                        <Column key={bead.id}>
-                                            <StringBeadCard
-                                                bead={bead}
-                                                index={index}
-                                                removeBead={removeBead}
-                                            />
-                                            <Row centerX className={styles.itemFooter}>
-                                                {index !== 0 && (
-                                                    <button
-                                                        type='button'
-                                                        onClick={() => moveBead(index, -1)}
-                                                    >
-                                                        <ChevronLeftIcon />
-                                                    </button>
-                                                )}
-                                                {index < string.length - 1 && (
-                                                    <button
-                                                        type='button'
-                                                        onClick={() => moveBead(index, 1)}
-                                                    >
-                                                        <ChevronRightIcon />
-                                                    </button>
-                                                )}
+                                            <Row centerY>
+                                                <button
+                                                    className={styles.playButton}
+                                                    type='button'
+                                                    aria-label='toggle-audio'
+                                                    onClick={toggleAudio}
+                                                >
+                                                    {audioPlaying ? <PauseIcon /> : <PlayIcon />}
+                                                </button>
+                                                <AudioTimeSlider
+                                                    audioElementId='new-post-audio'
+                                                    audioURL={URL.createObjectURL(audioFile)}
+                                                    location='preview'
+                                                    onPlay={() => setAudioPlaying(true)}
+                                                    onPause={() => setAudioPlaying(false)}
+                                                    onEnded={() => setAudioPlaying(false)}
+                                                />
                                             </Row>
                                         </Column>
-                                    ))}
-                                    <span style={{ marginLeft: -7, width: 7, flexShrink: 0 }} />
-                                </Scrollbars>
+                                    )}
+                                    {showRecordControls && (
+                                        <Column centerX style={{ marginBottom: 20 }}>
+                                            <h2>{formatTimeMMSS(recordingTime)}</h2>
+                                            <Button
+                                                text={`${
+                                                    recording
+                                                        ? 'Stop'
+                                                        : `${audioFile ? 'Restart' : 'Start'}`
+                                                } recording`}
+                                                color={recording ? 'red' : 'aqua'}
+                                                onClick={toggleAudioRecording}
+                                            />
+                                        </Column>
+                                    )}
+                                </Column>
+                            )}
+                            {currentStep === 3 && (
+                                <Column centerX style={{ width: '100%', marginBottom: 30 }}>
+                                    <Input
+                                        type='text-area'
+                                        placeholder='Add a description for your images here... (optional)'
+                                        rows={4}
+                                        value={audioForm.text.value}
+                                        state={audioForm.text.state}
+                                        errors={audioForm.text.errors}
+                                        onChange={(value) =>
+                                            setAudioForm({
+                                                ...audioForm,
+                                                text: {
+                                                    ...audioForm.text,
+                                                    value,
+                                                    state: 'default',
+                                                },
+                                            })
+                                        }
+                                        style={{ width: '100%' }}
+                                    />
+                                </Column>
                             )}
                         </Column>
                     )}
 
-                    {postType === 'String' && currentStep === 3 && (
-                        <Column centerX style={{ marginBottom: 30, width: 400 }}>
-                            <Input
-                                type='text-area'
-                                placeholder='Add a description for your game... (optional)'
-                                rows={4}
-                                value={stringForm.description.value}
-                                state={stringForm.description.state}
-                                errors={stringForm.description.errors}
-                                onChange={(value) =>
-                                    setStringForm({
-                                        ...stringForm,
-                                        description: {
-                                            ...stringForm.description,
-                                            value,
-                                            state: 'default',
-                                        },
-                                    })
-                                }
-                            />
+                    {postType === 'Event' && (
+                        <Column centerX style={{ width: '100%' }}>
+                            {currentStep === 2 && (
+                                <Column centerX style={{ width: '100%', marginBottom: 30 }}>
+                                    <Input
+                                        type='text'
+                                        placeholder='Add a title for your event...'
+                                        value={eventForm1.title.value}
+                                        state={eventForm1.title.state}
+                                        errors={eventForm1.title.errors}
+                                        onChange={(value) =>
+                                            setEventForm1({
+                                                ...eventForm1,
+                                                title: {
+                                                    ...eventForm1.title,
+                                                    value,
+                                                    state: 'default',
+                                                },
+                                            })
+                                        }
+                                    />
+                                </Column>
+                            )}
+                            {currentStep === 3 && (
+                                <Column centerX style={{ width: '100%', marginBottom: 30 }}>
+                                    <Input
+                                        type='text-area'
+                                        placeholder='Add a description for your event... (optional)'
+                                        rows={4}
+                                        value={eventForm2.description.value}
+                                        state={eventForm2.description.state}
+                                        errors={eventForm2.description.errors}
+                                        onChange={(value) =>
+                                            setEventForm2({
+                                                ...eventForm2,
+                                                description: {
+                                                    ...eventForm2.description,
+                                                    value,
+                                                    state: 'default',
+                                                },
+                                            })
+                                        }
+                                    />
+                                </Column>
+                            )}
+                            {currentStep === 4 && (
+                                <Column centerX style={{ width: '100%', marginBottom: 30 }}>
+                                    <Row className={styles.dateTimePicker}>
+                                        <div id='date-time-start-wrapper'>
+                                            <Input
+                                                id='date-time-start'
+                                                title='Start time'
+                                                type='text'
+                                                placeholder='select start time...'
+                                                state={eventForm3.startTime.state}
+                                                errors={eventForm3.startTime.errors}
+                                            />
+                                        </div>
+                                        <div id='date-time-end-wrapper'>
+                                            <Input
+                                                id='date-time-end'
+                                                title='End time (optional)'
+                                                type='text'
+                                                placeholder='select end time...'
+                                                state={eventForm3.endTime.state}
+                                                errors={eventForm3.endTime.errors}
+                                            />
+                                        </div>
+                                    </Row>
+                                    {duration && <p>Duration: {duration}</p>}
+                                </Column>
+                            )}
+                        </Column>
+                    )}
+
+                    {postType === 'Glass Bead Game' && (
+                        <Column centerX style={{ width: '100%' }}>
+                            {currentStep === 2 && (
+                                <Column centerX style={{ width: '100%', marginBottom: 20 }}>
+                                    <h3 style={{ marginBottom: 10 }}>Choose a topic:</h3>
+                                    <Row className={styles.topicGroupButtons}>
+                                        <Button
+                                            text='Archetopics'
+                                            color={topicGroup === 'archetopics' ? 'blue' : 'grey'}
+                                            onClick={() => {
+                                                setGBGForm1({
+                                                    ...GBGForm1,
+                                                    topic: {
+                                                        ...GBGForm1.topic,
+                                                        value: '',
+                                                        state: 'default',
+                                                    },
+                                                })
+                                                setSelectedTopic(null)
+                                                setTopicError(false)
+                                                setTopicGroup('archetopics')
+                                            }}
+                                        />
+                                        <Button
+                                            text='Liminal'
+                                            color={topicGroup === 'liminal' ? 'blue' : 'grey'}
+                                            onClick={() => {
+                                                setGBGForm1({
+                                                    ...GBGForm1,
+                                                    topic: {
+                                                        ...GBGForm1.topic,
+                                                        value: '',
+                                                        state: 'default',
+                                                    },
+                                                })
+                                                setSelectedTopic(null)
+                                                setTopicError(false)
+                                                setTopicGroup('liminal')
+                                            }}
+                                        />
+                                        <Button
+                                            text='Custom'
+                                            color={topicGroup === 'custom' ? 'blue' : 'grey'}
+                                            onClick={() => {
+                                                setGBGForm1({
+                                                    ...GBGForm1,
+                                                    topic: {
+                                                        ...GBGForm1.topic,
+                                                        value: '',
+                                                        state: 'default',
+                                                    },
+                                                })
+                                                setTopicError(false)
+                                                setSelectedTopic(null)
+                                                setTopicGroup('custom')
+                                            }}
+                                        />
+                                    </Row>
+
+                                    {topicGroup === 'custom' ? (
+                                        <Input
+                                            type='text'
+                                            placeholder='Custom topic...'
+                                            value={GBGForm1.topic.value}
+                                            state={GBGForm1.topic.state}
+                                            errors={GBGForm1.topic.errors}
+                                            onChange={(value) =>
+                                                setGBGForm1({
+                                                    ...GBGForm1,
+                                                    topic: {
+                                                        ...GBGForm1.topic,
+                                                        value,
+                                                        state: 'default',
+                                                    },
+                                                })
+                                            }
+                                            style={{ marginBottom: 15 }}
+                                        />
+                                    ) : (
+                                        <Scrollbars className={styles.topics}>
+                                            <Row
+                                                wrap
+                                                centerX
+                                                style={{ width: '100%', height: 280 }}
+                                            >
+                                                {GlassBeadGameTopics[topicGroup].map((topic) => (
+                                                    <Column
+                                                        centerX
+                                                        className={styles.topic}
+                                                        key={topic.name}
+                                                    >
+                                                        <button
+                                                            type='button'
+                                                            className={
+                                                                selectedTopic &&
+                                                                selectedTopic.name === topic.name
+                                                                    ? styles.selected
+                                                                    : ''
+                                                            }
+                                                            onClick={() => {
+                                                                setTopicError(false)
+                                                                setSelectedTopic(topic)
+                                                                setGBGForm1({
+                                                                    ...GBGForm1,
+                                                                    topic: {
+                                                                        ...GBGForm1.topic,
+                                                                        value: topic.name,
+                                                                        state: 'default',
+                                                                    },
+                                                                })
+                                                            }}
+                                                        >
+                                                            <img src={topic.imagePath} alt='' />
+                                                        </button>
+                                                        <p>{topic.name}</p>
+                                                    </Column>
+                                                ))}
+                                            </Row>
+                                        </Scrollbars>
+                                    )}
+                                    {topicError && <p className='danger'>No topic selected</p>}
+                                </Column>
+                            )}
+                            {currentStep === 3 && (
+                                <Column centerX style={{ width: '100%', marginBottom: 30 }}>
+                                    <Input
+                                        type='text-area'
+                                        placeholder='Add a description for your game... (optional)'
+                                        rows={4}
+                                        value={GBGForm2.description.value}
+                                        state={GBGForm2.description.state}
+                                        errors={GBGForm2.description.errors}
+                                        onChange={(value) =>
+                                            setGBGForm2({
+                                                ...GBGForm2,
+                                                description: {
+                                                    ...GBGForm2.description,
+                                                    value,
+                                                    state: 'default',
+                                                },
+                                            })
+                                        }
+                                    />
+                                </Column>
+                            )}
+                            {currentStep === 4 && (
+                                <Column centerX style={{ width: '100%', marginBottom: 30 }}>
+                                    <Row className={styles.dateTimePicker}>
+                                        <div id='date-time-start-wrapper'>
+                                            <Input
+                                                id='date-time-start'
+                                                title='Start time (optional)'
+                                                type='text'
+                                                placeholder='select start time...'
+                                                state={GBGForm3.startTime.state}
+                                                errors={GBGForm3.startTime.errors}
+                                            />
+                                        </div>
+                                        <div id='date-time-end-wrapper'>
+                                            <Input
+                                                id='date-time-end'
+                                                title='End time (optional)'
+                                                type='text'
+                                                placeholder='select end time...'
+                                                state={GBGForm3.endTime.state}
+                                                errors={GBGForm3.endTime.errors}
+                                            />
+                                        </div>
+                                    </Row>
+                                    {duration && <p>Duration: {duration}</p>}
+                                </Column>
+                            )}
+                        </Column>
+                    )}
+
+                    {postType === 'String' && (
+                        <Column centerX style={{ width: '100%' }}>
+                            {currentStep === 2 && (
+                                <Column style={{ width: '100%' }}>
+                                    <Column centerX>
+                                        {stringPostError && (
+                                            <p className='danger' style={{ marginBottom: 20 }}>
+                                                No beads added to string
+                                            </p>
+                                        )}
+                                        {stringSizeError && (
+                                            <p className='danger' style={{ marginBottom: 20 }}>
+                                                Total string upload size must be less than{' '}
+                                                {totalMBUploadLimit}
+                                                MB. (Current size: {totalStringSize().toFixed(2)}MB)
+                                            </p>
+                                        )}
+                                    </Column>
+                                    <Row centerX className={styles.beadTypeButtons}>
+                                        <button
+                                            type='button'
+                                            className={`${
+                                                newBead.type === 'text' && styles.selected
+                                            }`}
+                                            onClick={() => setNewBead({ ...newBead, type: 'text' })}
+                                        >
+                                            <TextIcon />
+                                        </button>
+                                        <button
+                                            type='button'
+                                            className={`${
+                                                newBead.type === 'url' && styles.selected
+                                            }`}
+                                            onClick={() => setNewBead({ ...newBead, type: 'url' })}
+                                        >
+                                            <UrlIcon />
+                                        </button>
+                                        <button
+                                            type='button'
+                                            className={`${
+                                                newBead.type === 'audio' && styles.selected
+                                            }`}
+                                            onClick={() =>
+                                                setNewBead({ ...newBead, type: 'audio' })
+                                            }
+                                        >
+                                            <AudioIcon />
+                                        </button>
+                                        <button
+                                            type='button'
+                                            className={`${
+                                                newBead.type === 'image' && styles.selected
+                                            }`}
+                                            onClick={() =>
+                                                setNewBead({ ...newBead, type: 'image' })
+                                            }
+                                        >
+                                            <ImageIcon />
+                                        </button>
+                                    </Row>
+                                    <Column centerX style={{ width: '100%' }}>
+                                        {newBead.type === 'text' && (
+                                            <Input
+                                                id='new-bead-text'
+                                                type='text-area'
+                                                placeholder='text...'
+                                                rows={1}
+                                                state={stringTextState}
+                                                errors={stringTextErrors}
+                                                value={newBead.text}
+                                                onChange={(v) => {
+                                                    setStringTextErrors([])
+                                                    setStringTextState('default')
+                                                    setNewBead({ ...newBead, text: v })
+                                                }}
+                                                style={{ width: '100%' }}
+                                            />
+                                        )}
+                                        {newBead.type === 'url' && (
+                                            <Column centerX style={{ width: '100%' }}>
+                                                <Input
+                                                    type='text'
+                                                    placeholder='url...'
+                                                    // state={newBead.url.state}
+                                                    // errors={newBead.url.errors}
+                                                    value={newBead.url}
+                                                    loading={urlLoading}
+                                                    onChange={(value) => {
+                                                        setNewBead({ ...newBead, url: value })
+                                                        scrapeURL(value)
+                                                    }}
+                                                    style={{ width: '100%' }}
+                                                />
+                                                {newBead.urlData && (
+                                                    <PostCardUrlPreview
+                                                        url={newBead.url}
+                                                        image={newBead.urlData.image}
+                                                        domain={newBead.urlData.domain}
+                                                        title={newBead.urlData.title}
+                                                        description={newBead.urlData.description}
+                                                        style={{ marginTop: 10 }}
+                                                    />
+                                                )}
+                                            </Column>
+                                        )}
+                                        {newBead.type === 'audio' && (
+                                            <Column centerX style={{ width: '100%' }}>
+                                                <Row style={{ marginBottom: 10 }}>
+                                                    <Button
+                                                        text='Record audio'
+                                                        color='grey'
+                                                        style={{ marginRight: 10 }}
+                                                        onClick={() => {
+                                                            resetAudioState()
+                                                            setAudioSizeError(false)
+                                                            setShowRecordControls(true)
+                                                        }}
+                                                    />
+                                                    <Row className={styles.beadUploadInput}>
+                                                        <label htmlFor='audio-file-input'>
+                                                            Upload audio
+                                                            <input
+                                                                type='file'
+                                                                id='audio-file-input'
+                                                                accept='.mp3'
+                                                                onChange={selectAudioFile}
+                                                                hidden
+                                                            />
+                                                        </label>
+                                                    </Row>
+                                                </Row>
+                                                {newBead.audioFile && (
+                                                    <Column
+                                                        key={newBead.audioFile.lastModified}
+                                                        style={{ marginBottom: 20, width: '100%' }}
+                                                    >
+                                                        <p>{newBead.audioFile.name}</p>
+                                                        <AudioVisualiser
+                                                            audioElementId='new-post-audio'
+                                                            audioURL={URL.createObjectURL(
+                                                                newBead.audioFile
+                                                            )}
+                                                            staticBars={1200}
+                                                            staticColor={
+                                                                colors.audioVisualiserColor
+                                                            }
+                                                            dynamicBars={160}
+                                                            dynamicColor={
+                                                                colors.audioVisualiserColor
+                                                            }
+                                                            style={{
+                                                                height: 80,
+                                                                margin: '20px 0 10px 0',
+                                                            }}
+                                                        />
+                                                        <Row centerY>
+                                                            <button
+                                                                className={styles.playButton}
+                                                                type='button'
+                                                                aria-label='toggle-audio'
+                                                                onClick={toggleAudio}
+                                                            >
+                                                                {audioPlaying ? (
+                                                                    <PauseIcon />
+                                                                ) : (
+                                                                    <PlayIcon />
+                                                                )}
+                                                            </button>
+                                                            <AudioTimeSlider
+                                                                audioElementId='new-post-audio'
+                                                                audioURL={URL.createObjectURL(
+                                                                    newBead.audioFile
+                                                                )}
+                                                                location='preview'
+                                                                onPlay={() => setAudioPlaying(true)}
+                                                                onPause={() =>
+                                                                    setAudioPlaying(false)
+                                                                }
+                                                                onEnded={() =>
+                                                                    setAudioPlaying(false)
+                                                                }
+                                                            />
+                                                        </Row>
+                                                    </Column>
+                                                )}
+                                                {showRecordControls && (
+                                                    <Column centerX style={{ marginBottom: 20 }}>
+                                                        <h2>{formatTimeMMSS(recordingTime)}</h2>
+                                                        <Button
+                                                            text={`${
+                                                                recording
+                                                                    ? 'Stop'
+                                                                    : `${
+                                                                          audioFile
+                                                                              ? 'Restart'
+                                                                              : 'Start'
+                                                                      }`
+                                                            } recording`}
+                                                            color={recording ? 'red' : 'blue'}
+                                                            onClick={toggleAudioRecording}
+                                                        />
+                                                    </Column>
+                                                )}
+                                            </Column>
+                                        )}
+                                        {newBead.type === 'image' && (
+                                            <Column centerX style={{ width: '100%' }}>
+                                                {imagePostError && (
+                                                    <p
+                                                        className='danger'
+                                                        style={{ marginBottom: 10 }}
+                                                    >
+                                                        No images added yet
+                                                    </p>
+                                                )}
+                                                <Row centerX style={{ width: '100%' }}>
+                                                    {images.length > 0 && (
+                                                        <Scrollbars
+                                                            className={`${styles.beadImages} row`}
+                                                        >
+                                                            {images.map((image, index) => (
+                                                                <Column
+                                                                    className={styles.image}
+                                                                    key={index}
+                                                                >
+                                                                    <CloseButton
+                                                                        size={20}
+                                                                        onClick={() =>
+                                                                            removeImage(index)
+                                                                        }
+                                                                    />
+                                                                    <img
+                                                                        src={
+                                                                            image.url ||
+                                                                            URL.createObjectURL(
+                                                                                image.file
+                                                                            )
+                                                                        }
+                                                                        alt=''
+                                                                    />
+                                                                    {image.caption && (
+                                                                        <p>{image.caption}</p>
+                                                                    )}
+                                                                    <Row
+                                                                        centerY
+                                                                        style={{ width: 180 }}
+                                                                    >
+                                                                        <Input
+                                                                            type='text'
+                                                                            placeholder={`${
+                                                                                image.caption
+                                                                                    ? 'change'
+                                                                                    : 'add'
+                                                                            } caption...`}
+                                                                            value={image.newCaption}
+                                                                            onChange={(v) =>
+                                                                                updateNewCaption(
+                                                                                    index,
+                                                                                    v
+                                                                                )
+                                                                            }
+                                                                            style={{
+                                                                                marginRight: 5,
+                                                                            }}
+                                                                        />
+                                                                        <Button
+                                                                            icon={<PlusIcon />}
+                                                                            color='grey'
+                                                                            onClick={() =>
+                                                                                updateCaption(index)
+                                                                            }
+                                                                            style={{
+                                                                                padding: '0 10px',
+                                                                            }}
+                                                                        />
+                                                                    </Row>
+                                                                </Column>
+                                                            ))}
+                                                        </Scrollbars>
+                                                    )}
+                                                </Row>
+                                                {imageSizeError && (
+                                                    <p
+                                                        className='danger'
+                                                        style={{ marginBottom: 10 }}
+                                                    >
+                                                        Max file size: {imageMBLimit}MB
+                                                    </p>
+                                                )}
+                                                {toalImageSizeError && (
+                                                    <p
+                                                        className='danger'
+                                                        style={{ marginBottom: 10 }}
+                                                    >
+                                                        Total image upload size must be less than{' '}
+                                                        {totalMBUploadLimit}MB. (Current size:{' '}
+                                                        {totalImageSize.toFixed(2)}MB)
+                                                    </p>
+                                                )}
+                                                <Row className={styles.beadUploadInput}>
+                                                    <label htmlFor='image-post-file-input'>
+                                                        Upload images
+                                                        <input
+                                                            type='file'
+                                                            id='image-post-file-input'
+                                                            accept='.png, .jpg, .jpeg, .gif'
+                                                            onChange={addImageFiles}
+                                                            multiple
+                                                            hidden
+                                                        />
+                                                    </label>
+                                                </Row>
+                                                <p>or paste an image URL:</p>
+                                                <Row style={{ width: '100%', marginTop: 5 }}>
+                                                    <Input
+                                                        type='text'
+                                                        placeholder='image url...'
+                                                        value={imageURL}
+                                                        onChange={(v) => setImageURL(v)}
+                                                        style={{ margin: '0 10px 10px 0' }}
+                                                    />
+                                                    <Button
+                                                        text='Add'
+                                                        color='grey'
+                                                        disabled={imageURL === ''}
+                                                        onClick={addImageURL}
+                                                    />
+                                                </Row>
+                                            </Column>
+                                        )}
+                                        <Button
+                                            text='Add bead'
+                                            color='aqua'
+                                            disabled={
+                                                (newBead.type === 'text' && !newBead.text) ||
+                                                (newBead.type === 'url' &&
+                                                    (newBead.urlData === null || urlLoading)) ||
+                                                (newBead.type === 'audio' &&
+                                                    newBead.audioFile === null) ||
+                                                (newBead.type === 'image' && !images.length)
+                                            }
+                                            onClick={addBeadToString}
+                                            style={{ margin: '20px 0' }}
+                                        />
+                                    </Column>
+                                    {string.length > 0 && (
+                                        <Scrollbars className={`${styles.beadDraw} row`}>
+                                            {string.map((bead, index) => (
+                                                <Column key={bead.id}>
+                                                    <StringBeadCard
+                                                        bead={bead}
+                                                        index={index}
+                                                        removeBead={removeBead}
+                                                    />
+                                                    <Row centerX className={styles.itemFooter}>
+                                                        {index !== 0 && (
+                                                            <button
+                                                                type='button'
+                                                                onClick={() => moveBead(index, -1)}
+                                                            >
+                                                                <ChevronLeftIcon />
+                                                            </button>
+                                                        )}
+                                                        {index < string.length - 1 && (
+                                                            <button
+                                                                type='button'
+                                                                onClick={() => moveBead(index, 1)}
+                                                            >
+                                                                <ChevronRightIcon />
+                                                            </button>
+                                                        )}
+                                                    </Row>
+                                                </Column>
+                                            ))}
+                                            <span
+                                                style={{ marginLeft: -7, width: 7, flexShrink: 0 }}
+                                            />
+                                        </Scrollbars>
+                                    )}
+                                </Column>
+                            )}
+                            {currentStep === 3 && (
+                                <Column centerX style={{ width: '100%', marginBottom: 30 }}>
+                                    <Input
+                                        type='text-area'
+                                        placeholder='Add a description for your game... (optional)'
+                                        rows={4}
+                                        value={stringForm.description.value}
+                                        state={stringForm.description.state}
+                                        errors={stringForm.description.errors}
+                                        onChange={(value) =>
+                                            setStringForm({
+                                                ...stringForm,
+                                                description: {
+                                                    ...stringForm.description,
+                                                    value,
+                                                    state: 'default',
+                                                },
+                                            })
+                                        }
+                                    />
+                                </Column>
+                            )}
                         </Column>
                     )}
 
                     {postType === 'Weave' && (
-                        <Column centerX>
+                        <Column centerX style={{ width: '100%' }}>
                             {currentStep === 2 && (
-                                <Column centerX style={{ width: 400, marginBottom: 30 }}>
+                                <Column centerX style={{ width: '100%', marginBottom: 30 }}>
                                     <Input
                                         type='text-area'
                                         placeholder='Add a description for your game... (optional)'
@@ -2098,11 +2191,12 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                                 },
                                             })
                                         }
+                                        style={{ width: '100%' }}
                                     />
                                 </Column>
                             )}
                             {currentStep === 3 && (
-                                <Column centerX style={{ width: 500 }}>
+                                <Column centerX style={{ width: '100%' }}>
                                     <p>Choose who else you want to be able to join the game:</p>
                                     <Toggle
                                         leftText='Anyone'
@@ -2134,7 +2228,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                                 onOptionSelected={(space) => addUser(space)}
                                                 options={userOptions}
                                                 loading={userSearchLoading}
-                                                style={{ width: 300, margin: '20px 0 30px 0' }}
+                                                style={{ width: '100%', margin: '20px 0 30px 0' }}
                                             />
                                             {selectedUsers.length > 1 && (
                                                 <Column centerX style={{ marginBottom: 20 }}>
@@ -2172,7 +2266,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                 </Column>
                             )}
                             {currentStep === 4 && (
-                                <Column centerX style={{ width: 500 }}>
+                                <Column centerX style={{ width: '100%' }}>
                                     <p>Game settings</p>
                                     <Row centerY style={{ margin: '30px 0' }}>
                                         {allUsersAllowed ? (
@@ -2281,7 +2375,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                 onSearchQuery={(query) => findSpaces(query)}
                                 onOptionSelected={(space) => addSpace(space)}
                                 options={spaceOptions}
-                                style={{ width: 300, margin: '20px 0' }}
+                                style={{ margin: '20px 0' }}
                             />
                             {selectedSpaces.length > 0 && (
                                 <Row centerX wrap style={{ marginBottom: 20, maxWidth: 400 }}>
@@ -2312,7 +2406,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                     )}
 
                     {currentStep === steps.length && (
-                        <Column centerX style={{ maxWidth: 800, marginBottom: 30 }}>
+                        <Column centerX style={{ width: '100%', maxWidth: 800, marginBottom: 30 }}>
                             <p style={{ marginBottom: 30 }}>
                                 Here's a preview of what your post will look like to other users:
                             </p>
@@ -2320,7 +2414,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                         </Column>
                     )}
 
-                    <Row centerX style={{ margin: '20px 0' }}>
+                    <Row centerX style={{ margin: '30px 0 20px 0' }}>
                         {currentStep > 1 && (
                             <Button
                                 text='Back'
@@ -2348,11 +2442,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                             />
                         )}
                     </Row>
-                    <ProgressBarSteps
-                        steps={steps}
-                        currentStep={currentStep}
-                        style={{ width: 500 }}
-                    />
+                    <ProgressBarSteps steps={steps} currentStep={currentStep} />
                 </Column>
             )}
         </Modal>

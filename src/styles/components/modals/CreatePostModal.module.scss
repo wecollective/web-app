@@ -1,5 +1,14 @@
 @import '@styles/Variables';
 
+.wrapper {
+    padding: 30px 20px;
+    width: 100vw;
+    @include for-tablet-landscape-up {
+        padding: 50px;
+        width: 600px;
+    }
+}
+
 .header {
     margin-bottom: 20px;
     > h1 { margin: 0 }
@@ -11,26 +20,6 @@
 }
 
 .title {
-    margin-bottom: 40px;
-
-    > h1 { margin: 0 }
-
-    > div {
-        width: 50px;
-        height: 50px;
-        background-color: white;
-        border-radius: 50%;
-        margin-left: 10px;
-
-        > svg {
-            width: 25px;
-            height: 25px;
-            opacity: 0.8;
-        }
-    }
-}
-
-.newTitle {
     margin-bottom: 30px;
     > div {
         width: 70px;
@@ -52,33 +41,45 @@
 }
 
 .postTypeButton {
-    padding: 10px;
-    width: 110px;
+    margin-bottom: 10px;
+    width: 80px;
+    @include for-tablet-landscape-up { width: 110px }
 
     > button {
         all: unset;
         cursor: pointer;
         margin-bottom: 7px;
-        width: 90px;
-        height: 90px;
+        width: 60px;
+        height: 60px;
         background-color: white;
         border: 1px solid black;
         display: flex;
         justify-content: center;
         align-items: center;
-        &.selected {
-            background-color: $blue8;
+
+        @include for-tablet-landscape-up {
+            width: 90px;
+            height: 90px;
         }
 
+        &.selected { background-color: $blue8 }
+
         > svg {
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
             opacity: 0.8;
+
+            @include for-tablet-landscape-up {
+                width: 40px;
+                height: 40px;
+            }
         }
     }
 
     > p {
         text-align: center;
+        font-size: 12px;
+        @include for-tablet-landscape-up { font-size: 16px }
     }
 }
 
@@ -91,6 +92,7 @@
 
 .topics {
     margin-bottom: 20px;
+    width: 100%;
 
     .topic {
         margin: 10px;
@@ -220,6 +222,7 @@
 }
 
 .urlPreviewWrapper {
+    width: 100%;
     padding: 15px;
     border-radius: 5px;
     background-color: white;
@@ -238,20 +241,31 @@
     > button {
         all: unset;
         cursor: pointer;
-        width: 80px;
-        height: 80px;
+        width: 60px;
+        height: 60px;
         background-color: white;
         border-radius: 50%;
         display: flex;
         justify-content: center;
         align-items: center;
-        &:not(:last-child) { margin-right: 20px }
+        flex-shrink: 0;
+        &:not(:last-child) { margin-right: 10px }
         &.selected { background-color: $blue8 }
 
         > svg {
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
             opacity: 0.8;
+        }
+
+        @include for-tablet-landscape-up {
+            width: 80px;
+            height: 80px;
+            &:not(:last-child) { margin-right: 20px }
+            > svg {
+                width: 40px;
+                height: 40px;
+            }
         }
     }
 }
@@ -285,6 +299,7 @@
 .beadImages {
     padding-bottom: 10px;
     margin-bottom: 10px;
+    width: 100%;
 
     .image {
         position: relative;
@@ -332,7 +347,6 @@
 
 .beadDraw {
     padding-bottom: 15px;
-    margin-bottom: 20px;
     padding: 7px;
 }
 
