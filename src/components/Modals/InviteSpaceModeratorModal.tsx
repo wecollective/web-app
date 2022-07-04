@@ -78,7 +78,7 @@ const InviteSpaceModeratorModal = (props: { close: () => void }): JSX.Element =>
     }
 
     return (
-        <Modal close={close}>
+        <Modal centered close={close}>
             <h1>Invite someone to moderate &apos;{spaceData.name}&apos;</h1>
             <form onSubmit={inviteSpaceModerator}>
                 <SearchSelector

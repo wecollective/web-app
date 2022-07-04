@@ -141,7 +141,7 @@ const ParentSpaceRequestModal = (props: { close: () => void }): JSX.Element => {
     useEffect(() => getParentSpaceBlacklist(), [])
 
     return (
-        <Modal close={close} style={{ maxWidth: 600 }}>
+        <Modal centered close={close} style={{ maxWidth: 600 }}>
             <h1>Add a new parent space</h1>
             <p>
                 If you&apos;re a moderator of the selected space it will be connected automatically

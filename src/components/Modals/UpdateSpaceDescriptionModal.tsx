@@ -64,7 +64,7 @@ const UpdateSpaceDescriptionModal = (props: { close: () => void }): JSX.Element 
     }
 
     return (
-        <Modal close={close}>
+        <Modal centered close={close}>
             <h1>Change the description for {spaceData.name}</h1>
             <p>
                 <a href='https://www.markdownguide.org/cheat-sheet/'>Markdown</a> enabled
@@ -78,7 +78,6 @@ const UpdateSpaceDescriptionModal = (props: { close: () => void }): JSX.Element 
                     state={inputState}
                     errors={inputErrors}
                     value={inputValue}
-                    style={{ minWidth: 800 }}
                     onChange={(newValue) => {
                         setInputState('default')
                         setInputValue(newValue)

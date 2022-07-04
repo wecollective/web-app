@@ -65,7 +65,7 @@ const UpdateUserBioModal = (props: { close: () => void }): JSX.Element => {
     }
 
     return (
-        <Modal close={close}>
+        <Modal centered close={close}>
             <h1>Change your account bio</h1>
             <p>
                 <a href='https://www.markdownguide.org/cheat-sheet/'>Markdown</a> enabled

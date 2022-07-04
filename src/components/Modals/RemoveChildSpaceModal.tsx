@@ -85,7 +85,7 @@ const RemoveChildSpaceModal = (props: { close: () => void }): JSX.Element => {
     }
 
     return (
-        <Modal close={close} style={{ maxWidth: 600 }}>
+        <Modal centered close={close} style={{ maxWidth: 600 }}>
             <h1>Remove a child space from &apos;{spaceData.name}&apos;</h1>
             <p>
                 Once removed, new posts to the removed child space will no longer appear in &apos;

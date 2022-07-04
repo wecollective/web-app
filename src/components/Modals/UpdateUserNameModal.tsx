@@ -65,7 +65,7 @@ const UpdateUserNameModal = (props: { close: () => void }): JSX.Element => {
     }
 
     return (
-        <Modal close={close}>
+        <Modal centered close={close} style={{ maxWidth: 500 }}>
             <h1>Change your account name</h1>
             <p>
                 This will be the main visible name for your account seen by other users on the site

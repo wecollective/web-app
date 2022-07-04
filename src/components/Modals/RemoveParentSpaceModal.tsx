@@ -89,7 +89,7 @@ const RemoveParentSpaceModal = (props: { close: () => void }): JSX.Element => {
     }
 
     return (
-        <Modal close={close} style={{ maxWidth: 600 }}>
+        <Modal centered close={close} style={{ maxWidth: 600 }}>
             <h1>Remove a parent space</h1>
             {onlyParentIsRoot ? (
                 <>

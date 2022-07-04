@@ -85,7 +85,7 @@ const RemoveSpaceModeratorModal = (props: { close: () => void }): JSX.Element =>
     }
 
     return (
-        <Modal close={close}>
+        <Modal centered close={close}>
             <h1>Remove a moderator from &apos;{spaceData.name}&apos;</h1>
             <form onSubmit={removeSpaceModerator}>
                 <SearchSelector

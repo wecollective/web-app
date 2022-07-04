@@ -62,7 +62,7 @@ const UpdateSpaceHandleModal = (props: { close: () => void }): JSX.Element => {
     }
 
     return (
-        <Modal close={close}>
+        <Modal centered close={close}>
             <h1>Change the name for {spaceData.name}</h1>
             <p>This will be the main visible name for your space</p>
             <form onSubmit={updateSpaceName}>

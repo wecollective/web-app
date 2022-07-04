@@ -53,7 +53,7 @@ const DeleteSpaceModal = (props: { close: () => void }): JSX.Element => {
     }
 
     return (
-        <Modal close={close} style={{ maxWidth: 600 }}>
+        <Modal centered close={close} style={{ maxWidth: 600 }}>
             <h1>Delete &apos;{spaceData.name}&apos;</h1>
             <p>Are you sure you want to permanently delete &apos;{spaceData.name}&apos;?</p>
             <p>
