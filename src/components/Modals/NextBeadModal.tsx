@@ -6,7 +6,7 @@ import axios from 'axios'
 import config from '@src/Config'
 import { v4 as uuidv4 } from 'uuid'
 import { defaultErrorState, isValidUrl, formatTimeMMSS } from '@src/Helpers'
-import styles from '@styles/components/cards/PostCard/NextBeadModal.module.scss'
+import styles from '@styles/components/modals/NextBeadModal.module.scss'
 import { AccountContext } from '@src/contexts/AccountContext'
 import Modal from '@components/Modal'
 import Column from '@components/Column'
@@ -321,7 +321,7 @@ const NextBeadModal = (props: {
             {saved ? (
                 <SuccessMessage text='Bead created!' />
             ) : (
-                <Column centerX>
+                <Column centerX style={{ width: '100%' }}>
                     <h1>Add a new bead</h1>
                     <Row centerX className={styles.beadTypeButtons}>
                         <button
@@ -353,7 +353,7 @@ const NextBeadModal = (props: {
                             <ImageIcon />
                         </button>
                     </Row>
-                    <Column centerX>
+                    <Column centerX style={{ width: '100%' }}>
                         {newBead.type === 'text' && (
                             <Input
                                 id='new-bead-text'
@@ -368,11 +368,11 @@ const NextBeadModal = (props: {
                                     setStringTextState('default')
                                     setNewBead({ ...newBead, text: v })
                                 }}
-                                style={{ width: 400 }}
+                                style={{ width: '100%' }}
                             />
                         )}
                         {newBead.type === 'url' && (
-                            <Column centerX>
+                            <Column centerX style={{ width: '100%' }}>
                                 <Input
                                     type='text'
                                     placeholder='url...'
@@ -384,12 +384,12 @@ const NextBeadModal = (props: {
                                         setNewBead({ ...newBead, url: value })
                                         scrapeURL(value)
                                     }}
-                                    style={{ width: 400 }}
+                                    style={{ width: '100%' }}
                                 />
                             </Column>
                         )}
                         {newBead.type === 'audio' && (
-                            <Column centerX>
+                            <Column centerX style={{ width: '100%' }}>
                                 {audioSizeError && (
                                     <p className='danger' style={{ marginBottom: 10 }}>
                                         Audio too large. Max size: {audioMBLimit}MB
@@ -436,7 +436,7 @@ const NextBeadModal = (props: {
                             </Column>
                         )}
                         {newBead.type === 'image' && (
-                            <Column centerX>
+                            <Column centerX style={{ width: '100%' }}>
                                 {imagePostError && (
                                     <p className='danger' style={{ marginBottom: 10 }}>
                                         No images added yet
@@ -468,7 +468,7 @@ const NextBeadModal = (props: {
                                     </label>
                                 </Row>
                                 <p>or paste an image URL:</p>
-                                <Row style={{ width: 400, marginTop: 5 }}>
+                                <Row style={{ width: '100%', marginTop: 5 }}>
                                     <Input
                                         type='text'
                                         placeholder='image url...'
@@ -483,7 +483,7 @@ const NextBeadModal = (props: {
                                         onClick={addImageURL}
                                     />
                                 </Row>
-                                <Row centerX style={{ width: 600 }}>
+                                <Row centerX style={{ width: '100%' }}>
                                     {images.length > 0 && (
                                         <Scrollbars className={`${styles.beadImages} row`}>
                                             {images.map((image, index) => (

@@ -6,20 +6,31 @@
     > button {
         all: unset;
         cursor: pointer;
-        width: 80px;
-        height: 80px;
+        width: 60px;
+        height: 60px;
         background-color: white;
         border-radius: 50%;
         display: flex;
         justify-content: center;
         align-items: center;
-        &:not(:last-child) { margin-right: 20px }
+        flex-shrink: 0;
+        &:not(:last-child) { margin-right: 10px }
         &.selected { background-color: $blue8 }
 
         > svg {
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
             opacity: 0.8;
+        }
+
+        @include for-tablet-landscape-up {
+            width: 80px;
+            height: 80px;
+            &:not(:last-child) { margin-right: 20px }
+            > svg {
+                width: 40px;
+                height: 40px;
+            }
         }
     }
 }
