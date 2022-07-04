@@ -1,25 +1,37 @@
 @import '@styles/Variables';
 
-.selectedImage {
-    > button {
-        all: unset;
-        cursor: pointer;
-        > svg {
-            color: $grey3;
-            width: 25px;
-            height: 25px;
-            &:hover {
-                color: $grey4;
+.wrapper {
+    .selectedImage {
+        max-width: calc(100vw - 60px);
+        max-height: calc(100vh - 60px);
+        overflow: hidden;
+
+        > button {
+            all: unset;
+            cursor: pointer;
+
+            > svg {
+                width: 20px;
+                height: 20px;
+                color: $grey3;
+                &:hover { color: $grey4 }
+                transition: color 0.5s;
+
+                @include for-tablet-landscape-up {
+                    width: 25px;
+                    height: 25px;
+                }
             }
-            transition: color 0.5s;
         }
-    }
-    > div {
-        margin: 0 10px;
-        > img {
-            max-width: calc(100vw - 200px);
-            max-height: calc(100vh - 200px);
-            margin-bottom: 20px;
+
+        > div {
+            margin: 0 5px;
+            @include for-tablet-landscape-up { margin: 0 10px }
+
+            > img {
+                width: 100%;
+                height: 100%;
+            }
         }
     }
 }

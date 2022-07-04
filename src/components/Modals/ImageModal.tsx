@@ -21,7 +21,7 @@ const ImageModal = (props: {
     }
 
     return (
-        <Modal close={close}>
+        <Modal close={close} className={styles.wrapper}>
             <Row centerY className={styles.selectedImage}>
                 {selectedImage.index !== 0 && (
                     <button type='button' onClick={() => toggleImage(-1)}>
@@ -38,7 +38,7 @@ const ImageModal = (props: {
                         <ShowMoreLess height={150}>
                             <Markdown
                                 text={selectedImage.caption}
-                                style={{ textAlign: 'center' }}
+                                style={{ textAlign: 'center', marginTop: 20 }}
                             />
                         </ShowMoreLess>
                     )}
