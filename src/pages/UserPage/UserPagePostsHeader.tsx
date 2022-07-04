@@ -18,13 +18,14 @@ const UserPagePostsHeader = (props: { params: any }): JSX.Element => {
     const location = useLocation()
     const history = useHistory()
     const mobileView = document.documentElement.clientWidth < 900
+    const smallMobileView = document.documentElement.clientWidth < 400
 
     useEffect(() => setFilterParams(params), [params])
 
     return (
         <Row centerY centerX className={styles.wrapper}>
             <SearchBar
-                placeholder='Search posts...'
+                placeholder={smallMobileView ? 'Search...' : 'Search posts...'}
                 setSearchFilter={(value) =>
                     history.push({
                         pathname: location.pathname,

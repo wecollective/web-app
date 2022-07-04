@@ -59,7 +59,7 @@ const SpacePagePostsHeader = (props: { params: any }): JSX.Element => {
                 />
             )} */}
             <SearchBar
-                placeholder='Search posts...'
+                placeholder={smallMobileView ? 'Search...' : 'Search posts...'}
                 setSearchFilter={(value) =>
                     history.push({
                         pathname: location.pathname,

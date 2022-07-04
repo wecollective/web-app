@@ -58,7 +58,7 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
         <form className={styles.searchBar} onSubmit={search} style={style}>
             <input
                 type='text'
-                placeholder='search all...'
+                placeholder='Search all...'
                 value={searchQuery}
                 data-lpignore='true'
                 onChange={(e) => updateSearchQuery(e.target.value)}

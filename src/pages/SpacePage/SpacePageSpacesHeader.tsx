@@ -46,7 +46,7 @@ const SpacePageSpacesHeader = (props: { params: any }): JSX.Element => {
                 style={{ marginRight: 10 }}
             />
             <SearchBar
-                placeholder='Search spaces...'
+                placeholder={smallMobileView ? 'Search...' : 'Search spaces...'}
                 setSearchFilter={(value) => {
                     // toggle depth param for text searches so results from all levels included
                     const depth = value ? 'All Contained Spaces' : 'Only Direct Descendants'
