@@ -50,8 +50,8 @@ const StringBeadCard = (props: {
         }
     }
 
-    function toggleAudio() {
-        const beadAudio = d3.select(`#string-bead-audio-${postId}-${beadIndex}-${location}`).node()
+    function toggleBeadAudio(index: number, reset?: boolean): void {
+        const beadAudio = d3.select(`#string-bead-audio-${postId}-${index}-${location}`).node()
         if (beadAudio) {
             if (!beadAudio.paused) beadAudio.pause()
             else {
@@ -60,6 +60,7 @@ const StringBeadCard = (props: {
                     .nodes()
                     .forEach((node) => node.pause())
                 // start selected bead
+                if (reset) beadAudio.currentTime = 0
                 beadAudio.play()
             }
         }
@@ -128,7 +129,7 @@ const StringBeadCard = (props: {
                                 className={styles.playButton}
                                 type='button'
                                 aria-label='toggle-audio'
-                                onClick={toggleAudio}
+                                onClick={() => toggleBeadAudio(beadIndex)}
                             >
                                 {audioPlaying ? <PauseIconSVG /> : <PlayIconSVG />}
                             </button>
@@ -138,7 +139,7 @@ const StringBeadCard = (props: {
                                 location='space-posts'
                                 onPlay={() => setAudioPlaying(true)}
                                 onPause={() => setAudioPlaying(false)}
-                                onEnded={() => setAudioPlaying(false)}
+                                onEnded={() => toggleBeadAudio(beadIndex + 1, true)}
                             />
                         </Row>
                     </Column>
