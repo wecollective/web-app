@@ -112,7 +112,7 @@ export function timeSinceCreatedShort(createdAt: string | undefined): string | u
     }
     if (difference >= minute && difference < hour) {
         const number = Number((difference / minute).toFixed(0))
-        time = `${number}min`
+        time = `${number}m`
     }
     if (difference >= hour && difference < day) {
         const number = Number((difference / hour).toFixed(0))
@@ -120,11 +120,11 @@ export function timeSinceCreatedShort(createdAt: string | undefined): string | u
     }
     if (difference >= day && difference < week) {
         const number = Number((difference / day).toFixed(0))
-        time = `${number}w`
+        time = `${number}d`
     }
     if (difference >= week && difference < year) {
         const number = Number((difference / week).toFixed(0))
-        time = `${number}m`
+        time = `${number}w`
     }
     if (difference >= year) {
         const number = Number((difference / year).toFixed(0))
