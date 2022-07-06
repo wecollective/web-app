@@ -39,6 +39,7 @@ import Scrollbars from '@components/Scrollbars'
 import StringBeadCard from '@components/Cards/StringBeadCard'
 import PostCard from '@components/Cards/PostCard/PostCard'
 import Markdown from '@components/Markdown'
+import MarkdownEditor from '@components/MarkdownEditor'
 import Toggle from '@components/Toggle'
 import { ReactComponent as PlayIcon } from '@svgs/play-solid.svg'
 import { ReactComponent as PauseIcon } from '@svgs/pause-solid.svg'
@@ -69,19 +70,19 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
         },
         {
             name: 'Url',
-            steps: ['Post Type: URL', 'URL', 'Text (optional)', 'Spaces', 'Create'],
+            steps: ['Post Type: URL', 'URL', 'Description (optional)', 'Spaces', 'Create'],
             icon: <UrlIcon />,
             description: `**Url**: Add a URL and we'll scrape its meta-data to display on the post.`,
         },
         {
             name: 'Image',
-            steps: ['Post Type: Image', 'Images', 'Text (optional)', 'Spaces', 'Create'],
+            steps: ['Post Type: Image', 'Images', 'Description (optional)', 'Spaces', 'Create'],
             icon: <ImageIcon />,
             description: `**Image**: Upload images from your device or via URL, include captions if you want, and re-order them how you like to create an album.`,
         },
         {
             name: 'Audio',
-            steps: ['Post Type: Audio', 'Audio', 'Text (optional)', 'Spaces', 'Create'],
+            steps: ['Post Type: Audio', 'Audio', 'Description (optional)', 'Spaces', 'Create'],
             icon: <AudioIcon />,
             description: `**Audio**: Upload an audio clip from your device or record your own audio file.`,
         },
@@ -113,7 +114,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
         },
         {
             name: 'String',
-            steps: ['Post Type: String', 'String', 'Text', 'Spaces', 'Create'],
+            steps: ['Post Type: String', 'String', 'Description (optional)', 'Spaces', 'Create'],
             icon: <StringIcon />,
             description: `**String**: Create a string of connected items (text, URL, audio, or image) in one post.`,
         },
@@ -142,7 +143,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             value: '',
             validate: (v) => {
                 const errors: string[] = []
-                if (!v) errors.push('Required')
+                if (v.length < 2) errors.push('Required')
                 if (v.length > 5000) errors.push('Must be less than 5K characters')
                 return errors
             },
@@ -1183,19 +1184,16 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
 
                     {postType === 'Text' && currentStep === 2 && (
                         <Column centerX style={{ width: '100%', marginBottom: 30 }}>
-                            <Input
-                                type='text-area'
-                                placeholder='Add your text here...'
-                                rows={4}
-                                value={textForm.text.value}
-                                state={textForm.text.state}
-                                errors={textForm.text.errors}
-                                onChange={(value) =>
+                            <MarkdownEditor
+                                initialValue={textForm.text.value}
+                                onChange={(value) => {
                                     setTextForm({
                                         ...textForm,
                                         text: { ...textForm.text, value, state: 'default' },
                                     })
-                                }
+                                }}
+                                state={textForm.text.state}
+                                errors={textForm.text.errors}
                             />
                         </Column>
                     )}
@@ -1236,20 +1234,17 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                             )}
                             {currentStep === 3 && (
                                 <Column centerX style={{ width: '100%', marginBottom: 30 }}>
-                                    <Input
-                                        type='text-area'
-                                        placeholder='Add a description for your URL here... (optional)'
-                                        rows={4}
-                                        value={urlForm2.text.value}
-                                        state={urlForm2.text.state}
-                                        errors={urlForm2.text.errors}
-                                        onChange={(value) =>
+                                    <p style={{ marginBottom: 20 }}>Description (optional):</p>
+                                    <MarkdownEditor
+                                        initialValue={urlForm2.text.value}
+                                        onChange={(value) => {
                                             setUrlForm2({
                                                 ...urlForm2,
                                                 text: { ...urlForm2.text, value, state: 'default' },
                                             })
-                                        }
-                                        style={{ width: '100%', maxWidth: 400 }}
+                                        }}
+                                        state={urlForm2.text.state}
+                                        errors={urlForm2.text.errors}
                                     />
                                 </Column>
                             )}
@@ -1377,14 +1372,10 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                             )}
                             {currentStep === 3 && (
                                 <Column centerX style={{ width: '100%', marginBottom: 30 }}>
-                                    <Input
-                                        type='text-area'
-                                        placeholder='Add a description for your images here... (optional)'
-                                        rows={4}
-                                        value={imageForm.text.value}
-                                        state={imageForm.text.state}
-                                        errors={imageForm.text.errors}
-                                        onChange={(value) =>
+                                    <p style={{ marginBottom: 20 }}>Description (optional):</p>
+                                    <MarkdownEditor
+                                        initialValue={imageForm.text.value}
+                                        onChange={(value) => {
                                             setImageForm({
                                                 ...imageForm,
                                                 text: {
@@ -1393,8 +1384,9 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                                     state: 'default',
                                                 },
                                             })
-                                        }
-                                        style={{ width: '100%' }}
+                                        }}
+                                        state={imageForm.text.state}
+                                        errors={imageForm.text.errors}
                                     />
                                 </Column>
                             )}
@@ -1490,14 +1482,10 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                             )}
                             {currentStep === 3 && (
                                 <Column centerX style={{ width: '100%', marginBottom: 30 }}>
-                                    <Input
-                                        type='text-area'
-                                        placeholder='Add a description for your images here... (optional)'
-                                        rows={4}
-                                        value={audioForm.text.value}
-                                        state={audioForm.text.state}
-                                        errors={audioForm.text.errors}
-                                        onChange={(value) =>
+                                    <p style={{ marginBottom: 20 }}>Description (optional):</p>
+                                    <MarkdownEditor
+                                        initialValue={audioForm.text.value}
+                                        onChange={(value) => {
                                             setAudioForm({
                                                 ...audioForm,
                                                 text: {
@@ -1506,8 +1494,9 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                                     state: 'default',
                                                 },
                                             })
-                                        }
-                                        style={{ width: '100%' }}
+                                        }}
+                                        state={audioForm.text.state}
+                                        errors={audioForm.text.errors}
                                     />
                                 </Column>
                             )}
@@ -1539,14 +1528,10 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                             )}
                             {currentStep === 3 && (
                                 <Column centerX style={{ width: '100%', marginBottom: 30 }}>
-                                    <Input
-                                        type='text-area'
-                                        placeholder='Add a description for your event... (optional)'
-                                        rows={4}
-                                        value={eventForm2.description.value}
-                                        state={eventForm2.description.state}
-                                        errors={eventForm2.description.errors}
-                                        onChange={(value) =>
+                                    <p style={{ marginBottom: 20 }}>Description (optional):</p>
+                                    <MarkdownEditor
+                                        initialValue={eventForm2.description.value}
+                                        onChange={(value) => {
                                             setEventForm2({
                                                 ...eventForm2,
                                                 description: {
@@ -1555,7 +1540,9 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                                     state: 'default',
                                                 },
                                             })
-                                        }
+                                        }}
+                                        state={eventForm2.description.state}
+                                        errors={eventForm2.description.errors}
                                     />
                                 </Column>
                             )}
@@ -1714,14 +1701,10 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                             )}
                             {currentStep === 3 && (
                                 <Column centerX style={{ width: '100%', marginBottom: 30 }}>
-                                    <Input
-                                        type='text-area'
-                                        placeholder='Add a description for your game... (optional)'
-                                        rows={4}
-                                        value={GBGForm2.description.value}
-                                        state={GBGForm2.description.state}
-                                        errors={GBGForm2.description.errors}
-                                        onChange={(value) =>
+                                    <p style={{ marginBottom: 20 }}>Description (optional):</p>
+                                    <MarkdownEditor
+                                        initialValue={GBGForm2.description.value}
+                                        onChange={(value) => {
                                             setGBGForm2({
                                                 ...GBGForm2,
                                                 description: {
@@ -1730,7 +1713,9 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                                     state: 'default',
                                                 },
                                             })
-                                        }
+                                        }}
+                                        state={GBGForm2.description.state}
+                                        errors={GBGForm2.description.errors}
                                     />
                                 </Column>
                             )}
@@ -1826,20 +1811,15 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                     </Row>
                                     <Column centerX style={{ width: '100%' }}>
                                         {newBead.type === 'text' && (
-                                            <Input
-                                                id='new-bead-text'
-                                                type='text-area'
-                                                placeholder='text...'
-                                                rows={1}
-                                                state={stringTextState}
-                                                errors={stringTextErrors}
-                                                value={newBead.text}
-                                                onChange={(v) => {
+                                            <MarkdownEditor
+                                                initialValue={newBead.text}
+                                                onChange={(value) => {
                                                     setStringTextErrors([])
                                                     setStringTextState('default')
-                                                    setNewBead({ ...newBead, text: v })
+                                                    setNewBead({ ...newBead, text: value })
                                                 }}
-                                                style={{ width: '100%' }}
+                                                state={stringTextState}
+                                                errors={stringTextErrors}
                                             />
                                         )}
                                         {newBead.type === 'url' && (
@@ -2098,7 +2078,8 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                             text='Add bead'
                                             color='aqua'
                                             disabled={
-                                                (newBead.type === 'text' && !newBead.text) ||
+                                                (newBead.type === 'text' &&
+                                                    newBead.text.length < 2) ||
                                                 (newBead.type === 'url' &&
                                                     (newBead.urlData === null || urlLoading)) ||
                                                 (newBead.type === 'audio' &&
@@ -2147,14 +2128,10 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                             )}
                             {currentStep === 3 && (
                                 <Column centerX style={{ width: '100%', marginBottom: 30 }}>
-                                    <Input
-                                        type='text-area'
-                                        placeholder='Add a description for your game... (optional)'
-                                        rows={4}
-                                        value={stringForm.description.value}
-                                        state={stringForm.description.state}
-                                        errors={stringForm.description.errors}
-                                        onChange={(value) =>
+                                    <p style={{ marginBottom: 20 }}>Description (optional):</p>
+                                    <MarkdownEditor
+                                        initialValue={stringForm.description.value}
+                                        onChange={(value) => {
                                             setStringForm({
                                                 ...stringForm,
                                                 description: {
@@ -2163,7 +2140,9 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                                     state: 'default',
                                                 },
                                             })
-                                        }
+                                        }}
+                                        state={stringForm.description.state}
+                                        errors={stringForm.description.errors}
                                     />
                                 </Column>
                             )}
@@ -2174,14 +2153,10 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                         <Column centerX style={{ width: '100%' }}>
                             {currentStep === 2 && (
                                 <Column centerX style={{ width: '100%', marginBottom: 30 }}>
-                                    <Input
-                                        type='text-area'
-                                        placeholder='Add a description for your game... (optional)'
-                                        rows={4}
-                                        value={multiplayerStringForm1.description.value}
-                                        state={multiplayerStringForm1.description.state}
-                                        errors={multiplayerStringForm1.description.errors}
-                                        onChange={(value) =>
+                                    <p style={{ marginBottom: 20 }}>Description (optional):</p>
+                                    <MarkdownEditor
+                                        initialValue={multiplayerStringForm1.description.value}
+                                        onChange={(value) => {
                                             setMultiplayerStringForm1({
                                                 ...multiplayerStringForm1,
                                                 description: {
@@ -2190,8 +2165,9 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                                     state: 'default',
                                                 },
                                             })
-                                        }
-                                        style={{ width: '100%' }}
+                                        }}
+                                        state={multiplayerStringForm1.description.state}
+                                        errors={multiplayerStringForm1.description.errors}
                                     />
                                 </Column>
                             )}
