@@ -6,7 +6,7 @@ import styles from '@styles/components/Modal.module.scss'
 import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
 import Modal from '@components/Modal'
-import Input from '@components/Input'
+import MarkdownEditor from '@components/MarkdownEditor'
 import Button from '@components/Button'
 import LoadingWheel from '@components/LoadingWheel'
 import SuccessMessage from '@components/SuccessMessage'
@@ -25,7 +25,7 @@ const UpdateUserBioModal = (props: { close: () => void }): JSX.Element => {
     function updateUserBio(e) {
         e.preventDefault()
         const unChanged = inputValue === accountData.bio
-        const invalid = inputValue.length < 1 || inputValue.length > 10000
+        const invalid = inputValue.length < 2 || inputValue.length > 10000
         if (unChanged) {
             setInputState('invalid')
             setInputErrors(['Unchanged from previous bio'])
@@ -67,22 +67,15 @@ const UpdateUserBioModal = (props: { close: () => void }): JSX.Element => {
     return (
         <Modal centered close={close}>
             <h1>Change your account bio</h1>
-            <p>
-                <a href='https://www.markdownguide.org/cheat-sheet/'>Markdown</a> enabled
-            </p>
             <form onSubmit={updateUserBio}>
-                <Input
-                    type='text-area'
-                    rows={5}
-                    title='New bio:'
-                    placeholder='bio...'
+                <MarkdownEditor
+                    initialValue={inputValue}
+                    onChange={(value) => {
+                        setInputState('default')
+                        setInputValue(value)
+                    }}
                     state={inputState}
                     errors={inputErrors}
-                    value={inputValue}
-                    onChange={(newValue) => {
-                        setInputState('default')
-                        setInputValue(newValue)
-                    }}
                 />
                 <div className={styles.footer}>
                     {!showSuccessMessage && (

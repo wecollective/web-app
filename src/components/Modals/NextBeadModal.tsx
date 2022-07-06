@@ -13,6 +13,7 @@ import Column from '@components/Column'
 import Row from '@components/Row'
 import Button from '@components/Button'
 import Input from '@components/Input'
+import MarkdownEditor from '@components/MarkdownEditor'
 import Scrollbars from '@components/Scrollbars'
 import CloseButton from '@components/CloseButton'
 import StringBeadCard from '@components/Cards/PostCard/StringBeadCard2'
@@ -355,20 +356,15 @@ const NextBeadModal = (props: {
                     </Row>
                     <Column centerX style={{ width: '100%' }}>
                         {newBead.type === 'text' && (
-                            <Input
-                                id='new-bead-text'
-                                type='text-area'
-                                placeholder='text...'
-                                rows={1}
-                                state={stringTextState}
-                                errors={stringTextErrors}
-                                value={newBead.text}
-                                onChange={(v) => {
+                            <MarkdownEditor
+                                initialValue={newBead.text}
+                                onChange={(value) => {
                                     setStringTextErrors([])
                                     setStringTextState('default')
-                                    setNewBead({ ...newBead, text: v })
+                                    setNewBead({ ...newBead, text: value })
                                 }}
-                                style={{ width: '100%' }}
+                                state={stringTextState}
+                                errors={stringTextErrors}
                             />
                         )}
                         {newBead.type === 'url' && (
@@ -546,7 +542,7 @@ const NextBeadModal = (props: {
                                 </Row>
                             </Column>
                         )}
-                        {((newBead.type === 'text' && newBead.text) ||
+                        {((newBead.type === 'text' && newBead.text.length > 1) ||
                             (newBead.type === 'url' && newBead.urlData !== null) ||
                             (newBead.type === 'audio' && newBead.audioFile) ||
                             (newBead.type === 'image' && images.length > 0)) && (
@@ -590,7 +586,7 @@ const NextBeadModal = (props: {
                             text='Add bead'
                             color='aqua'
                             disabled={
-                                (newBead.type === 'text' && !newBead.text) ||
+                                (newBead.type === 'text' && newBead.text.length < 2) ||
                                 (newBead.type === 'url' &&
                                     (newBead.urlData === null || urlLoading)) ||
                                 (newBead.type === 'audio' && newBead.audioFile === null) ||

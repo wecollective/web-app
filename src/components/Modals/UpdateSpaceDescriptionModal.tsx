@@ -5,7 +5,7 @@ import config from '@src/Config'
 import styles from '@styles/components/Modal.module.scss'
 import { SpaceContext } from '@contexts/SpaceContext'
 import Modal from '@components/Modal'
-import Input from '@components/Input'
+import MarkdownEditor from '@components/MarkdownEditor'
 import Button from '@components/Button'
 import LoadingWheel from '@components/LoadingWheel'
 import SuccessMessage from '@components/SuccessMessage'
@@ -23,7 +23,7 @@ const UpdateSpaceDescriptionModal = (props: { close: () => void }): JSX.Element 
     function updateSpaceDescription(e) {
         e.preventDefault()
         const unChanged = inputValue === spaceData.description
-        const invalid = inputValue.length < 1 || inputValue.length > 10000
+        const invalid = inputValue.length < 2 || inputValue.length > 10000
         if (unChanged) {
             setInputState('invalid')
             setInputErrors(['Unchanged from previous description'])
@@ -66,22 +66,15 @@ const UpdateSpaceDescriptionModal = (props: { close: () => void }): JSX.Element 
     return (
         <Modal centered close={close}>
             <h1>Change the description for {spaceData.name}</h1>
-            <p>
-                <a href='https://www.markdownguide.org/cheat-sheet/'>Markdown</a> enabled
-            </p>
             <form onSubmit={updateSpaceDescription}>
-                <Input
-                    type='text-area'
-                    rows={5}
-                    title='New description:'
-                    placeholder='description...'
+                <MarkdownEditor
+                    initialValue={inputValue}
+                    onChange={(value) => {
+                        setInputState('default')
+                        setInputValue(value)
+                    }}
                     state={inputState}
                     errors={inputErrors}
-                    value={inputValue}
-                    onChange={(newValue) => {
-                        setInputState('default')
-                        setInputValue(newValue)
-                    }}
                 />
                 <div className={styles.footer}>
                     {!showSuccessMessage && (
