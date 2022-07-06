@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
-import gfm from 'remark-gfm'
+import rehypeRaw from 'rehype-raw'
 import { v4 as uuidv4 } from 'uuid'
 import styles from '@styles/components/Markdown.module.scss'
 
@@ -19,7 +19,7 @@ const Markdown = (props: { text: string; style?: any; className?: any }): JSX.El
     }, [])
     return (
         <div className={`${styles.markdown} ${className}`} id={id} style={style}>
-            <ReactMarkdown source={text} plugins={[gfm]} escapeHtml={false} />
+            <ReactMarkdown rehypePlugins={[rehypeRaw]}>{text}</ReactMarkdown>
         </div>
     )
 }

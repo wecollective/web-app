@@ -1,0 +1,30 @@
+@import '@styles/Variables';
+
+.wrapper {
+    :global(.rdw-editor-toolbar) {
+        border: 1px solid $grey2;
+        margin: 0;
+
+        :global(.rdw-option-wrapper) {
+            height: 30px;
+            min-width: 30px;
+
+            &:global(.rdw-option-active) {
+                background-color: $grey2;
+            }
+        }
+
+        :global(.rdw-colorpicker-modal) {
+            left: -142px;
+        }
+    }
+
+    :global(.rdw-editor-main) {
+        background-color: white;
+        padding: 0 15px;
+        border: 1px solid $grey2;
+
+        span { font-family: inherit }
+        img { max-width: 100% }
+    }
+}
