@@ -30,6 +30,38 @@ export const defaultErrorState = {
     state: 'default' as 'default' | 'valid' | 'invalid',
 }
 
+export const defaultPostData = {
+    type: 'text',
+    text: '',
+    url: '',
+    urlImage: null,
+    urlDomain: null,
+    urlTitle: null,
+    urlDescription: null,
+    totalLikes: 0,
+    totalComments: 0,
+    totalReposts: 0,
+    totalRatings: 0,
+    totalLinks: 0,
+    Creator: {
+        id: 0,
+        handle: '',
+        name: '',
+        flagImagePath: '',
+    },
+    DirectSpaces: [] as any[],
+    IndirectSpaces: [] as any[],
+    Reactions: [] as any[],
+    IncomingLinks: [] as any[],
+    OutgoingLinks: [] as any[],
+    PostImages: [] as any[],
+    Event: null as any,
+    GlassBeadGame: null as any,
+    StringPosts: [] as any[],
+    Weave: null as any,
+    StringPlayers: [] as any[],
+}
+
 // functions
 export function isPlural(value: number): boolean {
     return value < 1 || value > 1

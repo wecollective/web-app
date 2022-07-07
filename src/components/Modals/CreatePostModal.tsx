@@ -10,8 +10,9 @@ import flatpickr from 'flatpickr'
 import 'flatpickr/dist/themes/material_green.css'
 import { v4 as uuidv4 } from 'uuid'
 import {
-    allValid,
+    defaultPostData,
     defaultErrorState,
+    allValid,
     isValidUrl,
     formatTimeMMSS,
     formatTimeDHM,
@@ -741,25 +742,17 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
 
     function findPostData() {
         const data = {
+            ...defaultPostData,
             type: postType.toLowerCase().split(' ').join('-'),
-            text: '',
-            url: '',
-            urlImage: null,
-            urlDomain: null,
-            urlTitle: null,
-            urlDescription: null,
-            Creator: accountData,
+            Creator: {
+                id: accountData.id,
+                handle: accountData.handle,
+                name: accountData.name,
+                flagImagePath: accountData.flagImagePath,
+            },
             DirectSpaces: selectedSpaces.map((space) => {
                 return { ...space, type: 'post', state: 'active' }
             }),
-            PostImages: [] as any[],
-            Event: null as any,
-            GlassBeadGame: null as any,
-            StringPosts: [] as any[],
-            Weave: null as any,
-            StringPlayers: [] as any[],
-            privacy: '',
-            numberOfTurns: 0,
         }
         if (postType === 'Text') data.text = textForm.text.value
         if (postType === 'Url') {
@@ -871,7 +864,6 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
         const accessToken = cookies.get('accessToken')
         const options = { headers: { Authorization: `Bearer ${accessToken}` } }
         const data = findPostData()
-        // todo: use findPostData() more effectively
         const postData = {
             spaceIds: selectedSpaces.map((s) => s.id),
             type: data.type,
@@ -949,29 +941,12 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                 if (selectedSpaces.map((space) => space.id).includes(spaceData.id)) {
                     const newPost = {
                         ...res.data.post,
-                        totalLikes: 0,
-                        totalComments: 0,
-                        totalReposts: 0,
-                        totalRatings: 0,
-                        totalLinks: 0,
-                        Creator: {
-                            handle: accountData.handle,
-                            name: accountData.name,
-                            flagImagePath: accountData.flagImagePath,
-                        },
-                        DirectSpaces: [
-                            ...selectedSpaces.map((space) => {
-                                return { ...space, type: 'post', state: 'active' }
-                            }),
-                        ],
+                        ...data,
                         IndirectSpaces: [
                             ...res.data.indirectRelationships.map((item) => {
                                 return { id: item.holonId }
                             }),
                         ],
-                        Reactions: [],
-                        IncomingLinks: [],
-                        OutgoingLinks: [],
                         PostImages: res.data.images || [],
                         Event: res.data.event
                             ? {
@@ -980,12 +955,6 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                   Interested: [],
                               }
                             : null,
-                        GlassBeadGame: {
-                            topic: data.GlassBeadGame ? data.GlassBeadGame.topic : null,
-                            topicGroup: data.GlassBeadGame ? data.GlassBeadGame.topicGroup : null,
-                            topicImage: data.GlassBeadGame ? data.GlassBeadGame.topicImage : null,
-                            GlassBeads: [],
-                        },
                         StringPosts: res.data.string
                             ? res.data.string.map((bead, i) => {
                                   return {
@@ -995,8 +964,6 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                   }
                               })
                             : [],
-                        Weave: data.Weave,
-                        StringPlayers: data.StringPlayers,
                     }
                     setSpacePosts([newPost, ...spacePosts])
                 }
@@ -2452,7 +2419,8 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                     {currentStep === steps.length && (
                         <Column centerX style={{ width: '100%', marginBottom: 30 }}>
                             <p style={{ marginBottom: 30 }}>
-                                Here's a preview of what your post will look like to other users:
+                                Here&apos;s a preview of what your post will look like to other
+                                users:
                             </p>
                             <Column className={styles.postPreviewWrapper}>
                                 <PostCard location='preview' post={findPostData()} />
