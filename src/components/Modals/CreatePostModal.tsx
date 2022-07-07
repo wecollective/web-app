@@ -38,7 +38,7 @@ import AudioVisualiser from '@components/AudioVisualiser'
 import AudioTimeSlider from '@components/AudioTimeSlider'
 import PostCardUrlPreview from '@components/cards/PostCard/PostCardUrlPreview'
 import Scrollbars from '@components/Scrollbars'
-import StringBeadCard from '@components/cards/StringBeadCard'
+import StringBeadCard from '@components/cards/PostCard/StringBeadCard2'
 import PostCard from '@components/cards/PostCard/PostCard'
 import Markdown from '@components/Markdown'
 import MarkdownEditor from '@components/MarkdownEditor'
@@ -59,40 +59,42 @@ import { ReactComponent as ChevronLeftIcon } from '@svgs/chevron-left-solid.svg'
 import { ReactComponent as ChevronRightIcon } from '@svgs/chevron-right-solid.svg'
 import { ReactComponent as ChevronUpIcon } from '@svgs/chevron-up-solid.svg'
 import { ReactComponent as ChevronDownIcon } from '@svgs/chevron-down-solid.svg'
+import { ReactComponent as DNAIcon } from '@svgs/dna.svg'
 
 const postTypes = [
     {
         name: 'Text',
+        description: `**Text**: The most basic post type on weco. Type in some text (with markdown formatting if you like), choose where you want the post to appear, and you're good to go!`,
         steps: ['Post Type: Text', 'Text', 'Spaces', 'Create'],
         icon: <TextIcon />,
-        description: `**Text**: The most basic post type on weco. Type in some text (with markdown formatting if you like), choose where you want the post to appear, and you're good to go!`,
     },
     {
         name: 'Url',
+        description: `**Url**: Add a URL and we'll scrape its meta-data to display on the post.`,
         steps: ['Post Type: URL', 'URL', 'Description (optional)', 'Spaces', 'Create'],
         icon: <UrlIcon />,
-        description: `**Url**: Add a URL and we'll scrape its meta-data to display on the post.`,
     },
     {
         name: 'Image',
+        description: `**Image**: Upload images from your device or via URL, include captions if you want, and re-order them how you like to create an album.`,
         steps: ['Post Type: Image', 'Images', 'Description (optional)', 'Spaces', 'Create'],
         icon: <ImageIcon />,
-        description: `**Image**: Upload images from your device or via URL, include captions if you want, and re-order them how you like to create an album.`,
     },
     {
         name: 'Audio',
+        description: `**Audio**: Upload an audio clip from your device or record your own audio file.`,
         steps: ['Post Type: Audio', 'Audio', 'Description (optional)', 'Spaces', 'Create'],
         icon: <AudioIcon />,
-        description: `**Audio**: Upload an audio clip from your device or record your own audio file.`,
     },
     {
         name: 'Event',
+        description: `**Event**: Schedule an event with a start and end time to be displayed in your spaces calendar. Mark yourself as 'going' or 'interested' to receive a notification just before the event starts.`,
         steps: ['Post Type: Event', 'Title', 'Description (optional)', 'Date', 'Spaces', 'Create'],
         icon: <EventIcon />,
-        description: `**Event**: Schedule an event with a start and end time to be displayed in your spaces calendar. Mark yourself as 'going' or 'interested' to receive a notification just before the event starts.`,
     },
     {
         name: 'Glass Bead Game',
+        description: `**Glass Bead Game**: Create your own Glass Bead Game and connect to other users with realtime audio-video streaming and chat functionality.`,
         steps: [
             'Post Type: Glass Bead Game',
             'Topic',
@@ -102,16 +104,16 @@ const postTypes = [
             'Create',
         ],
         icon: <GBGIcon />,
-        description: `**Glass Bead Game**: Create your own Glass Bead Game and connect to other users with realtime audio-video streaming and chat functionality.`,
     },
     {
         name: 'String',
+        description: `**String**: Create a string of connected items (text, URL, audio, or image) in one post.`,
         steps: ['Post Type: String', 'String', 'Description (optional)', 'Spaces', 'Create'],
         icon: <StringIcon />,
-        description: `**String**: Create a string of connected items (text, URL, audio, or image) in one post.`,
     },
     {
         name: 'Weave',
+        description: `**Weave**: Set up an asynchronous game where players take turns adding beads (text, URL, audio, or image) to a single string post.`,
         steps: [
             'Post Type: Weave',
             'Description (optional)',
@@ -121,7 +123,6 @@ const postTypes = [
             'Create',
         ],
         icon: <WeaveIcon />,
-        description: `**Weave**: Set up an asynchronous game where players take turns adding beads (text, URL, audio, or image) to a single string post.`,
     },
 ]
 
@@ -1726,7 +1727,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                     {postType === 'String' && (
                         <Column centerX style={{ width: '100%' }}>
                             {currentStep === 2 && (
-                                <Column style={{ width: '100%', maxWidth: 500 }}>
+                                <Column centerX style={{ width: '100%', maxWidth: 500 }}>
                                     <Column centerX>
                                         {stringPostError && (
                                             <p className='danger' style={{ marginBottom: 20 }}>
@@ -1936,7 +1937,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                                 <Row centerX style={{ width: '100%' }}>
                                                     {images.length > 0 && (
                                                         <Scrollbars
-                                                            className={`${styles.beadImages} row`}
+                                                            className={`${styles.images} row`}
                                                         >
                                                             {images.map((image, index) => (
                                                                 <Column
@@ -2067,31 +2068,87 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                     {string.length > 0 && (
                                         <Scrollbars className={`${styles.beadDraw} row`}>
                                             {string.map((bead, index) => (
-                                                <Column key={bead.id}>
-                                                    <StringBeadCard
-                                                        bead={bead}
-                                                        index={index}
-                                                        removeBead={removeBead}
-                                                    />
-                                                    <Row centerX className={styles.itemFooter}>
-                                                        {index !== 0 && (
-                                                            <button
-                                                                type='button'
-                                                                onClick={() => moveBead(index, -1)}
-                                                            >
-                                                                <ChevronLeftIcon />
-                                                            </button>
-                                                        )}
-                                                        {index < string.length - 1 && (
-                                                            <button
-                                                                type='button'
-                                                                onClick={() => moveBead(index, 1)}
-                                                            >
-                                                                <ChevronRightIcon />
-                                                            </button>
-                                                        )}
-                                                    </Row>
-                                                </Column>
+                                                <Row key={bead.id}>
+                                                    <Column>
+                                                        <StringBeadCard
+                                                            // todo: set up findBeadData function
+                                                            bead={{
+                                                                ...bead,
+                                                                type: `string-${bead.type}`,
+                                                                url:
+                                                                    bead.type === 'audio'
+                                                                        ? URL.createObjectURL(
+                                                                              bead.audioFile
+                                                                          )
+                                                                        : bead.url,
+                                                                urlName: bead.urlData
+                                                                    ? bead.urlData.name
+                                                                    : null,
+                                                                urlDomain: bead.urlData
+                                                                    ? bead.urlData.domain
+                                                                    : null,
+                                                                urlTitle: bead.urlData
+                                                                    ? bead.urlData.title
+                                                                    : null,
+                                                                urlImage: bead.urlData
+                                                                    ? bead.urlData.image
+                                                                    : null,
+                                                                Link: { index },
+                                                                PostImages: bead.images.map(
+                                                                    (image, i) => {
+                                                                        return {
+                                                                            id: image.id,
+                                                                            index: i,
+                                                                            caption: image.caption,
+                                                                            url: image.file
+                                                                                ? URL.createObjectURL(
+                                                                                      image.file
+                                                                                  )
+                                                                                : image.url,
+                                                                        }
+                                                                    }
+                                                                ),
+                                                            }}
+                                                            beadIndex={index}
+                                                            location=''
+                                                            removeBead={removeBead}
+                                                            style={{
+                                                                marginRight:
+                                                                    string.length > 2 &&
+                                                                    index === string.length - 1
+                                                                        ? 7
+                                                                        : 0,
+                                                            }}
+                                                        />
+                                                        <Row centerX className={styles.itemFooter}>
+                                                            {index !== 0 && (
+                                                                <button
+                                                                    type='button'
+                                                                    onClick={() =>
+                                                                        moveBead(index, -1)
+                                                                    }
+                                                                >
+                                                                    <ChevronLeftIcon />
+                                                                </button>
+                                                            )}
+                                                            {index < string.length - 1 && (
+                                                                <button
+                                                                    type='button'
+                                                                    onClick={() =>
+                                                                        moveBead(index, 1)
+                                                                    }
+                                                                >
+                                                                    <ChevronRightIcon />
+                                                                </button>
+                                                            )}
+                                                        </Row>
+                                                    </Column>
+                                                    {index < string.length - 1 && (
+                                                        <Row centerY className={styles.beadDivider}>
+                                                            <DNAIcon />
+                                                        </Row>
+                                                    )}
+                                                </Row>
                                             ))}
                                             <span
                                                 style={{ marginLeft: -7, width: 7, flexShrink: 0 }}

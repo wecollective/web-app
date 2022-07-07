@@ -297,36 +297,6 @@
     }
 }
 
-.beadImages {
-    padding-bottom: 10px;
-    margin-bottom: 10px;
-    width: 100%;
-
-    .image {
-        position: relative;
-        &:not(:last-child) {  margin-right: 10px }
-
-        > button {
-            position: absolute;
-            right: 0;
-        }
-
-        > img {
-            width: 180px;
-            height: 180px;
-            object-fit: cover;
-            margin-bottom: 10px;
-        }
-
-        > p {
-            width: 180px;
-            text-align: center;
-            overflow-wrap: break-word;
-            margin-bottom: 10px;
-        }
-    }
-}
-
 .itemFooter {
     height: 20px;
     margin: 7px 10px 5px 0;
@@ -349,6 +319,22 @@
 .beadDraw {
     padding-bottom: 15px;
     padding: 7px;
+    max-width: 100%;
+}
+
+.beadDivider {
+    width: 35px;
+    height: 220px;
+    opacity: 1;
+    animation-name: fadeInOpacity;
+    animation-timing-function: ease-in;
+    animation-duration: 2s;
+    
+    > svg {
+        transform: rotate(90deg);
+        height: 35px;
+        color: $bluegrey2;
+    }
 }
 
 .position {

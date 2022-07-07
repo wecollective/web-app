@@ -6,6 +6,7 @@ import colors from '@styles/Colors.module.scss'
 import { AccountContext } from '@src/contexts/AccountContext'
 import Column from '@components/Column'
 import Row from '@components/Row'
+import CloseButton from '@components/CloseButton'
 import ImageTitle from '@components/ImageTitle'
 import BeadCardUrlPreview from '@components/cards/BeadCardUrlPreview'
 import Markdown from '@components/Markdown'
@@ -13,22 +14,23 @@ import Scrollbars from '@components/Scrollbars'
 import ImageModal from '@components/modals/ImageModal'
 import AudioVisualiser from '@components/AudioVisualiser'
 import AudioTimeSlider from '@components/AudioTimeSlider'
-import { ReactComponent as TextIconSVG } from '@svgs/font-solid.svg'
-import { ReactComponent as LinkIconSVG } from '@svgs/link-solid.svg'
-import { ReactComponent as AudioIconSVG } from '@svgs/volume-high-solid.svg'
-import { ReactComponent as ImageIconSVG } from '@svgs/image-solid.svg'
-import { ReactComponent as PlayIconSVG } from '@svgs/play-solid.svg'
-import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
+import { ReactComponent as TextIcon } from '@svgs/font-solid.svg'
+import { ReactComponent as LinkIcon } from '@svgs/link-solid.svg'
+import { ReactComponent as AudioIcon } from '@svgs/volume-high-solid.svg'
+import { ReactComponent as ImageIcon } from '@svgs/image-solid.svg'
+import { ReactComponent as PlayIcon } from '@svgs/play-solid.svg'
+import { ReactComponent as PauseIcon } from '@svgs/pause-solid.svg'
 
 const StringBeadCard = (props: {
     bead: any
-    postId: number
-    postType: string
+    postId?: number
+    postType?: string
     beadIndex: number
     location: string
+    removeBead?: (beadIndex: number) => void
     style?: any
 }): JSX.Element => {
-    const { bead, postId, postType, beadIndex, location, style } = props
+    const { bead, postId, postType, beadIndex, location, removeBead, style } = props
     const { accountData } = useContext(AccountContext)
     const [audioPlaying, setAudioPlaying] = useState(false)
     const [imageModalOpen, setImageModalOpen] = useState(false)
@@ -38,13 +40,13 @@ const StringBeadCard = (props: {
     function findBeadIcon(beadType) {
         switch (beadType) {
             case 'string-text':
-                return <TextIconSVG />
+                return <TextIcon />
             case 'string-url':
-                return <LinkIconSVG />
+                return <LinkIcon />
             case 'string-audio':
-                return <AudioIconSVG />
+                return <AudioIcon />
             case 'string-image':
-                return <ImageIconSVG />
+                return <ImageIcon />
             default:
                 return null
         }
@@ -74,7 +76,7 @@ const StringBeadCard = (props: {
     return (
         <Column className={styles.wrapper} style={style}>
             <Row spaceBetween className={styles.beadHeader}>
-                {['glass-bead-game', 'weave'].includes(postType) && (
+                {postType && ['glass-bead-game', 'weave'].includes(postType) && (
                     <ImageTitle
                         type='user'
                         imagePath={bead.Creator.flagImagePath}
@@ -85,6 +87,7 @@ const StringBeadCard = (props: {
                     />
                 )}
                 {findBeadIcon(bead.type)}
+                {removeBead && <CloseButton size={20} onClick={() => removeBead(beadIndex)} />}
             </Row>
             <Column centerY className={styles.beadContent}>
                 {bead.type === 'string-text' && (
@@ -128,10 +131,9 @@ const StringBeadCard = (props: {
                             <button
                                 className={styles.playButton}
                                 type='button'
-                                aria-label='toggle-audio'
                                 onClick={() => toggleBeadAudio(beadIndex)}
                             >
-                                {audioPlaying ? <PauseIconSVG /> : <PlayIconSVG />}
+                                {audioPlaying ? <PauseIcon /> : <PlayIcon />}
                             </button>
                             <AudioTimeSlider
                                 audioElementId={`string-bead-audio-${postId}-${beadIndex}-${location}`}
@@ -174,6 +176,9 @@ const StringBeadCard = (props: {
 }
 
 StringBeadCard.defaultProps = {
+    postId: null,
+    postType: null,
+    removeBead: null,
     style: null,
 }
 
