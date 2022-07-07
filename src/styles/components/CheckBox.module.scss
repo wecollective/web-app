@@ -1,0 +1,51 @@
+@import '@styles/Variables';
+
+.wrapper {
+    display: flex;
+    cursor: pointer;
+    position: relative;
+    align-items: center;
+
+    // hide default checkbox styling
+    > input { display: none }
+
+    // check box
+    > div {
+        width: 26px;
+        height: 26px;
+        margin-right: 5px;
+        border-radius: 5px;
+        border: 2px solid $blue9;
+        background-color: white;
+        transition: background-color 0.2s;
+    }
+
+    // check icon
+    > svg {
+        position: absolute;
+        left: 5px;
+        width: 16px;
+        height: 16px;
+        color: $blue5;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    // show check icon if input checked
+    input:checked ~ svg { opacity: 1 }
+
+    // show checkbox background color on hover
+    &:hover > div { background-color: $bluegrey1 }
+
+    // disabled styling
+    &.disabled {
+        cursor: auto;
+
+        > div {
+            border: 2px solid $grey4;
+            background-color: $grey2
+        }
+
+        > svg { color: $grey5 }
+    }
+}
