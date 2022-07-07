@@ -71,8 +71,8 @@ const Input = (props: {
                 <div className={styles.stateIcon}>
                     {state === 'invalid' && <DangerIconSVG />}
                     {state === 'valid' && <SuccessIconSVG />}
+                    {loading && <LoadingWheel size={30} style={{ marginTop: -5 }} />}
                 </div>
-                {loading && <LoadingWheel size={30} style={{ marginRight: 5 }} />}
             </div>
         </div>
     )
