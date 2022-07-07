@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid'
+
 // constants
 export const weekDays = [
     'Monday',
@@ -31,6 +33,7 @@ export const defaultErrorState = {
 }
 
 export const defaultPostData = {
+    id: uuidv4(),
     type: 'text',
     text: '',
     url: '',
@@ -60,6 +63,18 @@ export const defaultPostData = {
     StringPosts: [] as any[],
     Weave: null as any,
     StringPlayers: [] as any[],
+}
+
+export const defaultBeadData = {
+    id: uuidv4(),
+    type: 'text',
+    text: '',
+    url: '',
+    urlData: null,
+    audioFile: null,
+    audioBlob: null,
+    audioType: '',
+    images: [],
 }
 
 // functions

@@ -9,17 +9,19 @@ import Cookies from 'universal-cookie'
 import flatpickr from 'flatpickr'
 import 'flatpickr/dist/themes/material_green.css'
 import { v4 as uuidv4 } from 'uuid'
+import { SpaceContext } from '@contexts/SpaceContext'
+import { AccountContext } from '@contexts/AccountContext'
+import config from '@src/Config'
+import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import {
     defaultPostData,
+    defaultBeadData,
     defaultErrorState,
     allValid,
     isValidUrl,
     formatTimeMMSS,
     formatTimeDHM,
 } from '@src/Helpers'
-import { SpaceContext } from '@contexts/SpaceContext'
-import { AccountContext } from '@contexts/AccountContext'
-import config from '@src/Config'
 import styles from '@styles/components/modals/CreatePostModal.module.scss'
 import colors from '@styles/Colors.module.scss'
 import Modal from '@components/Modal'
@@ -35,7 +37,6 @@ import CloseButton from '@components/CloseButton'
 import AudioVisualiser from '@components/AudioVisualiser'
 import AudioTimeSlider from '@components/AudioTimeSlider'
 import PostCardUrlPreview from '@components/cards/PostCard/PostCardUrlPreview'
-import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import Scrollbars from '@components/Scrollbars'
 import StringBeadCard from '@components/cards/StringBeadCard'
 import PostCard from '@components/cards/PostCard/PostCard'
@@ -59,85 +60,80 @@ import { ReactComponent as ChevronRightIcon } from '@svgs/chevron-right-solid.sv
 import { ReactComponent as ChevronUpIcon } from '@svgs/chevron-up-solid.svg'
 import { ReactComponent as ChevronDownIcon } from '@svgs/chevron-down-solid.svg'
 
+const postTypes = [
+    {
+        name: 'Text',
+        steps: ['Post Type: Text', 'Text', 'Spaces', 'Create'],
+        icon: <TextIcon />,
+        description: `**Text**: The most basic post type on weco. Type in some text (with markdown formatting if you like), choose where you want the post to appear, and you're good to go!`,
+    },
+    {
+        name: 'Url',
+        steps: ['Post Type: URL', 'URL', 'Description (optional)', 'Spaces', 'Create'],
+        icon: <UrlIcon />,
+        description: `**Url**: Add a URL and we'll scrape its meta-data to display on the post.`,
+    },
+    {
+        name: 'Image',
+        steps: ['Post Type: Image', 'Images', 'Description (optional)', 'Spaces', 'Create'],
+        icon: <ImageIcon />,
+        description: `**Image**: Upload images from your device or via URL, include captions if you want, and re-order them how you like to create an album.`,
+    },
+    {
+        name: 'Audio',
+        steps: ['Post Type: Audio', 'Audio', 'Description (optional)', 'Spaces', 'Create'],
+        icon: <AudioIcon />,
+        description: `**Audio**: Upload an audio clip from your device or record your own audio file.`,
+    },
+    {
+        name: 'Event',
+        steps: ['Post Type: Event', 'Title', 'Description (optional)', 'Date', 'Spaces', 'Create'],
+        icon: <EventIcon />,
+        description: `**Event**: Schedule an event with a start and end time to be displayed in your spaces calendar. Mark yourself as 'going' or 'interested' to receive a notification just before the event starts.`,
+    },
+    {
+        name: 'Glass Bead Game',
+        steps: [
+            'Post Type: Glass Bead Game',
+            'Topic',
+            'Description (optional)',
+            'Date (optional)',
+            'Spaces',
+            'Create',
+        ],
+        icon: <GBGIcon />,
+        description: `**Glass Bead Game**: Create your own Glass Bead Game and connect to other users with realtime audio-video streaming and chat functionality.`,
+    },
+    {
+        name: 'String',
+        steps: ['Post Type: String', 'String', 'Description (optional)', 'Spaces', 'Create'],
+        icon: <StringIcon />,
+        description: `**String**: Create a string of connected items (text, URL, audio, or image) in one post.`,
+    },
+    {
+        name: 'Weave',
+        steps: [
+            'Post Type: Weave',
+            'Description (optional)',
+            'People',
+            'Settings',
+            'Spaces',
+            'Create',
+        ],
+        icon: <WeaveIcon />,
+        description: `**Weave**: Set up an asynchronous game where players take turns adding beads (text, URL, audio, or image) to a single string post.`,
+    },
+]
+
 const CreatePostModal = (props: { initialType: string; close: () => void }): JSX.Element => {
     const { initialType, close } = props
     const { accountData } = useContext(AccountContext)
     const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
-    const postTypes = [
-        {
-            name: 'Text',
-            steps: ['Post Type: Text', 'Text', 'Spaces', 'Create'],
-            icon: <TextIcon />,
-            description: `**Text**: The most basic post type on weco. Type in some text (with markdown formatting if you like), choose where you want the post to appear, and you're good to go!`,
-        },
-        {
-            name: 'Url',
-            steps: ['Post Type: URL', 'URL', 'Description (optional)', 'Spaces', 'Create'],
-            icon: <UrlIcon />,
-            description: `**Url**: Add a URL and we'll scrape its meta-data to display on the post.`,
-        },
-        {
-            name: 'Image',
-            steps: ['Post Type: Image', 'Images', 'Description (optional)', 'Spaces', 'Create'],
-            icon: <ImageIcon />,
-            description: `**Image**: Upload images from your device or via URL, include captions if you want, and re-order them how you like to create an album.`,
-        },
-        {
-            name: 'Audio',
-            steps: ['Post Type: Audio', 'Audio', 'Description (optional)', 'Spaces', 'Create'],
-            icon: <AudioIcon />,
-            description: `**Audio**: Upload an audio clip from your device or record your own audio file.`,
-        },
-        {
-            name: 'Event',
-            steps: [
-                'Post Type: Event',
-                'Title',
-                'Description (optional)',
-                'Date',
-                'Spaces',
-                'Create',
-            ],
-            icon: <EventIcon />,
-            description: `**Event**: Schedule an event with a start and end time to be displayed in your spaces calendar. Mark yourself as 'going' or 'interested' to receive a notification just before the event starts.`,
-        },
-        {
-            name: 'Glass Bead Game',
-            steps: [
-                'Post Type: Glass Bead Game',
-                'Topic',
-                'Description (optional)',
-                'Date (optional)',
-                'Spaces',
-                'Create',
-            ],
-            icon: <GBGIcon />,
-            description: `**Glass Bead Game**: Create your own Glass Bead Game and connect to other users with realtime audio-video streaming and chat functionality.`,
-        },
-        {
-            name: 'String',
-            steps: ['Post Type: String', 'String', 'Description (optional)', 'Spaces', 'Create'],
-            icon: <StringIcon />,
-            description: `**String**: Create a string of connected items (text, URL, audio, or image) in one post.`,
-        },
-        {
-            name: 'Weave',
-            steps: [
-                'Post Type: Weave',
-                'Description (optional)',
-                'People',
-                'Settings',
-                'Spaces',
-                'Create',
-            ],
-            icon: <WeaveIcon />,
-            description: `**Weave**: Set up an asynchronous game where players take turns adding beads (text, URL, audio, or image) to a single string post.`,
-        },
-    ]
     const [postType, setPostType] = useState(initialType)
     const [steps, setSteps] = useState<string[]>(['Post Type', 'Text', 'Spaces', 'Create'])
     const [currentStep, setCurrentStep] = useState(1)
 
+    // todo: set up validateItem function and remove unnecessary object nesting in state
     // text
     const [textForm, setTextForm] = useState({
         text: {
@@ -275,20 +271,9 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
         },
     })
     // string
-    const defaultBead = {
-        id: uuidv4(),
-        type: 'text',
-        text: '',
-        url: '',
-        urlData: null,
-        audioFile: null,
-        audioBlob: null,
-        audioType: '',
-        images: [],
-    }
-    type errorState = 'default' | 'valid' | 'invalid'
-    const [newBead, setNewBead] = useState<any>(defaultBead)
+    const [newBead, setNewBead] = useState<any>(defaultBeadData)
     const [string, setString] = useState<any[]>([])
+    type errorState = 'default' | 'valid' | 'invalid'
     const [stringTextState, setStringTextState] = useState<errorState>('default')
     const [stringTextErrors, setStringTextErrors] = useState<string[]>([])
     const [stringPostError, setStringPostError] = useState(false)
@@ -581,7 +566,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             }
             setString([...string, newBead])
             setNewBead({
-                ...defaultBead,
+                ...defaultBeadData,
                 type: newBead.type,
             })
             // reset state
