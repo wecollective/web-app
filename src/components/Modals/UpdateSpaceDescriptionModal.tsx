@@ -66,7 +66,7 @@ const UpdateSpaceDescriptionModal = (props: { close: () => void }): JSX.Element 
     return (
         <Modal centered close={close}>
             <h1>Change the description for {spaceData.name}</h1>
-            <form onSubmit={updateSpaceDescription}>
+            <form onSubmit={updateSpaceDescription} style={{ maxWidth: 500 }}>
                 <MarkdownEditor
                     initialValue={inputValue}
                     onChange={(value) => {

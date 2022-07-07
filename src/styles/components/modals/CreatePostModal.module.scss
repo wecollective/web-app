@@ -5,7 +5,8 @@
     width: 100vw;
     @include for-tablet-landscape-up {
         padding: 50px;
-        width: 600px;
+        width: auto;
+        min-width: 600px;
     }
 }
 
@@ -386,4 +387,11 @@
         }
     }
     
+}
+
+.postPreviewWrapper {
+    width: 100%;
+    @include for-tablet-landscape-up {
+        width: 600px;
+    }
 }

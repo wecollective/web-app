@@ -1153,7 +1153,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                     )}
 
                     {currentStep === 1 && (
-                        <Column centerX>
+                        <Column centerX style={{ maxWidth: 500 }}>
                             <p>Choose a post type:</p>
                             <Row wrap centerX style={{ margin: '20px 0' }}>
                                 {postTypes.map((type) => (
@@ -1183,7 +1183,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                     )}
 
                     {postType === 'Text' && currentStep === 2 && (
-                        <Column centerX style={{ width: '100%', marginBottom: 30 }}>
+                        <Column centerX style={{ maxWidth: 500, marginBottom: 30 }}>
                             <MarkdownEditor
                                 initialValue={textForm.text.value}
                                 onChange={(value) => {
@@ -1199,7 +1199,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                     )}
 
                     {postType === 'Url' && (
-                        <Column centerX style={{ width: '100%' }}>
+                        <Column centerX style={{ width: '100%', maxWidth: 500 }}>
                             {currentStep === 2 && (
                                 <Column centerX style={{ width: '100%', marginBottom: 30 }}>
                                     <Input
@@ -1252,7 +1252,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                     )}
 
                     {postType === 'Image' && (
-                        <Column centerX style={{ width: '100%' }}>
+                        <Column centerX style={{ width: '100%', maxWidth: 600 }}>
                             {currentStep === 2 && (
                                 <Column centerX style={{ width: '100%', marginBottom: 30 }}>
                                     {imagePostError && (
@@ -1371,7 +1371,10 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                 </Column>
                             )}
                             {currentStep === 3 && (
-                                <Column centerX style={{ width: '100%', marginBottom: 30 }}>
+                                <Column
+                                    centerX
+                                    style={{ width: '100%', maxWidth: 500, marginBottom: 30 }}
+                                >
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
                                     <MarkdownEditor
                                         initialValue={imageForm.text.value}
@@ -1481,7 +1484,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                 </Column>
                             )}
                             {currentStep === 3 && (
-                                <Column centerX style={{ width: '100%', marginBottom: 30 }}>
+                                <Column centerX style={{ maxWidth: 500, marginBottom: 30 }}>
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
                                     <MarkdownEditor
                                         initialValue={audioForm.text.value}
@@ -1527,7 +1530,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                 </Column>
                             )}
                             {currentStep === 3 && (
-                                <Column centerX style={{ width: '100%', marginBottom: 30 }}>
+                                <Column centerX style={{ maxWidth: 500, marginBottom: 30 }}>
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
                                     <MarkdownEditor
                                         initialValue={eventForm2.description.value}
@@ -1579,7 +1582,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                     {postType === 'Glass Bead Game' && (
                         <Column centerX style={{ width: '100%' }}>
                             {currentStep === 2 && (
-                                <Column centerX style={{ width: '100%', marginBottom: 20 }}>
+                                <Column centerX style={{ maxWidth: 500, marginBottom: 20 }}>
                                     <h3 style={{ marginBottom: 10 }}>Choose a topic:</h3>
                                     <Row className={styles.topicGroupButtons}>
                                         <Button
@@ -1700,7 +1703,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                 </Column>
                             )}
                             {currentStep === 3 && (
-                                <Column centerX style={{ width: '100%', marginBottom: 30 }}>
+                                <Column centerX style={{ maxWidth: 500, marginBottom: 30 }}>
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
                                     <MarkdownEditor
                                         initialValue={GBGForm2.description.value}
@@ -1752,7 +1755,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                     {postType === 'String' && (
                         <Column centerX style={{ width: '100%' }}>
                             {currentStep === 2 && (
-                                <Column style={{ width: '100%' }}>
+                                <Column style={{ width: '100%', maxWidth: 500 }}>
                                     <Column centerX>
                                         {stringPostError && (
                                             <p className='danger' style={{ marginBottom: 20 }}>
@@ -2127,7 +2130,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                 </Column>
                             )}
                             {currentStep === 3 && (
-                                <Column centerX style={{ width: '100%', marginBottom: 30 }}>
+                                <Column centerX style={{ maxWidth: 500, marginBottom: 30 }}>
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
                                     <MarkdownEditor
                                         initialValue={stringForm.description.value}
@@ -2152,7 +2155,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                     {postType === 'Weave' && (
                         <Column centerX style={{ width: '100%' }}>
                             {currentStep === 2 && (
-                                <Column centerX style={{ width: '100%', marginBottom: 30 }}>
+                                <Column centerX style={{ maxWidth: 500, marginBottom: 30 }}>
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
                                     <MarkdownEditor
                                         initialValue={multiplayerStringForm1.description.value}
@@ -2343,7 +2346,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                     )}
 
                     {currentStep === steps.length - 1 && (
-                        <Column centerX>
+                        <Column centerX style={{ width: '100%' }}>
                             <p>Choose where you want the post to appear:</p>
                             <SearchSelector
                                 type='space'
@@ -2382,11 +2385,13 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                     )}
 
                     {currentStep === steps.length && (
-                        <Column centerX style={{ width: '100%', maxWidth: 800, marginBottom: 30 }}>
+                        <Column centerX style={{ width: '100%', marginBottom: 30 }}>
                             <p style={{ marginBottom: 30 }}>
                                 Here's a preview of what your post will look like to other users:
                             </p>
-                            <PostCard location='preview' post={findPostData()} />
+                            <Column className={styles.postPreviewWrapper}>
+                                <PostCard location='preview' post={findPostData()} />
+                            </Column>
                         </Column>
                     )}
 

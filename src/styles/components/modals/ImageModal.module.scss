@@ -6,6 +6,11 @@
         max-height: calc(100vh - 60px);
         overflow: hidden;
 
+        @include for-desktop-small-up {
+            max-width: calc(100vw - 60px);
+            max-height: calc(100vh - 250px);
+        }
+
         > button {
             all: unset;
             cursor: pointer;

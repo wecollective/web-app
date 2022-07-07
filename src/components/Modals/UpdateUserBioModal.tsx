@@ -67,7 +67,7 @@ const UpdateUserBioModal = (props: { close: () => void }): JSX.Element => {
     return (
         <Modal centered close={close}>
             <h1>Change your account bio</h1>
-            <form onSubmit={updateUserBio}>
+            <form onSubmit={updateUserBio} style={{ maxWidth: 500 }}>
                 <MarkdownEditor
                     initialValue={inputValue}
                     onChange={(value) => {

@@ -356,16 +356,18 @@ const NextBeadModal = (props: {
                     </Row>
                     <Column centerX style={{ width: '100%' }}>
                         {newBead.type === 'text' && (
-                            <MarkdownEditor
-                                initialValue={newBead.text}
-                                onChange={(value) => {
-                                    setStringTextErrors([])
-                                    setStringTextState('default')
-                                    setNewBead({ ...newBead, text: value })
-                                }}
-                                state={stringTextState}
-                                errors={stringTextErrors}
-                            />
+                            <Column centerX style={{ maxWidth: 500 }}>
+                                <MarkdownEditor
+                                    initialValue={newBead.text}
+                                    onChange={(value) => {
+                                        setStringTextErrors([])
+                                        setStringTextState('default')
+                                        setNewBead({ ...newBead, text: value })
+                                    }}
+                                    state={stringTextState}
+                                    errors={stringTextErrors}
+                                />
+                            </Column>
                         )}
                         {newBead.type === 'url' && (
                             <Column centerX style={{ width: '100%' }}>
