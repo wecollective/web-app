@@ -41,6 +41,7 @@ import PostCard from '@components/Cards/PostCard/PostCard'
 import Markdown from '@components/Markdown'
 import MarkdownEditor from '@components/MarkdownEditor'
 import Toggle from '@components/Toggle'
+import CheckBox from '@components/CheckBox'
 import { ReactComponent as PlayIcon } from '@svgs/play-solid.svg'
 import { ReactComponent as PauseIcon } from '@svgs/pause-solid.svg'
 import { ReactComponent as PlusIcon } from '@svgs/plus.svg'
@@ -299,7 +300,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
         },
     })
 
-    // multiplayer string
+    // weave
     const [multiplayerStringForm1, setMultiplayerStringForm1] = useState({
         description: {
             ...defaultErrorState,
@@ -308,6 +309,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
         },
     })
     const [allUsersAllowed, setAllUsersAllowed] = useState(true)
+    const [allowedBeadTypes, setAllowedBeadTypes] = useState(['Text', 'Url', 'Audio', 'Image'])
     const [userSearchLoading, setUserSearchLoading] = useState(false)
     const [userOptions, setUserOptions] = useState<any[]>([])
     const [selectedUsers, setSelectedUsers] = useState<any[]>([
@@ -617,6 +619,20 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
         return filesSizes.reduce((a, b) => a + b, 0) / (1024 * 1024)
     }
 
+    function updateAllowedBeadTypes(type, checked) {
+        if (checked) setAllowedBeadTypes([...allowedBeadTypes, type])
+        else setAllowedBeadTypes([...allowedBeadTypes.filter((t) => t !== type)])
+    }
+
+    function sortAndStringifyAllowedBeadTypes(typesArray) {
+        const orderedArray = [] as string[]
+        if (typesArray.find((t) => t === 'Text')) orderedArray.push('Text')
+        if (typesArray.find((t) => t === 'Url')) orderedArray.push('Url')
+        if (typesArray.find((t) => t === 'Audio')) orderedArray.push('Audio')
+        if (typesArray.find((t) => t === 'Image')) orderedArray.push('Image')
+        return orderedArray.join(',')
+    }
+
     function updatePlayerPosition(from, to) {
         const newPlayers = [...selectedUsers]
         const player = newPlayers[from]
@@ -697,9 +713,10 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             }
             if (currentStep === 4) {
                 if (
-                    allUsersAllowed
+                    (allUsersAllowed
                         ? allValid(multiplayerStringForm2, setMultiplayerStringForm2)
-                        : allValid(multiplayerStringForm3, setMultiplayerStringForm3)
+                        : allValid(multiplayerStringForm3, setMultiplayerStringForm3)) &&
+                    allowedBeadTypes.length
                 )
                     setCurrentStep(5)
             }
@@ -842,7 +859,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                 numberOfMoves: allUsersAllowed ? multiplayerStringForm2.numberOfMoves.value : null,
                 numberOfTurns: allUsersAllowed ? null : multiplayerStringForm3.numberOfTurns.value,
                 moveDuration: null,
-                allowedPostTypes: null,
+                allowedBeadTypes: sortAndStringifyAllowedBeadTypes(allowedBeadTypes),
                 privacy: allUsersAllowed ? 'all-users-allowed' : 'only-selected-users',
             }
         }
@@ -854,6 +871,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
         const accessToken = cookies.get('accessToken')
         const options = { headers: { Authorization: `Bearer ${accessToken}` } }
         const data = findPostData()
+        // todo: use findPostData() more effectively
         const postData = {
             spaceIds: selectedSpaces.map((s) => s.id),
             type: data.type,
@@ -877,6 +895,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             userIds: selectedUsers.map((s) => s.id),
             numberOfMoves: data.Weave ? data.Weave.numberOfMoves : null,
             numberOfTurns: data.Weave ? data.Weave.numberOfTurns : null,
+            allowedBeadTypes: data.Weave ? data.Weave.allowedBeadTypes : null,
         }
         let fileData
         let uploadType
@@ -2286,59 +2305,105 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                             />
                                         )}
                                     </Row>
-                                    {!allUsersAllowed && (
+                                    <Row centerX>
                                         <Column centerX>
-                                            <p>Player order:</p>
-                                            <Column style={{ margin: '20px 0' }}>
-                                                {selectedUsers.map((user, index) => (
-                                                    <Row
-                                                        key={user.id}
-                                                        centerY
-                                                        style={{ margin: '0 10px 10px 0' }}
-                                                    >
-                                                        <div className={styles.position}>
-                                                            {index + 1}
-                                                        </div>
-                                                        <div className={styles.positionControls}>
-                                                            {index > 0 && (
-                                                                <button
-                                                                    type='button'
-                                                                    onClick={() =>
-                                                                        updatePlayerPosition(
-                                                                            index,
-                                                                            index - 1
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    <ChevronUpIcon />
-                                                                </button>
-                                                            )}
-                                                            {index < selectedUsers.length - 1 && (
-                                                                <button
-                                                                    type='button'
-                                                                    onClick={() =>
-                                                                        updatePlayerPosition(
-                                                                            index,
-                                                                            index + 1
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    <ChevronDownIcon />
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                        <ImageTitle
-                                                            type='space'
-                                                            imagePath={user.flagImagePath}
-                                                            title={`${user.name} (${user.handle})`}
-                                                            imageSize={35}
-                                                            fontSize={16}
-                                                            style={{ marginRight: 5 }}
-                                                        />
-                                                    </Row>
-                                                ))}
+                                            <p>Allowed bead types:</p>
+                                            <Column style={{ alignItems: 'start', marginTop: 10 }}>
+                                                <CheckBox
+                                                    text='Text'
+                                                    checked={allowedBeadTypes.includes('Text')}
+                                                    onChange={(c) =>
+                                                        updateAllowedBeadTypes('Text', c)
+                                                    }
+                                                    style={{ marginBottom: 5 }}
+                                                />
+                                                <CheckBox
+                                                    text='Url'
+                                                    checked={allowedBeadTypes.includes('Url')}
+                                                    onChange={(checked) =>
+                                                        updateAllowedBeadTypes('Url', checked)
+                                                    }
+                                                    style={{ marginBottom: 5 }}
+                                                />
+                                                <CheckBox
+                                                    text='Audio'
+                                                    checked={allowedBeadTypes.includes('Audio')}
+                                                    onChange={(checked) =>
+                                                        updateAllowedBeadTypes('Audio', checked)
+                                                    }
+                                                    style={{ marginBottom: 5 }}
+                                                />
+                                                <CheckBox
+                                                    text='Image'
+                                                    checked={allowedBeadTypes.includes('Image')}
+                                                    onChange={(checked) =>
+                                                        updateAllowedBeadTypes('Image', checked)
+                                                    }
+                                                />
                                             </Column>
                                         </Column>
+                                        {!allUsersAllowed && (
+                                            <Column centerX style={{ marginLeft: 60 }}>
+                                                <p>Player order:</p>
+                                                <Column style={{ marginTop: 10 }}>
+                                                    {selectedUsers.map((user, index) => (
+                                                        <Row
+                                                            key={user.id}
+                                                            centerY
+                                                            style={{ margin: '0 10px 10px 0' }}
+                                                        >
+                                                            <div className={styles.position}>
+                                                                {index + 1}
+                                                            </div>
+                                                            <div
+                                                                className={styles.positionControls}
+                                                            >
+                                                                {index > 0 && (
+                                                                    <button
+                                                                        type='button'
+                                                                        onClick={() =>
+                                                                            updatePlayerPosition(
+                                                                                index,
+                                                                                index - 1
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <ChevronUpIcon />
+                                                                    </button>
+                                                                )}
+                                                                {index <
+                                                                    selectedUsers.length - 1 && (
+                                                                    <button
+                                                                        type='button'
+                                                                        onClick={() =>
+                                                                            updatePlayerPosition(
+                                                                                index,
+                                                                                index + 1
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <ChevronDownIcon />
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                            <ImageTitle
+                                                                type='space'
+                                                                imagePath={user.flagImagePath}
+                                                                title={`${user.name} (${user.handle})`}
+                                                                imageSize={35}
+                                                                fontSize={16}
+                                                                style={{ marginRight: 5 }}
+                                                            />
+                                                        </Row>
+                                                    ))}
+                                                </Column>
+                                            </Column>
+                                        )}
+                                    </Row>
+                                    {!allowedBeadTypes.length && (
+                                        <p className='danger' style={{ marginTop: 20 }}>
+                                            At least one bead type must be allowed
+                                        </p>
                                     )}
                                 </Column>
                             )}

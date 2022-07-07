@@ -37,7 +37,7 @@ const NextBeadModal = (props: {
 
     const defaultBead = {
         id: uuidv4(),
-        type: 'text',
+        type: postData.Weave.allowedBeadTypes.split(',')[0].toLowerCase(),
         text: '',
         url: '',
         urlData: null,
@@ -325,34 +325,42 @@ const NextBeadModal = (props: {
                 <Column centerX style={{ width: '100%' }}>
                     <h1>Add a new bead</h1>
                     <Row centerX className={styles.beadTypeButtons}>
-                        <button
-                            type='button'
-                            className={`${newBead.type === 'text' && styles.selected}`}
-                            onClick={() => setNewBead({ ...newBead, type: 'text' })}
-                        >
-                            <TextIcon />
-                        </button>
-                        <button
-                            type='button'
-                            className={`${newBead.type === 'url' && styles.selected}`}
-                            onClick={() => setNewBead({ ...newBead, type: 'url' })}
-                        >
-                            <UrlIcon />
-                        </button>
-                        <button
-                            type='button'
-                            className={`${newBead.type === 'audio' && styles.selected}`}
-                            onClick={() => setNewBead({ ...newBead, type: 'audio' })}
-                        >
-                            <AudioIcon />
-                        </button>
-                        <button
-                            type='button'
-                            className={`${newBead.type === 'image' && styles.selected}`}
-                            onClick={() => setNewBead({ ...newBead, type: 'image' })}
-                        >
-                            <ImageIcon />
-                        </button>
+                        {postData.Weave.allowedBeadTypes.includes('Text') && (
+                            <button
+                                type='button'
+                                className={`${newBead.type === 'text' && styles.selected}`}
+                                onClick={() => setNewBead({ ...newBead, type: 'text' })}
+                            >
+                                <TextIcon />
+                            </button>
+                        )}
+                        {postData.Weave.allowedBeadTypes.includes('Url') && (
+                            <button
+                                type='button'
+                                className={`${newBead.type === 'url' && styles.selected}`}
+                                onClick={() => setNewBead({ ...newBead, type: 'url' })}
+                            >
+                                <UrlIcon />
+                            </button>
+                        )}
+                        {postData.Weave.allowedBeadTypes.includes('Audio') && (
+                            <button
+                                type='button'
+                                className={`${newBead.type === 'audio' && styles.selected}`}
+                                onClick={() => setNewBead({ ...newBead, type: 'audio' })}
+                            >
+                                <AudioIcon />
+                            </button>
+                        )}
+                        {postData.Weave.allowedBeadTypes.includes('Image') && (
+                            <button
+                                type='button'
+                                className={`${newBead.type === 'image' && styles.selected}`}
+                                onClick={() => setNewBead({ ...newBead, type: 'image' })}
+                            >
+                                <ImageIcon />
+                            </button>
+                        )}
                     </Row>
                     <Column centerX style={{ width: '100%' }}>
                         {newBead.type === 'text' && (
