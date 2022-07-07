@@ -32,6 +32,7 @@ const MarkdownEditor = (props: {
             style={style}
         >
             <Editor
+                placeholder='Enter text...'
                 defaultContentState={markdownToDraft(parseMarkdown(initialValue), {
                     remarkableOptions: { html: true },
                     remarkablePreset: 'full',
@@ -43,11 +44,39 @@ const MarkdownEditor = (props: {
                 onEditorStateChange={(value) => {
                     onChange(draftToMarkdown(convertToRaw(value.getCurrentContent())))
                 }}
+                toolbar={{
+                    options: [
+                        'inline',
+                        'blockType',
+                        'fontSize',
+                        'fontFamily',
+                        'list',
+                        // 'textAlign',
+                        'colorPicker',
+                        'link',
+                        // 'embedded',
+                        'emoji',
+                        'image',
+                        'remove',
+                        'history',
+                    ],
+                    inline: {
+                        options: [
+                            'bold',
+                            'italic',
+                            // 'underline',
+                            // 'strikethrough',
+                            'monospace',
+                            'superscript',
+                            'subscript',
+                        ],
+                    },
+                }}
             />
-            <div className={styles.stateIcon}>
+            {/* <div className={styles.stateIcon}>
                 {state === 'invalid' && <DangerIconSVG />}
                 {state === 'valid' && <SuccessIconSVG />}
-            </div>
+            </div> */}
             {state === 'invalid' && errors && errors.map((error) => <p key={error}>{error}</p>)}
         </div>
     )
