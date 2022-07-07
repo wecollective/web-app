@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react'
 import axios from 'axios'
-import config from '../Config'
-import styles from '../styles/components/PlotGraph.module.scss'
-import { PostContext } from '../contexts/PostContext'
-import PostCard from './Cards/PostCard/PostCard'
+import config from '@src/Config'
+import styles from '@styles/components/PlotGraph.module.scss'
+import { PostContext } from '@contexts/PostContext'
+import PostCard from '@components/cards/PostCard/PostCard'
 import PlotGraphMap from './PlotGraphMap'
 
 const PlotGraph = (): JSX.Element => {

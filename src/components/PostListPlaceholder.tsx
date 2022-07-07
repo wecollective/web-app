@@ -1,7 +1,7 @@
 import React from 'react'
 import styles from '@styles/components/ListPlaceholder.module.scss'
 import Column from '@components/Column'
-import PostCardPlaceholder from '@components/Cards/PostCard/PostCardPlaceholder'
+import PostCardPlaceholder from '@components/cards/PostCard/PostCardPlaceholder'
 
 const PostListPlaceholder = (): JSX.Element => {
     return (

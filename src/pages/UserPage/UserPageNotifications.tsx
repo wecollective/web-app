@@ -6,7 +6,7 @@ import Cookies from 'universal-cookie'
 import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
 import styles from '@styles/pages/UserPage/UserPageNotifications.module.scss'
-import NotificationCard from '@components/Cards/NotificationCard'
+import NotificationCard from '@components/cards/NotificationCard'
 import Column from '@components/Column'
 import config from '@src/Config'
 

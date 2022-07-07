@@ -6,10 +6,10 @@ import OverlayScrollbars from 'overlayscrollbars'
 import { resizeTextArea } from '@src/Helpers'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
-import Column from '@src/components/Column'
-import Row from '@src/components/Row'
+import Column from '@components/Column'
+import Row from '@components/Row'
 import CommentInput from '@components/CommentInput'
-import CommentCard from '@components/Cards/CommentCard'
+import CommentCard from '@components/cards/CommentCard'
 import LoadingWheel from '@components/LoadingWheel'
 
 const PostCardComments = (props: {

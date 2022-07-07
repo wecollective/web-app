@@ -8,8 +8,8 @@ import ShowMoreLess from '@components/ShowMoreLess'
 import Markdown from '@components/Markdown'
 import Column from '@components/Column'
 import Row from '@components/Row'
-import UpdateUserNameModal from '@src/components/modals/UpdateUserNameModal'
-import UpdateUserBioModal from '@src/components/modals/UpdateUserBioModal'
+import UpdateUserNameModal from '@components/modals/UpdateUserNameModal'
+import UpdateUserBioModal from '@components/modals/UpdateUserBioModal'
 
 const UserPageSettings = (): JSX.Element => {
     const { accountData, accountDataLoading } = useContext(AccountContext)

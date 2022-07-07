@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
 import React, { useEffect, useContext } from 'react'
 import styles from '@styles/components/PostList.module.scss'
-import HorizontalSpaceCard from '@components/Cards/HorizontalSpaceCard'
+import HorizontalSpaceCard from '@components/cards/HorizontalSpaceCard'
 import SpaceListPlaceholder from '@components/SpaceListPlaceholder'
 import Row from '@components/Row'
 import Column from '@components/Column'

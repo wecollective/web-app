@@ -11,7 +11,7 @@ import Column from '@components/Column'
 import Row from '@components/Row'
 import Button from '@components/Button'
 import ImageTitle from '@components/ImageTitle'
-import TextLink from '@src/components/TextLink'
+import TextLink from '@components/TextLink'
 import Input from '@components/Input'
 import { pluralise, allValid, defaultErrorState } from '@src/Helpers'
 
