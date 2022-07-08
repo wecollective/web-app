@@ -42,7 +42,11 @@ const MarkdownEditor = (props: {
                     },
                 })}
                 onEditorStateChange={(value) => {
-                    onChange(draftToMarkdown(convertToRaw(value.getCurrentContent())))
+                    onChange(
+                        draftToMarkdown(convertToRaw(value.getCurrentContent()), null, null, {
+                            emptyLineBeforeBlock: true,
+                        })
+                    )
                 }}
                 toolbar={{
                     options: [
