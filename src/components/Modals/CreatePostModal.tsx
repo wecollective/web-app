@@ -845,6 +845,27 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
         return data
     }
 
+    function formatBeadData(bead, index) {
+        return {
+            ...bead,
+            type: `string-${bead.type}`,
+            url: bead.type === 'audio' ? URL.createObjectURL(bead.audioFile) : bead.url,
+            urlName: bead.urlData ? bead.urlData.name : null,
+            urlDomain: bead.urlData ? bead.urlData.domain : null,
+            urlTitle: bead.urlData ? bead.urlData.title : null,
+            urlImage: bead.urlData ? bead.urlData.image : null,
+            Link: { index },
+            PostImages: bead.images.map((image, i) => {
+                return {
+                    id: image.id,
+                    index: i,
+                    caption: image.caption,
+                    url: image.file ? URL.createObjectURL(image.file) : image.url,
+                }
+            }),
+        }
+    }
+
     function createPost() {
         setLoading(true)
         const accessToken = cookies.get('accessToken')
@@ -2071,44 +2092,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                                 <Row key={bead.id}>
                                                     <Column>
                                                         <StringBeadCard
-                                                            // todo: set up findBeadData function
-                                                            bead={{
-                                                                ...bead,
-                                                                type: `string-${bead.type}`,
-                                                                url:
-                                                                    bead.type === 'audio'
-                                                                        ? URL.createObjectURL(
-                                                                              bead.audioFile
-                                                                          )
-                                                                        : bead.url,
-                                                                urlName: bead.urlData
-                                                                    ? bead.urlData.name
-                                                                    : null,
-                                                                urlDomain: bead.urlData
-                                                                    ? bead.urlData.domain
-                                                                    : null,
-                                                                urlTitle: bead.urlData
-                                                                    ? bead.urlData.title
-                                                                    : null,
-                                                                urlImage: bead.urlData
-                                                                    ? bead.urlData.image
-                                                                    : null,
-                                                                Link: { index },
-                                                                PostImages: bead.images.map(
-                                                                    (image, i) => {
-                                                                        return {
-                                                                            id: image.id,
-                                                                            index: i,
-                                                                            caption: image.caption,
-                                                                            url: image.file
-                                                                                ? URL.createObjectURL(
-                                                                                      image.file
-                                                                                  )
-                                                                                : image.url,
-                                                                        }
-                                                                    }
-                                                                ),
-                                                            }}
+                                                            bead={formatBeadData(bead, index)}
                                                             beadIndex={index}
                                                             location=''
                                                             removeBead={removeBead}
