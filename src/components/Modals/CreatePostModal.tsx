@@ -322,6 +322,9 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             validate: (v) => (+v < 1 || +v > 20 ? ['Must be between 1 and 20 turns'] : []),
         },
     })
+    const [audioTimeLimitOn, setAudioTimeLimitOn] = useState(false)
+    const [audioTimeLimit, setAudioTimeLimit] = useState(60)
+    const [audioTimeLimitError, setAudioTimeLimitError] = useState(false)
 
     // selected spaces
     const [spaceOptions, setSpaceOptions] = useState<any[]>([])
@@ -704,8 +707,18 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                         ? allValid(multiplayerStringForm2, setMultiplayerStringForm2)
                         : allValid(multiplayerStringForm3, setMultiplayerStringForm3)) &&
                     allowedBeadTypes.length
-                )
-                    setCurrentStep(5)
+                ) {
+                    if (
+                        allowedBeadTypes.includes('Audio') &&
+                        audioTimeLimitOn &&
+                        (audioTimeLimit < 10 || audioTimeLimit > 300)
+                    )
+                        setAudioTimeLimitError(true)
+                    else {
+                        setAudioTimeLimitError(false)
+                        setCurrentStep(5)
+                    }
+                }
             }
         }
 
@@ -2299,7 +2312,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                         )}
                                     </Row>
                                     <Row centerX>
-                                        <Column centerX>
+                                        <Column centerX style={{ marginBottom: 20 }}>
                                             <p>Allowed bead types:</p>
                                             <Column style={{ alignItems: 'start', marginTop: 10 }}>
                                                 <CheckBox
@@ -2393,9 +2406,66 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                             </Column>
                                         )}
                                     </Row>
+                                    {allowedBeadTypes.includes('Audio') && (
+                                        <Column centerX>
+                                            <Row centerY style={{ marginBottom: 20 }}>
+                                                <p>Audio time limit:</p>
+                                                <Toggle
+                                                    leftText='Off'
+                                                    rightText='On'
+                                                    rightColor='blue'
+                                                    positionLeft={!audioTimeLimitOn}
+                                                    onClick={() =>
+                                                        setAudioTimeLimitOn(!audioTimeLimitOn)
+                                                    }
+                                                    style={{ marginLeft: 20 }}
+                                                />
+                                            </Row>
+                                            {audioTimeLimitOn && (
+                                                <Row centerY style={{ marginBottom: 20 }}>
+                                                    <Button
+                                                        text='1 min'
+                                                        color={
+                                                            audioTimeLimit === 60 ? 'blue' : 'grey'
+                                                        }
+                                                        onClick={() => setAudioTimeLimit(60)}
+                                                        style={{ marginRight: 10 }}
+                                                    />
+                                                    <Button
+                                                        text='2 min'
+                                                        color={
+                                                            audioTimeLimit === 120 ? 'blue' : 'grey'
+                                                        }
+                                                        onClick={() => setAudioTimeLimit(120)}
+                                                        style={{ marginRight: 10 }}
+                                                    />
+                                                    <Button
+                                                        text='3 min'
+                                                        color={
+                                                            audioTimeLimit === 180 ? 'blue' : 'grey'
+                                                        }
+                                                        onClick={() => setAudioTimeLimit(180)}
+                                                        style={{ marginRight: 20 }}
+                                                    />
+                                                    <Input
+                                                        type='text'
+                                                        value={audioTimeLimit}
+                                                        onChange={(v) => setAudioTimeLimit(+v)}
+                                                        style={{ width: 90, marginRight: 10 }}
+                                                    />
+                                                    <p>seconds</p>
+                                                </Row>
+                                            )}
+                                        </Column>
+                                    )}
                                     {!allowedBeadTypes.length && (
                                         <p className='danger' style={{ marginTop: 20 }}>
                                             At least one bead type must be allowed
+                                        </p>
+                                    )}
+                                    {audioTimeLimitOn && audioTimeLimitError && (
+                                        <p className='danger' style={{ marginTop: 20 }}>
+                                            Audio time limit must be between 10 secs and 5 mins
                                         </p>
                                     )}
                                 </Column>
