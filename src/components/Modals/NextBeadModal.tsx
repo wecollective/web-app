@@ -3,8 +3,9 @@ import React, { useState, useRef, useContext } from 'react'
 import * as d3 from 'd3'
 import Cookies from 'universal-cookie'
 import axios from 'axios'
-import config from '@src/Config'
 import { v4 as uuidv4 } from 'uuid'
+import getBlobDuration from 'get-blob-duration'
+import config from '@src/Config'
 import { defaultErrorState, isValidUrl, formatTimeMMSS } from '@src/Helpers'
 import styles from '@styles/components/modals/NextBeadModal.module.scss'
 import { AccountContext } from '@src/contexts/AccountContext'
@@ -83,6 +84,7 @@ const NextBeadModal = (props: {
     // audio
     const [audioFile, setAudioFile] = useState<File>()
     const [audioSizeError, setAudioSizeError] = useState(false)
+    const [audioTimeError, setAudioTimeError] = useState(false)
     const [showRecordControls, setShowRecordControls] = useState(false)
     const [recording, setRecording] = useState(false)
     const [recordingTime, setRecordingTime] = useState(0)
@@ -146,15 +148,20 @@ const NextBeadModal = (props: {
         if (input) input.value = ''
     }
 
-    function selectAudioFile() {
+    async function selectAudioFile() {
         setShowRecordControls(false)
         const input = d3.select('#audio-file-input').node()
         if (input && input.files && input.files[0]) {
+            const duration = await getBlobDuration(URL.createObjectURL(input.files[0]))
             if (input.files[0].size > audioMBLimit * 1024 * 1024) {
                 setAudioSizeError(true)
                 resetAudioState()
+            } else if (duration > postData.Weave.audioTimeLimit) {
+                setAudioTimeError(true)
+                resetAudioState()
             } else {
                 setAudioSizeError(false)
+                setAudioTimeError(false)
                 setNewBead({
                     ...newBead,
                     id: uuidv4(),
@@ -178,7 +185,14 @@ const NextBeadModal = (props: {
                 }
                 audioRecorderRef.current.onstart = () => {
                     recordingIntervalRef.current = setInterval(() => {
-                        setRecordingTime((t) => t + 1)
+                        setRecordingTime((t) => {
+                            if (t === postData.Weave.audioTimeLimit) {
+                                audioRecorderRef.current.stop()
+                                setRecording(false)
+                                return t
+                            }
+                            return t + 1
+                        })
                     }, 1000)
                 }
                 audioRecorderRef.current.onstop = () => {
@@ -401,6 +415,14 @@ const NextBeadModal = (props: {
                                         Audio too large. Max size: {audioMBLimit}MB
                                     </p>
                                 )}
+                                {postData.Weave.audioTimeLimit && (
+                                    <p
+                                        className={audioTimeError ? 'danger' : ''}
+                                        style={{ marginBottom: 20 }}
+                                    >
+                                        Max time limit: {postData.Weave.audioTimeLimit} seconds
+                                    </p>
+                                )}
                                 <Row style={{ marginBottom: 10 }}>
                                     <Button
                                         text='Record audio'
@@ -409,6 +431,7 @@ const NextBeadModal = (props: {
                                         onClick={() => {
                                             resetAudioState()
                                             setAudioSizeError(false)
+                                            setAudioTimeError(false)
                                             setShowRecordControls(true)
                                         }}
                                     />

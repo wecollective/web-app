@@ -852,6 +852,8 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                 numberOfTurns: allUsersAllowed ? null : multiplayerStringForm3.numberOfTurns.value,
                 moveDuration: null,
                 allowedBeadTypes: sortAndStringifyAllowedBeadTypes(allowedBeadTypes),
+                audioTimeLimit:
+                    allowedBeadTypes.includes('Audio') && audioTimeLimitOn ? audioTimeLimit : null,
                 privacy: allUsersAllowed ? 'all-users-allowed' : 'only-selected-users',
             }
         }
@@ -908,6 +910,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             numberOfMoves: data.Weave ? data.Weave.numberOfMoves : null,
             numberOfTurns: data.Weave ? data.Weave.numberOfTurns : null,
             allowedBeadTypes: data.Weave ? data.Weave.allowedBeadTypes : null,
+            audioTimeLimit: data.Weave ? data.Weave.audioTimeLimit : null,
         }
         let fileData
         let uploadType
