@@ -2,7 +2,6 @@
 
 .wrapper {
     width: 100%;
-    max-width: 800px;
 
     .posts > div, .spaces > div { margin-bottom: 2px }
 
@@ -10,7 +9,7 @@
         padding: 0 10px;
         .posts > div, .spaces > div { margin-bottom: 15px }
     }
-
+    @include for-post-width-up { width: 800px }
     @include for-tablet-landscape-up { min-height: calc(100vh - 220px) }
     @include for-desktop-medium-up { min-height: calc(100vh - 320px) }
     
