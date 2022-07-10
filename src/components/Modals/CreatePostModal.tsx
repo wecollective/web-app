@@ -963,8 +963,8 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                 setCurrentStep(steps.length + 1)
                 if (selectedSpaces.map((space) => space.id).includes(spaceData.id)) {
                     const newPost = {
-                        ...res.data.post,
                         ...data,
+                        ...res.data.post,
                         IndirectSpaces: [
                             ...res.data.indirectRelationships.map((item) => {
                                 return { id: item.holonId }
