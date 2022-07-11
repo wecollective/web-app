@@ -162,7 +162,7 @@ const NextBeadModal = (props: {
             if (input.files[0].size > audioMBLimit * 1024 * 1024) {
                 setAudioSizeError(true)
                 resetAudioState()
-            } else if (duration > audioTimeLimit) {
+            } else if (duration > audioTimeLimit + 1 || duration < audioTimeLimit - 1) {
                 setAudioTimeError(true)
                 resetAudioState()
             } else {
@@ -182,6 +182,7 @@ const NextBeadModal = (props: {
         if (recording) {
             audioRecorderRef.current.stop()
             setRecording(false)
+            if (audioTimeLimit) resetAudioState()
         } else {
             resetAudioState()
             navigator.mediaDevices.getUserMedia({ audio: true }).then((audio) => {
@@ -192,7 +193,7 @@ const NextBeadModal = (props: {
                 audioRecorderRef.current.onstart = () => {
                     recordingIntervalRef.current = setInterval(() => {
                         setRecordingTime((t) => {
-                            if (t === audioTimeLimit) {
+                            if (audioTimeLimit && audioTimeLimit === t) {
                                 audioRecorderRef.current.stop()
                                 setRecording(false)
                                 return t
@@ -201,16 +202,19 @@ const NextBeadModal = (props: {
                         })
                     }, 1000)
                 }
-                audioRecorderRef.current.onstop = () => {
+                audioRecorderRef.current.onstop = async () => {
                     clearInterval(recordingIntervalRef.current)
                     const blob = new Blob(audioChunksRef.current, { type: 'audio/mpeg-3' })
-                    setNewBead({
-                        ...newBead,
-                        id: uuidv4(),
-                        audioFile: new File([blob], ''),
-                        audioBlob: blob,
-                        audioType: 'recording',
-                    })
+                    const duration = await getBlobDuration(blob)
+                    if (audioTimeLimit && duration > audioTimeLimit) {
+                        setNewBead({
+                            ...newBead,
+                            id: uuidv4(),
+                            audioFile: new File([blob], ''),
+                            audioBlob: blob,
+                            audioType: 'recording',
+                        })
+                    }
                 }
                 audioRecorderRef.current.start()
                 setRecording(true)
@@ -435,7 +439,7 @@ const NextBeadModal = (props: {
                                         className={audioTimeError ? 'danger' : ''}
                                         style={{ marginBottom: 20 }}
                                     >
-                                        Max time limit: {audioTimeLimit} seconds
+                                        Audio length: {audioTimeLimit} seconds
                                     </p>
                                 )}
                                 <Row style={{ marginBottom: 10 }}>
@@ -469,7 +473,7 @@ const NextBeadModal = (props: {
                                         <Button
                                             text={`${
                                                 recording
-                                                    ? 'Stop'
+                                                    ? `${audioTimeLimit ? 'Reset' : 'Stop'}`
                                                     : `${audioFile ? 'Restart' : 'Start'}`
                                             } recording`}
                                             color={recording ? 'red' : 'blue'}
