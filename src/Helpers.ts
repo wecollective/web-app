@@ -68,6 +68,7 @@ export const defaultPostData = {
 export const defaultBeadData = {
     id: uuidv4(),
     type: 'text',
+    color: '#fff',
     text: '',
     url: '',
     urlData: null,

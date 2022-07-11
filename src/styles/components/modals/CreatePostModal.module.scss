@@ -321,6 +321,26 @@
     }
 }
 
+.colorButtons {
+    margin: 20px 0 10px 0;
+
+    > button {
+        all: unset;
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        border-radius: 5px;
+        border: 1px solid $black3;
+        &:not(:last-child) {
+            margin-right: 10px;
+        }
+
+        &.selected {
+            border: 3px solid $black3;
+        }
+    }
+}
+
 .itemFooter {
     height: 20px;
     margin: 7px 10px 5px 0;

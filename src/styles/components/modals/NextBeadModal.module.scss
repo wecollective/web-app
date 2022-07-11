@@ -1,5 +1,21 @@
 @import '@styles/Variables';
 
+.colorButtons {
+    margin-bottom: 20px;
+
+    > button {
+        all: unset;
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        border-radius: 5px;
+        border: 1px solid $black3;
+        &:not(:last-child) {
+            margin-right: 10px;
+        }
+    }
+}
+
 .beadTypeButtons {
     margin-bottom: 20px;
 

@@ -12,6 +12,7 @@ import SuccessMessage from '@components/SuccessMessage'
 import config from '@src/Config'
 import { AccountContext } from '@src/contexts/AccountContext'
 import { defaultErrorState, formatTimeMMSS, isValidUrl } from '@src/Helpers'
+import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/NextBeadModal.module.scss'
 import { ReactComponent as ChevronLeftIcon } from '@svgs/chevron-left-solid.svg'
 import { ReactComponent as ChevronRightIcon } from '@svgs/chevron-right-solid.svg'
@@ -26,6 +27,9 @@ import getBlobDuration from 'get-blob-duration'
 import React, { useContext, useRef, useState } from 'react'
 import Cookies from 'universal-cookie'
 import { v4 as uuidv4 } from 'uuid'
+
+const { white, red, orange, yellow, green, blue, purple } = colors
+const beadColors = [white, red, orange, yellow, green, blue, purple]
 
 const NextBeadModal = (props: {
     beadIndex: number
@@ -49,6 +53,7 @@ const NextBeadModal = (props: {
     const defaultBead = {
         id: uuidv4(),
         type: allowedBeadTypes.split(',')[0].toLowerCase(),
+        color: colors.white,
         text: '',
         url: '',
         urlData: null,
@@ -283,6 +288,7 @@ const NextBeadModal = (props: {
                 privacy,
                 nextPlayerId: findNextPlayerId(),
                 type: newBead.type,
+                color: newBead.color,
                 text: newBead.text,
                 url: newBead.url,
                 urlData: newBead.urlData,
@@ -598,41 +604,52 @@ const NextBeadModal = (props: {
                             (newBead.type === 'url' && newBead.urlData !== null) ||
                             (newBead.type === 'audio' && newBead.audioFile) ||
                             (newBead.type === 'image' && images.length > 0)) && (
-                            <StringBeadCard
-                                key={newBead.id}
-                                bead={{
-                                    ...newBead,
-                                    type: `string-${newBead.type.toLowerCase()}`,
-                                    PostImages: images.map((image, index) => {
-                                        return {
-                                            id: uuidv4(),
-                                            index,
-                                            caption: image.caption,
-                                            url: image.url || URL.createObjectURL(image.file),
-                                        }
-                                    }),
-                                    url:
-                                        newBead.type === 'audio'
-                                            ? URL.createObjectURL(newBead.audioFile)
-                                            : newBead.url,
-                                    urlImage: newBead.urlData ? newBead.urlData.image : null,
-                                    urlDomain: newBead.urlData ? newBead.urlData.domain : null,
-                                    urlDescription: newBead.urlData
-                                        ? newBead.urlData.description
-                                        : null,
-                                    urlTitle: newBead.urlData ? newBead.urlData.title : null,
-                                    Creator: {
-                                        id: accountData.id,
-                                        name: accountData.name,
-                                        flagImagePath: accountData.flagImagePath,
-                                    },
-                                }}
-                                postId={0}
-                                postType='weave'
-                                beadIndex={0}
-                                location='test'
-                                style={{ marginTop: 20 }}
-                            />
+                            <Column centerX style={{ margin: '20px 0' }}>
+                                <Row className={styles.colorButtons}>
+                                    {beadColors.map((color) => (
+                                        <button
+                                            key={color}
+                                            type='button'
+                                            aria-label='color'
+                                            onClick={() => setNewBead({ ...newBead, color })}
+                                            style={{ backgroundColor: color }}
+                                        />
+                                    ))}
+                                </Row>
+                                <StringBeadCard
+                                    key={newBead.id}
+                                    bead={{
+                                        ...newBead,
+                                        type: `string-${newBead.type.toLowerCase()}`,
+                                        PostImages: images.map((image, index) => {
+                                            return {
+                                                id: uuidv4(),
+                                                index,
+                                                caption: image.caption,
+                                                url: image.url || URL.createObjectURL(image.file),
+                                            }
+                                        }),
+                                        url:
+                                            newBead.type === 'audio'
+                                                ? URL.createObjectURL(newBead.audioFile)
+                                                : newBead.url,
+                                        urlImage: newBead.urlData ? newBead.urlData.image : null,
+                                        urlDomain: newBead.urlData ? newBead.urlData.domain : null,
+                                        urlDescription: newBead.urlData
+                                            ? newBead.urlData.description
+                                            : null,
+                                        urlTitle: newBead.urlData ? newBead.urlData.title : null,
+                                        Creator: {
+                                            id: accountData.id,
+                                            name: accountData.name,
+                                            flagImagePath: accountData.flagImagePath,
+                                        },
+                                    }}
+                                    postType='weave'
+                                    beadIndex={0}
+                                    location='next-bead-modal'
+                                />
+                            </Column>
                         )}
                         <Button
                             text='Add bead'

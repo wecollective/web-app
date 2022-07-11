@@ -126,6 +126,9 @@ const postTypes = [
     },
 ]
 
+const { white, red, orange, yellow, green, blue, purple } = colors
+const beadColors = [white, red, orange, yellow, green, blue, purple]
+
 const CreatePostModal = (props: { initialType: string; close: () => void }): JSX.Element => {
     const { initialType, close } = props
     const { accountData } = useContext(AccountContext)
@@ -829,6 +832,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                 return {
                     text: bead.text,
                     type: `string-${bead.type}`,
+                    color: bead.color,
                     url: beadUrl,
                     urlDescription: bead.urlData ? bead.urlData.description : null,
                     urlDomain: bead.urlData ? bead.urlData.domain : null,
@@ -2099,6 +2103,22 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                                 </Row>
                                             </Column>
                                         )}
+                                        <Row centerY className={styles.colorButtons}>
+                                            {beadColors.map((color) => (
+                                                <button
+                                                    key={color}
+                                                    type='button'
+                                                    aria-label='color'
+                                                    onClick={() =>
+                                                        setNewBead({ ...newBead, color })
+                                                    }
+                                                    className={`${
+                                                        newBead.color === color && styles.selected
+                                                    }`}
+                                                    style={{ backgroundColor: color }}
+                                                />
+                                            ))}
+                                        </Row>
                                         <Button
                                             text='Add bead'
                                             color='aqua'

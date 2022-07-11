@@ -74,7 +74,7 @@ const StringBeadCard = (props: {
     }
 
     return (
-        <Column className={styles.wrapper} style={style}>
+        <Column className={styles.wrapper} style={{ ...style, backgroundColor: bead.color }}>
             <Row spaceBetween className={styles.beadHeader}>
                 {postType && ['glass-bead-game', 'weave'].includes(postType) && (
                     <ImageTitle

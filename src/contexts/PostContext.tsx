@@ -10,7 +10,7 @@ const defaults = {
     postData: {
         id: null,
         type: '',
-        subType: null,
+        color: null,
         state: '',
         text: '',
         url: null,
