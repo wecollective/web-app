@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react'
 import styles from '@styles/components/ImageFade.module.scss'
 import * as d3 from 'd3'
+import React, { useEffect, useRef, useState } from 'react'
 
 const ImageFade = (props: {
     imagePath: string | null

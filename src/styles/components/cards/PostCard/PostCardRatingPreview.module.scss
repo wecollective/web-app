@@ -76,7 +76,6 @@
     margin-bottom: 10px;
 }
 .items {
-
 }
 .item {
     font-size: 14px;
@@ -88,7 +87,9 @@
     align-items: center;
     justify-content: space-between;
     flex-shrink: 0;
-    &:last-child { margin-bottom: 0 }
+    &:last-child {
+        margin-bottom: 0;
+    }
 }
 .user {
     display: flex;

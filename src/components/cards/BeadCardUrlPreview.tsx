@@ -1,8 +1,8 @@
-import React from 'react'
-import styles from '@styles/components/cards/BeadCardUrlPreview.module.scss'
-import Row from '@components/Row'
 import Column from '@components/Column'
+import Row from '@components/Row'
+import styles from '@styles/components/cards/BeadCardUrlPreview.module.scss'
 import { ReactComponent as LinkIconSVG } from '@svgs/link-solid.svg'
+import React from 'react'
 
 const BeadCardUrlPreview = (props: {
     url: string

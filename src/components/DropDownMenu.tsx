@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react'
-import styles from '../styles/components/DropDownMenu.module.scss'
-import CloseOnClickOutside from './CloseOnClickOutside'
+import CloseOnClickOutside from '@components/CloseOnClickOutside'
+import styles from '@styles/components/DropDownMenu.module.scss'
+import React, { useState } from 'react'
 
 const DropDownMenu = (props: {
     title: string

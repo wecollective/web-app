@@ -1,17 +1,17 @@
 /* eslint-disable no-param-reassign */
-import React, { useContext, useState, useEffect, useRef } from 'react'
-import * as d3 from 'd3'
-import axios from 'axios'
-import { SpaceContext } from '@contexts/SpaceContext'
-import { AccountContext } from '@contexts/AccountContext'
-import styles from '@styles/pages/SpacePage/SpacePagePostMap.module.scss'
-import colors from '@styles/Colors.module.scss'
-import Column from '@components/Column'
-import Modal from '@components/Modal'
 import PostCard from '@components/cards/PostCard/PostCard'
+import Column from '@components/Column'
 import LoadingWheel from '@components/LoadingWheel'
+import Modal from '@components/Modal'
+import { AccountContext } from '@contexts/AccountContext'
+import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import { IPost } from '@src/Interfaces'
+import colors from '@styles/Colors.module.scss'
+import styles from '@styles/pages/SpacePage/SpacePagePostMap.module.scss'
+import axios from 'axios'
+import * as d3 from 'd3'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 
 const SpacePagePostMap = (props: { postMapData: any; params: any }): JSX.Element => {
     const { postMapData, params } = props

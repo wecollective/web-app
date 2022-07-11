@@ -1,9 +1,9 @@
+import PostCardLikePreview from '@components/cards/PostCard/PostCardLikePreview'
+import PostCardLinkPreview from '@components/cards/PostCard/PostCardLinkPreview'
+import PostCardRatingPreview from '@components/cards/PostCard/PostCardRatingPreview'
+import PostCardRepostPreview from '@components/cards/PostCard/PostCardRepostPreview'
+import styles from '@styles/components/PostCardReactionItem.module.scss'
 import React from 'react'
-import styles from '../../../styles/components/PostCardReactionItem.module.scss'
-import PostCardLikePreview from './PostCardLikePreview'
-import PostCardRepostPreview from './PostCardRepostPreview'
-import PostCardRatingPreview from './PostCardRatingPreview'
-import PostCardLinkPreview from './PostCardLinkPreview'
 
 const PostCardReactionItem = (props: {
     reactions: any

@@ -1,11 +1,11 @@
 /* eslint-disable no-nested-ternary */
-import React from 'react'
-import styles from '@styles/components/PeopleList.module.scss'
 import VerticalUserCard from '@components/cards/VerticalUserCard'
-import PeopleListPlaceholder from '@components/PeopleListPlaceholder'
-import Row from '@components/Row'
 import Column from '@components/Column'
 import LoadingWheel from '@components/LoadingWheel'
+import PeopleListPlaceholder from '@components/PeopleListPlaceholder'
+import Row from '@components/Row'
+import styles from '@styles/components/PeopleList.module.scss'
+import React from 'react'
 
 const PeopleList = (props: {
     people: any[]

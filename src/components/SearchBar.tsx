@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
 import styles from '@styles/components/SearchBar.module.scss'
 import { ReactComponent as SearchIcon } from '@svgs/search.svg'
+import React, { useState } from 'react'
 
 const SearchBar = (props: {
     setSearchFilter: (payload: string) => void

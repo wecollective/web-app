@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
-import styles from '@styles/components/DropDown.module.scss'
 import CloseOnClickOutside from '@components/CloseOnClickOutside'
-import Row from '@components/Row'
 import Column from '@components/Column'
+import Row from '@components/Row'
+import styles from '@styles/components/DropDown.module.scss'
 import { ReactComponent as CaretDownIconSVG } from '@svgs/caret-down-solid.svg'
+import React, { useState } from 'react'
 
 const DropDown = (props: {
     title: string

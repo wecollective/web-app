@@ -1,6 +1,6 @@
+import styles from '@styles/components/SideBarButton.module.scss'
 import React from 'react'
 import { Link } from 'react-router-dom'
-import styles from '../styles/components/SideBarButton.module.scss'
 
 const SideBarButton = (props: {
     icon: string

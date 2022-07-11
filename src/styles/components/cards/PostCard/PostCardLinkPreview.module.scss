@@ -43,7 +43,9 @@
     flex-direction: row;
     align-items: center;
     flex-shrink: 0;
-    &:last-child { margin-bottom: 0 }
+    &:last-child {
+        margin-bottom: 0;
+    }
 }
 .image {
     width: 25px;
@@ -76,7 +78,6 @@
     margin-bottom: 5px;
 }
 .text {
-
 }
 .links {
     //margin-bottom: 20px;
@@ -92,11 +93,15 @@
     flex-direction: row;
     align-items: center;
     flex-shrink: 0;
-    &:last-child { margin-bottom: 0 }
+    &:last-child {
+        margin-bottom: 0;
+    }
 }
 .imageTextLink {
     display: flex;
     flex-direction: row;
     align-items: center;
-    span { margin: 0 5px; }
+    span {
+        margin: 0 5px;
+    }
 }

@@ -2,7 +2,7 @@
 
 .beadTypeButtons {
     margin-bottom: 20px;
-    
+
     > button {
         all: unset;
         cursor: pointer;
@@ -14,8 +14,12 @@
         justify-content: center;
         align-items: center;
         flex-shrink: 0;
-        &:not(:last-child) { margin-right: 10px }
-        &.selected { background-color: $blue8 }
+        &:not(:last-child) {
+            margin-right: 10px;
+        }
+        &.selected {
+            background-color: $blue8;
+        }
 
         > svg {
             width: 30px;
@@ -26,7 +30,9 @@
         @include for-tablet-landscape-up {
             width: 80px;
             height: 80px;
-            &:not(:last-child) { margin-right: 20px }
+            &:not(:last-child) {
+                margin-right: 20px;
+            }
             > svg {
                 width: 40px;
                 height: 40px;
@@ -67,7 +73,9 @@
 
     .image {
         position: relative;
-        &:not(:last-child) {  margin-right: 10px }
+        &:not(:last-child) {
+            margin-right: 10px;
+        }
 
         > button {
             position: absolute;

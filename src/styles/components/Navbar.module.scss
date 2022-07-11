@@ -10,12 +10,22 @@
 
     .mobileLeft {
         display: flex;
-        @include for-tablet-landscape-up { display: none }
+        @include for-tablet-landscape-up {
+            display: none;
+        }
 
-        &.entering > .hamburgerMenuBackground { background-color: rgba(black, 0.5) }
-        &.entering > .hamburgerMenu { left: 0 }
-        &.exiting > .hamburgerMenuBackground { background-color: rgba(black, 0) }
-        &.exiting > .hamburgerMenu { left: -302px }
+        &.entering > .hamburgerMenuBackground {
+            background-color: rgba(black, 0.5);
+        }
+        &.entering > .hamburgerMenu {
+            left: 0;
+        }
+        &.exiting > .hamburgerMenuBackground {
+            background-color: rgba(black, 0);
+        }
+        &.exiting > .hamburgerMenu {
+            left: -302px;
+        }
 
         > button {
             all: unset;
@@ -33,9 +43,10 @@
                 transition: color 0.5s;
             }
 
-            &:hover > svg { color: white }
+            &:hover > svg {
+                color: white;
+            }
         }
-
 
         .hamburgerMenuBackground {
             all: unset;
@@ -65,7 +76,7 @@
                 width: 40px;
                 height: 40px;
                 margin-right: 5px;
-    
+
                 > svg {
                     width: 40px;
                     height: 40px;
@@ -75,12 +86,14 @@
             .hamburgerMenuHeader {
                 margin-bottom: 20px;
                 word-break: break-word;
-                h1 { margin: 0 }
+                h1 {
+                    margin: 0;
+                }
             }
 
             .hamburgerMenuTabs {
                 margin-bottom: 20px;
-                
+
                 > a {
                     display: flex;
                     align-items: center;
@@ -88,7 +101,9 @@
                     color: $grey7;
                     transition: color 0.3s;
 
-                    &:hover { color: $blue5 }
+                    &:hover {
+                        color: $blue5;
+                    }
 
                     > svg {
                         width: 30px;
@@ -98,7 +113,6 @@
                 }
             }
         }
-
     }
 
     .desktopLeft {
@@ -125,7 +139,7 @@
             position: relative;
             display: flex;
             align-items: center;
-        
+
             > a {
                 color: $grey5;
                 font-size: 18px;
@@ -141,8 +155,12 @@
             }
 
             &:hover {
-                > a { color: white }
-                > svg { color: white }
+                > a {
+                    color: white;
+                }
+                > svg {
+                    color: white;
+                }
             }
 
             .exploreDropDown {
@@ -152,7 +170,7 @@
                 background-color: $black2;
                 padding: 15px 15px 5px 15px;
                 border-radius: 5px;
-        
+
                 > a {
                     display: flex;
                     align-items: center;
@@ -172,8 +190,12 @@
                     }
 
                     &:hover {
-                        > svg { color: white }
-                        > p { color: white }
+                        > svg {
+                            color: white;
+                        }
+                        > p {
+                            color: white;
+                        }
                     }
                 }
             }
@@ -182,10 +204,14 @@
 
     .mobileCenter {
         display: flex;
-        @include for-tablet-landscape-up { display: none }
+        @include for-tablet-landscape-up {
+            display: none;
+        }
         z-index: 5;
 
-        &.entering > .mobileSearchBackground { background-color: rgba(black, 0.5) }
+        &.entering > .mobileSearchBackground {
+            background-color: rgba(black, 0.5);
+        }
         &.entering > .mobileSearchDropDown {
             transition-delay: 0s;
             height: 60px;
@@ -194,7 +220,9 @@
                 opacity: 1;
             }
         }
-        &.exiting > .mobileSearchBackground { background-color: rgba(black, 0) }
+        &.exiting > .mobileSearchBackground {
+            background-color: rgba(black, 0);
+        }
         &.exiting > .mobileSearchDropDown {
             transition-delay: 0.3s;
             height: 0px;
@@ -265,12 +293,22 @@
 
     .mobileRight {
         display: flex;
-        @include for-tablet-landscape-up { display: none }
+        @include for-tablet-landscape-up {
+            display: none;
+        }
 
-        &.entering > .accountMenuBackground { background-color: rgba(black, 0.5) }
-        &.entering > .accountMenu { right: 0 }
-        &.exiting > .accountMenuBackground { background-color: rgba(black, 0) }
-        &.exiting > .accountMenu { right: -302px }
+        &.entering > .accountMenuBackground {
+            background-color: rgba(black, 0.5);
+        }
+        &.entering > .accountMenu {
+            right: 0;
+        }
+        &.exiting > .accountMenuBackground {
+            background-color: rgba(black, 0);
+        }
+        &.exiting > .accountMenu {
+            right: -302px;
+        }
 
         > button {
             all: unset;
@@ -288,9 +326,10 @@
                 transition: color 0.5s;
             }
 
-            &:hover > svg { color: white }
+            &:hover > svg {
+                color: white;
+            }
         }
-
 
         .accountMenuBackground {
             all: unset;
@@ -317,12 +356,14 @@
             .accountMenuHeader {
                 margin-bottom: 20px;
                 word-break: break-word;
-                h1 { margin: 0 }
+                h1 {
+                    margin: 0;
+                }
             }
 
             .accountMenuTabs {
                 margin-bottom: 20px;
-                
+
                 > a {
                     display: flex;
                     align-items: center;
@@ -330,7 +371,9 @@
                     color: $grey7;
                     transition: color 0.3s;
 
-                    &:hover { color: $blue5 }
+                    &:hover {
+                        color: $blue5;
+                    }
 
                     > svg {
                         width: 30px;
@@ -376,7 +419,9 @@
             }
 
             &:hover {
-                > p { color: white }
+                > p {
+                    color: white;
+                }
             }
 
             .profileDropDown {
@@ -386,12 +431,12 @@
                 background-color: $black2;
                 padding: 10px 20px 15px 15px;
                 border-radius: 5px;
-        
+
                 > a {
                     display: flex;
                     align-items: center;
                     margin-bottom: 10px;
-    
+
                     > svg {
                         width: 22px;
                         height: 22px;
@@ -399,15 +444,19 @@
                         margin-right: 10px;
                         transition: color 0.5s;
                     }
-    
+
                     > p {
                         color: $grey5;
                         transition: color 0.5s;
                     }
-    
+
                     &:hover {
-                        > svg { color: white }
-                        > p { color: white }
+                        > svg {
+                            color: white;
+                        }
+                        > p {
+                            color: white;
+                        }
                     }
 
                     .unseenItems {

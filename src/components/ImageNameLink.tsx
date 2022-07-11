@@ -1,7 +1,7 @@
+import FlagImage from '@components/FlagImage'
+import styles from '@styles/components/ImageNameLink.module.scss'
 import React from 'react'
 import { Link } from 'react-router-dom'
-import styles from '@styles/components/ImageNameLink.module.scss'
-import FlagImage from '@components/FlagImage'
 
 const ImageNameLink = (props: {
     type: 'space' | 'user'

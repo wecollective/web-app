@@ -1,12 +1,10 @@
-import React from 'react'
-import { Editor } from 'react-draft-wysiwyg'
+import styles from '@styles/components/MarkdownEditor.module.scss'
+import { convertToRaw } from 'draft-js'
 import draftToMarkdown from 'draftjs-to-markdown'
 import { markdownToDraft } from 'markdown-draft-js'
-import { convertToRaw } from 'draft-js'
+import React from 'react'
+import { Editor } from 'react-draft-wysiwyg'
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'
-import styles from '@styles/components/MarkdownEditor.module.scss'
-import { ReactComponent as DangerIconSVG } from '@svgs/exclamation-circle-solid.svg'
-import { ReactComponent as SuccessIconSVG } from '@svgs/check-circle-solid.svg'
 
 const MarkdownEditor = (props: {
     initialValue: string

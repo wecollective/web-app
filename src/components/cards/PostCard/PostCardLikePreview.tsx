@@ -1,6 +1,6 @@
-import React from 'react'
-import styles from '../../../styles/components/PostCardLikePreview.module.scss'
 import FlagImage from '@components/FlagImage'
+import styles from '@styles/components/PostCardLikePreview.module.scss'
+import React from 'react'
 
 const PostCardLikePreview = (props: { reactions: any[] }): JSX.Element => {
     const { reactions } = props

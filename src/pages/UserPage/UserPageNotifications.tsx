@@ -1,14 +1,14 @@
 /* eslint-disable no-nested-ternary */
-import React, { useContext, useEffect, useState } from 'react'
-import { useHistory, useLocation } from 'react-router-dom'
-import axios from 'axios'
-import Cookies from 'universal-cookie'
-import { AccountContext } from '@contexts/AccountContext'
-import { UserContext } from '@contexts/UserContext'
-import styles from '@styles/pages/UserPage/UserPageNotifications.module.scss'
 import NotificationCard from '@components/cards/NotificationCard'
 import Column from '@components/Column'
+import { AccountContext } from '@contexts/AccountContext'
+import { UserContext } from '@contexts/UserContext'
 import config from '@src/Config'
+import styles from '@styles/pages/UserPage/UserPageNotifications.module.scss'
+import axios from 'axios'
+import React, { useContext, useEffect, useState } from 'react'
+import { useHistory, useLocation } from 'react-router-dom'
+import Cookies from 'universal-cookie'
 
 const UserPageNotifications = (): JSX.Element => {
     const { accountData, accountDataLoading, setAccountData } = useContext(AccountContext)

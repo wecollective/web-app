@@ -1,14 +1,14 @@
-import React, { useEffect, useContext } from 'react'
-import { useLocation } from 'react-router-dom'
-import styles from '@styles/pages/PostPage/PostPage.module.scss'
+import PostCard from '@components/cards/PostCard/PostCard'
+import Column from '@components/Column'
+import DecisionTree from '@components/DecisionTree'
+import GlassBeadGame from '@components/GlassBeadGame'
+import PlotGraph from '@components/PlotGraph'
+import Prism from '@components/Prism'
 import { AccountContext } from '@contexts/AccountContext'
 import { PostContext } from '@contexts/PostContext'
-import Column from '@components/Column'
-import PostCard from '@components/cards/PostCard/PostCard'
-import Prism from '@components/Prism'
-import PlotGraph from '@components/PlotGraph'
-import GlassBeadGame from '@components/GlassBeadGame'
-import DecisionTree from '@components/DecisionTree'
+import styles from '@styles/pages/PostPage/PostPage.module.scss'
+import React, { useContext, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 
 const PostPage = (): JSX.Element => {
     const location = useLocation()

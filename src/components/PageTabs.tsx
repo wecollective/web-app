@@ -1,7 +1,7 @@
+import Row from '@components/Row'
+import styles from '@styles/components/PageTabs.module.scss'
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import styles from '@styles/components/PageTabs.module.scss'
-import Row from '@components/Row'
 
 const Tab = (props: { baseRoute: string; tab: any }): JSX.Element => {
     const { baseRoute, tab } = props

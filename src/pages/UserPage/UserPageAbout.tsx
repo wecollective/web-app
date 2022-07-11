@@ -1,13 +1,13 @@
+import Column from '@components/Column'
+import Markdown from '@components/Markdown'
+import Row from '@components/Row'
+import Scrollbars from '@components/Scrollbars'
+import { UserContext } from '@contexts/UserContext'
+import UserNotFound from '@pages/SpaceNotFound'
+import { dateCreated, timeSinceCreated } from '@src/Helpers'
+import styles from '@styles/pages/UserPage/UserPageAbout.module.scss'
 import React, { useContext } from 'react'
 import { useLocation } from 'react-router-dom'
-import styles from '@styles/pages/UserPage/UserPageAbout.module.scss'
-import { UserContext } from '@contexts/UserContext'
-import { timeSinceCreated, dateCreated } from '@src/Helpers'
-import Column from '@components/Column'
-import Row from '@components/Row'
-import UserNotFound from '@pages/SpaceNotFound'
-import Markdown from '@components/Markdown'
-import Scrollbars from '@components/Scrollbars'
 
 const UserPageAbout = (): JSX.Element => {
     const { userData, userNotFound } = useContext(UserContext)

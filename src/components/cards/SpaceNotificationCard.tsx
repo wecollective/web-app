@@ -1,13 +1,12 @@
-import React, { useContext, useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import axios from 'axios'
+import FlagImage from '@components/FlagImage'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
-import { UserContext } from '@contexts/UserContext'
-import styles from '@styles/components/SpaceNotificationCard.module.scss'
-import FlagImage from '@components/FlagImage'
 import config from '@src/Config'
-import { timeSinceCreated, dateCreated } from '@src/Helpers'
+import { dateCreated, timeSinceCreated } from '@src/Helpers'
+import styles from '@styles/components/SpaceNotificationCard.module.scss'
+import axios from 'axios'
+import React, { useContext, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 const SpaceNotificationCard = (props: {
     notification: any

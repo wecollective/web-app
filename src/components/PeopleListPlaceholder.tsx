@@ -1,7 +1,5 @@
-import React from 'react'
-import styles from '@styles/components/ListPlaceholder.module.scss'
 import Column from '@components/Column'
-import SpaceCardPlaceholder from '@components/cards/SpaceCardPlaceholder'
+import React from 'react'
 
 const PeopleListPlaceholder = (): JSX.Element => {
     return (

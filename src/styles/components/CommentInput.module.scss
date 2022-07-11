@@ -14,7 +14,9 @@
         transition-property: box-shadow, background-color;
         transition-duration: 0.3s, 1s;
 
-        &.error { box-shadow: 0 0 0 3px $red }
+        &.error {
+            box-shadow: 0 0 0 3px $red;
+        }
 
         &:hover {
             box-shadow: 0 0 0 3px $blue9;

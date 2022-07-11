@@ -1,12 +1,12 @@
-import React, { useState } from 'react'
-import axios from 'axios'
-import Cookies from 'universal-cookie'
-import styles from '@styles/components/modals/ImageUploadModal.module.scss'
-import config from '@src/Config'
 import Button from '@components/Button'
+import Input from '@components/Input'
 import Modal from '@components/Modal'
 import Row from '@components/Row'
-import Input from '@components/Input'
+import config from '@src/Config'
+import styles from '@styles/components/modals/ImageUploadModal.module.scss'
+import axios from 'axios'
+import React, { useState } from 'react'
+import Cookies from 'universal-cookie'
 
 const ImageUploadModal = (props: {
     type: 'user-flag' | 'user-cover' | 'space-flag' | 'space-cover' | 'gbg-topic' | 'gbg-background'

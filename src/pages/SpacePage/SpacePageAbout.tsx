@@ -1,14 +1,14 @@
+import Column from '@components/Column'
+import ImageTitle from '@components/ImageTitle'
+import Markdown from '@components/Markdown'
+import Row from '@components/Row'
+import Scrollbars from '@components/Scrollbars'
+import { SpaceContext } from '@contexts/SpaceContext'
+import SpaceNotFound from '@pages/SpaceNotFound'
+import { dateCreated, timeSinceCreated } from '@src/Helpers'
+import styles from '@styles/pages/SpacePage/SpacePageAbout.module.scss'
 import React, { useContext } from 'react'
 import { useLocation } from 'react-router-dom'
-import { SpaceContext } from '@contexts/SpaceContext'
-import styles from '@styles/pages/SpacePage/SpacePageAbout.module.scss'
-import { timeSinceCreated, dateCreated } from '@src/Helpers'
-import Column from '@components/Column'
-import Row from '@components/Row'
-import Markdown from '@components/Markdown'
-import ImageTitle from '@components/ImageTitle'
-import SpaceNotFound from '@pages/SpaceNotFound'
-import Scrollbars from '@components/Scrollbars'
 
 const SpacePageAbout = (): JSX.Element => {
     const { spaceData, spaceNotFound } = useContext(SpaceContext)

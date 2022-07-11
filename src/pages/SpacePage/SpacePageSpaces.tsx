@@ -1,14 +1,14 @@
-import React, { useContext, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
-import { AccountContext } from '@src/contexts/AccountContext'
-import { SpaceContext } from '@contexts/SpaceContext'
-import styles from '@styles/pages/SpacePage/SpacePageSpaces.module.scss'
 import Column from '@components/Column'
 import Row from '@components/Row'
-import SpacePageSpacesHeader from '@pages/SpacePage/SpacePageSpacesHeader'
 import SpaceList from '@components/SpaceList'
-import SpacePageSpaceMap from '@pages/SpacePage/SpacePageSpaceMap'
+import { SpaceContext } from '@contexts/SpaceContext'
 import SpaceNotFound from '@pages/SpaceNotFound'
+import SpacePageSpaceMap from '@pages/SpacePage/SpacePageSpaceMap'
+import SpacePageSpacesHeader from '@pages/SpacePage/SpacePageSpacesHeader'
+import { AccountContext } from '@src/contexts/AccountContext'
+import styles from '@styles/pages/SpacePage/SpacePageSpaces.module.scss'
+import React, { useContext, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 
 const SpacePageSpaces = (): JSX.Element => {
     const { pageBottomReached } = useContext(AccountContext)

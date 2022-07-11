@@ -1,9 +1,9 @@
-import React, { useContext } from 'react'
-import styles from '@styles/components/CommentInput.module.scss'
-import { AccountContext } from '@contexts/AccountContext'
 import Button from '@components/Button'
-import Row from '@components/Row'
 import FlagImage from '@components/FlagImage'
+import Row from '@components/Row'
+import { AccountContext } from '@contexts/AccountContext'
+import styles from '@styles/components/CommentInput.module.scss'
+import React, { useContext } from 'react'
 
 const CommentInput = (props: {
     id?: string

@@ -1,6 +1,6 @@
-import React from 'react'
-import styles from '@styles/components/FlagImageHighlights.module.scss'
 import FlagImage from '@components/FlagImage'
+import styles from '@styles/components/FlagImageHighlights.module.scss'
+import React from 'react'
 
 const FlagImageHighlights = (props: {
     type: 'user' | 'space' | 'post'

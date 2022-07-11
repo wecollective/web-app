@@ -1,6 +1,6 @@
-import React, { useEffect, useContext } from 'react'
+import { PostContext } from '@contexts/PostContext'
 import * as d3 from 'd3'
-import { PostContext } from '../../../contexts/PostContext'
+import React, { useContext, useEffect } from 'react'
 
 function PollResultsPieChart() {
     const { postData, totalPollVotes, pollAnswersSortedByScore, colorScale } = useContext(

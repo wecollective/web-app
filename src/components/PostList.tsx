@@ -1,13 +1,13 @@
 /* eslint-disable no-nested-ternary */
-import React, { useEffect, useContext } from 'react'
+import PostCard from '@components/cards/PostCard/PostCard'
+import Column from '@components/Column'
+import LoadingWheel from '@components/LoadingWheel'
+import PostListPlaceholder from '@components/PostListPlaceholder'
+import Row from '@components/Row'
 import { SpaceContext } from '@contexts/SpaceContext'
 import { UserContext } from '@contexts/UserContext'
 import styles from '@styles/components/PostList.module.scss'
-import PostCard from '@components/cards/PostCard/PostCard'
-import PostListPlaceholder from '@components/PostListPlaceholder'
-import Row from '@components/Row'
-import Column from '@components/Column'
-import LoadingWheel from '@components/LoadingWheel'
+import React, { useContext, useEffect } from 'react'
 
 const PostList = (props: {
     location: 'space-posts' | 'user-posts'

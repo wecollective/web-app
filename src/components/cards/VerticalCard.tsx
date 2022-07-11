@@ -1,9 +1,9 @@
+import FlagImage from '@components/FlagImage'
+import Markdown from '@components/Markdown'
+import ShowMoreLess from '@components/ShowMoreLess'
+import styles from '@styles/components/VerticalCard.module.scss'
 import React from 'react'
 import { Link } from 'react-router-dom'
-import styles from '@styles/components/VerticalCard.module.scss'
-import FlagImage from '@components/FlagImage'
-import ShowMoreLess from '@components/ShowMoreLess'
-import Markdown from '@components/Markdown'
 
 const VerticalCard = (props: {
     type: 'user' | 'space'

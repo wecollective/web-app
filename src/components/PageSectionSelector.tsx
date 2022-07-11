@@ -1,7 +1,7 @@
+import { PostContext } from '@contexts/PostContext'
+import styles from '@styles/components/PageSectionSelector.module.scss'
 import React, { useContext, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import styles from '../styles/components/PageSectionSelector.module.scss'
-import { PostContext } from '../contexts/PostContext'
 
 const PageSectionSelector = (props: { url: string; pathname: string }): JSX.Element => {
     const { url, pathname } = props

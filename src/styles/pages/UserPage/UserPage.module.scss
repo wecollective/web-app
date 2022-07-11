@@ -31,7 +31,7 @@
                 background-color: white;
                 padding: 3px;
                 box-shadow: 0 0 10px 0 rgba(10, 8, 72, 0.08);
-        
+
                 > button {
                     all: unset;
                     position: absolute;
@@ -50,7 +50,9 @@
                     justify-content: center;
                     opacity: 0;
                     transition: opacity 0.3s;
-                    &:hover { opacity: 1 }
+                    &:hover {
+                        opacity: 1;
+                    }
                 }
             }
 
@@ -60,7 +62,7 @@
                 margin-right: 20px;
                 > h1 {
                     margin-bottom: 3px;
-                    line-height: 26px;;
+                    line-height: 26px;
                 }
             }
         }

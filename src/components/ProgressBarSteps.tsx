@@ -1,8 +1,8 @@
-import React from 'react'
-import styles from '@styles/components/ProgressBarSteps.module.scss'
 import Column from '@components/Column'
 import Row from '@components/Row'
+import styles from '@styles/components/ProgressBarSteps.module.scss'
 import { ReactComponent as TickIcon } from '@svgs/check-solid.svg'
+import React from 'react'
 
 const ProgressBarSteps = (props: {
     steps: string[]

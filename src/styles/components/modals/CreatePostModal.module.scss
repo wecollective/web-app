@@ -12,7 +12,9 @@
 
 .header {
     margin-bottom: 20px;
-    > h1 { margin: 0 }
+    > h1 {
+        margin: 0;
+    }
 }
 
 .spaces {
@@ -44,7 +46,9 @@
 .postTypeButton {
     margin-bottom: 10px;
     width: 80px;
-    @include for-tablet-landscape-up { width: 110px }
+    @include for-tablet-landscape-up {
+        width: 110px;
+    }
 
     > button {
         all: unset;
@@ -63,7 +67,9 @@
             height: 90px;
         }
 
-        &.selected { background-color: $blue8 }
+        &.selected {
+            background-color: $blue8;
+        }
 
         > svg {
             width: 30px;
@@ -80,14 +86,18 @@
     > p {
         text-align: center;
         font-size: 12px;
-        @include for-tablet-landscape-up { font-size: 16px }
+        @include for-tablet-landscape-up {
+            font-size: 16px;
+        }
     }
 }
 
 .topicGroupButtons {
     margin: 20px 0;
     > button {
-        &:not(:last-child) { margin-right: 10px }
+        &:not(:last-child) {
+            margin-right: 10px;
+        }
     }
 }
 
@@ -142,7 +152,9 @@
 
     .image {
         position: relative;
-        &:not(:last-child) {  margin-right: 10px }
+        &:not(:last-child) {
+            margin-right: 10px;
+        }
 
         > button {
             position: absolute;
@@ -186,7 +198,9 @@
             &:not(.disabled) {
                 cursor: pointer;
                 filter: brightness(110%);
-                &.grey { filter: brightness(96%) }
+                &.grey {
+                    filter: brightness(96%);
+                }
             }
         }
     }
@@ -217,8 +231,12 @@
     margin-bottom: 40px;
     > div {
         position: relative;
-        &:not(:last-child) { margin-right: 30px }
-        input { cursor: pointer }
+        &:not(:last-child) {
+            margin-right: 30px;
+        }
+        input {
+            cursor: pointer;
+        }
     }
 }
 
@@ -238,7 +256,7 @@
 
 .beadTypeButtons {
     margin-bottom: 20px;
-    
+
     > button {
         all: unset;
         cursor: pointer;
@@ -250,8 +268,12 @@
         justify-content: center;
         align-items: center;
         flex-shrink: 0;
-        &:not(:last-child) { margin-right: 10px }
-        &.selected { background-color: $blue8 }
+        &:not(:last-child) {
+            margin-right: 10px;
+        }
+        &.selected {
+            background-color: $blue8;
+        }
 
         > svg {
             width: 30px;
@@ -262,7 +284,9 @@
         @include for-tablet-landscape-up {
             width: 80px;
             height: 80px;
-            &:not(:last-child) { margin-right: 20px }
+            &:not(:last-child) {
+                margin-right: 20px;
+            }
             > svg {
                 width: 40px;
                 height: 40px;
@@ -329,7 +353,7 @@
     animation-name: fadeInOpacity;
     animation-timing-function: ease-in;
     animation-duration: 2s;
-    
+
     > svg {
         transform: rotate(90deg);
         height: 35px;
@@ -369,10 +393,8 @@
         > svg {
             width: 16px;
             height: 16px;
-            
         }
     }
-    
 }
 
 .postPreviewWrapper {

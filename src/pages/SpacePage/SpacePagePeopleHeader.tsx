@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react'
-import { useLocation, useHistory } from 'react-router-dom'
-import styles from '@styles/pages/SpacePage/SpacePageHeader.module.scss'
-import { getParamString } from '@src/Helpers'
-import SearchBar from '@components/SearchBar'
-import DropDown from '@components/DropDown'
 import Button from '@components/Button'
-import Row from '@components/Row'
+import DropDown from '@components/DropDown'
 import Modal from '@components/Modal'
+import Row from '@components/Row'
+import SearchBar from '@components/SearchBar'
+import { getParamString } from '@src/Helpers'
+import styles from '@styles/pages/SpacePage/SpacePageHeader.module.scss'
 import { ReactComponent as SlidersIconSVG } from '@svgs/sliders-h-solid.svg'
+import React, { useEffect, useState } from 'react'
+import { useHistory, useLocation } from 'react-router-dom'
 
 const SpacePagePeopleHeader = (props: { params: any }): JSX.Element => {
     const { params } = props

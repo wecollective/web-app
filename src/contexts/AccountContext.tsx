@@ -1,8 +1,8 @@
-import React, { createContext, useState, useEffect } from 'react'
-import axios from 'axios'
-import Cookies from 'universal-cookie'
 import config from '@src/Config'
 import { IAccountContext } from '@src/Interfaces'
+import axios from 'axios'
+import React, { createContext, useEffect, useState } from 'react'
+import Cookies from 'universal-cookie'
 
 export const AccountContext = createContext<IAccountContext>({} as IAccountContext)
 

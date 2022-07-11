@@ -1,15 +1,15 @@
-import React, { useContext, useState } from 'react'
+import Button from '@components/Button'
+import Input from '@components/Input'
+import Modal from '@components/Modal'
+import Row from '@components/Row'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import { UserContext } from '@contexts/UserContext'
-import axios from 'axios'
-import Cookies from 'universal-cookie'
-import styles from '@styles/components/modals/ImageUploadModal.module.scss'
 import config from '@src/Config'
-import Button from '@components/Button'
-import Modal from '@components/Modal'
-import Row from '@components/Row'
-import Input from '@components/Input'
+import styles from '@styles/components/modals/ImageUploadModal.module.scss'
+import axios from 'axios'
+import React, { useContext, useState } from 'react'
+import Cookies from 'universal-cookie'
 
 const ImageUploadModal = (): JSX.Element => {
     const { setImageUploadModalOpen, imageUploadType, accountData, setAccountData } = useContext(

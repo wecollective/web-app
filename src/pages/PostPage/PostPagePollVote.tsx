@@ -1,7 +1,6 @@
-import React, { useContext } from 'react'
+import { PostContext } from '@contexts/PostContext'
 import styles from '@styles/pages/PostPage/PostPagePollVote.module.scss'
-import PollAnswer from './Poll/PollAnswer'
-import { PostContext } from '../../contexts/PostContext'
+import React, { useContext } from 'react'
 
 const PostPagePollVote = (): JSX.Element => {
     const {

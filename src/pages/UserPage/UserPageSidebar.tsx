@@ -1,11 +1,11 @@
-import React, { useContext, useState } from 'react'
-import { UserContext } from '@contexts/UserContext'
-import styles from '@styles/pages/UserPage/UserPageSidebar.module.scss'
 import Column from '@components/Column'
+import FlagImagePlaceholder from '@components/FlagImagePlaceholder'
 import ImageFade from '@components/ImageFade'
 import Markdown from '@components/Markdown'
-import FlagImagePlaceholder from '@components/FlagImagePlaceholder'
 import ImageUploadModal from '@components/modals/ImageUploadModal'
+import { UserContext } from '@contexts/UserContext'
+import styles from '@styles/pages/UserPage/UserPageSidebar.module.scss'
+import React, { useContext, useState } from 'react'
 
 const UserPageSidebar = (): JSX.Element => {
     const { userData, setUserData, isOwnAccount } = useContext(UserContext)

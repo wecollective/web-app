@@ -1,8 +1,8 @@
-import React, { useContext, useState, useEffect } from 'react'
+import { PostContext } from '@contexts/PostContext'
+import config from '@src/Config'
 import axios from 'axios'
 import * as d3 from 'd3'
-import config from '../../../Config'
-import { PostContext } from '../../../contexts/PostContext'
+import React, { useContext, useEffect, useState } from 'react'
 
 const PollResultsTimeGraph = () => {
     // : JSX.Element => {

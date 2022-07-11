@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react'
-import * as d3 from 'd3'
-import getBlobDuration from 'get-blob-duration'
-import styles from '@styles/components/AudioTimeSlider.module.scss'
 import Column from '@components/Column'
 import Row from '@components/Row'
 import { formatTimeMMSS } from '@src/Helpers'
+import styles from '@styles/components/AudioTimeSlider.module.scss'
+import * as d3 from 'd3'
+import getBlobDuration from 'get-blob-duration'
+import React, { useEffect, useState } from 'react'
 
 const AudioTimeSlider = (props: {
     audioElementId: string

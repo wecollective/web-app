@@ -1,9 +1,9 @@
-import React from 'react'
-import styles from '@styles/components/FlagImagePlaceholder.module.scss'
 import Row from '@components/Row'
+import styles from '@styles/components/FlagImagePlaceholder.module.scss'
+import { ReactComponent as PostIconSVG } from '@svgs/edit-solid.svg'
 import { ReactComponent as UserIconSVG } from '@svgs/user-solid.svg'
 import { ReactComponent as UsersIconSVG } from '@svgs/users-solid.svg'
-import { ReactComponent as PostIconSVG } from '@svgs/edit-solid.svg'
+import React from 'react'
 
 const FlagImagePlaceholder = (props: { type: 'space' | 'user' | 'post' }): JSX.Element => {
     const { type } = props

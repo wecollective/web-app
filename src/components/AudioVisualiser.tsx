@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react'
-import * as d3 from 'd3'
 import Column from '@components/Column'
+import * as d3 from 'd3'
+import React, { useEffect, useRef } from 'react'
 
 const AudioVisualiser = (props: {
     audioElementId: string

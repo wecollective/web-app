@@ -1,5 +1,5 @@
+import styles from '@styles/pages/CoopPage.module.scss'
 import React from 'react'
-import styles from '../styles/pages/CoopPage.module.scss'
 
 const CoopPage = (): JSX.Element => {
     return (

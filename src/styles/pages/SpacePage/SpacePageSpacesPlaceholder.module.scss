@@ -14,8 +14,8 @@
     // z-index: -1;
     // transition: opacity $transitionSpeed;
     // &.visible {
-        opacity: 1;
-        z-index: 1;
+    opacity: 1;
+    z-index: 1;
     // }
 }
 .PHChildHolonsGradientWrapper {
@@ -24,6 +24,6 @@
     left: 0;
     width: 100%;
     height: 1000px;
-    background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(247,247,249,1));
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(247, 247, 249, 1));
     z-index: 1;
 }

@@ -1,6 +1,6 @@
+import { UserContext } from '@contexts/UserContext'
+import styles from '@styles/components/UserPageMessages.module.scss'
 import React, { useContext, useEffect } from 'react'
-import { UserContext } from '../../contexts/UserContext'
-import styles from '../../styles/components/UserPageMessages.module.scss'
 // import PostCard from './PostCard'
 // import SpacePagePostsHeader from './SpacePagePostsHeader'
 // import SpacePagePostsPlaceholder from './SpacePagePostsPlaceholder'

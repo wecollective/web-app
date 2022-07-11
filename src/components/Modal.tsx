@@ -1,7 +1,7 @@
-import React from 'react'
-import styles from '@styles/components/Modal.module.scss'
-import CloseOnClickOutside from '@components/CloseOnClickOutside'
 import CloseButton from '@components/CloseButton'
+import CloseOnClickOutside from '@components/CloseOnClickOutside'
+import styles from '@styles/components/Modal.module.scss'
+import React from 'react'
 
 const Modal = (props: {
     close: () => void

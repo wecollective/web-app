@@ -1,5 +1,5 @@
-import React from 'react'
 import styles from '@styles/components/StatButton.module.scss'
+import React from 'react'
 
 const StatButton = (props: {
     icon: any

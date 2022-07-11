@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useContext } from 'react'
-import styles from '../../../styles/components/PollAnswer.module.scss'
-import { PostContext } from '../../../contexts/PostContext'
+import { PostContext } from '@contexts/PostContext'
+import styles from '@styles/components/PollAnswer.module.scss'
+import React, { useContext, useEffect, useState } from 'react'
 
 function PollAnswer(props) {
     const { answer } = props

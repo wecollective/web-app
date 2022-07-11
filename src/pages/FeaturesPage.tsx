@@ -1,5 +1,5 @@
+import styles from '@styles/pages/FeaturesPage.module.scss'
 import React from 'react'
-import styles from '../styles/pages/FeaturesPage.module.scss'
 
 const FeaturesPage = (): JSX.Element => {
     return (

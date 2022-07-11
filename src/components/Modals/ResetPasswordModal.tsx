@@ -1,9 +1,9 @@
-import React, { useContext, useState } from 'react'
-import axios from 'axios'
-import config from '@src/Config'
-import { AccountContext } from '@contexts/AccountContext'
-import styles from '@styles/components/modals/ResetPasswordModal.module.scss'
 import Modal from '@components/Modal'
+import { AccountContext } from '@contexts/AccountContext'
+import config from '@src/Config'
+import styles from '@styles/components/modals/ResetPasswordModal.module.scss'
+import axios from 'axios'
+import React, { useContext, useState } from 'react'
 
 const ResetPasswordModal = (): JSX.Element => {
     const { setResetPasswordModalOpen, resetPasswordModalToken } = useContext(AccountContext)

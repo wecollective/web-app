@@ -45,7 +45,7 @@ $padding: 10px;
 .videos {
     position: absolute;
     right: 0;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0, 0, 0, 0.5);
     margin: $padding;
     padding: $padding;
     border-radius: 5px;
@@ -66,7 +66,6 @@ $padding: 10px;
         //     margin-bottom: 0;
         // }
         object-fit: cover;
-        
     }
     &.xl {
         // 1 - 2

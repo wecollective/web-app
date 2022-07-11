@@ -1,7 +1,6 @@
-import React, { useContext } from 'react'
-import { AccountContext } from '@contexts/AccountContext'
-import styles from '@styles/components/FlagImage.module.scss'
 import FlagImagePlaceholder from '@components/FlagImagePlaceholder'
+import styles from '@styles/components/FlagImage.module.scss'
+import React from 'react'
 
 const FlagImage = (props: {
     type: 'space' | 'user' | 'post'

@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
-import styles from '@styles/components/SearchSelector.module.scss'
-import Input from '@components/Input'
 import ImageTitle from '@components/ImageTitle'
+import Input from '@components/Input'
+import styles from '@styles/components/SearchSelector.module.scss'
+import React, { useState } from 'react'
 // import Row from '@components/Row'
 
 // general purpose search selector:

@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
+import React, { useEffect, useRef } from 'react'
 
 const Scrollbars = (props: {
     id?: string

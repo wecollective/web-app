@@ -7,5 +7,7 @@
 .postCardWrapper {
     width: 100%;
     max-width: 800px;
-    @include for-tablet-portrait-up { width: calc(100% - 20px) }
+    @include for-tablet-portrait-up {
+        width: calc(100% - 20px);
+    }
 }

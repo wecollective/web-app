@@ -7,7 +7,7 @@
             "@contexts/*": ["./src/contexts/*"],
             "@svgs/*": ["./src/svgs/*"],
             "@styles/*": ["./src/styles/*"],
-            "@pages/*": ["./src/pages/*"],
+            "@pages/*": ["./src/pages/*"]
         }
     }
 }

@@ -1,12 +1,12 @@
 /* eslint-disable no-nested-ternary */
-import React, { useEffect, useContext } from 'react'
-import styles from '@styles/components/PostList.module.scss'
 import HorizontalSpaceCard from '@components/cards/HorizontalSpaceCard'
-import SpaceListPlaceholder from '@components/SpaceListPlaceholder'
-import Row from '@components/Row'
 import Column from '@components/Column'
 import LoadingWheel from '@components/LoadingWheel'
+import Row from '@components/Row'
+import SpaceListPlaceholder from '@components/SpaceListPlaceholder'
 import { SpaceContext } from '@contexts/SpaceContext'
+import styles from '@styles/components/PostList.module.scss'
+import React, { useContext, useEffect } from 'react'
 
 const SpaceList = (props: {
     location: 'space-spaces'

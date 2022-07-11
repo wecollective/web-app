@@ -1,14 +1,14 @@
-import React, { useContext, useState, useEffect } from 'react'
-import axios from 'axios'
-import { useGoogleReCaptcha } from 'react-google-recaptcha-v3'
+import Button from '@components/Button'
+import Input from '@components/Input'
+import LoadingWheel from '@components/LoadingWheel'
+import Modal from '@components/Modal'
+import SuccessMessage from '@components/SuccessMessage'
+import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
 import styles from '@styles/components/Modal.module.scss'
-import { AccountContext } from '@contexts/AccountContext'
-import Modal from '@components/Modal'
-import Input from '@components/Input'
-import Button from '@components/Button'
-import LoadingWheel from '@components/LoadingWheel'
-import SuccessMessage from '@components/SuccessMessage'
+import axios from 'axios'
+import React, { useContext, useEffect, useState } from 'react'
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3'
 
 const ForgotPasswordModal = (props: { close: () => void }): JSX.Element => {
     const { close } = props

@@ -1,16 +1,15 @@
 /* eslint-disable no-return-assign */
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useState, useEffect, useContext, useRef } from 'react'
-import { io } from 'socket.io-client'
-import Peer from 'simple-peer'
-import * as d3 from 'd3'
-import { v4 as uuidv4 } from 'uuid'
-import styles from '../styles/components/DecisionTree.module.scss'
-import { PostContext } from '../contexts/PostContext'
-import { AccountContext } from '../contexts/AccountContext'
 import FlagImage from '@components/FlagImage'
-import config from '../Config'
+import { AccountContext } from '@contexts/AccountContext'
+import { PostContext } from '@contexts/PostContext'
+import config from '@src/Config'
+import styles from '@styles/components/DecisionTree.module.scss'
+import React, { useContext, useEffect, useRef, useState } from 'react'
+import Peer from 'simple-peer'
+import { io } from 'socket.io-client'
+import { v4 as uuidv4 } from 'uuid'
 
 const Video = (props) => {
     const { peer, videoRef, mainUser, size } = props

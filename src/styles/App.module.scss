@@ -5,5 +5,7 @@
     flex-direction: column;
     align-items: center;
     zoom: 0.9;
-    @include for-desktop-medium-up { zoom: 1 }
+    @include for-desktop-medium-up {
+        zoom: 1;
+    }
 }

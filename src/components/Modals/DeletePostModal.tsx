@@ -1,14 +1,14 @@
-import React, { useContext, useState } from 'react'
-import Cookies from 'universal-cookie'
-import axios from 'axios'
-import config from '@src/Config'
+import Button from '@components/Button'
+import Column from '@components/Column'
+import Modal from '@components/Modal'
+import Row from '@components/Row'
+import SuccessMessage from '@components/SuccessMessage'
 import { SpaceContext } from '@contexts/SpaceContext'
 import { UserContext } from '@contexts/UserContext'
-import Modal from '@components/Modal'
-import Column from '@components/Column'
-import Row from '@components/Row'
-import Button from '@components/Button'
-import SuccessMessage from '@components/SuccessMessage'
+import config from '@src/Config'
+import axios from 'axios'
+import React, { useContext, useState } from 'react'
+import Cookies from 'universal-cookie'
 
 const DeletePostModal = (props: {
     postId: number

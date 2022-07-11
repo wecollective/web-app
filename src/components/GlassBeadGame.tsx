@@ -1,52 +1,52 @@
 /* eslint-disable no-return-assign */
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useState, useEffect, useContext, useRef } from 'react'
-import { useLocation, useHistory } from 'react-router-dom'
-import { io } from 'socket.io-client'
-import axios from 'axios'
-import Peer from 'simple-peer'
-import * as d3 from 'd3'
-import { v4 as uuidv4 } from 'uuid'
-import styles from '@styles/components/GlassBeadGame.module.scss'
-import { PostContext } from '@contexts/PostContext'
-import { AccountContext } from '@contexts/AccountContext'
+import Button from '@components/Button'
+import BeadCard from '@components/cards/BeadCard'
+import Column from '@components/Column'
 import FlagImage from '@components/FlagImage'
+import ImageTitle from '@components/ImageTitle'
+import Input from '@components/Input'
+import LoadingWheel from '@components/LoadingWheel'
+import Markdown from '@components/Markdown'
+import Modal from '@components/Modal'
+import GBGBackgroundModal from '@components/modals/GBGBackgroundModal'
+import ImageUploadModal from '@components/modals/ImageUploadModal'
+import Row from '@components/Row'
+import Scrollbars from '@components/Scrollbars'
+import SuccessMessage from '@components/SuccessMessage'
+import { AccountContext } from '@contexts/AccountContext'
+import { PostContext } from '@contexts/PostContext'
 import config from '@src/Config'
 import {
-    isPlural,
-    timeSinceCreated,
-    dateCreated,
-    notNull,
     allValid,
+    dateCreated,
     defaultErrorState,
+    isPlural,
+    notNull,
+    timeSinceCreated,
 } from '@src/Helpers'
-import Modal from '@components/Modal'
-import ImageUploadModal from '@components/modals/ImageUploadModal'
-import Input from '@components/Input'
-import Button from '@components/Button'
-import ImageTitle from '@components/ImageTitle'
-import LoadingWheel from '@components/LoadingWheel'
-import SuccessMessage from '@components/SuccessMessage'
-import Row from '@components/Row'
-import Column from '@components/Column'
-import Scrollbars from '@components/Scrollbars'
-import Markdown from '@components/Markdown'
-import GBGBackgroundModal from '@components/modals/GBGBackgroundModal'
-import BeadCard from '@components/cards/BeadCard'
-import { ReactComponent as AudioIconSVG } from '@svgs/microphone-solid.svg'
-import { ReactComponent as AudioSlashIconSVG } from '@svgs/microphone-slash-solid.svg'
-import { ReactComponent as VideoIconSVG } from '@svgs/video-solid.svg'
-import { ReactComponent as VideoSlashIconSVG } from '@svgs/video-slash-solid.svg'
-import { ReactComponent as ChevronUpIconSVG } from '@svgs/chevron-up-solid.svg'
-import { ReactComponent as ChevronDownIconSVG } from '@svgs/chevron-down-solid.svg'
-import { ReactComponent as DNAIconSVG } from '@svgs/dna.svg'
-import { ReactComponent as LockIconSVG } from '@svgs/lock-solid.svg'
-import { ReactComponent as EditIconSVG } from '@svgs/edit-solid.svg'
-import { ReactComponent as RefreshIconSVG } from '@svgs/repost.svg'
-import { ReactComponent as CurvedDNASVG } from '@svgs/curved-dna.svg'
-import { ReactComponent as CommentIconSVG } from '@svgs/comment-solid.svg'
+import styles from '@styles/components/GlassBeadGame.module.scss'
 import { ReactComponent as CastaliaIconSVG } from '@svgs/castalia-logo.svg'
+import { ReactComponent as ChevronDownIconSVG } from '@svgs/chevron-down-solid.svg'
+import { ReactComponent as ChevronUpIconSVG } from '@svgs/chevron-up-solid.svg'
+import { ReactComponent as CommentIconSVG } from '@svgs/comment-solid.svg'
+import { ReactComponent as CurvedDNASVG } from '@svgs/curved-dna.svg'
+import { ReactComponent as DNAIconSVG } from '@svgs/dna.svg'
+import { ReactComponent as EditIconSVG } from '@svgs/edit-solid.svg'
+import { ReactComponent as LockIconSVG } from '@svgs/lock-solid.svg'
+import { ReactComponent as AudioSlashIconSVG } from '@svgs/microphone-slash-solid.svg'
+import { ReactComponent as AudioIconSVG } from '@svgs/microphone-solid.svg'
+import { ReactComponent as RefreshIconSVG } from '@svgs/repost.svg'
+import { ReactComponent as VideoSlashIconSVG } from '@svgs/video-slash-solid.svg'
+import { ReactComponent as VideoIconSVG } from '@svgs/video-solid.svg'
+import axios from 'axios'
+import * as d3 from 'd3'
+import React, { useContext, useEffect, useRef, useState } from 'react'
+import { useHistory, useLocation } from 'react-router-dom'
+import Peer from 'simple-peer'
+import { io } from 'socket.io-client'
+import { v4 as uuidv4 } from 'uuid'
 
 interface GameSettingsData {
     gameId: number

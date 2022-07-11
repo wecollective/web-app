@@ -1,13 +1,13 @@
-import React, { useContext, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
-import { AccountContext } from '@src/contexts/AccountContext'
-import { UserContext } from '@contexts/UserContext'
-import styles from '@styles/pages/UserPage/UserPagePosts.module.scss'
-import Row from '@components/Row'
 import Column from '@components/Column'
 import PostList from '@components/PostList'
-import UserPagePostsHeader from '@pages/UserPage/UserPagePostsHeader'
+import Row from '@components/Row'
+import { UserContext } from '@contexts/UserContext'
 import UserNotFound from '@pages/SpaceNotFound'
+import UserPagePostsHeader from '@pages/UserPage/UserPagePostsHeader'
+import { AccountContext } from '@src/contexts/AccountContext'
+import styles from '@styles/pages/UserPage/UserPagePosts.module.scss'
+import React, { useContext, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 
 const UserPagePosts = (): JSX.Element => {
     const { pageBottomReached } = useContext(AccountContext)

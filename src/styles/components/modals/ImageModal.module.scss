@@ -19,7 +19,9 @@
                 width: 20px;
                 height: 20px;
                 color: $grey3;
-                &:hover { color: $grey4 }
+                &:hover {
+                    color: $grey4;
+                }
                 transition: color 0.5s;
 
                 @include for-tablet-landscape-up {
@@ -31,7 +33,9 @@
 
         > div {
             margin: 0 5px;
-            @include for-tablet-landscape-up { margin: 0 10px }
+            @include for-tablet-landscape-up {
+                margin: 0 10px;
+            }
 
             > img {
                 width: 100%;

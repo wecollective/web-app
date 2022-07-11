@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react'
-import { useHistory } from 'react-router-dom'
-import axios from 'axios'
-import config from '@src/Config'
-import styles from '@styles/components/GlobalSearchBar.module.scss'
-import DropDownMenu from '@components/DropDownMenu'
 import Column from '@components/Column'
+import DropDownMenu from '@components/DropDownMenu'
 import FlagImage from '@components/FlagImage'
 import LoadingWheel from '@components/LoadingWheel'
+import config from '@src/Config'
+import styles from '@styles/components/GlobalSearchBar.module.scss'
 import { ReactComponent as SearchIcon } from '@svgs/search.svg'
+import axios from 'axios'
+import React, { useEffect, useState } from 'react'
+import { useHistory } from 'react-router-dom'
 
 const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }): JSX.Element => {
     const { onLocationChange, style } = props

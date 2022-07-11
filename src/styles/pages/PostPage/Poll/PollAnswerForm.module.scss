@@ -47,14 +47,16 @@
     font-weight: 800;
     transition-property: box-shadow, background-color;
     transition-duration: 0.3s, 2s;
- 
-    &:hover { 
+
+    &:hover {
         outline: none;
         filter: brightness(110%);
         cursor: pointer;
     }
-    
-    &:focus { outline: none }
+
+    &:focus {
+        outline: none;
+    }
 }
 .pollAnswerFormSubTitle {
     font-size: 24px;
@@ -69,7 +71,7 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    background-color: #e1f1ff;//#ddd;
+    background-color: #e1f1ff; //#ddd;
     border-radius: 5px;
     //height: 32px;
     //padding: 0 12px;

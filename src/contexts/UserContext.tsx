@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
-import axios from 'axios'
-import config from '@src/Config'
 import { AccountContext } from '@contexts/AccountContext'
-import { IUserContext, IPost } from '@src/Interfaces'
+import config from '@src/Config'
+import { IPost, IUserContext } from '@src/Interfaces'
+import axios from 'axios'
+import React, { createContext, useContext, useEffect, useState } from 'react'
 
 export const UserContext = createContext<IUserContext>({} as IUserContext)
 

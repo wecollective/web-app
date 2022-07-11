@@ -7,7 +7,9 @@
     align-items: center;
 
     // hide default checkbox styling
-    > input { display: none }
+    > input {
+        display: none;
+    }
 
     // check box
     > div {
@@ -32,10 +34,14 @@
     }
 
     // show check icon if input checked
-    input:checked ~ svg { opacity: 1 }
+    input:checked ~ svg {
+        opacity: 1;
+    }
 
     // show checkbox background color on hover
-    &:hover > div { background-color: $bluegrey1 }
+    &:hover > div {
+        background-color: $bluegrey1;
+    }
 
     // disabled styling
     &.disabled {
@@ -43,9 +49,11 @@
 
         > div {
             border: 2px solid $grey4;
-            background-color: $grey2
+            background-color: $grey2;
         }
 
-        > svg { color: $grey5 }
+        > svg {
+            color: $grey5;
+        }
     }
 }

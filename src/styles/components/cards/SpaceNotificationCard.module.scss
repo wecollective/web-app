@@ -117,5 +117,7 @@
     text-decoration: underline;
     color: rgb(0, 160, 253);
     line-height: 30px;
-    &:hover { cursor: pointer }
+    &:hover {
+        cursor: pointer;
+    }
 }

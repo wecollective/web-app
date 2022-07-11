@@ -1,9 +1,9 @@
+import styles from '@styles/components/Markdown.module.scss'
 import React, { useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import gfm from 'remark-gfm'
 import { v4 as uuidv4 } from 'uuid'
-import styles from '@styles/components/Markdown.module.scss'
 
 const Markdown = (props: { text: string; style?: any; className?: any }): JSX.Element => {
     const { text, style, className } = props

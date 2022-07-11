@@ -1,14 +1,14 @@
-import React, { useContext, useState } from 'react'
-import axios from 'axios'
-import Cookies from 'universal-cookie'
-import config from '@src/Config'
-import styles from '@styles/components/Modal.module.scss'
-import { SpaceContext } from '@contexts/SpaceContext'
-import Modal from '@components/Modal'
-import MarkdownEditor from '@components/MarkdownEditor'
 import Button from '@components/Button'
 import LoadingWheel from '@components/LoadingWheel'
+import MarkdownEditor from '@components/MarkdownEditor'
+import Modal from '@components/Modal'
 import SuccessMessage from '@components/SuccessMessage'
+import { SpaceContext } from '@contexts/SpaceContext'
+import config from '@src/Config'
+import styles from '@styles/components/Modal.module.scss'
+import axios from 'axios'
+import React, { useContext, useState } from 'react'
+import Cookies from 'universal-cookie'
 
 const UpdateSpaceDescriptionModal = (props: { close: () => void }): JSX.Element => {
     const { close } = props

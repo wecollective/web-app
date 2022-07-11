@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useRef } from 'react'
-import styles from '../styles/components/ShowMoreLess.module.scss'
-import { ReactComponent as ChevronIconSVG } from '../svgs/chevron-down-solid.svg'
+import styles from '@styles/components/ShowMoreLess.module.scss'
+import { ReactComponent as ChevronIconSVG } from '@svgs/chevron-down-solid.svg'
+import React, { useEffect, useRef, useState } from 'react'
 
 const ShowMoreLess = (props: {
     height: number

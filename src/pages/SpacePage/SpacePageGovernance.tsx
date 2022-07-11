@@ -1,9 +1,9 @@
+import Column from '@components/Column'
+import { SpaceContext } from '@contexts/SpaceContext'
+import SpaceNotFound from '@pages/SpaceNotFound'
+import styles from '@styles/pages/SpacePage/SpacePageGovernance.module.scss'
 import React, { useContext } from 'react'
 import { useLocation } from 'react-router-dom'
-import { SpaceContext } from '@contexts/SpaceContext'
-import styles from '@styles/pages/SpacePage/SpacePageGovernance.module.scss'
-import Column from '@components/Column'
-import SpaceNotFound from '@pages/SpaceNotFound'
 
 const SpacePageGovernance = (): JSX.Element => {
     const { spaceData, spaceNotFound } = useContext(SpaceContext)

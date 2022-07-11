@@ -1,6 +1,6 @@
+import { PostContext } from '@contexts/PostContext'
+import styles from '@styles/components/PollResultsAnswer.module.scss'
 import React, { useContext } from 'react'
-import styles from '../../../styles/components/PollResultsAnswer.module.scss'
-import { PostContext } from '../../../contexts/PostContext'
 
 function PollResultsAnswer(props) {
     const { answer, index } = props
@@ -20,12 +20,15 @@ function PollResultsAnswer(props) {
             <div className={styles.pollAnswerIndex} style={{ backgroundColor: color }}>
                 {index + 1}
             </div>
-            <div className={styles.pollAnswerScoreRatio}>{`${ pollAnswerVotes } ↑`}</div>
+            <div className={styles.pollAnswerScoreRatio}>{`${pollAnswerVotes} ↑`}</div>
             <div className={styles.pollAnswerScore}>
-                <div className={styles.pollAnswerScoreBar} style={{width: `${ pollAnswerScore }%`}}/>
-                <div className={styles.pollAnswerScoreText}>{ pollAnswerScore }%</div>
+                <div
+                    className={styles.pollAnswerScoreBar}
+                    style={{ width: `${pollAnswerScore}%` }}
+                />
+                <div className={styles.pollAnswerScoreText}>{pollAnswerScore}%</div>
             </div>
-            <div className={styles.pollAnswerText}>{ answer.text }</div>
+            <div className={styles.pollAnswerText}>{answer.text}</div>
         </div>
     )
 }

@@ -1,8 +1,12 @@
 @import '@styles/Variables';
 
 @keyframes fadeInOpacity {
-	0% { opacity: 0 }
-	100% { opacity: 1 }
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
 }
 
 .bead {
@@ -25,7 +29,7 @@
     }
 
     .shareButton {
-        all:unset;
+        all: unset;
         width: 20px;
         height: 20px;
         cursor: pointer;

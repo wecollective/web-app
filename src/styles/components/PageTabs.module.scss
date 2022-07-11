@@ -35,12 +35,16 @@ $highlightColor: $blue5;
         }
 
         &:hover {
-            .underline { background-color: $defaultColor }
+            .underline {
+                background-color: $defaultColor;
+            }
         }
 
         &.selected {
             color: $highlightColor;
-            .underline { background-color: $highlightColor }
+            .underline {
+                background-color: $highlightColor;
+            }
         }
     }
 }

@@ -1,5 +1,5 @@
+import styles from '@styles/components/UrlPreview.module.scss'
 import React from 'react'
-import styles from '../../styles/components/UrlPreview.module.scss'
 
 const UrlPreview = (props: {
     url: string

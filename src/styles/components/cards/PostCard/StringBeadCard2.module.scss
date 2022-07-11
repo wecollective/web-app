@@ -22,7 +22,9 @@
         margin: 5px 0;
 
         .markdown {
-            img { max-width: 100% }
+            img {
+                max-width: 100%;
+            }
         }
 
         .playButton {
@@ -41,7 +43,9 @@
             cursor: pointer;
             width: 160px;
             height: 160px;
-            &:not(:last-child) { margin-right: 7px }
+            &:not(:last-child) {
+                margin-right: 7px;
+            }
             > img {
                 width: 160px;
                 height: 160px;

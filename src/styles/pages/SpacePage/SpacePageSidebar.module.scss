@@ -32,7 +32,9 @@
             justify-content: center;
             opacity: 0;
             transition: opacity 0.3s;
-            &:hover { opacity: 1 }
+            &:hover {
+                opacity: 1;
+            }
         }
     }
 

@@ -1,8 +1,7 @@
 /* eslint-disable camelcase */
-import React, { useState, useEffect } from 'react'
 import * as d3 from 'd3'
 import * as d3Hexbin from 'd3-hexbin'
-import { IPost } from '../Interfaces'
+import React, { useEffect, useState } from 'react'
 // import styles from '../styles/components/PrismMap.module.scss'
 
 const PrismMap = (props: { postData: any; prismData: any }): JSX.Element => {

@@ -1,7 +1,7 @@
-import React, { useContext } from 'react'
-import { AccountContext } from '@contexts/AccountContext'
-import Modal from '@components/Modal'
 import Button from '@components/Button'
+import Modal from '@components/Modal'
+import { AccountContext } from '@contexts/AccountContext'
+import React, { useContext } from 'react'
 
 const AlertModal = (): JSX.Element => {
     const { setAlertModalOpen, alertMessage, setLogInModalOpen } = useContext(AccountContext)

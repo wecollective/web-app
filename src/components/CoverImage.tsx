@@ -1,7 +1,7 @@
-import React, { useContext } from 'react'
-import styles from '@styles/components/CoverImage.module.scss'
 import ImageFade from '@components/ImageFade'
 import { AccountContext } from '@src/contexts/AccountContext'
+import styles from '@styles/components/CoverImage.module.scss'
+import React, { useContext } from 'react'
 
 const CoverImage = (props: {
     type: 'user' | 'space'

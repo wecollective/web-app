@@ -1,7 +1,7 @@
-import React, { useContext } from 'react'
+import PollResultsPieChart from '@pages/PostPage/Poll/PollResultsPieChart'
+import PollResultsTimeGraph from '@pages/PostPage/Poll/PollResultsTimeGraph'
 import styles from '@styles/pages/PostPage/PostPagePollResults.module.scss'
-import PollResultsPieChart from './Poll/PollResultsPieChart'
-import PollResultsTimeGraph from './Poll/PollResultsTimeGraph'
+import React from 'react'
 // import PollResultsAnswer from './Poll/PollResultsAnswer'
 // import { PostContext } from '../../contexts/PostContext'
 

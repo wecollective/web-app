@@ -1,10 +1,10 @@
 /* eslint-disable react/no-array-index-key */
-import React, { useState } from 'react'
-import styles from '@styles/components/CollapsibleCards.module.scss'
 import Column from '@components/Column'
-import Row from '@components/Row'
 import Markdown from '@components/Markdown'
+import Row from '@components/Row'
+import styles from '@styles/components/CollapsibleCards.module.scss'
 import { ReactComponent as ChevronDownIcon } from '@svgs/chevron-down-solid.svg'
+import React, { useState } from 'react'
 
 const Card = (props: {
     data: any

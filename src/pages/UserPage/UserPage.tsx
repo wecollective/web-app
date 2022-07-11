@@ -1,23 +1,23 @@
-import React, { useContext, useEffect } from 'react'
-import { Route, Switch, Redirect, useLocation } from 'react-router-dom'
+import Column from '@components/Column'
+import CoverImage from '@components/CoverImage'
+import FlagImagePlaceholder from '@components/FlagImagePlaceholder'
+import ImageFade from '@components/ImageFade'
+import PageTabs from '@components/PageTabs'
+import Row from '@components/Row'
 import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
-import { onPageBottomReached } from '@src/Helpers'
-import styles from '@styles/pages/UserPage/UserPage.module.scss'
-import Column from '@components/Column'
-import Row from '@components/Row'
-import CoverImage from '@components/CoverImage'
-import ImageFade from '@components/ImageFade'
-import FlagImagePlaceholder from '@components/FlagImagePlaceholder'
-import PageTabs from '@components/PageTabs'
 import UserPageAbout from '@pages/UserPage/UserPageAbout'
-import UserPageSettings from '@pages/UserPage/UserPageSettings'
 import UserPageNotifications from '@pages/UserPage/UserPageNotifications'
 import UserPagePosts from '@pages/UserPage/UserPagePosts'
-import { ReactComponent as AboutIcon } from '@svgs/book-open-solid.svg'
-import { ReactComponent as PostsIcon } from '@svgs/edit-solid.svg'
+import UserPageSettings from '@pages/UserPage/UserPageSettings'
+import { onPageBottomReached } from '@src/Helpers'
+import styles from '@styles/pages/UserPage/UserPage.module.scss'
 import { ReactComponent as BellIcon } from '@svgs/bell-solid.svg'
+import { ReactComponent as AboutIcon } from '@svgs/book-open-solid.svg'
 import { ReactComponent as SettingsIcon } from '@svgs/cog-solid.svg'
+import { ReactComponent as PostsIcon } from '@svgs/edit-solid.svg'
+import React, { useContext, useEffect } from 'react'
+import { Redirect, Route, Switch, useLocation } from 'react-router-dom'
 
 const UserPage = (): JSX.Element => {
     const {
@@ -25,7 +25,7 @@ const UserPage = (): JSX.Element => {
         setPageBottomReached,
         setImageUploadType,
         setImageUploadModalOpen,
-        loggedIn
+        loggedIn,
     } = useContext(AccountContext)
     const {
         userData,

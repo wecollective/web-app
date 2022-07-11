@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useContext } from 'react'
-import axios from 'axios'
-import config from '@src/Config'
-import styles from '@styles/components/Prism.module.scss'
-import { PostContext } from '@contexts/PostContext'
 import PostCard from '@components/cards/PostCard/PostCard'
-import PrismMap from './PrismMap'
-import { IPrism } from '../Interfaces'
+import PrismMap from '@components/PrismMap'
+import { PostContext } from '@contexts/PostContext'
+import config from '@src/Config'
+import { IPrism } from '@src/Interfaces'
+import styles from '@styles/components/Prism.module.scss'
+import axios from 'axios'
+import React, { useContext, useEffect, useState } from 'react'
 
 const Prism = (): JSX.Element => {
     const { postData } = useContext(PostContext)

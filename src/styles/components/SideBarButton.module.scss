@@ -9,12 +9,16 @@
     transition-duration: 0.3s;
     &:hover {
         cursor: pointer;
-        background-color: rgba(0,0,0,0.03);// rgba(255, 255, 255, 1);
-        .icon { opacity: 0.4; }
+        background-color: rgba(0, 0, 0, 0.03); // rgba(255, 255, 255, 1);
+        .icon {
+            opacity: 0.4;
+        }
     }
     &.selected {
-        background-color: rgba(0,0,0,0.03);// #e5e7eb;//rgba(0,0,0,0.05);
-        .icon { opacity: 0.4; }
+        background-color: rgba(0, 0, 0, 0.03); // #e5e7eb;//rgba(0,0,0,0.05);
+        .icon {
+            opacity: 0.4;
+        }
     }
 }
 .icon {

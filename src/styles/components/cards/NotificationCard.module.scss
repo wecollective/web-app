@@ -42,19 +42,30 @@
     flex-direction: row;
     align-items: center;
     flex-wrap: wrap;
-    > a, > p, > div, > button {
+    > a,
+    > p,
+    > div,
+    > button {
         flex-shrink: 0;
         margin: 0 $contentMargin $contentMargin 0;
     }
     .inlineIcon {
         width: 25px;
         height: 25px;
-        &.green > svg > path { fill: $green2 }
-        &.red > svg > path { fill: $red }
+        &.green > svg > path {
+            fill: $green2;
+        }
+        &.red > svg > path {
+            fill: $red;
+        }
     }
     > p {
-        &.green { color: $green2 }
-        &.red { color: $red }
+        &.green {
+            color: $green2;
+        }
+        &.red {
+            color: $red;
+        }
     }
 }
 .seenButton {
@@ -68,7 +79,9 @@
     svg {
         width: 30px;
         height: 30px;
-        path { fill: $grey3 }
+        path {
+            fill: $grey3;
+        }
     }
 }
 .state {

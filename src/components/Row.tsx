@@ -1,5 +1,5 @@
-import React from 'react'
 import styles from '@styles/components/Row.module.scss'
+import React from 'react'
 
 const Row = (props: {
     children: any

@@ -1,9 +1,9 @@
-import React from 'react'
-import styles from '@styles/components/Input.module.scss'
-import { resizeTextArea } from '@src/Helpers'
 import LoadingWheel from '@components/LoadingWheel'
-import { ReactComponent as DangerIconSVG } from '@svgs/exclamation-circle-solid.svg'
+import { resizeTextArea } from '@src/Helpers'
+import styles from '@styles/components/Input.module.scss'
 import { ReactComponent as SuccessIconSVG } from '@svgs/check-circle-solid.svg'
+import { ReactComponent as DangerIconSVG } from '@svgs/exclamation-circle-solid.svg'
+import React from 'react'
 
 const Input = (props: {
     type: 'text' | 'number' | 'text-area' | 'password' | 'email'

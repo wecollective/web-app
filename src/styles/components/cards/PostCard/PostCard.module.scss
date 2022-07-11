@@ -37,7 +37,9 @@
 
         .postSpaces {
             overflow: hidden;
-            > p { flex-shrink: 0 }
+            > p {
+                flex-shrink: 0;
+            }
 
             .otherSpacesButton {
                 all: unset;
@@ -59,7 +61,7 @@
                         color: $grey6;
                     }
                 }
-    
+
                 > p {
                     font-size: 14px;
                     font-weight: 800;
@@ -165,7 +167,9 @@
                 display: flex;
                 align-items: center;
 
-                &:hover > svg { color: $grey6; }
+                &:hover > svg {
+                    color: $grey6;
+                }
 
                 > svg {
                     width: 20px;
@@ -186,10 +190,12 @@
         .images {
             padding: 7px;
             margin-top: 10px;
-        
+
             .image {
                 position: relative;
-                &:not(:last-child) {  margin-right: 10px }
+                &:not(:last-child) {
+                    margin-right: 10px;
+                }
 
                 > button {
                     all: unset;
@@ -202,7 +208,7 @@
                         box-shadow: 0 0 7px 0 rgba(10, 8, 72, 0.1);
                     }
                 }
-        
+
                 > p {
                     text-align: center;
                     overflow-wrap: break-word;
@@ -213,7 +219,9 @@
                         max-width: 100%;
                         max-height: 450px;
                     }
-                    > p { width: 100% }
+                    > p {
+                        width: 100%;
+                    }
                 }
 
                 &.medium {
@@ -221,7 +229,9 @@
                         width: 300px;
                         height: 300px;
                     }
-                    > p { width: 300px }
+                    > p {
+                        width: 300px;
+                    }
                 }
 
                 &.small {
@@ -229,7 +239,9 @@
                         width: 225px;
                         height: 225px;
                     }
-                    > p { width: 225px }
+                    > p {
+                        width: 225px;
+                    }
                 }
             }
         }
@@ -275,11 +287,14 @@
                 color: $grey4;
             }
 
-            svg, p {
+            svg,
+            p {
                 margin-right: 5px;
             }
 
-            p { font-size: 14px }
+            p {
+                font-size: 14px;
+            }
         }
 
         // audio posts
@@ -299,7 +314,7 @@
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            box-shadow: 0 0 3px rgba(0,0,0,0.2);
+            box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
             object-fit: cover;
             margin-right: 10px;
         }
@@ -337,14 +352,14 @@
             animation-name: fadeInOpacity;
             animation-timing-function: ease-in;
             animation-duration: 2s;
-            
+
             > svg {
                 transform: rotate(90deg);
                 height: 35px;
                 color: $bluegrey2;
             }
         }
-    
+
         .newBeadButton {
             all: unset;
             cursor: pointer;
@@ -361,7 +376,9 @@
             box-shadow: 0 0 7px 0 rgba(10, 8, 72, 0.1);
             transition: all 0.3s;
 
-            &:hover { background-color: rgb(245, 251, 255) }
+            &:hover {
+                background-color: rgb(245, 251, 255);
+            }
 
             > svg {
                 width: 40px;
@@ -390,7 +407,6 @@
                 margin-bottom: 10px;
             }
         }
-
     }
 
     .footer {
@@ -415,7 +431,9 @@
                 height: 20px;
                 color: $grey4;
                 transition: color 0.3s;
-                &:hover { color: $grey6 }
+                &:hover {
+                    color: $grey6;
+                }
             }
         }
     }

@@ -1,7 +1,7 @@
-import React from 'react'
-import styles from '@styles/components/modals/DonateModal.module.scss'
 import Modal from '@components/Modal'
+import styles from '@styles/components/modals/DonateModal.module.scss'
 import { ReactComponent as DonateIconSVG } from '@svgs/donate-solid.svg'
+import React from 'react'
 
 const DonateModal = (props: { close: () => void }): JSX.Element => {
     const { close } = props

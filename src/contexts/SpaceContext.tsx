@@ -1,8 +1,8 @@
-import React, { createContext, useState, useContext, useEffect } from 'react'
-import axios from 'axios'
-import config from '@src/Config'
 import { AccountContext } from '@contexts/AccountContext'
-import { ISpaceContext, ISpace, IPost, IUser } from '@src/Interfaces'
+import config from '@src/Config'
+import { ISpaceContext } from '@src/Interfaces'
+import axios from 'axios'
+import React, { createContext, useContext, useState } from 'react'
 
 export const SpaceContext = createContext<ISpaceContext>({} as ISpaceContext)
 

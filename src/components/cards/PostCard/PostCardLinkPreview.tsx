@@ -1,7 +1,7 @@
-import React, { useContext } from 'react'
-import styles from '../../../styles/components/PostCardLinkPreview.module.scss'
 import FlagImage from '@components/FlagImage'
-import { AccountContext } from '../../../contexts/AccountContext'
+import { AccountContext } from '@contexts/AccountContext'
+import styles from '@styles/components/PostCardLinkPreview.module.scss'
+import React, { useContext } from 'react'
 
 const PostCardLinkPreview = (props: { links: any }): JSX.Element => {
     const { links } = props

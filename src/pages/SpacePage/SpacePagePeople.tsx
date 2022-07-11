@@ -1,13 +1,13 @@
+import Column from '@components/Column'
+import PeopleList from '@components/PeopleList'
+import Row from '@components/Row'
+import { SpaceContext } from '@contexts/SpaceContext'
+import SpaceNotFound from '@pages/SpaceNotFound'
+import SpacePagePeopleHeader from '@pages/SpacePage/SpacePagePeopleHeader'
+import { AccountContext } from '@src/contexts/AccountContext'
+import styles from '@styles/pages/SpacePage/SpacePagePeople.module.scss'
 import React, { useContext, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import styles from '@styles/pages/SpacePage/SpacePagePeople.module.scss'
-import { AccountContext } from '@src/contexts/AccountContext'
-import { SpaceContext } from '@contexts/SpaceContext'
-import Row from '@components/Row'
-import Column from '@components/Column'
-import SpacePagePeopleHeader from '@pages/SpacePage/SpacePagePeopleHeader'
-import PeopleList from '@components/PeopleList'
-import SpaceNotFound from '@pages/SpaceNotFound'
 
 const SpacePagePeople = (): JSX.Element => {
     const { pageBottomReached } = useContext(AccountContext)

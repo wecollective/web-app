@@ -1,12 +1,12 @@
-import React from 'react'
-import styles from '@styles/components/modals/ImageModal.module.scss'
 import Column from '@components/Column'
-import Row from '@components/Row'
-import ShowMoreLess from '@components/ShowMoreLess'
 import Markdown from '@components/Markdown'
 import Modal from '@components/Modal'
+import Row from '@components/Row'
+import ShowMoreLess from '@components/ShowMoreLess'
+import styles from '@styles/components/modals/ImageModal.module.scss'
 import { ReactComponent as ChevronLeftSVG } from '@svgs/chevron-left-solid.svg'
 import { ReactComponent as ChevronRightSVG } from '@svgs/chevron-right-solid.svg'
+import React from 'react'
 
 const ImageModal = (props: {
     images: any[]

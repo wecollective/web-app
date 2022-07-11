@@ -43,7 +43,9 @@
     flex-direction: row;
     align-items: center;
     flex-shrink: 0;
-    &:last-child { margin-bottom: 0 }
+    &:last-child {
+        margin-bottom: 0;
+    }
 }
 .image {
     width: 25px;

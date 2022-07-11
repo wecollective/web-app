@@ -1,12 +1,12 @@
-import React, { useContext } from 'react'
-import { AccountContext } from '@contexts/AccountContext'
 import AlertModal from '@components/modals/AlertModal'
-import ResetPasswordModal from '@components/modals/ResetPasswordModal'
+import DonateModal from '@components/modals/DonateModal'
+import ForgotPasswordModal from '@components/modals/ForgotPasswordModal'
+import GlobalImageUploadModal from '@components/modals/GlobalImageUploadModal'
 import LogInModal from '@components/modals/LogInModal'
 import RegisterModal from '@components/modals/RegisterModal'
-import ForgotPasswordModal from '@components/modals/ForgotPasswordModal'
-import DonateModal from '@components/modals/DonateModal'
-import GlobalImageUploadModal from '@components/modals/GlobalImageUploadModal'
+import ResetPasswordModal from '@components/modals/ResetPasswordModal'
+import { AccountContext } from '@contexts/AccountContext'
+import React, { useContext } from 'react'
 
 const Modals = (): JSX.Element => {
     const {

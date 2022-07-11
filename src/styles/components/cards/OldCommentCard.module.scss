@@ -71,7 +71,6 @@
     //margin-right: 10px;
 }
 .content {
-
 }
 .text {
     color: black;
@@ -113,7 +112,7 @@
     // }
     &.selected {
         opacity: 0.8;
-        filter: invert(.5) sepia(1) saturate(5) hue-rotate(190deg);
+        filter: invert(0.5) sepia(1) saturate(5) hue-rotate(190deg);
     }
 }
 // .likeIcon {
