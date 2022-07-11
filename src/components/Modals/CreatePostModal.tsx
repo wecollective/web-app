@@ -142,7 +142,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             value: '',
             validate: (v) => {
                 const errors: string[] = []
-                if (v.length < 2) errors.push('Required')
+                if (v.length < 1) errors.push('Required')
                 if (v.length > 5000) errors.push('Must be less than 5K characters')
                 return errors
             },
@@ -2104,7 +2104,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                             color='aqua'
                                             disabled={
                                                 (newBead.type === 'text' &&
-                                                    newBead.text.length < 2) ||
+                                                    newBead.text.length < 1) ||
                                                 (newBead.type === 'url' &&
                                                     (newBead.urlData === null || urlLoading)) ||
                                                 (newBead.type === 'audio' &&

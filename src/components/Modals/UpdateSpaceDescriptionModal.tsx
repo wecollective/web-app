@@ -23,7 +23,7 @@ const UpdateSpaceDescriptionModal = (props: { close: () => void }): JSX.Element 
     function updateSpaceDescription(e) {
         e.preventDefault()
         const unChanged = inputValue === spaceData.description
-        const invalid = inputValue.length < 2 || inputValue.length > 10000
+        const invalid = inputValue.length < 1 || inputValue.length > 10000
         if (unChanged) {
             setInputState('invalid')
             setInputErrors(['Unchanged from previous description'])

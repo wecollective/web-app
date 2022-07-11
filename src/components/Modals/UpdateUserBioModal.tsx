@@ -25,7 +25,7 @@ const UpdateUserBioModal = (props: { close: () => void }): JSX.Element => {
     function updateUserBio(e) {
         e.preventDefault()
         const unChanged = inputValue === accountData.bio
-        const invalid = inputValue.length < 2 || inputValue.length > 10000
+        const invalid = inputValue.length < 1 || inputValue.length > 10000
         if (unChanged) {
             setInputState('invalid')
             setInputErrors(['Unchanged from previous bio'])
