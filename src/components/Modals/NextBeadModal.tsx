@@ -34,11 +34,21 @@ const NextBeadModal = (props: {
     close: () => void
 }): JSX.Element => {
     const { beadIndex, postData, setPostData, close } = props
+    const { id, Weave, StringPlayers, StringPosts } = postData
+    const {
+        numberOfTurns,
+        allowedBeadTypes,
+        characterLimit,
+        audioTimeLimit,
+        // fixedPlayerColors,
+        // moveTimeWindow,
+        privacy,
+    } = Weave
     const { accountData } = useContext(AccountContext)
 
     const defaultBead = {
         id: uuidv4(),
-        type: postData.Weave.allowedBeadTypes.split(',')[0].toLowerCase(),
+        type: allowedBeadTypes.split(',')[0].toLowerCase(),
         text: '',
         url: '',
         urlData: null,
@@ -54,13 +64,8 @@ const NextBeadModal = (props: {
     const [saved, setSaved] = useState(false)
 
     function findNextPlayerId() {
-        if (
-            postData.StringPosts.length + 1 <
-            postData.StringPlayers.length * postData.Weave.numberOfTurns
-        ) {
-            return postData.StringPlayers[
-                (postData.StringPosts.length + 1) % postData.StringPlayers.length
-            ].id
+        if (StringPosts.length + 1 < StringPlayers.length * numberOfTurns) {
+            return StringPlayers[(StringPosts.length + 1) % StringPlayers.length].id
         }
         return null
     }
@@ -70,6 +75,7 @@ const NextBeadModal = (props: {
         'default'
     )
     const [stringTextErrors, setStringTextErrors] = useState<string[]>([])
+    const [characterLimitError, setCharacterLimitError] = useState(false)
 
     // url
     const [urlLoading, setUrlLoading] = useState(false)
@@ -156,7 +162,7 @@ const NextBeadModal = (props: {
             if (input.files[0].size > audioMBLimit * 1024 * 1024) {
                 setAudioSizeError(true)
                 resetAudioState()
-            } else if (duration > postData.Weave.audioTimeLimit) {
+            } else if (duration > audioTimeLimit) {
                 setAudioTimeError(true)
                 resetAudioState()
             } else {
@@ -186,7 +192,7 @@ const NextBeadModal = (props: {
                 audioRecorderRef.current.onstart = () => {
                     recordingIntervalRef.current = setInterval(() => {
                         setRecordingTime((t) => {
-                            if (t === postData.Weave.audioTimeLimit) {
+                            if (t === audioTimeLimit) {
                                 audioRecorderRef.current.stop()
                                 setRecording(false)
                                 return t
@@ -268,9 +274,9 @@ const NextBeadModal = (props: {
             const accessToken = cookies.get('accessToken')
             const options = { headers: { Authorization: `Bearer ${accessToken}` } }
             const beadData = {
-                postId: postData.id,
+                postId: id,
                 beadIndex,
-                privacy: postData.Weave.privacy,
+                privacy,
                 nextPlayerId: findNextPlayerId(),
                 type: newBead.type,
                 text: newBead.text,
@@ -313,7 +319,7 @@ const NextBeadModal = (props: {
                     setPostData({
                         ...postData,
                         StringPosts: [
-                            ...postData.StringPosts,
+                            ...StringPosts,
                             {
                                 ...res.data.bead,
                                 Link: { index: beadIndex },
@@ -339,7 +345,7 @@ const NextBeadModal = (props: {
                 <Column centerX style={{ width: '100%' }}>
                     <h1>Add a new bead</h1>
                     <Row centerX className={styles.beadTypeButtons}>
-                        {postData.Weave.allowedBeadTypes.includes('Text') && (
+                        {allowedBeadTypes.includes('Text') && (
                             <button
                                 type='button'
                                 className={`${newBead.type === 'text' && styles.selected}`}
@@ -348,7 +354,7 @@ const NextBeadModal = (props: {
                                 <TextIcon />
                             </button>
                         )}
-                        {postData.Weave.allowedBeadTypes.includes('Url') && (
+                        {allowedBeadTypes.includes('Url') && (
                             <button
                                 type='button'
                                 className={`${newBead.type === 'url' && styles.selected}`}
@@ -357,7 +363,7 @@ const NextBeadModal = (props: {
                                 <UrlIcon />
                             </button>
                         )}
-                        {postData.Weave.allowedBeadTypes.includes('Audio') && (
+                        {allowedBeadTypes.includes('Audio') && (
                             <button
                                 type='button'
                                 className={`${newBead.type === 'audio' && styles.selected}`}
@@ -366,7 +372,7 @@ const NextBeadModal = (props: {
                                 <AudioIcon />
                             </button>
                         )}
-                        {postData.Weave.allowedBeadTypes.includes('Image') && (
+                        {allowedBeadTypes.includes('Image') && (
                             <button
                                 type='button'
                                 className={`${newBead.type === 'image' && styles.selected}`}
@@ -379,9 +385,18 @@ const NextBeadModal = (props: {
                     <Column centerX style={{ width: '100%' }}>
                         {newBead.type === 'text' && (
                             <Column centerX style={{ maxWidth: 500 }}>
+                                {characterLimit && (
+                                    <p
+                                        className={characterLimitError ? 'danger' : ''}
+                                        style={{ marginBottom: 20 }}
+                                    >
+                                        {newBead.text.length}/{characterLimit} characters
+                                    </p>
+                                )}
                                 <MarkdownEditor
                                     initialValue={newBead.text}
                                     onChange={(value) => {
+                                        setCharacterLimitError(value.length > characterLimit)
                                         setStringTextErrors([])
                                         setStringTextState('default')
                                         setNewBead({ ...newBead, text: value })
@@ -415,12 +430,12 @@ const NextBeadModal = (props: {
                                         Audio too large. Max size: {audioMBLimit}MB
                                     </p>
                                 )}
-                                {postData.Weave.audioTimeLimit && (
+                                {audioTimeLimit && (
                                     <p
                                         className={audioTimeError ? 'danger' : ''}
                                         style={{ marginBottom: 20 }}
                                     >
-                                        Max time limit: {postData.Weave.audioTimeLimit} seconds
+                                        Max time limit: {audioTimeLimit} seconds
                                     </p>
                                 )}
                                 <Row style={{ marginBottom: 10 }}>
@@ -575,7 +590,7 @@ const NextBeadModal = (props: {
                                 </Row>
                             </Column>
                         )}
-                        {((newBead.type === 'text' && newBead.text.length > 1) ||
+                        {((newBead.type === 'text' && newBead.text.length > 0) ||
                             (newBead.type === 'url' && newBead.urlData !== null) ||
                             (newBead.type === 'audio' && newBead.audioFile) ||
                             (newBead.type === 'image' && images.length > 0)) && (
@@ -619,7 +634,8 @@ const NextBeadModal = (props: {
                             text='Add bead'
                             color='aqua'
                             disabled={
-                                (newBead.type === 'text' && newBead.text.length < 2) ||
+                                (newBead.type === 'text' && newBead.text.length < 1) ||
+                                (newBead.type === 'text' && newBead.text.length > characterLimit) ||
                                 (newBead.type === 'url' &&
                                     (newBead.urlData === null || urlLoading)) ||
                                 (newBead.type === 'audio' && newBead.audioFile === null) ||
