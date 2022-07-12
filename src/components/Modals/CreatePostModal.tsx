@@ -308,6 +308,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             handle: accountData.handle,
             name: accountData.name,
             flagImagePath: accountData.flagImagePath,
+            color: colors.white,
         },
     ])
     const [selectedUsersError, setSelectedUsersError] = useState(false)
@@ -325,6 +326,8 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             validate: (v) => (+v < 1 || +v > 20 ? ['Must be between 1 and 20 turns'] : []),
         },
     })
+    const [playerColorsOn, setPlayerColorsOn] = useState(false)
+    const [selectedPlayerId, setSelectedPlayerId] = useState<null | number>(null)
     const [characterLimitOn, setCharacterLimitOn] = useState(false)
     const [characterLimit, setCharacterLimit] = useState(140)
     const [characterLimitError, setCharacterLimitError] = useState(false)
@@ -897,6 +900,33 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
         }
     }
 
+    function togglePlayerColors() {
+        if (playerColorsOn) {
+            // remove colors
+            setSelectedUsers(
+                selectedUsers.map((player) => {
+                    return { ...player, color: colors.white }
+                })
+            )
+        } else {
+            // add colors
+            setSelectedUsers(
+                selectedUsers.map((player, index) => {
+                    return { ...player, color: beadColors[index + 1] }
+                })
+            )
+        }
+        setPlayerColorsOn(!playerColorsOn)
+    }
+
+    function changePlayerColor(color) {
+        const newPlayers = [...selectedUsers]
+        const selectedPlayer = newPlayers.find((p) => p.id === selectedPlayerId)
+        if (selectedPlayer) selectedPlayer.color = color
+        setSelectedUsers(newPlayers)
+        setSelectedPlayerId(null)
+    }
+
     function createPost() {
         setLoading(true)
         const accessToken = cookies.get('accessToken')
@@ -922,7 +952,14 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             topicImage: data.GlassBeadGame ? data.GlassBeadGame.topicImage : null,
             // weaves
             privacy: data.Weave ? data.Weave.privacy : null,
-            userIds: selectedUsers.map((s) => s.id),
+            playerData: JSON.stringify(
+                selectedUsers.map((p) => {
+                    return {
+                        id: p.id,
+                        color: p.color,
+                    }
+                })
+            ),
             numberOfMoves: data.Weave ? data.Weave.numberOfMoves : null,
             numberOfTurns: data.Weave ? data.Weave.numberOfTurns : null,
             allowedBeadTypes: data.Weave ? data.Weave.allowedBeadTypes : null,
@@ -2347,8 +2384,8 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                             />
                                         )}
                                     </Row>
-                                    <Row centerX>
-                                        <Column centerX style={{ marginBottom: 10 }}>
+                                    <Row centerX style={{ marginBottom: 10 }}>
+                                        <Column centerX>
                                             <p>Allowed bead types:</p>
                                             <Column style={{ alignItems: 'start', marginTop: 10 }}>
                                                 <CheckBox
@@ -2394,9 +2431,24 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                                             centerY
                                                             style={{ margin: '0 10px 10px 0' }}
                                                         >
-                                                            <div className={styles.position}>
+                                                            <button
+                                                                type='button'
+                                                                className={`${styles.position} ${
+                                                                    playerColorsOn &&
+                                                                    styles.clickable
+                                                                }`}
+                                                                style={{
+                                                                    backgroundColor: playerColorsOn
+                                                                        ? user.color
+                                                                        : 'white',
+                                                                }}
+                                                                onClick={() =>
+                                                                    playerColorsOn &&
+                                                                    setSelectedPlayerId(user.id)
+                                                                }
+                                                            >
                                                                 {index + 1}
-                                                            </div>
+                                                            </button>
                                                             <div
                                                                 className={styles.positionControls}
                                                             >
@@ -2439,6 +2491,32 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                                         </Row>
                                                     ))}
                                                 </Column>
+                                                {selectedPlayerId && (
+                                                    <Modal
+                                                        centered
+                                                        close={() => setSelectedPlayerId(null)}
+                                                    >
+                                                        <h1>Choose the players color:</h1>
+                                                        <Row
+                                                            centerY
+                                                            className={styles.colorButtons}
+                                                        >
+                                                            {beadColors.map((color) => (
+                                                                <button
+                                                                    key={color}
+                                                                    type='button'
+                                                                    aria-label='color'
+                                                                    onClick={() =>
+                                                                        changePlayerColor(color)
+                                                                    }
+                                                                    style={{
+                                                                        backgroundColor: color,
+                                                                    }}
+                                                                />
+                                                            ))}
+                                                        </Row>
+                                                    </Modal>
+                                                )}
                                             </Column>
                                         )}
                                     </Row>
@@ -2447,10 +2525,23 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                             At least one bead type must be allowed
                                         </p>
                                     )}
+                                    {!allUsersAllowed && (
+                                        <Row centerY style={{ margin: '10px 0' }}>
+                                            <p>Fix player colors:</p>
+                                            <Toggle
+                                                leftText='Off'
+                                                rightText='On'
+                                                rightColor='blue'
+                                                positionLeft={!playerColorsOn}
+                                                onClick={() => togglePlayerColors()}
+                                                style={{ marginLeft: 20 }}
+                                            />
+                                        </Row>
+                                    )}
                                     {allowedBeadTypes.includes('Text') && (
-                                        <Column centerX>
-                                            <Row centerY style={{ margin: '10px 0' }}>
-                                                <p>Text character limit:</p>
+                                        <Column centerX style={{ marginTop: 10 }}>
+                                            <Row centerY style={{ marginBottom: 10 }}>
+                                                <p>Character limit:</p>
                                                 <Toggle
                                                     leftText='Off'
                                                     rightText='On'
@@ -2508,9 +2599,9 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                             </p>
                                         )}
                                     {allowedBeadTypes.includes('Audio') && (
-                                        <Column centerX>
-                                            <Row centerY style={{ margin: '10px 0' }}>
-                                                <p>Audio time limit:</p>
+                                        <Column centerX style={{ marginTop: 10 }}>
+                                            <Row centerY style={{ marginBottom: 10 }}>
+                                                <p>Time limit:</p>
                                                 <Toggle
                                                     leftText='Off'
                                                     rightText='On'

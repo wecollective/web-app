@@ -382,6 +382,7 @@
 }
 
 .position {
+    all: unset;
     width: 35px;
     height: 35px;
     background-color: $white;
@@ -390,6 +391,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
+
+    &.clickable {
+        cursor: pointer;
+    }
 }
 
 .positionControls {

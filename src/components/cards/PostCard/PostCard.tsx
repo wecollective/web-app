@@ -976,7 +976,6 @@ const PostCard = (props: {
                         )}
                         {nextBeadModalOpen && (
                             <NextBeadModal
-                                beadIndex={StringPosts.length + 1}
                                 postData={postData}
                                 setPostData={setPostData}
                                 close={() => setNextBeadModalOpen(false)}

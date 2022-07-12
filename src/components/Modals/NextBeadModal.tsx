@@ -32,12 +32,12 @@ const { white, red, orange, yellow, green, blue, purple } = colors
 const beadColors = [white, red, orange, yellow, green, blue, purple]
 
 const NextBeadModal = (props: {
-    beadIndex: number
     postData: any
     setPostData: (data: any) => void
     close: () => void
 }): JSX.Element => {
-    const { beadIndex, postData, setPostData, close } = props
+    const { accountData } = useContext(AccountContext)
+    const { postData, setPostData, close } = props
     const { id, Weave, StringPlayers, StringPosts } = postData
     const {
         numberOfTurns,
@@ -48,12 +48,13 @@ const NextBeadModal = (props: {
         // moveTimeWindow,
         privacy,
     } = Weave
-    const { accountData } = useContext(AccountContext)
-
+    const beadIndex = StringPosts.length + 1
+    const playerData = StringPlayers.find((p) => p.id === accountData.id)
+    const playerColor = playerData ? playerData.UserPost.color : null
     const defaultBead = {
         id: uuidv4(),
         type: allowedBeadTypes.split(',')[0].toLowerCase(),
-        color: colors.white,
+        color: playerColor || colors.white,
         text: '',
         url: '',
         urlData: null,
@@ -167,9 +168,11 @@ const NextBeadModal = (props: {
             if (input.files[0].size > audioMBLimit * 1024 * 1024) {
                 setAudioSizeError(true)
                 resetAudioState()
+                setNewBead({ ...defaultBead, type: newBead.type })
             } else if (duration > audioTimeLimit + 1 || duration < audioTimeLimit - 1) {
                 setAudioTimeError(true)
                 resetAudioState()
+                setNewBead({ ...defaultBead, type: newBead.type })
             } else {
                 setAudioSizeError(false)
                 setAudioTimeError(false)
@@ -605,17 +608,19 @@ const NextBeadModal = (props: {
                             (newBead.type === 'audio' && newBead.audioFile) ||
                             (newBead.type === 'image' && images.length > 0)) && (
                             <Column centerX style={{ margin: '20px 0' }}>
-                                <Row className={styles.colorButtons}>
-                                    {beadColors.map((color) => (
-                                        <button
-                                            key={color}
-                                            type='button'
-                                            aria-label='color'
-                                            onClick={() => setNewBead({ ...newBead, color })}
-                                            style={{ backgroundColor: color }}
-                                        />
-                                    ))}
-                                </Row>
+                                {!playerColor && (
+                                    <Row className={styles.colorButtons}>
+                                        {beadColors.map((color) => (
+                                            <button
+                                                key={color}
+                                                type='button'
+                                                aria-label='color'
+                                                onClick={() => setNewBead({ ...newBead, color })}
+                                                style={{ backgroundColor: color }}
+                                            />
+                                        ))}
+                                    </Row>
+                                )}
                                 <StringBeadCard
                                     key={newBead.id}
                                     bead={{
@@ -656,7 +661,9 @@ const NextBeadModal = (props: {
                             color='aqua'
                             disabled={
                                 (newBead.type === 'text' && newBead.text.length < 1) ||
-                                (newBead.type === 'text' && newBead.text.length > characterLimit) ||
+                                (newBead.type === 'text' &&
+                                    characterLimit &&
+                                    newBead.text.length > characterLimit) ||
                                 (newBead.type === 'url' &&
                                     (newBead.urlData === null || urlLoading)) ||
                                 (newBead.type === 'audio' && newBead.audioFile === null) ||
