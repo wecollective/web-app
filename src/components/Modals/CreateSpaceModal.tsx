@@ -114,7 +114,7 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
     }
 
     return (
-        <Modal close={close} style={{ maxWidth: 600 }}>
+        <Modal centered close={close} style={{ maxWidth: 600 }}>
             <h1>Create a new space in &apos;{spaceData.name}&apos;</h1>
             {!authorizedToAttachParent && (
                 <>
@@ -133,7 +133,7 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
             <form onSubmit={createSpace}>
                 <Input
                     type='text'
-                    title='Handle (the unique identifier used in the spaces url):'
+                    title='Handle (the unique name used in your spaces URL):'
                     prefix='weco.io/s/'
                     placeholder='handle...'
                     style={{ marginBottom: 20 }}
@@ -147,7 +147,7 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                 />
                 <Input
                     type='text'
-                    title='Name (max 30 characters):'
+                    title='Visible name (max 30 characters):'
                     placeholder='name...'
                     style={{ marginBottom: 20 }}
                     state={nameState}
@@ -160,7 +160,7 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                 />
                 <Input
                     type='text-area'
-                    title='Description (max 10K characters):'
+                    title='Space description (max 10K characters):'
                     placeholder='description...'
                     style={{ marginBottom: 20 }}
                     state={descriptionState}
