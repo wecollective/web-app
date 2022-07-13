@@ -39,7 +39,10 @@ const Input = (props: {
     } = props
 
     return (
-        <div className={`${styles.wrapper} ${disabled && styles.disabled}`} style={style}>
+        <div
+            className={`${styles.wrapper} ${disabled && styles.disabled} ${state && styles.state}`}
+            style={style}
+        >
             {title && <h1>{title}</h1>}
             {state === 'invalid' && errors && errors.map((error) => <h2 key={error}>{error}</h2>)}
             <div className={styles[state || 'default']}>

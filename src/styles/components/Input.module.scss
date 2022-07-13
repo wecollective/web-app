@@ -10,6 +10,10 @@
         background-color: $blue6;
     }
 
+    &.state input {
+        padding: 0 15px;
+    }
+
     // title
     h1 {
         font-size: 14px;
