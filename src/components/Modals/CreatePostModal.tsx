@@ -34,6 +34,7 @@ import {
     formatTimeDHM,
     formatTimeMMSS,
     isValidUrl,
+    pluralise,
 } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/CreatePostModal.module.scss'
@@ -332,8 +333,15 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
     const [characterLimit, setCharacterLimit] = useState(140)
     const [characterLimitError, setCharacterLimitError] = useState(false)
     const [audioTimeLimitOn, setAudioTimeLimitOn] = useState(false)
-    const [audioTimeLimit, setAudioTimeLimit] = useState(60)
+    const [audioTimeLimit, setAudioTimeLimit] = useState(60) // seconds
     const [audioTimeLimitError, setAudioTimeLimitError] = useState(false)
+    const [moveTimeWindowOn, setMoveTimeWindowOn] = useState(false)
+    const [moveTimeWindow, setMoveTimeWindow] = useState({
+        days: 1,
+        hours: 0,
+        minutes: 0,
+    })
+    const [moveTimeWindowError, setMoveTimeWindowError] = useState(false)
 
     // selected spaces
     const [spaceOptions, setSpaceOptions] = useState<any[]>([])
@@ -640,6 +648,14 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
         setSelectedUsers(newPlayers)
     }
 
+    function invalidTimeWindow() {
+        const greaterThanMax =
+            moveTimeWindow.days === 365 && (moveTimeWindow.hours || moveTimeWindow.minutes)
+        const lessThanMin =
+            moveTimeWindow.days === 0 && moveTimeWindow.hours === 0 && moveTimeWindow.minutes < 10
+        return greaterThanMax || lessThanMin
+    }
+
     function moveForward() {
         if (currentStep === 1) setCurrentStep(2)
 
@@ -729,9 +745,12 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                         (audioTimeLimit < 10 || audioTimeLimit > 300)
                     )
                         setAudioTimeLimitError(true)
-                    else {
+                    else if (!allUsersAllowed && moveTimeWindowOn && invalidTimeWindow()) {
+                        setMoveTimeWindowError(true)
+                    } else {
                         setCharacterLimitError(false)
                         setAudioTimeLimitError(false)
+                        setMoveTimeWindowError(false)
                         setCurrentStep(5)
                     }
                 }
@@ -873,6 +892,12 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                     allowedBeadTypes.includes('Text') && characterLimitOn ? characterLimit : null,
                 audioTimeLimit:
                     allowedBeadTypes.includes('Audio') && audioTimeLimitOn ? audioTimeLimit : null,
+                moveTimeWindow:
+                    !allUsersAllowed && moveTimeWindowOn
+                        ? moveTimeWindow.days * 24 * 60 +
+                          moveTimeWindow.hours * 60 +
+                          moveTimeWindow.minutes
+                        : null,
                 privacy: allUsersAllowed ? 'all-users-allowed' : 'only-selected-users',
             }
         }
@@ -927,6 +952,12 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
         setSelectedPlayerId(null)
     }
 
+    function trimNumber(number, maxValue) {
+        // if invalid number: return 0
+        // if greater than max value: return max value
+        return number ? (number > maxValue ? maxValue : number) : 0
+    }
+
     function createPost() {
         setLoading(true)
         const accessToken = cookies.get('accessToken')
@@ -965,6 +996,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             allowedBeadTypes: data.Weave ? data.Weave.allowedBeadTypes : null,
             characterLimit: data.Weave ? data.Weave.characterLimit : null,
             audioTimeLimit: data.Weave ? data.Weave.audioTimeLimit : null,
+            moveTimeWindow: data.Weave ? data.Weave.moveTimeWindow : null,
         }
         let fileData
         let uploadType
@@ -2539,7 +2571,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                         </Row>
                                     )}
                                     {allowedBeadTypes.includes('Text') && (
-                                        <Column centerX style={{ marginTop: 10 }}>
+                                        <Column centerX style={{ marginTop: 20 }}>
                                             <Row centerY style={{ marginBottom: 10 }}>
                                                 <p>Character limit:</p>
                                                 <Toggle
@@ -2584,7 +2616,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                                             setCharacterLimitError(false)
                                                             setCharacterLimit(+v)
                                                         }}
-                                                        style={{ width: 90, marginRight: 10 }}
+                                                        style={{ width: 70, marginRight: 10 }}
                                                     />
                                                     <p>chars</p>
                                                 </Row>
@@ -2599,9 +2631,9 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                             </p>
                                         )}
                                     {allowedBeadTypes.includes('Audio') && (
-                                        <Column centerX style={{ marginTop: 10 }}>
+                                        <Column centerX style={{ marginTop: 20 }}>
                                             <Row centerY style={{ marginBottom: 10 }}>
-                                                <p>Time limit:</p>
+                                                <p>Audio time limit:</p>
                                                 <Toggle
                                                     leftText='Off'
                                                     rightText='On'
@@ -2655,7 +2687,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                                             setAudioTimeLimitError(false)
                                                             setAudioTimeLimit(+v)
                                                         }}
-                                                        style={{ width: 90, marginRight: 10 }}
+                                                        style={{ width: 70, marginRight: 10 }}
                                                     />
                                                     <p>seconds</p>
                                                 </Row>
@@ -2669,6 +2701,97 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                                 Audio time limit must be between 10 secs and 5 mins
                                             </p>
                                         )}
+                                    {!allUsersAllowed && (
+                                        <Column centerX style={{ marginTop: 20 }}>
+                                            <Row centerY style={{ marginBottom: 10 }}>
+                                                <p>Time window for moves:</p>
+                                                <Toggle
+                                                    leftText='Off'
+                                                    rightText='On'
+                                                    rightColor='blue'
+                                                    positionLeft={!moveTimeWindowOn}
+                                                    onClick={() =>
+                                                        setMoveTimeWindowOn(!moveTimeWindowOn)
+                                                    }
+                                                    style={{ marginLeft: 20 }}
+                                                />
+                                            </Row>
+                                            {moveTimeWindowOn && (
+                                                <Column centerX style={{ marginBottom: 20 }}>
+                                                    <Row centerY style={{ marginBottom: 20 }}>
+                                                        <Row centerY style={{ marginRight: 20 }}>
+                                                            <Input
+                                                                type='text'
+                                                                value={moveTimeWindow.days}
+                                                                onChange={(v) => {
+                                                                    setMoveTimeWindowError(false)
+                                                                    setMoveTimeWindow({
+                                                                        ...moveTimeWindow,
+                                                                        days: trimNumber(+v, 365),
+                                                                    })
+                                                                }}
+                                                                style={{
+                                                                    width: 60,
+                                                                    marginRight: 10,
+                                                                }}
+                                                            />
+                                                            <p>
+                                                                day{pluralise(moveTimeWindow.days)}
+                                                            </p>
+                                                        </Row>
+                                                        <Row centerY style={{ marginRight: 20 }}>
+                                                            <Input
+                                                                type='text'
+                                                                value={moveTimeWindow.hours}
+                                                                onChange={(v) => {
+                                                                    setMoveTimeWindowError(false)
+                                                                    setMoveTimeWindow({
+                                                                        ...moveTimeWindow,
+                                                                        hours: trimNumber(+v, 24),
+                                                                    })
+                                                                }}
+                                                                style={{
+                                                                    width: 60,
+                                                                    marginRight: 10,
+                                                                }}
+                                                            />
+                                                            <p>
+                                                                hour
+                                                                {pluralise(moveTimeWindow.hours)}
+                                                            </p>
+                                                        </Row>
+                                                        <Row centerY style={{ marginRight: 20 }}>
+                                                            <Input
+                                                                type='text'
+                                                                value={moveTimeWindow.minutes}
+                                                                onChange={(v) => {
+                                                                    setMoveTimeWindowError(false)
+                                                                    setMoveTimeWindow({
+                                                                        ...moveTimeWindow,
+                                                                        minutes: trimNumber(+v, 60),
+                                                                    })
+                                                                }}
+                                                                style={{
+                                                                    width: 60,
+                                                                    marginRight: 10,
+                                                                }}
+                                                            />
+                                                            <p>
+                                                                minute
+                                                                {pluralise(moveTimeWindow.minutes)}
+                                                            </p>
+                                                        </Row>
+                                                    </Row>
+                                                    {moveTimeWindowError && (
+                                                        <p className='danger'>
+                                                            The time window for moves must be
+                                                            between 10 mins and 1 year
+                                                        </p>
+                                                    )}
+                                                </Column>
+                                            )}
+                                        </Column>
+                                    )}
                                 </Column>
                             )}
                         </Column>
