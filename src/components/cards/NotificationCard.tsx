@@ -114,6 +114,7 @@ const NotificationCard = (props: {
         triggerUser,
         triggerSpace,
         secondarySpace,
+        relatedPost,
         createdAt,
     } = notification
 
@@ -393,10 +394,36 @@ const NotificationCard = (props: {
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>invited you to join a</p>
                             <TextLink text='weave' link={`/p/${postId}`} />
-                            <State
-                                state={state}
-                                respond={(response) => respondToMultiplayerStringInvite(response)}
-                            />
+                            {relatedPost.Weave.state === 'cancelled' ? (
+                                <p>Game cancelled</p>
+                            ) : (
+                                <State
+                                    state={state}
+                                    respond={(response) =>
+                                        respondToMultiplayerStringInvite(response)
+                                    }
+                                />
+                            )}
+                            <CreatedAt date={createdAt} />
+                        </Content>
+                    )}
+
+                    {type === 'weave-accepted' && (
+                        <Content typeIcon={<WeaveIcon />}>
+                            <ImageNameLink type='user' data={triggerUser} />
+                            <p>accepted your</p>
+                            <TextLink text='weave' link={`/p/${postId}`} />
+                            <p>invite</p>
+                            <CreatedAt date={createdAt} />
+                        </Content>
+                    )}
+
+                    {type === 'weave-rejected' && (
+                        <Content typeIcon={<WeaveIcon />}>
+                            <ImageNameLink type='user' data={triggerUser} />
+                            <p>has rejected their</p>
+                            <TextLink text='weave' link={`/p/${postId}`} />
+                            <p>invite so the game has been cancelled</p>
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}
@@ -405,6 +432,54 @@ const NotificationCard = (props: {
                         <Content typeIcon={<WeaveIcon />}>
                             <p>It's your move! Add the next bead to the</p>
                             <TextLink text='weave' link={`/p/${postId}`} />
+                            <CreatedAt date={createdAt} />
+                        </Content>
+                    )}
+
+                    {type === 'weave-move-from-other-player' && (
+                        <Content typeIcon={<WeaveIcon />}>
+                            <ImageNameLink type='user' data={triggerUser} />
+                            <p>just added a new bead to a</p>
+                            <TextLink text='weave' link={`/p/${postId}`} />
+                            <p>you have particpated in</p>
+                            <CreatedAt date={createdAt} />
+                        </Content>
+                    )}
+
+                    {type === 'weave-creator-move-from-other-player' && (
+                        <Content typeIcon={<WeaveIcon />}>
+                            <ImageNameLink type='user' data={triggerUser} />
+                            <p>just added a new bead to a</p>
+                            <TextLink text='weave' link={`/p/${postId}`} />
+                            <p>you created</p>
+                            <CreatedAt date={createdAt} />
+                        </Content>
+                    )}
+
+                    {type === 'weave-move-reminder' && (
+                        <Content typeIcon={<WeaveIcon />}>
+                            <p>You have 15 minutes left to complete your move on</p>
+                            <TextLink text='this weave!' link={`/p/${postId}`} />
+                            <p>If you fail to do this, the game ends!</p>
+                            <CreatedAt date={createdAt} />
+                        </Content>
+                    )}
+
+                    {type === 'weave-cancelled' && (
+                        <Content typeIcon={<WeaveIcon />}>
+                            <ImageNameLink type='user' data={triggerUser} />
+                            <p>failed to make their move in time on</p>
+                            <TextLink text='this weave.' link={`/p/${postId}`} />
+                            <p>The game has now ended!</p>
+                            <CreatedAt date={createdAt} />
+                        </Content>
+                    )}
+
+                    {type === 'weave-ended' && (
+                        <Content typeIcon={<WeaveIcon />}>
+                            <p>A</p>
+                            <TextLink text='weave' link={`/p/${postId}`} />
+                            <p>you participated in has ended</p>
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}
