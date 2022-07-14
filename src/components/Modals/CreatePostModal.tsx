@@ -652,7 +652,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
         const greaterThanMax =
             moveTimeWindow.days === 365 && (moveTimeWindow.hours || moveTimeWindow.minutes)
         const lessThanMin =
-            moveTimeWindow.days === 0 && moveTimeWindow.hours === 0 && moveTimeWindow.minutes < 10
+            moveTimeWindow.days === 0 && moveTimeWindow.hours === 0 && moveTimeWindow.minutes < 20
         return greaterThanMax || lessThanMin
     }
 
