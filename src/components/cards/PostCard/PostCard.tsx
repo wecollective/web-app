@@ -846,18 +846,22 @@ const PostCard = (props: {
                                         />
                                     </Row>
                                 )}
-                                {!playersRejected.length && playersPending.length > 0 && (
-                                    <Row centerY>
-                                        <p>Waiting for {playersPending.length}</p>
-                                        <FlagImageHighlights
-                                            type='user'
-                                            imagePaths={playersPending.map((p) => p.flagImagePath)}
-                                            imageSize={30}
-                                            style={{ marginLeft: 5 }}
-                                        />
-                                    </Row>
-                                )}
-                                {playersReady && (
+                                {!playersRejected.length &&
+                                    Weave.state !== 'cancelled' &&
+                                    playersPending.length > 0 && (
+                                        <Row centerY>
+                                            <p>Waiting for {playersPending.length}</p>
+                                            <FlagImageHighlights
+                                                type='user'
+                                                imagePaths={playersPending.map(
+                                                    (p) => p.flagImagePath
+                                                )}
+                                                imageSize={30}
+                                                style={{ marginLeft: 5 }}
+                                            />
+                                        </Row>
+                                    )}
+                                {playersReady && Weave.state !== 'cancelled' && (
                                     <Row>
                                         {movesLeft ? (
                                             <ImageTitle
@@ -873,6 +877,7 @@ const PostCard = (props: {
                                         )}
                                     </Row>
                                 )}
+                                {Weave.state === 'cancelled' && <p>Game cancelled</p>}
                             </Row>
                         ) : (
                             <Row
@@ -900,7 +905,7 @@ const PostCard = (props: {
                                 </ShowMoreLess>
                             </Column>
                         )}
-                        {playersReady && (
+                        {playersReady && Weave.state !== 'cancelled' && (
                             <Row centerX>
                                 <Scrollbars className={`${styles.beadDraw} row`}>
                                     {StringPosts.map((bead, i) => (
