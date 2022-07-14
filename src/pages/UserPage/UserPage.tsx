@@ -38,7 +38,7 @@ const UserPage = (): JSX.Element => {
     const userHandle = location.pathname.split('/')[2]
     const subpage = location.pathname.split('/')[3]
     const tabs = {
-        baseRoute: `/u/${userData.handle}`,
+        baseRoute: `/u/${userHandle}`,
         left: [
             { text: 'About', visible: true, icon: <AboutIcon /> },
             { text: 'Posts', visible: true, icon: <PostsIcon /> },

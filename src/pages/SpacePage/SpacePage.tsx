@@ -57,7 +57,7 @@ const SpacePage = (): JSX.Element => {
     const subpage = location.pathname.split('/')[3]
     const cookies = new Cookies()
     const tabs = {
-        baseRoute: `/s/${spaceData.handle}`,
+        baseRoute: `/s/${spaceHandle}`,
         left: [
             { text: 'About', visible: true, icon: <AboutIcon /> },
             { text: 'Posts', visible: true, icon: <PostsIcon /> },
