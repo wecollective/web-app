@@ -17,6 +17,7 @@ import { ReactComponent as WeaveIcon } from '@svgs/multiplayer-string-icon.svg'
 import { ReactComponent as OverlappingCirclesIconSVG } from '@svgs/overlapping-circles-thick.svg'
 import { ReactComponent as RetweetIconSVG } from '@svgs/retweet-solid.svg'
 import { ReactComponent as StarIconSVG } from '@svgs/star-solid.svg'
+import { ReactComponent as StringIcon } from '@svgs/string-icon.svg'
 import { ReactComponent as ThumbsUpIconSVG } from '@svgs/thumbs-up-solid.svg'
 import { ReactComponent as FailIconSVG } from '@svgs/times-circle-regular.svg'
 import axios from 'axios'
@@ -480,6 +481,16 @@ const NotificationCard = (props: {
                             <p>A</p>
                             <TextLink text='weave' link={`/p/${postId}`} />
                             <p>you participated in has ended</p>
+                            <CreatedAt date={createdAt} />
+                        </Content>
+                    )}
+
+                    {type === 'new-string-from-your-post' && (
+                        <Content typeIcon={<StringIcon />}>
+                            <ImageNameLink type='user' data={triggerUser} />
+                            <p>just created a</p>
+                            <TextLink text='string' link={`/p/${postId}`} />
+                            <p>from your post</p>
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}

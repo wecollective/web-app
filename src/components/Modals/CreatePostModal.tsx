@@ -802,7 +802,10 @@ const CreatePostModal = (): JSX.Element => {
             DirectSpaces: selectedSpaces.map((space) => {
                 return { ...space, type: 'post', state: 'active' }
             }),
-            sourceId: createPostModalSettings.source ? createPostModalSettings.source.id : null,
+            sourcePostId: createPostModalSettings.source ? createPostModalSettings.source.id : null,
+            sourceCreatorId: createPostModalSettings.source
+                ? createPostModalSettings.source.Creator.id
+                : null,
         }
         if (postType === 'Text') data.text = textForm.text.value
         if (postType === 'Url') {
@@ -981,6 +984,8 @@ const CreatePostModal = (): JSX.Element => {
         const options = { headers: { Authorization: `Bearer ${accessToken}` } }
         const data = findPostData()
         const postData = {
+            creatorName: accountData.name,
+            creatorHandle: accountData.handle,
             spaceIds: selectedSpaces.map((s) => s.id),
             type: data.type,
             text: data.text,
@@ -1015,7 +1020,8 @@ const CreatePostModal = (): JSX.Element => {
             audioTimeLimit: data.Weave ? data.Weave.audioTimeLimit : null,
             moveTimeWindow: data.Weave ? data.Weave.moveTimeWindow : null,
             // strings and weaves:
-            sourceId: data.sourceId,
+            sourcePostId: data.sourcePostId,
+            sourceCreatorId: data.sourceCreatorId,
         }
         let fileData
         let uploadType
@@ -1042,20 +1048,18 @@ const CreatePostModal = (): JSX.Element => {
         if (postType === 'String') {
             uploadType = 'string'
             fileData = new FormData()
-            string.forEach((bead, index) => {
-                if (!bead.Link) {
-                    if (bead.type === 'audio') {
-                        if (bead.audioType === 'file')
-                            fileData.append('audioFile', bead.audioFile, index)
-                        else fileData.append('audioRecording', bead.audioBlob, index)
-                    } else if (bead.type === 'image') {
-                        bead.images.forEach((image, i) => {
-                            if (image.file) fileData.append('image', image.file, `${index}-${i}`)
-                        })
-                    }
+            const filteredString = string.filter((b) => b.role !== 'source')
+            filteredString.forEach((bead, index) => {
+                if (bead.type === 'audio') {
+                    if (bead.audioType === 'file')
+                        fileData.append('audioFile', bead.audioFile, index)
+                    else fileData.append('audioRecording', bead.audioBlob, index)
+                } else if (bead.type === 'image') {
+                    bead.images.forEach((image, i) => {
+                        if (image.file) fileData.append('image', image.file, `${index}-${i}`)
+                    })
                 }
             })
-            const filteredString = string.filter((b) => !b.Link)
             fileData.append('stringData', JSON.stringify(filteredString))
             fileData.append('postData', JSON.stringify(postData))
         }
