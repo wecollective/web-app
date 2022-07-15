@@ -49,17 +49,24 @@ const PostContextProvider = ({ children }: { children: JSX.Element }): JSX.Eleme
     const [selectedSubPage, setSelectedSubPage] = useState('')
     const [postData, setPostData] = useState(defaults.postData)
     const [postDataLoading, setPostDataLoading] = useState(true)
+    const [postState, setPostState] = useState<'default' | 'deleted' | 'not-found'>('default')
 
     function getPostData(postId) {
         console.log('PostContext: getPostData')
+        setPostState('default')
         setPostDataLoading(true)
         axios
             .get(`${config.apiURL}/post-data?accountId=${accountData.id}&postId=${postId}`)
             .then((res) => {
-                if (res.data) setPostData(res.data)
+                setPostData(res.data)
                 setPostDataLoading(false)
             })
-            .catch((error) => console.log('GET post-data error: ', error))
+            .catch((error) => {
+                console.log(error)
+                setPostDataLoading(false)
+                if (error.response.status === 401) setPostState('deleted')
+                if (error.response.status === 404) setPostState('not-found')
+            })
     }
 
     function resetPostContext() {
@@ -74,6 +81,7 @@ const PostContextProvider = ({ children }: { children: JSX.Element }): JSX.Eleme
                 setSelectedSubPage,
                 postData,
                 postDataLoading,
+                postState,
                 // functions
                 getPostData,
                 resetPostContext,

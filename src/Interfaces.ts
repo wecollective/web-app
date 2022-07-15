@@ -215,6 +215,7 @@ export interface IPostContext {
     setSelectedSubPage: (payload: string) => void
     postData: any
     postDataLoading: boolean
+    postState: 'default' | 'deleted' | 'not-found'
     // functions
     getPostData: (payload: number) => void
     resetPostContext: () => void

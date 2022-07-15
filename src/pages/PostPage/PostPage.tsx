@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import PostCard from '@components/cards/PostCard/PostCard'
 import Column from '@components/Column'
 import DecisionTree from '@components/DecisionTree'
@@ -15,7 +16,9 @@ const PostPage = (): JSX.Element => {
     const location = useLocation()
     const postId = location.pathname.split('/')[2]
     const { accountDataLoading } = useContext(AccountContext)
-    const { getPostData, postData, postDataLoading, resetPostContext } = useContext(PostContext)
+    const { getPostData, postData, postDataLoading, postState, resetPostContext } = useContext(
+        PostContext
+    )
 
     useEffect(() => {
         if (!accountDataLoading && postId !== postData.id) getPostData(postId)
@@ -39,9 +42,14 @@ const PostPage = (): JSX.Element => {
     return (
         <Column centerX className={styles.wrapper}>
             <Column className={styles.postCardWrapper}>
-                {accountDataLoading || postDataLoading || !postData.id ? (
+                {accountDataLoading || postDataLoading ? (
                     <Column centerX centerY style={{ width: '100%', height: 300 }}>
                         <LoadingWheel />
+                    </Column>
+                ) : !postData.id || postState !== 'default' ? (
+                    <Column centerX centerY style={{ width: '100%', height: 300 }}>
+                        {postState === 'deleted' && <p>Post deleted...</p>}
+                        {postState === 'not-found' && <p>Post not found...</p>}
                     </Column>
                 ) : (
                     <PostCard post={postData} location='post-page' />
