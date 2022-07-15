@@ -6,6 +6,7 @@ import PlotGraph from '@components/PlotGraph'
 import Prism from '@components/Prism'
 import { AccountContext } from '@contexts/AccountContext'
 import { PostContext } from '@contexts/PostContext'
+import LoadingWheel from '@src/components/LoadingWheel'
 import styles from '@styles/pages/PostPage/PostPage.module.scss'
 import React, { useContext, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
@@ -14,7 +15,7 @@ const PostPage = (): JSX.Element => {
     const location = useLocation()
     const postId = location.pathname.split('/')[2]
     const { accountDataLoading } = useContext(AccountContext)
-    const { getPostData, postData, resetPostContext } = useContext(PostContext)
+    const { getPostData, postData, postDataLoading, resetPostContext } = useContext(PostContext)
 
     useEffect(() => {
         if (!accountDataLoading && postId !== postData.id) getPostData(postId)
@@ -38,7 +39,13 @@ const PostPage = (): JSX.Element => {
     return (
         <Column centerX className={styles.wrapper}>
             <Column className={styles.postCardWrapper}>
-                {postData.id && <PostCard post={postData} location='post-page' />}
+                {accountDataLoading || postDataLoading || !postData.id ? (
+                    <Column centerX centerY style={{ width: '100%', height: 300 }}>
+                        <LoadingWheel />
+                    </Column>
+                ) : (
+                    <PostCard post={postData} location='post-page' />
+                )}
             </Column>
         </Column>
     )
