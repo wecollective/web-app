@@ -178,7 +178,7 @@
                 > svg {
                     width: 20px;
                     height: 20px;
-                    margin-right: 5px;
+                    margin-right: 8px;
                     color: $grey5;
                     transition: color 0.3s;
                 }
@@ -427,16 +427,37 @@
             }
         }
 
-        .link {
-            width: 20px;
-            height: 20px;
-            > svg {
+        .otherButtons {
+            button {
+                all: unset;
+                cursor: pointer;
+                width: 25px;
+                height: 20px;
+                display: flex;
+                align-items: center;
+                margin-right: 10px;
+
+                > svg {
+                    width: 25px;
+                    height: 25px;
+                    color: $grey4;
+                    transition: color 0.3s;
+                    &:hover {
+                        color: $grey6;
+                    }
+                }
+            }
+            a {
                 width: 20px;
                 height: 20px;
-                color: $grey4;
-                transition: color 0.3s;
-                &:hover {
-                    color: $grey6;
+                > svg {
+                    width: 20px;
+                    height: 20px;
+                    color: $grey4;
+                    transition: color 0.3s;
+                    &:hover {
+                        color: $grey6;
+                    }
                 }
             }
         }

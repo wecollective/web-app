@@ -94,14 +94,18 @@ const StringBeadCard = (props: {
                     />
                 )}
                 <div className={styles.beadType}>{findBeadIcon(type)}</div>
-                {removeBead && <CloseButton size={20} onClick={() => removeBead(beadIndex)} />}
+                {removeBead && bead.Link.relationship !== 'source' && (
+                    <CloseButton size={20} onClick={() => removeBead(beadIndex)} />
+                )}
                 {bead.Link.relationship === 'source' && (
                     <button
                         type='button'
+                        title='Open source bead'
                         className={styles.beadRelationship}
-                        onClick={() => {
+                        onClick={() =>
+                            !['create-string', 'preview'].includes(location) &&
                             history.push(`/p/${bead.id}`)
-                        }}
+                        }
                     >
                         <SourceIcon />
                     </button>
