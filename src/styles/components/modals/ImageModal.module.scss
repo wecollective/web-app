@@ -1,16 +1,7 @@
 @import '@styles/Variables';
 
 .wrapper {
-    .selectedImage {
-        max-width: calc(100vw - 60px);
-        max-height: calc(100vh - 60px);
-        overflow: hidden;
-
-        @include for-desktop-small-up {
-            max-width: calc(100vw - 60px);
-            max-height: calc(100vh - 250px);
-        }
-
+    > div {
         > button {
             all: unset;
             cursor: pointer;
@@ -38,8 +29,14 @@
             }
 
             > img {
-                width: 100%;
-                height: 100%;
+                max-width: calc(100vw - 60px);
+                max-height: calc(100vh - 90px);
+                overflow: hidden;
+
+                @include for-desktop-small-up {
+                    max-width: calc(100vw - 60px);
+                    max-height: calc(100vh - 250px);
+                }
             }
         }
     }

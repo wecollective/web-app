@@ -17,9 +17,11 @@ import { ReactComponent as ImageIcon } from '@svgs/image-solid.svg'
 import { ReactComponent as LinkIcon } from '@svgs/link-solid.svg'
 import { ReactComponent as PauseIcon } from '@svgs/pause-solid.svg'
 import { ReactComponent as PlayIcon } from '@svgs/play-solid.svg'
+import { ReactComponent as SourceIcon } from '@svgs/right-to-bracket-solid.svg'
 import { ReactComponent as AudioIcon } from '@svgs/volume-high-solid.svg'
 import * as d3 from 'd3'
 import React, { useContext, useState } from 'react'
+import { useHistory } from 'react-router-dom'
 
 const StringBeadCard = (props: {
     bead: any
@@ -36,16 +38,18 @@ const StringBeadCard = (props: {
     const [imageModalOpen, setImageModalOpen] = useState(false)
     const [selectedImage, setSelectedImage] = useState<any>(null)
     const images = bead.PostImages ? bead.PostImages.sort((a, b) => a.index - b.index) : []
+    const type = bead.type.replace('string-', '')
+    const history = useHistory()
 
     function findBeadIcon(beadType) {
         switch (beadType) {
-            case 'string-text':
+            case 'text':
                 return <TextIcon />
-            case 'string-url':
+            case 'url':
                 return <LinkIcon />
-            case 'string-audio':
+            case 'audio':
                 return <AudioIcon />
-            case 'string-image':
+            case 'image':
                 return <ImageIcon />
             default:
                 return null
@@ -74,7 +78,10 @@ const StringBeadCard = (props: {
     }
 
     return (
-        <Column className={styles.wrapper} style={{ ...style, backgroundColor: bead.color }}>
+        <Column
+            className={`${styles.wrapper} ${bead.Link.relationship === 'source' && styles.source}`}
+            style={{ ...style, backgroundColor: bead.color }}
+        >
             <Row spaceBetween className={styles.beadHeader}>
                 {postType && ['glass-bead-game', 'weave'].includes(postType) && (
                     <ImageTitle
@@ -86,11 +93,22 @@ const StringBeadCard = (props: {
                         style={{ marginRight: 10 }}
                     />
                 )}
-                {findBeadIcon(bead.type)}
+                <div className={styles.beadType}>{findBeadIcon(type)}</div>
                 {removeBead && <CloseButton size={20} onClick={() => removeBead(beadIndex)} />}
+                {bead.Link.relationship === 'source' && (
+                    <button
+                        type='button'
+                        className={styles.beadRelationship}
+                        onClick={() => {
+                            history.push(`/p/${bead.id}`)
+                        }}
+                    >
+                        <SourceIcon />
+                    </button>
+                )}
             </Row>
             <Column centerY className={styles.beadContent}>
-                {bead.type === 'string-text' && (
+                {type === 'text' && (
                     <Scrollbars>
                         <Markdown
                             text={bead.text}
@@ -105,7 +123,7 @@ const StringBeadCard = (props: {
                         />
                     </Scrollbars>
                 )}
-                {bead.type === 'string-url' && (
+                {type === 'url' && (
                     <Scrollbars>
                         <BeadCardUrlPreview
                             url={bead.url}
@@ -116,7 +134,7 @@ const StringBeadCard = (props: {
                         />
                     </Scrollbars>
                 )}
-                {bead.type === 'string-audio' && (
+                {type === 'audio' && (
                     <Column key={beadIndex} spaceBetween style={{ height: '100%' }}>
                         <AudioVisualiser
                             audioElementId={`string-bead-audio-${postId}-${beadIndex}-${location}`}
@@ -146,7 +164,7 @@ const StringBeadCard = (props: {
                         </Row>
                     </Column>
                 )}
-                {bead.type === 'string-image' && (
+                {type === 'image' && (
                     <Row centerX>
                         <Scrollbars style={{ paddingBottom: 5 }} className='row'>
                             {images.map((image, i) => (

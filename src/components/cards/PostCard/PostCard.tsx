@@ -73,7 +73,14 @@ const PostCard = (props: {
     style?: any
 }): JSX.Element => {
     const { post, index, location, style } = props
-    const { accountData, loggedIn, setAlertModalOpen, setAlertMessage } = useContext(AccountContext)
+    const {
+        accountData,
+        loggedIn,
+        setAlertModalOpen,
+        setAlertMessage,
+        setCreatePostModalSettings,
+        setCreatePostModalOpen,
+    } = useContext(AccountContext)
     const [postData, setPostData] = useState(post)
     const {
         id,
@@ -284,8 +291,8 @@ const PostCard = (props: {
         return 'small'
     }
 
-    function findPostTypeIcon() {
-        switch (type) {
+    function findPostTypeIcon(postType) {
+        switch (postType) {
             case 'text':
                 return <TextIcon />
             case 'url':
@@ -407,9 +414,9 @@ const PostCard = (props: {
                         className={`${styles.postType} ${styles[type]}`}
                         title={type}
                     >
-                        {findPostTypeIcon()}
+                        {findPostTypeIcon(type)}
                     </Column>
-                    {location !== 'preview' && isOwnPost && (
+                    {location !== 'preview' && (
                         <>
                             <button
                                 type='button'
@@ -421,13 +428,30 @@ const PostCard = (props: {
                             {menuOpen && (
                                 <CloseOnClickOutside onClick={() => setMenuOpen(false)}>
                                     <Column className={styles.menu}>
-                                        <button
-                                            type='button'
-                                            onClick={() => setDeletePostModalOpen(true)}
-                                        >
-                                            <DeleteIcon />
-                                            Delete post
-                                        </button>
+                                        {isOwnPost && (
+                                            <button
+                                                type='button'
+                                                onClick={() => setDeletePostModalOpen(true)}
+                                            >
+                                                <DeleteIcon />
+                                                Delete post
+                                            </button>
+                                        )}
+                                        {['text', 'url', 'audio', 'image'].includes(type) && (
+                                            <button
+                                                type='button'
+                                                onClick={() => {
+                                                    setCreatePostModalSettings({
+                                                        type: 'string-from-post',
+                                                        source: postData,
+                                                    })
+                                                    setCreatePostModalOpen(true)
+                                                }}
+                                            >
+                                                {findPostTypeIcon('string')}
+                                                Start string
+                                            </button>
+                                        )}
                                     </Column>
                                 </CloseOnClickOutside>
                             )}

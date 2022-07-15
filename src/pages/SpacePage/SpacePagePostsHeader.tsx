@@ -5,7 +5,6 @@ import { useHistory, useLocation } from 'react-router-dom'
 import Button from '@components/Button'
 import DropDown from '@components/DropDown'
 import Modal from '@components/Modal'
-import CreatePostModal from '@components/modals/CreatePostModal'
 import Row from '@components/Row'
 import SearchBar from '@components/SearchBar'
 import Toggle from '@components/Toggle'
@@ -17,10 +16,13 @@ import { ReactComponent as SlidersIconSVG } from '@svgs/sliders-h-solid.svg'
 
 const SpacePagePostsHeader = (props: { params: any }): JSX.Element => {
     const { params } = props
-    const { loggedIn, setAlertModalOpen, setAlertMessage } = useContext(AccountContext)
-    // const { spaceData } = useContext(SpaceContext)
-    const [createPostModalType, setCreatePostModalType] = useState('Text')
-    const [createPostModalOpen, setCreatePostModalOpen] = useState(false)
+    const {
+        loggedIn,
+        setAlertModalOpen,
+        setAlertMessage,
+        // setCreatePostModalSettings,
+        setCreatePostModalOpen,
+    } = useContext(AccountContext)
     const [filtersModalOpen, setFiltersModalOpen] = useState(false)
     const [filterParams, setFilterParams] = useState(params)
     const [lensesModalOpen, setLensesModalOpen] = useState(false)
@@ -29,9 +31,9 @@ const SpacePagePostsHeader = (props: { params: any }): JSX.Element => {
     const mobileView = document.documentElement.clientWidth < 900
     const smallMobileView = document.documentElement.clientWidth < 400
 
-    function openCreatePostModal(type) {
+    function openCreatePostModal() {
         if (loggedIn) {
-            setCreatePostModalType(type)
+            // setCreatePostModalSettings({ type: 'text' })
             setCreatePostModalOpen(true)
         } else {
             setAlertModalOpen(true)
@@ -47,7 +49,7 @@ const SpacePagePostsHeader = (props: { params: any }): JSX.Element => {
                 icon={smallMobileView ? <PlusIconSVG /> : undefined}
                 text={smallMobileView ? '' : 'New post'}
                 color='blue'
-                onClick={() => openCreatePostModal('Text')}
+                onClick={() => openCreatePostModal()}
                 style={{ marginRight: 10 }}
             />
             {/* {spaceData.HolonHandles.map((h) => h.handle).includes('castalia') && (
@@ -81,12 +83,12 @@ const SpacePagePostsHeader = (props: { params: any }): JSX.Element => {
                 color='purple'
                 onClick={() => setLensesModalOpen(true)}
             />
-            {createPostModalOpen && (
+            {/* {createPostModalOpen && (
                 <CreatePostModal
-                    initialType={createPostModalType}
+                    initialType={createPostModalSettings}
                     close={() => setCreatePostModalOpen(false)}
                 />
-            )}
+            )} */}
             {filtersModalOpen && (
                 <Modal centered close={() => setFiltersModalOpen(false)}>
                     <h1>Post Filters</h1>

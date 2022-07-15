@@ -130,13 +130,23 @@ const postTypes = [
 const { white, red, orange, yellow, green, blue, purple } = colors
 const beadColors = [white, red, orange, yellow, green, blue, purple]
 
-const CreatePostModal = (props: { initialType: string; close: () => void }): JSX.Element => {
-    const { initialType, close } = props
-    const { accountData } = useContext(AccountContext)
+const CreatePostModal = (): JSX.Element => {
+    const {
+        accountData,
+        setCreatePostModalOpen,
+        createPostModalSettings,
+        setCreatePostModalSettings,
+    } = useContext(AccountContext)
     const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
+
+    let initialType = 'Text'
+    if (createPostModalSettings.type === 'string-from-post') initialType = 'String'
+    let initialStep = 1
+    if (createPostModalSettings.type === 'string-from-post') initialStep = 2
+
     const [postType, setPostType] = useState(initialType)
     const [steps, setSteps] = useState<string[]>(['Post Type', 'Text', 'Spaces', 'Create'])
-    const [currentStep, setCurrentStep] = useState(1)
+    const [currentStep, setCurrentStep] = useState(initialStep)
 
     // todo: set up validateItem function and remove unnecessary object nesting in state
     // text
@@ -347,10 +357,12 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
     const [spaceOptions, setSpaceOptions] = useState<any[]>([])
     const [selectedSpaces, setSelectedSpaces] = useState<any[]>([
         {
-            id: spaceData.id,
-            handle: spaceData.handle,
-            name: spaceData.name,
-            flagImagePath: spaceData.flagImagePath,
+            id: spaceData.id ? spaceData.id : 1,
+            handle: spaceData.id ? spaceData.handle : 'all',
+            name: spaceData.id ? spaceData.name : 'All',
+            flagImagePath: spaceData.id
+                ? spaceData.flagImagePath
+                : 'https://weco-prod-space-flag-images.s3.eu-west-1.amazonaws.com/1614556880362',
         },
     ])
     const [selectedSpacesError, setSelectedSpacesError] = useState(false)
@@ -588,6 +600,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             setString([...string, newBead])
             setNewBead({
                 ...defaultBeadData,
+                id: uuidv4(),
                 type: newBead.type,
             })
             // reset state
@@ -787,6 +800,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             DirectSpaces: selectedSpaces.map((space) => {
                 return { ...space, type: 'post', state: 'active' }
             }),
+            sourceId: createPostModalSettings.source ? createPostModalSettings.source.id : null,
         }
         if (postType === 'Text') data.text = textForm.text.value
         if (postType === 'Url') {
@@ -847,11 +861,13 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
         if (postType === 'String') {
             data.text = stringForm.description.value
             data.StringPosts = string.map((bead, index) => {
+                if (bead.role === 'source') return bead
                 let beadUrl = ''
                 if (bead.type === 'url') beadUrl = bead.url
                 if (bead.type === 'audio')
                     beadUrl = URL.createObjectURL(bead.audioFile || bead.audioBlob)
                 return {
+                    id: bead.id,
                     text: bead.text,
                     type: `string-${bead.type}`,
                     color: bead.color,
@@ -907,7 +923,6 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
     function formatBeadData(bead, index) {
         return {
             ...bead,
-            type: `string-${bead.type}`,
             url: bead.type === 'audio' ? URL.createObjectURL(bead.audioFile) : bead.url,
             urlName: bead.urlData ? bead.urlData.name : null,
             urlDomain: bead.urlData ? bead.urlData.domain : null,
@@ -997,6 +1012,8 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             characterLimit: data.Weave ? data.Weave.characterLimit : null,
             audioTimeLimit: data.Weave ? data.Weave.audioTimeLimit : null,
             moveTimeWindow: data.Weave ? data.Weave.moveTimeWindow : null,
+            // strings and weaves:
+            sourceId: data.sourceId,
         }
         let fileData
         let uploadType
@@ -1024,17 +1041,20 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
             uploadType = 'string'
             fileData = new FormData()
             string.forEach((bead, index) => {
-                if (bead.type === 'audio') {
-                    if (bead.audioType === 'file')
-                        fileData.append('audioFile', bead.audioFile, index)
-                    else fileData.append('audioRecording', bead.audioBlob, index)
-                } else if (bead.type === 'image') {
-                    bead.images.forEach((image, i) => {
-                        if (image.file) fileData.append('image', image.file, `${index}-${i}`)
-                    })
+                if (!bead.Link) {
+                    if (bead.type === 'audio') {
+                        if (bead.audioType === 'file')
+                            fileData.append('audioFile', bead.audioFile, index)
+                        else fileData.append('audioRecording', bead.audioBlob, index)
+                    } else if (bead.type === 'image') {
+                        bead.images.forEach((image, i) => {
+                            if (image.file) fileData.append('image', image.file, `${index}-${i}`)
+                        })
+                    }
                 }
             })
-            fileData.append('stringData', JSON.stringify(string))
+            const filteredString = string.filter((b) => !b.Link)
+            fileData.append('stringData', JSON.stringify(filteredString))
             fileData.append('postData', JSON.stringify(postData))
         }
         axios
@@ -1048,6 +1068,24 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                 setSaved(true)
                 setCurrentStep(steps.length + 1)
                 if (selectedSpaces.map((space) => space.id).includes(spaceData.id)) {
+                    let stringPosts = [] as any[]
+                    if (res.data.string)
+                        stringPosts = [
+                            ...res.data.string.map((bead, i) => {
+                                return {
+                                    ...bead.stringPost,
+                                    Link: { index: i },
+                                    PostImages: bead.imageData || [],
+                                }
+                            }),
+                        ]
+                    if (createPostModalSettings.type === 'string-from-post') {
+                        stringPosts.unshift({
+                            ...createPostModalSettings.source,
+                            Link: { index: 0, relationship: 'source' },
+                        })
+                    }
+
                     const newPost = {
                         ...data,
                         ...res.data.post,
@@ -1064,19 +1102,14 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                   Interested: [],
                               }
                             : null,
-                        StringPosts: res.data.string
-                            ? res.data.string.map((bead, i) => {
-                                  return {
-                                      ...bead.stringPost,
-                                      Link: { index: i },
-                                      PostImages: bead.imageData || [],
-                                  }
-                              })
-                            : [],
+                        StringPosts: stringPosts,
                     }
                     setSpacePosts([newPost, ...spacePosts])
                 }
-                setTimeout(() => close(), 1000)
+                setTimeout(() => {
+                    setCreatePostModalOpen(false)
+                    setCreatePostModalSettings({ type: 'text' })
+                }, 1000)
             })
             .catch((error) => {
                 if (!error.response) console.log(error)
@@ -1102,6 +1135,20 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
         minuteIncrement: 1,
         altInput: true,
     }
+
+    useEffect(() => {
+        const { type, source } = createPostModalSettings
+        if (type === 'string-from-post') {
+            setString([
+                {
+                    ...source,
+                    role: 'source',
+                    type: `string-${source.type}`,
+                    Link: { index: 0, relationship: 'source' },
+                },
+            ])
+        }
+    }, [])
 
     useEffect(() => {
         if (postType === 'Event' && currentStep === 4) {
@@ -1231,7 +1278,14 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
     }, [endTime])
 
     return (
-        <Modal centered close={close} className={styles.wrapper}>
+        <Modal
+            centered
+            close={() => {
+                setCreatePostModalOpen(false)
+                setCreatePostModalSettings({ type: 'text' })
+            }}
+            className={styles.wrapper}
+        >
             {saved ? (
                 <SuccessMessage text='Post created!' />
             ) : (
@@ -1281,6 +1335,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                         <Column centerX style={{ maxWidth: 500, marginBottom: 30 }}>
                             <MarkdownEditor
                                 initialValue={textForm.text.value}
+                                // text={textForm.text.value}
                                 onChange={(value) => {
                                     setTextForm({
                                         ...textForm,
@@ -2210,7 +2265,11 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                                 <Row key={bead.id}>
                                                     <Column>
                                                         <StringBeadCard
-                                                            bead={formatBeadData(bead, index)}
+                                                            bead={
+                                                                bead.role === 'source'
+                                                                    ? bead
+                                                                    : formatBeadData(bead, index)
+                                                            }
                                                             beadIndex={index}
                                                             location=''
                                                             removeBead={removeBead}
@@ -2223,7 +2282,9 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                                             }}
                                                         />
                                                         <Row centerX className={styles.itemFooter}>
-                                                            {index !== 0 && (
+                                                            {(string[0].role === 'source'
+                                                                ? index > 1
+                                                                : index > 0) && (
                                                                 <button
                                                                     type='button'
                                                                     onClick={() =>
@@ -2233,7 +2294,10 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                                                     <ChevronLeftIcon />
                                                                 </button>
                                                             )}
-                                                            {index < string.length - 1 && (
+                                                            {(string[0].role === 'source'
+                                                                ? index > 0 &&
+                                                                  index < string.length - 1
+                                                                : index < string.length - 1) && (
                                                                 <button
                                                                     type='button'
                                                                     onClick={() =>
@@ -2785,7 +2849,7 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                                                     {moveTimeWindowError && (
                                                         <p className='danger'>
                                                             The time window for moves must be
-                                                            between 10 mins and 1 year
+                                                            between 20 mins and 1 year
                                                         </p>
                                                     )}
                                                 </Column>
@@ -2849,15 +2913,17 @@ const CreatePostModal = (props: { initialType: string; close: () => void }): JSX
                     )}
 
                     <Row centerX style={{ margin: '30px 0 20px 0' }}>
-                        {currentStep > 1 && (
-                            <Button
-                                text='Back'
-                                color='purple'
-                                disabled={urlLoading || loading}
-                                onClick={() => setCurrentStep(currentStep - 1)}
-                                style={{ marginRight: 10 }}
-                            />
-                        )}
+                        {currentStep > 1 &&
+                            (currentStep > 2 ||
+                                createPostModalSettings.type !== 'string-from-post') && (
+                                <Button
+                                    text='Back'
+                                    color='purple'
+                                    disabled={urlLoading || loading}
+                                    onClick={() => setCurrentStep(currentStep - 1)}
+                                    style={{ marginRight: 10 }}
+                                />
+                            )}
                         {currentStep < steps.length && (
                             <Button
                                 text='Next'

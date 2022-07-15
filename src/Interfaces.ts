@@ -122,6 +122,10 @@ export interface IAccountContext {
     setRegisterModalOpen: (payload: boolean) => void
     forgotPasswordModalOpen: boolean
     setForgotPasswordModalOpen: (payload: boolean) => void
+    createPostModalSettings: any
+    setCreatePostModalSettings: (payload: any) => void
+    createPostModalOpen: boolean
+    setCreatePostModalOpen: (payload: boolean) => void
     createCommentModalOpen: boolean
     setCreateCommentModalOpen: (payload: boolean) => void
     settingModalOpen: boolean

@@ -9,11 +9,24 @@
     border-radius: 15px;
     box-shadow: 0 0 7px 0 rgba(10, 8, 72, 0.1);
 
+    &.source {
+        border: 2px solid $blue5;
+    }
+
     .beadHeader {
-        > svg {
-            opacity: 0.3;
+        svg {
             width: 20px;
             height: 20px;
+        }
+        .beadType > svg {
+            opacity: 0.3;
+        }
+        .beadRelationship {
+            all: unset;
+            cursor: pointer;
+            > svg {
+                color: $blue5;
+            }
         }
     }
 

@@ -167,6 +167,10 @@
                 display: flex;
                 align-items: center;
 
+                &:not(:last-child) {
+                    margin-bottom: 10px;
+                }
+
                 &:hover > svg {
                     color: $grey6;
                 }

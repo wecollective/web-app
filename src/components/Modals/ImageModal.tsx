@@ -22,7 +22,7 @@ const ImageModal = (props: {
 
     return (
         <Modal close={close} className={styles.wrapper}>
-            <Row centerY className={styles.selectedImage}>
+            <Row centerY>
                 {selectedImage.index !== 0 && (
                     <button type='button' onClick={() => toggleImage(-1)}>
                         <ChevronLeftSVG />
