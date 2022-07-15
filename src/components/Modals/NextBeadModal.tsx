@@ -649,6 +649,9 @@ const NextBeadModal = (props: {
                                             name: accountData.name,
                                             flagImagePath: accountData.flagImagePath,
                                         },
+                                        Link: {
+                                            relationship: null,
+                                        },
                                     }}
                                     postType='weave'
                                     beadIndex={0}
