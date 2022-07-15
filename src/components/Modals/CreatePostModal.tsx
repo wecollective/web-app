@@ -725,7 +725,9 @@ const CreatePostModal = (): JSX.Element => {
 
         if (postType === 'String') {
             if (currentStep === 2) {
-                if (!string.length) setStringPostError(true)
+                const noNewBeads =
+                    string.length < (createPostModalSettings.type === 'string-from-post' ? 2 : 1)
+                if (noNewBeads) setStringPostError(true)
                 else if (totalStringSize() >= totalMBUploadLimit) setStringSizeError(true)
                 else setCurrentStep(3)
             }
@@ -2271,7 +2273,7 @@ const CreatePostModal = (): JSX.Element => {
                                                                     : formatBeadData(bead, index)
                                                             }
                                                             beadIndex={index}
-                                                            location=''
+                                                            location='create-string'
                                                             removeBead={removeBead}
                                                             style={{
                                                                 marginRight:
