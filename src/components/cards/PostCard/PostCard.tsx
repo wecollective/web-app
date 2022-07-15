@@ -768,6 +768,7 @@ const PostCard = (props: {
                                                     type: 'string-audio',
                                                     Creator: bead.user,
                                                     url: bead.beadUrl,
+                                                    Link: { relationship: null },
                                                 }}
                                                 postId={id}
                                                 postType={postData.type}
