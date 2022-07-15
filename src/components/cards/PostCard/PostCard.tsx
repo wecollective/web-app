@@ -416,7 +416,7 @@ const PostCard = (props: {
                     >
                         {findPostTypeIcon(type)}
                     </Column>
-                    {location !== 'preview' && (
+                    {location !== 'preview' && isOwnPost && (
                         <>
                             <button
                                 type='button'
@@ -435,21 +435,6 @@ const PostCard = (props: {
                                             >
                                                 <DeleteIcon />
                                                 Delete post
-                                            </button>
-                                        )}
-                                        {['text', 'url', 'audio', 'image'].includes(type) && (
-                                            <button
-                                                type='button'
-                                                onClick={() => {
-                                                    setCreatePostModalSettings({
-                                                        type: 'string-from-post',
-                                                        source: postData,
-                                                    })
-                                                    setCreatePostModalOpen(true)
-                                                }}
-                                            >
-                                                {findPostTypeIcon('string')}
-                                                Start string
                                             </button>
                                         )}
                                     </Column>
@@ -1099,16 +1084,33 @@ const PostCard = (props: {
                             />
                         )}
                     </Row>
-                    {location !== 'post-page' && (
-                        <Link
-                            to={`/p/${id}`}
-                            className={styles.link}
-                            title='Open post page'
-                            style={location === 'preview' ? { pointerEvents: 'none' } : null}
-                        >
-                            <ExpandIcon />
-                        </Link>
-                    )}
+                    <Row className={styles.otherButtons}>
+                        {['text', 'url', 'audio', 'image'].includes(type) && (
+                            <button
+                                type='button'
+                                title='Create string from post'
+                                onClick={() => {
+                                    setCreatePostModalSettings({
+                                        type: 'string-from-post',
+                                        source: postData,
+                                    })
+                                    setCreatePostModalOpen(true)
+                                }}
+                            >
+                                <StringIcon />
+                            </button>
+                        )}
+                        {location !== 'post-page' && (
+                            <Link
+                                to={`/p/${id}`}
+                                className={styles.link}
+                                title='Open post page'
+                                style={location === 'preview' ? { pointerEvents: 'none' } : null}
+                            >
+                                <ExpandIcon />
+                            </Link>
+                        )}
+                    </Row>
                 </Row>
                 {commentsOpen && (
                     <PostCardComments
