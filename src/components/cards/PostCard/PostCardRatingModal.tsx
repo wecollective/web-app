@@ -69,19 +69,6 @@ const PostCardRatingModal = (props: {
                         totalRatings: postData.totalRatings + 1,
                         totalRatingPoints: postData.totalRatingPoints + newRating,
                         accountRating: true,
-                        Reactions: [
-                            ...postData.Reactions,
-                            {
-                                type: 'rating',
-                                value: newRating,
-                                Creator: {
-                                    id: accountData.id,
-                                    handle: accountData.handle,
-                                    name: accountData.name,
-                                    flagImagePath: accountData.flagImagePath,
-                                },
-                            },
-                        ],
                     })
                     close()
                 })
@@ -112,11 +99,6 @@ const PostCardRatingModal = (props: {
                         totalRatings: postData.totalRatings - 1,
                         totalRatingPoints: postData.totalRatingPoints - +removedRating.value,
                         accountRating: false,
-                        Reactions: [
-                            ...postData.Reactions.filter(
-                                (r) => !(r.type === 'rating' && r.Creator.id === accountData.id)
-                            ),
-                        ],
                     })
                     close()
                 })

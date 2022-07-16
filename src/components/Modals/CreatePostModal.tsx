@@ -2277,7 +2277,7 @@ const CreatePostModal = (): JSX.Element => {
                                                                     : formatBeadData(bead, index)
                                                             }
                                                             beadIndex={index}
-                                                            location='create-string'
+                                                            location='create-string-modal'
                                                             removeBead={removeBead}
                                                             style={{
                                                                 marginRight:

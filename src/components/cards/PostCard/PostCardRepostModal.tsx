@@ -14,7 +14,6 @@ import styles from '@styles/components/cards/PostCard/PostCardRepostModal.module
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
-import { v4 as uuidv4 } from 'uuid'
 
 const PostCardRepostModal = (props: {
     close: () => void
@@ -95,27 +94,6 @@ const PostCardRepostModal = (props: {
                         totalReactions: postData.totalReactions + selectedSpaces.length,
                         totalReposts: postData.totalReposts + selectedSpaces.length,
                         accountRepost: true,
-                        Reactions: [
-                            ...postData.Reactions,
-                            ...selectedSpaces.map((space) => {
-                                return {
-                                    id: uuidv4(),
-                                    type: 'repost',
-                                    Creator: {
-                                        id: accountData.id,
-                                        handle: accountData.handle,
-                                        name: accountData.name,
-                                        flagImagePath: accountData.flagImagePath,
-                                    },
-                                    Space: {
-                                        id: space.id,
-                                        handle: space.handle,
-                                        name: space.name,
-                                        flagImagePath: space.flagImagePath,
-                                    },
-                                }
-                            }),
-                        ],
                         DirectSpaces: [
                             ...postData.DirectSpaces,
                             ...selectedSpaces.map((space) => {

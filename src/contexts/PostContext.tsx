@@ -80,6 +80,7 @@ const PostContextProvider = ({ children }: { children: JSX.Element }): JSX.Eleme
                 selectedSubPage,
                 setSelectedSubPage,
                 postData,
+                setPostData,
                 postDataLoading,
                 postState,
                 // functions
