@@ -214,7 +214,7 @@ const NextBeadModal = (props: {
                     clearInterval(recordingIntervalRef.current)
                     const blob = new Blob(audioChunksRef.current, { type: 'audio/mpeg-3' })
                     const duration = await getBlobDuration(blob)
-                    if (audioTimeLimit && duration > audioTimeLimit) {
+                    if (!audioTimeLimit || duration > audioTimeLimit) {
                         setNewBead({
                             ...newBead,
                             id: uuidv4(),
