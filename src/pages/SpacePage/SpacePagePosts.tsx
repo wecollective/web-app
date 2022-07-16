@@ -52,6 +52,7 @@ const SpacePagePosts = (): JSX.Element => {
         if (
             !spacePostsLoading &&
             !nextSpacePostsLoading &&
+            spaceData.handle === spaceHandle &&
             spacePostsPaginationHasMore &&
             pageBottomReached
         ) {
