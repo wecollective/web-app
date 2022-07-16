@@ -14,11 +14,13 @@ import Cookies from 'universal-cookie'
 
 const PostCardComments = (props: {
     postId: number | undefined
+    type: 'post' | 'bead'
     location: string
     totalComments: number
     incrementTotalComments: (value: number) => void
+    style?: any
 }): JSX.Element => {
-    const { postId, location, totalComments, incrementTotalComments } = props
+    const { postId, type, location, totalComments, incrementTotalComments, style } = props
     const { accountData, loggedIn } = useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
     const [comments, setComments] = useState<any[]>([])
@@ -27,12 +29,17 @@ const PostCardComments = (props: {
     const [loading, setLoading] = useState(false)
     const cookies = new Cookies()
 
+    // todo: rethink component structure, add multi-layer nesting
+
     function getComments() {
         setLoading(true)
-        axios.get(`${config.apiURL}/post-comments?postId=${postId}`).then((res) => {
-            setLoading(false)
-            setComments(res.data)
-        })
+        axios
+            .get(`${config.apiURL}/post-comments?postId=${postId}`)
+            .then((res) => {
+                setLoading(false)
+                setComments(res.data)
+            })
+            .catch((error) => console.log(error))
     }
 
     function validateComment(text) {
@@ -99,15 +106,16 @@ const PostCardComments = (props: {
     }
 
     useEffect(() => {
+        setComments([])
         if (totalComments) getComments()
-    }, [])
+    }, [postId])
 
     return (
-        <Column>
+        <Column style={style}>
             {loggedIn && (
                 <CommentInput
                     value={newComment}
-                    placeholder='new comment...'
+                    placeholder={`new ${type} comment...`}
                     error={commentError}
                     onChange={(e) => {
                         setNewComment(e.target.value)
@@ -115,7 +123,7 @@ const PostCardComments = (props: {
                         resizeTextArea(e.target)
                     }}
                     submit={() => validateComment(newComment) && submitComment(newComment)}
-                    style={{ marginTop: 15 }}
+                    style={{ marginBottom: 15 }}
                 />
             )}
             {loading && (
@@ -124,7 +132,7 @@ const PostCardComments = (props: {
                 </Row>
             )}
             {comments.length > 0 && (
-                <Column style={{ marginTop: 15 }}>
+                <Column>
                     {comments.map((comment) => (
                         <CommentCard
                             key={comment.id}
@@ -138,6 +146,10 @@ const PostCardComments = (props: {
             )}
         </Column>
     )
+}
+
+PostCardComments.defaultProps = {
+    style: null,
 }
 
 export default PostCardComments

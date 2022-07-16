@@ -10,11 +10,12 @@ const CommentInput = (props: {
     value: string
     placeholder: string
     error: boolean
+    loading?: boolean
     style?: any
     onChange: (event: any) => void
     submit: () => void
 }): JSX.Element => {
-    const { id, value, placeholder, error, style, onChange, submit } = props
+    const { id, value, placeholder, error, loading, style, onChange, submit } = props
     const { accountData } = useContext(AccountContext)
 
     return (
@@ -28,7 +29,13 @@ const CommentInput = (props: {
                     value={value}
                     onChange={(e) => onChange(e)}
                 />
-                <Button color='blue' size='medium-large' text='Post' onClick={submit} />
+                <Button
+                    color='blue'
+                    size='medium-large'
+                    text='Add'
+                    loading={loading}
+                    onClick={submit}
+                />
             </Row>
         </Row>
     )
@@ -36,6 +43,7 @@ const CommentInput = (props: {
 
 CommentInput.defaultProps = {
     id: null,
+    loading: false,
     style: null,
 }
 

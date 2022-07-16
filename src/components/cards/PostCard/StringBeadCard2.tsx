@@ -2,6 +2,8 @@
 import AudioTimeSlider from '@components/AudioTimeSlider'
 import AudioVisualiser from '@components/AudioVisualiser'
 import BeadCardUrlPreview from '@components/cards/BeadCardUrlPreview'
+import PostCardLikeModal from '@components/cards/PostCard/PostCardLikeModal'
+import PostCardLinkModal from '@components/cards/PostCard/PostCardLinkModal'
 import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
 import ImageTitle from '@components/ImageTitle'
@@ -9,11 +11,15 @@ import Markdown from '@components/Markdown'
 import ImageModal from '@components/modals/ImageModal'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
+import StatButton from '@components/StatButton'
 import { AccountContext } from '@src/contexts/AccountContext'
+import { statTitle } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/cards/PostCard/StringBeadCard2.module.scss'
+import { ReactComponent as CommentIcon } from '@svgs/comment-solid.svg'
 import { ReactComponent as TextIcon } from '@svgs/font-solid.svg'
 import { ReactComponent as ImageIcon } from '@svgs/image-solid.svg'
+import { ReactComponent as LikeIcon } from '@svgs/like.svg'
 import { ReactComponent as LinkIcon } from '@svgs/link-solid.svg'
 import { ReactComponent as PauseIcon } from '@svgs/pause-solid.svg'
 import { ReactComponent as PlayIcon } from '@svgs/play-solid.svg'
@@ -28,17 +34,42 @@ const StringBeadCard = (props: {
     postId?: number
     postType?: string
     beadIndex: number
-    location: string
+    location:
+        | 'preview'
+        | 'create-string-modal'
+        | 'next-bead-modal'
+        | 'post-page'
+        | 'space-posts'
+        | 'space-post-map'
+        | 'user-posts'
+    selected?: boolean
+    toggleBeadComments?: () => void
     removeBead?: (beadIndex: number) => void
     style?: any
 }): JSX.Element => {
-    const { bead, postId, postType, beadIndex, location, removeBead, style } = props
+    const {
+        bead: sourceBeadData,
+        postId,
+        postType,
+        beadIndex,
+        location,
+        selected,
+        toggleBeadComments,
+        removeBead,
+        style,
+    } = props
     const { accountData } = useContext(AccountContext)
+    const [bead, setBead] = useState(sourceBeadData)
+    const { totalLikes, totalComments, totalLinks, accountLike, accountComment, accountLink } = bead
     const [audioPlaying, setAudioPlaying] = useState(false)
     const [imageModalOpen, setImageModalOpen] = useState(false)
+    const [likeModalOpen, setLikeModalOpen] = useState(false)
+    const [linkModalOpen, setLinkModalOpen] = useState(false)
     const [selectedImage, setSelectedImage] = useState<any>(null)
     const images = bead.PostImages ? bead.PostImages.sort((a, b) => a.index - b.index) : []
     const type = bead.type.replace('string-', '')
+    const isSource = bead.Link && bead.Link.relationship === 'source'
+    const showFooter = !['create-string-modal', 'next-bead-modal'].includes(location)
     const history = useHistory()
 
     function findBeadIcon(beadType) {
@@ -79,9 +110,13 @@ const StringBeadCard = (props: {
 
     return (
         <Column
-            className={`${styles.wrapper} ${bead.Link.relationship === 'source' && styles.source}`}
+            spaceBetween
+            className={`${styles.wrapper} ${selected && styles.selected} ${
+                isSource && styles.source
+            }`}
             style={{ ...style, backgroundColor: bead.color }}
         >
+            {/* <div className={styles.watermark} /> */}
             <Row spaceBetween className={styles.beadHeader}>
                 {postType && ['glass-bead-game', 'weave'].includes(postType) && (
                     <ImageTitle
@@ -103,8 +138,9 @@ const StringBeadCard = (props: {
                         title='Open source bead'
                         className={styles.beadRelationship}
                         onClick={() =>
-                            !['create-string', 'preview'].includes(location) &&
-                            history.push(`/p/${bead.id}`)
+                            !['create-string-modal', 'next-bead-modal', 'preview'].includes(
+                                location
+                            ) && history.push(`/p/${bead.id}`)
                         }
                     >
                         <SourceIcon />
@@ -147,7 +183,11 @@ const StringBeadCard = (props: {
                             staticColor={colors.audioVisualiserColor}
                             dynamicBars={60}
                             dynamicColor={colors.audioVisualiserColor}
-                            style={{ width: '100%', height: 100, marginTop: 20 }}
+                            style={{
+                                width: '100%',
+                                height: 100,
+                                marginTop: showFooter ? 10 : 20,
+                            }}
                         />
                         <Row centerY>
                             <button
@@ -185,6 +225,54 @@ const StringBeadCard = (props: {
                     </Row>
                 )}
             </Column>
+            {showFooter && (
+                <Row spaceBetween className={styles.beadFooter}>
+                    <StatButton
+                        icon={<LikeIcon />}
+                        iconSize={20}
+                        text={totalLikes || ''}
+                        title={statTitle('Like', totalLikes || 0)}
+                        color={accountLike && 'blue'}
+                        disabled={location === 'preview'}
+                        onClick={() => setLikeModalOpen(true)}
+                    />
+                    <StatButton
+                        icon={<CommentIcon />}
+                        iconSize={20}
+                        text={totalComments || ''}
+                        title={statTitle('Comment', totalComments || 0)}
+                        // color={accountComment && 'blue'}
+                        disabled={location === 'preview'}
+                        onClick={() => toggleBeadComments && toggleBeadComments()}
+                    />
+                    <StatButton
+                        icon={<LinkIcon />}
+                        iconSize={20}
+                        text={totalLinks || ''}
+                        title={statTitle('Link', totalLinks || 0)}
+                        color={accountLink && 'blue'}
+                        disabled={location === 'preview'}
+                        onClick={() => setLinkModalOpen(true)}
+                    />
+                    {likeModalOpen && (
+                        <PostCardLikeModal
+                            close={() => setLikeModalOpen(false)}
+                            postData={bead}
+                            setPostData={setBead}
+                        />
+                    )}
+                    {linkModalOpen && (
+                        <PostCardLinkModal
+                            type='bead'
+                            location={location}
+                            postId={postId}
+                            postData={bead}
+                            setPostData={setBead}
+                            close={() => setLinkModalOpen(false)}
+                        />
+                    )}
+                </Row>
+            )}
             {imageModalOpen && (
                 <ImageModal
                     images={images}
@@ -200,6 +288,8 @@ const StringBeadCard = (props: {
 StringBeadCard.defaultProps = {
     postId: null,
     postType: null,
+    selected: false,
+    toggleBeadComments: null,
     removeBead: null,
     style: null,
 }

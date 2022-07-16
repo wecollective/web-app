@@ -123,6 +123,8 @@ const PostCard = (props: {
     const [eventGoingModalOpen, setEventGoingModalOpen] = useState(false)
     const [eventInterestedModalOpen, setEventInterestedModalOpen] = useState(false)
     const [commentsOpen, setCommentsOpen] = useState(location === 'post-page')
+    const [beadCommentsOpen, setBeadCommentsOpen] = useState(false)
+    const [selectedBead, setSelectedBead] = useState<any>(null)
     const [deletePostModalOpen, setDeletePostModalOpen] = useState(false)
     const [audioPlaying, setAudioPlaying] = useState(false)
     const [nextBeadModalOpen, setNextBeadModalOpen] = useState(false)
@@ -812,6 +814,17 @@ const PostCard = (props: {
                                             postType={postData.type}
                                             beadIndex={i}
                                             location={location}
+                                            selected={selectedBead && selectedBead.id === bead.id}
+                                            toggleBeadComments={() => {
+                                                if (beadCommentsOpen) {
+                                                    if (bead.id !== selectedBead.id)
+                                                        setSelectedBead(bead)
+                                                    else setBeadCommentsOpen(false)
+                                                } else {
+                                                    setSelectedBead(bead)
+                                                    setBeadCommentsOpen(true)
+                                                }
+                                            }}
                                             style={{
                                                 marginRight:
                                                     StringPosts.length > 2 &&
@@ -926,6 +939,19 @@ const PostCard = (props: {
                                                 postType={postData.type}
                                                 beadIndex={i}
                                                 location={location}
+                                                selected={
+                                                    selectedBead && selectedBead.id === bead.id
+                                                }
+                                                toggleBeadComments={() => {
+                                                    if (beadCommentsOpen) {
+                                                        if (bead.id !== selectedBead.id)
+                                                            setSelectedBead(bead)
+                                                        else setBeadCommentsOpen(false)
+                                                    } else {
+                                                        setSelectedBead(bead)
+                                                        setBeadCommentsOpen(true)
+                                                    }
+                                                }}
                                                 style={{
                                                     marginRight:
                                                         i === StringPosts.length - 1 &&
@@ -999,6 +1025,22 @@ const PostCard = (props: {
                     </Column>
                 )}
             </Column>
+            {beadCommentsOpen && (
+                <PostCardComments
+                    postId={selectedBead.id}
+                    type='bead'
+                    location={location}
+                    totalComments={selectedBead.totalComments}
+                    incrementTotalComments={(value) => {
+                        const newPostData = { ...postData }
+                        const bead = newPostData.StringPosts.find((b) => b.id === selectedBead.id)
+                        bead.totalComments += value
+                        bead.accountComment = value > 0
+                        setPostData(newPostData)
+                    }}
+                    style={{ margin: '10px 0' }}
+                />
+            )}
             <Column className={styles.footer}>
                 <Row spaceBetween>
                     <Row className={styles.statButtons}>
@@ -1058,30 +1100,32 @@ const PostCard = (props: {
                         )}
                         {likeModalOpen && (
                             <PostCardLikeModal
-                                close={() => setLikeModalOpen(false)}
                                 postData={postData}
                                 setPostData={setPostData}
+                                close={() => setLikeModalOpen(false)}
                             />
                         )}
                         {repostModalOpen && (
                             <PostCardRepostModal
-                                close={() => setRepostModalOpen(false)}
                                 postData={postData}
                                 setPostData={setPostData}
+                                close={() => setRepostModalOpen(false)}
                             />
                         )}
                         {ratingModalOpen && (
                             <PostCardRatingModal
-                                close={() => setRatingModalOpen(false)}
                                 postData={postData}
                                 setPostData={setPostData}
+                                close={() => setRatingModalOpen(false)}
                             />
                         )}
                         {linkModalOpen && (
                             <PostCardLinkModal
-                                close={() => setLinkModalOpen(false)}
+                                type='post'
+                                location={location}
                                 postData={postData}
                                 setPostData={setPostData}
+                                close={() => setLinkModalOpen(false)}
                             />
                         )}
                     </Row>
@@ -1116,11 +1160,13 @@ const PostCard = (props: {
                 {commentsOpen && (
                     <PostCardComments
                         postId={postData.id}
+                        type='post'
                         location={location}
                         totalComments={totalComments}
                         incrementTotalComments={(value) =>
                             setPostData({ ...postData, totalComments: totalComments + value })
                         }
+                        style={{ marginTop: 20 }}
                     />
                 )}
                 {deletePostModalOpen && (
