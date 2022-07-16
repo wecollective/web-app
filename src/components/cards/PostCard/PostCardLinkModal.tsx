@@ -7,6 +7,7 @@ import Row from '@components/Row'
 import TextLink from '@components/TextLink'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
+import { UserContext } from '@contexts/UserContext'
 import LoadingWheel from '@src/components/LoadingWheel'
 import config from '@src/Config'
 import { allValid, defaultErrorState, pluralise } from '@src/Helpers'
@@ -16,11 +17,14 @@ import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 const PostCardLinkModal = (props: {
-    close: () => void
+    type: 'post' | 'bead'
+    location: string
+    postId?: number // required for beads
     postData: any
     setPostData: (payload: any) => void
+    close: () => void
 }): JSX.Element => {
-    const { close, postData, setPostData } = props
+    const { type, location, postId, postData, setPostData, close } = props
     const {
         loggedIn,
         accountData,
@@ -29,6 +33,7 @@ const PostCardLinkModal = (props: {
         setAlertModalOpen,
     } = useContext(AccountContext)
     const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
+    const { userPosts, setUserPosts } = useContext(UserContext)
     const [incomingLinks, setIncomingLinks] = useState<any[]>([])
     const [outgoingLinks, setOutgoingLinks] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
@@ -65,115 +70,110 @@ const PostCardLinkModal = (props: {
         setFormData({ ...formData, [name]: { ...formData[name], value, state: 'default' } })
     }
 
-    function addLink() {
-        if (allValid(formData, setFormData)) {
-            setResponseLoading(true)
-            const accessToken = cookies.get('accessToken')
-            if (!accessToken) {
-                close()
-                setAlertMessage('Log in to link posts')
-                setAlertModalOpen(true)
-            } else {
-                const data = {
-                    accountHandle: accountData.handle,
-                    accountName: accountData.name,
-                    spaceId: window.location.pathname.includes('/s/') ? spaceData.id : null,
-                    description: linkDescription.value,
-                    itemAId: postData.id,
-                    itemBId: +linkTarget.value,
-                }
-                const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
-                axios
-                    .post(`${config.apiURL}/add-link`, data, authHeader)
-                    .then((res) => {
-                        const { link } = res.data
-                        // update post state
-                        const newPostData = {
-                            ...postData,
-                            totalReactions: postData.totalReactions + 1,
-                            totalLinks: postData.totalLinks + 1,
-                            accountLink: true,
-                            OutgoingLinks: [
-                                ...postData.OutgoingLinks,
-                                {
-                                    id: link.id,
-                                    Creator: {
-                                        id: accountData.id,
-                                        handle: accountData.handle,
-                                        name: accountData.name,
-                                        flagImagePath: accountData.flagImagePath,
-                                    },
-                                    PostB: {
-                                        id: +linkTarget.value,
-                                        Creator: {
-                                            id: postData.Creator.id,
-                                            handle: postData.Creator.handle,
-                                            name: postData.Creator.name,
-                                            flagImagePath: postData.Creator.flagImagePath,
-                                        },
-                                    },
-                                },
-                            ],
-                        }
-                        setPostData(newPostData)
-                        const newSpacePosts = [...spacePosts]
-                        // update post
-                        const postIndex = newSpacePosts.findIndex((p) => p.id === postData.id)
-                        newSpacePosts[postIndex] = newPostData
-                        // update linked post if in state
-                        const linkedPost = newSpacePosts.find((p) => p.id === +linkTarget.value)
-                        if (linkedPost) {
-                            linkedPost.totalLinks += 1
-                            linkedPost.accountLink = true
-                            linkedPost.IncomingLinks = [
-                                ...linkedPost.IncomingLinks,
-                                {
-                                    id: link.id,
-                                    Creator: {
-                                        id: accountData.id,
-                                        handle: accountData.handle,
-                                        name: accountData.name,
-                                        flagImagePath: accountData.flagImagePath,
-                                    },
-                                    PostA: {
-                                        id: postData.id,
-                                        Creator: {
-                                            id: postData.Creator.id,
-                                            handle: postData.Creator.handle,
-                                            name: postData.Creator.name,
-                                            flagImagePath: postData.Creator.flagImagePath,
-                                        },
-                                    },
-                                },
-                            ]
-                        }
-                        setSpacePosts(newSpacePosts)
-                        close()
-                    })
-                    .catch((error) => {
-                        switch (error.response.data.message) {
-                            case 'Item B not found':
-                                setFormData({
-                                    ...formData,
-                                    linkTarget: {
-                                        ...formData.linkTarget,
-                                        state: 'invalid',
-                                        errors: ['Post not found.'],
-                                    },
-                                })
-                                setResponseLoading(false)
-                                break
-                            default:
-                                console.log(error)
-                                setResponseLoading(false)
-                        }
-                    })
-            }
+    function findPosts() {
+        switch (location) {
+            case 'space-posts':
+                return [...spacePosts]
+            case 'user-posts':
+                return [...userPosts]
+            case 'post-page':
+                return [{ ...postData }]
+            default:
+                return []
         }
     }
 
-    function removeLink(direction, linkId, linkedPostId) {
+    function addLink() {
         setResponseLoading(true)
+        const accessToken = cookies.get('accessToken')
+        if (!accessToken) {
+            close()
+            setAlertMessage('Log in to link posts')
+            setAlertModalOpen(true)
+        } else if (allValid(formData, setFormData)) {
+            const data = {
+                accountHandle: accountData.handle,
+                accountName: accountData.name,
+                spaceId: window.location.pathname.includes('/s/') ? spaceData.id : null,
+                description: linkDescription.value,
+                itemAId: postData.id,
+                itemBId: +linkTarget.value,
+            }
+            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+            axios
+                .post(`${config.apiURL}/add-link`, data, options)
+                .then((res) => {
+                    // update link state
+                    setOutgoingLinks((links) => [
+                        ...links,
+                        {
+                            id: res.data.link.id,
+                            Creator: {
+                                id: accountData.id,
+                                handle: accountData.handle,
+                                name: accountData.name,
+                            },
+                            PostB: res.data.itemB,
+                        },
+                    ])
+                    // update post state
+                    const newPosts = findPosts()
+                    const post = newPosts.find((p) => p.id === (postId || postData.id))
+                    if (type === 'post') {
+                        post.totalLinks += 1
+                        post.accountLink = true
+                    } else if (type === 'bead') {
+                        // update bead state
+                        const bead = post.StringPosts.find((p) => p.id === postData.id)
+                        bead.totalLinks += 1
+                        bead.accountLink = true
+                    }
+                    // update linked post if in state
+                    const linkedPost = newPosts.find((p) => p.id === +linkTarget.value)
+                    if (linkedPost) {
+                        linkedPost.totalLinks += 1
+                        linkedPost.accountLink = true
+                    }
+                    // update linked bead if in state
+                    newPosts.forEach((p) => {
+                        const linkedBead = p.StringPosts.find((b) => b.id === +linkTarget.value)
+                        if (linkedBead) {
+                            linkedBead.totalLinks += 1
+                            linkedBead.accountLink = true
+                        }
+                    })
+                    if (location === 'space-posts') setSpacePosts(newPosts)
+                    if (location === 'user-posts') setUserPosts(newPosts)
+                    if (location === 'post-page') setPostData(newPosts[0])
+                    // reset form data
+                    setFormData({
+                        linkTarget: { ...formData.linkTarget, value: '', state: 'default' },
+                        linkDescription: {
+                            ...formData.linkDescription,
+                            value: '',
+                            state: 'default',
+                        },
+                    })
+                    setResponseLoading(false)
+                })
+                .catch((error) => {
+                    console.log(error)
+                    if (error.response.status === 404) {
+                        setFormData({
+                            ...formData,
+                            linkTarget: {
+                                ...formData.linkTarget,
+                                state: 'invalid',
+                                errors: ['Post not found.'],
+                            },
+                        })
+                        setResponseLoading(false)
+                    }
+                })
+        } else setResponseLoading(false)
+    }
+
+    function removeLink(direction, linkId, linkedPostId) {
         const accessToken = cookies.get('accessToken')
         if (!accessToken) {
             close()
@@ -181,57 +181,46 @@ const PostCardLinkModal = (props: {
             setAlertModalOpen(true)
         } else {
             const data = { linkId }
-            const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
+            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
             axios
-                .post(`${config.apiURL}/remove-link`, data, authHeader)
+                .post(`${config.apiURL}/remove-link`, data, options)
                 .then(() => {
-                    // filter out removed link
-                    let newLinks =
-                        direction === 'incoming'
-                            ? [...postData.IncomingLinks]
-                            : [...postData.OutgoingLinks]
-                    newLinks = newLinks.filter((l) => l.id !== linkId)
-                    // check if other account links still present
-                    const otherAccountLinks = newLinks.find((l) => l.Creator.id === accountData.id)
-                    // create new post data object
-                    const newPostData = {
-                        ...postData,
-                        totalReactions: postData.totalReactions - 1,
-                        totalLinks: postData.totalLinks - 1,
-                        accountLink: !!otherAccountLinks,
-                        OutgoingLinks: direction === 'outgoing' ? newLinks : postData.OutgoingLinks,
-                        IncomingLinks: direction === 'incoming' ? newLinks : postData.IncomingLinks,
+                    // update link state
+                    if (direction === 'incoming')
+                        setIncomingLinks((links) => links.filter((l) => l.id !== linkId))
+                    else setOutgoingLinks((links) => links.filter((l) => l.id !== linkId))
+                    // update post state
+                    const newPosts = findPosts()
+                    const post = newPosts.find((p) => p.id === (postId || postData.id))
+                    if (type === 'post') {
+                        post.totalLinks -= 1
+                        const links = direction === 'incoming' ? incomingLinks : outgoingLinks
+                        post.accountLink = !!links.find(
+                            (l) => l.Creator.id === accountData.id && l.id !== linkId
+                        )
+                    } else if (type === 'bead') {
+                        // update bead state
+                        const bead = post.StringPosts.find((p) => p.id === postData.id)
+                        bead.totalLinks -= 1
+                        bead.accountLink = false
                     }
-                    setPostData(newPostData)
-                    const newSpacePosts = [...spacePosts]
-                    // update post
-                    const postIndex = newSpacePosts.findIndex((p) => p.id === postData.id)
-                    newSpacePosts[postIndex] = newPostData
-                    // find linked post if present in state
-                    const linkedPost = newSpacePosts.find((p) => p.id === linkedPostId)
+                    // update linked post if in state
+                    const linkedPost = newPosts.find((p) => p.id === linkedPostId)
                     if (linkedPost) {
-                        const otherLinkedPostAccountLinks =
-                            direction === 'outgoing'
-                                ? linkedPost.IncomingLinks.find(
-                                      (l) => l.id !== linkId && l.Creator.id === accountData.id
-                                  )
-                                : linkedPost.OutgoingLinks.find(
-                                      (l) => l.id !== linkId && l.Creator.id === accountData.id
-                                  )
                         linkedPost.totalLinks -= 1
-                        linkedPost.accountLink = !!otherLinkedPostAccountLinks
-                        if (direction === 'outgoing') {
-                            linkedPost.IncomingLinks = linkedPost.IncomingLinks.filter(
-                                (l) => l.id !== linkId
-                            )
-                        } else {
-                            linkedPost.OutgoingLinks = linkedPost.OutgoingLinks.filter(
-                                (l) => l.id !== linkId
-                            )
-                        }
+                        linkedPost.accountLink = false
                     }
-                    setSpacePosts(newSpacePosts)
-                    close()
+                    // update linked beads if in state
+                    newPosts.forEach((p) => {
+                        const linkedBead = p.StringPosts.find((b) => b.id === linkedPostId)
+                        if (linkedBead) {
+                            linkedBead.totalLinks -= 1
+                            linkedBead.accountLink = false
+                        }
+                    })
+                    if (location === 'space-posts') setSpacePosts(newPosts)
+                    if (location === 'user-posts') setUserPosts(newPosts)
+                    if (location === 'post-page') setPostData(newPosts[0])
                 })
                 .catch((error) => console.log(error))
         }
@@ -359,6 +348,10 @@ const PostCardLinkModal = (props: {
             )}
         </Modal>
     )
+}
+
+PostCardLinkModal.defaultProps = {
+    postId: null,
 }
 
 export default PostCardLinkModal
