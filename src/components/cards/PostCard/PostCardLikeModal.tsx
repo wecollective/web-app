@@ -44,74 +44,32 @@ const PostCardLikeModal = (props: {
             .catch((error) => console.log(error))
     }
 
-    function addLike() {
+    function toggleLike() {
         setResponseLoading(true)
+        const addingLike = !postData.accountLike
         const accessToken = cookies.get('accessToken')
         if (accessToken) {
-            const data = {
-                accountHandle: accountData.handle,
-                accountName: accountData.name,
-                postId: postData.id,
-                holonId: window.location.pathname.includes('/s/') ? spaceData.id : null,
+            const data = { postId: postData.id } as any
+            if (addingLike) {
+                data.accountHandle = accountData.handle
+                data.accountName = accountData.name
+                data.holonId = window.location.pathname.includes('/s/') ? spaceData.id : null
             }
             const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
             axios
-                .post(`${config.apiURL}/add-like`, data, authHeader)
+                .post(`${config.apiURL}/${addingLike ? 'add' : 'remove'}-like`, data, authHeader)
                 .then(() => {
                     setPostData({
                         ...postData,
-                        totalReactions: postData.totalReactions + 1,
-                        totalLikes: postData.totalLikes + 1,
-                        accountLike: true,
-                        Reactions: [
-                            ...postData.Reactions,
-                            {
-                                type: 'like',
-                                Creator: {
-                                    id: accountData.id,
-                                    handle: accountData.handle,
-                                    name: accountData.name,
-                                    flagImagePath: accountData.flagImagePath,
-                                },
-                            },
-                        ],
+                        totalLikes: postData.totalLikes + (addingLike ? 1 : -1),
+                        accountLike: addingLike,
                     })
                     close()
                 })
                 .catch((error) => console.log(error))
         } else {
             close()
-            setAlertMessage('Log in to like posts')
-            setAlertModalOpen(true)
-        }
-    }
-
-    function removeLike() {
-        setResponseLoading(true)
-        const accessToken = cookies.get('accessToken')
-        if (accessToken) {
-            const data = { postId: postData.id }
-            const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
-            axios
-                .post(`${config.apiURL}/remove-like`, data, authHeader)
-                .then(() => {
-                    setPostData({
-                        ...postData,
-                        totalReactions: postData.totalReactions - 1,
-                        totalLikes: postData.totalLikes - 1,
-                        accountLike: false,
-                        Reactions: [
-                            ...postData.Reactions.filter(
-                                (r) => !(r.type === 'like' && r.Creator.id === accountData.id)
-                            ),
-                        ],
-                    })
-                    close()
-                })
-                .catch((error) => console.log(error))
-        } else {
-            close()
-            setAlertMessage('Log in to unlike posts')
+            setAlertMessage(`Log in to ${!addingLike && 'un'}like posts`)
             setAlertModalOpen(true)
         }
     }
@@ -145,7 +103,7 @@ const PostCardLikeModal = (props: {
                             color={postData.accountLike ? 'red' : 'blue'}
                             style={{ marginTop: likes.length ? 20 : 0 }}
                             loading={responseLoading}
-                            onClick={postData.accountLike ? removeLike : addLike}
+                            onClick={() => toggleLike()}
                         />
                     ) : (
                         <Row centerY style={{ marginTop: likes.length ? 20 : 0 }}>
