@@ -6,11 +6,12 @@ import Modal from '@components/Modal'
 import Row from '@components/Row'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
+import LoadingWheel from '@src/components/LoadingWheel'
 import config from '@src/Config'
 import { pluralise } from '@src/Helpers'
 import styles from '@styles/components/cards/PostCard/PostCardRatingModal.module.scss'
 import axios from 'axios'
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 const PostCardRatingModal = (props: {
@@ -27,17 +28,28 @@ const PostCardRatingModal = (props: {
         setAlertModalOpen,
     } = useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
+    const [ratings, setRatings] = useState<any[]>([])
     const [newRating, setNewRating] = useState(100)
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
+    const [responseLoading, setResponseLoading] = useState(false)
     const cookies = new Cookies()
-    const ratings = postData.Reactions.filter((r) => r.type === 'rating')
     const headerText = ratings.length
         ? `${ratings.length} rating${pluralise(ratings.length)}`
         : 'No ratings yet...'
     const averageScore = `${(postData.totalRatingPoints / ratings.length).toFixed(2)}%`
 
+    function getRatings() {
+        axios
+            .get(`${config.apiURL}/post-ratings?postId=${postData.id}`)
+            .then((res) => {
+                setRatings(res.data)
+                setLoading(false)
+            })
+            .catch((error) => console.log(error))
+    }
+
     function addRating() {
-        setLoading(true)
+        setResponseLoading(true)
         const accessToken = cookies.get('accessToken')
         if (accessToken) {
             const data = {
@@ -82,7 +94,7 @@ const PostCardRatingModal = (props: {
     }
 
     function removeRating() {
-        setLoading(true)
+        setResponseLoading(true)
         const accessToken = cookies.get('accessToken')
         if (accessToken) {
             const data = {
@@ -116,68 +128,81 @@ const PostCardRatingModal = (props: {
         }
     }
 
+    useEffect(() => getRatings(), [])
+
     return (
         <Modal close={close} centered style={{ width: 400 }}>
-            <h1>{headerText}</h1>
-            {ratings.length > 0 && (
-                <Column style={{ marginBottom: 10 }}>
-                    <Row centerY spaceBetween style={{ marginBottom: 15 }}>
-                        <p>Average score:</p>
-                        <div className={`${styles.scoreBar} ${styles.aqua}`}>
-                            <div style={{ width: averageScore }} />
-                            <p>{averageScore}</p>
-                        </div>
-                    </Row>
-                    {ratings.map((rating) => (
-                        <Row centerY spaceBetween style={{ marginBottom: 15 }} key={rating.id}>
-                            <ImageTitle
-                                type='user'
-                                imagePath={rating.Creator.flagImagePath}
-                                title={rating.Creator.name}
-                                link={`/u/${rating.Creator.handle}`}
+            {loading ? (
+                <LoadingWheel />
+            ) : (
+                <Column centerX>
+                    <h1>{headerText}</h1>
+                    {ratings.length > 0 && (
+                        <Column style={{ marginBottom: 10 }}>
+                            <Row centerY spaceBetween style={{ marginBottom: 15 }}>
+                                <p>Average score:</p>
+                                <div className={`${styles.scoreBar} ${styles.aqua}`}>
+                                    <div style={{ width: averageScore }} />
+                                    <p>{averageScore}</p>
+                                </div>
+                            </Row>
+                            {ratings.map((rating) => (
+                                <Row
+                                    centerY
+                                    spaceBetween
+                                    style={{ marginBottom: 15 }}
+                                    key={rating.id}
+                                >
+                                    <ImageTitle
+                                        type='user'
+                                        imagePath={rating.Creator.flagImagePath}
+                                        title={rating.Creator.name}
+                                        link={`/u/${rating.Creator.handle}`}
+                                    />
+                                    <div className={styles.scoreBar}>
+                                        <div style={{ width: `${rating.value}%` }} />
+                                        <p>{`${rating.value}%`}</p>
+                                    </div>
+                                </Row>
+                            ))}
+                        </Column>
+                    )}
+                    {loggedIn ? (
+                        <Column>
+                            {!postData.accountRating && (
+                                <Row centerY style={{ marginBottom: 20 }}>
+                                    <Input
+                                        type='text'
+                                        style={{ width: 80, marginRight: 10 }}
+                                        value={newRating}
+                                        onChange={(v) => setNewRating(+v.replace(/\D/g, ''))}
+                                    />
+                                    <p>/ 100</p>
+                                </Row>
+                            )}
+                            <Button
+                                text={`${postData.accountRating ? 'Remove' : 'Add'} rating`}
+                                color={postData.accountRating ? 'red' : 'blue'}
+                                disabled={newRating > 100}
+                                loading={responseLoading}
+                                onClick={postData.accountRating ? removeRating : addRating}
                             />
-                            <div className={styles.scoreBar}>
-                                <div style={{ width: `${rating.value}%` }} />
-                                <p>{`${rating.value}%`}</p>
-                            </div>
-                        </Row>
-                    ))}
-                </Column>
-            )}
-            {loggedIn ? (
-                <Column>
-                    {!postData.accountRating && (
-                        <Row centerY style={{ marginBottom: 20 }}>
-                            <Input
-                                type='text'
-                                style={{ width: 80, marginRight: 10 }}
-                                value={newRating}
-                                onChange={(v) => setNewRating(+v.replace(/\D/g, ''))}
+                        </Column>
+                    ) : (
+                        <Row centerY style={{ marginTop: ratings.length ? 20 : 0 }}>
+                            <Button
+                                text='Log in'
+                                color='blue'
+                                style={{ marginRight: 5 }}
+                                onClick={() => {
+                                    setLogInModalOpen(true)
+                                    close()
+                                }}
                             />
-                            <p>/ 100</p>
+                            <p>to rate posts</p>
                         </Row>
                     )}
-                    <Button
-                        text={`${postData.accountRating ? 'Remove' : 'Add'} rating`}
-                        color={postData.accountRating ? 'red' : 'blue'}
-                        disabled={newRating > 100}
-                        loading={loading}
-                        onClick={postData.accountRating ? removeRating : addRating}
-                    />
                 </Column>
-            ) : (
-                <Row centerY style={{ marginTop: ratings.length ? 20 : 0 }}>
-                    <Button
-                        text='Log in'
-                        color='blue'
-                        style={{ marginRight: 5 }}
-                        onClick={() => {
-                            setLogInModalOpen(true)
-                            close()
-                        }}
-                    />
-                    <p>to rate posts</p>
-                </Row>
             )}
         </Modal>
     )

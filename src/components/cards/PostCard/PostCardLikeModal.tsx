@@ -5,10 +5,11 @@ import Modal from '@components/Modal'
 import Row from '@components/Row'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
+import LoadingWheel from '@src/components/LoadingWheel'
 import config from '@src/Config'
 import { pluralise } from '@src/Helpers'
 import axios from 'axios'
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 const PostCardLikeModal = (props: {
@@ -25,15 +26,26 @@ const PostCardLikeModal = (props: {
         setAlertModalOpen,
     } = useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
-    const [loading, setLoading] = useState(false)
+    const [likes, setLikes] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+    const [responseLoading, setResponseLoading] = useState(false)
     const cookies = new Cookies()
-    const likes = postData.Reactions.filter((r) => r.type === 'like')
     const headerText = likes.length
         ? `${likes.length} like${pluralise(likes.length)}`
         : 'No likes yet...'
 
+    function getLikes() {
+        axios
+            .get(`${config.apiURL}/post-likes?postId=${postData.id}`)
+            .then((res) => {
+                setLikes(res.data)
+                setLoading(false)
+            })
+            .catch((error) => console.log(error))
+    }
+
     function addLike() {
-        setLoading(true)
+        setResponseLoading(true)
         const accessToken = cookies.get('accessToken')
         if (accessToken) {
             const data = {
@@ -75,7 +87,7 @@ const PostCardLikeModal = (props: {
     }
 
     function removeLike() {
-        setLoading(true)
+        setResponseLoading(true)
         const accessToken = cookies.get('accessToken')
         if (accessToken) {
             const data = { postId: postData.id }
@@ -104,47 +116,53 @@ const PostCardLikeModal = (props: {
         }
     }
 
+    useEffect(() => getLikes(), [])
+
     return (
         <Modal close={close} style={{ width: 400 }} centered>
-            <Column centerX>
-                <h1>{headerText}</h1>
-                {likes.length > 0 && (
-                    <Column centerX>
-                        {likes.map((like) => (
-                            <ImageTitle
-                                key={like.id}
-                                type='user'
-                                imagePath={like.Creator.flagImagePath}
-                                title={like.Creator.name}
-                                link={`/u/${like.Creator.handle}`}
-                                style={{ marginBottom: 10 }}
-                            />
-                        ))}
-                    </Column>
-                )}
-                {loggedIn ? (
-                    <Button
-                        text={`${postData.accountLike ? 'Remove' : 'Add'} like`}
-                        color={postData.accountLike ? 'red' : 'blue'}
-                        style={{ marginTop: likes.length ? 20 : 0 }}
-                        loading={loading}
-                        onClick={postData.accountLike ? removeLike : addLike}
-                    />
-                ) : (
-                    <Row centerY style={{ marginTop: likes.length ? 20 : 0 }}>
+            {loading ? (
+                <LoadingWheel />
+            ) : (
+                <Column centerX>
+                    <h1>{headerText}</h1>
+                    {likes.length > 0 && (
+                        <Column centerX>
+                            {likes.map((like) => (
+                                <ImageTitle
+                                    key={like.id}
+                                    type='user'
+                                    imagePath={like.Creator.flagImagePath}
+                                    title={like.Creator.name}
+                                    link={`/u/${like.Creator.handle}`}
+                                    style={{ marginBottom: 10 }}
+                                />
+                            ))}
+                        </Column>
+                    )}
+                    {loggedIn ? (
                         <Button
-                            text='Log in'
-                            color='blue'
-                            style={{ marginRight: 5 }}
-                            onClick={() => {
-                                setLogInModalOpen(true)
-                                close()
-                            }}
+                            text={`${postData.accountLike ? 'Remove' : 'Add'} like`}
+                            color={postData.accountLike ? 'red' : 'blue'}
+                            style={{ marginTop: likes.length ? 20 : 0 }}
+                            loading={responseLoading}
+                            onClick={postData.accountLike ? removeLike : addLike}
                         />
-                        <p>to like posts</p>
-                    </Row>
-                )}
-            </Column>
+                    ) : (
+                        <Row centerY style={{ marginTop: likes.length ? 20 : 0 }}>
+                            <Button
+                                text='Log in'
+                                color='blue'
+                                style={{ marginRight: 5 }}
+                                onClick={() => {
+                                    setLogInModalOpen(true)
+                                    close()
+                                }}
+                            />
+                            <p>to like posts</p>
+                        </Row>
+                    )}
+                </Column>
+            )}
         </Modal>
     )
 }

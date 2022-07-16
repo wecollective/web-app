@@ -1,9 +1,3 @@
-import config from '@src/Config'
-import styles from '@styles/components/cards/PostCard/PostCardLinkModal.module.scss'
-import axios from 'axios'
-import React, { useContext, useState } from 'react'
-import Cookies from 'universal-cookie'
-// import DropDownMenu from '@components/DropDownMenu'
 import Button from '@components/Button'
 import Column from '@components/Column'
 import ImageTitle from '@components/ImageTitle'
@@ -13,7 +7,13 @@ import Row from '@components/Row'
 import TextLink from '@components/TextLink'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
+import LoadingWheel from '@src/components/LoadingWheel'
+import config from '@src/Config'
 import { allValid, defaultErrorState, pluralise } from '@src/Helpers'
+import styles from '@styles/components/cards/PostCard/PostCardLinkModal.module.scss'
+import axios from 'axios'
+import React, { useContext, useEffect, useState } from 'react'
+import Cookies from 'universal-cookie'
 
 const PostCardLinkModal = (props: {
     close: () => void
@@ -29,6 +29,10 @@ const PostCardLinkModal = (props: {
         setAlertModalOpen,
     } = useContext(AccountContext)
     const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
+    const [incomingLinks, setIncomingLinks] = useState<any[]>([])
+    const [outgoingLinks, setOutgoingLinks] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+    const [responseLoading, setResponseLoading] = useState(false)
     const [formData, setFormData] = useState({
         linkTarget: {
             value: '',
@@ -41,14 +45,21 @@ const PostCardLinkModal = (props: {
             ...defaultErrorState,
         },
     })
-    const [loading, setLoading] = useState(false)
-    const cookies = new Cookies()
     const { linkTarget, linkDescription } = formData
-    const { IncomingLinks, OutgoingLinks } = postData
-    const links = [...IncomingLinks, ...OutgoingLinks]
-    const headerText = links.length
-        ? `${links.length} link${pluralise(links.length)}`
-        : 'No links yet...'
+    const cookies = new Cookies()
+    const totalLinks = incomingLinks.length + outgoingLinks.length
+    const headerText = totalLinks ? `${totalLinks} link${pluralise(totalLinks)}` : 'No links yet...'
+
+    function getLinks() {
+        axios
+            .get(`${config.apiURL}/post-links?postId=${postData.id}`)
+            .then((res) => {
+                setIncomingLinks(res.data.IncomingLinks)
+                setOutgoingLinks(res.data.OutgoingLinks)
+                setLoading(false)
+            })
+            .catch((error) => console.log(error))
+    }
 
     function updateValue(name, value) {
         setFormData({ ...formData, [name]: { ...formData[name], value, state: 'default' } })
@@ -56,7 +67,7 @@ const PostCardLinkModal = (props: {
 
     function addLink() {
         if (allValid(formData, setFormData)) {
-            setLoading(true)
+            setResponseLoading(true)
             const accessToken = cookies.get('accessToken')
             if (!accessToken) {
                 close()
@@ -150,11 +161,11 @@ const PostCardLinkModal = (props: {
                                         errors: ['Post not found.'],
                                     },
                                 })
-                                setLoading(false)
+                                setResponseLoading(false)
                                 break
                             default:
                                 console.log(error)
-                                setLoading(false)
+                                setResponseLoading(false)
                         }
                     })
             }
@@ -162,7 +173,7 @@ const PostCardLinkModal = (props: {
     }
 
     function removeLink(direction, linkId, linkedPostId) {
-        setLoading(true)
+        setResponseLoading(true)
         const accessToken = cookies.get('accessToken')
         if (!accessToken) {
             close()
@@ -226,108 +237,125 @@ const PostCardLinkModal = (props: {
         }
     }
 
+    useEffect(() => getLinks(), [])
+
     return (
         <Modal close={close} centered style={{ minWidth: 400 }}>
-            <h1>{headerText}</h1>
-            {IncomingLinks.length > 0 && (
-                <div className={styles.links}>
-                    <h2>Incoming:</h2>
-                    {IncomingLinks.map((link) => (
-                        <Row key={link.id} centerY>
-                            <ImageTitle
-                                type='user'
-                                imagePath={link.Creator.flagImagePath}
-                                title={link.Creator.name}
-                                link={`/u/${link.Creator.handle}`}
-                            />
-                            <p>linked from</p>
-                            <ImageTitle
-                                type='user'
-                                imagePath={link.PostA.Creator.flagImagePath}
-                                title={`${link.PostA.Creator.name}'s`}
-                                link={`/u/${link.PostA.Creator.handle}`}
-                            />
-                            <TextLink text='post' link={`/p/${link.PostA.id}`} />
-                            {link.Creator.id === accountData.id && (
-                                <Button
-                                    text='Delete'
-                                    color='blue'
-                                    size='medium'
-                                    onClick={() => removeLink('incoming', link.id, link.PostA.id)}
-                                />
-                            )}
-                        </Row>
-                    ))}
-                </div>
-            )}
-            {OutgoingLinks.length > 0 && (
-                <div className={styles.links}>
-                    <h2>Outgoing:</h2>
-                    {OutgoingLinks.map((link) => (
-                        <Row key={link.id} centerY>
-                            <ImageTitle
-                                type='user'
-                                imagePath={link.Creator.flagImagePath}
-                                title={link.Creator.name}
-                                link={`/u/${link.Creator.handle}`}
-                            />
-                            <p>linked to</p>
-                            <ImageTitle
-                                type='user'
-                                imagePath={link.PostB.Creator.flagImagePath}
-                                title={`${link.PostB.Creator.name}'s`}
-                                link={`/u/${link.PostB.Creator.handle}`}
-                            />
-                            <TextLink text='post' link={`/p/${link.PostB.id}`} />
-                            {link.Creator.id === accountData.id && (
-                                <Button
-                                    text='Delete'
-                                    color='blue'
-                                    size='medium'
-                                    onClick={() => removeLink('outgoing', link.id, link.PostB.id)}
-                                />
-                            )}
-                        </Row>
-                    ))}
-                </div>
-            )}
-            {loggedIn ? (
-                <Column centerX style={{ marginTop: links.length ? 20 : 0 }}>
-                    <Input
-                        title='Link to another post'
-                        type='text'
-                        prefix='p/'
-                        value={linkTarget.value}
-                        state={linkTarget.state}
-                        errors={linkTarget.errors}
-                        onChange={(v) => updateValue('linkTarget', v)}
-                        style={{ marginBottom: 10 }}
-                    />
-                    <Input
-                        title='Description (optional)'
-                        type='text'
-                        placeholder='link description...'
-                        value={linkDescription.value}
-                        state={linkDescription.state}
-                        errors={linkDescription.errors}
-                        onChange={(v) => updateValue('linkDescription', v)}
-                        style={{ marginBottom: 30 }}
-                    />
-                    <Button text='Add link' color='blue' onClick={addLink} loading={loading} />
-                </Column>
+            {loading ? (
+                <LoadingWheel />
             ) : (
-                <Row centerY style={{ marginTop: links.length ? 20 : 0 }}>
-                    <Button
-                        text='Log in'
-                        color='blue'
-                        style={{ marginRight: 5 }}
-                        onClick={() => {
-                            setLogInModalOpen(true)
-                            close()
-                        }}
-                    />
-                    <p>to link posts</p>
-                </Row>
+                <Column centerX>
+                    <h1>{headerText}</h1>
+                    {incomingLinks.length > 0 && (
+                        <div className={styles.links}>
+                            <h2>Incoming:</h2>
+                            {incomingLinks.map((link) => (
+                                <Row key={link.id} centerY>
+                                    <ImageTitle
+                                        type='user'
+                                        imagePath={link.Creator.flagImagePath}
+                                        title={link.Creator.name}
+                                        link={`/u/${link.Creator.handle}`}
+                                    />
+                                    <p>linked from</p>
+                                    <ImageTitle
+                                        type='user'
+                                        imagePath={link.PostA.Creator.flagImagePath}
+                                        title={`${link.PostA.Creator.name}'s`}
+                                        link={`/u/${link.PostA.Creator.handle}`}
+                                    />
+                                    <TextLink text='post' link={`/p/${link.PostA.id}`} />
+                                    {link.Creator.id === accountData.id && (
+                                        <Button
+                                            text='Delete'
+                                            color='blue'
+                                            size='medium'
+                                            onClick={() =>
+                                                removeLink('incoming', link.id, link.PostA.id)
+                                            }
+                                        />
+                                    )}
+                                </Row>
+                            ))}
+                        </div>
+                    )}
+                    {outgoingLinks.length > 0 && (
+                        <div className={styles.links}>
+                            <h2>Outgoing:</h2>
+                            {outgoingLinks.map((link) => (
+                                <Row key={link.id} centerY>
+                                    <ImageTitle
+                                        type='user'
+                                        imagePath={link.Creator.flagImagePath}
+                                        title={link.Creator.name}
+                                        link={`/u/${link.Creator.handle}`}
+                                    />
+                                    <p>linked to</p>
+                                    <ImageTitle
+                                        type='user'
+                                        imagePath={link.PostB.Creator.flagImagePath}
+                                        title={`${link.PostB.Creator.name}'s`}
+                                        link={`/u/${link.PostB.Creator.handle}`}
+                                    />
+                                    <TextLink text='post' link={`/p/${link.PostB.id}`} />
+                                    {link.Creator.id === accountData.id && (
+                                        <Button
+                                            text='Delete'
+                                            color='blue'
+                                            size='medium'
+                                            onClick={() =>
+                                                removeLink('outgoing', link.id, link.PostB.id)
+                                            }
+                                        />
+                                    )}
+                                </Row>
+                            ))}
+                        </div>
+                    )}
+                    {loggedIn ? (
+                        <Column centerX style={{ marginTop: totalLinks ? 20 : 0 }}>
+                            <Input
+                                title='Link to another post'
+                                type='text'
+                                prefix='p/'
+                                value={linkTarget.value}
+                                state={linkTarget.state}
+                                errors={linkTarget.errors}
+                                onChange={(v) => updateValue('linkTarget', v)}
+                                style={{ marginBottom: 10 }}
+                            />
+                            <Input
+                                title='Description (optional)'
+                                type='text'
+                                placeholder='link description...'
+                                value={linkDescription.value}
+                                state={linkDescription.state}
+                                errors={linkDescription.errors}
+                                onChange={(v) => updateValue('linkDescription', v)}
+                                style={{ marginBottom: 30 }}
+                            />
+                            <Button
+                                text='Add link'
+                                color='blue'
+                                onClick={addLink}
+                                loading={responseLoading}
+                            />
+                        </Column>
+                    ) : (
+                        <Row centerY style={{ marginTop: totalLinks ? 20 : 0 }}>
+                            <Button
+                                text='Log in'
+                                color='blue'
+                                style={{ marginRight: 5 }}
+                                onClick={() => {
+                                    setLogInModalOpen(true)
+                                    close()
+                                }}
+                            />
+                            <p>to link posts</p>
+                        </Row>
+                    )}
+                </Column>
             )}
         </Modal>
     )
