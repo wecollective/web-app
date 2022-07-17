@@ -189,6 +189,23 @@ export function formatTimeMMSS(seconds: number): string {
     return `${mins < 10 ? '0' : ''}${mins}m ${+secs < 10 ? '0' : ''}${secs}s`
 }
 
+export function formatTimeHHDDMMSS(seconds: number): string {
+    // output: '1d 2h 3m 4s'
+    // values only included if > 0
+    const min = 60
+    const hour = min * 60
+    const day = hour * 24
+    const days = Math.floor(seconds / day)
+    const hours = Math.floor(seconds / hour) - days * 24
+    const mins = Math.floor(seconds / min) - (days * 60 * 24 + hours * 60)
+    const secs = Math.floor(seconds) - (days * 24 * 60 * 60 + hours * 60 * 60 + mins * 60)
+    const dayText = days ? `${days}d ` : ''
+    const hourText = hours ? `${hours}h ` : ''
+    const minText = mins ? `${mins}m ` : ''
+    const secText = secs ? `${secs}s` : ''
+    return `${dayText}${hourText}${minText}${secText}`
+}
+
 export function formatTimeDHM(seconds: number): string {
     // output: '0 days, 0 hours, 0 mins' (days and hours only included if > 0)
     const min = 60
