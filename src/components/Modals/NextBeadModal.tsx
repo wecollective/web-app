@@ -331,6 +331,10 @@ const NextBeadModal = (props: {
                     setLoading(false)
                     setPostData({
                         ...postData,
+                        Weave: {
+                            ...Weave,
+                            nextMoveDeadline: res.data.newDeadline,
+                        },
                         StringPosts: [
                             ...StringPosts,
                             {
@@ -609,13 +613,16 @@ const NextBeadModal = (props: {
                             (newBead.type === 'image' && images.length > 0)) && (
                             <Column centerX style={{ margin: '20px 0' }}>
                                 {!playerColor && (
-                                    <Row className={styles.colorButtons}>
+                                    <Row centerY className={styles.colorButtons}>
                                         {beadColors.map((color) => (
                                             <button
                                                 key={color}
                                                 type='button'
                                                 aria-label='color'
                                                 onClick={() => setNewBead({ ...newBead, color })}
+                                                className={`${
+                                                    newBead.color === color && styles.selected
+                                                }`}
                                                 style={{ backgroundColor: color }}
                                             />
                                         ))}
