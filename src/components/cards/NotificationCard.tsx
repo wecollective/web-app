@@ -60,6 +60,8 @@ const State = (props: {
     respond: (response: 'accepted' | 'rejected') => void
 }): JSX.Element => {
     const { state, respond } = props
+    const [acceptLoading, setAcceptLoading] = useState(false)
+    const [rejectLoading, setRejectLoading] = useState(false)
 
     return (
         <div className={styles.state}>
@@ -69,15 +71,23 @@ const State = (props: {
                         text='Accept'
                         color='blue'
                         size='medium'
+                        loading={acceptLoading}
+                        onClick={() => {
+                            setAcceptLoading(true)
+                            respond('accepted')
+                        }}
                         style={{ marginRight: 5 }}
-                        onClick={() => respond('accepted')}
                     />
                     <Button
                         text='Reject'
                         color='aqua'
                         size='medium'
+                        loading={rejectLoading}
+                        onClick={() => {
+                            setRejectLoading(true)
+                            respond('rejected')
+                        }}
                         style={{ marginRight: 5 }}
-                        onClick={() => respond('rejected')}
                     />
                 </>
             )}
@@ -213,7 +223,7 @@ const NotificationCard = (props: {
         }
     }
 
-    function respondToMultiplayerStringInvite(response) {
+    function respondToWeaveInvite(response) {
         if (accessToken) {
             const data = { postId, notificationId: id, response }
             const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
@@ -395,16 +405,11 @@ const NotificationCard = (props: {
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>invited you to join a</p>
                             <TextLink text='weave' link={`/p/${postId}`} />
-                            {relatedPost.Weave.state === 'cancelled' ? (
-                                <p>Game cancelled</p>
-                            ) : (
-                                <State
-                                    state={state}
-                                    respond={(response) =>
-                                        respondToMultiplayerStringInvite(response)
-                                    }
-                                />
-                            )}
+                            <State
+                                state={state}
+                                respond={(response) => respondToWeaveInvite(response)}
+                            />
+                            {relatedPost.Weave.state === 'cancelled' && <p>Game cancelled</p>}
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}
