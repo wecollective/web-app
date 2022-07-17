@@ -27,6 +27,7 @@ import config from '@src/Config'
 import {
     dateCreated,
     formatTimeDHM,
+    formatTimeHHDDMMSS,
     formatTimeHM,
     formatTimeMDYT,
     pluralise,
@@ -62,7 +63,7 @@ import { ReactComponent as UsersIcon } from '@svgs/users-solid.svg'
 import { ReactComponent as AudioIcon } from '@svgs/volume-high-solid.svg'
 import axios from 'axios'
 import * as d3 from 'd3'
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Link, useHistory } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
@@ -128,6 +129,8 @@ const PostCard = (props: {
     const [deletePostModalOpen, setDeletePostModalOpen] = useState(false)
     const [audioPlaying, setAudioPlaying] = useState(false)
     const [nextBeadModalOpen, setNextBeadModalOpen] = useState(false)
+    const [timeLeftInMove, setTimeLeftInMove] = useState(0)
+    const timeLeftInMoveIntervalRef = useRef<any>(null)
 
     const mobileView = document.documentElement.clientWidth < 900
     // todo: sort on load like StringPlayers and use main const
@@ -188,7 +191,20 @@ const PostCard = (props: {
         return null
     }
 
-    // multiplayer strings
+    // weaves
+    const deadlinePassed =
+        Weave && Weave.nextMoveDeadline && new Date(Weave.nextMoveDeadline) < new Date()
+    useEffect(() => {
+        if (Weave && Weave.nextMoveDeadline && !deadlinePassed) {
+            timeLeftInMoveIntervalRef.current = setInterval(() => {
+                const now = new Date().getTime()
+                const deadline = new Date(Weave.nextMoveDeadline).getTime()
+                setTimeLeftInMove((deadline - now) / 1000)
+            }, 1000)
+        }
+        return () => clearInterval(timeLeftInMoveIntervalRef.current)
+    }, [postData])
+
     StringPlayers.sort((a, b) => a.UserPost.index - b.UserPost.index)
     const currentPlayer =
         Weave && Weave.privacy === 'only-selected-users'
@@ -869,6 +885,17 @@ const PostCard = (props: {
                                         />
                                     </Row>
                                 )}
+                                {Weave.state === 'active' &&
+                                    Weave.nextMoveDeadline &&
+                                    !deadlinePassed &&
+                                    timeLeftInMove > 0 && (
+                                        <p>
+                                            <span style={{ color: 'black' }}>
+                                                {formatTimeHHDDMMSS(timeLeftInMove)}
+                                            </span>{' '}
+                                            left for next move
+                                        </p>
+                                    )}
                                 {!playersRejected.length &&
                                     Weave.state !== 'cancelled' &&
                                     playersPending.length > 0 && (
