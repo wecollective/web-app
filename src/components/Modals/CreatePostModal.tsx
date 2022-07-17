@@ -319,7 +319,7 @@ const CreatePostModal = (): JSX.Element => {
             handle: accountData.handle,
             name: accountData.name,
             flagImagePath: accountData.flagImagePath,
-            color: colors.white,
+            color: null,
         },
     ])
     const [selectedUsersError, setSelectedUsersError] = useState(false)
