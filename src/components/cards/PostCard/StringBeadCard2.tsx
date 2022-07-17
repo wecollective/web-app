@@ -26,7 +26,7 @@ import { ReactComponent as PlayIcon } from '@svgs/play-solid.svg'
 import { ReactComponent as SourceIcon } from '@svgs/right-to-bracket-solid.svg'
 import { ReactComponent as AudioIcon } from '@svgs/volume-high-solid.svg'
 import * as d3 from 'd3'
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 
 const StringBeadCard = (props: {
@@ -107,6 +107,8 @@ const StringBeadCard = (props: {
         setSelectedImage(images.find((image) => image.id === imageId))
         setImageModalOpen(true)
     }
+
+    useEffect(() => setBead(sourceBeadData), [sourceBeadData])
 
     return (
         <Column
