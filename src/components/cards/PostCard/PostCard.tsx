@@ -1135,11 +1135,16 @@ const PostCard = (props: {
                                 type='button'
                                 title='Create string from post'
                                 onClick={() => {
-                                    setCreatePostModalSettings({
-                                        type: 'string-from-post',
-                                        source: postData,
-                                    })
-                                    setCreatePostModalOpen(true)
+                                    if (loggedIn) {
+                                        setCreatePostModalSettings({
+                                            type: 'string-from-post',
+                                            source: postData,
+                                        })
+                                        setCreatePostModalOpen(true)
+                                    } else {
+                                        setAlertMessage('Log in to create strings from posts')
+                                        setAlertModalOpen(true)
+                                    }
                                 }}
                             >
                                 <StringIcon />
