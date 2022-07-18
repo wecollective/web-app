@@ -863,7 +863,11 @@ const PostCard = (props: {
                 {type === 'weave' && (
                     <Column>
                         {Weave.privacy === 'only-selected-users' ? (
-                            <Row spaceBetween style={{ marginBottom: 10, color: '#acacae' }}>
+                            <Row
+                                centerY
+                                spaceBetween
+                                style={{ marginBottom: 10, color: '#acacae' }}
+                            >
                                 <FlagImageHighlights
                                     type='user'
                                     imagePaths={StringPlayers.map((p) => p.flagImagePath)}
