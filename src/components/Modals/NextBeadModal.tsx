@@ -103,6 +103,7 @@ const NextBeadModal = (props: {
     const audioRecorderRef = useRef<any>(null)
     const audioChunksRef = useRef<any>([])
     const recordingIntervalRef = useRef<any>(null)
+    const timeLimitReachedRef = useRef(false)
     const audioMBLimit = 5
 
     // images
@@ -156,6 +157,7 @@ const NextBeadModal = (props: {
         setAudioFile(undefined)
         setRecordingTime(0)
         audioChunksRef.current = []
+        timeLimitReachedRef.current = false
         const input = d3.select('#audio-file-input').node()
         if (input) input.value = ''
     }
@@ -199,22 +201,22 @@ const NextBeadModal = (props: {
                     audioChunksRef.current.push(e.data)
                 }
                 audioRecorderRef.current.onstart = () => {
+                    let time = 0
                     recordingIntervalRef.current = setInterval(() => {
-                        setRecordingTime((t) => {
-                            if (audioTimeLimit && audioTimeLimit === t) {
-                                audioRecorderRef.current.stop()
-                                setRecording(false)
-                                return t
-                            }
-                            return t + 1
-                        })
+                        time += 1
+                        setRecordingTime(time)
+                        if (audioTimeLimit && audioTimeLimit === time) {
+                            timeLimitReachedRef.current = true
+                            clearInterval(recordingIntervalRef.current)
+                            audioRecorderRef.current.stop()
+                            setRecording(false)
+                        }
                     }, 1000)
                 }
                 audioRecorderRef.current.onstop = async () => {
                     clearInterval(recordingIntervalRef.current)
                     const blob = new Blob(audioChunksRef.current, { type: 'audio/mpeg-3' })
-                    const duration = await getBlobDuration(blob)
-                    if (!audioTimeLimit || duration > audioTimeLimit) {
+                    if (!audioTimeLimit || timeLimitReachedRef.current) {
                         setNewBead({
                             ...newBead,
                             id: uuidv4(),
