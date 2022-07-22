@@ -866,6 +866,7 @@ const PostCard = (props: {
                             <Row
                                 centerY
                                 spaceBetween
+                                wrap
                                 style={{ marginBottom: 10, color: '#acacae' }}
                             >
                                 <FlagImageHighlights
@@ -893,11 +894,11 @@ const PostCard = (props: {
                                     Weave.nextMoveDeadline &&
                                     !deadlinePassed &&
                                     timeLeftInMove > 0 && (
-                                        <p>
-                                            <span style={{ color: 'black' }}>
-                                                {formatTimeHHDDMMSS(timeLeftInMove)}
-                                            </span>{' '}
-                                            left for next move
+                                        <p
+                                            style={{ color: 'black' }}
+                                            title='Time left for next move'
+                                        >
+                                            {formatTimeHHDDMMSS(timeLeftInMove)}
                                         </p>
                                     )}
                                 {!playersRejected.length &&
