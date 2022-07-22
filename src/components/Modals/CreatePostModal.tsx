@@ -2447,7 +2447,7 @@ const CreatePostModal = (): JSX.Element => {
                             {currentStep === 4 && (
                                 <Column centerX style={{ width: '100%' }}>
                                     <p>Game settings</p>
-                                    <Row centerY style={{ margin: '30px 0' }}>
+                                    <Row centerY style={{ margin: '30px 0 20px 0' }}>
                                         {allUsersAllowed ? (
                                             <Input
                                                 type='text'
@@ -2469,7 +2469,7 @@ const CreatePostModal = (): JSX.Element => {
                                         ) : (
                                             <Input
                                                 type='text'
-                                                title='Number of turns (moves per player):'
+                                                title='Moves per player:'
                                                 value={multiplayerStringForm3.numberOfTurns.value}
                                                 state={multiplayerStringForm3.numberOfTurns.state}
                                                 errors={multiplayerStringForm3.numberOfTurns.errors}
@@ -2486,142 +2486,132 @@ const CreatePostModal = (): JSX.Element => {
                                             />
                                         )}
                                     </Row>
-                                    <Row centerX style={{ marginBottom: 10 }}>
+                                    <Column centerX style={{ marginBottom: 10 }}>
+                                        <p>Allowed bead types:</p>
+                                        <Row wrap centerX style={{ marginTop: 10 }}>
+                                            <CheckBox
+                                                text='Text'
+                                                checked={allowedBeadTypes.includes('Text')}
+                                                onChange={(c) => updateAllowedBeadTypes('Text', c)}
+                                                style={{ marginRight: 10, marginBottom: 10 }}
+                                            />
+                                            <CheckBox
+                                                text='Url'
+                                                checked={allowedBeadTypes.includes('Url')}
+                                                onChange={(checked) =>
+                                                    updateAllowedBeadTypes('Url', checked)
+                                                }
+                                                style={{ marginRight: 10, marginBottom: 10 }}
+                                            />
+                                            <CheckBox
+                                                text='Audio'
+                                                checked={allowedBeadTypes.includes('Audio')}
+                                                onChange={(checked) =>
+                                                    updateAllowedBeadTypes('Audio', checked)
+                                                }
+                                                style={{ marginRight: 10, marginBottom: 10 }}
+                                            />
+                                            <CheckBox
+                                                text='Image'
+                                                checked={allowedBeadTypes.includes('Image')}
+                                                onChange={(checked) =>
+                                                    updateAllowedBeadTypes('Image', checked)
+                                                }
+                                                style={{ marginBottom: 10 }}
+                                            />
+                                        </Row>
+                                    </Column>
+                                    {!allUsersAllowed && (
                                         <Column centerX>
-                                            <p>Allowed bead types:</p>
-                                            <Column style={{ alignItems: 'start', marginTop: 10 }}>
-                                                <CheckBox
-                                                    text='Text'
-                                                    checked={allowedBeadTypes.includes('Text')}
-                                                    onChange={(c) =>
-                                                        updateAllowedBeadTypes('Text', c)
-                                                    }
-                                                    style={{ marginBottom: 5 }}
-                                                />
-                                                <CheckBox
-                                                    text='Url'
-                                                    checked={allowedBeadTypes.includes('Url')}
-                                                    onChange={(checked) =>
-                                                        updateAllowedBeadTypes('Url', checked)
-                                                    }
-                                                    style={{ marginBottom: 5 }}
-                                                />
-                                                <CheckBox
-                                                    text='Audio'
-                                                    checked={allowedBeadTypes.includes('Audio')}
-                                                    onChange={(checked) =>
-                                                        updateAllowedBeadTypes('Audio', checked)
-                                                    }
-                                                    style={{ marginBottom: 5 }}
-                                                />
-                                                <CheckBox
-                                                    text='Image'
-                                                    checked={allowedBeadTypes.includes('Image')}
-                                                    onChange={(checked) =>
-                                                        updateAllowedBeadTypes('Image', checked)
-                                                    }
-                                                />
-                                            </Column>
-                                        </Column>
-                                        {!allUsersAllowed && (
-                                            <Column centerX style={{ marginLeft: 60 }}>
-                                                <p>Player order:</p>
-                                                <Column style={{ marginTop: 10 }}>
-                                                    {selectedUsers.map((user, index) => (
-                                                        <Row
-                                                            key={user.id}
-                                                            centerY
-                                                            style={{ margin: '0 10px 10px 0' }}
-                                                        >
-                                                            <button
-                                                                type='button'
-                                                                className={`${styles.position} ${
-                                                                    playerColorsOn &&
-                                                                    styles.clickable
-                                                                }`}
-                                                                style={{
-                                                                    backgroundColor: playerColorsOn
-                                                                        ? user.color
-                                                                        : 'white',
-                                                                }}
-                                                                onClick={() =>
-                                                                    playerColorsOn &&
-                                                                    setSelectedPlayerId(user.id)
-                                                                }
-                                                            >
-                                                                {index + 1}
-                                                            </button>
-                                                            <div
-                                                                className={styles.positionControls}
-                                                            >
-                                                                {index > 0 && (
-                                                                    <button
-                                                                        type='button'
-                                                                        onClick={() =>
-                                                                            updatePlayerPosition(
-                                                                                index,
-                                                                                index - 1
-                                                                            )
-                                                                        }
-                                                                    >
-                                                                        <ChevronUpIcon />
-                                                                    </button>
-                                                                )}
-                                                                {index <
-                                                                    selectedUsers.length - 1 && (
-                                                                    <button
-                                                                        type='button'
-                                                                        onClick={() =>
-                                                                            updatePlayerPosition(
-                                                                                index,
-                                                                                index + 1
-                                                                            )
-                                                                        }
-                                                                    >
-                                                                        <ChevronDownIcon />
-                                                                    </button>
-                                                                )}
-                                                            </div>
-                                                            <ImageTitle
-                                                                type='space'
-                                                                imagePath={user.flagImagePath}
-                                                                title={`${user.name} (${user.handle})`}
-                                                                imageSize={35}
-                                                                fontSize={16}
-                                                                style={{ marginRight: 5 }}
-                                                            />
-                                                        </Row>
-                                                    ))}
-                                                </Column>
-                                                {selectedPlayerId && (
-                                                    <Modal
-                                                        centered
-                                                        close={() => setSelectedPlayerId(null)}
+                                            <p>Player order:</p>
+                                            <Column style={{ marginTop: 10 }}>
+                                                {selectedUsers.map((user, index) => (
+                                                    <Row
+                                                        key={user.id}
+                                                        centerY
+                                                        style={{ margin: '0 10px 10px 0' }}
                                                     >
-                                                        <h1>Choose the players color:</h1>
-                                                        <Row
-                                                            centerY
-                                                            className={styles.colorButtons}
+                                                        <button
+                                                            type='button'
+                                                            className={`${styles.position} ${
+                                                                playerColorsOn && styles.clickable
+                                                            }`}
+                                                            style={{
+                                                                backgroundColor: playerColorsOn
+                                                                    ? user.color
+                                                                    : 'white',
+                                                            }}
+                                                            onClick={() =>
+                                                                playerColorsOn &&
+                                                                setSelectedPlayerId(user.id)
+                                                            }
                                                         >
-                                                            {beadColors.map((color) => (
+                                                            {index + 1}
+                                                        </button>
+                                                        <div className={styles.positionControls}>
+                                                            {index > 0 && (
                                                                 <button
-                                                                    key={color}
                                                                     type='button'
-                                                                    aria-label='color'
                                                                     onClick={() =>
-                                                                        changePlayerColor(color)
+                                                                        updatePlayerPosition(
+                                                                            index,
+                                                                            index - 1
+                                                                        )
                                                                     }
-                                                                    style={{
-                                                                        backgroundColor: color,
-                                                                    }}
-                                                                />
-                                                            ))}
-                                                        </Row>
-                                                    </Modal>
-                                                )}
+                                                                >
+                                                                    <ChevronUpIcon />
+                                                                </button>
+                                                            )}
+                                                            {index < selectedUsers.length - 1 && (
+                                                                <button
+                                                                    type='button'
+                                                                    onClick={() =>
+                                                                        updatePlayerPosition(
+                                                                            index,
+                                                                            index + 1
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <ChevronDownIcon />
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                        <ImageTitle
+                                                            type='space'
+                                                            imagePath={user.flagImagePath}
+                                                            title={`${user.name} (${user.handle})`}
+                                                            imageSize={35}
+                                                            fontSize={16}
+                                                            style={{ marginRight: 5 }}
+                                                        />
+                                                    </Row>
+                                                ))}
                                             </Column>
-                                        )}
-                                    </Row>
+                                            {selectedPlayerId && (
+                                                <Modal
+                                                    centered
+                                                    close={() => setSelectedPlayerId(null)}
+                                                >
+                                                    <h1>Choose the players color:</h1>
+                                                    <Row centerY className={styles.colorButtons}>
+                                                        {beadColors.map((color) => (
+                                                            <button
+                                                                key={color}
+                                                                type='button'
+                                                                aria-label='color'
+                                                                onClick={() =>
+                                                                    changePlayerColor(color)
+                                                                }
+                                                                style={{
+                                                                    backgroundColor: color,
+                                                                }}
+                                                            />
+                                                        ))}
+                                                    </Row>
+                                                </Modal>
+                                            )}
+                                        </Column>
+                                    )}
                                     {!allowedBeadTypes.length && (
                                         <p className='danger' style={{ marginTop: 10 }}>
                                             At least one bead type must be allowed
@@ -2656,7 +2646,12 @@ const CreatePostModal = (): JSX.Element => {
                                                 />
                                             </Row>
                                             {characterLimitOn && (
-                                                <Row centerY style={{ marginBottom: 20 }}>
+                                                <Row
+                                                    wrap
+                                                    centerY
+                                                    centerX
+                                                    style={{ marginBottom: 10 }}
+                                                >
                                                     <Button
                                                         text='140 chars'
                                                         color={
@@ -2666,7 +2661,10 @@ const CreatePostModal = (): JSX.Element => {
                                                             setCharacterLimitError(false)
                                                             setCharacterLimit(140)
                                                         }}
-                                                        style={{ marginRight: 10 }}
+                                                        style={{
+                                                            marginRight: 10,
+                                                            marginBottom: 10,
+                                                        }}
                                                     />
                                                     <Button
                                                         text='280 chars'
@@ -2677,18 +2675,26 @@ const CreatePostModal = (): JSX.Element => {
                                                             setCharacterLimitError(false)
                                                             setCharacterLimit(280)
                                                         }}
-                                                        style={{ marginRight: 10 }}
-                                                    />
-                                                    <Input
-                                                        type='text'
-                                                        value={characterLimit}
-                                                        onChange={(v) => {
-                                                            setCharacterLimitError(false)
-                                                            setCharacterLimit(+v)
+                                                        style={{
+                                                            marginRight: 10,
+                                                            marginBottom: 10,
                                                         }}
-                                                        style={{ width: 70, marginRight: 10 }}
                                                     />
-                                                    <p>chars</p>
+                                                    <Row centerY style={{ marginBottom: 10 }}>
+                                                        <Input
+                                                            type='text'
+                                                            value={characterLimit}
+                                                            onChange={(v) => {
+                                                                setCharacterLimitError(false)
+                                                                setCharacterLimit(+v)
+                                                            }}
+                                                            style={{
+                                                                width: 70,
+                                                                marginRight: 10,
+                                                            }}
+                                                        />
+                                                        <p>chars</p>
+                                                    </Row>
                                                 </Row>
                                             )}
                                         </Column>
@@ -2716,7 +2722,12 @@ const CreatePostModal = (): JSX.Element => {
                                                 />
                                             </Row>
                                             {audioTimeLimitOn && (
-                                                <Row centerY style={{ marginBottom: 20 }}>
+                                                <Row
+                                                    wrap
+                                                    centerY
+                                                    centerX
+                                                    style={{ marginBottom: 10 }}
+                                                >
                                                     <Button
                                                         text='1 min'
                                                         color={
@@ -2726,7 +2737,10 @@ const CreatePostModal = (): JSX.Element => {
                                                             setAudioTimeLimitError(false)
                                                             setAudioTimeLimit(60)
                                                         }}
-                                                        style={{ marginRight: 10 }}
+                                                        style={{
+                                                            marginRight: 10,
+                                                            marginBottom: 10,
+                                                        }}
                                                     />
                                                     <Button
                                                         text='2 min'
@@ -2737,7 +2751,10 @@ const CreatePostModal = (): JSX.Element => {
                                                             setAudioTimeLimitError(false)
                                                             setAudioTimeLimit(120)
                                                         }}
-                                                        style={{ marginRight: 10 }}
+                                                        style={{
+                                                            marginRight: 10,
+                                                            marginBottom: 10,
+                                                        }}
                                                     />
                                                     <Button
                                                         text='3 min'
@@ -2748,18 +2765,26 @@ const CreatePostModal = (): JSX.Element => {
                                                             setAudioTimeLimitError(false)
                                                             setAudioTimeLimit(180)
                                                         }}
-                                                        style={{ marginRight: 20 }}
-                                                    />
-                                                    <Input
-                                                        type='text'
-                                                        value={audioTimeLimit}
-                                                        onChange={(v) => {
-                                                            setAudioTimeLimitError(false)
-                                                            setAudioTimeLimit(+v)
+                                                        style={{
+                                                            marginRight: 20,
+                                                            marginBottom: 10,
                                                         }}
-                                                        style={{ width: 70, marginRight: 10 }}
                                                     />
-                                                    <p>seconds</p>
+                                                    <Row centerY style={{ marginBottom: 10 }}>
+                                                        <Input
+                                                            type='text'
+                                                            value={audioTimeLimit}
+                                                            onChange={(v) => {
+                                                                setAudioTimeLimitError(false)
+                                                                setAudioTimeLimit(+v)
+                                                            }}
+                                                            style={{
+                                                                width: 70,
+                                                                marginRight: 10,
+                                                            }}
+                                                        />
+                                                        <p>seconds</p>
+                                                    </Row>
                                                 </Row>
                                             )}
                                         </Column>
@@ -2788,8 +2813,19 @@ const CreatePostModal = (): JSX.Element => {
                                             </Row>
                                             {moveTimeWindowOn && (
                                                 <Column centerX style={{ marginBottom: 20 }}>
-                                                    <Row centerY style={{ marginBottom: 20 }}>
-                                                        <Row centerY style={{ marginRight: 20 }}>
+                                                    <Row
+                                                        wrap
+                                                        centerY
+                                                        centerX
+                                                        style={{ marginBottom: 10 }}
+                                                    >
+                                                        <Row
+                                                            centerY
+                                                            style={{
+                                                                marginRight: 20,
+                                                                marginBottom: 10,
+                                                            }}
+                                                        >
                                                             <Input
                                                                 type='text'
                                                                 value={moveTimeWindow.days}
@@ -2809,7 +2845,13 @@ const CreatePostModal = (): JSX.Element => {
                                                                 day{pluralise(moveTimeWindow.days)}
                                                             </p>
                                                         </Row>
-                                                        <Row centerY style={{ marginRight: 20 }}>
+                                                        <Row
+                                                            centerY
+                                                            style={{
+                                                                marginRight: 20,
+                                                                marginBottom: 10,
+                                                            }}
+                                                        >
                                                             <Input
                                                                 type='text'
                                                                 value={moveTimeWindow.hours}
@@ -2830,7 +2872,13 @@ const CreatePostModal = (): JSX.Element => {
                                                                 {pluralise(moveTimeWindow.hours)}
                                                             </p>
                                                         </Row>
-                                                        <Row centerY style={{ marginRight: 20 }}>
+                                                        <Row
+                                                            centerY
+                                                            style={{
+                                                                marginRight: 20,
+                                                                marginBottom: 10,
+                                                            }}
+                                                        >
                                                             <Input
                                                                 type='text'
                                                                 value={moveTimeWindow.minutes}
@@ -2846,7 +2894,7 @@ const CreatePostModal = (): JSX.Element => {
                                                                     marginRight: 10,
                                                                 }}
                                                             />
-                                                            <p>
+                                                            <p style={{ marginBottom: 10 }}>
                                                                 minute
                                                                 {pluralise(moveTimeWindow.minutes)}
                                                             </p>
