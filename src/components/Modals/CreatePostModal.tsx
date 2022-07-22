@@ -1300,7 +1300,11 @@ const CreatePostModal = (): JSX.Element => {
                         <h1>New post</h1>
                     ) : (
                         <Column centerX className={styles.title}>
-                            <p>{postType}</p>
+                            {createPostModalSettings.type === 'string-from-post' ? (
+                                <p>Create string from post</p>
+                            ) : (
+                                <p>{postType}</p>
+                            )}
                             <Column centerX centerY>
                                 {findPostTypeValue(postType, 'icon')}
                             </Column>
