@@ -1026,7 +1026,7 @@ const PostCard = (props: {
                                                 centerY
                                                 className={styles.pendingBead}
                                                 style={{
-                                                    marginRight: StringPosts.length > 2 ? 15 : 0,
+                                                    marginRight: StringPosts.length > 1 ? 15 : 0,
                                                 }}
                                             >
                                                 <p>Waiting for</p>
