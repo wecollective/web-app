@@ -1336,7 +1336,7 @@ const CreatePostModal = (): JSX.Element => {
                             </Row>
                             <Markdown
                                 text={findPostTypeValue(postType, 'description')}
-                                style={{ textAlign: 'center' }}
+                                style={{ textAlign: 'center', marginBottom: 20 }}
                             />
                         </Column>
                     )}
@@ -1915,7 +1915,7 @@ const CreatePostModal = (): JSX.Element => {
                     {postType === 'String' && (
                         <Column centerX style={{ width: '100%' }}>
                             {currentStep === 2 && (
-                                <Column centerX style={{ width: '100%', maxWidth: 500 }}>
+                                <Column centerX style={{ width: '100%', maxWidth: 700 }}>
                                     <Column centerX>
                                         {stringPostError && (
                                             <p className='danger' style={{ marginBottom: 20 }}>
@@ -1975,6 +1975,7 @@ const CreatePostModal = (): JSX.Element => {
                                     <Column centerX style={{ width: '100%' }}>
                                         {newBead.type === 'text' && (
                                             <MarkdownEditor
+                                                key={newBead.id}
                                                 initialValue={newBead.text}
                                                 onChange={(value) => {
                                                     setStringTextErrors([])
@@ -2449,7 +2450,7 @@ const CreatePostModal = (): JSX.Element => {
                                 </Column>
                             )}
                             {currentStep === 4 && (
-                                <Column centerX style={{ width: '100%' }}>
+                                <Column centerX style={{ width: '100%', marginBottom: 20 }}>
                                     <p>Game settings</p>
                                     <Row centerY style={{ margin: '30px 0 20px 0' }}>
                                         {allUsersAllowed ? (
@@ -2816,7 +2817,7 @@ const CreatePostModal = (): JSX.Element => {
                                                 />
                                             </Row>
                                             {moveTimeWindowOn && (
-                                                <Column centerX style={{ marginBottom: 20 }}>
+                                                <Column centerX style={{ marginBottom: 10 }}>
                                                     <Row
                                                         wrap
                                                         centerY
@@ -2970,7 +2971,7 @@ const CreatePostModal = (): JSX.Element => {
                         </Column>
                     )}
 
-                    <Row centerX style={{ margin: '30px 0 20px 0' }}>
+                    <Row centerX style={{ margin: '10px 0 20px 0' }}>
                         {currentStep > 1 &&
                             (currentStep > 2 ||
                                 createPostModalSettings.type !== 'string-from-post') && (
