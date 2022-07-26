@@ -1,0 +1,32 @@
+@import '@styles/Variables';
+
+.wrapper {
+    position: relative;
+    padding: 10px 40px 10px 10px;
+    border-radius: 10px;
+    background-color: white;
+    margin-bottom: 10px;
+    min-height: 60px;
+
+    // answer number
+    > div {
+        width: 40px;
+        height: 40px;
+        border-radius: 5px;
+        margin-right: 15px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-shrink: 0;
+
+        > p {
+            color: white;
+        }
+    }
+
+    // close button
+    > button {
+        position: absolute;
+        right: 10px;
+    }
+}
