@@ -5,6 +5,7 @@
 import AudioTimeSlider from '@components/AudioTimeSlider'
 import AudioVisualiser from '@components/AudioVisualiser'
 import Button from '@components/Button'
+import InquiryAnswer from '@components/cards/InquiryAnswer'
 import PostCard from '@components/cards/PostCard/PostCard'
 import PostCardUrlPreview from '@components/cards/PostCard/PostCardUrlPreview'
 import StringBeadCard from '@components/cards/PostCard/StringBeadCard2'
@@ -52,6 +53,7 @@ import { ReactComponent as WeaveIcon } from '@svgs/multiplayer-string-icon.svg'
 import { ReactComponent as PauseIcon } from '@svgs/pause-solid.svg'
 import { ReactComponent as PlayIcon } from '@svgs/play-solid.svg'
 import { ReactComponent as PlusIcon } from '@svgs/plus.svg'
+import { ReactComponent as InquiryIcon } from '@svgs/square-poll-vertical-solid.svg'
 import { ReactComponent as StringIcon } from '@svgs/string-icon.svg'
 import { ReactComponent as AudioIcon } from '@svgs/volume-high-solid.svg'
 import axios from 'axios'
@@ -92,6 +94,20 @@ const postTypes = [
         description: `**Event**: Schedule an event with a start and end time to be displayed in your spaces calendar. Mark yourself as 'going' or 'interested' to receive a notification just before the event starts.`,
         steps: ['Post Type: Event', 'Title', 'Description (optional)', 'Date', 'Spaces', 'Create'],
         icon: <EventIcon />,
+    },
+    {
+        name: 'Inquiry',
+        description: `**Inquiry**: Ask a question, supply your own answers or leave them open for other users to add to, and keep track of the results. Single choice, multiple choice, or weighted choice voting allowed.`,
+        steps: [
+            'Post Type: Inquiry',
+            'Title',
+            'Description (optional)',
+            'Settings',
+            'Answers',
+            'Spaces',
+            'Create',
+        ],
+        icon: <InquiryIcon />,
     },
     {
         name: 'Glass Bead Game',
@@ -162,6 +178,7 @@ const CreatePostModal = (): JSX.Element => {
             },
         },
     })
+
     // url
     const [urlForm1, setUrlForm1] = useState({
         url: {
@@ -179,6 +196,7 @@ const CreatePostModal = (): JSX.Element => {
     })
     const [urlLoading, setUrlLoading] = useState(false)
     const [urlData, setUrlData] = useState<any>(null)
+
     // image
     const [images, setImages] = useState<any[]>([])
     const [imageURL, setImageURL] = useState('')
@@ -196,6 +214,7 @@ const CreatePostModal = (): JSX.Element => {
             validate: (v) => (v.length > 5000 ? ['Must be less than 5K characters'] : []),
         },
     })
+
     // audio
     const [audioFile, setAudioFile] = useState<File>()
     const [audioSizeError, setAudioSizeError] = useState(false)
@@ -215,6 +234,7 @@ const CreatePostModal = (): JSX.Element => {
             validate: (v) => (v.length > 5000 ? ['Must be less than 5K characters'] : []),
         },
     })
+
     // event
     const [startTime, setStartTime] = useState('')
     const [endTime, setEndTime] = useState('')
@@ -250,6 +270,44 @@ const CreatePostModal = (): JSX.Element => {
             required: false,
         },
     })
+
+    // inquiry
+    const [inquiryForm1, setInquiryForm1] = useState({
+        title: {
+            ...defaultErrorState,
+            value: '',
+            validate: (v) => {
+                const errors: string[] = []
+                if (!v) errors.push('Required')
+                if (v.length > 500) errors.push('Must be less than 500 characters')
+                return errors
+            },
+        },
+    })
+    const [inquiryForm2, setInquiryForm2] = useState({
+        description: {
+            ...defaultErrorState,
+            value: '',
+            validate: (v) => (v.length > 5000 ? ['Must be less than 5K characters'] : []),
+        },
+    })
+    const [inquiryType, setInquiryType] = useState('single-choice')
+    const [answersLocked, setAnswersLocked] = useState(true)
+    const [inquiryForm3, setInquiryForm3] = useState({
+        endTime: {
+            ...defaultErrorState,
+            value: '',
+            required: false,
+        },
+    })
+    const [newAnswer, setNewAnswer] = useState('')
+    const [answers, setAnswers] = useState<any[]>([])
+    const [answersError, setAnswersError] = useState(false)
+    const colorScale = d3
+        .scaleSequential()
+        .domain([0, answers.length])
+        .interpolator(d3.interpolateViridis)
+
     // glass bead game
     const [topicGroup, setTopicGroup] = useState('archetopics')
     const [selectedTopic, setSelectedTopic] = useState<any>(null)
@@ -285,6 +343,7 @@ const CreatePostModal = (): JSX.Element => {
             required: false,
         },
     })
+
     // string
     const [newBead, setNewBead] = useState<any>(defaultBeadData)
     const [string, setString] = useState<any[]>([])
@@ -714,6 +773,16 @@ const CreatePostModal = (): JSX.Element => {
             if (currentStep === 4 && allValid(eventForm3, setEventForm3)) setCurrentStep(5)
         }
 
+        if (postType === 'Inquiry') {
+            if (currentStep === 2 && allValid(inquiryForm1, setInquiryForm1)) setCurrentStep(3)
+            if (currentStep === 3 && allValid(inquiryForm2, setInquiryForm2)) setCurrentStep(4)
+            if (currentStep === 4) setCurrentStep(5)
+            if (currentStep === 5) {
+                if (answersLocked && !answers.length) setAnswersError(true)
+                else setCurrentStep(6)
+            }
+        }
+
         if (postType === 'Glass Bead Game') {
             if (currentStep === 2) {
                 if (allValid(GBGForm1, setGBGForm1)) setCurrentStep(3)
@@ -839,6 +908,16 @@ const CreatePostModal = (): JSX.Element => {
                 endTime: eventForm3.endTime.value,
                 Going: [],
                 Interested: [],
+            }
+        }
+        if (postType === 'Inquiry') {
+            data.text = inquiryForm2.description.value
+            data.Inquiry = {
+                title: inquiryForm1.title.value,
+                type: inquiryType,
+                endTime: inquiryForm3.endTime.value,
+                answersLocked,
+                InquiryAnswers: answers,
             }
         }
         if (postType === 'Glass Bead Game') {
@@ -999,6 +1078,12 @@ const CreatePostModal = (): JSX.Element => {
             title: data.Event ? data.Event.title : '',
             startTime: data.Event ? data.Event.startTime : null,
             endTime: data.Event ? data.Event.endTime : null,
+            // inquiry posts
+            inquiryTitle: inquiryForm1.title.value,
+            inquiryEndTime: inquiryForm3.endTime.value,
+            answersLocked,
+            inquiryType,
+            inquiryAnswers: JSON.stringify(answers),
             // glass bead games
             topic: data.GlassBeadGame ? data.GlassBeadGame.topic : null,
             topicGroup: data.GlassBeadGame ? data.GlassBeadGame.topicGroup : null,
@@ -1091,7 +1176,6 @@ const CreatePostModal = (): JSX.Element => {
                             Link: { index: 0, relationship: 'source' },
                         })
                     }
-
                     const newPost = {
                         ...data,
                         ...res.data.post,
@@ -1108,6 +1192,13 @@ const CreatePostModal = (): JSX.Element => {
                                   Interested: [],
                               }
                             : null,
+                        Inquiry:
+                            postType === 'Inquiry'
+                                ? {
+                                      ...data.Inquiry,
+                                      InquiryAnswers: res.data.inquiryAnswers,
+                                  }
+                                : null,
                         StringPosts: stringPosts,
                     }
                     setSpacePosts([newPost, ...spacePosts])
@@ -1217,6 +1308,23 @@ const CreatePostModal = (): JSX.Element => {
             if (startTimePast && defaultStartDate) setStartTime(defaultStartDate.toString())
             if (endTimePast && defaultEndDate) setStartTime(defaultEndDate.toString())
         }
+        if (postType === 'Inquiry' && currentStep === 4) {
+            const now = new Date()
+            const endTimePast = new Date(inquiryForm3.endTime.value) < now
+            const defaultEndDate = inquiryForm3.endTime.value
+                ? endTimePast
+                    ? now
+                    : new Date(inquiryForm3.endTime.value)
+                : undefined
+            flatpickr('#date-time-end', {
+                ...dateTimeOptions,
+                defaultDate: defaultEndDate,
+                minDate: now,
+                appendTo: document.getElementById('date-time-end-wrapper') || undefined,
+                onChange: ([value]) => setEndTime(value.toString()),
+            })
+            if (endTimePast && defaultEndDate) setStartTime(defaultEndDate.toString())
+        }
     }, [currentStep])
 
     useEffect(() => {
@@ -1280,6 +1388,15 @@ const CreatePostModal = (): JSX.Element => {
                     },
                 })
             }
+        }
+        if (postType === 'Inquiry') {
+            setInquiryForm3({
+                ...inquiryForm3,
+                endTime: {
+                    ...inquiryForm3.endTime,
+                    value: endTime,
+                },
+            })
         }
     }, [endTime])
 
@@ -1734,6 +1851,200 @@ const CreatePostModal = (): JSX.Element => {
                                         </div>
                                     </Row>
                                     {duration && <p>Duration: {duration}</p>}
+                                </Column>
+                            )}
+                        </Column>
+                    )}
+
+                    {postType === 'Inquiry' && (
+                        <Column centerX style={{ width: '100%' }}>
+                            {currentStep === 2 && (
+                                <Column centerX style={{ width: '100%', marginBottom: 30 }}>
+                                    <p style={{ marginBottom: 20 }}>Title</p>
+                                    <Input
+                                        type='text'
+                                        placeholder='Add a title...'
+                                        value={inquiryForm1.title.value}
+                                        state={inquiryForm1.title.state}
+                                        errors={inquiryForm1.title.errors}
+                                        onChange={(value) =>
+                                            setInquiryForm1({
+                                                ...inquiryForm1,
+                                                title: {
+                                                    ...inquiryForm1.title,
+                                                    value,
+                                                    state: 'default',
+                                                },
+                                            })
+                                        }
+                                        style={{ maxWidth: 400 }}
+                                    />
+                                </Column>
+                            )}
+                            {currentStep === 3 && (
+                                <Column centerX style={{ maxWidth: 500, marginBottom: 30 }}>
+                                    <p style={{ marginBottom: 20 }}>Description (optional):</p>
+                                    <MarkdownEditor
+                                        initialValue={inquiryForm2.description.value}
+                                        onChange={(value) => {
+                                            setInquiryForm2({
+                                                ...inquiryForm2,
+                                                description: {
+                                                    ...inquiryForm2.description,
+                                                    value,
+                                                    state: 'default',
+                                                },
+                                            })
+                                        }}
+                                        state={inquiryForm2.description.state}
+                                        errors={inquiryForm2.description.errors}
+                                    />
+                                </Column>
+                            )}
+                            {currentStep === 4 && (
+                                <Column centerX style={{ width: '100%', marginBottom: 30 }}>
+                                    <p style={{ marginBottom: 20 }}>Settings</p>
+                                    <Row>
+                                        <Button
+                                            text='Single choice'
+                                            color={
+                                                inquiryType === 'single-choice' ? 'blue' : 'grey'
+                                            }
+                                            onClick={() => setInquiryType('single-choice')}
+                                            style={{
+                                                marginRight: 10,
+                                                marginBottom: 10,
+                                            }}
+                                        />
+                                        <Button
+                                            text='Multiple choice'
+                                            color={
+                                                inquiryType === 'multiple-choice' ? 'blue' : 'grey'
+                                            }
+                                            onClick={() => setInquiryType('multiple-choice')}
+                                            style={{
+                                                marginRight: 10,
+                                                marginBottom: 10,
+                                            }}
+                                        />
+                                        <Button
+                                            text='Weighted choice'
+                                            color={
+                                                inquiryType === 'weighted-choice' ? 'blue' : 'grey'
+                                            }
+                                            onClick={() => setInquiryType('weighted-choice')}
+                                            style={{
+                                                marginRight: 10,
+                                                marginBottom: 10,
+                                            }}
+                                        />
+                                    </Row>
+                                    <Row
+                                        centerX
+                                        style={{
+                                            maxWidth: 400,
+                                            textAlign: 'center',
+                                            marginBottom: 30,
+                                        }}
+                                    >
+                                        {inquiryType === 'single-choice' && (
+                                            <p>
+                                                <i>Participants can only select one answer</i>
+                                            </p>
+                                        )}
+                                        {inquiryType === 'multiple-choice' && (
+                                            <p>
+                                                <i>Participants can select multiple answers</i>
+                                            </p>
+                                        )}
+                                        {inquiryType === 'weighted-choice' && (
+                                            <p>
+                                                <i>
+                                                    Participants each have 100 points which can be
+                                                    spread across answers in proportion to their
+                                                    preference
+                                                </i>
+                                            </p>
+                                        )}
+                                    </Row>
+                                    <Column
+                                        centerX
+                                        className={styles.dateTimePicker}
+                                        style={{ maxWidth: 400, margin: 0 }}
+                                    >
+                                        <p style={{ marginBottom: 10 }}>
+                                            Choose an end time for the inquiry after which voting is
+                                            locked (optional):
+                                        </p>
+                                        <div id='date-time-end-wrapper'>
+                                            <Input
+                                                id='date-time-end'
+                                                type='text'
+                                                placeholder='end time...'
+                                                state={inquiryForm3.endTime.state}
+                                                errors={inquiryForm3.endTime.errors}
+                                            />
+                                        </div>
+                                    </Column>
+                                </Column>
+                            )}
+                            {currentStep === 5 && (
+                                <Column centerX style={{ width: '100%', marginBottom: 30 }}>
+                                    <p style={{ marginBottom: 20 }}>Answers</p>
+                                    <Row centerY style={{ marginBottom: 30 }}>
+                                        <p>Allow participants to add their own answers:</p>
+                                        <Toggle
+                                            leftText='No'
+                                            rightText='Yes'
+                                            rightColor='blue'
+                                            positionLeft={answersLocked}
+                                            onClick={() => {
+                                                if (answersLocked) setAnswersError(false)
+                                                setAnswersLocked(!answersLocked)
+                                            }}
+                                            style={{ marginLeft: 20 }}
+                                        />
+                                    </Row>
+                                    <Row style={{ width: '100%', marginBottom: 20 }}>
+                                        <Input
+                                            type='text'
+                                            placeholder='New answer...'
+                                            value={newAnswer}
+                                            onChange={(value) => setNewAnswer(value)}
+                                            style={{ width: '100%', marginRight: 10 }}
+                                        />
+                                        <Button
+                                            color='blue'
+                                            text='Add'
+                                            onClick={() => {
+                                                setAnswers([
+                                                    ...answers,
+                                                    { id: uuidv4(), text: newAnswer },
+                                                ])
+                                                setNewAnswer('')
+                                                setAnswersError(false)
+                                            }}
+                                        />
+                                    </Row>
+                                    <Column style={{ maxWidth: 600 }}>
+                                        {answers.map((answer, index) => (
+                                            <InquiryAnswer
+                                                key={answer.id}
+                                                index={index}
+                                                answer={answer}
+                                                color={colorScale(index)}
+                                                close={() =>
+                                                    setAnswers(
+                                                        answers.filter((a) => a.id !== answer.id)
+                                                    )
+                                                }
+                                                preview
+                                            />
+                                        ))}
+                                    </Column>
+                                    {answersError && (
+                                        <p className='danger'>At least one answer required</p>
+                                    )}
                                 </Column>
                             )}
                         </Column>
