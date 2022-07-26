@@ -4,7 +4,7 @@ import React from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
 const CheckBox = (props: {
-    text: string
+    text?: string
     checked: boolean
     onChange: (checked: boolean) => void
     disabled?: boolean
@@ -27,12 +27,13 @@ const CheckBox = (props: {
             />
             <div />
             <CheckIcon />
-            <p>{text}</p>
+            {text && <p>{text}</p>}
         </label>
     )
 }
 
 CheckBox.defaultProps = {
+    text: null,
     disabled: false,
     style: null,
 }
