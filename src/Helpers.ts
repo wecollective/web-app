@@ -59,6 +59,7 @@ export const defaultPostData = {
     OutgoingLinks: [] as any[],
     PostImages: [] as any[],
     Event: null as any,
+    Inquiry: null as any,
     GlassBeadGame: null as any,
     StringPosts: [] as any[],
     Weave: null as any,
