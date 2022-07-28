@@ -917,7 +917,9 @@ const CreatePostModal = (): JSX.Element => {
                 type: inquiryType,
                 endTime: inquiryForm3.endTime.value,
                 answersLocked,
-                InquiryAnswers: answers,
+                InquiryAnswers: answers.map((a) => {
+                    return { ...a, Reactions: [] }
+                }),
             }
         }
         if (postType === 'Glass Bead Game') {

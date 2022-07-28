@@ -1,7 +1,10 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable no-return-assign */
 /* eslint-disable no-param-reassign */
 import AudioTimeSlider from '@components/AudioTimeSlider'
 import AudioVisualiser from '@components/AudioVisualiser'
 import Button from '@components/Button'
+import InquiryAnswer from '@components/cards/InquiryAnswer'
 import PostCardComments from '@components/cards/PostCard/PostCardComments'
 import PostCardLikeModal from '@components/cards/PostCard/PostCardLikeModal'
 import PostCardLinkModal from '@components/cards/PostCard/PostCardLinkModal'
@@ -18,11 +21,13 @@ import Modal from '@components/Modal'
 import DeletePostModal from '@components/modals/DeletePostModal'
 import ImageModal from '@components/modals/ImageModal'
 import NextBeadModal from '@components/modals/NextBeadModal'
+import PieChart from '@components/PieChart'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
 import ShowMoreLess from '@components/ShowMoreLess'
 import StatButton from '@components/StatButton'
 import { AccountContext } from '@contexts/AccountContext'
+import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import {
     dateCreated,
@@ -56,6 +61,7 @@ import { ReactComponent as PlayIcon } from '@svgs/play-solid.svg'
 import { ReactComponent as PlusIcon } from '@svgs/plus.svg'
 import { ReactComponent as PrismIcon } from '@svgs/prism-icon.svg'
 import { ReactComponent as RepostIcon } from '@svgs/repost.svg'
+import { ReactComponent as InquiryIcon } from '@svgs/square-poll-vertical-solid.svg'
 import { ReactComponent as RatingIcon } from '@svgs/star-solid.svg'
 import { ReactComponent as StringIcon } from '@svgs/string-icon.svg'
 import { ReactComponent as DeleteIcon } from '@svgs/trash-can-solid.svg'
@@ -82,6 +88,7 @@ const PostCard = (props: {
         setCreatePostModalSettings,
         setCreatePostModalOpen,
     } = useContext(AccountContext)
+    const { spaceData } = useContext(SpaceContext)
     const [postData, setPostData] = useState(post)
     const {
         id,
@@ -105,9 +112,10 @@ const PostCard = (props: {
         Creator,
         DirectSpaces,
         // IndirectSpaces,
-        GlassBeadGame,
-        Event,
         PostImages,
+        Event,
+        Inquiry,
+        GlassBeadGame,
         StringPosts,
         Weave,
         StringPlayers,
@@ -121,6 +129,17 @@ const PostCard = (props: {
     const [linkModalOpen, setLinkModalOpen] = useState(false)
     const [imageModalOpen, setImageModalOpen] = useState(false)
     const [selectedImage, setSelectedImage] = useState<any>(null)
+
+    // inquiries
+    const [totalVotes, setTotalVotes] = useState(0)
+    const [accountHasVoted, setAccountHasVoted] = useState(false)
+    const [voteChanged, setVoteChanged] = useState(false)
+    const [voteLoading, setVoteLoading] = useState(false)
+    const [showVoteSavedMessage, setShowVoteSavedMessage] = useState(false)
+    const [inquiryAnswers, setInquiryAnswers] = useState<any[]>([])
+    const [newInquiryAnswers, setNewInquiryAnswers] = useState<any[]>([])
+
+    // events
     const [eventGoingModalOpen, setEventGoingModalOpen] = useState(false)
     const [eventInterestedModalOpen, setEventInterestedModalOpen] = useState(false)
     const [commentsOpen, setCommentsOpen] = useState(location === 'post-page')
@@ -191,20 +210,16 @@ const PostCard = (props: {
         return null
     }
 
-    // weaves
-    const deadlinePassed =
-        Weave && Weave.nextMoveDeadline && new Date(Weave.nextMoveDeadline) < new Date()
-    useEffect(() => {
-        if (Weave && Weave.nextMoveDeadline && !deadlinePassed) {
-            timeLeftInMoveIntervalRef.current = setInterval(() => {
-                const now = new Date().getTime()
-                const deadline = new Date(Weave.nextMoveDeadline).getTime()
-                setTimeLeftInMove((deadline - now) / 1000)
-            }, 1000)
-        }
-        return () => clearInterval(timeLeftInMoveIntervalRef.current)
-    }, [postData])
+    // inquiries
+    const colorScale = d3
+        .scaleSequential()
+        .domain([0, Inquiry ? Inquiry.InquiryAnswers.length : 0])
+        .interpolator(d3.interpolateViridis)
 
+    // weaves
+    const deadlinePassed = () => {
+        return Weave && Weave.nextMoveDeadline && new Date(Weave.nextMoveDeadline) < new Date()
+    }
     StringPlayers.sort((a, b) => a.UserPost.index - b.UserPost.index)
     const currentPlayer =
         Weave && Weave.privacy === 'only-selected-users'
@@ -321,6 +336,8 @@ const PostCard = (props: {
                 return <AudioIcon />
             case 'event':
                 return <EventIcon />
+            case 'inquiry':
+                return <InquiryIcon />
             case 'glass-bead-game':
                 return <GBGIcon />
             case 'string':
@@ -333,6 +350,92 @@ const PostCard = (props: {
                 return null
         }
     }
+
+    function vote() {
+        if (!loggedIn) {
+            setAlertMessage('Log in to vote on inquiries')
+            setAlertModalOpen(true)
+        } else {
+            setVoteLoading(true)
+            const accessToken = cookies.get('accessToken')
+            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+            const data = {
+                userName: accountData.name,
+                userHandle: accountData.handle,
+                spaceId: spaceData.id,
+                postId: id,
+                voteData: newInquiryAnswers
+                    .filter((a) => a.accountVote)
+                    .map((a) => {
+                        return {
+                            id: a.id,
+                            value: a.value,
+                        }
+                    }),
+            }
+            axios.post(`${config.apiURL}/vote-on-inquiry`, data, options).then(() => {
+                const newAnswers = [
+                    ...newInquiryAnswers.sort((a, b) => b.totalVotes - a.totalVotes),
+                ]
+                setTotalVotes(newAnswers.map((a) => a.totalVotes).reduce((a, b) => a + b, 0))
+                setInquiryAnswers(newAnswers)
+                setNewInquiryAnswers(newAnswers)
+                setVoteLoading(false)
+                setShowVoteSavedMessage(true)
+                setTimeout(() => setShowVoteSavedMessage(false), 3000)
+            })
+        }
+    }
+
+    function updateAnswers(answerId, value) {
+        const newAnswers = [...newInquiryAnswers]
+        if (Inquiry.type === 'single-choice') {
+            newAnswers.forEach((a) => {
+                if (a.accountVote) {
+                    a.accountVote = false
+                    a.totalVotes -= 1
+                }
+            })
+        }
+        const selectedAnswer = newAnswers.find((a) => a.id === answerId)
+        selectedAnswer.accountVote = value
+        selectedAnswer.totalVotes += value ? 1 : -1
+        setNewInquiryAnswers(newAnswers)
+        setVoteChanged(true)
+    }
+
+    // build inquiry data
+    useEffect(() => {
+        if (Inquiry) {
+            const answers = [] as any[]
+            let totalInquiryVotes = 0
+            Inquiry.InquiryAnswers.forEach((answer) => {
+                totalInquiryVotes += answer.Reactions.length
+                const accountVote = answer.Reactions.find((r) => r.Creator.id === accountData.id)
+                if (accountVote && !accountHasVoted) setAccountHasVoted(true)
+                answers.push({
+                    ...answer,
+                    totalVotes: answer.Reactions.length,
+                    accountVote: !!accountVote,
+                })
+            })
+            answers.sort((a, b) => b.totalVotes - a.totalVotes)
+            setTotalVotes(totalInquiryVotes)
+            setInquiryAnswers(answers)
+            setNewInquiryAnswers(answers)
+        }
+    }, [])
+
+    useEffect(() => {
+        if (Weave && Weave.nextMoveDeadline && !deadlinePassed()) {
+            timeLeftInMoveIntervalRef.current = setInterval(() => {
+                const now = new Date().getTime()
+                const deadline = new Date(Weave.nextMoveDeadline).getTime()
+                setTimeLeftInMove((deadline - now) / 1000)
+            }, 1000)
+        }
+        return () => clearInterval(timeLeftInMoveIntervalRef.current)
+    }, [postData])
 
     return (
         <Column className={`${styles.post} ${styles[location]}`} key={id} style={style}>
@@ -562,7 +665,7 @@ const PostCard = (props: {
                 )}
                 {type === 'event' && (
                     <Column>
-                        <Markdown text={`# ${Event.title}`} className={styles.eventTitle} />
+                        <Markdown text={`# ${Event.title}`} className={styles.title} />
                         {text && (
                             <ShowMoreLess height={150} style={{ marginBottom: 10 }}>
                                 <Markdown text={text} />
@@ -650,6 +753,46 @@ const PostCard = (props: {
                                     onClick={() => respondToEvent('interested')}
                                 />
                             </Row>
+                        )}
+                    </Column>
+                )}
+                {type === 'inquiry' && (
+                    <Column>
+                        <Markdown text={`# ${Inquiry.title}`} className={styles.title} />
+                        {text && (
+                            <ShowMoreLess height={150} style={{ marginBottom: 10 }}>
+                                <Markdown text={text} />
+                            </ShowMoreLess>
+                        )}
+                        <PieChart postId={id} totalVotes={totalVotes} answers={inquiryAnswers} />
+                        <Row centerY spaceBetween style={{ marginBottom: 15 }}>
+                            <p className='grey'>Inquiry type: {Inquiry.type}</p>
+                            {showVoteSavedMessage && <p>Vote saved!</p>}
+                            <Button
+                                color='blue'
+                                text={accountHasVoted ? 'Change vote' : 'Vote'}
+                                loading={voteLoading}
+                                disabled={
+                                    loggedIn &&
+                                    (!voteChanged || !newInquiryAnswers.find((a) => a.accountVote))
+                                }
+                                onClick={() => vote()}
+                            />
+                        </Row>
+                        {newInquiryAnswers.length > 0 && (
+                            <Column className={styles.inquiryAnswers}>
+                                {newInquiryAnswers.map((answer, i) => (
+                                    <InquiryAnswer
+                                        key={answer.id}
+                                        index={i}
+                                        answer={answer}
+                                        color={colorScale(i)}
+                                        selected={answer.accountVote}
+                                        preview={!loggedIn}
+                                        onChange={(v) => updateAnswers(answer.id, v)}
+                                    />
+                                ))}
+                            </Column>
                         )}
                     </Column>
                 )}
@@ -892,7 +1035,7 @@ const PostCard = (props: {
                                 )}
                                 {Weave.state === 'active' &&
                                     Weave.nextMoveDeadline &&
-                                    !deadlinePassed &&
+                                    !deadlinePassed() &&
                                     timeLeftInMove > 0 && (
                                         <p
                                             style={{ color: 'black' }}

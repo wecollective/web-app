@@ -103,6 +103,10 @@
                 color: $postTypeEvent;
                 border: 2px solid $postTypeEvent;
             }
+            &.inquiry {
+                color: $postTypeInquiry;
+                border: 2px solid $postTypeInquiry;
+            }
             &.glass-bead-game {
                 color: $postTypeGlassBeadGame;
                 border: 2px solid $postTypeGlassBeadGame;
@@ -275,7 +279,7 @@
         }
 
         // event posts
-        .eventTitle {
+        .title {
             h1 {
                 margin-bottom: 10px;
                 font-size: 24px;
@@ -298,6 +302,13 @@
 
             p {
                 font-size: 14px;
+            }
+        }
+
+        // inquiries
+        .inquiryAnswers {
+            > div {
+                background-color: $grey1;
             }
         }
 
