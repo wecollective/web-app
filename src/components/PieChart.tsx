@@ -3,9 +3,8 @@
 import * as d3 from 'd3'
 import React, { useEffect } from 'react'
 
-const PieChart = (props: { postId: number; answers: any[] }): JSX.Element => {
-    const { postId } = props
-    // console.log('answers: ', props.answers)
+const PieChart = (props: { postId: number; totalVotes: number; answers: any[] }): JSX.Element => {
+    const { postId, totalVotes, answers } = props
 
     const size = 300
     const padding = 100
@@ -17,17 +16,10 @@ const PieChart = (props: { postId: number; answers: any[] }): JSX.Element => {
         .interpolator(d3.interpolateViridis)
 
     useEffect(() => {
-        // calculate values and sort answers
-        const answers = [] as any[]
-        let totalVotes = 0
-        props.answers.forEach((answer) => {
-            totalVotes += answer.Reactions.length
-            answers.push({ ...answer, totalVotes: answer.Reactions.length })
-        })
-        answers.sort((a, b) => b.totalVotes - a.totalVotes)
-
-        // build pie chart
         const canvas = d3.select(`#pie-chart-${postId}`)
+        // remove old chart if present
+        d3.select(canvas.node()).select('svg').remove()
+        // build new chart
         const arc = d3
             .arc()
             .outerRadius(circleRadius)
@@ -175,7 +167,7 @@ const PieChart = (props: { postId: number; answers: any[] }): JSX.Element => {
             .transition()
             .duration(2000)
             .style('opacity', 1)
-    }, [props.answers])
+    }, [answers])
 
     return <div id={`pie-chart-${postId}`} style={{ width: 450 }} />
 }
