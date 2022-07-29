@@ -3,16 +3,23 @@
 import * as d3 from 'd3'
 import React, { useEffect } from 'react'
 
-const PieChart = (props: { postId: number; totalVotes: number; answers: any[] }): JSX.Element => {
-    const { postId, totalVotes, answers } = props
-
-    const size = 300
+const PieChart = (props: {
+    type: string
+    postId: number
+    totalVotes: number
+    totalPoints: number
+    totalUsers: number
+    answers: any[]
+}): JSX.Element => {
+    const { type, postId, totalVotes, totalPoints, totalUsers, answers } = props
+    const weighted = type === 'weighted-choice'
+    const size = 280
     const padding = 100
     const arcWidth = 30
     const circleRadius = (size - padding) / 2
     const colorScale = d3
         .scaleSequential()
-        .domain([0, props.answers.length])
+        .domain([0, answers.length])
         .interpolator(d3.interpolateViridis)
 
     useEffect(() => {
@@ -25,8 +32,7 @@ const PieChart = (props: { postId: number; totalVotes: number; answers: any[] })
             .outerRadius(circleRadius)
             .innerRadius(circleRadius - arcWidth)
         const pie = d3.pie().value((d) => {
-            // todo: handle weighted choice inquiries
-            // if (inquiryType === 'weighted-choice') return d.totalScore
+            if (weighted) return d.totalPoints
             return d.totalVotes
         })
 
@@ -81,7 +87,7 @@ const PieChart = (props: { postId: number; totalVotes: number; answers: any[] })
                 .style('opacity', 1)
         }
 
-        // total votes text
+        // total votes / points
         answerGroup
             .append('text')
             .attr('transform', (d) => {
@@ -98,11 +104,11 @@ const PieChart = (props: { postId: number; totalVotes: number; answers: any[] })
             .duration(2000)
             .style('opacity', 1)
             .text((d) => {
-                // todo: handle weighted choice inquiries
+                if (weighted) return d.data.totalPoints ? `${d.data.totalPoints / 100} ↑` : ''
                 return d.data.totalVotes ? `${d.data.totalVotes} ↑` : '' // ↑⇧⇑⇪⬆
             })
 
-        // percentage of votes
+        // percentage of votes / points
         answerGroup
             .append('text')
             .attr('class', 'percentage')
@@ -119,12 +125,16 @@ const PieChart = (props: { postId: number; totalVotes: number; answers: any[] })
             .duration(2000)
             .style('opacity', 1)
             .text((d) => {
-                // todo: handle weighted choice inquiries
+                if (weighted)
+                    return totalPoints && d.data.totalPoints
+                        ? `${+((d.data.totalPoints / totalPoints) * 100).toFixed(1)}%`
+                        : ''
                 return totalVotes && d.data.totalVotes
                     ? `${+((d.data.totalVotes / totalVotes) * 100).toFixed(1)}%`
                     : ''
             })
 
+        // arc index
         answerGroup
             .append('text')
             .attr('transform', (d) => `translate(${arc.centroid(d)})`)
@@ -142,26 +152,28 @@ const PieChart = (props: { postId: number; totalVotes: number; answers: any[] })
                 return `${i + 1}`
             })
 
+        // total text
         d3.select(canvas.node())
             .select('#svg')
             .append('text')
             .attr('text-anchor', 'middle')
-            .attr('font-size', '3em')
+            .attr('font-size', 36)
             .attr('x', size / 2)
-            .attr('y', size / 2 + 10)
-            .text(totalVotes.toFixed(0))
+            .attr('y', size / 2)
+            .text(weighted ? totalUsers : totalVotes.toFixed(0))
             .style('opacity', 0)
             .transition()
             .duration(2000)
             .style('opacity', 1)
 
+        // votes text
         d3.select(canvas.node())
             .select('#svg')
             .append('text')
             .attr('text-anchor', 'middle')
-            .attr('font-size', '1em')
+            .attr('font-size', 18)
             .attr('x', size / 2)
-            .attr('y', size / 2 + 35)
+            .attr('y', size / 2 + 25)
             .text('votes')
             .style('opacity', 0)
             .transition()
@@ -169,7 +181,7 @@ const PieChart = (props: { postId: number; totalVotes: number; answers: any[] })
             .style('opacity', 1)
     }, [answers])
 
-    return <div id={`pie-chart-${postId}`} style={{ width: 450 }} />
+    return <div id={`pie-chart-${postId}`} />
 }
 
 export default PieChart
