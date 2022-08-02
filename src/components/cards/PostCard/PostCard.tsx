@@ -21,13 +21,16 @@ import Modal from '@components/Modal'
 import DeletePostModal from '@components/modals/DeletePostModal'
 import ImageModal from '@components/modals/ImageModal'
 import NextBeadModal from '@components/modals/NextBeadModal'
-import PieChart from '@components/PieChart'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
 import ShowMoreLess from '@components/ShowMoreLess'
 import StatButton from '@components/StatButton'
 import { AccountContext } from '@contexts/AccountContext'
+import { PostContext } from '@contexts/PostContext'
 import { SpaceContext } from '@contexts/SpaceContext'
+import { UserContext } from '@contexts/UserContext'
+import PieChart from '@src/components/PieChart'
+import TimeGraph from '@src/components/TimeGraph'
 import config from '@src/Config'
 import {
     dateCreated,
@@ -70,7 +73,7 @@ import { ReactComponent as AudioIcon } from '@svgs/volume-high-solid.svg'
 import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
-import { Link, useHistory } from 'react-router-dom'
+import { Link, useHistory, useLocation } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
 const PostCard = (props: {
@@ -88,7 +91,11 @@ const PostCard = (props: {
         setCreatePostModalSettings,
         setCreatePostModalOpen,
     } = useContext(AccountContext)
-    const { spaceData } = useContext(SpaceContext)
+    const { spaceData, spacePostsFilters, getSpacePosts, spacePostsPaginationLimit } = useContext(
+        SpaceContext
+    )
+    const { getPostData } = useContext(PostContext)
+    const { userData, getUserPosts, userPostsPaginationLimit } = useContext(UserContext)
     const [postData, setPostData] = useState(post)
     const {
         id,
@@ -132,12 +139,15 @@ const PostCard = (props: {
 
     // inquiries
     const [totalVotes, setTotalVotes] = useState(0)
+    const [totalPoints, setTotalPoints] = useState(0)
+    const [totalUsers, setTotalUsers] = useState(0)
     const [accountHasVoted, setAccountHasVoted] = useState(false)
     const [voteChanged, setVoteChanged] = useState(false)
     const [voteLoading, setVoteLoading] = useState(false)
     const [showVoteSavedMessage, setShowVoteSavedMessage] = useState(false)
     const [inquiryAnswers, setInquiryAnswers] = useState<any[]>([])
     const [newInquiryAnswers, setNewInquiryAnswers] = useState<any[]>([])
+    const [totalUsedPoints, setTotalUsedPoints] = useState(0)
 
     // events
     const [eventGoingModalOpen, setEventGoingModalOpen] = useState(false)
@@ -351,6 +361,15 @@ const PostCard = (props: {
         }
     }
 
+    const loc = useLocation()
+    const urlParams = Object.fromEntries(new URLSearchParams(loc.search))
+    const params = { ...spacePostsFilters }
+    Object.keys(urlParams).forEach((param) => {
+        params[param] = urlParams[param]
+    })
+
+    console.log('location: ', location)
+
     function vote() {
         if (!loggedIn) {
             setAlertMessage('Log in to vote on inquiries')
@@ -369,7 +388,7 @@ const PostCard = (props: {
                     .map((a) => {
                         return {
                             id: a.id,
-                            value: a.value,
+                            value: a.accountPoints,
                         }
                     }),
             }
@@ -382,7 +401,15 @@ const PostCard = (props: {
                 setNewInquiryAnswers(newAnswers)
                 setVoteLoading(false)
                 setShowVoteSavedMessage(true)
-                setTimeout(() => setShowVoteSavedMessage(false), 3000)
+                setTimeout(() => {
+                    setShowVoteSavedMessage(false)
+                    // todo: update state locally
+                    if (location === 'space-posts')
+                        getSpacePosts(spaceData.id, 0, spacePostsPaginationLimit, params)
+                    if (location === 'user-posts')
+                        getUserPosts(userData.id, 0, userPostsPaginationLimit, params)
+                    if (location === 'post-page') getPostData(id)
+                }, 3000)
             })
         }
     }
@@ -393,34 +420,72 @@ const PostCard = (props: {
             newAnswers.forEach((a) => {
                 if (a.accountVote) {
                     a.accountVote = false
-                    a.totalVotes -= 1
+                    // a.totalVotes -= 1
                 }
             })
         }
         const selectedAnswer = newAnswers.find((a) => a.id === answerId)
-        selectedAnswer.accountVote = value
-        selectedAnswer.totalVotes += value ? 1 : -1
+        if (Inquiry.type === 'weighted-choice') {
+            selectedAnswer.accountVote = !!value
+            selectedAnswer.accountPoints = value > 100 ? 100 : value
+            setTotalUsedPoints(newAnswers.map((a) => +a.accountPoints).reduce((a, b) => a + b, 0))
+        } else {
+            selectedAnswer.accountVote = value
+            // selectedAnswer.totalVotes += value ? 1 : -1
+        }
         setNewInquiryAnswers(newAnswers)
         setVoteChanged(true)
+    }
+
+    function voteDisabled() {
+        const weighted = Inquiry.type === 'weighted-choice'
+        if (loggedIn) {
+            if (weighted) {
+                if (!voteChanged || totalUsedPoints !== 100) return true
+            } else if (!voteChanged || !newInquiryAnswers.find((a) => a.accountVote)) {
+                return true
+            }
+        }
+        return false
     }
 
     // build inquiry data
     useEffect(() => {
         if (Inquiry) {
+            const weighted = Inquiry.type === 'weighted-choice'
             const answers = [] as any[]
             let totalInquiryVotes = 0
+            let totalInquiryPoints = 0
+            const inquiryUsers = [] as number[]
             Inquiry.InquiryAnswers.forEach((answer) => {
-                totalInquiryVotes += answer.Reactions.length
-                const accountVote = answer.Reactions.find((r) => r.Creator.id === accountData.id)
-                if (accountVote && !accountHasVoted) setAccountHasVoted(true)
+                const activeReactions = answer.Reactions.filter((r) => r.state === 'active')
+                // find all users
+                activeReactions.forEach((r) => {
+                    if (!inquiryUsers.includes(r.Creator.id)) inquiryUsers.push(r.Creator.id)
+                })
+                const points = weighted
+                    ? activeReactions.map((r) => +r.value).reduce((a, b) => a + b, 0)
+                    : 0
+                totalInquiryVotes += activeReactions.length
+                totalInquiryPoints += points
+                const accountVote = activeReactions.find((r) => r.Creator.id === accountData.id)
+                if (accountVote && !accountHasVoted) {
+                    setAccountHasVoted(true)
+                    setTotalUsedPoints(100)
+                }
                 answers.push({
                     ...answer,
-                    totalVotes: answer.Reactions.length,
+                    totalVotes: activeReactions.length,
                     accountVote: !!accountVote,
+                    accountPoints: accountVote ? +accountVote.value : 0,
+                    totalPoints: points,
                 })
             })
-            answers.sort((a, b) => b.totalVotes - a.totalVotes)
+            if (weighted) answers.sort((a, b) => b.totalPoints - a.totalPoints)
+            else answers.sort((a, b) => b.totalVotes - a.totalVotes)
             setTotalVotes(totalInquiryVotes)
+            setTotalPoints(totalInquiryPoints)
+            setTotalUsers(inquiryUsers.length)
             setInquiryAnswers(answers)
             setNewInquiryAnswers(answers)
         }
@@ -764,18 +829,42 @@ const PostCard = (props: {
                                 <Markdown text={text} />
                             </ShowMoreLess>
                         )}
-                        <PieChart postId={id} totalVotes={totalVotes} answers={inquiryAnswers} />
+                        <Row centerX>
+                            <PieChart
+                                type={Inquiry.type}
+                                postId={id}
+                                totalVotes={totalVotes}
+                                totalPoints={totalPoints}
+                                totalUsers={totalUsers}
+                                answers={inquiryAnswers}
+                            />
+                            {totalVotes > 0 && (
+                                <TimeGraph
+                                    type={Inquiry.type}
+                                    postId={id}
+                                    answers={inquiryAnswers}
+                                    startTime={postData.createdAt}
+                                />
+                            )}
+                        </Row>
                         <Row centerY spaceBetween style={{ marginBottom: 15 }}>
-                            <p className='grey'>Inquiry type: {Inquiry.type}</p>
+                            <Row>
+                                <p className='grey'>Inquiry type: {Inquiry.type}</p>
+                                {Inquiry.type === 'weighted-choice' && (
+                                    <p
+                                        className={totalUsedPoints !== 100 ? 'danger' : 'grey'}
+                                        style={{ marginLeft: 10 }}
+                                    >
+                                        ({totalUsedPoints}/100 points used)
+                                    </p>
+                                )}
+                            </Row>
                             {showVoteSavedMessage && <p>Vote saved!</p>}
                             <Button
                                 color='blue'
                                 text={accountHasVoted ? 'Change vote' : 'Vote'}
                                 loading={voteLoading}
-                                disabled={
-                                    loggedIn &&
-                                    (!voteChanged || !newInquiryAnswers.find((a) => a.accountVote))
-                                }
+                                disabled={voteDisabled()}
                                 onClick={() => vote()}
                             />
                         </Row>
@@ -785,10 +874,13 @@ const PostCard = (props: {
                                     <InquiryAnswer
                                         key={answer.id}
                                         index={i}
+                                        type={Inquiry.type}
                                         answer={answer}
+                                        totalVotes={totalVotes}
+                                        totalPoints={totalPoints}
                                         color={colorScale(i)}
                                         selected={answer.accountVote}
-                                        preview={!loggedIn}
+                                        preview={location === 'preview' || !loggedIn}
                                         onChange={(v) => updateAnswers(answer.id, v)}
                                     />
                                 ))}
