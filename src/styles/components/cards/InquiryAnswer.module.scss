@@ -2,14 +2,14 @@
 
 .wrapper {
     position: relative;
-    padding: 10px 40px 10px 10px;
+    padding: 10px 90px 10px 10px;
     border-radius: 10px;
     background-color: white;
     margin-bottom: 10px;
     min-height: 60px;
 
     // answer number
-    > div {
+    .index {
         width: 40px;
         height: 40px;
         border-radius: 5px;
@@ -24,8 +24,16 @@
         }
     }
 
-    // close button
-    > button {
+    .points {
+        margin-right: 10px;
+    }
+
+    .percentage {
+        font-weight: 800;
+        margin-right: 10px;
+    }
+
+    .buttons {
         position: absolute;
         right: 10px;
     }
