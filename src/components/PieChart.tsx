@@ -1,5 +1,6 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable no-param-reassign */
+import { pluralise } from '@src/Helpers'
 import * as d3 from 'd3'
 import React, { useEffect } from 'react'
 
@@ -112,6 +113,7 @@ const PieChart = (props: {
         answerGroup
             .append('text')
             .attr('class', 'percentage')
+            .attr('font-size', 12)
             .attr('transform', (d) => {
                 const centroid = arc.centroid(d)
                 centroid[0] *= 1.5
@@ -174,7 +176,7 @@ const PieChart = (props: {
             .attr('font-size', 18)
             .attr('x', size / 2)
             .attr('y', size / 2 + 25)
-            .text('votes')
+            .text(`vote${pluralise(weighted ? +totalUsers : +totalVotes.toFixed(0))}`)
             .style('opacity', 0)
             .transition()
             .duration(2000)
