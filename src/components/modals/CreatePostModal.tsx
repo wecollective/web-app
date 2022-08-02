@@ -291,7 +291,9 @@ const CreatePostModal = (): JSX.Element => {
             validate: (v) => (v.length > 5000 ? ['Must be less than 5K characters'] : []),
         },
     })
-    const [inquiryType, setInquiryType] = useState('single-choice')
+    const [inquiryType, setInquiryType] = useState<
+        'single-choice' | 'multiple-choice' | 'weighted-choice'
+    >('single-choice')
     const [answersLocked, setAnswersLocked] = useState(true)
     const [inquiryForm3, setInquiryForm3] = useState({
         endTime: {
@@ -1198,7 +1200,9 @@ const CreatePostModal = (): JSX.Element => {
                             postType === 'Inquiry'
                                 ? {
                                       ...data.Inquiry,
-                                      InquiryAnswers: res.data.inquiryAnswers,
+                                      InquiryAnswers: res.data.inquiryAnswers.map((a) => {
+                                          return { ...a, Reactions: [] }
+                                      }),
                                   }
                                 : null,
                         StringPosts: stringPosts,
@@ -1969,7 +1973,7 @@ const CreatePostModal = (): JSX.Element => {
                                             </p>
                                         )}
                                     </Row>
-                                    <Column
+                                    {/* <Column
                                         centerX
                                         className={styles.dateTimePicker}
                                         style={{ maxWidth: 400, margin: 0 }}
@@ -1987,13 +1991,13 @@ const CreatePostModal = (): JSX.Element => {
                                                 errors={inquiryForm3.endTime.errors}
                                             />
                                         </div>
-                                    </Column>
+                                    </Column> */}
                                 </Column>
                             )}
                             {currentStep === 5 && (
                                 <Column centerX style={{ width: '100%', marginBottom: 30 }}>
                                     <p style={{ marginBottom: 20 }}>Answers</p>
-                                    <Row centerY style={{ marginBottom: 30 }}>
+                                    {/* <Row centerY style={{ marginBottom: 30 }}>
                                         <p>Allow participants to add their own answers:</p>
                                         <Toggle
                                             leftText='No'
@@ -2006,7 +2010,7 @@ const CreatePostModal = (): JSX.Element => {
                                             }}
                                             style={{ marginLeft: 20 }}
                                         />
-                                    </Row>
+                                    </Row> */}
                                     <Row style={{ width: '100%', marginBottom: 20 }}>
                                         <Input
                                             type='text'
@@ -2021,7 +2025,11 @@ const CreatePostModal = (): JSX.Element => {
                                             onClick={() => {
                                                 setAnswers([
                                                     ...answers,
-                                                    { id: uuidv4(), text: newAnswer },
+                                                    {
+                                                        id: uuidv4(),
+                                                        text: newAnswer,
+                                                        Reactions: [],
+                                                    },
                                                 ])
                                                 setNewAnswer('')
                                                 setAnswersError(false)
@@ -2033,7 +2041,10 @@ const CreatePostModal = (): JSX.Element => {
                                             <InquiryAnswer
                                                 key={answer.id}
                                                 index={index}
+                                                type={inquiryType}
                                                 answer={answer}
+                                                totalVotes={0}
+                                                totalPoints={0}
                                                 color={colorScale(index)}
                                                 close={() =>
                                                     setAnswers(
