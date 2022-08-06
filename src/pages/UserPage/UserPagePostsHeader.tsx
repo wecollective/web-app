@@ -53,6 +53,7 @@ const UserPagePostsHeader = (props: { params: any }): JSX.Element => {
                             'Url',
                             'Audio',
                             'Event',
+                            'Inquiry',
                             'Glass Bead Game',
                             'String',
                             'Weave',
