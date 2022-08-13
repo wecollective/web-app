@@ -139,6 +139,9 @@ const SpacePagePostMap = (props: { postMapData: any; params: any }): JSX.Element
         if (d.type === 'event') {
             return colors.red
         }
+        if (d.type === 'inquiry') {
+            return colors.purple
+        }
         if (d.type === 'string') {
             return colors.lightBlue
         }
