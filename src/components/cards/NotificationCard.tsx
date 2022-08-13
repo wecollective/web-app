@@ -16,6 +16,7 @@ import { ReactComponent as LinkIconSVG } from '@svgs/link-solid.svg'
 import { ReactComponent as WeaveIcon } from '@svgs/multiplayer-string-icon.svg'
 import { ReactComponent as OverlappingCirclesIconSVG } from '@svgs/overlapping-circles-thick.svg'
 import { ReactComponent as RetweetIconSVG } from '@svgs/retweet-solid.svg'
+import { ReactComponent as InquiryIcon } from '@svgs/square-poll-vertical-solid.svg'
 import { ReactComponent as StarIconSVG } from '@svgs/star-solid.svg'
 import { ReactComponent as StringIcon } from '@svgs/string-icon.svg'
 import { ReactComponent as ThumbsUpIconSVG } from '@svgs/thumbs-up-solid.svg'
@@ -496,6 +497,15 @@ const NotificationCard = (props: {
                             <p>just created a</p>
                             <TextLink text='string' link={`/p/${postId}`} />
                             <p>from your post</p>
+                            <CreatedAt date={createdAt} />
+                        </Content>
+                    )}
+
+                    {type === 'inquiry-vote' && (
+                        <Content typeIcon={<InquiryIcon />}>
+                            <ImageNameLink type='user' data={triggerUser} />
+                            <p>just voted on your</p>
+                            <TextLink text='Inquiry' link={`/p/${postId}`} />
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}
