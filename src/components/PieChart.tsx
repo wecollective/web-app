@@ -98,6 +98,7 @@ const PieChart = (props: {
                 return `translate(${centroid})`
             })
             .attr('dy', 5)
+            .attr('font-size', 14)
             .style('font-weight', 800)
             .style('text-anchor', 'middle')
             .style('opacity', 0)
