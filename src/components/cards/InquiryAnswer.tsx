@@ -39,7 +39,7 @@ const InquiryAnswer = (props: {
         let percent = 0
         if (weighted && totalPoints) percent = (answer.totalPoints / totalPoints) * 100
         if (!weighted && totalVotes) percent = (100 / totalVotes) * answer.totalVotes
-        return +percent.toFixed(2)
+        return +percent.toFixed(1)
     }
 
     return (
@@ -53,6 +53,7 @@ const InquiryAnswer = (props: {
                         <FlagImageHighlights
                             type='user'
                             imagePaths={activeReactions.map((r) => r.Creator.flagImagePath)}
+                            imageSize={30}
                             style={{ marginRight: 10 }}
                         />
                     )}
