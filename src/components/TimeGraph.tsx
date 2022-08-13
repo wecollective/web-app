@@ -12,7 +12,7 @@ const TimeGraph = (props: {
     const { type, postId, answers, startTime } = props
     const [bezierCurves, setBezierCurves] = useState(false)
     const weighted = type === 'weighted-choice'
-    const width = 450
+    const width = document.body.clientWidth < 450 ? document.body.clientWidth : 450
     const height = 280
     const margin = { top: 20, right: 20, bottom: 20, left: 35 }
 
@@ -119,7 +119,7 @@ const TimeGraph = (props: {
                 const date = new Date(d)
                 return `${date.getHours()}:${formatMinutes(
                     date.getMinutes()
-                )} | ${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`
+                )} | ${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
             })
             .tickArguments([2])
 
