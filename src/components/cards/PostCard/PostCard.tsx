@@ -368,8 +368,6 @@ const PostCard = (props: {
         params[param] = urlParams[param]
     })
 
-    console.log('location: ', location)
-
     function vote() {
         if (!loggedIn) {
             setAlertMessage('Log in to vote on inquiries')
@@ -829,7 +827,7 @@ const PostCard = (props: {
                                 <Markdown text={text} />
                             </ShowMoreLess>
                         )}
-                        <Row centerX>
+                        <Row centerX className={styles.inquiryResults}>
                             <PieChart
                                 type={Inquiry.type}
                                 postId={id}
@@ -852,7 +850,11 @@ const PostCard = (props: {
                                 <p className='grey'>Inquiry type: {Inquiry.type}</p>
                                 {Inquiry.type === 'weighted-choice' && (
                                     <p
-                                        className={totalUsedPoints !== 100 ? 'danger' : 'grey'}
+                                        className={
+                                            voteChanged && totalUsedPoints !== 100
+                                                ? 'danger'
+                                                : 'grey'
+                                        }
                                         style={{ marginLeft: 10 }}
                                     >
                                         ({totalUsedPoints}/100 points used)
@@ -880,7 +882,7 @@ const PostCard = (props: {
                                         totalPoints={totalPoints}
                                         color={colorScale(i)}
                                         selected={answer.accountVote}
-                                        preview={location === 'preview' || !loggedIn}
+                                        preview={location === 'preview'}
                                         onChange={(v) => updateAnswers(answer.id, v)}
                                     />
                                 ))}
