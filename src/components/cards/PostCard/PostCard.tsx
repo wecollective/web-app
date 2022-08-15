@@ -629,12 +629,12 @@ const PostCard = (props: {
                 </Row>
             </Row>
             <Column className={styles.content}>
-                {type === 'text' && (
+                {type.includes('text') && (
                     <ShowMoreLess height={150}>
                         <Markdown text={text} />
                     </ShowMoreLess>
                 )}
-                {type === 'url' && (
+                {type.includes('url') && (
                     <Column>
                         {text && (
                             <Column style={{ marginBottom: 10 }}>
@@ -652,7 +652,7 @@ const PostCard = (props: {
                         />
                     </Column>
                 )}
-                {type === 'image' && (
+                {type.includes('image') && (
                     <Column>
                         {text && (
                             <ShowMoreLess height={150}>
@@ -690,7 +690,7 @@ const PostCard = (props: {
                         )}
                     </Column>
                 )}
-                {type === 'audio' && (
+                {type.includes('audio') && (
                     <Column>
                         {text && (
                             <ShowMoreLess height={150}>
