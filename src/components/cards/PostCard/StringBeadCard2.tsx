@@ -13,7 +13,7 @@ import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
 import StatButton from '@components/StatButton'
 import { AccountContext } from '@src/contexts/AccountContext'
-import { statTitle } from '@src/Helpers'
+import { handleImageError, statTitle } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/cards/PostCard/StringBeadCard2.module.scss'
 import { ReactComponent as CommentIcon } from '@svgs/comment-solid.svg'
@@ -220,7 +220,11 @@ const StringBeadCard = (props: {
                                     type='button'
                                     onClick={() => openImageModal(image.id)}
                                 >
-                                    <img src={image.url} alt='' />
+                                    <img
+                                        src={image.url}
+                                        onError={(e) => handleImageError(e, image.url)}
+                                        alt=''
+                                    />
                                 </button>
                             ))}
                         </Scrollbars>

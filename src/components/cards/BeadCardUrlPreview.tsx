@@ -1,5 +1,6 @@
 import Column from '@components/Column'
 import Row from '@components/Row'
+import { handleImageError } from '@src/Helpers'
 import styles from '@styles/components/cards/BeadCardUrlPreview.module.scss'
 import { ReactComponent as LinkIconSVG } from '@svgs/link-solid.svg'
 import React from 'react'
@@ -16,19 +17,14 @@ const BeadCardUrlPreview = (props: {
 
     const availableMetaData = image || domain || title || description
 
-    function handleImageError(e) {
-        e.target.onerror = null
-        if (!e.target.src.includes('//images.weserv.nl/')) {
-            e.target.src = `//images.weserv.nl/?url=${image}`
-        } else {
-            e.target.src = ''
-        }
-    }
-
     return (
         <a className={styles.wrapper} style={style} href={url} target='_blank' rel='noreferrer'>
             {image && (
-                <img src={image} onError={(e) => handleImageError(e)} aria-label='URL image' />
+                <img
+                    src={image}
+                    onError={(e) => handleImageError(e, image)}
+                    aria-label='URL image'
+                />
             )}
             <Column>
                 {availableMetaData ? (

@@ -3,6 +3,7 @@ import Markdown from '@components/Markdown'
 import Modal from '@components/Modal'
 import Row from '@components/Row'
 import ShowMoreLess from '@components/ShowMoreLess'
+import { handleImageError } from '@src/Helpers'
 import styles from '@styles/components/modals/ImageModal.module.scss'
 import { ReactComponent as ChevronLeftSVG } from '@svgs/chevron-left-solid.svg'
 import { ReactComponent as ChevronRightSVG } from '@svgs/chevron-right-solid.svg'
@@ -32,6 +33,12 @@ const ImageModal = (props: {
                     <img
                         className={styles.selectedImage}
                         src={selectedImage.url || URL.createObjectURL(selectedImage.file)}
+                        onError={(e) =>
+                            handleImageError(
+                                e,
+                                selectedImage.url || URL.createObjectURL(selectedImage.file)
+                            )
+                        }
                         alt=''
                     />
                     {selectedImage.caption && (

@@ -297,3 +297,13 @@ export function getParamString(params: any, param?: string, value?: string): str
     })
     return `?${queryString.join('&')}`
 }
+
+export function handleImageError(e: any, image: string): void {
+    e.target.onerror = null
+    // if http address and not already proxied via images.weserv.nl, proxy via images.weserv.nl
+    if (!e.target.src.includes('https://') && !e.target.src.includes('//images.weserv.nl/')) {
+        e.target.src = `//images.weserv.nl/?url=${image}`
+    } else {
+        e.target.src = '/images/placeholders/broken-image.jpg'
+    }
+}

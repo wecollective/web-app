@@ -1,4 +1,5 @@
 import FlagImagePlaceholder from '@components/FlagImagePlaceholder'
+import { handleImageError } from '@src/Helpers'
 import styles from '@styles/components/FlagImage.module.scss'
 import React from 'react'
 
@@ -31,7 +32,12 @@ const FlagImage = (props: {
             {imagePath ? (
                 <>
                     <div className={styles.background} />
-                    <img className={styles.flagImage} src={imagePath} alt='' />
+                    <img
+                        className={styles.flagImage}
+                        src={imagePath}
+                        onError={(e) => handleImageError(e, imagePath)}
+                        alt=''
+                    />
                 </>
             ) : (
                 <FlagImagePlaceholder type={type} />
