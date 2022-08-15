@@ -1183,7 +1183,8 @@ const PostCard = (props: {
                                 </Row>
                                 {movesLeft ? (
                                     <p>
-                                        Move: {StringPosts.length + 1} / {Weave.numberOfMoves}
+                                        Waiting for move: {StringPosts.length + 1} /{' '}
+                                        {Weave.numberOfMoves}
                                     </p>
                                 ) : (
                                     <p>Game finished</p>
