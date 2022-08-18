@@ -136,6 +136,7 @@ const PostCard = (props: {
     const [linkModalOpen, setLinkModalOpen] = useState(false)
     const [imageModalOpen, setImageModalOpen] = useState(false)
     const [selectedImage, setSelectedImage] = useState<any>(null)
+    const [likeResponseLoading, setLikeResponseLoading] = useState(false)
 
     // inquiries
     const [totalVotes, setTotalVotes] = useState(0)
@@ -445,6 +446,37 @@ const PostCard = (props: {
             }
         }
         return false
+    }
+
+    function toggleLike() {
+        console.log("Should see this")
+        setLikeResponseLoading(true)
+        const addingLike = !postData.accountLike
+        const accessToken = cookies.get('accessToken')
+        if (accessToken) {
+            const data = { postId: postData.id } as any
+            if (addingLike) {
+                data.accountHandle = accountData.handle
+                data.accountName = accountData.name
+                data.holonId = window.location.pathname.includes('/s/') ? spaceData.id : null
+            }
+            const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
+            axios
+                .post(`${config.apiURL}/${addingLike ? 'add' : 'remove'}-like`, data, authHeader)
+                .then(() => {
+                    setPostData({
+                        ...postData,
+                        totalLikes: postData.totalLikes + (addingLike ? 1 : -1),
+                        accountLike: addingLike,
+                    })
+                    setLikeResponseLoading(false)
+                })
+                .catch((error) => console.log(error))
+        } else {
+            setLikeResponseLoading(false)
+            setAlertMessage(`Log in to ${!addingLike && 'un'}like posts`)
+            setAlertModalOpen(true)
+        }
     }
 
     // build inquiry data
@@ -1321,7 +1353,9 @@ const PostCard = (props: {
                             title={statTitle('Like', totalLikes || 0)}
                             color={accountLike && 'blue'}
                             disabled={location === 'preview'}
-                            onClick={() => setLikeModalOpen(true)}
+                            loading={likeResponseLoading}
+                            onClickIcon={toggleLike}
+                            onClickStat={() => setLikeModalOpen(true)}
                         />
                         <StatButton
                             icon={<CommentIcon />}
