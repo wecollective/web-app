@@ -591,7 +591,8 @@ const PostCard = (props: {
                         </p>
                     )}
                 </Row>
-                <Row>
+                <Row centerY>
+                    <p className='grey'>ID: {id}</p>
                     <Column
                         centerX
                         centerY
