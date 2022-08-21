@@ -1,26 +1,31 @@
 @import '@styles/Variables';
 
 .wrapper {
-    all: unset;
     display: flex;
     flex-direction: row;
     align-items: center;
     flex-shrink: 0;
-    transition: color 0.5s;
-    > p {
-        font-size: 16px;
-        margin-right: 5px;
+    margin-right: 12px;
+
+    > button {
+        all: unset;
+        transition: color 0.5s;
+    }
+
+    p {
+        font-size: 17px;
+        margin-left: 6px;
         &:last-child {
             margin-right: 0;
         }
     }
-    .icon {
-        margin-right: 5px;
 
+    .icon {
         > svg {
             width: inherit;
             height: inherit;
         }
+
         &.blue {
             color: $blue1;
         }

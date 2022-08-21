@@ -435,9 +435,8 @@
     .footer {
         .statButtons {
             flex-shrink: 0;
-            > button {
+            > div > button {
                 font-size: 15px;
-                margin-right: 12px;
                 color: $grey4;
                 &:hover {
                     color: $grey6;
