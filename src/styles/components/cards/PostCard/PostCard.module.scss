@@ -438,11 +438,6 @@
             flex-shrink: 0;
             > div > button {
                 font-size: 15px;
-                color: $grey4;
-                &:hover {
-                    color: $grey6;
-                    cursor: pointer;
-                }
             }
         }
 

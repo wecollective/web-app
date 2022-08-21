@@ -6,6 +6,12 @@
     align-items: center;
     flex-shrink: 0;
     margin-right: 12px;
+    color: $grey4;
+
+    &:hover {
+        color: $grey6;
+        cursor: pointer;
+    }
 
     > button {
         all: unset;

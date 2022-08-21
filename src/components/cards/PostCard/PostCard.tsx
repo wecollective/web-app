@@ -452,7 +452,7 @@ const PostCard = (props: {
         setLikeResponseLoading(true)
         const addingLike = !postData.accountLike
         const accessToken = cookies.get('accessToken')
-        if (accessToken) {
+        if (loggedIn && accessToken) {
             const data = { postId: postData.id } as any
             if (addingLike) {
                 data.accountHandle = accountData.handle
