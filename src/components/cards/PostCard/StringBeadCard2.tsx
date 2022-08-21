@@ -69,7 +69,9 @@ const StringBeadCard = (props: {
     const images = bead.PostImages ? bead.PostImages.sort((a, b) => a.index - b.index) : []
     const type = bead.type.replace('string-', '')
     const isSource = bead.Link && bead.Link.relationship === 'source'
-    const showFooter = !['create-string-modal', 'next-bead-modal'].includes(location)
+    const showFooter =
+        !['create-string-modal', 'next-bead-modal'].includes(location) &&
+        postType !== 'glass-bead-game'
     const history = useHistory()
 
     function findBeadIcon(beadType) {
