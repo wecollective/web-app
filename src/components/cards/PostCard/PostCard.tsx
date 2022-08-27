@@ -623,7 +623,7 @@ const PostCard = (props: {
                     )}
                 </Row>
                 <Row centerY>
-                    <p className='grey'>ID: {id}</p>
+                    {location !== 'preview' && <p className='grey'>ID: {id}</p>}
                     <Column
                         centerX
                         centerY
