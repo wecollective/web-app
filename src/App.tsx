@@ -1,4 +1,4 @@
-import Modals from '@components/Modals'
+import Modals from '@components/modals/Modals'
 import Navbar from '@components/Navbar'
 import SidebarSmall from '@components/SidebarSmall'
 import ContextProviders from '@contexts/ContextProviders'

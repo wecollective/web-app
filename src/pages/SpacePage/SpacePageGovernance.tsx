@@ -36,7 +36,7 @@ const SpacePageGovernance = (): JSX.Element => {
                     <a href='http://wiki.weco.io/#/governance'>
                         <img
                             width='100%'
-                            src='http://wiki.weco.io/images/decision-pipeline.jpg'
+                            src='/images/decision-pipeline.jpg'
                             alt='Stages: Suggestions, Proposals, Pending Tasks, Active Tasks, Completed Tasks'
                         />
                     </a>
