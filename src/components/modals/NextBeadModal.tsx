@@ -357,7 +357,7 @@ const NextBeadModal = (props: {
     }
 
     return (
-        <Modal centered close={close}>
+        <Modal close={close} centered confirmClose>
             {saved ? (
                 <SuccessMessage text='Bead created!' />
             ) : (

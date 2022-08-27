@@ -5,7 +5,7 @@ import SuccessMessage from '@components/SuccessMessage'
 import { AccountContext } from '@contexts/AccountContext'
 import Modal from '@src/components/modals/Modal'
 import config from '@src/Config'
-import styles from '@styles/components/Modal.module.scss'
+import styles from '@styles/components/modals/Modal.module.scss'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3'
@@ -117,7 +117,7 @@ const RegisterModal = (props: { close: () => void }): JSX.Element => {
     })
 
     return (
-        <Modal close={close} centered>
+        <Modal close={close} centered confirmClose>
             <h1>Create a new account</h1>
             <form onSubmit={register}>
                 <Input

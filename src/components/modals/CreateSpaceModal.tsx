@@ -6,7 +6,7 @@ import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import Modal from '@src/components/modals/Modal'
 import config from '@src/Config'
-import styles from '@styles/components/Modal.module.scss'
+import styles from '@styles/components/modals/Modal.module.scss'
 import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -114,7 +114,7 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
     }
 
     return (
-        <Modal centered close={close} style={{ maxWidth: 600 }}>
+        <Modal close={close} centered confirmClose style={{ maxWidth: 600 }}>
             <h1>Create a new space in &apos;{spaceData.name}&apos;</h1>
             {!authorizedToAttachParent && (
                 <>

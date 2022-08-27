@@ -1408,12 +1408,13 @@ const CreatePostModal = (): JSX.Element => {
 
     return (
         <Modal
-            centered
+            className={styles.wrapper}
             close={() => {
                 setCreatePostModalOpen(false)
                 setCreatePostModalSettings({ type: 'text' })
             }}
-            className={styles.wrapper}
+            centered
+            confirmClose
         >
             {saved ? (
                 <SuccessMessage text='Post created!' />

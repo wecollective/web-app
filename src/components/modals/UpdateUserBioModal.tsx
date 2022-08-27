@@ -6,7 +6,7 @@ import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
 import Modal from '@src/components/modals/Modal'
 import config from '@src/Config'
-import styles from '@styles/components/Modal.module.scss'
+import styles from '@styles/components/modals/Modal.module.scss'
 import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import Cookies from 'universal-cookie'
@@ -65,7 +65,7 @@ const UpdateUserBioModal = (props: { close: () => void }): JSX.Element => {
     }
 
     return (
-        <Modal centered close={close}>
+        <Modal close={close} centered confirmClose>
             <h1>Change your account bio</h1>
             <form onSubmit={updateUserBio} style={{ maxWidth: 500 }}>
                 <MarkdownEditor

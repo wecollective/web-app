@@ -5,7 +5,7 @@ import SuccessMessage from '@components/SuccessMessage'
 import { SpaceContext } from '@contexts/SpaceContext'
 import Modal from '@src/components/modals/Modal'
 import config from '@src/Config'
-import styles from '@styles/components/Modal.module.scss'
+import styles from '@styles/components/modals/Modal.module.scss'
 import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import Cookies from 'universal-cookie'
@@ -64,7 +64,7 @@ const UpdateSpaceDescriptionModal = (props: { close: () => void }): JSX.Element 
     }
 
     return (
-        <Modal centered close={close}>
+        <Modal close={close} centered confirmClose>
             <h1>Change the description for {spaceData.name}</h1>
             <form onSubmit={updateSpaceDescription} style={{ maxWidth: 500 }}>
                 <MarkdownEditor
