@@ -1,6 +1,6 @@
 /* eslint-disable react/no-array-index-key */
 import Button from '@components/Button'
-import StringBeadCard from '@components/cards/PostCard/StringBeadCard2'
+import StringBeadCard from '@components/cards/PostCard/StringBeadCard'
 import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
 import Input from '@components/Input'
