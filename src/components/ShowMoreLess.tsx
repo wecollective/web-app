@@ -14,15 +14,21 @@ const ShowMoreLess = (props: {
     const [expanded, setExpanded] = useState(false)
     const contentRef = useRef<HTMLDivElement>(null)
 
-    function findContentHeight() {
-        if (contentRef.current) return contentRef.current.scrollHeight
-        return 0
+    function contentHeight() {
+        return contentRef.current ? contentRef.current.scrollHeight : 0
     }
 
     useEffect(() => {
-        if (findContentHeight() > height) setOverflow(true)
-        else setOverflow(false)
-    }, [props])
+        if (contentHeight() > height) setOverflow(true)
+        // listen for content height changes after draft text initialises
+        const resizeObserver = new ResizeObserver(() => {
+            if (!overflow && contentHeight() > height) {
+                setOverflow(true)
+                resizeObserver.disconnect()
+            }
+        })
+        resizeObserver.observe(contentRef.current!)
+    }, [])
 
     function showMoreLess() {
         // // if expanded, scroll back to top of content
@@ -41,7 +47,7 @@ const ShowMoreLess = (props: {
                 ref={contentRef}
                 className={styles.content}
                 style={{
-                    maxHeight: expanded ? findContentHeight() : height,
+                    maxHeight: expanded ? contentHeight() : height,
                 }}
             >
                 {children}
