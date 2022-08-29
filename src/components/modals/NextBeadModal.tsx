@@ -48,6 +48,7 @@ const NextBeadModal = (props: {
         // moveTimeWindow,
         privacy,
     } = Weave
+    const maxChars = characterLimit || 5000
     const beadIndex = StringPosts.length + 1
     const playerData = StringPlayers.find((p) => p.id === accountData.id)
     const playerColor = playerData ? playerData.UserPost.color : null
@@ -405,13 +406,13 @@ const NextBeadModal = (props: {
                             <Column centerX style={{ maxWidth: 500 }}>
                                 <DraftTextEditor
                                     stringifiedDraft={newBead.text}
-                                    maxChars={characterLimit}
+                                    maxChars={maxChars}
                                     onChange={(value) => {
-                                        const invalid = findDraftLength(value) > characterLimit
+                                        const invalid = findDraftLength(value) > maxChars
                                         setStringTextState(invalid ? 'invalid' : 'default')
                                         setStringTextErrors(
                                             invalid
-                                                ? [`Must be less than ${characterLimit} characters`]
+                                                ? [`Must be less than ${maxChars} characters`]
                                                 : []
                                         )
                                         setNewBead({ ...newBead, text: value })
@@ -670,8 +671,7 @@ const NextBeadModal = (props: {
                             disabled={
                                 (newBead.type === 'text' && findDraftLength(newBead.text) < 1) ||
                                 (newBead.type === 'text' &&
-                                    characterLimit &&
-                                    findDraftLength(newBead.text) > characterLimit) ||
+                                    findDraftLength(newBead.text) > maxChars) ||
                                 (newBead.type === 'url' &&
                                     (newBead.urlData === null || urlLoading)) ||
                                 (newBead.type === 'audio' && newBead.audioFile === null) ||
