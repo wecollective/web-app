@@ -1,0 +1,54 @@
+@import '@styles/Variables';
+
+.wrapper {
+    position: relative;
+    width: 100%;
+
+    :global(.rdw-editor-main) {
+        background-color: white;
+        padding: 0 15px;
+        border: 1px solid $grey2;
+    }
+
+    &.invalid {
+        :global(.rdw-editor-main) {
+            border: 2px solid $red;
+        }
+
+        svg {
+            color: $red;
+        }
+    }
+
+    &.valid {
+        :global(.rdw-editor-main) {
+            border: 2px solid $green;
+        }
+
+        svg {
+            color: $green;
+        }
+    }
+
+    .stats {
+        background-color: white;
+        padding: 0 10px;
+        border: 1px solid $grey2;
+        font-size: 14px;
+        color: $grey4;
+        height: 30px;
+
+        &.error {
+            color: $red;
+        }
+
+        .errors {
+            > svg {
+                flex-shrink: 0;
+                height: 20px;
+                width: 20px;
+                margin-right: 5px;
+            }
+        }
+    }
+}

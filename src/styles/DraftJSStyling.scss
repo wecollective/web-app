@@ -1,0 +1,52 @@
+@import '@styles/Variables';
+
+// toolbar styles
+.rdw-editor-toolbar {
+    border: 1px solid $grey2;
+    margin: 0;
+
+    .rdw-option-wrapper {
+        height: 30px;
+        min-width: 30px;
+
+        .rdw-option-active {
+            background-color: $grey2;
+        }
+    }
+
+    .rdw-colorpicker-modal {
+        left: -142px;
+    }
+}
+
+// text content styles
+.rdw-editor-main {
+    span {
+        font-family: inherit;
+    }
+
+    img {
+        max-width: 100%;
+    }
+
+    a {
+        color: $blue1;
+    }
+
+    // force text align for paragraphs
+    .rdw-center-aligned-block {
+        > .public-DraftStyleDefault-block > span {
+            text-align: center;
+            width: 100%;
+            display: block;
+        }
+    }
+
+    .rdw-right-aligned-block {
+        > .public-DraftStyleDefault-block > span {
+            text-align: right;
+            width: 100%;
+            display: block;
+        }
+    }
+}
