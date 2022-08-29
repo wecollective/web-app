@@ -6,8 +6,8 @@ import PostCardLikeModal from '@components/cards/PostCard/PostCardLikeModal'
 import PostCardLinkModal from '@components/cards/PostCard/PostCardLinkModal'
 import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
+import DraftText from '@components/DraftText'
 import ImageTitle from '@components/ImageTitle'
-import Markdown from '@components/Markdown'
 import ImageModal from '@components/modals/ImageModal'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
@@ -154,17 +154,7 @@ const StringBeadCard = (props: {
             <Column centerY className={styles.beadContent}>
                 {type === 'text' && (
                     <Scrollbars>
-                        <Markdown
-                            text={bead.text}
-                            className={styles.markdown}
-                            style={{
-                                padding: '0 10px 2px 10px',
-                                fontSize: 14,
-                                lineHeight: '18px',
-                                width: '100%',
-                                textAlign: 'center',
-                            }}
-                        />
+                        <DraftText text={bead.text} />
                     </Scrollbars>
                 )}
                 {type === 'url' && (

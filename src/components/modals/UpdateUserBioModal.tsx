@@ -1,11 +1,12 @@
 import Button from '@components/Button'
+import DraftTextEditor from '@components/DraftTextEditor'
 import LoadingWheel from '@components/LoadingWheel'
-import MarkdownEditor from '@components/MarkdownEditor'
 import SuccessMessage from '@components/SuccessMessage'
 import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
 import Modal from '@src/components/modals/Modal'
 import config from '@src/Config'
+import { findDraftLength } from '@src/Helpers'
 import styles from '@styles/components/modals/Modal.module.scss'
 import axios from 'axios'
 import React, { useContext, useState } from 'react'
@@ -25,7 +26,8 @@ const UpdateUserBioModal = (props: { close: () => void }): JSX.Element => {
     function updateUserBio(e) {
         e.preventDefault()
         const unChanged = inputValue === accountData.bio
-        const invalid = inputValue.length < 1 || inputValue.length > 10000
+        const charLength = findDraftLength(inputValue)
+        const invalid = charLength < 1 || charLength > 10000
         if (unChanged) {
             setInputState('invalid')
             setInputErrors(['Unchanged from previous bio'])
@@ -55,7 +57,7 @@ const UpdateUserBioModal = (props: { close: () => void }): JSX.Element => {
                         setAccountData({ ...accountData, bio: inputValue })
                         setUserData({ ...userData, bio: inputValue })
                         setShowSuccessMessage(true)
-                        setTimeout(() => close(), 3000)
+                        setTimeout(() => close(), 1000)
                         break
                     default:
                         break
@@ -68,8 +70,9 @@ const UpdateUserBioModal = (props: { close: () => void }): JSX.Element => {
         <Modal close={close} centered confirmClose>
             <h1>Change your account bio</h1>
             <form onSubmit={updateUserBio} style={{ maxWidth: 500 }}>
-                <MarkdownEditor
-                    initialValue={inputValue}
+                <DraftTextEditor
+                    stringifiedDraft={inputValue}
+                    maxChars={10000}
                     onChange={(value) => {
                         setInputState('default')
                         setInputValue(value)

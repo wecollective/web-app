@@ -1,6 +1,6 @@
 import Button from '@components/Button'
 import Column from '@components/Column'
-import Markdown from '@components/Markdown'
+import DraftText from '@components/DraftText'
 import DeleteSpaceModal from '@components/modals/DeleteSpaceModal'
 import InviteSpaceModeratorModal from '@components/modals/InviteSpaceModeratorModal'
 import ParentSpaceRequestModal from '@components/modals/ParentSpaceRequestModal'
@@ -73,7 +73,7 @@ const SpacePageSettings = ({ history }): JSX.Element => {
                     <Column centerX>
                         <h1>Description:</h1>
                         <ShowMoreLess height={75}>
-                            <Markdown text={spaceData.description || ''} />
+                            <DraftText text={spaceData.description || ''} />
                         </ShowMoreLess>
                         <Button
                             text='Edit'

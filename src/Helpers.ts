@@ -1,3 +1,4 @@
+import { convertFromRaw, EditorState } from 'draft-js'
 import { v4 as uuidv4 } from 'uuid'
 
 // constants
@@ -306,4 +307,11 @@ export function handleImageError(e: any, image: string): void {
     } else {
         e.target.src = '/images/placeholders/broken-image.jpg'
     }
+}
+
+export function findDraftLength(strigifiedDraft: string) {
+    if (!strigifiedDraft.length) return 0
+    const contentState = convertFromRaw(JSON.parse(strigifiedDraft))
+    const editorState = EditorState.createWithContent(contentState)
+    return editorState.getCurrentContent().getPlainText().length
 }

@@ -1,6 +1,6 @@
 import Button from '@components/Button'
 import Column from '@components/Column'
-import Markdown from '@components/Markdown'
+import DraftText from '@components/DraftText'
 import UpdateUserBioModal from '@components/modals/UpdateUserBioModal'
 import UpdateUserNameModal from '@components/modals/UpdateUserNameModal'
 import Row from '@components/Row'
@@ -57,7 +57,7 @@ const UserPageSettings = (): JSX.Element => {
                     <Column centerX>
                         <h1>Bio:</h1>
                         <ShowMoreLess height={75}>
-                            <Markdown text={bio} />
+                            <DraftText text={bio} />
                         </ShowMoreLess>
                         <Button
                             text='Edit'

@@ -14,6 +14,7 @@ import PostCardUrlPreview from '@components/cards/PostCard/PostCardUrlPreview'
 import StringBeadCard from '@components/cards/PostCard/StringBeadCard'
 import CloseOnClickOutside from '@components/CloseOnClickOutside'
 import Column from '@components/Column'
+import DraftText from '@components/DraftText'
 import FlagImageHighlights from '@components/FlagImageHighlights'
 import ImageTitle from '@components/ImageTitle'
 import Markdown from '@components/Markdown'
@@ -663,7 +664,7 @@ const PostCard = (props: {
             <Column className={styles.content}>
                 {type.includes('text') && (
                     <ShowMoreLess height={150}>
-                        <Markdown text={text} />
+                        <DraftText text={text} />
                     </ShowMoreLess>
                 )}
                 {type.includes('url') && (
@@ -671,7 +672,7 @@ const PostCard = (props: {
                         {text && (
                             <Column style={{ marginBottom: 10 }}>
                                 <ShowMoreLess height={150}>
-                                    <Markdown text={text} />
+                                    <DraftText text={text} />
                                 </ShowMoreLess>
                             </Column>
                         )}
@@ -688,7 +689,7 @@ const PostCard = (props: {
                     <Column>
                         {text && (
                             <ShowMoreLess height={150}>
-                                <Markdown text={text} />
+                                <DraftText text={text} />
                             </ShowMoreLess>
                         )}
                         <Row centerX>
@@ -726,7 +727,7 @@ const PostCard = (props: {
                     <Column>
                         {text && (
                             <ShowMoreLess height={150}>
-                                <Markdown text={text} />
+                                <DraftText text={text} />
                             </ShowMoreLess>
                         )}
                         <AudioVisualiser
@@ -763,7 +764,7 @@ const PostCard = (props: {
                         <Markdown text={`# ${Event.title}`} className={styles.title} />
                         {text && (
                             <ShowMoreLess height={150} style={{ marginBottom: 10 }}>
-                                <Markdown text={text} />
+                                <DraftText text={text} />
                             </ShowMoreLess>
                         )}
                         <Row wrap centerY className={styles.eventTimes}>
@@ -856,7 +857,7 @@ const PostCard = (props: {
                         <Markdown text={`# ${Inquiry.title}`} className={styles.title} />
                         {text && (
                             <ShowMoreLess height={150} style={{ marginBottom: 10 }}>
-                                <Markdown text={text} />
+                                <DraftText text={text} />
                             </ShowMoreLess>
                         )}
                         <Row centerX className={styles.inquiryResults}>
@@ -939,7 +940,7 @@ const PostCard = (props: {
                                 />
                                 {text && (
                                     <ShowMoreLess height={150}>
-                                        <Markdown text={text} />
+                                        <DraftText text={text} />
                                     </ShowMoreLess>
                                 )}
                             </Column>
@@ -1085,7 +1086,7 @@ const PostCard = (props: {
                         {text && (
                             <Column style={{ marginBottom: 10 }}>
                                 <ShowMoreLess height={150}>
-                                    <Markdown text={text} />
+                                    <DraftText text={text} />
                                 </ShowMoreLess>
                             </Column>
                         )}
@@ -1226,7 +1227,7 @@ const PostCard = (props: {
                         {text && (
                             <Column style={{ marginBottom: 10 }}>
                                 <ShowMoreLess height={150}>
-                                    <Markdown text={text} />
+                                    <DraftText text={text} />
                                 </ShowMoreLess>
                             </Column>
                         )}

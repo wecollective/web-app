@@ -15,7 +15,6 @@ import Column from '@components/Column'
 import ImageTitle from '@components/ImageTitle'
 import Input from '@components/Input'
 import Markdown from '@components/Markdown'
-import MarkdownEditor from '@components/MarkdownEditor'
 import ProgressBarSteps from '@components/ProgressBarSteps'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
@@ -24,6 +23,7 @@ import SuccessMessage from '@components/SuccessMessage'
 import Toggle from '@components/Toggle'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
+import DraftTextEditor from '@src/components/DraftTextEditor'
 import Modal from '@src/components/modals/Modal'
 import config from '@src/Config'
 import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
@@ -32,6 +32,7 @@ import {
     defaultBeadData,
     defaultErrorState,
     defaultPostData,
+    findDraftLength,
     formatTimeDHM,
     formatTimeMMSS,
     isValidUrl,
@@ -172,8 +173,9 @@ const CreatePostModal = (): JSX.Element => {
             value: '',
             validate: (v) => {
                 const errors: string[] = []
-                if (v.length < 1) errors.push('Required')
-                if (v.length > 5000) errors.push('Must be less than 5K characters')
+                const totalCharacters = findDraftLength(v)
+                if (totalCharacters < 1) errors.push('Required')
+                if (totalCharacters > 5000) errors.push('Must be less than 5K characters')
                 return errors
             },
         },
@@ -191,7 +193,7 @@ const CreatePostModal = (): JSX.Element => {
         text: {
             ...defaultErrorState,
             value: '',
-            validate: (v) => (v.length > 5000 ? ['Must be less than 5K characters'] : []),
+            validate: (v) => (findDraftLength(v) > 5000 ? ['Must be less than 5K characters'] : []),
         },
     })
     const [urlLoading, setUrlLoading] = useState(false)
@@ -231,7 +233,7 @@ const CreatePostModal = (): JSX.Element => {
         text: {
             ...defaultErrorState,
             value: '',
-            validate: (v) => (v.length > 5000 ? ['Must be less than 5K characters'] : []),
+            validate: (v) => (findDraftLength(v) > 5000 ? ['Must be less than 5K characters'] : []),
         },
     })
 
@@ -255,7 +257,7 @@ const CreatePostModal = (): JSX.Element => {
         description: {
             ...defaultErrorState,
             value: '',
-            validate: (v) => (v.length > 5000 ? ['Must be less than 5K characters'] : []),
+            validate: (v) => (findDraftLength(v) > 5000 ? ['Must be less than 5K characters'] : []),
         },
     })
     const [eventForm3, setEventForm3] = useState({
@@ -288,7 +290,7 @@ const CreatePostModal = (): JSX.Element => {
         description: {
             ...defaultErrorState,
             value: '',
-            validate: (v) => (v.length > 5000 ? ['Must be less than 5K characters'] : []),
+            validate: (v) => (findDraftLength(v) > 5000 ? ['Must be less than 5K characters'] : []),
         },
     })
     const [inquiryType, setInquiryType] = useState<
@@ -330,7 +332,7 @@ const CreatePostModal = (): JSX.Element => {
         description: {
             ...defaultErrorState,
             value: '',
-            validate: (v) => (v.length > 5000 ? ['Must be less than 5K characters'] : []),
+            validate: (v) => (findDraftLength(v) > 5000 ? ['Must be less than 5K characters'] : []),
         },
     })
     const [GBGForm3, setGBGForm3] = useState({
@@ -358,7 +360,7 @@ const CreatePostModal = (): JSX.Element => {
         description: {
             ...defaultErrorState,
             value: '',
-            validate: (v) => (v.length > 5000 ? ['Must be less than 5K characters'] : []),
+            validate: (v) => (findDraftLength(v) > 5000 ? ['Must be less than 5K characters'] : []),
         },
     })
 
@@ -367,7 +369,7 @@ const CreatePostModal = (): JSX.Element => {
         description: {
             ...defaultErrorState,
             value: '',
-            validate: (v) => (v.length > 5000 ? ['Must be less than 5K characters'] : []),
+            validate: (v) => (findDraftLength(v) > 5000 ? ['Must be less than 5K characters'] : []),
         },
     })
     const [allUsersAllowed, setAllUsersAllowed] = useState(true)
@@ -646,7 +648,7 @@ const CreatePostModal = (): JSX.Element => {
         // validate bead
         let valid = false
         if (newBead.type === 'text') {
-            valid = newBead.text.length < 5000
+            valid = findDraftLength(newBead.text) < 5000
             setStringTextErrors(valid ? [] : ['Must be less than 5K characters'])
             setStringTextState(valid ? 'default' : 'invalid')
         } else if (newBead.type === 'image' && totalImageSize >= totalMBUploadLimit) {
@@ -1467,9 +1469,9 @@ const CreatePostModal = (): JSX.Element => {
 
                     {postType === 'Text' && currentStep === 2 && (
                         <Column centerX style={{ maxWidth: 500, marginBottom: 30 }}>
-                            <MarkdownEditor
-                                initialValue={textForm.text.value}
-                                // text={textForm.text.value}
+                            <DraftTextEditor
+                                stringifiedDraft={textForm.text.value}
+                                maxChars={5000}
                                 onChange={(value) => {
                                     setTextForm({
                                         ...textForm,
@@ -1519,8 +1521,9 @@ const CreatePostModal = (): JSX.Element => {
                             {currentStep === 3 && (
                                 <Column centerX style={{ width: '100%', marginBottom: 30 }}>
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
-                                    <MarkdownEditor
-                                        initialValue={urlForm2.text.value}
+                                    <DraftTextEditor
+                                        stringifiedDraft={urlForm2.text.value}
+                                        maxChars={5000}
                                         onChange={(value) => {
                                             setUrlForm2({
                                                 ...urlForm2,
@@ -1660,8 +1663,9 @@ const CreatePostModal = (): JSX.Element => {
                                     style={{ width: '100%', maxWidth: 500, marginBottom: 30 }}
                                 >
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
-                                    <MarkdownEditor
-                                        initialValue={imageForm.text.value}
+                                    <DraftTextEditor
+                                        stringifiedDraft={imageForm.text.value}
+                                        maxChars={5000}
                                         onChange={(value) => {
                                             setImageForm({
                                                 ...imageForm,
@@ -1770,8 +1774,9 @@ const CreatePostModal = (): JSX.Element => {
                             {currentStep === 3 && (
                                 <Column centerX style={{ maxWidth: 500, marginBottom: 30 }}>
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
-                                    <MarkdownEditor
-                                        initialValue={audioForm.text.value}
+                                    <DraftTextEditor
+                                        stringifiedDraft={audioForm.text.value}
+                                        maxChars={5000}
                                         onChange={(value) => {
                                             setAudioForm({
                                                 ...audioForm,
@@ -1816,8 +1821,9 @@ const CreatePostModal = (): JSX.Element => {
                             {currentStep === 3 && (
                                 <Column centerX style={{ maxWidth: 500, marginBottom: 30 }}>
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
-                                    <MarkdownEditor
-                                        initialValue={eventForm2.description.value}
+                                    <DraftTextEditor
+                                        stringifiedDraft={eventForm2.description.value}
+                                        maxChars={5000}
                                         onChange={(value) => {
                                             setEventForm2({
                                                 ...eventForm2,
@@ -1891,8 +1897,9 @@ const CreatePostModal = (): JSX.Element => {
                             {currentStep === 3 && (
                                 <Column centerX style={{ maxWidth: 500, marginBottom: 30 }}>
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
-                                    <MarkdownEditor
-                                        initialValue={inquiryForm2.description.value}
+                                    <DraftTextEditor
+                                        stringifiedDraft={inquiryForm2.description.value}
+                                        maxChars={5000}
                                         onChange={(value) => {
                                             setInquiryForm2({
                                                 ...inquiryForm2,
@@ -2190,8 +2197,9 @@ const CreatePostModal = (): JSX.Element => {
                             {currentStep === 3 && (
                                 <Column centerX style={{ maxWidth: 500, marginBottom: 30 }}>
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
-                                    <MarkdownEditor
-                                        initialValue={GBGForm2.description.value}
+                                    <DraftTextEditor
+                                        stringifiedDraft={GBGForm2.description.value}
+                                        maxChars={5000}
                                         onChange={(value) => {
                                             setGBGForm2({
                                                 ...GBGForm2,
@@ -2297,11 +2305,12 @@ const CreatePostModal = (): JSX.Element => {
                                             <ImageIcon />
                                         </button>
                                     </Row>
-                                    <Column centerX style={{ width: '100%' }}>
+                                    <Column centerX style={{ maxWidth: 500 }}>
                                         {newBead.type === 'text' && (
-                                            <MarkdownEditor
+                                            <DraftTextEditor
                                                 key={newBead.id}
-                                                initialValue={newBead.text}
+                                                stringifiedDraft={newBead.text}
+                                                maxChars={5000}
                                                 onChange={(value) => {
                                                     setStringTextErrors([])
                                                     setStringTextState('default')
@@ -2584,7 +2593,7 @@ const CreatePostModal = (): JSX.Element => {
                                             color='aqua'
                                             disabled={
                                                 (newBead.type === 'text' &&
-                                                    newBead.text.length < 1) ||
+                                                    findDraftLength(newBead.text) < 1) ||
                                                 (newBead.type === 'url' &&
                                                     (newBead.urlData === null || urlLoading)) ||
                                                 (newBead.type === 'audio' &&
@@ -2662,8 +2671,9 @@ const CreatePostModal = (): JSX.Element => {
                             {currentStep === 3 && (
                                 <Column centerX style={{ maxWidth: 500, marginBottom: 30 }}>
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
-                                    <MarkdownEditor
-                                        initialValue={stringForm.description.value}
+                                    <DraftTextEditor
+                                        stringifiedDraft={stringForm.description.value}
+                                        maxChars={5000}
                                         onChange={(value) => {
                                             setStringForm({
                                                 ...stringForm,
@@ -2687,8 +2697,9 @@ const CreatePostModal = (): JSX.Element => {
                             {currentStep === 2 && (
                                 <Column centerX style={{ maxWidth: 500, marginBottom: 30 }}>
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
-                                    <MarkdownEditor
-                                        initialValue={multiplayerStringForm1.description.value}
+                                    <DraftTextEditor
+                                        stringifiedDraft={multiplayerStringForm1.description.value}
+                                        maxChars={5000}
                                         onChange={(value) => {
                                             setMultiplayerStringForm1({
                                                 ...multiplayerStringForm1,

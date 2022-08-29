@@ -3,15 +3,15 @@ import Button from '@components/Button'
 import StringBeadCard from '@components/cards/PostCard/StringBeadCard'
 import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
+import DraftTextEditor from '@components/DraftTextEditor'
 import Input from '@components/Input'
-import MarkdownEditor from '@components/MarkdownEditor'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
 import SuccessMessage from '@components/SuccessMessage'
 import Modal from '@src/components/modals/Modal'
 import config from '@src/Config'
 import { AccountContext } from '@src/contexts/AccountContext'
-import { defaultErrorState, formatTimeMMSS, isValidUrl } from '@src/Helpers'
+import { defaultErrorState, findDraftLength, formatTimeMMSS, isValidUrl } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/NextBeadModal.module.scss'
 import { ReactComponent as ChevronLeftIcon } from '@svgs/chevron-left-solid.svg'
@@ -81,7 +81,6 @@ const NextBeadModal = (props: {
         'default'
     )
     const [stringTextErrors, setStringTextErrors] = useState<string[]>([])
-    const [characterLimitError, setCharacterLimitError] = useState(false)
 
     // url
     const [urlLoading, setUrlLoading] = useState(false)
@@ -404,20 +403,17 @@ const NextBeadModal = (props: {
                     <Column centerX style={{ width: '100%' }}>
                         {newBead.type === 'text' && (
                             <Column centerX style={{ maxWidth: 500 }}>
-                                {characterLimit && (
-                                    <p
-                                        className={characterLimitError ? 'danger' : ''}
-                                        style={{ marginBottom: 20 }}
-                                    >
-                                        {newBead.text.length}/{characterLimit} characters
-                                    </p>
-                                )}
-                                <MarkdownEditor
-                                    initialValue={newBead.text}
+                                <DraftTextEditor
+                                    stringifiedDraft={newBead.text}
+                                    maxChars={characterLimit}
                                     onChange={(value) => {
-                                        setCharacterLimitError(value.length > characterLimit)
-                                        setStringTextErrors([])
-                                        setStringTextState('default')
+                                        const invalid = findDraftLength(value) > characterLimit
+                                        setStringTextState(invalid ? 'invalid' : 'default')
+                                        setStringTextErrors(
+                                            invalid
+                                                ? [`Must be less than ${characterLimit} characters`]
+                                                : []
+                                        )
                                         setNewBead({ ...newBead, text: value })
                                     }}
                                     state={stringTextState}
@@ -609,7 +605,7 @@ const NextBeadModal = (props: {
                                 </Row>
                             </Column>
                         )}
-                        {((newBead.type === 'text' && newBead.text.length > 0) ||
+                        {((newBead.type === 'text' && findDraftLength(newBead.text) > 0) ||
                             (newBead.type === 'url' && newBead.urlData !== null) ||
                             (newBead.type === 'audio' && newBead.audioFile) ||
                             (newBead.type === 'image' && images.length > 0)) && (
@@ -672,10 +668,10 @@ const NextBeadModal = (props: {
                             text='Add bead'
                             color='aqua'
                             disabled={
-                                (newBead.type === 'text' && newBead.text.length < 1) ||
+                                (newBead.type === 'text' && findDraftLength(newBead.text) < 1) ||
                                 (newBead.type === 'text' &&
                                     characterLimit &&
-                                    newBead.text.length > characterLimit) ||
+                                    findDraftLength(newBead.text) > characterLimit) ||
                                 (newBead.type === 'url' &&
                                     (newBead.urlData === null || urlLoading)) ||
                                 (newBead.type === 'audio' && newBead.audioFile === null) ||
