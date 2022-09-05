@@ -1,5 +1,5 @@
 import Column from '@components/Column'
-import Markdown from '@components/Markdown'
+import DraftText from '@components/DraftText'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
 import { UserContext } from '@contexts/UserContext'
@@ -27,7 +27,7 @@ const UserPageAbout = (): JSX.Element => {
                             <p>Joined</p>
                             <p title={dateCreated(createdAt)}>{timeSinceCreated(createdAt)}</p>
                         </Row>
-                        <Markdown text={bio} style={{ textAlign: 'center' }} />
+                        <DraftText text={bio || ''} />
                     </Column>
                 </Scrollbars>
             )}
