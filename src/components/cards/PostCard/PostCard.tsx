@@ -693,7 +693,23 @@ const PostCard = (props: {
                             </ShowMoreLess>
                         )}
                         <Row centerX>
-                            {images.length > 0 && (
+                            {images.length === 1 ? (
+                                <Row className={styles.images}>
+                                    <Column
+                                        centerX
+                                        className={`${styles.image} ${styles[findImageSize()]}`}
+                                        key={images[0].index}
+                                    >
+                                        <button
+                                            type='button'
+                                            onClick={() => openImageModal(images[0].id)}
+                                        >
+                                            <img src={images[0].url} alt='' />
+                                        </button>
+                                        {images[0].caption && <p>{images[0].caption}</p>}
+                                    </Column>
+                                </Row>
+                            ) : (
                                 <Scrollbars className={`${styles.images} row`}>
                                     {images.map((image) => (
                                         <Column
