@@ -64,7 +64,6 @@ const DraftText = (props: {
         <div className={`${styles.wrapper} ${className}`} style={style}>
             {type === 'draft' && (
                 <Editor
-                    placeholder='Enter text...'
                     editorState={editorState}
                     onChange={(newState) => setEditorState(newState)}
                     plugins={plugins}
