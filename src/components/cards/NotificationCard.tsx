@@ -8,20 +8,20 @@ import config from '@src/Config'
 import { dateCreated, timeSinceCreated } from '@src/Helpers'
 import styles from '@styles/components/cards/NotificationCard.module.scss'
 import { ReactComponent as AtIcon } from '@svgs/at-solid.svg'
-import { ReactComponent as BabyIconSVG } from '@svgs/baby-solid.svg'
-import { ReactComponent as BellIconSVG } from '@svgs/bell-solid.svg'
-import { ReactComponent as SuccessIconSVG } from '@svgs/check-circle-solid.svg'
-import { ReactComponent as CommentIconSVG } from '@svgs/comment-solid.svg'
-import { ReactComponent as EnvelopeIconSVG } from '@svgs/envelope-solid.svg'
-import { ReactComponent as LinkIconSVG } from '@svgs/link-solid.svg'
+import { ReactComponent as BabyIcon } from '@svgs/baby-solid.svg'
+import { ReactComponent as BellIcon } from '@svgs/bell-solid.svg'
+import { ReactComponent as SuccessIcon } from '@svgs/check-circle-solid.svg'
+import { ReactComponent as CommentIcon } from '@svgs/comment-solid.svg'
+import { ReactComponent as EnvelopeIcon } from '@svgs/envelope-solid.svg'
+import { ReactComponent as LinkIcon } from '@svgs/link-solid.svg'
 import { ReactComponent as WeaveIcon } from '@svgs/multiplayer-string-icon.svg'
-import { ReactComponent as OverlappingCirclesIconSVG } from '@svgs/overlapping-circles-thick.svg'
-import { ReactComponent as RetweetIconSVG } from '@svgs/retweet-solid.svg'
+import { ReactComponent as OverlappingCirclesIcon } from '@svgs/overlapping-circles-thick.svg'
+import { ReactComponent as RetweetIcon } from '@svgs/retweet-solid.svg'
 import { ReactComponent as InquiryIcon } from '@svgs/square-poll-vertical-solid.svg'
-import { ReactComponent as StarIconSVG } from '@svgs/star-solid.svg'
+import { ReactComponent as StarIcon } from '@svgs/star-solid.svg'
 import { ReactComponent as StringIcon } from '@svgs/string-icon.svg'
-import { ReactComponent as ThumbsUpIconSVG } from '@svgs/thumbs-up-solid.svg'
-import { ReactComponent as FailIconSVG } from '@svgs/times-circle-regular.svg'
+import { ReactComponent as ThumbsUpIcon } from '@svgs/thumbs-up-solid.svg'
+import { ReactComponent as FailIcon } from '@svgs/times-circle-regular.svg'
 import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import Cookies from 'universal-cookie'
@@ -41,18 +41,18 @@ const CreatedAt = (props: { date: string }): JSX.Element => {
     return <p title={dateCreated(date)}>• {timeSinceCreated(date)}</p>
 }
 
-const SuccessIcon = (): JSX.Element => {
+const Success = (): JSX.Element => {
     return (
         <div className={`${styles.inlineIcon} ${styles.green}`}>
-            <SuccessIconSVG />
+            <SuccessIcon />
         </div>
     )
 }
 
-const FailIcon = (): JSX.Element => {
+const Fail = (): JSX.Element => {
     return (
         <div className={`${styles.inlineIcon} ${styles.red}`}>
-            <FailIconSVG />
+            <FailIcon />
         </div>
     )
 }
@@ -97,14 +97,14 @@ const State = (props: {
                 <>
                     <p>•</p>
                     <p className={styles.green}>Accepted</p>
-                    <SuccessIcon />
+                    <Success />
                 </>
             )}
             {state === 'rejected' && (
                 <>
                     <p>•</p>
                     <p className={styles.red}>Rejected</p>
-                    <FailIcon />
+                    <Fail />
                 </>
             )}
         </div>
@@ -243,23 +243,23 @@ const NotificationCard = (props: {
             {location === 'account' && (
                 <>
                     {type === 'welcome-message' && (
-                        <Content typeIcon={<BabyIconSVG />}>
+                        <Content typeIcon={<BabyIcon />}>
                             <p>Account created</p>
-                            <SuccessIcon />
+                            <Success />
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}
 
                     {type === 'email-verified' && (
-                        <Content typeIcon={<EnvelopeIconSVG />}>
+                        <Content typeIcon={<EnvelopeIcon />}>
                             <p>Email verified</p>
-                            <SuccessIcon />
+                            <Success />
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}
 
                     {type === 'post-like' && (
-                        <Content typeIcon={<ThumbsUpIconSVG />}>
+                        <Content typeIcon={<ThumbsUpIcon />}>
                             {you ? <p>You</p> : <ImageNameLink type='user' data={triggerUser} />}
                             <p>liked your</p>
                             <TextLink text='post' link={`/p/${postId}`} />
@@ -270,7 +270,7 @@ const NotificationCard = (props: {
                     )}
 
                     {type === 'post-comment' && (
-                        <Content typeIcon={<CommentIconSVG />}>
+                        <Content typeIcon={<CommentIcon />}>
                             {you ? <p>You</p> : <ImageNameLink type='user' data={triggerUser} />}
                             <p>commented on your</p>
                             <TextLink text='post' link={`/p/${postId}`} />
@@ -281,7 +281,7 @@ const NotificationCard = (props: {
                     )}
 
                     {type === 'post-repost' && (
-                        <Content typeIcon={<RetweetIconSVG />}>
+                        <Content typeIcon={<RetweetIcon />}>
                             {you ? <p>You</p> : <ImageNameLink type='user' data={triggerUser} />}
                             <p>reposted your</p>
                             <TextLink text='post' link={`/p/${postId}`} />
@@ -292,7 +292,7 @@ const NotificationCard = (props: {
                     )}
 
                     {type === 'post-rating' && (
-                        <Content typeIcon={<StarIconSVG />}>
+                        <Content typeIcon={<StarIcon />}>
                             {you ? <p>You</p> : <ImageNameLink type='user' data={triggerUser} />}
                             <p>rated your</p>
                             <TextLink text='post' link={`/p/${postId}`} />
@@ -303,7 +303,7 @@ const NotificationCard = (props: {
                     )}
 
                     {type === 'post-link' && (
-                        <Content typeIcon={<LinkIconSVG />}>
+                        <Content typeIcon={<LinkIcon />}>
                             {you ? <p>You</p> : <ImageNameLink type='user' data={triggerUser} />}
                             <p>linked your</p>
                             <TextLink text='post' link={`/p/${postId}`} />
@@ -325,7 +325,7 @@ const NotificationCard = (props: {
                     )}
 
                     {type === 'comment-reply' && (
-                        <Content typeIcon={<CommentIconSVG />}>
+                        <Content typeIcon={<CommentIcon />}>
                             {you ? <p>You</p> : <ImageNameLink type='user' data={triggerUser} />}
                             <p>replied to your</p>
                             <TextLink text='comment' link={`/p/${postId}`} />
@@ -336,7 +336,7 @@ const NotificationCard = (props: {
                     )}
 
                     {type === 'parent-space-request' && (
-                        <Content typeIcon={<OverlappingCirclesIconSVG />}>
+                        <Content typeIcon={<OverlappingCirclesIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>wants to make</p>
                             <ImageNameLink type='space' data={triggerSpace} />
@@ -351,19 +351,19 @@ const NotificationCard = (props: {
                     )}
 
                     {type === 'parent-space-request-response' && (
-                        <Content typeIcon={<OverlappingCirclesIconSVG />}>
+                        <Content typeIcon={<OverlappingCirclesIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>{state} your request to make</p>
                             <ImageNameLink type='space' data={triggerSpace} />
                             <p>a child space of</p>
                             <ImageNameLink type='space' data={secondarySpace} />
-                            {/* {state === 'accepted' ? <SuccessIcon /> : <FailIcon />} */}
+                            {/* {state === 'accepted' ? <Success /> : <Fail />} */}
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}
 
                     {type === 'mod-invite' && (
-                        <Content typeIcon={<OverlappingCirclesIconSVG />}>
+                        <Content typeIcon={<OverlappingCirclesIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>invited you to moderate</p>
                             <ImageNameLink type='space' data={triggerSpace} />
@@ -376,7 +376,7 @@ const NotificationCard = (props: {
                     )}
 
                     {type === 'mod-invite-response' && (
-                        <Content typeIcon={<OverlappingCirclesIconSVG />}>
+                        <Content typeIcon={<OverlappingCirclesIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>{state} your invitation to moderate</p>
                             <ImageNameLink type='space' data={triggerSpace} />
@@ -385,7 +385,7 @@ const NotificationCard = (props: {
                     )}
 
                     {type === 'mod-removed' && (
-                        <Content typeIcon={<OverlappingCirclesIconSVG />}>
+                        <Content typeIcon={<OverlappingCirclesIcon />}>
                             {you ? <p>You</p> : <ImageNameLink type='user' data={triggerUser} />}
                             <p>just removed you from moderating</p>
                             <ImageNameLink type='space' data={triggerSpace} />
@@ -394,7 +394,7 @@ const NotificationCard = (props: {
                     )}
 
                     {type === 'event-going-reminder' && (
-                        <Content typeIcon={<BellIconSVG />}>
+                        <Content typeIcon={<BellIcon />}>
                             <p>An</p>
                             <TextLink text='event' link={`/p/${postId}`} />
                             <p>you marked yourself as going to is starting in 15 minutes</p>
@@ -403,7 +403,7 @@ const NotificationCard = (props: {
                     )}
 
                     {type === 'event-interested-reminder' && (
-                        <Content typeIcon={<BellIconSVG />}>
+                        <Content typeIcon={<BellIcon />}>
                             <p>An</p>
                             <TextLink text='event' link={`/p/${postId}`} />
                             <p>you marked yourself as interested in is starting in 15 minutes</p>
@@ -525,7 +525,7 @@ const NotificationCard = (props: {
             {location === 'space' && (
                 <>
                     {type === 'parent-space-request' && (
-                        <Content typeIcon={<OverlappingCirclesIconSVG />}>
+                        <Content typeIcon={<OverlappingCirclesIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>wants to make</p>
                             <ImageNameLink type='space' data={triggerSpace} />
