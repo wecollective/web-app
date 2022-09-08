@@ -7,6 +7,7 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import { dateCreated, timeSinceCreated } from '@src/Helpers'
 import styles from '@styles/components/cards/NotificationCard.module.scss'
+import { ReactComponent as AtIcon } from '@svgs/at-solid.svg'
 import { ReactComponent as BabyIconSVG } from '@svgs/baby-solid.svg'
 import { ReactComponent as BellIconSVG } from '@svgs/bell-solid.svg'
 import { ReactComponent as SuccessIconSVG } from '@svgs/check-circle-solid.svg'
@@ -310,6 +311,15 @@ const NotificationCard = (props: {
                             <p>to another post</p>
                             {triggerSpace && <p>in</p>}
                             {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
+                            <CreatedAt date={createdAt} />
+                        </Content>
+                    )}
+
+                    {type === 'post-mention' && (
+                        <Content typeIcon={<AtIcon />}>
+                            <ImageNameLink type='user' data={triggerUser} />
+                            <p>just mentioned you in a</p>
+                            <TextLink text='post' link={`/p/${postId}`} />
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}

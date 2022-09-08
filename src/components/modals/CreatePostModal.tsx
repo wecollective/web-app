@@ -153,6 +153,8 @@ const CreatePostModal = (): JSX.Element => {
         setCreatePostModalOpen,
         createPostModalSettings,
         setCreatePostModalSettings,
+        setAlertModalOpen,
+        setAlertMessage,
     } = useContext(AccountContext)
     const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
 
@@ -164,6 +166,7 @@ const CreatePostModal = (): JSX.Element => {
     const [postType, setPostType] = useState(initialType)
     const [steps, setSteps] = useState<string[]>(['Post Type', 'Text', 'Spaces', 'Create'])
     const [currentStep, setCurrentStep] = useState(initialStep)
+    const [mentions, setMentions] = useState<any[]>([])
 
     // todo: set up validateItem function and remove unnecessary object nesting in state
     // text
@@ -1073,6 +1076,7 @@ const CreatePostModal = (): JSX.Element => {
             creatorHandle: accountData.handle,
             spaceIds: selectedSpaces.map((s) => s.id),
             type: data.type,
+            mentions: mentions.map((m) => m.link),
             text: data.text,
             url: data.url,
             // url posts
@@ -1154,82 +1158,85 @@ const CreatePostModal = (): JSX.Element => {
             fileData.append('stringData', JSON.stringify(filteredString))
             fileData.append('postData', JSON.stringify(postData))
         }
-        axios
-            .post(
-                `${config.apiURL}/create-post?uploadType=${uploadType}`,
-                fileData || postData,
-                options
-            )
-            .then((res) => {
-                setLoading(false)
-                setSaved(true)
-                setCurrentStep(steps.length + 1)
-                if (selectedSpaces.map((space) => space.id).includes(spaceData.id)) {
-                    let stringPosts = [] as any[]
-                    if (res.data.string)
-                        stringPosts = [
-                            ...res.data.string.map((bead, i) => {
-                                return {
-                                    ...bead.stringPost,
-                                    Link: { index: i },
-                                    PostImages: bead.imageData || [],
-                                }
-                            }),
-                        ]
-                    if (createPostModalSettings.type === 'string-from-post') {
-                        stringPosts.unshift({
-                            ...createPostModalSettings.source,
-                            Link: { index: 0, relationship: 'source' },
-                        })
-                    }
-                    const newPost = {
-                        ...data,
-                        ...res.data.post,
-                        IndirectSpaces: [
-                            ...res.data.indirectRelationships.map((item) => {
+        if (accessToken) {
+            axios
+                .post(
+                    `${config.apiURL}/create-post?uploadType=${uploadType}`,
+                    fileData || postData,
+                    options
+                )
+                .then((res) => {
+                    setLoading(false)
+                    setSaved(true)
+                    setCurrentStep(steps.length + 1)
+                    if (selectedSpaces.map((space) => space.id).includes(spaceData.id)) {
+                        let stringPosts = [] as any[]
+                        if (res.data.string)
+                            stringPosts = [
+                                ...res.data.string.map((bead, i) => {
+                                    return {
+                                        ...bead.stringPost,
+                                        Link: { index: i },
+                                        PostImages: bead.imageData || [],
+                                    }
+                                }),
+                            ]
+                        if (createPostModalSettings.type === 'string-from-post') {
+                            stringPosts.unshift({
+                                ...createPostModalSettings.source,
+                                Link: { index: 0, relationship: 'source' },
+                            })
+                        }
+                        const newPost = {
+                            ...data,
+                            ...res.data.post,
+                            IndirectSpaces: res.data.indirectRelationships.map((item) => {
                                 return { id: item.holonId }
                             }),
-                        ],
-                        PostImages: res.data.images || [],
-                        Event: res.data.event
-                            ? {
-                                  ...res.data.event,
-                                  Going: [],
-                                  Interested: [],
-                              }
-                            : null,
-                        Inquiry:
-                            postType === 'Inquiry'
+                            PostImages: res.data.images || [],
+                            Event: res.data.event
                                 ? {
-                                      ...data.Inquiry,
-                                      InquiryAnswers: res.data.inquiryAnswers.map((a) => {
-                                          return { ...a, Reactions: [] }
-                                      }),
+                                      ...res.data.event,
+                                      Going: [],
+                                      Interested: [],
                                   }
                                 : null,
-                        StringPosts: stringPosts,
+                            Inquiry:
+                                postType === 'Inquiry'
+                                    ? {
+                                          ...data.Inquiry,
+                                          InquiryAnswers: res.data.inquiryAnswers.map((a) => {
+                                              return { ...a, Reactions: [] }
+                                          }),
+                                      }
+                                    : null,
+                            StringPosts: stringPosts,
+                        }
+                        setSpacePosts([newPost, ...spacePosts])
                     }
-                    setSpacePosts([newPost, ...spacePosts])
-                }
-                setTimeout(() => {
-                    setCreatePostModalOpen(false)
-                    setCreatePostModalSettings({ type: 'text' })
-                }, 1000)
-            })
-            .catch((error) => {
-                if (!error.response) console.log(error)
-                else {
-                    const { message } = error.response.data
-                    switch (message) {
-                        case 'File size too large':
-                            setAudioSizeError(true)
-                            break
-                        default:
-                            break
+                    setTimeout(() => {
+                        setCreatePostModalOpen(false)
+                        setCreatePostModalSettings({ type: 'text' })
+                    }, 1000)
+                })
+                .catch((error) => {
+                    if (!error.response) console.log(error)
+                    else {
+                        const { message } = error.response.data
+                        switch (message) {
+                            case 'File size too large':
+                                setAudioSizeError(true)
+                                break
+                            default:
+                                break
+                        }
                     }
-                }
-                setLoading(false)
-            })
+                    setLoading(false)
+                })
+        } else {
+            setAlertMessage('Please log in to create posts')
+            setAlertModalOpen(true)
+        }
     }
 
     const dateTimeOptions = {
@@ -1472,11 +1479,12 @@ const CreatePostModal = (): JSX.Element => {
                             <DraftTextEditor
                                 stringifiedDraft={textForm.text.value}
                                 maxChars={5000}
-                                onChange={(value) => {
+                                onChange={(value, userMentions) => {
                                     setTextForm({
                                         ...textForm,
                                         text: { ...textForm.text, value, state: 'default' },
                                     })
+                                    setMentions(userMentions)
                                 }}
                                 state={textForm.text.state}
                                 errors={textForm.text.errors}
@@ -1524,11 +1532,16 @@ const CreatePostModal = (): JSX.Element => {
                                     <DraftTextEditor
                                         stringifiedDraft={urlForm2.text.value}
                                         maxChars={5000}
-                                        onChange={(value) => {
+                                        onChange={(value, userMentions) => {
                                             setUrlForm2({
                                                 ...urlForm2,
-                                                text: { ...urlForm2.text, value, state: 'default' },
+                                                text: {
+                                                    ...urlForm2.text,
+                                                    value,
+                                                    state: 'default',
+                                                },
                                             })
+                                            setMentions(userMentions)
                                         }}
                                         state={urlForm2.text.state}
                                         errors={urlForm2.text.errors}
@@ -1666,7 +1679,7 @@ const CreatePostModal = (): JSX.Element => {
                                     <DraftTextEditor
                                         stringifiedDraft={imageForm.text.value}
                                         maxChars={5000}
-                                        onChange={(value) => {
+                                        onChange={(value, userMentions) => {
                                             setImageForm({
                                                 ...imageForm,
                                                 text: {
@@ -1675,6 +1688,7 @@ const CreatePostModal = (): JSX.Element => {
                                                     state: 'default',
                                                 },
                                             })
+                                            setMentions(userMentions)
                                         }}
                                         state={imageForm.text.state}
                                         errors={imageForm.text.errors}
@@ -1777,7 +1791,7 @@ const CreatePostModal = (): JSX.Element => {
                                     <DraftTextEditor
                                         stringifiedDraft={audioForm.text.value}
                                         maxChars={5000}
-                                        onChange={(value) => {
+                                        onChange={(value, userMentions) => {
                                             setAudioForm({
                                                 ...audioForm,
                                                 text: {
@@ -1786,6 +1800,7 @@ const CreatePostModal = (): JSX.Element => {
                                                     state: 'default',
                                                 },
                                             })
+                                            setMentions(userMentions)
                                         }}
                                         state={audioForm.text.state}
                                         errors={audioForm.text.errors}
@@ -1824,7 +1839,7 @@ const CreatePostModal = (): JSX.Element => {
                                     <DraftTextEditor
                                         stringifiedDraft={eventForm2.description.value}
                                         maxChars={5000}
-                                        onChange={(value) => {
+                                        onChange={(value, userMentions) => {
                                             setEventForm2({
                                                 ...eventForm2,
                                                 description: {
@@ -1833,6 +1848,7 @@ const CreatePostModal = (): JSX.Element => {
                                                     state: 'default',
                                                 },
                                             })
+                                            setMentions(userMentions)
                                         }}
                                         state={eventForm2.description.state}
                                         errors={eventForm2.description.errors}
@@ -1900,7 +1916,7 @@ const CreatePostModal = (): JSX.Element => {
                                     <DraftTextEditor
                                         stringifiedDraft={inquiryForm2.description.value}
                                         maxChars={5000}
-                                        onChange={(value) => {
+                                        onChange={(value, userMentions) => {
                                             setInquiryForm2({
                                                 ...inquiryForm2,
                                                 description: {
@@ -1909,6 +1925,7 @@ const CreatePostModal = (): JSX.Element => {
                                                     state: 'default',
                                                 },
                                             })
+                                            setMentions(userMentions)
                                         }}
                                         state={inquiryForm2.description.state}
                                         errors={inquiryForm2.description.errors}
@@ -2200,7 +2217,7 @@ const CreatePostModal = (): JSX.Element => {
                                     <DraftTextEditor
                                         stringifiedDraft={GBGForm2.description.value}
                                         maxChars={5000}
-                                        onChange={(value) => {
+                                        onChange={(value, userMentions) => {
                                             setGBGForm2({
                                                 ...GBGForm2,
                                                 description: {
@@ -2209,6 +2226,7 @@ const CreatePostModal = (): JSX.Element => {
                                                     state: 'default',
                                                 },
                                             })
+                                            setMentions(userMentions)
                                         }}
                                         state={GBGForm2.description.state}
                                         errors={GBGForm2.description.errors}
@@ -2311,10 +2329,11 @@ const CreatePostModal = (): JSX.Element => {
                                                 key={newBead.id}
                                                 stringifiedDraft={newBead.text}
                                                 maxChars={5000}
-                                                onChange={(value) => {
+                                                onChange={(value, userMentions) => {
                                                     setStringTextErrors([])
                                                     setStringTextState('default')
                                                     setNewBead({ ...newBead, text: value })
+                                                    setMentions(userMentions)
                                                 }}
                                                 state={stringTextState}
                                                 errors={stringTextErrors}
@@ -2674,7 +2693,7 @@ const CreatePostModal = (): JSX.Element => {
                                     <DraftTextEditor
                                         stringifiedDraft={stringForm.description.value}
                                         maxChars={5000}
-                                        onChange={(value) => {
+                                        onChange={(value, userMentions) => {
                                             setStringForm({
                                                 ...stringForm,
                                                 description: {
@@ -2683,6 +2702,7 @@ const CreatePostModal = (): JSX.Element => {
                                                     state: 'default',
                                                 },
                                             })
+                                            setMentions(userMentions)
                                         }}
                                         state={stringForm.description.state}
                                         errors={stringForm.description.errors}
@@ -2700,7 +2720,7 @@ const CreatePostModal = (): JSX.Element => {
                                     <DraftTextEditor
                                         stringifiedDraft={multiplayerStringForm1.description.value}
                                         maxChars={5000}
-                                        onChange={(value) => {
+                                        onChange={(value, userMentions) => {
                                             setMultiplayerStringForm1({
                                                 ...multiplayerStringForm1,
                                                 description: {
@@ -2709,6 +2729,7 @@ const CreatePostModal = (): JSX.Element => {
                                                     state: 'default',
                                                 },
                                             })
+                                            setMentions(userMentions)
                                         }}
                                         state={multiplayerStringForm1.description.state}
                                         errors={multiplayerStringForm1.description.errors}
