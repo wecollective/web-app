@@ -1477,7 +1477,7 @@ const CreatePostModal = (): JSX.Element => {
                     )}
 
                     {postType === 'Text' && currentStep === 2 && (
-                        <Column centerX style={{ maxWidth: 500, marginBottom: 30 }}>
+                        <Column centerX style={{ width: '100%', maxWidth: 500, marginBottom: 30 }}>
                             <DraftTextEditor
                                 stringifiedDraft={textForm.text.value}
                                 maxChars={5000}
@@ -1529,7 +1529,10 @@ const CreatePostModal = (): JSX.Element => {
                                 </Column>
                             )}
                             {currentStep === 3 && (
-                                <Column centerX style={{ width: '100%', marginBottom: 30 }}>
+                                <Column
+                                    centerX
+                                    style={{ width: '100%', maxWidth: 500, marginBottom: 30 }}
+                                >
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
                                     <DraftTextEditor
                                         stringifiedDraft={urlForm2.text.value}
@@ -1788,7 +1791,10 @@ const CreatePostModal = (): JSX.Element => {
                                 </Column>
                             )}
                             {currentStep === 3 && (
-                                <Column centerX style={{ maxWidth: 500, marginBottom: 30 }}>
+                                <Column
+                                    centerX
+                                    style={{ width: '100%', maxWidth: 500, marginBottom: 30 }}
+                                >
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
                                     <DraftTextEditor
                                         stringifiedDraft={audioForm.text.value}
@@ -1836,7 +1842,10 @@ const CreatePostModal = (): JSX.Element => {
                                 </Column>
                             )}
                             {currentStep === 3 && (
-                                <Column centerX style={{ maxWidth: 500, marginBottom: 30 }}>
+                                <Column
+                                    centerX
+                                    style={{ width: '100%', maxWidth: 500, marginBottom: 30 }}
+                                >
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
                                     <DraftTextEditor
                                         stringifiedDraft={eventForm2.description.value}
@@ -1913,7 +1922,10 @@ const CreatePostModal = (): JSX.Element => {
                                 </Column>
                             )}
                             {currentStep === 3 && (
-                                <Column centerX style={{ maxWidth: 500, marginBottom: 30 }}>
+                                <Column
+                                    centerX
+                                    style={{ width: '100%', maxWidth: 500, marginBottom: 30 }}
+                                >
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
                                     <DraftTextEditor
                                         stringifiedDraft={inquiryForm2.description.value}
@@ -2214,7 +2226,10 @@ const CreatePostModal = (): JSX.Element => {
                                 </Column>
                             )}
                             {currentStep === 3 && (
-                                <Column centerX style={{ maxWidth: 500, marginBottom: 30 }}>
+                                <Column
+                                    centerX
+                                    style={{ width: '100%', maxWidth: 500, marginBottom: 30 }}
+                                >
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
                                     <DraftTextEditor
                                         stringifiedDraft={GBGForm2.description.value}
@@ -2325,7 +2340,7 @@ const CreatePostModal = (): JSX.Element => {
                                             <ImageIcon />
                                         </button>
                                     </Row>
-                                    <Column centerX style={{ maxWidth: 500 }}>
+                                    <Column centerX style={{ width: '100%', maxWidth: 500 }}>
                                         {newBead.type === 'text' && (
                                             <DraftTextEditor
                                                 key={newBead.id}
@@ -2690,7 +2705,10 @@ const CreatePostModal = (): JSX.Element => {
                                 </Column>
                             )}
                             {currentStep === 3 && (
-                                <Column centerX style={{ maxWidth: 500, marginBottom: 30 }}>
+                                <Column
+                                    centerX
+                                    style={{ width: '100%', maxWidth: 500, marginBottom: 30 }}
+                                >
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
                                     <DraftTextEditor
                                         stringifiedDraft={stringForm.description.value}
@@ -2717,7 +2735,10 @@ const CreatePostModal = (): JSX.Element => {
                     {postType === 'Weave' && (
                         <Column centerX style={{ width: '100%' }}>
                             {currentStep === 2 && (
-                                <Column centerX style={{ maxWidth: 500, marginBottom: 30 }}>
+                                <Column
+                                    centerX
+                                    style={{ width: '100%', maxWidth: 500, marginBottom: 30 }}
+                                >
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
                                     <DraftTextEditor
                                         stringifiedDraft={multiplayerStringForm1.description.value}

@@ -10,17 +10,21 @@
     }
 
     blockquote {
-        display: block;
-        margin-block-start: 1em;
-        margin-block-end: 1em;
-        margin-inline-start: 40px;
-        margin-inline-end: 40px;
+        margin-block-start: 10px;
+        margin-block-end: 10px;
+        border-left: 5px solid $grey2;
+        padding-left: 10px;
+        color: $grey6;
     }
 
     code,
     pre {
         font-family: monospace;
         > div {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: $grey1;
             font-family: inherit;
         }
     }
@@ -53,7 +57,7 @@
     }
 
     .toolbar {
-        padding: 5px;
+        padding: 5px 5px 0 5px;
         border-bottom: 2px solid $grey2;
         z-index: 2;
 
@@ -68,9 +72,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 35px;
-            width: 35px;
-            margin-right: 5px;
+            height: 32px;
+            width: 32px;
+            margin: 0 5px 5px 0;
             cursor: pointer;
 
             &:hover {
@@ -78,8 +82,8 @@
             }
 
             > svg {
-                height: 35px;
-                width: 35px;
+                height: 32px;
+                width: 32px;
             }
 
             &.active {
@@ -89,7 +93,7 @@
 
         .separator {
             width: 2px;
-            height: 35px;
+            height: 32px;
             background-color: $grey2;
             margin: 0 10px 0 5px;
         }
@@ -108,11 +112,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 35px;
-            width: 35px;
+            height: 32px;
+            width: 32px;
             margin-right: 5px;
             cursor: pointer;
-            font-size: 25px;
+            font-size: 20px;
             padding-bottom: 6px;
 
             &:hover {

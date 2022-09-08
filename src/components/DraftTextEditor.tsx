@@ -140,12 +140,12 @@ const DraftTextEditor = (props: {
         >
             <Toolbar key={toolbarKey}>
                 {(externalProps) => (
-                    <Row>
+                    <Row wrap style={{ paddingRight: 40 }}>
                         <BoldButton {...externalProps} />
                         <ItalicButton {...externalProps} />
                         <UnderlineButton {...externalProps} />
                         <CodeButton {...externalProps} />
-                        <div className={styles.separator} />
+                        {/* <div className={styles.separator} /> */}
                         <UnorderedListButton {...externalProps} />
                         <OrderedListButton {...externalProps} />
                         <BlockquoteButton {...externalProps} />

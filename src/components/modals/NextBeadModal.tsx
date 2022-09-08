@@ -407,7 +407,7 @@ const NextBeadModal = (props: {
                     </Row>
                     <Column centerX style={{ width: '100%' }}>
                         {newBead.type === 'text' && (
-                            <Column centerX style={{ maxWidth: 500 }}>
+                            <Column centerX style={{ width: '100%', maxWidth: 500 }}>
                                 <DraftTextEditor
                                     stringifiedDraft={newBead.text}
                                     maxChars={maxChars}
