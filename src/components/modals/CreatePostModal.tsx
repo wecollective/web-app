@@ -1010,6 +1010,8 @@ const CreatePostModal = (): JSX.Element => {
                 privacy: allUsersAllowed ? 'all-users-allowed' : 'only-selected-users',
             }
         }
+        // remove draft formatting if 0 characters
+        data.text = findDraftLength(data.text) > 0 ? data.text : ''
         return data
     }
 
