@@ -65,6 +65,7 @@ const NextBeadModal = (props: {
         images: [],
     }
     const [newBead, setNewBead] = useState<any>(defaultBead)
+    const [mentions, setMentions] = useState<any[]>([])
     const totalMBUploadLimit = 10
     const cookies = new Cookies()
     const [loading, setLoading] = useState(false)
@@ -288,8 +289,11 @@ const NextBeadModal = (props: {
             const accessToken = cookies.get('accessToken')
             const options = { headers: { Authorization: `Bearer ${accessToken}` } }
             const beadData = {
+                creatorName: accountData.name,
+                creatorHandle: accountData.handle,
                 postId: id,
                 beadIndex,
+                mentions: mentions.map((m) => m.link),
                 privacy,
                 nextPlayerId: findNextPlayerId(),
                 type: newBead.type,
@@ -407,7 +411,7 @@ const NextBeadModal = (props: {
                                 <DraftTextEditor
                                     stringifiedDraft={newBead.text}
                                     maxChars={maxChars}
-                                    onChange={(value) => {
+                                    onChange={(value, userMentions) => {
                                         const invalid = findDraftLength(value) > maxChars
                                         setStringTextState(invalid ? 'invalid' : 'default')
                                         setStringTextErrors(
@@ -416,6 +420,7 @@ const NextBeadModal = (props: {
                                                 : []
                                         )
                                         setNewBead({ ...newBead, text: value })
+                                        setMentions(userMentions)
                                     }}
                                     state={stringTextState}
                                     errors={stringTextErrors}

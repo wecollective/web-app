@@ -324,6 +324,15 @@ const NotificationCard = (props: {
                         </Content>
                     )}
 
+                    {type === 'bead-mention' && (
+                        <Content typeIcon={<AtIcon />}>
+                            <ImageNameLink type='user' data={triggerUser} />
+                            <p>just mentioned you in a</p>
+                            <TextLink text='bead' link={`/p/${postId}`} />
+                            <CreatedAt date={createdAt} />
+                        </Content>
+                    )}
+
                     {type === 'comment-reply' && (
                         <Content typeIcon={<CommentIcon />}>
                             {you ? <p>You</p> : <ImageNameLink type='user' data={triggerUser} />}
