@@ -3,7 +3,6 @@
 .wrapper {
     position: relative;
     width: 100%;
-    background-color: white;
     padding: 5px 0;
 
     span {
@@ -33,6 +32,7 @@
 
     // editor styling
     &.editable {
+        background-color: white;
         padding: 0;
 
         :global(.DraftEditor-root) {
