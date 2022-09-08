@@ -1,17 +1,34 @@
-import Column from '@components/Column'
+/* eslint-disable react/jsx-props-no-spreading */
 import Row from '@components/Row'
-import styles from '@styles/components/DraftTextEditor.module.scss'
-import '@styles/DraftJSStyling.scss'
-import { ReactComponent as SuccessIconSVG } from '@svgs/check-circle-solid.svg'
+import {
+    BlockquoteButton,
+    BoldButton,
+    CodeBlockButton,
+    CodeButton,
+    ItalicButton,
+    OrderedListButton,
+    UnderlineButton,
+    UnorderedListButton,
+} from '@draft-js-plugins/buttons'
+import Editor from '@draft-js-plugins/editor'
+import createEmojiPlugin, { defaultTheme } from '@draft-js-plugins/emoji'
+import '@draft-js-plugins/emoji/lib/plugin.css'
+import createMentionPlugin from '@draft-js-plugins/mention'
+import '@draft-js-plugins/mention/lib/plugin.css'
+import createToolbarPlugin from '@draft-js-plugins/static-toolbar'
+import createTextAlignmentPlugin from '@draft-js-plugins/text-alignment'
+import config from '@src/Config'
+import styles from '@styles/components/DraftText.module.scss'
+// import { ReactComponent as SuccessIconSVG } from '@svgs/check-circle-solid.svg'
+import Mention from '@components/Mention'
 import { ReactComponent as DangerIconSVG } from '@svgs/exclamation-circle-solid.svg'
+import axios from 'axios'
 import { ContentState, convertFromRaw, convertToRaw, EditorState } from 'draft-js'
-import React, { useEffect, useState } from 'react'
-import { Editor } from 'react-draft-wysiwyg'
-import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'
+import React, { useEffect, useRef, useState } from 'react'
 
 const DraftTextEditor = (props: {
     stringifiedDraft: string
-    onChange: (value: string) => void
+    onChange: (text: string, mentions: any[]) => void
     maxChars?: number
     state?: 'default' | 'valid' | 'invalid'
     errors?: string[]
@@ -19,56 +36,84 @@ const DraftTextEditor = (props: {
     style?: any
 }): JSX.Element => {
     const { stringifiedDraft, onChange, maxChars, state, errors, className, style } = props
-
-    const toolbarSettings = {
-        options: [
-            'inline',
-            'blockType',
-            'fontSize',
-            'fontFamily',
-            'list',
-            'textAlign',
-            'colorPicker',
-            'link',
-            // 'embedded',
-            'emoji',
-            'image',
-            'remove',
-            'history',
-        ],
-        inline: {
-            inDropdown: true,
-            options: [
-                'bold',
-                'italic',
-                'underline',
-                'strikethrough',
-                'monospace',
-                'superscript',
-                'subscript',
-            ],
-        },
-        list: {
-            inDropdown: true,
-        },
-        textAlign: {
-            inDropdown: true,
-            options: ['left', 'center', 'right'],
-        },
-        // link: {
-        //     showOpenOptionOnHover: false,
-        // },
-    }
-
-    const [editorState, setEditorState] = useState(EditorState.createEmpty())
+    const [editorState, setEditorState] = useState<any>(null)
+    const [toolbarPlugin] = useState(
+        createToolbarPlugin({ theme: { buttonStyles: styles, toolbarStyles: styles } })
+    )
+    const [mentionPlugin] = useState(
+        createMentionPlugin({
+            mentionTrigger: '@',
+            mentionComponent: Mention,
+        })
+    )
+    const [emojiPlugin] = useState(
+        createEmojiPlugin({
+            theme: {
+                ...defaultTheme,
+                emojiSelectButton: styles.emojiSelectButton,
+                emojiSelectButtonPressed: `${styles.emojiSelectButton} ${styles.selected}`,
+                emojiSelectPopover: styles.emojiSelectPopover,
+            },
+            // useNativeArt: true,
+        })
+    )
+    const [textAlignmentPlugin] = useState(
+        createTextAlignmentPlugin({
+            theme: {
+                alignmentStyles: {
+                    draftLeft: styles.alignLeft,
+                    draftCenter: styles.alignCenter,
+                    draftRight: styles.alignRight,
+                },
+            },
+        })
+    )
+    const plugins = [toolbarPlugin, textAlignmentPlugin, mentionPlugin, emojiPlugin]
+    const [suggestions, setSuggestions] = useState([])
+    const [showSuggestions, setShowSuggestions] = useState(false)
     const [characterLength, setCharacterLength] = useState(0)
+    const [toolbarKey, setToolbarKey] = useState(0)
+    const editorRef = useRef<any>(null)
+
+    const { EmojiSuggestions, EmojiSelect } = emojiPlugin
+    const { TextAlignment } = textAlignmentPlugin as any
+    const { Toolbar } = toolbarPlugin
+    const { MentionSuggestions } = mentionPlugin
 
     function onEditorStateChange(newEditorState) {
         setEditorState(newEditorState)
         const contentState = newEditorState.getCurrentContent()
         setCharacterLength(contentState.getPlainText().length)
         const rawDraft = convertToRaw(contentState)
-        onChange(JSON.stringify(rawDraft))
+        const mentions = [] as any
+        const entities = rawDraft.entityMap
+        Object.keys(entities).forEach((key) => {
+            if (entities[key].type === 'mention') mentions.push(entities[key].data.mention)
+        })
+        onChange(JSON.stringify(rawDraft), mentions)
+    }
+
+    function onSearchChange({ value }) {
+        const data = { query: value, blacklist: [] }
+        axios
+            .post(`${config.apiURL}/find-users`, data)
+            .then((res) => {
+                setSuggestions(
+                    res.data.map((user) => {
+                        return {
+                            name: user.name,
+                            link: user.handle,
+                            avatar: user.flagImagePath,
+                        }
+                    })
+                )
+            })
+            .catch((error) => console.log(error))
+    }
+
+    function focus() {
+        editorRef.current.focus()
+        setToolbarKey(toolbarKey + 1)
     }
 
     useEffect(() => {
@@ -83,15 +128,53 @@ const DraftTextEditor = (props: {
     }, [])
 
     return (
-        <Column
-            className={`${styles.wrapper} ${className} ${styles[state || 'default']}`}
+        <div
+            role='button'
+            className={`${styles.wrapper} ${styles.editable} ${className} ${
+                styles[state || 'default']
+            }`}
             style={style}
+            tabIndex={0}
+            onKeyDown={focus}
+            onClick={focus}
         >
-            <Editor
-                placeholder='Enter text...'
-                editorState={editorState}
-                onEditorStateChange={onEditorStateChange}
-                toolbar={toolbarSettings}
+            <Toolbar key={toolbarKey}>
+                {(externalProps) => (
+                    <Row>
+                        <BoldButton {...externalProps} />
+                        <ItalicButton {...externalProps} />
+                        <UnderlineButton {...externalProps} />
+                        <CodeButton {...externalProps} />
+                        <div className={styles.separator} />
+                        <UnorderedListButton {...externalProps} />
+                        <OrderedListButton {...externalProps} />
+                        <BlockquoteButton {...externalProps} />
+                        <CodeBlockButton {...externalProps} />
+                        <TextAlignment {...externalProps} />
+                    </Row>
+                )}
+            </Toolbar>
+            <div className={styles.emojiButtonWrapper}>
+                <EmojiSelect closeOnEmojiSelect />
+                <EmojiSuggestions />
+            </div>
+            {editorState && (
+                <Editor
+                    placeholder='Enter text...'
+                    editorState={editorState}
+                    onChange={onEditorStateChange}
+                    plugins={plugins}
+                    ref={(element) => {
+                        editorRef.current = element
+                    }}
+                />
+            )}
+            <MentionSuggestions
+                onSearchChange={onSearchChange}
+                suggestions={suggestions}
+                open={showSuggestions}
+                onOpenChange={(openState) => setShowSuggestions(openState)}
+                onAddMention={() => null}
             />
             <Row
                 centerY
@@ -100,7 +183,7 @@ const DraftTextEditor = (props: {
             >
                 <Row className={styles.errors}>
                     {state === 'invalid' && <DangerIconSVG />}
-                    {state === 'valid' && <SuccessIconSVG />}
+                    {/* {state === 'valid' && <SuccessIconSVG />} */}
                     {state === 'invalid' && errors!.map((error) => <p key={error}>{error}</p>)}
                 </Row>
                 <p>
@@ -108,7 +191,7 @@ const DraftTextEditor = (props: {
                     {maxChars ? `/${maxChars}` : ''} Chars
                 </p>
             </Row>
-        </Column>
+        </div>
     )
 }
 

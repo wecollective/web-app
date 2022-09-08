@@ -48,6 +48,7 @@ const ShowMoreLess = (props: {
                 className={styles.content}
                 style={{
                     maxHeight: expanded ? contentHeight() : height,
+                    overflow: overflow && !expanded ? 'hidden' : 'visible',
                 }}
             >
                 {children}

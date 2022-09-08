@@ -1,0 +1,28 @@
+@import '@styles/Variables';
+
+.mentionComponent {
+    position: relative;
+
+    .text {
+        color: $blue1;
+        cursor: pointer;
+    }
+
+    .modal {
+        position: absolute;
+        left: -10px;
+        top: 26px;
+        background-color: white;
+        border-radius: 5px;
+        padding: 10px;
+        box-shadow: 0 1px 10px 0 rgba(10, 8, 72, 0.2);
+        z-index: 5;
+
+        > img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+    }
+}
