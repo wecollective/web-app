@@ -57,7 +57,7 @@ const UserPageSettings = (): JSX.Element => {
                     <Column centerX>
                         <h1>Bio:</h1>
                         <ShowMoreLess height={75}>
-                            <DraftText text={bio} />
+                            <DraftText stringifiedDraft={bio} />
                         </ShowMoreLess>
                         <Button
                             text='Edit'

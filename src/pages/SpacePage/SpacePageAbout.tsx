@@ -1,6 +1,6 @@
 import Column from '@components/Column'
-import ImageTitle from '@components/ImageTitle'
 import DraftText from '@components/DraftText'
+import ImageTitle from '@components/ImageTitle'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
 import { SpaceContext } from '@contexts/SpaceContext'
@@ -24,7 +24,7 @@ const SpacePageAbout = (): JSX.Element => {
             ) : (
                 <Scrollbars className={styles.contentWrapper}>
                     <Column className={styles.content}>
-                        <DraftText text={description || ''} />
+                        <DraftText stringifiedDraft={description || ''} />
                         <Row centerY centerX className={styles.creation}>
                             <p>Created</p>
                             <p title={dateCreated(createdAt)}>{timeSinceCreated(createdAt)}</p>

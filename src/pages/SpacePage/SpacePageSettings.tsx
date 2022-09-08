@@ -73,7 +73,7 @@ const SpacePageSettings = ({ history }): JSX.Element => {
                     <Column centerX>
                         <h1>Description:</h1>
                         <ShowMoreLess height={75}>
-                            <DraftText text={spaceData.description || ''} />
+                            <DraftText stringifiedDraft={spaceData.description || ''} />
                         </ShowMoreLess>
                         <Button
                             text='Edit'

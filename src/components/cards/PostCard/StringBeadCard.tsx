@@ -154,7 +154,7 @@ const StringBeadCard = (props: {
             <Column centerY className={styles.beadContent}>
                 {type === 'text' && (
                     <Scrollbars>
-                        <DraftText text={bead.text} />
+                        <DraftText stringifiedDraft={bead.text} />
                     </Scrollbars>
                 )}
                 {type === 'url' && (

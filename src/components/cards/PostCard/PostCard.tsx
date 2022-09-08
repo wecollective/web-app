@@ -664,7 +664,7 @@ const PostCard = (props: {
             <Column className={styles.content}>
                 {type.includes('text') && (
                     <ShowMoreLess height={150}>
-                        <DraftText text={text} />
+                        <DraftText stringifiedDraft={text} />
                     </ShowMoreLess>
                 )}
                 {type.includes('url') && (
@@ -672,7 +672,7 @@ const PostCard = (props: {
                         {text && (
                             <Column style={{ marginBottom: 10 }}>
                                 <ShowMoreLess height={150}>
-                                    <DraftText text={text} />
+                                    <DraftText stringifiedDraft={text} />
                                 </ShowMoreLess>
                             </Column>
                         )}
@@ -689,7 +689,7 @@ const PostCard = (props: {
                     <Column>
                         {text && (
                             <ShowMoreLess height={150}>
-                                <DraftText text={text} />
+                                <DraftText stringifiedDraft={text} />
                             </ShowMoreLess>
                         )}
                         <Row centerX>
@@ -743,7 +743,7 @@ const PostCard = (props: {
                     <Column>
                         {text && (
                             <ShowMoreLess height={150}>
-                                <DraftText text={text} />
+                                <DraftText stringifiedDraft={text} />
                             </ShowMoreLess>
                         )}
                         <AudioVisualiser
@@ -780,7 +780,7 @@ const PostCard = (props: {
                         <Markdown text={`# ${Event.title}`} className={styles.title} />
                         {text && (
                             <ShowMoreLess height={150} style={{ marginBottom: 10 }}>
-                                <DraftText text={text} />
+                                <DraftText stringifiedDraft={text} />
                             </ShowMoreLess>
                         )}
                         <Row wrap centerY className={styles.eventTimes}>
@@ -873,7 +873,7 @@ const PostCard = (props: {
                         <Markdown text={`# ${Inquiry.title}`} className={styles.title} />
                         {text && (
                             <ShowMoreLess height={150} style={{ marginBottom: 10 }}>
-                                <DraftText text={text} />
+                                <DraftText stringifiedDraft={text} />
                             </ShowMoreLess>
                         )}
                         <Row centerX className={styles.inquiryResults}>
@@ -956,7 +956,7 @@ const PostCard = (props: {
                                 />
                                 {text && (
                                     <ShowMoreLess height={150}>
-                                        <DraftText text={text} />
+                                        <DraftText stringifiedDraft={text} />
                                     </ShowMoreLess>
                                 )}
                             </Column>
@@ -1102,7 +1102,7 @@ const PostCard = (props: {
                         {text && (
                             <Column style={{ marginBottom: 10 }}>
                                 <ShowMoreLess height={150}>
-                                    <DraftText text={text} />
+                                    <DraftText stringifiedDraft={text} />
                                 </ShowMoreLess>
                             </Column>
                         )}
@@ -1243,7 +1243,7 @@ const PostCard = (props: {
                         {text && (
                             <Column style={{ marginBottom: 10 }}>
                                 <ShowMoreLess height={150}>
-                                    <DraftText text={text} />
+                                    <DraftText stringifiedDraft={text} />
                                 </ShowMoreLess>
                             </Column>
                         )}

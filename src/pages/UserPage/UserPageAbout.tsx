@@ -27,7 +27,7 @@ const UserPageAbout = (): JSX.Element => {
                             <p>Joined</p>
                             <p title={dateCreated(createdAt)}>{timeSinceCreated(createdAt)}</p>
                         </Row>
-                        <DraftText text={bio || ''} />
+                        <DraftText stringifiedDraft={bio || ''} />
                     </Column>
                 </Scrollbars>
             )}
