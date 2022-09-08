@@ -17,6 +17,7 @@ const UpdateSpaceDescriptionModal = (props: { close: () => void }): JSX.Element 
     const [inputValue, setInputValue] = useState(spaceData.description || '')
     const [inputState, setInputState] = useState<'default' | 'valid' | 'invalid'>('default')
     const [inputErrors, setInputErrors] = useState<string[]>([])
+    const [mentions, setMentions] = useState<any[]>([])
     const [loading, setLoading] = useState(false)
     const [showSuccessMessage, setShowSuccessMessage] = useState(false)
     const cookies = new Cookies()
@@ -72,9 +73,10 @@ const UpdateSpaceDescriptionModal = (props: { close: () => void }): JSX.Element 
                 <DraftTextEditor
                     stringifiedDraft={inputValue}
                     maxChars={10000}
-                    onChange={(value) => {
+                    onChange={(value, userMentions) => {
                         setInputState('default')
                         setInputValue(value)
+                        setMentions(userMentions)
                     }}
                     state={inputState}
                     errors={inputErrors}
