@@ -11,12 +11,12 @@ import LoadingWheel from '@components/LoadingWheel'
 import Markdown from '@components/Markdown'
 import GBGBackgroundModal from '@components/modals/GBGBackgroundModal'
 import ImageUploadModal from '@components/modals/ImageUploadModal'
+import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
 import SuccessMessage from '@components/SuccessMessage'
 import { AccountContext } from '@contexts/AccountContext'
 import { PostContext } from '@contexts/PostContext'
-import Modal from '@src/components/modals/Modal'
 import config from '@src/Config'
 import {
     allValid,

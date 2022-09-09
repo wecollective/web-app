@@ -1,6 +1,6 @@
 import Button from '@components/Button'
+import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
-import Modal from '@src/components/modals/Modal'
 import React, { useContext } from 'react'
 
 const AlertModal = (): JSX.Element => {

@@ -1,5 +1,5 @@
 import Column from '@components/Column'
-import DraftText from '@components/DraftText'
+import DraftText from '@components/draft-js/DraftText'
 import ImageTitle from '@components/ImageTitle'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'

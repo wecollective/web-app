@@ -1,5 +1,5 @@
+import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
-import Modal from '@src/components/modals/Modal'
 import config from '@src/Config'
 import styles from '@styles/components/modals/ResetPasswordModal.module.scss'
 import axios from 'axios'

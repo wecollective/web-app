@@ -1,7 +1,7 @@
 import Column from '@components/Column'
+import TextLink from '@components/TextLink'
 import { SpaceContext } from '@contexts/SpaceContext'
 import SpaceNotFound from '@pages/SpaceNotFound'
-import TextLink from '@src/components/TextLink'
 import styles from '@styles/pages/SpacePage/SpacePageGovernance.module.scss'
 import React, { useContext } from 'react'
 import { useLocation } from 'react-router-dom'

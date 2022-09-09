@@ -1,6 +1,6 @@
 import ImageTitle from '@components/ImageTitle'
 import Row from '@components/Row'
-import styles from '@styles/components/Mention.module.scss'
+import styles from '@styles/components/draft-js/Mention.module.scss'
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 

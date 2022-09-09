@@ -1,5 +1,5 @@
 import ImageFade from '@components/ImageFade'
-import { AccountContext } from '@src/contexts/AccountContext'
+import { AccountContext } from '@contexts/AccountContext'
 import styles from '@styles/components/CoverImage.module.scss'
 import React, { useContext } from 'react'
 

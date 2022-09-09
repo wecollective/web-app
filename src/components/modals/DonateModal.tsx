@@ -1,4 +1,4 @@
-import Modal from '@src/components/modals/Modal'
+import Modal from '@components/modals/Modal'
 import styles from '@styles/components/modals/DonateModal.module.scss'
 import { ReactComponent as DonateIconSVG } from '@svgs/donate-solid.svg'
 import React from 'react'

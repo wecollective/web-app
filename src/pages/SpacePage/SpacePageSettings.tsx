@@ -1,6 +1,6 @@
 import Button from '@components/Button'
 import Column from '@components/Column'
-import DraftText from '@components/DraftText'
+import DraftText from '@components/draft-js/DraftText'
 import DeleteSpaceModal from '@components/modals/DeleteSpaceModal'
 import InviteSpaceModeratorModal from '@components/modals/InviteSpaceModeratorModal'
 import ParentSpaceRequestModal from '@components/modals/ParentSpaceRequestModal'

@@ -1,6 +1,6 @@
 import Button from '@components/Button'
 import Column from '@components/Column'
-import DraftText from '@components/DraftText'
+import DraftText from '@components/draft-js/DraftText'
 import UpdateUserBioModal from '@components/modals/UpdateUserBioModal'
 import UpdateUserNameModal from '@components/modals/UpdateUserNameModal'
 import Row from '@components/Row'

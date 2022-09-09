@@ -1,5 +1,5 @@
 import Column from '@components/Column'
-import DraftText from '@components/DraftText'
+import DraftText from '@components/draft-js/DraftText'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
 import { UserContext } from '@contexts/UserContext'
