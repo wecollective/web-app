@@ -1,0 +1,16 @@
+@import '@styles/Variables';
+
+.wrapper {
+    margin-bottom: 2px;
+    font-size: 14px;
+    cursor: pointer;
+
+    > p {
+        margin-left: 5px;
+    }
+
+    > span {
+        margin-left: 5px;
+        color: $grey5;
+    }
+}

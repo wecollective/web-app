@@ -21,6 +21,7 @@ import config from '@src/Config'
 import styles from '@styles/components/draft-js/DraftText.module.scss'
 // import { ReactComponent as SuccessIconSVG } from '@svgs/check-circle-solid.svg'
 import Mention from '@components/draft-js/Mention'
+import Suggestion from '@components/draft-js/Suggestion'
 import { ReactComponent as DangerIconSVG } from '@svgs/exclamation-circle-solid.svg'
 import axios from 'axios'
 import { ContentState, convertFromRaw, convertToRaw, EditorState } from 'draft-js'
@@ -175,6 +176,7 @@ const DraftTextEditor = (props: {
                 open={showSuggestions}
                 onOpenChange={(openState) => setShowSuggestions(openState)}
                 onAddMention={() => null}
+                entryComponent={Suggestion}
             />
             <Row
                 centerY
