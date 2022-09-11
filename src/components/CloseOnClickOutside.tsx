@@ -26,7 +26,7 @@ const CloseOnClickOutside = (props: {
     })
 
     return (
-        <div id='test' ref={ref}>
+        <div ref={ref}>
             {children}
             {confirmationModalOpen && (
                 <Modal close={() => setConfirmationModalOpen(false)} centered>

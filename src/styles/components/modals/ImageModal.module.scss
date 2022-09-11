@@ -1,6 +1,8 @@
 @import '@styles/Variables';
 
 .wrapper {
+    height: 100%;
+
     > div {
         > button {
             all: unset;
@@ -29,12 +31,10 @@
             }
 
             > img {
-                max-width: calc(100vw - 60px);
-                max-height: calc(100vh - 90px);
-                overflow: hidden;
+                max-width: 100%;
+                max-height: calc(100% - 90px);
 
                 @include for-desktop-small-up {
-                    max-width: calc(100vw - 60px);
                     max-height: calc(100vh - 250px);
                 }
             }
