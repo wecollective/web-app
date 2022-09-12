@@ -344,6 +344,15 @@ const NotificationCard = (props: {
                         </Content>
                     )}
 
+                    {type === 'comment-mention' && (
+                        <Content typeIcon={<AtIcon />}>
+                            <ImageNameLink type='user' data={triggerUser} />
+                            <p>just mentioned you in a</p>
+                            <TextLink text='comment' link={`/p/${postId}`} />
+                            <CreatedAt date={createdAt} />
+                        </Content>
+                    )}
+
                     {type === 'parent-space-request' && (
                         <Content typeIcon={<OverlappingCirclesIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
