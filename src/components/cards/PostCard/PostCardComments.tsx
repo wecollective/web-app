@@ -1,14 +1,13 @@
 import CommentCard from '@components/cards/CommentCard'
 import Column from '@components/Column'
-import CommentInput from '@components/CommentInput'
+import DraftTextEditor from '@components/draft-js/DraftTextEditor'
 import LoadingWheel from '@components/LoadingWheel'
 import Row from '@components/Row'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
-import { resizeTextArea } from '@src/Helpers'
+import { defaultErrorState, findDraftLength, isValid } from '@src/Helpers'
 import axios from 'axios'
-import OverlayScrollbars from 'overlayscrollbars'
 import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
@@ -24,73 +23,92 @@ const PostCardComments = (props: {
     const { accountData, loggedIn } = useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
     const [comments, setComments] = useState<any[]>([])
-    const [newComment, setNewComment] = useState('')
-    const [commentError, setCommentError] = useState(false)
-    const [loading, setLoading] = useState(false)
+    const [commentsLoading, setCommentsLoading] = useState(false)
+    const [newComment, setNewComment] = useState({
+        ...defaultErrorState,
+        value: '',
+        validate: (v) => {
+            const errors: string[] = []
+            const totalCharacters = findDraftLength(v)
+            if (totalCharacters < 1) errors.push('Required')
+            if (totalCharacters > 5000) errors.push('Must be less than 5K characters')
+            return errors
+        },
+    })
+    const [submitCommentLoading, setSubmitCommentLoading] = useState(false)
+    const [editorKey, setEditoryKey] = useState(0)
+    const [mentions, setMentions] = useState<any[]>([])
     const cookies = new Cookies()
 
     // todo: rethink component structure, add multi-layer nesting
 
     function getComments() {
-        setLoading(true)
+        setCommentsLoading(true)
         axios
             .get(`${config.apiURL}/post-comments?postId=${postId}`)
             .then((res) => {
-                setLoading(false)
+                setCommentsLoading(false)
                 setComments(res.data)
             })
             .catch((error) => console.log(error))
     }
 
-    function validateComment(text) {
-        const invalid = text.length < 1 || text.length > 10000
-        if (invalid) {
-            setCommentError(true)
-            return false
-        }
-        return true
-    }
-
     function scrollToInput(inputElement) {
-        if (['space-posts', 'user-posts'].includes(location)) {
-            const instance = OverlayScrollbars(document.getElementById(`${location}-scrollbars`))
-            if (instance) instance.scroll({ el: inputElement, margin: 200 }, 400)
-        } else {
-            const yOffset = window.screen.height / 2.3
-            const top = inputElement.getBoundingClientRect().top + window.pageYOffset - yOffset
-            window.scrollTo({ top, behavior: 'smooth' })
-        }
+        const yOffset = window.screen.height / 2.3
+        const top = inputElement.getBoundingClientRect().top + window.pageYOffset - yOffset
+        window.scrollTo({ top, behavior: 'smooth' })
     }
 
-    function submitComment(text, parentCommentId?) {
-        setNewComment('')
+    // todo: split into submitComment function in this file and submitReply function in CommentCard component
+    function submitComment(
+        comment,
+        setComment,
+        setKey,
+        setLoading,
+        userMentions,
+        parentCommentId?: number,
+        callback?
+    ) {
         const accessToken = cookies.get('accessToken')
-        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
-        const data = {
-            text,
-            postId,
-            parentCommentId: parentCommentId || null,
-            spaceId: window.location.pathname.includes('/s/') ? spaceData.id : null,
-            accountHandle: accountData.handle,
-            accountName: accountData.name,
-        }
-        axios
-            .post(`${config.apiURL}/submit-comment`, data, options)
-            .then((res) => {
-                incrementTotalComments(1)
-                if (parentCommentId) {
-                    const newComments = [...comments]
-                    const parentComment = newComments.find((c) => c.id === parentCommentId)
-                    parentComment.Replies.push({
-                        ...res.data,
-                        Creator: accountData,
-                        Replies: [],
+        if (isValid(comment, setComment) && accessToken) {
+            setLoading(true)
+            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+            const data = {
+                text: comment.value,
+                postId,
+                parentCommentId: parentCommentId || null,
+                spaceId: window.location.pathname.includes('/s/') ? spaceData.id : null,
+                accountHandle: accountData.handle,
+                accountName: accountData.name,
+                mentions: userMentions.map((m) => m.link),
+            }
+            axios
+                .post(`${config.apiURL}/submit-comment`, data, options)
+                .then((res) => {
+                    incrementTotalComments(1)
+                    if (parentCommentId) {
+                        const newComments = [...comments]
+                        const parentComment = newComments.find((c) => c.id === parentCommentId)
+                        parentComment.Replies.push({
+                            ...res.data,
+                            Creator: accountData,
+                            Replies: [],
+                        })
+                        setComments(newComments)
+                    } else
+                        setComments([
+                            ...comments,
+                            { ...res.data, Creator: accountData, Replies: [] },
+                        ])
+                    setComment((c) => {
+                        return { ...c, value: '' }
                     })
-                    setComments(newComments)
-                } else
-                    setComments([...comments, { ...res.data, Creator: accountData, Replies: [] }])
-            })
-            .catch((error) => console.log(error))
+                    if (callback) callback()
+                    setLoading(false)
+                    setKey((k) => k + 1)
+                })
+                .catch((error) => console.log(error))
+        }
     }
 
     function removeComment(commentId, parentCommentId) {
@@ -113,20 +131,33 @@ const PostCardComments = (props: {
     return (
         <Column style={style}>
             {loggedIn && (
-                <CommentInput
-                    value={newComment}
-                    placeholder={`new ${type} comment...`}
-                    error={commentError}
-                    onChange={(e) => {
-                        setNewComment(e.target.value)
-                        setCommentError(false)
-                        resizeTextArea(e.target)
+                <DraftTextEditor
+                    key={editorKey}
+                    type='comment'
+                    stringifiedDraft={newComment.value}
+                    maxChars={5000}
+                    onChange={(value, userMentions) => {
+                        if (value !== newComment.value)
+                            setNewComment((c) => {
+                                return { ...c, value, state: 'default' }
+                            })
+                        setMentions(userMentions)
                     }}
-                    submit={() => validateComment(newComment) && submitComment(newComment)}
-                    style={{ marginBottom: 15 }}
+                    onSubmit={() =>
+                        submitComment(
+                            newComment,
+                            setNewComment,
+                            setEditoryKey,
+                            setSubmitCommentLoading,
+                            mentions
+                        )
+                    }
+                    submitLoading={submitCommentLoading}
+                    state={newComment.state}
+                    errors={newComment.errors}
                 />
             )}
-            {loading && (
+            {commentsLoading && (
                 <Row centerX style={{ margin: '20px 0' }}>
                     <LoadingWheel />
                 </Row>

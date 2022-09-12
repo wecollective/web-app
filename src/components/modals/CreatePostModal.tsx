@@ -1479,6 +1479,7 @@ const CreatePostModal = (): JSX.Element => {
                     {postType === 'Text' && currentStep === 2 && (
                         <Column centerX style={{ width: '100%', maxWidth: 500, marginBottom: 30 }}>
                             <DraftTextEditor
+                                type='post'
                                 stringifiedDraft={textForm.text.value}
                                 maxChars={5000}
                                 onChange={(value, userMentions) => {
@@ -1535,6 +1536,7 @@ const CreatePostModal = (): JSX.Element => {
                                 >
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
                                     <DraftTextEditor
+                                        type='post'
                                         stringifiedDraft={urlForm2.text.value}
                                         maxChars={5000}
                                         onChange={(value, userMentions) => {
@@ -1682,6 +1684,7 @@ const CreatePostModal = (): JSX.Element => {
                                 >
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
                                     <DraftTextEditor
+                                        type='post'
                                         stringifiedDraft={imageForm.text.value}
                                         maxChars={5000}
                                         onChange={(value, userMentions) => {
@@ -1797,6 +1800,7 @@ const CreatePostModal = (): JSX.Element => {
                                 >
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
                                     <DraftTextEditor
+                                        type='post'
                                         stringifiedDraft={audioForm.text.value}
                                         maxChars={5000}
                                         onChange={(value, userMentions) => {
@@ -1848,6 +1852,7 @@ const CreatePostModal = (): JSX.Element => {
                                 >
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
                                     <DraftTextEditor
+                                        type='post'
                                         stringifiedDraft={eventForm2.description.value}
                                         maxChars={5000}
                                         onChange={(value, userMentions) => {
@@ -1928,6 +1933,7 @@ const CreatePostModal = (): JSX.Element => {
                                 >
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
                                     <DraftTextEditor
+                                        type='post'
                                         stringifiedDraft={inquiryForm2.description.value}
                                         maxChars={5000}
                                         onChange={(value, userMentions) => {
@@ -2232,6 +2238,7 @@ const CreatePostModal = (): JSX.Element => {
                                 >
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
                                     <DraftTextEditor
+                                        type='post'
                                         stringifiedDraft={GBGForm2.description.value}
                                         maxChars={5000}
                                         onChange={(value, userMentions) => {
@@ -2343,6 +2350,7 @@ const CreatePostModal = (): JSX.Element => {
                                     <Column centerX style={{ width: '100%', maxWidth: 500 }}>
                                         {newBead.type === 'text' && (
                                             <DraftTextEditor
+                                                type='post'
                                                 key={newBead.id}
                                                 stringifiedDraft={newBead.text}
                                                 maxChars={5000}
@@ -2711,6 +2719,7 @@ const CreatePostModal = (): JSX.Element => {
                                 >
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
                                     <DraftTextEditor
+                                        type='post'
                                         stringifiedDraft={stringForm.description.value}
                                         maxChars={5000}
                                         onChange={(value, userMentions) => {
@@ -2741,6 +2750,7 @@ const CreatePostModal = (): JSX.Element => {
                                 >
                                     <p style={{ marginBottom: 20 }}>Description (optional):</p>
                                     <DraftTextEditor
+                                        type='post'
                                         stringifiedDraft={multiplayerStringForm1.description.value}
                                         maxChars={5000}
                                         onChange={(value, userMentions) => {

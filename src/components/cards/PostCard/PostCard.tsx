@@ -1492,7 +1492,7 @@ const PostCard = (props: {
                         incrementTotalComments={(value) =>
                             setPostData({ ...postData, totalComments: totalComments + value })
                         }
-                        style={{ marginTop: 20 }}
+                        style={{ marginTop: 10 }}
                     />
                 )}
                 {deletePostModalOpen && (

@@ -20,23 +20,43 @@ import createTextAlignmentPlugin from '@draft-js-plugins/text-alignment'
 import config from '@src/Config'
 import styles from '@styles/components/draft-js/DraftText.module.scss'
 // import { ReactComponent as SuccessIconSVG } from '@svgs/check-circle-solid.svg'
+import Button from '@components/Button'
 import Mention from '@components/draft-js/Mention'
 import Suggestion from '@components/draft-js/Suggestion'
+import FlagImage from '@components/FlagImage'
+import { AccountContext } from '@contexts/AccountContext'
 import { ReactComponent as DangerIconSVG } from '@svgs/exclamation-circle-solid.svg'
 import axios from 'axios'
 import { ContentState, convertFromRaw, convertToRaw, EditorState } from 'draft-js'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 
 const DraftTextEditor = (props: {
+    id?: string
+    type: 'post' | 'comment'
     stringifiedDraft: string
     onChange: (text: string, mentions: any[]) => void
+    onSubmit?: () => void
+    submitLoading?: boolean
     maxChars?: number
     state?: 'default' | 'valid' | 'invalid'
     errors?: string[]
     className?: string
     style?: any
 }): JSX.Element => {
-    const { stringifiedDraft, onChange, maxChars, state, errors, className, style } = props
+    const {
+        id,
+        type,
+        stringifiedDraft,
+        onChange,
+        onSubmit,
+        submitLoading,
+        maxChars,
+        state,
+        errors,
+        className,
+        style,
+    } = props
+    const { accountData } = useContext(AccountContext)
     const [editorState, setEditorState] = useState<any>(null)
     const [toolbarPlugin] = useState(
         createToolbarPlugin({ theme: { buttonStyles: styles, toolbarStyles: styles } })
@@ -130,8 +150,9 @@ const DraftTextEditor = (props: {
 
     return (
         <div
+            id={id}
             role='button'
-            className={`${styles.wrapper} ${styles.editable} ${className} ${
+            className={`${styles.wrapper} ${styles.editable} ${styles[type]} ${className} ${
                 styles[state || 'default']
             }`}
             style={style}
@@ -160,15 +181,35 @@ const DraftTextEditor = (props: {
                 <EmojiSuggestions />
             </div>
             {editorState && (
-                <Editor
-                    placeholder='Enter text...'
-                    editorState={editorState}
-                    onChange={onEditorStateChange}
-                    plugins={plugins}
-                    ref={(element) => {
-                        editorRef.current = element
-                    }}
-                />
+                <Row>
+                    {type === 'comment' && (
+                        <FlagImage
+                            type='user'
+                            size={35}
+                            imagePath={accountData.flagImagePath}
+                            style={{ marginTop: 10 }}
+                        />
+                    )}
+                    <Editor
+                        placeholder='Enter text...'
+                        editorState={editorState}
+                        onChange={onEditorStateChange}
+                        plugins={plugins}
+                        ref={(element) => {
+                            editorRef.current = element
+                        }}
+                    />
+                    {type === 'comment' && (
+                        <Button
+                            color='blue'
+                            size='medium-large'
+                            text='Add'
+                            loading={submitLoading}
+                            onClick={onSubmit}
+                            style={{ marginTop: 10 }}
+                        />
+                    )}
+                </Row>
             )}
             <MentionSuggestions
                 onSearchChange={onSearchChange}
@@ -178,26 +219,31 @@ const DraftTextEditor = (props: {
                 onAddMention={() => null}
                 entryComponent={Suggestion}
             />
-            <Row
-                centerY
-                spaceBetween
-                className={`${styles.stats} ${state === 'invalid' && styles.error}`}
-            >
-                <Row className={styles.errors}>
-                    {state === 'invalid' && <DangerIconSVG />}
-                    {/* {state === 'valid' && <SuccessIconSVG />} */}
-                    {state === 'invalid' && errors!.map((error) => <p key={error}>{error}</p>)}
+            {(type === 'post' || state === 'invalid') && (
+                <Row
+                    centerY
+                    spaceBetween
+                    className={`${styles.stats} ${state === 'invalid' && styles.error}`}
+                >
+                    <Row className={styles.errors}>
+                        {state === 'invalid' && <DangerIconSVG />}
+                        {/* {state === 'valid' && <SuccessIconSVG />} */}
+                        {state === 'invalid' && errors!.map((error) => <p key={error}>{error}</p>)}
+                    </Row>
+                    <p>
+                        {characterLength}
+                        {maxChars ? `/${maxChars}` : ''} Chars
+                    </p>
                 </Row>
-                <p>
-                    {characterLength}
-                    {maxChars ? `/${maxChars}` : ''} Chars
-                </p>
-            </Row>
+            )}
         </div>
     )
 }
 
 DraftTextEditor.defaultProps = {
+    id: null,
+    onSubmit: null,
+    submitLoading: false,
     maxChars: null,
     state: 'default',
     errors: [],

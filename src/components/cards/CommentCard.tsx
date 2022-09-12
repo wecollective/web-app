@@ -1,15 +1,15 @@
 import Column from '@components/Column'
-import CommentInput from '@components/CommentInput'
+import DraftTextEditor from '@components/draft-js/DraftTextEditor'
 import FlagImage from '@components/FlagImage'
-import Markdown from '@components/Markdown'
 import DeleteCommentModal from '@components/modals/DeleteCommentModal'
 import Row from '@components/Row'
 import ShowMoreLess from '@components/ShowMoreLess'
 import { AccountContext } from '@contexts/AccountContext'
-import { dateCreated, resizeTextArea, timeSinceCreated } from '@src/Helpers'
+import { dateCreated, defaultErrorState, findDraftLength, timeSinceCreated } from '@src/Helpers'
 import styles from '@styles/components/cards/CommentCard.module.scss'
 import React, { useContext, useState } from 'react'
 import { Link } from 'react-router-dom'
+import DraftText from '../draft-js/DraftText'
 
 const Comment = (props: {
     comment: any
@@ -39,7 +39,7 @@ const Comment = (props: {
                         </p>
                     </Row>
                     <ShowMoreLess height={150} gradientColor='grey'>
-                        <Markdown text={text} style={{ fontSize: 14, lineHeight: '22px' }} />
+                        <DraftText stringifiedDraft={text} />
                     </ShowMoreLess>
                 </Column>
             </Row>
@@ -74,29 +74,40 @@ Comment.defaultProps = {
 const CommentCard = (props: {
     comment: any
     scrollToInput: (input: any) => void
-    submit: (text: string, parentCommentId?: number) => void
+    submit: (
+        comment: any,
+        setComment: any,
+        setKey: any,
+        setLoading: any,
+        mentions: any,
+        parentCommentId?: number,
+        callback?: any
+    ) => void
     removeComment: (commentId: number, parentCommentId: number | null) => void
 }): JSX.Element => {
     const { comment, scrollToInput, submit, removeComment } = props
     const [replyInputOpen, setReplyInputOpen] = useState(false)
-    const [newReply, setNewReply] = useState('')
-    const [replyError, setReplyError] = useState(false)
-
-    function validateComment(text) {
-        const invalid = text.length < 1 || text.length > 10000
-        if (invalid) {
-            setReplyError(true)
-            return false
-        }
-        return true
-    }
+    const [newReply, setNewReply] = useState({
+        ...defaultErrorState,
+        value: '',
+        validate: (v) => {
+            const errors: string[] = []
+            const totalCharacters = findDraftLength(v)
+            if (totalCharacters < 1) errors.push('Required')
+            if (totalCharacters > 5000) errors.push('Must be less than 5K characters')
+            return errors
+        },
+    })
+    const [submitReplyLoading, setSubmitReplyLoading] = useState(false)
+    const [editorKey, setEditoryKey] = useState(0)
+    const [mentions, setMentions] = useState<any[]>([])
 
     function toggleReplyInput() {
         Promise.all([setReplyInputOpen(!replyInputOpen)]).then(() => {
             if (!replyInputOpen) {
                 const replyInput = document.getElementById(`reply-input-${comment.id}`)
                 if (replyInput) scrollToInput(replyInput)
-            } else setReplyError(false)
+            }
         })
     }
 
@@ -118,23 +129,33 @@ const CommentCard = (props: {
                     />
                 ))}
                 {replyInputOpen && (
-                    <CommentInput
+                    <DraftTextEditor
+                        key={editorKey}
                         id={`reply-input-${comment.id}`}
-                        value={newReply}
-                        placeholder='new reply...'
-                        error={replyError}
-                        onChange={(e) => {
-                            setNewReply(e.target.value)
-                            setReplyError(false)
-                            resizeTextArea(e.target)
+                        type='comment'
+                        stringifiedDraft={newReply.value}
+                        maxChars={5000}
+                        onChange={(value, userMentions) => {
+                            if (value !== newReply.value)
+                                setNewReply((c) => {
+                                    return { ...c, value, state: 'default' }
+                                })
+                            setMentions(userMentions)
                         }}
-                        submit={() => {
-                            if (validateComment(newReply)) {
-                                submit(newReply, comment.id)
-                                setNewReply('')
-                            }
-                        }}
-                        style={{ marginBottom: 10 }}
+                        onSubmit={() =>
+                            submit(
+                                newReply,
+                                setNewReply,
+                                setEditoryKey,
+                                setSubmitReplyLoading,
+                                mentions,
+                                comment.id,
+                                () => setReplyInputOpen(false)
+                            )
+                        }
+                        submitLoading={submitReplyLoading}
+                        state={newReply.state}
+                        errors={newReply.errors}
                     />
                 )}
             </Column>

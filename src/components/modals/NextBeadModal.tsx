@@ -409,6 +409,7 @@ const NextBeadModal = (props: {
                         {newBead.type === 'text' && (
                             <Column centerX style={{ width: '100%', maxWidth: 500 }}>
                                 <DraftTextEditor
+                                    type='post'
                                     stringifiedDraft={newBead.text}
                                     maxChars={maxChars}
                                     onChange={(value, userMentions) => {

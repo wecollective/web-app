@@ -40,18 +40,56 @@
         padding: 0;
 
         :global(.DraftEditor-root) {
-            padding: 0 15px;
             min-height: 30px;
+            width: 100%;
 
             :global(.DraftEditor-editorContainer) {
-                padding: 15px 0;
+                padding: 15px;
             }
 
             :global(.public-DraftEditorPlaceholder-root) {
-                padding: 15px 0;
+                padding: 15px;
                 color: #9197a3;
                 position: absolute;
                 z-index: 0;
+            }
+        }
+    }
+
+    // comment editor styling
+    &.comment {
+        :global(.DraftEditor-root) {
+            padding: 5px 10px 10px 10px;
+        }
+
+        :global(.DraftEditor-editorContainer) {
+            background-color: $grey1;
+            border-radius: 10px;
+            padding: 12px !important;
+        }
+
+        :global(.public-DraftEditorPlaceholder-root) {
+            padding: 12px !important;
+        }
+
+        .toolbar {
+            border-bottom: none;
+        }
+
+        &.invalid {
+            :global(.DraftEditor-root) {
+                border: none;
+                padding-bottom: 0;
+            }
+
+            :global(.DraftEditor-editorContainer) {
+                border: 2px solid $red;
+            }
+
+            .stats {
+                border: none;
+                margin-bottom: 5px;
+                padding: 0;
             }
         }
     }
@@ -179,10 +217,6 @@
     &.invalid {
         :global(.DraftEditor-root) {
             border: 2px solid $red;
-        }
-
-        svg {
-            color: $red;
         }
     }
 
