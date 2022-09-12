@@ -271,6 +271,16 @@ export function allValid(items: any, setItems: (newItems: any) => void): boolean
     return valid
 }
 
+export function isValid(item: any, setItem: (newItem: any) => void): boolean {
+    let valid = true
+    const newItem = { ...item }
+    newItem.errors = item.required ? item.validate(item.value) : []
+    newItem.state = newItem.errors.length ? 'invalid' : 'valid'
+    if (newItem.errors.length) valid = false
+    setItem(newItem)
+    return valid
+}
+
 export function notNull(value: number | null): number | false {
     return value !== null ? value : false
 }
@@ -309,7 +319,7 @@ export function handleImageError(e: any, image: string): void {
     }
 }
 
-export function findDraftLength(strigifiedDraft: string) {
+export function findDraftLength(strigifiedDraft: string): number {
     if (!strigifiedDraft.length) return 0
     const contentState = convertFromRaw(JSON.parse(strigifiedDraft))
     const editorState = EditorState.createWithContent(contentState)
