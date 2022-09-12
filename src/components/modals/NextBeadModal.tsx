@@ -298,7 +298,7 @@ const NextBeadModal = (props: {
                 nextPlayerId: findNextPlayerId(),
                 type: newBead.type,
                 color: newBead.color,
-                text: newBead.text,
+                text: findDraftLength(newBead.text) > 0 ? newBead.text : '',
                 url: newBead.url,
                 urlData: newBead.urlData,
             }
