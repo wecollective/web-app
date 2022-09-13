@@ -5,6 +5,7 @@ import Modal from '@components/modals/Modal'
 import SuccessMessage from '@components/SuccessMessage'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
+import { isValidEmail } from '@src/Helpers'
 import styles from '@styles/components/modals/Modal.module.scss'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
@@ -48,11 +49,12 @@ const RegisterModal = (props: { close: () => void }): JSX.Element => {
         passwordState === 'invalid' ||
         confirmPasswordState === 'invalid'
 
+    // todo: use updated validation approach
     function register(e) {
         e.preventDefault()
         const invalidHandle = handle.length < 1 || handle.length > 30
         const invalidName = name.length < 1 || name.length > 30
-        const invalidEmail = email.length < 1
+        const invalidEmail = !isValidEmail(email)
         const invalidPassword = password.length < 1
         const invalidConfirmPassword = confirmPassword.length < 1 || confirmPassword !== password
         setHandleState(invalidHandle ? 'invalid' : 'valid')
