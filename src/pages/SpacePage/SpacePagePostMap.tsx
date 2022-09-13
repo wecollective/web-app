@@ -6,6 +6,7 @@ import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
+import { getDraftPlainText } from '@src/Helpers'
 import { IPost } from '@src/Interfaces'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/pages/SpacePage/SpacePagePostMap.module.scss'
@@ -307,9 +308,10 @@ const SpacePagePostMap = (props: { postMapData: any; params: any }): JSX.Element
             )
     }
 
-    function trimText(text) {
-        const t = text.substring(0, 20)
-        return text.length > 20 ? t.concat('...') : t
+    function formatText(text) {
+        const formattedText = getDraftPlainText(text)
+        const trimmedText = formattedText.substring(0, 20)
+        return formattedText.length > 20 ? trimmedText.concat('...') : formattedText
     }
 
     function updateMap(data) {
@@ -483,9 +485,9 @@ const SpacePagePostMap = (props: { postMapData: any; params: any }): JSX.Element
                         .append('text')
                         .classed('post-map-node-text', true)
                         .text((d) => {
-                            if (d.text) return trimText(d.text)
+                            if (d.text) return formatText(d.text)
                             if (d.type === 'url' && !d.urlImage)
-                                return trimText(d.text || d.urlTitle || d.urlDescription || '')
+                                return formatText(d.text || d.urlTitle || d.urlDescription || '')
                             return null
                         })
                         .attr('opacity', 0)
