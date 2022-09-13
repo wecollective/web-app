@@ -1,8 +1,12 @@
+/* eslint-disable jsx-a11y/anchor-has-content */
+/* eslint-disable react/jsx-props-no-spreading */
 import Mention from '@components/draft-js/Mention'
 import Markdown from '@components/Markdown'
+import createLinkPlugin from '@draft-js-plugins/anchor'
 import Editor from '@draft-js-plugins/editor'
 import createEmojiPlugin, { defaultTheme } from '@draft-js-plugins/emoji'
 import '@draft-js-plugins/emoji/lib/plugin.css'
+import createLinkifyPlugin from '@draft-js-plugins/linkify'
 import createMentionPlugin from '@draft-js-plugins/mention'
 import '@draft-js-plugins/mention/lib/plugin.css'
 import createTextAlignmentPlugin from '@draft-js-plugins/text-alignment'
@@ -47,7 +51,13 @@ const DraftText = (props: {
             },
         })
     )
-    const plugins = [textAlignmentPlugin, mentionPlugin, emojiPlugin]
+    const [linkPlugin] = useState(createLinkPlugin())
+    const [linkifyPlugin] = useState(
+        createLinkifyPlugin({
+            component: (linkifyProps) => <a {...linkifyProps} />,
+        })
+    )
+    const plugins = [textAlignmentPlugin, mentionPlugin, emojiPlugin, linkPlugin, linkifyPlugin]
     const editorRef = useRef<any>(null)
 
     useEffect(() => {

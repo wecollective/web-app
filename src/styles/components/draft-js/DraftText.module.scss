@@ -9,6 +9,10 @@
         font-family: inherit;
     }
 
+    a {
+        color: $blue1;
+    }
+
     blockquote {
         margin-block-start: 10px;
         margin-block-end: 10px;
@@ -135,12 +139,21 @@
             background-color: $grey2;
             margin: 0 10px 0 5px;
         }
+
+        .linkInput {
+            width: calc(100% - 37px);
+            padding: 6px 8px;
+            outline: none;
+            border: 1px solid $grey2;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
     }
 
     .emojiButtonWrapper {
         position: absolute;
         top: 5px;
-        right: 5px;
+        right: 0;
         z-index: 5;
 
         .emojiSelectButton {
@@ -178,6 +191,11 @@
                 padding: 0;
             }
         }
+    }
+
+    .editorWrapper {
+        all: unset;
+        width: 100%;
     }
 
     .alignLeft {

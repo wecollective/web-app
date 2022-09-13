@@ -1,5 +1,7 @@
+/* eslint-disable jsx-a11y/anchor-has-content */
 /* eslint-disable react/jsx-props-no-spreading */
 import Row from '@components/Row'
+import createLinkPlugin, { defaultTheme as anchorTheme } from '@draft-js-plugins/anchor'
 import {
     BlockquoteButton,
     BoldButton,
@@ -11,8 +13,9 @@ import {
     UnorderedListButton,
 } from '@draft-js-plugins/buttons'
 import Editor from '@draft-js-plugins/editor'
-import createEmojiPlugin, { defaultTheme } from '@draft-js-plugins/emoji'
+import createEmojiPlugin, { defaultTheme as emojiTheme } from '@draft-js-plugins/emoji'
 import '@draft-js-plugins/emoji/lib/plugin.css'
+import createLinkifyPlugin from '@draft-js-plugins/linkify'
 import createMentionPlugin from '@draft-js-plugins/mention'
 import '@draft-js-plugins/mention/lib/plugin.css'
 import createToolbarPlugin from '@draft-js-plugins/static-toolbar'
@@ -70,7 +73,7 @@ const DraftTextEditor = (props: {
     const [emojiPlugin] = useState(
         createEmojiPlugin({
             theme: {
-                ...defaultTheme,
+                ...emojiTheme,
                 emojiSelectButton: styles.emojiSelectButton,
                 emojiSelectButtonPressed: `${styles.emojiSelectButton} ${styles.selected}`,
                 emojiSelectPopover: styles.emojiSelectPopover,
@@ -89,7 +92,28 @@ const DraftTextEditor = (props: {
             },
         })
     )
-    const plugins = [toolbarPlugin, textAlignmentPlugin, mentionPlugin, emojiPlugin]
+    const [linkPlugin] = useState(
+        createLinkPlugin({
+            theme: {
+                ...anchorTheme,
+                input: styles.linkInput,
+            },
+            placeholder: 'Add a valid URL and press Enter...',
+        })
+    )
+    const [linkifyPlugin] = useState(
+        createLinkifyPlugin({
+            component: (linkifyProps) => <a {...linkifyProps} />,
+        })
+    )
+    const plugins = [
+        toolbarPlugin,
+        textAlignmentPlugin,
+        mentionPlugin,
+        emojiPlugin,
+        linkPlugin,
+        linkifyPlugin,
+    ]
     const [suggestions, setSuggestions] = useState([])
     const [showSuggestions, setShowSuggestions] = useState(false)
     const [characterLength, setCharacterLength] = useState(0)
@@ -98,6 +122,7 @@ const DraftTextEditor = (props: {
 
     const { EmojiSuggestions, EmojiSelect } = emojiPlugin
     const { TextAlignment } = textAlignmentPlugin as any
+    const { LinkButton } = linkPlugin
     const { Toolbar } = toolbarPlugin
     const { MentionSuggestions } = mentionPlugin
 
@@ -151,14 +176,10 @@ const DraftTextEditor = (props: {
     return (
         <div
             id={id}
-            role='button'
             className={`${styles.wrapper} ${styles.editable} ${styles[type]} ${className} ${
                 styles[state || 'default']
             }`}
             style={style}
-            tabIndex={0}
-            onKeyDown={focus}
-            onClick={focus}
         >
             <Toolbar key={toolbarKey}>
                 {(externalProps) => (
@@ -173,6 +194,7 @@ const DraftTextEditor = (props: {
                         <BlockquoteButton {...externalProps} />
                         <CodeBlockButton {...externalProps} />
                         <TextAlignment {...externalProps} />
+                        <LinkButton {...externalProps} />
                     </Row>
                 )}
             </Toolbar>
@@ -190,15 +212,17 @@ const DraftTextEditor = (props: {
                             style={{ marginTop: 10 }}
                         />
                     )}
-                    <Editor
-                        placeholder='Enter text...'
-                        editorState={editorState}
-                        onChange={onEditorStateChange}
-                        plugins={plugins}
-                        ref={(element) => {
-                            editorRef.current = element
-                        }}
-                    />
+                    <button className={styles.editorWrapper} type='button' onClick={focus}>
+                        <Editor
+                            placeholder='Enter text...'
+                            editorState={editorState}
+                            onChange={onEditorStateChange}
+                            plugins={plugins}
+                            ref={(element) => {
+                                editorRef.current = element
+                            }}
+                        />
+                    </button>
                     {type === 'comment' && (
                         <Button
                             color='blue'
