@@ -2,6 +2,7 @@ import Button from '@components/Button'
 import Column from '@components/Column'
 import DraftText from '@components/draft-js/DraftText'
 import UpdateUserBioModal from '@components/modals/UpdateUserBioModal'
+import UpdateUserEmailModal from '@components/modals/UpdateUserEmailModal'
 import UpdateUserNameModal from '@components/modals/UpdateUserNameModal'
 import Row from '@components/Row'
 import ShowMoreLess from '@components/ShowMoreLess'
@@ -14,10 +15,11 @@ import { useHistory, useLocation } from 'react-router-dom'
 const UserPageSettings = (): JSX.Element => {
     const { accountData, accountDataLoading } = useContext(AccountContext)
     const { setSelectedUserSubPage, userData, getUserData, isOwnAccount } = useContext(UserContext)
-    const { handle, name, bio } = accountData
+    const { handle, name, bio, email } = accountData
 
-    const [updateUserNameModalOpen, setUpdateUserNameModalOpen] = useState(false)
-    const [updateUserBioModalOpen, setUpdateUserBioModalOpen] = useState(false)
+    const [userNameModalOpen, setUserNameModalOpen] = useState(false)
+    const [userBioModalOpen, setUserBioModalOpen] = useState(false)
+    const [userEmailModalOpen, setUserEmailModalOpen] = useState(false)
 
     const history = useHistory()
     const location = useLocation()
@@ -48,10 +50,10 @@ const UserPageSettings = (): JSX.Element => {
                             text='Edit'
                             color='blue'
                             size='medium'
-                            onClick={() => setUpdateUserNameModalOpen(true)}
+                            onClick={() => setUserNameModalOpen(true)}
                         />
-                        {updateUserNameModalOpen && (
-                            <UpdateUserNameModal close={() => setUpdateUserNameModalOpen(false)} />
+                        {userNameModalOpen && (
+                            <UpdateUserNameModal close={() => setUserNameModalOpen(false)} />
                         )}
                     </Row>
                     <Column centerX>
@@ -64,12 +66,25 @@ const UserPageSettings = (): JSX.Element => {
                             color='blue'
                             size='medium'
                             style={{ marginTop: 10 }}
-                            onClick={() => setUpdateUserBioModalOpen(true)}
+                            onClick={() => setUserBioModalOpen(true)}
                         />
-                        {updateUserBioModalOpen && (
-                            <UpdateUserBioModal close={() => setUpdateUserBioModalOpen(false)} />
+                        {userBioModalOpen && (
+                            <UpdateUserBioModal close={() => setUserBioModalOpen(false)} />
                         )}
                     </Column>
+                    <Row centerY>
+                        <h1>Email:</h1>
+                        <p>{email}</p>
+                        <Button
+                            text='Edit'
+                            color='blue'
+                            size='medium'
+                            onClick={() => setUserEmailModalOpen(true)}
+                        />
+                        {userEmailModalOpen && (
+                            <UpdateUserEmailModal close={() => setUserEmailModalOpen(false)} />
+                        )}
+                    </Row>
                 </Column>
             )}
         </Column>
