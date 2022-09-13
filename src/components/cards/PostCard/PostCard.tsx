@@ -672,7 +672,7 @@ const PostCard = (props: {
                         <p className='grey'>now</p>
                     ) : (
                         <Row>
-                            <p className='grey' title={dateCreated(createdAt)}>
+                            <p className='grey' title={`Posted at ${dateCreated(createdAt)}`}>
                                 {mobileView
                                     ? timeSinceCreatedShort(createdAt)
                                     : timeSinceCreated(createdAt)}
