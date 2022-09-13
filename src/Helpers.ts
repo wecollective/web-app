@@ -319,9 +319,19 @@ export function handleImageError(e: any, image: string): void {
     }
 }
 
-export function findDraftLength(strigifiedDraft: string): number {
-    if (!strigifiedDraft.length) return 0
-    const contentState = convertFromRaw(JSON.parse(strigifiedDraft))
+export function findDraftLength(stringifiedDraft: string): number {
+    if (!stringifiedDraft.length) return 0
+    const contentState = convertFromRaw(JSON.parse(stringifiedDraft))
     const editorState = EditorState.createWithContent(contentState)
     return editorState.getCurrentContent().getPlainText().length
+}
+
+export function getDraftPlainText(stringifiedDraft: string): string {
+    const isDraft = stringifiedDraft.slice(0, 10) === `{"blocks":`
+    if (isDraft) {
+        const contentState = convertFromRaw(JSON.parse(stringifiedDraft))
+        const editorState = EditorState.createWithContent(contentState)
+        return editorState.getCurrentContent().getPlainText()
+    }
+    return stringifiedDraft
 }
