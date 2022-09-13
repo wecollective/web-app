@@ -1,138 +1,147 @@
 @import '@styles/Variables';
 
-.colorButtons {
-    margin-bottom: 20px;
-
-    > button {
-        all: unset;
-        cursor: pointer;
-        width: 30px;
-        height: 30px;
-        border-radius: 5px;
-        border: 1px solid $black3;
-        &:not(:last-child) {
-            margin-right: 10px;
-        }
-
-        &.selected {
-            border: 3px solid $black3;
-        }
+.wrapper {
+    width: 100vw;
+    @include for-tablet-landscape-up {
+        padding: 50px;
+        width: auto;
+        min-width: 600px;
     }
-}
 
-.beadTypeButtons {
-    margin-bottom: 20px;
-
-    > button {
-        all: unset;
-        cursor: pointer;
-        width: 60px;
-        height: 60px;
-        background-color: white;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-shrink: 0;
-        &:not(:last-child) {
-            margin-right: 10px;
-        }
-        &.selected {
-            background-color: $blue8;
-        }
-
-        > svg {
-            width: 30px;
-            height: 30px;
-            opacity: 0.8;
-        }
-
-        @include for-tablet-landscape-up {
-            width: 80px;
-            height: 80px;
-            &:not(:last-child) {
-                margin-right: 20px;
-            }
-            > svg {
-                width: 40px;
-                height: 40px;
-            }
-        }
-    }
-}
-
-.beadUploadInput {
-    margin-bottom: 10px;
-    label {
-        height: 40px;
-        border-radius: 20px;
-        padding: 0px 20px;
-        font-size: 14px;
-        border: none;
-        outline: none;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        transition-property: background-color, filter, color;
-        transition-duration: 0.3s;
-        flex-shrink: 0;
-        background-color: $grey2;
-        color: black;
-        &:hover {
-            &:not(.disabled) {
-                cursor: pointer;
-                filter: brightness(96%);
-            }
-        }
-    }
-}
-
-.beadImages {
-    padding-bottom: 10px;
-    margin-top: 10px;
-
-    .image {
-        position: relative;
-        &:not(:last-child) {
-            margin-right: 10px;
-        }
+    .colorButtons {
+        margin-bottom: 20px;
 
         > button {
-            position: absolute;
-            right: 0;
-        }
+            all: unset;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            border: 1px solid $black3;
+            &:not(:last-child) {
+                margin-right: 10px;
+            }
 
-        > img {
-            width: 180px;
-            height: 180px;
-            object-fit: cover;
-            margin-bottom: 10px;
-        }
-
-        > p {
-            width: 180px;
-            text-align: center;
-            overflow-wrap: break-word;
-            margin-bottom: 10px;
+            &.selected {
+                border: 3px solid $black3;
+            }
         }
     }
-}
 
-.itemFooter {
-    height: 20px;
-    margin: 7px 10px 5px 0;
+    .beadTypeButtons {
+        margin-bottom: 20px;
 
-    > button {
-        all: unset;
-        cursor: pointer;
-        width: 20px;
+        > button {
+            all: unset;
+            cursor: pointer;
+            width: 60px;
+            height: 60px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            &:not(:last-child) {
+                margin-right: 10px;
+            }
+            &.selected {
+                background-color: $blue8;
+            }
+
+            > svg {
+                width: 30px;
+                height: 30px;
+                opacity: 0.8;
+            }
+
+            @include for-tablet-landscape-up {
+                width: 80px;
+                height: 80px;
+                &:not(:last-child) {
+                    margin-right: 20px;
+                }
+                > svg {
+                    width: 40px;
+                    height: 40px;
+                }
+            }
+        }
+    }
+
+    .beadUploadInput {
+        margin-bottom: 10px;
+        label {
+            height: 40px;
+            border-radius: 20px;
+            padding: 0px 20px;
+            font-size: 14px;
+            border: none;
+            outline: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition-property: background-color, filter, color;
+            transition-duration: 0.3s;
+            flex-shrink: 0;
+            background-color: $grey2;
+            color: black;
+            &:hover {
+                &:not(.disabled) {
+                    cursor: pointer;
+                    filter: brightness(96%);
+                }
+            }
+        }
+    }
+
+    .beadImages {
+        padding-bottom: 10px;
+        margin-top: 10px;
+
+        .image {
+            position: relative;
+            &:not(:last-child) {
+                margin-right: 10px;
+            }
+
+            > button {
+                position: absolute;
+                right: 0;
+            }
+
+            > img {
+                width: 180px;
+                height: 180px;
+                object-fit: cover;
+                margin-bottom: 10px;
+            }
+
+            > p {
+                width: 180px;
+                text-align: center;
+                overflow-wrap: break-word;
+                margin-bottom: 10px;
+            }
+        }
+    }
+
+    .itemFooter {
         height: 20px;
-        margin: 0 10px;
+        margin: 7px 10px 5px 0;
 
-        > svg {
-            opacity: 0.15;
+        > button {
+            all: unset;
+            cursor: pointer;
             width: 20px;
             height: 20px;
+            margin: 0 10px;
+
+            > svg {
+                opacity: 0.15;
+                width: 20px;
+                height: 20px;
+            }
         }
     }
 }

@@ -98,7 +98,7 @@ const DraftTextEditor = (props: {
                 ...anchorTheme,
                 input: styles.linkInput,
             },
-            placeholder: 'Add a valid URL and press Enter...',
+            placeholder: 'Add a valid URL & press Enter...',
         })
     )
     const [linkifyPlugin] = useState(
