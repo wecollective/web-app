@@ -32,13 +32,18 @@ import { AccountContext } from '@contexts/AccountContext'
 import { PostContext } from '@contexts/PostContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import { UserContext } from '@contexts/UserContext'
+import DraftTextEditor from '@src/components/draft-js/DraftTextEditor'
+import SuccessMessage from '@src/components/SuccessMessage'
 import config from '@src/Config'
 import {
     dateCreated,
+    defaultErrorState,
+    findDraftLength,
     formatTimeDHM,
     formatTimeHHDDMMSS,
     formatTimeHM,
     formatTimeMDYT,
+    isValid,
     pluralise,
     statTitle,
     timeSinceCreated,
@@ -53,6 +58,7 @@ import { ReactComponent as SuccessIcon } from '@svgs/check-circle-solid.svg'
 import { ReactComponent as ClockIcon } from '@svgs/clock-solid.svg'
 import { ReactComponent as CommentIcon } from '@svgs/comment-solid.svg'
 import { ReactComponent as DNAIcon } from '@svgs/dna.svg'
+import { ReactComponent as EditIcon } from '@svgs/edit-solid.svg'
 import { ReactComponent as VerticalEllipsisIcon } from '@svgs/ellipsis-vertical-solid.svg'
 import { ReactComponent as ExpandIcon } from '@svgs/expand-icon.svg'
 import { ReactComponent as TextIcon } from '@svgs/font-solid.svg'
@@ -108,6 +114,7 @@ const PostCard = (props: {
         urlTitle,
         urlDescription,
         createdAt,
+        updatedAt,
         totalComments,
         totalLikes,
         totalRatings,
@@ -138,6 +145,45 @@ const PostCard = (props: {
     const [imageModalOpen, setImageModalOpen] = useState(false)
     const [selectedImage, setSelectedImage] = useState<any>(null)
     const [likeResponseLoading, setLikeResponseLoading] = useState(false)
+    const [commentsOpen, setCommentsOpen] = useState(location === 'post-page')
+    const [deletePostModalOpen, setDeletePostModalOpen] = useState(false)
+    const [editPostModalOpen, setEditPostModalOpen] = useState(false)
+    const [postEditLoading, setPostEditLoading] = useState(false)
+    const [postEditSaved, setPostEditSaved] = useState(false)
+    const [newText, setNewText] = useState({
+        ...defaultErrorState,
+        value: text,
+        validate: (v) => {
+            const errors: string[] = []
+            const totalCharacters = findDraftLength(v)
+            if (totalCharacters < 1) errors.push('Required')
+            if (totalCharacters > 5000) errors.push('Must be less than 5K characters')
+            return errors
+        },
+    })
+    const [mentions, setMentions] = useState<any[]>([])
+    const mobileView = document.documentElement.clientWidth < 900
+    const history = useHistory()
+    const cookies = new Cookies()
+    const isOwnPost = accountData && Creator && accountData.id === Creator.id
+    const postSpaces = DirectSpaces.filter((space) => space.type === 'post' && space.id !== 1) // vs. 'repost'. todo: apply filter on backend
+    const otherSpacesTitle = postSpaces
+        .map((s) => s.handle)
+        .filter((s, i) => i !== 0)
+        .join(', ')
+
+    // images
+    // todo: sort on load like StringPlayers and use main const
+    const images = PostImages.sort((a, b) => a.index - b.index)
+
+    // audio
+    const [audioPlaying, setAudioPlaying] = useState(false)
+
+    // events
+    const goingToEvent = Event && Event.Going.map((u) => u.id).includes(accountData.id)
+    const interestedInEvent = Event && Event.Interested.map((u) => u.id).includes(accountData.id)
+    const [eventGoingModalOpen, setEventGoingModalOpen] = useState(false)
+    const [eventInterestedModalOpen, setEventInterestedModalOpen] = useState(false)
 
     // inquiries
     const [totalVotes, setTotalVotes] = useState(0)
@@ -150,37 +196,40 @@ const PostCard = (props: {
     const [inquiryAnswers, setInquiryAnswers] = useState<any[]>([])
     const [newInquiryAnswers, setNewInquiryAnswers] = useState<any[]>([])
     const [totalUsedPoints, setTotalUsedPoints] = useState(0)
+    const colorScale = d3
+        .scaleSequential()
+        .domain([0, Inquiry ? Inquiry.InquiryAnswers.length : 0])
+        .interpolator(d3.interpolateViridis)
 
-    // events
-    const [eventGoingModalOpen, setEventGoingModalOpen] = useState(false)
-    const [eventInterestedModalOpen, setEventInterestedModalOpen] = useState(false)
-    const [commentsOpen, setCommentsOpen] = useState(location === 'post-page')
-    const [beadCommentsOpen, setBeadCommentsOpen] = useState(false)
-    const [selectedBead, setSelectedBead] = useState<any>(null)
-    const [deletePostModalOpen, setDeletePostModalOpen] = useState(false)
-    const [audioPlaying, setAudioPlaying] = useState(false)
+    // glass bead games
     const [nextBeadModalOpen, setNextBeadModalOpen] = useState(false)
     const [timeLeftInMove, setTimeLeftInMove] = useState(0)
     const timeLeftInMoveIntervalRef = useRef<any>(null)
-
-    const mobileView = document.documentElement.clientWidth < 900
-    // todo: sort on load like StringPlayers and use main const
+    const [beadCommentsOpen, setBeadCommentsOpen] = useState(false)
+    const [selectedBead, setSelectedBead] = useState<any>(null)
     const beads = GlassBeadGame ? GlassBeadGame.GlassBeads.sort((a, b) => a.index - b.index) : []
-    const images = PostImages.sort((a, b) => a.index - b.index)
     StringPosts.sort((a, b) => a.Link.index - b.Link.index)
-
-    const history = useHistory()
-    const cookies = new Cookies()
-    const isOwnPost = accountData && Creator && accountData.id === Creator.id
-    const postSpaces = DirectSpaces.filter((space) => space.type === 'post' && space.id !== 1) // vs. 'repost'. todo: apply filter on backend
-    const otherSpacesTitle = postSpaces
-        .map((s) => s.handle)
-        .filter((s, i) => i !== 0)
-        .join(', ')
-
-    // events
-    const goingToEvent = Event && Event.Going.map((u) => u.id).includes(accountData.id)
-    const interestedInEvent = Event && Event.Interested.map((u) => u.id).includes(accountData.id)
+    const deadlinePassed = () => {
+        return Weave && Weave.nextMoveDeadline && new Date(Weave.nextMoveDeadline) < new Date()
+    }
+    StringPlayers.sort((a, b) => a.UserPost.index - b.UserPost.index)
+    const currentPlayer =
+        Weave && Weave.privacy === 'only-selected-users'
+            ? StringPlayers[StringPosts.length % StringPlayers.length] // calculates current player index
+            : null
+    const playersPending = StringPlayers.filter((p) => p.UserPost.state === 'pending')
+    const playersRejected = StringPlayers.filter((p) => p.UserPost.state === 'rejected')
+    const playersReady = !playersPending.length && !playersRejected.length
+    const totalMoves =
+        Weave && Weave.privacy === 'only-selected-users'
+            ? Weave && Weave.numberOfTurns * StringPlayers.length
+            : Weave && Weave.numberOfMoves
+    const movesLeft = StringPosts.length < totalMoves
+    const waitingForPlayer = Weave && Weave.privacy === 'only-selected-users' && movesLeft
+    const nextMoveAvailable =
+        Weave && Weave.privacy === 'all-users-allowed'
+            ? movesLeft
+            : movesLeft && currentPlayer.id === accountData.id
 
     // todo: add to helper functions (pass in start and end dates)
     function findEventTimes() {
@@ -222,34 +271,40 @@ const PostCard = (props: {
         return null
     }
 
-    // inquiries
-    const colorScale = d3
-        .scaleSequential()
-        .domain([0, Inquiry ? Inquiry.InquiryAnswers.length : 0])
-        .interpolator(d3.interpolateViridis)
-
-    // weaves
-    const deadlinePassed = () => {
-        return Weave && Weave.nextMoveDeadline && new Date(Weave.nextMoveDeadline) < new Date()
+    function saveTextChanges() {
+        const accessToken = cookies.get('accessToken')
+        if (!accessToken) {
+            setAlertMessage('Log in again to edit your post')
+            setAlertModalOpen(true)
+        } else if (isValid(newText, setNewText)) {
+            setPostEditLoading(true)
+            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+            const data = {
+                postId: id,
+                type,
+                text: newText.value,
+                mentions: mentions.map((m) => m.link),
+                creatorName: accountData.name,
+                creatorHandle: accountData.handle,
+            }
+            axios
+                .post(`${config.apiURL}/update-post-text`, data, options)
+                .then(() => {
+                    setPostData({
+                        ...postData,
+                        text: newText.value,
+                        updatedAt: new Date().toISOString(),
+                    })
+                    setPostEditSaved(true)
+                    setPostEditLoading(false)
+                    setTimeout(() => {
+                        setEditPostModalOpen(false)
+                        setPostEditSaved(false)
+                    }, 1000)
+                })
+                .catch((error) => console.log(error))
+        }
     }
-    StringPlayers.sort((a, b) => a.UserPost.index - b.UserPost.index)
-    const currentPlayer =
-        Weave && Weave.privacy === 'only-selected-users'
-            ? StringPlayers[StringPosts.length % StringPlayers.length] // calculates current player index
-            : null
-    const playersPending = StringPlayers.filter((p) => p.UserPost.state === 'pending')
-    const playersRejected = StringPlayers.filter((p) => p.UserPost.state === 'rejected')
-    const playersReady = !playersPending.length && !playersRejected.length
-    const totalMoves =
-        Weave && Weave.privacy === 'only-selected-users'
-            ? Weave && Weave.numberOfTurns * StringPlayers.length
-            : Weave && Weave.numberOfMoves
-    const movesLeft = StringPosts.length < totalMoves
-    const waitingForPlayer = Weave && Weave.privacy === 'only-selected-users' && movesLeft
-    const nextMoveAvailable =
-        Weave && Weave.privacy === 'all-users-allowed'
-            ? movesLeft
-            : movesLeft && currentPlayer.id === accountData.id
 
     function openImageModal(imageId) {
         setSelectedImage(images.find((image) => image.id === imageId))
@@ -616,11 +671,18 @@ const PostCard = (props: {
                     {location === 'preview' ? (
                         <p className='grey'>now</p>
                     ) : (
-                        <p className='grey' title={dateCreated(createdAt)}>
-                            {mobileView
-                                ? timeSinceCreatedShort(createdAt)
-                                : timeSinceCreated(createdAt)}
-                        </p>
+                        <Row>
+                            <p className='grey' title={dateCreated(createdAt)}>
+                                {mobileView
+                                    ? timeSinceCreatedShort(createdAt)
+                                    : timeSinceCreated(createdAt)}
+                            </p>
+                            {createdAt !== updatedAt && (
+                                <p className='grey' title={`Edited at ${dateCreated(updatedAt)}`}>
+                                    *
+                                </p>
+                            )}
+                        </Row>
                     )}
                 </Row>
                 <Row centerY>
@@ -646,13 +708,22 @@ const PostCard = (props: {
                                 <CloseOnClickOutside onClick={() => setMenuOpen(false)}>
                                     <Column className={styles.menu}>
                                         {isOwnPost && (
-                                            <button
-                                                type='button'
-                                                onClick={() => setDeletePostModalOpen(true)}
-                                            >
-                                                <DeleteIcon />
-                                                Delete post
-                                            </button>
+                                            <Column>
+                                                <button
+                                                    type='button'
+                                                    onClick={() => setEditPostModalOpen(true)}
+                                                >
+                                                    <EditIcon />
+                                                    Edit post
+                                                </button>
+                                                <button
+                                                    type='button'
+                                                    onClick={() => setDeletePostModalOpen(true)}
+                                                >
+                                                    <DeleteIcon />
+                                                    Delete post
+                                                </button>
+                                            </Column>
                                         )}
                                     </Column>
                                 </CloseOnClickOutside>
@@ -1495,14 +1566,51 @@ const PostCard = (props: {
                         style={{ marginTop: 10 }}
                     />
                 )}
-                {deletePostModalOpen && (
-                    <DeletePostModal
-                        postId={postData.id}
-                        location={location}
-                        close={() => setDeletePostModalOpen(false)}
-                    />
-                )}
             </Column>
+            {editPostModalOpen && (
+                <Modal
+                    className={styles.editPostModal}
+                    close={() => setEditPostModalOpen(false)}
+                    centered
+                >
+                    {postEditSaved ? (
+                        <SuccessMessage text='Changes saved' />
+                    ) : (
+                        <Column centerX style={{ width: '100%' }}>
+                            <h1>Edit post</h1>
+                            <DraftTextEditor
+                                type='post'
+                                stringifiedDraft={newText.value}
+                                maxChars={5000}
+                                onChange={(value, userMentions) => {
+                                    if (value !== newText.value)
+                                        setNewText((t) => {
+                                            return { ...t, value, state: 'default' }
+                                        })
+                                    setMentions(userMentions)
+                                }}
+                                state={newText.state}
+                                errors={newText.errors}
+                                style={{ marginBottom: 20 }}
+                            />
+                            <Button
+                                color='blue'
+                                text='Save changes'
+                                disabled={newText.value === text || postEditLoading}
+                                loading={postEditLoading}
+                                onClick={saveTextChanges}
+                            />
+                        </Column>
+                    )}
+                </Modal>
+            )}
+            {deletePostModalOpen && (
+                <DeletePostModal
+                    postId={postData.id}
+                    location={location}
+                    close={() => setDeletePostModalOpen(false)}
+                />
+            )}
         </Column>
     )
 }

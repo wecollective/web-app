@@ -166,7 +166,7 @@
             padding: 12px;
             z-index: 5;
 
-            > button {
+            button {
                 all: unset;
                 cursor: pointer;
                 display: flex;
@@ -474,6 +474,15 @@
                     }
                 }
             }
+        }
+    }
+
+    .editPostModal {
+        width: 100vw;
+        @include for-tablet-landscape-up {
+            padding: 50px;
+            width: auto;
+            min-width: 600px;
         }
     }
 }
