@@ -13,9 +13,10 @@ import React, { useEffect, useRef, useState } from 'react'
 const DraftText = (props: {
     stringifiedDraft: string
     className?: string
+    markdownStyles?: string
     style?: any
 }): JSX.Element => {
-    const { stringifiedDraft, className, style } = props
+    const { stringifiedDraft, className, markdownStyles, style } = props
     const [type, setType] = useState('')
     const [editorState, setEditorState] = useState<any>(null)
     const [mentionPlugin] = useState(
@@ -73,13 +74,14 @@ const DraftText = (props: {
                     }}
                 />
             )}
-            {type === 'markdown' && <Markdown text={stringifiedDraft} />}
+            {type === 'markdown' && <Markdown text={stringifiedDraft} className={markdownStyles} />}
         </div>
     )
 }
 
 DraftText.defaultProps = {
     className: '',
+    markdownStyles: '',
     style: null,
 }
 

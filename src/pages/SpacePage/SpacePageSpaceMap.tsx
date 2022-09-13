@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import Column from '@components/Column'
-import Markdown from '@components/Markdown'
+import DraftText from '@components/draft-js/DraftText'
 import Row from '@components/Row'
 import StatButton from '@components/StatButton'
 import { SpaceContext } from '@contexts/SpaceContext'
@@ -301,7 +301,6 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
 
         // move out of update tree function ?
         function getChildren(node) {
-            console.log('SpacePageSpaceMap: getSpaceMapData 2')
             axios
                 .get(
                     /* prettier-ignore */
@@ -934,9 +933,10 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
                     {highlightedSpace.handle ? (
                         <>
                             <h2>s/{highlightedSpace.handle}</h2>
-                            <Markdown
-                                text={highlightedSpace.description}
-                                className={styles.markdown}
+                            <DraftText
+                                stringifiedDraft={highlightedSpace.description}
+                                className={styles.draft}
+                                markdownStyles={styles.markdown}
                             />
                             <Row className={styles.stats}>
                                 <StatButton

@@ -37,12 +37,17 @@
             font-size: 12px;
         }
 
+        .draft {
+            overflow: hidden;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
         .markdown {
             color: white;
             font-size: 14px;
             line-height: 18px;
             overflow: hidden;
-            margin: 5px 0 10px 0;
 
             img {
                 max-width: 200px;
