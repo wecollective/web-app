@@ -179,7 +179,7 @@ const StringBeadCard = (props: {
                             dynamicColor={colors.audioVisualiserColor}
                             style={{
                                 width: '100%',
-                                height: 100,
+                                height: 150,
                                 marginTop: showFooter ? 10 : 20,
                             }}
                         />

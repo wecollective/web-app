@@ -5,8 +5,11 @@
     flex-direction: row;
     align-items: center;
     flex-shrink: 0;
-    margin-right: 12px;
     color: $grey4;
+
+    &:not(:last-child) {
+        margin-right: 12px;
+    }
 
     &:hover {
         color: $grey6;
