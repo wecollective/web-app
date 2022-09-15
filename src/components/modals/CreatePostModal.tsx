@@ -1076,7 +1076,10 @@ const CreatePostModal = (): JSX.Element => {
         const postData = {
             creatorName: accountData.name,
             creatorHandle: accountData.handle,
-            spaceIds: selectedSpaces.map((s) => s.id),
+            spaceIds:
+                selectedSpaces.length > 1
+                    ? selectedSpaces.filter((s) => s.id !== 1).map((s) => s.id)
+                    : selectedSpaces.map((s) => s.id),
             type: data.type,
             mentions: mentions.map((m) => m.link),
             text: data.text,
