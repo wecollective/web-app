@@ -196,10 +196,8 @@ h3 {
 
 a {
     text-decoration: none;
-    color: black; // $blue1;
-    &:hover {
-        cursor: pointer;
-    }
+    color: black;
+    cursor: pointer;
 }
 
 ul {

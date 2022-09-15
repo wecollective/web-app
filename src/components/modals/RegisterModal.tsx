@@ -124,7 +124,7 @@ const RegisterModal = (props: { close: () => void }): JSX.Element => {
             <form onSubmit={register}>
                 <Input
                     type='text'
-                    title='Handle (the unique identifier used in your profiles url)'
+                    title='Handle (the unique name used in your profiles URL)'
                     prefix='weco.io/u/'
                     placeholder='handle...'
                     style={{ marginBottom: 10 }}
@@ -138,7 +138,7 @@ const RegisterModal = (props: { close: () => void }): JSX.Element => {
                 />
                 <Input
                     type='text'
-                    title='Name (max 30 characters)'
+                    title='Visible name (max 30 characters)'
                     placeholder='name...'
                     style={{ marginBottom: 10 }}
                     state={nameState}

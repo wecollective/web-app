@@ -22,17 +22,10 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
     const [firstRun, setFirstRun] = useState(true)
     const [highlightedSpace, setHighlightedSpace] = useState<any>(null)
     const [highlightedSpacePosition, setHighlightedSpacePosition] = useState<any>({})
-    // const [spaceTransitioning, setSpaceTransitioning] = useState<boolean>(true)
     const spaceTransitioning = useRef<boolean>(false)
-
     const history = useHistory()
-
-    // const width = '100%'
-    // const height = '100%'
     const circleRadius = 25
     const maxTextLength = 14
-    // const xOffset = 0
-    // const yOffset = 180
     const duration = 1000
 
     const findParent = (tree: any, itemId: string): any => {

@@ -1,12 +1,15 @@
 import Button from '@components/Button'
+import Column from '@components/Column'
+import DraftTextEditor from '@components/draft-js/DraftTextEditor'
+import ImageTitle from '@components/ImageTitle'
 import Input from '@components/Input'
-import LoadingWheel from '@components/LoadingWheel'
 import Modal from '@components/modals/Modal'
+import Row from '@components/Row'
 import SuccessMessage from '@components/SuccessMessage'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
-import styles from '@styles/components/modals/Modal.module.scss'
+import { allValid, defaultErrorState, defaultSpaceData, findDraftLength } from '@src/Helpers'
 import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -14,91 +17,104 @@ import Cookies from 'universal-cookie'
 
 const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
     const { close } = props
-    const { accountData } = useContext(AccountContext)
-    const { isModerator, spaceData, setSpaceData, spaceSpaces, setSpaceSpaces } = useContext(
-        SpaceContext
-    )
-
-    type InputState = 'default' | 'valid' | 'invalid'
-
-    const [name, setName] = useState('')
-    const [nameState, setNameState] = useState<InputState>('default')
-    const [nameErrors, setNameErrors] = useState<string[]>([])
-
-    const [handle, setHandle] = useState('')
-    const [handleState, setHandleState] = useState<InputState>('default')
-    const [handleErrors, setHandleErrors] = useState<string[]>([])
-
-    const [description, setDescription] = useState('')
-    const [descriptionState, setDescriptionState] = useState<InputState>('default')
-    const [descriptionErrors, setDescriptionErrors] = useState<string[]>([])
-
+    const { accountData, setAlertModalOpen, setAlertMessage } = useContext(AccountContext)
+    const {
+        isModerator,
+        spaceData,
+        setSpaceData,
+        spaceSpaces,
+        setSpaceSpaces,
+        spaceMapData,
+        setSpaceMapData,
+    } = useContext(SpaceContext)
+    const [formData, setFormData] = useState({
+        handle: {
+            ...defaultErrorState,
+            value: '',
+            validate: (v) => {
+                const errors: string[] = []
+                if (!v) errors.push('Required')
+                if (v.length > 30) errors.push('Must be less than 30 characters')
+                return errors
+            },
+        },
+        name: {
+            ...defaultErrorState,
+            value: '',
+            validate: (v) => {
+                const errors: string[] = []
+                if (!v) errors.push('Required')
+                if (v.length > 30) errors.push('Must be less than 30 characters')
+                return errors
+            },
+        },
+        description: {
+            ...defaultErrorState,
+            value: '',
+            validate: (v) => {
+                const errors: string[] = []
+                const totalCharacters = findDraftLength(v)
+                if (!totalCharacters) errors.push('Required')
+                if (totalCharacters > 5000) errors.push('Must be less than 5K characters')
+                return errors
+            },
+        },
+    })
+    const { handle, name, description } = formData
     const [loading, setLoading] = useState(false)
     const [successMessage, setSuccessMessage] = useState('')
-    const errors =
-        nameState === 'invalid' || handleState === 'invalid' || descriptionState === 'invalid'
 
     const cookies = new Cookies()
-    const authorizedToAttachParent = isModerator || spaceData.id === 1
+    const authorized = isModerator || spaceData.id === 1
 
     function createSpace(e) {
         e.preventDefault()
-        const invalidHandle = handle.length < 1 || handle.length > 30
-        const invalidName = name.length < 1 || name.length > 30
-        const invalidDescription = description.length < 1 || description.length > 10000
-        setHandleState(invalidHandle ? 'invalid' : 'valid')
-        setHandleErrors(invalidHandle ? ['Must be between 1 and 30 characters.'] : [])
-        setNameState(invalidName ? 'invalid' : 'valid')
-        setNameErrors(invalidName ? ['Must be between 1 and 30 characters.'] : [])
-        setDescriptionState(invalidDescription ? 'invalid' : 'valid')
-        setDescriptionErrors(invalidDescription ? ['Must be between 1 and 10K characters.'] : [])
-        if (!invalidHandle && !invalidName && !invalidDescription) {
+        const accessToken = cookies.get('accessToken')
+        if (!accessToken) {
+            setAlertMessage('Log in to create a new space')
+            setAlertModalOpen(true)
+        } else if (allValid(formData, setFormData)) {
             setLoading(true)
             const data = {
                 accountName: accountData.name,
                 accountHandle: accountData.handle,
                 parentId: spaceData.id,
-                authorizedToAttachParent,
-                handle,
-                name,
-                description,
+                authorizedToAttachParent: authorized,
+                handle: handle.value,
+                name: name.value,
+                description: description.value,
             }
-            const accessToken = cookies.get('accessToken')
-            const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
-            axios.post(`${config.apiURL}/create-space`, data, authHeader).then((res) => {
+            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+            axios.post(`${config.apiURL}/create-space`, data, options).then((res) => {
                 setLoading(false)
                 switch (res.data) {
-                    case 'invalid-auth-token':
-                        // setInputState('invalid')
-                        // setInputErrors(['Invalid auth token. Try logging in again.'])
-                        break
                     case 'handle-taken':
-                        setHandleState('invalid')
-                        setHandleErrors(['Handle already taken'])
+                        setFormData({
+                            ...formData,
+                            handle: {
+                                ...formData.handle,
+                                state: 'invalid',
+                                errors: ['Handle already taken'],
+                            },
+                        })
                         break
                     case 'success': {
-                        setSuccessMessage(`Space created and attached to '${spaceData.name}'`)
-                        // update space context
                         const newSpaceData = {
-                            id: null,
-                            handle,
-                            name,
-                            description,
-                            flagImagePath: null,
-                            coverImagePath: null,
-                            createdAt: new Date(),
-                            totalFollowers: 0,
-                            totalComments: 0,
-                            totalReactions: 0,
-                            totalLikes: 0,
-                            totalRatings: 0,
-                            totalPosts: 0,
-                            totalChildren: 0,
+                            ...defaultSpaceData,
+                            handle: handle.value,
+                            name: name.value,
+                            description: description.value,
                         }
-                        const newDirectChildSpaces = [newSpaceData, ...spaceData.DirectChildHolons]
-                        setSpaceData({ ...spaceData, DirectChildHolons: newDirectChildSpaces })
-                        const newSpaceSpaces = [newSpaceData, ...spaceSpaces]
-                        setSpaceSpaces(newSpaceSpaces)
+                        setSpaceData({
+                            ...spaceData,
+                            DirectChildHolons: [newSpaceData, ...spaceData.DirectChildHolons],
+                        })
+                        setSpaceMapData({
+                            ...spaceMapData,
+                            children: [newSpaceData, ...spaceMapData.children],
+                        })
+                        setSpaceSpaces([newSpaceData, ...spaceSpaces])
+                        setSuccessMessage(`Space created and attached to '${spaceData.name}'`)
                         setTimeout(() => close(), 3000)
                         break
                     }
@@ -115,78 +131,114 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
 
     return (
         <Modal close={close} centered confirmClose style={{ maxWidth: 600 }}>
-            <h1>Create a new space in &apos;{spaceData.name}&apos;</h1>
-            {!authorizedToAttachParent && (
-                <>
-                    <p>You&apos;re not authorised to create a space here automatically.</p>
+            {successMessage.length > 0 ? (
+                <SuccessMessage text={successMessage} />
+            ) : (
+                <Column>
+                    <Column centerX style={{ marginBottom: 30, fontSize: 24 }}>
+                        <p>Create a new space in</p>
+                        <ImageTitle
+                            type='space'
+                            imagePath={spaceData.flagImagePath}
+                            imageSize={40}
+                            title={`${spaceData.name} (s/${spaceData.handle})`}
+                            fontSize={24}
+                        />
+                    </Column>
+                    {!authorized && (
+                        <Column>
+                            <p>You&apos;re not authorised to create a space here automatically.</p>
+                            <br />
+                            <p>
+                                If you want, you can create it anyway and a request will be sent to{' '}
+                                {spaceData.name}&apos;s moderators.
+                            </p>
+                            <br />
+                            <p>
+                                Until it&apos;s accepted by them your space will appear in the root
+                                space <Link to='/s/all/spaces'>s/all</Link>.
+                            </p>
+                            <br />
+                        </Column>
+                    )}
                     <p>
-                        If you want you can create it anyway and a request will be sent to{' '}
-                        {spaceData.name}&apos;s moderators.
+                        You will be the default moderator of the space and have access to its
+                        settings.
                     </p>
-                    <p>
-                        Until it&apos;s accepted by them your space will appear in the root space{' '}
-                        <Link to='/s/all/spaces'>all</Link>.
-                    </p>
-                </>
+                    <br />
+                    <form onSubmit={createSpace}>
+                        <Input
+                            type='text'
+                            title='Handle (the unique name used in your spaces URL)'
+                            prefix='weco.io/s/'
+                            placeholder='handle...'
+                            value={handle.value}
+                            state={handle.state}
+                            errors={handle.errors}
+                            onChange={(value) => {
+                                setFormData({
+                                    ...formData,
+                                    handle: {
+                                        ...formData.handle,
+                                        value: value.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                                        state: 'default',
+                                    },
+                                })
+                            }}
+                            style={{ marginBottom: 20 }}
+                        />
+                        <Input
+                            type='text'
+                            title='Visible name (max 30 characters)'
+                            placeholder='name...'
+                            value={name.value}
+                            state={name.state}
+                            errors={name.errors}
+                            onChange={(value) => {
+                                setFormData({
+                                    ...formData,
+                                    name: {
+                                        ...formData.name,
+                                        value,
+                                        state: 'default',
+                                    },
+                                })
+                            }}
+                            style={{ marginBottom: 20 }}
+                        />
+                        <Column style={{ width: '100%', marginBottom: 30 }}>
+                            <p style={{ fontSize: 14, marginBottom: 5 }}>Description</p>
+                            <DraftTextEditor
+                                type='post'
+                                stringifiedDraft={description.value}
+                                maxChars={5000}
+                                onChange={(value) => {
+                                    setFormData({
+                                        ...formData,
+                                        description: {
+                                            ...formData.description,
+                                            value,
+                                            state: 'default',
+                                        },
+                                    })
+                                }}
+                                state={description.state}
+                                errors={description.errors}
+                            />
+                        </Column>
+                        <Row centerX>
+                            <Button
+                                text={authorized ? 'Create space' : 'Create space and send request'}
+                                color='blue'
+                                style={{ marginRight: 10 }}
+                                disabled={loading}
+                                loading={loading}
+                                submit
+                            />
+                        </Row>
+                    </form>
+                </Column>
             )}
-            <p>You will be the default moderator of the space and have access to its settings.</p>
-            <form onSubmit={createSpace}>
-                <Input
-                    type='text'
-                    title='Handle (the unique name used in your spaces URL):'
-                    prefix='weco.io/s/'
-                    placeholder='handle...'
-                    style={{ marginBottom: 20 }}
-                    state={handleState}
-                    errors={handleErrors}
-                    value={handle}
-                    onChange={(newValue) => {
-                        setHandleState('default')
-                        setHandle(newValue.toLowerCase().replace(/[^a-z0-9]/g, '-'))
-                    }}
-                />
-                <Input
-                    type='text'
-                    title='Visible name (max 30 characters):'
-                    placeholder='name...'
-                    style={{ marginBottom: 20 }}
-                    state={nameState}
-                    errors={nameErrors}
-                    value={name}
-                    onChange={(newValue) => {
-                        setNameState('default')
-                        setName(newValue)
-                    }}
-                />
-                <Input
-                    type='text-area'
-                    title='Space description (max 10K characters):'
-                    placeholder='description...'
-                    style={{ marginBottom: 20 }}
-                    state={descriptionState}
-                    errors={descriptionErrors}
-                    value={description}
-                    onChange={(newValue) => {
-                        setDescriptionState('default')
-                        setDescription(newValue)
-                    }}
-                />
-                <div className={styles.footer}>
-                    <Button
-                        text={
-                            authorizedToAttachParent
-                                ? 'Create space'
-                                : 'Create space and send request'
-                        }
-                        color='blue'
-                        style={{ marginRight: 10 }}
-                        disabled={loading || successMessage.length > 0 || errors}
-                        submit
-                    />
-                    {loading && <LoadingWheel />}
-                    {successMessage.length > 0 && <SuccessMessage text={successMessage} />}
-                </div>
-            </form>
         </Modal>
     )
 }

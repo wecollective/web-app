@@ -81,6 +81,23 @@ export const defaultBeadData = {
     images: [],
 }
 
+export const defaultSpaceData = {
+    id: uuidv4(),
+    handle: '',
+    name: '',
+    description: '',
+    flagImagePath: null,
+    coverImagePath: null,
+    createdAt: new Date(),
+    totalFollowers: 0,
+    totalComments: 0,
+    totalReactions: 0,
+    totalLikes: 0,
+    totalRatings: 0,
+    totalPosts: 0,
+    totalChildren: 0,
+}
+
 // functions
 export function isPlural(value: number): boolean {
     return value < 1 || value > 1
