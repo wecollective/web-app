@@ -39,7 +39,7 @@ const Comment = (props: {
                         </p>
                     </Row>
                     <ShowMoreLess height={150} gradientColor='grey'>
-                        <DraftText stringifiedDraft={text} />
+                        <DraftText stringifiedDraft={text} markdownStyles={styles.markdown} />
                     </ShowMoreLess>
                 </Column>
             </Row>

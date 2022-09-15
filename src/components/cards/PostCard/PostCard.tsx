@@ -1576,7 +1576,7 @@ const PostCard = (props: {
                     {postEditSaved ? (
                         <SuccessMessage text='Changes saved' />
                     ) : (
-                        <Column centerX style={{ width: '100%' }}>
+                        <Column centerX style={{ width: '100%', maxWidth: 700 }}>
                             <h1>Edit post</h1>
                             <DraftTextEditor
                                 type='post'
