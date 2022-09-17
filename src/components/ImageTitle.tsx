@@ -10,6 +10,7 @@ const ImageTitle = (props: {
     title: string
     fontSize?: number
     style?: any
+    className?: any
     shadow?: boolean
     link?: string
     wrapText?: boolean
@@ -22,6 +23,7 @@ const ImageTitle = (props: {
         title,
         fontSize,
         style,
+        className,
         shadow,
         link,
         wrapText,
@@ -32,7 +34,7 @@ const ImageTitle = (props: {
             <Link
                 to={link}
                 onClick={onClick}
-                className={`${styles.container} ${styles.clickable}`}
+                className={`${styles.container} ${styles.clickable} ${className}`}
                 style={style}
             >
                 <FlagImage type={type} size={imageSize!} imagePath={imagePath} shadow={shadow} />
@@ -47,7 +49,7 @@ const ImageTitle = (props: {
             <button
                 type='button'
                 onClick={onClick}
-                className={`${styles.container} ${styles.clickable}`}
+                className={`${styles.container} ${styles.clickable} ${className}`}
                 style={style}
             >
                 <FlagImage type={type} size={imageSize!} imagePath={imagePath} shadow={shadow} />
@@ -58,7 +60,7 @@ const ImageTitle = (props: {
         )
     }
     return (
-        <div className={styles.container} style={style}>
+        <div className={`${styles.container} ${className}`} style={style}>
             <FlagImage type={type} size={imageSize!} imagePath={imagePath} shadow={shadow} />
             <p style={{ fontSize }} className={wrapText ? styles.wrapText : ''}>
                 {title}
@@ -71,6 +73,7 @@ ImageTitle.defaultProps = {
     imageSize: 30,
     fontSize: 14,
     style: null,
+    className: null,
     shadow: false,
     link: null,
     wrapText: false,
