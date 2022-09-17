@@ -16,13 +16,13 @@
         .postListView {
             width: 100%;
             @include for-desktop-small-up {
-                width: 1215px;
+                width: 1200px;
             }
 
             .spaceNavWrapper {
                 flex-shrink: 0;
                 position: sticky !important;
-                top: 313px;
+                top: 174px;
                 align-self: flex-start;
                 max-height: 68vh;
                 width: 200px;

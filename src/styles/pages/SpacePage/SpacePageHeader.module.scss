@@ -6,8 +6,5 @@
     background-color: $grey1;
     z-index: 50;
     position: sticky;
-    top: 214px;
-    @include for-tablet-landscape-up {
-        top: 244px;
-    }
+    top: 104px;
 }

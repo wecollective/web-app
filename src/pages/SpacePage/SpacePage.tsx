@@ -1,8 +1,7 @@
 import Button from '@components/Button'
 import Column from '@components/Column'
 import CoverImage from '@components/CoverImage'
-import FlagImagePlaceholder from '@components/FlagImagePlaceholder'
-import ImageFade from '@components/ImageFade'
+import EditableFlagImage from '@components/EditableFlagImage'
 import PageTabs from '@components/PageTabs'
 import Row from '@components/Row'
 import { AccountContext } from '@contexts/AccountContext'
@@ -16,6 +15,7 @@ import SpacePagePosts from '@pages/SpacePage/SpacePagePosts'
 import SpacePageRooms from '@pages/SpacePage/SpacePageRooms'
 import SpacePageSettings from '@pages/SpacePage/SpacePageSettings'
 import SpacePageSpaces from '@pages/SpacePage/SpacePageSpaces'
+import FlagImage from '@src/components/FlagImage'
 import config from '@src/Config'
 import { onPageBottomReached } from '@src/Helpers'
 import styles from '@styles/pages/SpacePage/SpacePage.module.scss'
@@ -28,7 +28,7 @@ import { ReactComponent as PostsIcon } from '@svgs/edit-solid.svg'
 import { ReactComponent as SpacesIcon } from '@svgs/overlapping-circles-thick.svg'
 import { ReactComponent as PeopleIcon } from '@svgs/users-solid.svg'
 import axios from 'axios'
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Redirect, Route, Switch, useLocation } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
@@ -39,8 +39,6 @@ const SpacePage = (): JSX.Element => {
         updateAccountData,
         loggedIn,
         setPageBottomReached,
-        setImageUploadType,
-        setImageUploadModalOpen,
     } = useContext(AccountContext)
     const {
         spaceData,
@@ -52,9 +50,13 @@ const SpacePage = (): JSX.Element => {
         setSelectedSpaceSubPage,
     } = useContext(SpaceContext)
 
+    const [headerCollapsed, setHeaderColapsed] = useState(false)
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]
     const subpage = location.pathname.split('/')[3]
+    const { clientWidth } = document.documentElement
+    const mobileView = clientWidth < 900
+    const tabletView = clientWidth >= 900 && clientWidth < 1200
     const cookies = new Cookies()
     const tabs = {
         baseRoute: `/s/${spaceHandle}`,
@@ -102,7 +104,10 @@ const SpacePage = (): JSX.Element => {
     useEffect(() => setSelectedSpaceSubPage(subpage), [location])
 
     useEffect(() => {
-        document.addEventListener('scroll', () => onPageBottomReached(setPageBottomReached))
+        document.addEventListener('scroll', () => {
+            setHeaderColapsed(window.pageYOffset > (mobileView ? 260 : 290))
+            onPageBottomReached(setPageBottomReached)
+        })
         // window.scrollTo(0, 300)
         // window.onunload = () => window.scrollTo(0, 300)
     }, [])
@@ -111,31 +116,22 @@ const SpacePage = (): JSX.Element => {
 
     return (
         <Column centerX className={styles.wrapper}>
-            <CoverImage type='space' image={spaceData.coverImagePath} canEdit={isModerator} />
-            <Column centerX className={styles.header}>
+            <Column centerX className={`${styles.header} ${headerCollapsed && styles.collapsed}`}>
+                <CoverImage type='space' image={spaceData.coverImagePath} canEdit={isModerator} />
                 <Row centerY className={styles.spaceData}>
-                    <div className={styles.flagImage}>
-                        <ImageFade imagePath={spaceData.flagImagePath} speed={1000}>
-                            <FlagImagePlaceholder type='space' />
-                        </ImageFade>
-                        {isModerator && (
-                            <button
-                                type='button'
-                                onClick={() => {
-                                    setImageUploadType('space-flag')
-                                    setImageUploadModalOpen(true)
-                                }}
-                            >
-                                Add a new <br /> flag image
-                            </button>
-                        )}
-                    </div>
-                    <Row centerY wrap>
+                    <EditableFlagImage
+                        type='space'
+                        size={120}
+                        imagePath={spaceData.flagImagePath}
+                        canEdit={isModerator}
+                        className={styles.flagImageLarge}
+                    />
+                    <Row centerY style={{ height: 50 }}>
                         <Column className={styles.spaceName}>
                             <h1>{spaceData.name}</h1>
                             <p className='grey'>s/{spaceData.handle}</p>
                         </Column>
-                        {spaceHandle !== 'all' && loggedIn && (
+                        {spaceHandle !== 'all' && loggedIn && !mobileView && (
                             <Row>
                                 <Button
                                     icon={isFollowing ? <SuccessIconSVG /> : undefined}
@@ -148,7 +144,23 @@ const SpacePage = (): JSX.Element => {
                         )}
                     </Row>
                 </Row>
-                <PageTabs tabs={tabs} />
+                <Row centerX className={styles.tabRow}>
+                    <Row centerY className={styles.spaceDataSmall}>
+                        <FlagImage
+                            type='space'
+                            imagePath={spaceData.flagImagePath}
+                            size={32}
+                            shadow
+                        />
+                        {!tabletView && (
+                            <Row centerY>
+                                <p>{spaceData.name}</p>
+                                <span>(s/{spaceData.handle})</span>
+                            </Row>
+                        )}
+                    </Row>
+                    <PageTabs tabs={tabs} />
+                </Row>
             </Column>
             <Column centerX className={styles.content}>
                 <Switch>

@@ -9,6 +9,8 @@ $highlightColor: $blue5;
         display: flex;
     }
     overflow: hidden;
+    background-color: white;
+    z-index: 2;
 
     .tab {
         margin: 0 10px;

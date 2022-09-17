@@ -1,7 +1,6 @@
 import Column from '@components/Column'
 import CoverImage from '@components/CoverImage'
-import FlagImagePlaceholder from '@components/FlagImagePlaceholder'
-import ImageFade from '@components/ImageFade'
+import EditableFlagImage from '@components/EditableFlagImage'
 import PageTabs from '@components/PageTabs'
 import Row from '@components/Row'
 import { AccountContext } from '@contexts/AccountContext'
@@ -10,23 +9,18 @@ import UserPageAbout from '@pages/UserPage/UserPageAbout'
 import UserPageNotifications from '@pages/UserPage/UserPageNotifications'
 import UserPagePosts from '@pages/UserPage/UserPagePosts'
 import UserPageSettings from '@pages/UserPage/UserPageSettings'
+import FlagImage from '@src/components/FlagImage'
 import { onPageBottomReached } from '@src/Helpers'
 import styles from '@styles/pages/UserPage/UserPage.module.scss'
 import { ReactComponent as BellIcon } from '@svgs/bell-solid.svg'
 import { ReactComponent as AboutIcon } from '@svgs/book-open-solid.svg'
 import { ReactComponent as SettingsIcon } from '@svgs/cog-solid.svg'
 import { ReactComponent as PostsIcon } from '@svgs/edit-solid.svg'
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Redirect, Route, Switch, useLocation } from 'react-router-dom'
 
 const UserPage = (): JSX.Element => {
-    const {
-        accountDataLoading,
-        setPageBottomReached,
-        setImageUploadType,
-        setImageUploadModalOpen,
-        loggedIn,
-    } = useContext(AccountContext)
+    const { accountDataLoading, setPageBottomReached, loggedIn } = useContext(AccountContext)
     const {
         userData,
         getUserData,
@@ -34,9 +28,14 @@ const UserPage = (): JSX.Element => {
         isOwnAccount,
         setSelectedUserSubPage,
     } = useContext(UserContext)
+
+    const [headerCollapsed, setHeaderColapsed] = useState(false)
     const location = useLocation()
     const userHandle = location.pathname.split('/')[2]
     const subpage = location.pathname.split('/')[3]
+    const { clientWidth } = document.documentElement
+    const mobileView = clientWidth < 900
+    const tabletView = clientWidth >= 900 && clientWidth < 1200
     const tabs = {
         baseRoute: `/u/${userHandle}`,
         left: [
@@ -60,36 +59,32 @@ const UserPage = (): JSX.Element => {
     useEffect(() => setSelectedUserSubPage(subpage), [location])
 
     useEffect(() => {
-        document.addEventListener('scroll', () => onPageBottomReached(setPageBottomReached))
+        document.addEventListener('scroll', () => {
+            setHeaderColapsed(window.pageYOffset > (mobileView ? 260 : 290))
+            onPageBottomReached(setPageBottomReached)
+        })
     }, [])
 
     useEffect(() => () => resetUserData(), [])
 
     return (
         <Column centerX className={styles.wrapper}>
-            <CoverImage type='user' image={userData.coverImagePath} canEdit={isOwnAccount} />
-            <Column centerX className={styles.header}>
+            <Column centerX className={`${styles.header} ${headerCollapsed && styles.collapsed}`}>
+                <CoverImage type='user' image={userData.coverImagePath} canEdit={isOwnAccount} />
                 <Row centerY className={styles.userData}>
-                    <div className={styles.flagImage}>
-                        <ImageFade imagePath={userData.flagImagePath} speed={1000}>
-                            <FlagImagePlaceholder type='space' />
-                        </ImageFade>
-                        {isOwnAccount && (
-                            <button
-                                type='button'
-                                onClick={() => {
-                                    setImageUploadType('user-flag')
-                                    setImageUploadModalOpen(true)
-                                }}
-                            >
-                                Add a new <br /> flag image
-                            </button>
-                        )}
-                    </div>
-                    <Column className={styles.userName}>
-                        <h1>{userData.name}</h1>
-                        <p className='grey'>u/{userData.handle}</p>
-                    </Column>
+                    <EditableFlagImage
+                        type='user'
+                        size={120}
+                        imagePath={userData.flagImagePath}
+                        canEdit={isOwnAccount}
+                        className={styles.flagImageLarge}
+                    />
+                    <Row centerY style={{ height: 50 }}>
+                        <Column className={styles.userName}>
+                            <h1>{userData.name}</h1>
+                            <p className='grey'>u/{userData.handle}</p>
+                        </Column>
+                    </Row>
                     {/* {loggedIn && (
                         <Button
                             icon={isFollowing ? <SuccessIconSVG /> : undefined}
@@ -100,7 +95,23 @@ const UserPage = (): JSX.Element => {
                         />
                     )} */}
                 </Row>
-                <PageTabs tabs={tabs} />
+                <Row centerX className={styles.tabRow}>
+                    <Row centerY className={styles.userDataSmall}>
+                        <FlagImage
+                            type='space'
+                            imagePath={userData.flagImagePath}
+                            size={32}
+                            shadow
+                        />
+                        {!tabletView && (
+                            <Row centerY>
+                                <p>{userData.name}</p>
+                                <span>(u/{userData.handle})</span>
+                            </Row>
+                        )}
+                    </Row>
+                    <PageTabs tabs={tabs} />
+                </Row>
             </Column>
             <Column centerX className={styles.content}>
                 <Switch>

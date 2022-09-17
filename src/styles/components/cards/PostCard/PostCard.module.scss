@@ -77,6 +77,7 @@
             width: 32px;
             height: 32px;
             margin-left: 5px;
+            flex-shrink: 0;
 
             > svg {
                 width: 18px;

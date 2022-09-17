@@ -15,13 +15,7 @@
         .spaceMapView {
             padding: 0 10px;
             width: 100%;
-            height: calc(100vh - 195px);
-            @include for-tablet-landscape-up {
-                height: calc(100vh - 220px);
-            }
-            @include for-desktop-medium-up {
-                height: calc(100vh - 320px);
-            }
+            height: calc(100vh - 185px);
         }
     }
 }
