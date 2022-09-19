@@ -35,7 +35,7 @@ const SpacePageAbout = (): JSX.Element => {
                                 imageSize={32}
                                 title={Creator.name}
                                 fontSize={16}
-                                link={`/u/${Creator.handle}`}
+                                link={`/u/${Creator.handle}/posts`}
                                 shadow
                                 style={{ marginLeft: 5 }}
                             />
