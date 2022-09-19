@@ -62,10 +62,10 @@ const DraftText = (props: {
 
     useEffect(() => {
         // isDraft boolean used as temporary solution until old markdown converted to draft
-        const isDraft = stringifiedDraft.slice(0, 10) === `{"blocks":`
+        const isDraft = stringifiedDraft && stringifiedDraft.slice(0, 10) === `{"blocks":`
         const contentState = isDraft
             ? convertFromRaw(JSON.parse(stringifiedDraft))
-            : ContentState.createFromText(stringifiedDraft)
+            : ContentState.createFromText(stringifiedDraft || '')
         const newEditorState = EditorState.createWithContent(contentState)
         setEditorState(newEditorState)
         setType(isDraft ? 'draft' : 'markdown')
