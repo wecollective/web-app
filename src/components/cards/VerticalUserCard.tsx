@@ -1,6 +1,6 @@
 import Column from '@components/Column'
+import DraftText from '@components/draft-js/DraftText'
 import FlagImage from '@components/FlagImage'
-import Markdown from '@components/Markdown'
 import Row from '@components/Row'
 import ShowMoreLess from '@components/ShowMoreLess'
 import StatButton from '@components/StatButton'
@@ -39,7 +39,7 @@ const VerticalUserCard = (props: { user: any; style?: any }): JSX.Element => {
                         <h2>{`u/${handle}`}</h2>
                     </Link>
                     <ShowMoreLess height={75}>
-                        <Markdown text={bio} style={{ fontSize: 14, lineHeight: '20px' }} />
+                        <DraftText stringifiedDraft={bio} />
                     </ShowMoreLess>
                 </Column>
             </Column>

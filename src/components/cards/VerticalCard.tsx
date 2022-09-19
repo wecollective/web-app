@@ -1,5 +1,5 @@
+import DraftText from '@components/draft-js/DraftText'
 import FlagImage from '@components/FlagImage'
-import Markdown from '@components/Markdown'
 import ShowMoreLess from '@components/ShowMoreLess'
 import styles from '@styles/components/VerticalCard.module.scss'
 import React from 'react'
@@ -53,7 +53,7 @@ const VerticalCard = (props: {
                         <p className={styles.subTitle}>{subTitle}</p>
                     </Link>
                     <ShowMoreLess height={75}>
-                        <Markdown text={text} />
+                        <DraftText stringifiedDraft={text} />
                     </ShowMoreLess>
                 </div>
             </div>
