@@ -142,7 +142,7 @@ const DraftTextEditor = (props: {
     function onSearchChange({ value }) {
         const data = { query: value, blacklist: [] }
         axios
-            .post(`${config.apiURL}/find-users`, data)
+            .post(`${config.apiURL}/find-people`, data)
             .then((res) => {
                 setSuggestions(
                     res.data.map((user) => {

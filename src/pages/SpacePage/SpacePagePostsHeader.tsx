@@ -6,7 +6,6 @@ import Button from '@components/Button'
 import DropDown from '@components/DropDown'
 import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
-import SearchBar from '@components/SearchBar'
 import Toggle from '@components/Toggle'
 import { getParamString } from '@src/Helpers'
 import styles from '@styles/pages/SpacePage/SpacePageHeader.module.scss'
@@ -60,16 +59,6 @@ const SpacePagePostsHeader = (props: { params: any }): JSX.Element => {
                     style={{ marginRight: 10 }}
                 />
             )} */}
-            <SearchBar
-                placeholder={smallMobileView ? 'Search...' : 'Search posts...'}
-                setSearchFilter={(value) =>
-                    history.push({
-                        pathname: location.pathname,
-                        search: getParamString(params, 'searchQuery', value),
-                    })
-                }
-                style={{ width: 250, marginRight: 10 }}
-            />
             <Button
                 icon={<SlidersIconSVG />}
                 text={mobileView ? '' : 'Filters'}

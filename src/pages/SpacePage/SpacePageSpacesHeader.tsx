@@ -3,7 +3,6 @@ import DropDown from '@components/DropDown'
 import CreateSpaceModal from '@components/modals/CreateSpaceModal'
 import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
-import SearchBar from '@components/SearchBar'
 import Toggle from '@components/Toggle'
 import { AccountContext } from '@contexts/AccountContext'
 import { getParamString } from '@src/Helpers'
@@ -43,20 +42,6 @@ const SpacePageSpacesHeader = (props: { params: any }): JSX.Element => {
                 text={smallMobileView ? '' : 'New space'}
                 color='blue'
                 onClick={openCreateSpaceModal}
-                style={{ marginRight: 10 }}
-            />
-            <SearchBar
-                placeholder={smallMobileView ? 'Search...' : 'Search spaces...'}
-                setSearchFilter={(value) => {
-                    // toggle depth param for text searches so results from all levels included
-                    const depth = value ? 'All Contained Spaces' : 'Only Direct Descendants'
-                    params.depth = depth
-                    setFilterParams({ ...filterParams, depth })
-                    history.push({
-                        pathname: location.pathname,
-                        search: getParamString(params, 'searchQuery', value),
-                    })
-                }}
                 style={{ marginRight: 10 }}
             />
             <Button

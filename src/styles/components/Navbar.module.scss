@@ -284,7 +284,7 @@
     .desktopCenter {
         position: absolute;
         top: 10px;
-        left: calc(50% - 200px);
+        left: calc(50% - 250px);
         display: none;
         @include for-tablet-landscape-up {
             display: flex;

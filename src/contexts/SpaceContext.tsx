@@ -211,7 +211,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         axios
             .get(
                 /* prettier-ignore */
-                `${config.apiURL}/${isRootSpace ? 'all-users' : 'space-users'
+                `${config.apiURL}/${isRootSpace ? 'all-users' : 'space-people'
                 }?accountId=${accountData.id
                 }&spaceId=${spaceId
                 }&sortBy=${params.sortBy

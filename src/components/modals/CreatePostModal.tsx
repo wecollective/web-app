@@ -466,7 +466,7 @@ const CreatePostModal = (): JSX.Element => {
             setUserSearchLoading(true)
             const data = { query, blacklist: selectedUsers.map((u) => u.id) }
             axios
-                .post(`${config.apiURL}/find-users`, data)
+                .post(`${config.apiURL}/find-people`, data)
                 .then((res) => {
                     setUserOptions(res.data)
                     setUserSearchLoading(false)

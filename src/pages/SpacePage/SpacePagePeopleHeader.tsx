@@ -2,7 +2,6 @@ import Button from '@components/Button'
 import DropDown from '@components/DropDown'
 import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
-import SearchBar from '@components/SearchBar'
 import { getParamString } from '@src/Helpers'
 import styles from '@styles/pages/SpacePage/SpacePageHeader.module.scss'
 import { ReactComponent as SlidersIconSVG } from '@svgs/sliders-h-solid.svg'
@@ -16,22 +15,12 @@ const SpacePagePeopleHeader = (props: { params: any }): JSX.Element => {
     const location = useLocation()
     const history = useHistory()
     const mobileView = document.documentElement.clientWidth < 900
-    const smallMobileView = document.documentElement.clientWidth < 400
+    // const smallMobileView = document.documentElement.clientWidth < 400
 
     useEffect(() => setFilterParams(params), [params])
 
     return (
         <Row centerY centerX className={styles.wrapper}>
-            <SearchBar
-                placeholder={smallMobileView ? 'Search...' : 'Search people...'}
-                setSearchFilter={(value) =>
-                    history.push({
-                        pathname: location.pathname,
-                        search: getParamString(params, 'searchQuery', value),
-                    })
-                }
-                style={{ marginRight: 10 }}
-            />
             <Button
                 icon={<SlidersIconSVG />}
                 text={mobileView ? '' : 'Filters'}
