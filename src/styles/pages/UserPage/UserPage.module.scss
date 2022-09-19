@@ -8,7 +8,7 @@
         width: 100%;
         background-color: white;
         border-bottom: 2px solid $grey2;
-        box-shadow: 0 -10px 15px 0 rgba(10, 8, 72, 0.06);
+        box-shadow: 0 -5px 15px 0 rgba(black, 0.2);
         z-index: 50;
         position: sticky;
         top: -245px;
@@ -87,5 +87,6 @@
     .content {
         width: 100%;
         min-height: calc(100vh - 103px);
+        padding-top: 15px;
     }
 }

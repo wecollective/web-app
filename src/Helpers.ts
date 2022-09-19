@@ -99,12 +99,16 @@ export const defaultSpaceData = {
 }
 
 // functions
-export function isPlural(value: number): boolean {
-    return value < 1 || value > 1
+export function isPlural(number: number): boolean {
+    return number < 1 || number > 1
 }
 
-export function pluralise(value: number): string {
-    return value < 1 || value > 1 ? 's' : ''
+export function pluralise(number: number): string {
+    return number < 1 || number > 1 ? 's' : ''
+}
+
+export function capitalise(string: string): string {
+    return string.charAt(0).toUpperCase() + string.slice(1)
 }
 
 export function resizeTextArea(target: HTMLElement): void {

@@ -38,7 +38,7 @@ const PostList = (props: {
                         <PostCard post={post} key={post.id} location={location} />
                     ))}
                     {nextPostsLoading && (
-                        <Row centerX>
+                        <Row centerX style={{ marginBottom: 70 }}>
                             <LoadingWheel />
                         </Row>
                     )}

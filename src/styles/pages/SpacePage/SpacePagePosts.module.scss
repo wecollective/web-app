@@ -22,9 +22,9 @@
             .spaceNavWrapper {
                 flex-shrink: 0;
                 position: sticky !important;
-                top: 174px;
+                top: 120px;
                 align-self: flex-start;
-                max-height: 68vh;
+                max-height: calc(100vh - 195px);
                 width: 200px;
             }
         }

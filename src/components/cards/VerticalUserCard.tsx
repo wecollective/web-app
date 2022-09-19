@@ -23,7 +23,7 @@ const VerticalUserCard = (props: { user: any; style?: any }): JSX.Element => {
         <Column spaceBetween className={styles.wrapper} style={style}>
             <Column centerX className={styles.content}>
                 <div className={styles.coverImage} style={{ backgroundImage }} />
-                <Link to={`/u/${handle}`}>
+                <Link to={`/u/${handle}/posts`}>
                     <FlagImage
                         className={styles.flagImage}
                         size={110}
@@ -34,7 +34,7 @@ const VerticalUserCard = (props: { user: any; style?: any }): JSX.Element => {
                     />
                 </Link>
                 <Column className={styles.textContent}>
-                    <Link to={`/u/${handle}`}>
+                    <Link to={`/u/${handle}/posts`}>
                         <h1>{name}</h1>
                         <h2>{`u/${handle}`}</h2>
                     </Link>

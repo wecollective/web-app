@@ -3,10 +3,8 @@
 .wrapper {
     width: 100%;
     max-width: 800px;
-    margin: 5px 0;
 
     @include for-tablet-portrait-up {
-        margin: 15px 0;
         padding: 0 15px;
     }
 }

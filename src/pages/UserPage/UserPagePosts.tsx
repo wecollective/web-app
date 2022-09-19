@@ -46,7 +46,13 @@ const UserPagePosts = (): JSX.Element => {
     }, [userData.handle, location])
 
     useEffect(() => {
-        if (!userPostsLoading && !nextUserPostsLoading && userPostsPaginationHasMore)
+        if (
+            !userPostsLoading &&
+            !nextUserPostsLoading &&
+            userData.handle === userHandle &&
+            userPostsPaginationHasMore &&
+            pageBottomReached
+        )
             getUserPosts(userData.id, userPostsPaginationOffset, userPostsPaginationLimit, params)
     }, [pageBottomReached])
 

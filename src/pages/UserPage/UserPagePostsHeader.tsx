@@ -1,5 +1,4 @@
 import DropDown from '@components/DropDown'
-import SearchBar from '@components/SearchBar'
 import { getParamString } from '@src/Helpers'
 import styles from '@styles/pages/SpacePage/SpacePageHeader.module.scss'
 import React, { useEffect, useState } from 'react'
@@ -18,22 +17,11 @@ const UserPagePostsHeader = (props: { params: any }): JSX.Element => {
     const location = useLocation()
     const history = useHistory()
     const mobileView = document.documentElement.clientWidth < 900
-    const smallMobileView = document.documentElement.clientWidth < 400
 
     useEffect(() => setFilterParams(params), [params])
 
     return (
         <Row centerY centerX className={styles.wrapper}>
-            <SearchBar
-                placeholder={smallMobileView ? 'Search...' : 'Search posts...'}
-                setSearchFilter={(value) =>
-                    history.push({
-                        pathname: location.pathname,
-                        search: getParamString(params, 'searchQuery', value),
-                    })
-                }
-                style={{ width: 250, marginRight: 10 }}
-            />
             <Button
                 icon={<SlidersIconSVG />}
                 text={mobileView ? '' : 'Filters'}

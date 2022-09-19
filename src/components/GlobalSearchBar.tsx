@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
 import DropDownMenu from '@components/DropDownMenu'
@@ -6,8 +7,9 @@ import ImageTitle from '@components/ImageTitle'
 import LoadingWheel from '@components/LoadingWheel'
 import Row from '@components/Row'
 import { SpaceContext } from '@contexts/SpaceContext'
+import { UserContext } from '@contexts/UserContext'
 import config from '@src/Config'
-import { getParamString } from '@src/Helpers'
+import { capitalise, getParamString } from '@src/Helpers'
 import styles from '@styles/components/GlobalSearchBar.module.scss'
 import { ReactComponent as SearchIcon } from '@svgs/search.svg'
 import axios from 'axios'
@@ -17,96 +19,117 @@ import { useHistory, useLocation } from 'react-router-dom'
 const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }): JSX.Element => {
     const { onLocationChange, style } = props
     const { spaceData } = useContext(SpaceContext)
+    const { userData } = useContext(UserContext)
     const history = useHistory()
     const location = useLocation()
-    const spaceHandle = location.pathname.split('/')[2]
+    const pageType = location.pathname.split('/')[1]
+    const handle = location.pathname.split('/')[2]
     const subpage = location.pathname.split('/')[3]
+    const [firstRun, setFirstRun] = useState(true)
     const [searchQuery, setSearchQuery] = useState('')
-    const [searchType, setSearchType] = useState('Spaces')
-    const [spaceConstraint, setSpaceConstraint] = useState(spaceHandle !== 'all')
+    const [searchType, setSearchType] = useState(
+        pageType === 's'
+            ? ['posts', 'spaces', 'people'].includes(subpage)
+                ? capitalise(subpage)
+                : 'Spaces'
+            : 'Posts'
+    )
+    const [searchConstraint, setSearchConstraint] = useState(pageType === 'p' || handle !== 'all')
     const [options, setOptions] = useState<any[]>([])
     const [loading, setLoading] = useState(false)
     const urlParams = Object.fromEntries(new URLSearchParams(location.search))
-    const params = {}
+    const params = {} as any
     Object.keys(urlParams).forEach((param) => {
         params[param] = urlParams[param]
     })
 
-    function updateSearchQuery(query) {
+    function getSuggestions(query) {
         setSearchQuery(query)
-        if (searchType === 'Posts') setOptions([])
-        if (['Spaces', 'People'].includes(searchType)) {
-            if (!query) setOptions([])
-            else {
-                setLoading(true)
-                const route = `find-${searchType.toLowerCase()}`
-                const data = {
-                    query,
-                    blacklist: [],
-                    spaceId: spaceConstraint ? spaceData.id : null,
-                }
-                axios
-                    .post(`${config.apiURL}/${route}`, data)
-                    .then((res) => {
-                        setLoading(false)
-                        // if search query removed since request sent don't set options
-                        setSearchQuery((s) => {
-                            if (s) setOptions(res.data)
-                            return s
-                        })
-                    })
-                    .catch((error) => console.log(error))
+        if (query && ['Spaces', 'People'].includes(searchType)) {
+            setLoading(true)
+            const route = `find-${searchType.toLowerCase()}`
+            const data = {
+                query,
+                blacklist: [],
+                spaceId: searchConstraint ? spaceData.id : null,
             }
-        }
+            axios
+                .post(`${config.apiURL}/${route}`, data)
+                .then((res) => {
+                    setLoading(false)
+                    // if search query removed since request sent don't set options
+                    setSearchQuery((s) => {
+                        if (s === query) setOptions(res.data)
+                        return s
+                    })
+                })
+                .catch((error) => console.log(error))
+        } else setOptions([])
     }
 
     function search(e) {
         e.preventDefault()
         setOptions([])
+        params.depth = `All Contained ${searchType}`
         history.push({
-            pathname: `/s/${spaceConstraint ? spaceHandle : 'all'}/${searchType.toLowerCase()}`,
+            pathname: `/${searchConstraint ? pageType : 's'}/${
+                searchConstraint ? handle : 'all'
+            }/${searchType.toLowerCase()}`,
             search: getParamString(params, 'searchQuery', searchQuery),
         })
         if (onLocationChange) onLocationChange()
     }
 
     useEffect(() => {
-        updateSearchQuery(searchQuery)
-    }, [searchType, spaceConstraint])
-
-    useEffect(() => {
-        if (['posts', 'spaces', 'people'].includes(subpage)) {
-            const newSearchType = subpage.charAt(0).toUpperCase() + subpage.slice(1)
-            if (newSearchType !== searchType && spaceData.handle !== 'all') setSpaceConstraint(true)
-            setSearchType(newSearchType)
+        if (firstRun) setFirstRun(false)
+        else {
+            // update search constraint
+            const showSpaceConstraint =
+                pageType === 's' &&
+                handle !== 'all' &&
+                (['posts', 'spaces', 'people'].includes(subpage) || searchConstraint)
+            const showUserConstraint = pageType === 'u' && (subpage === 'posts' || searchConstraint)
+            setSearchConstraint(showSpaceConstraint || showUserConstraint)
+            // update search type
+            const updateSpaceSearchType =
+                pageType === 's' && ['posts', 'spaces', 'people'].includes(subpage)
+            const updateUserSearchType = pageType === 'u' && subpage === 'posts'
+            if (updateSpaceSearchType || updateUserSearchType) setSearchType(capitalise(subpage))
         }
     }, [location])
 
+    // update suggestions if search type or constraint changed
     useEffect(() => {
-        setSpaceConstraint(spaceData.handle !== 'all')
-    }, [spaceData.handle])
+        getSuggestions(searchQuery)
+    }, [searchType, searchConstraint])
+
+    //  && spaceData.id && spaceData.handle !== 'all'
 
     return (
         <form className={styles.searchBar} onSubmit={search} style={style}>
-            {spaceConstraint && spaceData.id && spaceData.handle !== 'all' && (
-                <Row centerY className={styles.spaceConstraint}>
+            {searchConstraint && (
+                <Row centerY className={styles.searchConstraint}>
                     <ImageTitle
-                        type='space'
-                        imagePath={spaceData.flagImagePath}
+                        type={pageType === 's' ? 'space' : 'user'}
+                        imagePath={
+                            pageType === 's' ? spaceData.flagImagePath : userData.flagImagePath
+                        }
                         imageSize={20}
-                        title={`s/${spaceData.handle}`}
+                        title={`${pageType}/${
+                            pageType === 's' ? spaceData.handle : userData.handle
+                        }`}
                     />
-                    <CloseButton size={14} onClick={() => setSpaceConstraint(false)} />
+                    <CloseButton size={14} onClick={() => setSearchConstraint(false)} />
                 </Row>
             )}
             <input
                 type='text'
                 placeholder={`Search ${
-                    spaceConstraint ? '' : 'all '
+                    searchConstraint ? '' : 'all '
                 }${searchType.toLowerCase()}...`}
                 value={searchQuery}
                 data-lpignore='true'
-                onChange={(e) => updateSearchQuery(e.target.value)}
+                onChange={(e) => getSuggestions(e.target.value)}
             />
             {options.length > 0 && (
                 <Column className={styles.searchOptions}>
@@ -116,11 +139,11 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
                             key={option.id}
                             onClick={() => {
                                 history.push(
-                                    `/${searchType === 'Spaces' ? 's' : 'u'}/${
-                                        option.handle
-                                    }/${subpage}`
+                                    `/${searchType === 'Spaces' ? 's' : 'u'}/${option.handle}/${
+                                        searchType === 'People' ? 'posts' : subpage
+                                    }`
                                 )
-                                updateSearchQuery('')
+                                setOptions([])
                                 if (onLocationChange) onLocationChange()
                             }}
                         >
@@ -146,7 +169,10 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
                 orientation='horizontal'
                 options={['Spaces', 'Posts', 'People']}
                 selectedOption={searchType}
-                setSelectedOption={(payload) => setSearchType(payload)}
+                setSelectedOption={(value) => {
+                    if (pageType === 'u' && value !== 'Posts') setSearchConstraint(false)
+                    setSearchType(value)
+                }}
             />
         </form>
     )
