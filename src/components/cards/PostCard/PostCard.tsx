@@ -686,7 +686,12 @@ const PostCard = (props: {
                     )}
                 </Row>
                 <Row centerY>
-                    {location !== 'preview' && <p className='grey'>ID: {id}</p>}
+                    {location !== 'preview' && (
+                        <p className='grey'>
+                            {mobileView ? '' : 'ID: '}
+                            {id}
+                        </p>
+                    )}
                     <Column
                         centerX
                         centerY
@@ -714,7 +719,7 @@ const PostCard = (props: {
                                                     onClick={() => setEditPostModalOpen(true)}
                                                 >
                                                     <EditIcon />
-                                                    Edit post
+                                                    Edit text
                                                 </button>
                                                 <button
                                                     type='button'
@@ -1577,7 +1582,7 @@ const PostCard = (props: {
                         <SuccessMessage text='Changes saved' />
                     ) : (
                         <Column centerX style={{ width: '100%', maxWidth: 700 }}>
-                            <h1>Edit post</h1>
+                            <h1>Edit post text</h1>
                             <DraftTextEditor
                                 type='post'
                                 stringifiedDraft={newText.value}

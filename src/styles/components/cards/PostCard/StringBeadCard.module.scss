@@ -89,10 +89,15 @@
 
     .beadFooter {
         flex-shrink: 0;
-        > button {
+        > div > button {
             font-size: 15px;
             cursor: pointer;
-            color: $grey4;
+            color: black;
+            opacity: 0.25;
+            &:hover {
+                opacity: 0.4;
+            }
+            transition: opacity 0.3s;
         }
     }
 }

@@ -252,23 +252,6 @@ const StringBeadCard = (props: {
                         disabled={location === 'preview'}
                         onClick={() => setLinkModalOpen(true)}
                     />
-                    {likeModalOpen && (
-                        <PostCardLikeModal
-                            close={() => setLikeModalOpen(false)}
-                            postData={bead}
-                            setPostData={setBead}
-                        />
-                    )}
-                    {linkModalOpen && (
-                        <PostCardLinkModal
-                            type='bead'
-                            location={location}
-                            postId={postId}
-                            postData={bead}
-                            setPostData={setBead}
-                            close={() => setLinkModalOpen(false)}
-                        />
-                    )}
                 </Row>
             )}
             {imageModalOpen && (
@@ -277,6 +260,23 @@ const StringBeadCard = (props: {
                     selectedImage={selectedImage}
                     setSelectedImage={setSelectedImage}
                     close={() => setImageModalOpen(false)}
+                />
+            )}
+            {likeModalOpen && (
+                <PostCardLikeModal
+                    close={() => setLikeModalOpen(false)}
+                    postData={bead}
+                    setPostData={setBead}
+                />
+            )}
+            {linkModalOpen && (
+                <PostCardLinkModal
+                    type='bead'
+                    location={location}
+                    postId={postId}
+                    postData={bead}
+                    setPostData={setBead}
+                    close={() => setLinkModalOpen(false)}
                 />
             )}
         </Column>
