@@ -19,6 +19,7 @@ const PostList = (props: {
     const { location, posts, firstPostsloading, nextPostsLoading, style } = props
     const { resetSpacePosts } = useContext(SpaceContext)
     const { resetUserPosts } = useContext(UserContext)
+    const mobileView = document.documentElement.clientWidth < 900
 
     useEffect(
         () => () => {
@@ -38,7 +39,7 @@ const PostList = (props: {
                         <PostCard post={post} key={post.id} location={location} />
                     ))}
                     {nextPostsLoading && (
-                        <Row centerX style={{ marginBottom: 70 }}>
+                        <Row centerX style={{ marginTop: mobileView ? 15 : 0 }}>
                             <LoadingWheel />
                         </Row>
                     )}
