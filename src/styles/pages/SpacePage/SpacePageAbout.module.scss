@@ -4,22 +4,16 @@
     width: 100%;
     max-width: 930px;
 
-    .contentWrapper {
-        width: inherit;
-        padding: 0 15px;
+    .content {
+        width: 100%;
+        background-color: white;
+        border-radius: 10px;
+        padding: 40px;
 
-        .content {
-            width: 100%;
-            background-color: white;
-            border-radius: 10px;
-            padding: 40px;
-            text-align: center;
-
-            .creation {
-                margin-top: 60px;
-                > p {
-                    margin-right: 5px;
-                }
+        .creation {
+            margin-top: 60px;
+            > p {
+                margin-right: 5px;
             }
         }
     }

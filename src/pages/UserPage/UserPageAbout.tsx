@@ -1,7 +1,6 @@
 import Column from '@components/Column'
 import DraftText from '@components/draft-js/DraftText'
 import Row from '@components/Row'
-import Scrollbars from '@components/Scrollbars'
 import { UserContext } from '@contexts/UserContext'
 import UserNotFound from '@pages/SpaceNotFound'
 import { dateCreated, timeSinceCreated } from '@src/Helpers'
@@ -21,15 +20,13 @@ const UserPageAbout = (): JSX.Element => {
             {handle !== userHandle ? (
                 <p>User data loading... </p>
             ) : (
-                <Scrollbars className={styles.contentWrapper}>
-                    <Column className={styles.content}>
-                        <Row centerY centerX className={styles.creation}>
-                            <p>Joined</p>
-                            <p title={dateCreated(createdAt)}>{timeSinceCreated(createdAt)}</p>
-                        </Row>
-                        <DraftText stringifiedDraft={bio || ''} />
-                    </Column>
-                </Scrollbars>
+                <Column className={styles.content}>
+                    <Row centerY centerX className={styles.creation}>
+                        <p>Joined</p>
+                        <p title={dateCreated(createdAt)}>{timeSinceCreated(createdAt)}</p>
+                    </Row>
+                    <DraftText stringifiedDraft={bio || ''} />
+                </Column>
             )}
         </Column>
     )
