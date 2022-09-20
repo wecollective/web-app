@@ -34,9 +34,13 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
                 : 'Spaces'
             : 'Posts'
     )
-    const [searchConstraint, setSearchConstraint] = useState(pageType === 'p' || handle !== 'all')
-    const [options, setOptions] = useState<any[]>([])
-    const [loading, setLoading] = useState(false)
+    const [searchConstraint, setSearchConstraint] = useState(
+        pageType === 'u' || (pageType === 's' && handle !== 'all')
+    )
+    const [suggestions, setSuggestions] = useState<any[]>([])
+    const [suggestionsLoading, setSuggestionsLoading] = useState(false)
+    const pageDataLoading =
+        (pageType === 's' && !spaceData.id) || (pageType === 'u' && !userData.id)
     const urlParams = Object.fromEntries(new URLSearchParams(location.search))
     const params = {} as any
     Object.keys(urlParams).forEach((param) => {
@@ -46,7 +50,7 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
     function getSuggestions(query) {
         setSearchQuery(query)
         if (query && ['Spaces', 'People'].includes(searchType)) {
-            setLoading(true)
+            setSuggestionsLoading(true)
             const route = `find-${searchType.toLowerCase()}`
             const data = {
                 query,
@@ -56,20 +60,20 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
             axios
                 .post(`${config.apiURL}/${route}`, data)
                 .then((res) => {
-                    setLoading(false)
-                    // if search query removed since request sent don't set options
+                    setSuggestionsLoading(false)
+                    // if search query changed since request sent don't set options
                     setSearchQuery((s) => {
-                        if (s === query) setOptions(res.data)
+                        if (s === query) setSuggestions(res.data)
                         return s
                     })
                 })
                 .catch((error) => console.log(error))
-        } else setOptions([])
+        } else setSuggestions([])
     }
 
     function search(e) {
         e.preventDefault()
-        setOptions([])
+        setSuggestions([])
         params.depth = `All Contained ${searchType}`
         history.push({
             pathname: `/${searchConstraint ? pageType : 's'}/${
@@ -83,6 +87,8 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
     useEffect(() => {
         if (firstRun) setFirstRun(false)
         else {
+            setSearchQuery('')
+            setSuggestions([])
             // update search constraint
             const showSpaceConstraint =
                 pageType === 's' &&
@@ -103,25 +109,25 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
         getSuggestions(searchQuery)
     }, [searchType, searchConstraint])
 
-    //  && spaceData.id && spaceData.handle !== 'all'
-
     return (
         <form className={styles.searchBar} onSubmit={search} style={style}>
-            {searchConstraint && (
-                <Row centerY className={styles.searchConstraint}>
-                    <ImageTitle
-                        type={pageType === 's' ? 'space' : 'user'}
-                        imagePath={
-                            pageType === 's' ? spaceData.flagImagePath : userData.flagImagePath
-                        }
-                        imageSize={20}
-                        title={`${pageType}/${
-                            pageType === 's' ? spaceData.handle : userData.handle
-                        }`}
-                    />
-                    <CloseButton size={14} onClick={() => setSearchConstraint(false)} />
-                </Row>
-            )}
+            {searchConstraint &&
+                !pageDataLoading &&
+                (pageType !== 's' || spaceData.handle !== 'all') && (
+                    <Row centerY className={styles.searchConstraint}>
+                        <ImageTitle
+                            type={pageType === 's' ? 'space' : 'user'}
+                            imagePath={
+                                pageType === 's' ? spaceData.flagImagePath : userData.flagImagePath
+                            }
+                            imageSize={20}
+                            title={`${pageType}/${
+                                pageType === 's' ? spaceData.handle : userData.handle
+                            }`}
+                        />
+                        <CloseButton size={14} onClick={() => setSearchConstraint(false)} />
+                    </Row>
+                )}
             <input
                 type='text'
                 placeholder={`Search ${
@@ -131,9 +137,9 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
                 data-lpignore='true'
                 onChange={(e) => getSuggestions(e.target.value)}
             />
-            {options.length > 0 && (
+            {suggestions.length > 0 && (
                 <Column className={styles.searchOptions}>
-                    {options.map((option) => (
+                    {suggestions.map((option) => (
                         <button
                             type='button'
                             key={option.id}
@@ -143,7 +149,7 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
                                         searchType === 'People' ? 'posts' : subpage
                                     }`
                                 )
-                                setOptions([])
+                                setSuggestions([])
                                 if (onLocationChange) onLocationChange()
                             }}
                         >
@@ -160,7 +166,7 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
                     ))}
                 </Column>
             )}
-            {loading && <LoadingWheel size={25} style={{ marginRight: 10 }} />}
+            {suggestionsLoading && <LoadingWheel size={25} style={{ marginRight: 10 }} />}
             <button type='submit' aria-label='search button'>
                 <SearchIcon />
             </button>
