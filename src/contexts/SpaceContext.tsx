@@ -27,6 +27,7 @@ const defaults = {
         DirectChildHolons: [],
         DirectParentHolons: [],
         HolonHandles: [],
+        UsersWithAccess: [],
     },
     postFilters: {
         type: 'All Types',

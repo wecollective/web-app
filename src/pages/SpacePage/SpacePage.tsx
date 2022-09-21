@@ -54,6 +54,11 @@ const SpacePage = (): JSX.Element => {
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]
     const subpage = location.pathname.split('/')[3]
+    const spaceChanging = spaceHandle !== spaceData.handle
+    const access =
+        !spaceData.privacy ||
+        spaceData.privacy === 'public' ||
+        spaceData.UsersWithAccess.find((u) => u.id === accountData.id)
     const { clientWidth } = document.documentElement
     const mobileView = clientWidth < 900
     const tabletView = clientWidth >= 900 && clientWidth < 1200
@@ -98,7 +103,7 @@ const SpacePage = (): JSX.Element => {
     }
 
     useEffect(() => {
-        if (!accountDataLoading && spaceHandle !== spaceData.handle) getSpaceData(spaceHandle)
+        if (!accountDataLoading && spaceChanging) getSpaceData(spaceHandle)
     }, [accountDataLoading, spaceHandle])
 
     useEffect(() => setSelectedSpaceSubPage(subpage), [location])
@@ -137,7 +142,7 @@ const SpacePage = (): JSX.Element => {
                                     icon={isFollowing ? <SuccessIconSVG /> : undefined}
                                     text={isFollowing ? 'Joined' : 'Join'}
                                     color='blue'
-                                    disabled={spaceHandle !== spaceData.handle}
+                                    disabled={spaceChanging}
                                     onClick={joinSpace}
                                 />
                             </Row>
@@ -163,22 +168,34 @@ const SpacePage = (): JSX.Element => {
                 </Row>
             </Column>
             <Column centerX className={styles.content}>
-                <Switch>
-                    <Redirect from='/s/:spaceHandle/' to='/s/:spaceHandle/posts' exact />
-                    <Route path='/s/:spaceHandle/about' component={SpacePageAbout} exact />
-                    <Route path='/s/:spaceHandle/posts' component={SpacePagePosts} exact />
-                    <Route path='/s/:spaceHandle/spaces' component={SpacePageSpaces} exact />
-                    <Route path='/s/:spaceHandle/people' component={SpacePagePeople} exact />
-                    <Route path='/s/:spaceHandle/calendar' component={SpacePageCalendar} exact />
-                    <Route path='/s/:spaceHandle/rooms' component={SpacePageRooms} exact />
-                    <Route
-                        path='/s/:spaceHandle/governance'
-                        component={SpacePageGovernance}
-                        exact
-                    />
-                    <Route path='/s/:spaceHandle/settings' component={SpacePageSettings} exact />
-                    <Route component={PageNotFound} />
-                </Switch>
+                {access ? (
+                    <Switch>
+                        <Redirect from='/s/:spaceHandle/' to='/s/:spaceHandle/posts' exact />
+                        <Route path='/s/:spaceHandle/about' component={SpacePageAbout} exact />
+                        <Route path='/s/:spaceHandle/posts' component={SpacePagePosts} exact />
+                        <Route path='/s/:spaceHandle/spaces' component={SpacePageSpaces} exact />
+                        <Route path='/s/:spaceHandle/people' component={SpacePagePeople} exact />
+                        <Route
+                            path='/s/:spaceHandle/calendar'
+                            component={SpacePageCalendar}
+                            exact
+                        />
+                        <Route path='/s/:spaceHandle/rooms' component={SpacePageRooms} exact />
+                        <Route
+                            path='/s/:spaceHandle/governance'
+                            component={SpacePageGovernance}
+                            exact
+                        />
+                        <Route
+                            path='/s/:spaceHandle/settings'
+                            component={SpacePageSettings}
+                            exact
+                        />
+                        <Route component={PageNotFound} />
+                    </Switch>
+                ) : (
+                    <p>No access!</p>
+                )}
             </Column>
         </Column>
     )
