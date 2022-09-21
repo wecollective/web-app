@@ -39,6 +39,8 @@ const SpacePage = (): JSX.Element => {
         updateAccountData,
         loggedIn,
         setPageBottomReached,
+        setAlertMessage,
+        setAlertModalOpen,
     } = useContext(AccountContext)
     const {
         spaceData,
@@ -51,6 +53,8 @@ const SpacePage = (): JSX.Element => {
     } = useContext(SpaceContext)
 
     const [headerCollapsed, setHeaderColapsed] = useState(false)
+    const [joinSpaceLoading, setJoinSpaceLoading] = useState(false)
+    const [accessPending, setAccessPending] = useState(false)
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]
     const subpage = location.pathname.split('/')[3]
@@ -77,34 +81,65 @@ const SpacePage = (): JSX.Element => {
     }
 
     function joinSpace() {
-        const data = { spaceId: spaceData.id, isFollowing }
         const accessToken = cookies.get('accessToken')
-        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
-        axios
-            .post(`${config.apiURL}/toggle-join-space`, data, options)
-            .then(() => {
-                if (isFollowing) {
-                    updateAccountData(
-                        'FollowedHolons',
-                        accountData.FollowedHolons.filter((h) => h.handle !== spaceData.handle)
-                    )
-                } else {
-                    const newFollowedSpaces = [...accountData.FollowedHolons]
-                    newFollowedSpaces.push({
-                        handle: spaceData.handle,
-                        name: spaceData.name,
-                        flagImagePath: spaceData.flagImagePath,
+        if (!accessToken) {
+            setAlertMessage('Your session has run out. Please log in again.')
+            setAlertModalOpen(true)
+        } else {
+            setJoinSpaceLoading(true)
+            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+            if (access) {
+                const data = { spaceId: spaceData.id, isFollowing }
+                axios
+                    .post(`${config.apiURL}/toggle-join-space`, data, options)
+                    .then(() => {
+                        if (isFollowing) {
+                            updateAccountData(
+                                'FollowedHolons',
+                                accountData.FollowedHolons.filter(
+                                    (h) => h.handle !== spaceData.handle
+                                )
+                            )
+                        } else {
+                            const newFollowedSpaces = [...accountData.FollowedHolons]
+                            newFollowedSpaces.push({
+                                handle: spaceData.handle,
+                                name: spaceData.name,
+                                flagImagePath: spaceData.flagImagePath,
+                            })
+                            updateAccountData('FollowedHolons', newFollowedSpaces)
+                        }
+                        setJoinSpaceLoading(false)
+                        setIsFollowing(!isFollowing)
                     })
-                    updateAccountData('FollowedHolons', newFollowedSpaces)
+                    .catch((error) => console.log(error))
+            } else {
+                const data = {
+                    accountHandle: accountData.handle,
+                    accountName: accountData.name,
+                    spaceId: spaceData.id,
                 }
-                setIsFollowing(!isFollowing)
-            })
-            .catch((error) => console.log(error))
+                axios
+                    .post(`${config.apiURL}/request-space-access`, data, options)
+                    .then(() => {
+                        setJoinSpaceLoading(false)
+                        setAccessPending(true)
+                    })
+                    .catch((error) => console.log(error))
+            }
+        }
+    }
+
+    function joinSpaceButtonText() {
+        if (access) return isFollowing ? 'Joined' : 'Join'
+        return accessPending ? 'Access requested' : 'Request access'
     }
 
     useEffect(() => {
         if (!accountDataLoading && spaceChanging) getSpaceData(spaceHandle)
     }, [accountDataLoading, spaceHandle])
+
+    useEffect(() => setAccessPending(spaceData.accessPending), [spaceData.id])
 
     useEffect(() => setSelectedSpaceSubPage(subpage), [location])
 
@@ -140,9 +175,10 @@ const SpacePage = (): JSX.Element => {
                             <Row>
                                 <Button
                                     icon={isFollowing ? <SuccessIconSVG /> : undefined}
-                                    text={isFollowing ? 'Joined' : 'Join'}
+                                    text={joinSpaceButtonText()}
                                     color='blue'
-                                    disabled={spaceChanging}
+                                    disabled={spaceChanging || accessPending}
+                                    loading={joinSpaceLoading}
                                     onClick={joinSpace}
                                 />
                             </Row>

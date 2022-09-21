@@ -2,7 +2,7 @@ import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
 import { ISpaceContext } from '@src/Interfaces'
 import axios from 'axios'
-import React, { createContext, useContext, useState } from 'react'
+import React, { createContext, useContext, useEffect, useState } from 'react'
 
 export const SpaceContext = createContext<ISpaceContext>({} as ISpaceContext)
 
@@ -95,12 +95,8 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         console.log(`SpaceContext: getSpaceData (${handle})`)
         setSpaceNotFound(false)
         axios
-            .get(`${config.apiURL}/space-data?handle=${handle}`)
+            .get(`${config.apiURL}/space-data?handle=${handle}&accountId=${accountData.id}`)
             .then((res) => {
-                if (loggedIn) {
-                    setIsFollowing(accountData.FollowedHolons.some((s) => s.id === res.data.id))
-                    setIsModerator(accountData.ModeratedHolons.some((s) => s.id === res.data.id))
-                }
                 // todo: apply default people filters when set up
                 // setSpacePostsFilters()
                 // setDefaultPeopleFilters()
@@ -255,6 +251,16 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         setSpacePeoplePaginationOffset(0)
         setSpacePeoplePaginationHasMore(true)
     }
+
+    useEffect(() => {
+        if (loggedIn) {
+            setIsFollowing(accountData.FollowedHolons.some((s) => s.id === spaceData.id))
+            setIsModerator(accountData.ModeratedHolons.some((s) => s.id === spaceData.id))
+        } else {
+            setIsFollowing(false)
+            setIsModerator(false)
+        }
+    }, [spaceData.id, loggedIn])
 
     return (
         <SpaceContext.Provider

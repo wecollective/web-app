@@ -14,6 +14,7 @@ import Row from '@components/Row'
 import ShowMoreLess from '@components/ShowMoreLess'
 import { SpaceContext } from '@contexts/SpaceContext'
 import SpaceNotFound from '@pages/SpaceNotFound'
+import InviteSpaceUsersModal from '@src/components/modals/InviteSpaceUsersModal'
 import styles from '@styles/pages/SpacePage/SpacePageSettings.module.scss'
 import React, { useContext, useEffect, useState } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
@@ -26,6 +27,7 @@ const SpacePageSettings = (): JSX.Element => {
     const [spaceHandleModalOpen, setSpaceHandleModalOpen] = useState(false)
     const [spaceNameModalOpen, setSpaceNameModalOpen] = useState(false)
     const [spaceDescriptionModalOpen, setSpaceDescriptionModalOpen] = useState(false)
+    const [inviteSpaceUsersModalOpen, setInviteSpaceUsersModalOpen] = useState(false)
     const [inviteSpaceModeratorModalOpen, setInviteSpaceModeratorModalOpen] = useState(false)
     const [removeSpaceModeratorModalOpen, setRemoveSpaceModeratorModalOpen] = useState(false)
     const [parentSpaceRequestModalOpen, setParentSpaceRequestModalOpen] = useState(false)
@@ -78,6 +80,13 @@ const SpacePageSettings = (): JSX.Element => {
                             onClick={() => setSpaceDescriptionModalOpen(true)}
                         />
                     </Column>
+                    {spaceData.privacy === 'private' && (
+                        <Button
+                            text='Invite users'
+                            color='blue'
+                            onClick={() => setInviteSpaceUsersModalOpen(true)}
+                        />
+                    )}
                     <Button
                         text='Invite moderator'
                         color='blue'
@@ -122,6 +131,9 @@ const SpacePageSettings = (): JSX.Element => {
             )}
             {spaceDescriptionModalOpen && (
                 <UpdateSpaceDescriptionModal close={() => setSpaceDescriptionModalOpen(false)} />
+            )}
+            {inviteSpaceUsersModalOpen && (
+                <InviteSpaceUsersModal close={() => setInviteSpaceUsersModalOpen(false)} />
             )}
             {inviteSpaceModeratorModalOpen && (
                 <InviteSpaceModeratorModal close={() => setInviteSpaceModeratorModalOpen(false)} />

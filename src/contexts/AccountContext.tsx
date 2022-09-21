@@ -57,8 +57,8 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                 .get(`${config.apiURL}/account-data`, authHeader)
                 .then((res) => {
                     if (res.data !== 'invalid-auth-token') {
-                        setLoggedIn(true)
                         setAccountData(res.data)
+                        setLoggedIn(true)
                     }
                     setAccountDataLoading(false)
                 })

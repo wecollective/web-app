@@ -131,20 +131,67 @@ const NotificationCard = (props: {
         createdAt,
     } = notification
 
-    // console.log(notification)
-
-    const { accountData, updateAccountData } = useContext(AccountContext)
+    const { accountData, updateAccountData, setAlertMessage, setAlertModalOpen } = useContext(
+        AccountContext
+    )
     const { spaceData } = useContext(SpaceContext)
-
     const [seen, setSeen] = useState(notification.seen)
-
     const cookies = new Cookies()
-    const accessToken = cookies.get('accessToken')
     const you = triggerUser && accountData.id === triggerUser.id
 
-    function respondToModInvite(response) {
+    function respondToSpaceInvite(response) {
+        const accessToken = cookies.get('accessToken')
         if (!accessToken) {
-            // todo: open alert modal, tell user to log in
+            setAlertMessage('Your session has run out. Please log in again to respond.')
+            setAlertModalOpen(true)
+        } else {
+            const data = {
+                accountHandle: accountData.handle,
+                accountName: accountData.name,
+                spaceId: triggerSpace.id,
+                spaceHandle: triggerSpace.handle,
+                spaceName: triggerSpace.name,
+                notificationId: id,
+                userId: triggerUser.id,
+                response,
+            }
+            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+            axios
+                .post(`${config.apiURL}/respond-to-space-invite`, data, options)
+                .then(() => updateNotification(id, 'state', response))
+                .catch((error) => console.log(error))
+        }
+    }
+
+    function respondToSpaceAccessRequest(response) {
+        const accessToken = cookies.get('accessToken')
+        if (!accessToken) {
+            setAlertMessage('Your session has run out. Please log in again to respond.')
+            setAlertModalOpen(true)
+        } else {
+            const data = {
+                accountHandle: accountData.handle,
+                accountName: accountData.name,
+                spaceId: triggerSpace.id,
+                spaceHandle: triggerSpace.handle,
+                spaceName: triggerSpace.name,
+                notificationId: id,
+                userId: triggerUser.id,
+                response,
+            }
+            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+            axios
+                .post(`${config.apiURL}/respond-to-space-access-request`, data, options)
+                .then(() => updateNotification(id, 'state', response))
+                .catch((error) => console.log(error))
+        }
+    }
+
+    function respondToModInvite(response) {
+        const accessToken = cookies.get('accessToken')
+        if (!accessToken) {
+            setAlertMessage('Your session has run out. Please log in again to respond.')
+            setAlertModalOpen(true)
         } else {
             const data = {
                 notificationId: id,
@@ -189,8 +236,10 @@ const NotificationCard = (props: {
     }
 
     function respondToParentSpaceRequest(response) {
+        const accessToken = cookies.get('accessToken')
         if (!accessToken) {
-            // todo: open alert modal, tell user to log in
+            setAlertMessage('Your session has run out. Please log in again to respond.')
+            setAlertModalOpen(true)
         } else {
             const data = {
                 notificationId: id,
@@ -226,7 +275,11 @@ const NotificationCard = (props: {
     }
 
     function respondToWeaveInvite(response) {
-        if (accessToken) {
+        const accessToken = cookies.get('accessToken')
+        if (!accessToken) {
+            setAlertMessage('Your session has run out. Please log in again to respond.')
+            setAlertModalOpen(true)
+        } else {
             const data = { postId, notificationId: id, response }
             const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
             axios
@@ -376,6 +429,50 @@ const NotificationCard = (props: {
                             <p>a child space of</p>
                             <ImageNameLink type='space' data={secondarySpace} />
                             {/* {state === 'accepted' ? <Success /> : <Fail />} */}
+                            <CreatedAt date={createdAt} />
+                        </Content>
+                    )}
+
+                    {type === 'space-invite' && (
+                        <Content typeIcon={<OverlappingCirclesIcon />}>
+                            <ImageNameLink type='user' data={triggerUser} />
+                            <p>invited you to join</p>
+                            <ImageNameLink type='space' data={triggerSpace} />
+                            <CreatedAt date={createdAt} />
+                            <State
+                                state={state}
+                                respond={(response) => respondToSpaceInvite(response)}
+                            />
+                        </Content>
+                    )}
+
+                    {type === 'space-invite-response' && (
+                        <Content typeIcon={<OverlappingCirclesIcon />}>
+                            <ImageNameLink type='user' data={triggerUser} />
+                            <p>{state} your invitation to join</p>
+                            <ImageNameLink type='space' data={triggerSpace} />
+                            <CreatedAt date={createdAt} />
+                        </Content>
+                    )}
+
+                    {type === 'space-access-request' && (
+                        <Content typeIcon={<OverlappingCirclesIcon />}>
+                            <ImageNameLink type='user' data={triggerUser} />
+                            <p>requested access to</p>
+                            <ImageNameLink type='space' data={triggerSpace} />
+                            <CreatedAt date={createdAt} />
+                            <State
+                                state={state}
+                                respond={(response) => respondToSpaceAccessRequest(response)}
+                            />
+                        </Content>
+                    )}
+
+                    {type === 'space-access-response' && (
+                        <Content typeIcon={<OverlappingCirclesIcon />}>
+                            <ImageNameLink type='user' data={triggerUser} />
+                            <p>{state} your request to access</p>
+                            <ImageNameLink type='space' data={triggerSpace} />
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}
