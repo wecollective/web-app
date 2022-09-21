@@ -6,6 +6,7 @@ import Input from '@components/Input'
 import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
 import SuccessMessage from '@components/SuccessMessage'
+import Toggle from '@components/Toggle'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
@@ -61,6 +62,7 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
         },
     })
     const { handle, name, description } = formData
+    const [privateSpace, setPrivateSpace] = useState(false)
     const [loading, setLoading] = useState(false)
     const [successMessage, setSuccessMessage] = useState('')
 
@@ -83,24 +85,17 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                 handle: handle.value,
                 name: name.value,
                 description: description.value,
+                private: privateSpace,
             }
             const options = { headers: { Authorization: `Bearer ${accessToken}` } }
-            axios.post(`${config.apiURL}/create-space`, data, options).then((res) => {
-                setLoading(false)
-                switch (res.data) {
-                    case 'handle-taken':
-                        setFormData({
-                            ...formData,
-                            handle: {
-                                ...formData.handle,
-                                state: 'invalid',
-                                errors: ['Handle already taken'],
-                            },
-                        })
-                        break
-                    case 'success': {
+            axios
+                .post(`${config.apiURL}/create-space`, data, options)
+                .then((res) => {
+                    setLoading(false)
+                    if (res.data.message === 'success') {
                         const newSpaceData = {
                             ...defaultSpaceData,
+                            id: res.data.spaceId,
                             handle: handle.value,
                             name: name.value,
                             description: description.value,
@@ -115,17 +110,27 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                         })
                         setSpaceSpaces([newSpaceData, ...spaceSpaces])
                         setSuccessMessage(`Space created and attached to '${spaceData.name}'`)
-                        setTimeout(() => close(), 3000)
-                        break
                     }
-                    case 'pending-acceptance':
+                    if (res.data.message === 'pending-acceptance') {
                         setSuccessMessage('Space created and request sent to moderators')
-                        setTimeout(() => close(), 3000)
-                        break
-                    default:
-                        break
-                }
-            })
+                    }
+                    setTimeout(() => close(), 3000)
+                })
+                .catch((error) => {
+                    if (!error.response) console.log(error)
+                    else {
+                        const { message } = error.response.data
+                        if (message === 'handle-taken')
+                            setFormData({
+                                ...formData,
+                                handle: {
+                                    ...formData.handle,
+                                    state: 'invalid',
+                                    errors: ['Handle already taken'],
+                                },
+                            })
+                    }
+                })
         }
     }
 
@@ -167,6 +172,16 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                     </p>
                     <br />
                     <form onSubmit={createSpace}>
+                        <Row centerY style={{ marginBottom: 20 }}>
+                            <p style={{ fontSize: 14, marginRight: 10 }}>Privacy:</p>
+                            <Toggle
+                                leftText='Public'
+                                rightText='Private'
+                                rightColor='blue'
+                                positionLeft={!privateSpace}
+                                onClick={() => setPrivateSpace(!privateSpace)}
+                            />
+                        </Row>
                         <Input
                             type='text'
                             title='Handle (the unique name used in your spaces URL)'
@@ -206,7 +221,7 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                             }}
                             style={{ marginBottom: 20 }}
                         />
-                        <Column style={{ width: '100%', marginBottom: 30 }}>
+                        <Column style={{ width: '100%', marginBottom: 40 }}>
                             <p style={{ fontSize: 14, marginBottom: 5 }}>Description</p>
                             <DraftTextEditor
                                 type='post'
