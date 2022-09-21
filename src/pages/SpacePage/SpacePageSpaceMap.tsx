@@ -85,12 +85,11 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
                 .attr('height', findRadius(d) * 2)
                 .attr('width', findRadius(d) * 2)
                 .attr('preserveAspectRatio', 'xMidYMid slice')
-                .attr(
-                    'xlink:href',
-                    d.data.isExpander
-                        ? '/icons/plus-icon.jpg'
-                        : d.data.flagImagePath || '/icons/default-space-flag.jpg'
-                )
+                .attr('xlink:href', () => {
+                    if (d.data.isExpander) return '/icons/plus-icon.jpg'
+                    if (d.data.privacy === 'private') return '/icons/lock-icon.png'
+                    return d.data.flagImagePath || '/icons/default-space-flag.jpg'
+                })
             // .on('error', () => {
             //     const newImage = d3.select(`#image-${d.id}`)
             //     // try image proxy
