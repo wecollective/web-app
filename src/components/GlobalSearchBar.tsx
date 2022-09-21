@@ -87,8 +87,6 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
     useEffect(() => {
         if (firstRun) setFirstRun(false)
         else {
-            setSearchQuery('')
-            setSuggestions([])
             // update search constraint
             const showSpaceConstraint =
                 pageType === 's' &&
@@ -103,6 +101,11 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
             if (updateSpaceSearchType || updateUserSearchType) setSearchType(capitalise(subpage))
         }
     }, [location])
+
+    useEffect(() => {
+        setSearchQuery('')
+        setSuggestions([])
+    }, [subpage])
 
     // update suggestions if search type or constraint changed
     useEffect(() => {

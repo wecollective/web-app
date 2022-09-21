@@ -821,7 +821,11 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
                     (enter) =>
                         enter
                             .filter((d) => {
-                                return d.data.totalResults > 0 && d.depth > 0
+                                return (
+                                    d.data.totalResults > 0 &&
+                                    d.depth > 0 &&
+                                    d.data.privacy !== 'private'
+                                )
                             })
                             .append('svg:image')
                             .attr('xlink:href', (d) => {
