@@ -16,11 +16,12 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import SpaceNotFound from '@pages/SpaceNotFound'
 import styles from '@styles/pages/SpacePage/SpacePageSettings.module.scss'
 import React, { useContext, useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useHistory, useLocation } from 'react-router-dom'
 
-const SpacePageSettings = ({ history }): JSX.Element => {
+const SpacePageSettings = (): JSX.Element => {
     const { spaceData, spaceNotFound, isModerator } = useContext(SpaceContext)
     const location = useLocation()
+    const history = useHistory()
     const spaceHandle = location.pathname.split('/')[2]
     const [spaceHandleModalOpen, setSpaceHandleModalOpen] = useState(false)
     const [spaceNameModalOpen, setSpaceNameModalOpen] = useState(false)
@@ -53,9 +54,6 @@ const SpacePageSettings = ({ history }): JSX.Element => {
                             size='medium'
                             onClick={() => setSpaceHandleModalOpen(true)}
                         />
-                        {spaceHandleModalOpen && (
-                            <UpdateSpaceHandleModal close={() => setSpaceHandleModalOpen(false)} />
-                        )}
                     </Row>
                     <Row centerY>
                         <h1>Name:</h1>
@@ -66,9 +64,6 @@ const SpacePageSettings = ({ history }): JSX.Element => {
                             size='medium'
                             onClick={() => setSpaceNameModalOpen(true)}
                         />
-                        {spaceNameModalOpen && (
-                            <UpdateSpaceNameModal close={() => setSpaceNameModalOpen(false)} />
-                        )}
                     </Row>
                     <Column centerX>
                         <h1>Description:</h1>
@@ -82,89 +77,69 @@ const SpacePageSettings = ({ history }): JSX.Element => {
                             style={{ marginTop: 10 }}
                             onClick={() => setSpaceDescriptionModalOpen(true)}
                         />
-                        {spaceDescriptionModalOpen && (
-                            <UpdateSpaceDescriptionModal
-                                close={() => setSpaceDescriptionModalOpen(false)}
-                            />
-                        )}
                     </Column>
-                    <Row>
-                        <Button
-                            text='Invite moderator'
-                            color='blue'
-                            onClick={() => setInviteSpaceModeratorModalOpen(true)}
-                        />
-                        {inviteSpaceModeratorModalOpen && (
-                            <InviteSpaceModeratorModal
-                                close={() => setInviteSpaceModeratorModalOpen(false)}
-                            />
-                        )}
-                    </Row>
-                    <Row>
-                        <Button
-                            text='Remove moderator'
-                            color='blue'
-                            onClick={() => setRemoveSpaceModeratorModalOpen(true)}
-                        />
-                        {removeSpaceModeratorModalOpen && (
-                            <RemoveSpaceModeratorModal
-                                close={() => setRemoveSpaceModeratorModalOpen(false)}
-                            />
-                        )}
-                    </Row>
+                    <Button
+                        text='Invite moderator'
+                        color='blue'
+                        onClick={() => setInviteSpaceModeratorModalOpen(true)}
+                    />
+                    <Button
+                        text='Remove moderator'
+                        color='blue'
+                        onClick={() => setRemoveSpaceModeratorModalOpen(true)}
+                    />
                     {spaceData.id !== 1 && (
                         <>
-                            <Row>
-                                <Button
-                                    text='Add parent space'
-                                    color='blue'
-                                    onClick={() => setParentSpaceRequestModalOpen(true)}
-                                />
-                                {parentSpaceRequestModalOpen && (
-                                    <ParentSpaceRequestModal
-                                        close={() => setParentSpaceRequestModalOpen(false)}
-                                    />
-                                )}
-                            </Row>
-                            <Row>
-                                <Button
-                                    text='Remove parent space'
-                                    color='blue'
-                                    onClick={() => setRemoveParentSpaceModalOpen(true)}
-                                />
-                                {removeParentSpaceModalOpen && (
-                                    <RemoveParentSpaceModal
-                                        close={() => setRemoveParentSpaceModalOpen(false)}
-                                    />
-                                )}
-                            </Row>
-                            <Row>
-                                <Button
-                                    text='Remove child space'
-                                    color='blue'
-                                    onClick={() => setRemoveChildSpaceModalOpen(true)}
-                                />
-                                {removeChildSpaceModalOpen && (
-                                    <RemoveChildSpaceModal
-                                        close={() => setRemoveChildSpaceModalOpen(false)}
-                                    />
-                                )}
-                            </Row>
-                            <Row>
-                                <Button
-                                    text='Delete'
-                                    color='red'
-                                    onClick={() => setDeleteSpaceModalOpen(true)}
-                                />
-                                {deleteSpaceModalOpen && (
-                                    <DeleteSpaceModal
-                                        close={() => setDeleteSpaceModalOpen(false)}
-                                    />
-                                )}
-                            </Row>
+                            <Button
+                                text='Add parent space'
+                                color='blue'
+                                onClick={() => setParentSpaceRequestModalOpen(true)}
+                            />
+                            <Button
+                                text='Remove parent space'
+                                color='blue'
+                                onClick={() => setRemoveParentSpaceModalOpen(true)}
+                            />
+                            <Button
+                                text='Remove child space'
+                                color='blue'
+                                onClick={() => setRemoveChildSpaceModalOpen(true)}
+                            />
+                            <Button
+                                text='Delete'
+                                color='red'
+                                onClick={() => setDeleteSpaceModalOpen(true)}
+                            />
                         </>
                     )}
                 </Column>
+            )}
+            {spaceHandleModalOpen && (
+                <UpdateSpaceHandleModal close={() => setSpaceHandleModalOpen(false)} />
+            )}
+            {spaceNameModalOpen && (
+                <UpdateSpaceNameModal close={() => setSpaceNameModalOpen(false)} />
+            )}
+            {spaceDescriptionModalOpen && (
+                <UpdateSpaceDescriptionModal close={() => setSpaceDescriptionModalOpen(false)} />
+            )}
+            {inviteSpaceModeratorModalOpen && (
+                <InviteSpaceModeratorModal close={() => setInviteSpaceModeratorModalOpen(false)} />
+            )}
+            {removeSpaceModeratorModalOpen && (
+                <RemoveSpaceModeratorModal close={() => setRemoveSpaceModeratorModalOpen(false)} />
+            )}
+            {parentSpaceRequestModalOpen && (
+                <ParentSpaceRequestModal close={() => setParentSpaceRequestModalOpen(false)} />
+            )}
+            {removeParentSpaceModalOpen && (
+                <RemoveParentSpaceModal close={() => setRemoveParentSpaceModalOpen(false)} />
+            )}
+            {removeChildSpaceModalOpen && (
+                <RemoveChildSpaceModal close={() => setRemoveChildSpaceModalOpen(false)} />
+            )}
+            {deleteSpaceModalOpen && (
+                <DeleteSpaceModal close={() => setDeleteSpaceModalOpen(false)} />
             )}
         </Column>
     )
