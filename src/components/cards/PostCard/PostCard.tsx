@@ -1531,6 +1531,7 @@ const PostCard = (props: {
                             <button
                                 type='button'
                                 title='Create string from post'
+                                disabled={location === 'preview'}
                                 onClick={() => {
                                     if (loggedIn) {
                                         setCreatePostModalSettings({
