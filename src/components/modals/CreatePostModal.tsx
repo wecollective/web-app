@@ -208,7 +208,7 @@ const CreatePostModal = (): JSX.Element => {
     const [imageSizeError, setImageSizeError] = useState(false)
     const [toalImageSizeError, setTotalImageSizeError] = useState(false)
     const [imagePostError, setImagePostError] = useState(false)
-    const imageMBLimit = 4
+    const imageMBLimit = 6
     const totalImageSize =
         images.map((image) => (image.file ? image.file.size : 0)).reduce((a, b) => a + b, 0) /
         (1024 * 1024)
