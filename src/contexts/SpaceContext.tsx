@@ -26,7 +26,7 @@ const defaults = {
         },
         DirectChildHolons: [],
         DirectParentHolons: [],
-        HolonHandles: [],
+        SpaceAncestors: [],
         UsersWithAccess: [],
     },
     postFilters: {

@@ -19,7 +19,7 @@ export interface ISpace {
     Creator: Partial<IUser>
     DirectChildHolons: Partial<ISpace[]>
     DirectParentHolons: Partial<ISpace[]>
-    HolonHandles: { handle: string }[]
+    SpaceAncestors: { handle: string }[]
 }
 
 export interface IPost {

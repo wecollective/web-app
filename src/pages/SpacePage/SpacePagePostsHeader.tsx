@@ -51,7 +51,7 @@ const SpacePagePostsHeader = (props: { params: any }): JSX.Element => {
                 onClick={() => openCreatePostModal()}
                 style={{ marginRight: 10 }}
             />
-            {/* {spaceData.HolonHandles.map((h) => h.handle).includes('castalia') && (
+            {/* {spaceData.SpaceAncestors.map((h) => h.handle).includes('castalia') && (
                 <Button
                     text='New game'
                     color='purple'
