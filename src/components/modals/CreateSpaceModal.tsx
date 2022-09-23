@@ -18,7 +18,9 @@ import Cookies from 'universal-cookie'
 
 const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
     const { close } = props
-    const { accountData, setAlertModalOpen, setAlertMessage } = useContext(AccountContext)
+    const { accountData, setAccountData, setAlertModalOpen, setAlertMessage } = useContext(
+        AccountContext
+    )
     const {
         isModerator,
         spaceData,
@@ -92,14 +94,21 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                 .post(`${config.apiURL}/create-space`, data, options)
                 .then((res) => {
                     setLoading(false)
-                    if (res.data.message === 'success') {
-                        const newSpaceData = {
-                            ...defaultSpaceData,
-                            id: res.data.spaceId,
-                            handle: handle.value,
-                            name: name.value,
-                            description: description.value,
-                        }
+                    const newSpaceData = {
+                        ...defaultSpaceData,
+                        id: res.data.spaceId,
+                        handle: handle.value,
+                        name: name.value,
+                        description: description.value,
+                    }
+                    setAccountData({
+                        ...accountData,
+                        FollowedHolons: [...accountData.FollowedHolons, newSpaceData],
+                        ModeratedHolons: [...accountData.ModeratedHolons, newSpaceData],
+                    })
+                    if (res.data.message === 'pending-acceptance') {
+                        setSuccessMessage('Space created and request sent to moderators')
+                    } else {
                         setSpaceData({
                             ...spaceData,
                             DirectChildHolons: [newSpaceData, ...spaceData.DirectChildHolons],
@@ -110,9 +119,6 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                         })
                         setSpaceSpaces([newSpaceData, ...spaceSpaces])
                         setSuccessMessage(`Space created and attached to '${spaceData.name}'`)
-                    }
-                    if (res.data.message === 'pending-acceptance') {
-                        setSuccessMessage('Space created and request sent to moderators')
                     }
                     setTimeout(() => close(), 3000)
                 })
