@@ -12,7 +12,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
 const SpacePagePosts = (): JSX.Element => {
-    const { pageBottomReached } = useContext(AccountContext)
+    const { pageBottomReached, loggedIn } = useContext(AccountContext)
     const {
         spaceData,
         spaceNotFound,
@@ -46,7 +46,7 @@ const SpacePagePosts = (): JSX.Element => {
                 getSpacePosts(spaceData.id, 0, spacePostsPaginationLimit, params)
             if (params.view === 'Map') getPostMapData(spaceData.id, params, 50)
         }
-    }, [spaceData.handle, location])
+    }, [spaceData.handle, location, loggedIn])
 
     useEffect(() => {
         if (

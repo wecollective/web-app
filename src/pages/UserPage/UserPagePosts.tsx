@@ -10,7 +10,7 @@ import React, { useContext, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
 const UserPagePosts = (): JSX.Element => {
-    const { pageBottomReached } = useContext(AccountContext)
+    const { pageBottomReached, loggedIn } = useContext(AccountContext)
     const {
         userData,
         userNotFound,
@@ -43,7 +43,7 @@ const UserPagePosts = (): JSX.Element => {
                 // getPostMapData(spaceData.id, params)
             }
         }
-    }, [userData.handle, location])
+    }, [userData.handle, location, loggedIn])
 
     useEffect(() => {
         if (
