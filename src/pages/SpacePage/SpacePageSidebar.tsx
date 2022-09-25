@@ -33,8 +33,8 @@ const SpacePageSidebar = (): JSX.Element => {
         selectedSpaceSubPage,
     } = useContext(SpaceContext)
     const {
-        DirectParentHolons: parentSpaces,
-        DirectChildHolons: childSpaces,
+        DirectParentSpaces: parentSpaces,
+        DirectChildSpaces: childSpaces,
         LatestUsers,
         totalUsers,
     } = spaceData
@@ -49,7 +49,7 @@ const SpacePageSidebar = (): JSX.Element => {
         if (isFollowing) {
             axios
                 .post(`${config.apiURL}/unfollow-space`, {
-                    holonId: spaceData.id,
+                    spaceId: spaceData.id,
                     userId: accountData.id,
                 })
                 .then((res) => {
@@ -67,7 +67,7 @@ const SpacePageSidebar = (): JSX.Element => {
         } else {
             axios
                 .post(`${config.apiURL}/follow-space`, {
-                    holonId: spaceData.id,
+                    spaceId: spaceData.id,
                     userId: accountData.id,
                 })
                 .then((res) => {
@@ -89,7 +89,7 @@ const SpacePageSidebar = (): JSX.Element => {
     }
 
     function expandSpace(type, spaceId) {
-        const key = `Direct${type}Holons`
+        const key = `Direct${type}Spaces`
         const space = spaceData[key].find((s) => s.id === spaceId)
         const newSpaces = [...spaceData[key]]
         const newSpace = newSpaces.find((s) => s.id === spaceId)
@@ -201,7 +201,7 @@ const SpacePageSidebar = (): JSX.Element => {
                                                 className={styles.spaces}
                                                 style={{ marginLeft: 15 }}
                                             >
-                                                {(space.DirectParentHolons || []).map((s) => (
+                                                {(space.DirectParentSpaces || []).map((s) => (
                                                     <Column key={s.id}>
                                                         <Row centerY style={{ marginBottom: 10 }}>
                                                             <ImageTitle
@@ -262,7 +262,7 @@ const SpacePageSidebar = (): JSX.Element => {
                                                 className={styles.spaces}
                                                 style={{ marginLeft: 15 }}
                                             >
-                                                {(space.DirectChildHolons || []).map((s) => (
+                                                {(space.DirectChildSpaces || []).map((s) => (
                                                     <Column key={s.id}>
                                                         <Row centerY style={{ marginBottom: 10 }}>
                                                             <ImageTitle

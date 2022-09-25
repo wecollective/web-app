@@ -151,7 +151,7 @@ const Navbar = (): JSX.Element => {
                                 </Row>
                                 {(otherUsersPage ||
                                     (spaceData.id !== 1 &&
-                                        !spaceData.DirectParentHolons.map((s) => s.id).includes(
+                                        !spaceData.DirectParentSpaces.map((s) => s.id).includes(
                                             1
                                         ))) && (
                                     <ImageTitle

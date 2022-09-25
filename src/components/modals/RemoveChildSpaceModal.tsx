@@ -26,7 +26,7 @@ const RemoveChildSpaceModal = (props: { close: () => void }): JSX.Element => {
     function findSpaces(query) {
         if (query.length < 1) setOptions([])
         else {
-            const filteredSpaces = spaceData.DirectChildHolons.filter(
+            const filteredSpaces = spaceData.DirectChildSpaces.filter(
                 (space) =>
                     space.handle.includes(query.toLowerCase()) ||
                     space.name.toLowerCase().includes(query.toLowerCase())
@@ -66,12 +66,12 @@ const RemoveChildSpaceModal = (props: { close: () => void }): JSX.Element => {
                         ])
                         break
                     case 'success': {
-                        const newChildSpaces = spaceData.DirectChildHolons.filter(
+                        const newChildSpaces = spaceData.DirectChildSpaces.filter(
                             (s) => s.id !== selectedSpace.id
                         )
                         setSpaceData({
                             ...spaceData,
-                            DirectChildHolons: newChildSpaces,
+                            DirectChildSpaces: newChildSpaces,
                         })
                         setShowSuccessMessage(true)
                         setTimeout(() => close(), 3000)

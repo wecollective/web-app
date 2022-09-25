@@ -111,7 +111,7 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                     } else {
                         setSpaceData({
                             ...spaceData,
-                            DirectChildHolons: [newSpaceData, ...spaceData.DirectChildHolons],
+                            DirectChildSpaces: [newSpaceData, ...spaceData.DirectChildSpaces],
                         })
                         setSpaceMapData({
                             ...spaceMapData,

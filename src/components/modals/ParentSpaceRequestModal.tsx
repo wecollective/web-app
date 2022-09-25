@@ -83,7 +83,7 @@ const ParentSpaceRequestModal = (props: { close: () => void }): JSX.Element => {
                             break
                         case 'success': {
                             // remove root space if present
-                            const newParentSpaces = spaceData.DirectParentHolons.filter(
+                            const newParentSpaces = spaceData.DirectParentSpaces.filter(
                                 (s) => s.id !== 1
                             )
                             // add new parent space
@@ -91,7 +91,7 @@ const ParentSpaceRequestModal = (props: { close: () => void }): JSX.Element => {
                             // update space context
                             setSpaceData({
                                 ...spaceData,
-                                DirectParentHolons: newParentSpaces,
+                                DirectParentSpaces: newParentSpaces,
                             })
                             setShowSuccessMessage(true)
                             setTimeout(() => close(), 3000)

@@ -115,7 +115,7 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
         const svg = d3.select('#space-map-svg')
         const svgWidth = parseInt(svg.style('width'), 10)
         const svgHeight = parseInt(svg.style('height'), 10)
-        const yOffset = spaceData.DirectParentHolons!.length ? 180 : 80
+        const yOffset = spaceData.DirectParentSpaces!.length ? 180 : 80
         // d3.select('#post-map-svg')
         //     .transition()
         //     .duration(2000)
@@ -144,7 +144,7 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
         //     // console.log('widthRatio: ', widthRatio)
         //     // console.log('heightRatio: ', heightRatio)
         //     // console.log('spacedata: ', spaceData)
-        //     const yOffset = spaceData.DirectParentHolons.length ? 180 : 80
+        //     const yOffset = spaceData.DirectParentSpaces.length ? 180 : 80
         //     // if (widthRatio < 1 || heightRatio < 1) {
         //     if (widthRatio < heightRatio) {
         //         // console.log('scale to width')
@@ -175,7 +175,7 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
     function createCanvas() {
         const width = '100%'
         const height = '100%' // window.innerHeight - (window.innerWidth < 1500 ? 250 : 330)
-        const yOffset = spaceData.DirectParentHolons.length ? 180 : 80
+        const yOffset = spaceData.DirectParentSpaces.length ? 180 : 80
         const svg = d3
             .select('#canvas')
             .append('svg')
@@ -262,7 +262,7 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
 
         // create parent tree
         const parents = d3.hierarchy(data, (d) => {
-            return d.DirectParentHolons
+            return d.DirectParentSpaces
         })
         const parentTree = d3
             .tree()
@@ -324,14 +324,14 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
 
         // const newWidth = parseInt(d3.select('#space-map-svg').style('width'), 10)
         // const transform = `translate(${newWidth / 2},${
-        //     data.DirectParentHolons.length ? yOffset : 80
+        //     data.DirectParentSpaces.length ? yOffset : 80
         // })`
 
         // d3.select('#link-group').transition().duration(duration).attr('transform', transform)
         // d3.select('#node-group').transition().duration(duration).attr('transform', transform)
 
         // const parentTransform = `translate(${newWidth / 2},${
-        //     data.DirectParentHolons.length ? yOffset : 80
+        //     data.DirectParentSpaces.length ? yOffset : 80
         // }),rotate(180,0,0)`
 
         // d3.select('#parent-link-group')

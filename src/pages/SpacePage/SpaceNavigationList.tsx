@@ -21,11 +21,11 @@ const SpaceNavigationList = (props: {
     const { onLocationChange, style } = props
     const { accountData } = useContext(AccountContext)
     const { spaceData, setSpaceData, selectedSpaceSubPage } = useContext(SpaceContext)
-    const { DirectParentHolons: parentSpaces, DirectChildHolons: childSpaces } = spaceData
+    const { DirectParentSpaces: parentSpaces, DirectChildSpaces: childSpaces } = spaceData
 
     function expandSpace(type, spaceId) {
         // todo: use local space arrays instead of mutating spaceData in context
-        const key = `Direct${type}Holons`
+        const key = `Direct${type}Spaces`
         const space = spaceData[key].find((s) => s.id === spaceId)
         const newSpaces = [...spaceData[key]]
         const newSpace = newSpaces.find((s) => s.id === spaceId)
@@ -97,7 +97,7 @@ const SpaceNavigationList = (props: {
                                 </Row>
                                 {space.expanded && (
                                     <Column scroll className={styles.childSpaces}>
-                                        {(space.DirectParentHolons || []).map((s) => (
+                                        {(space.DirectParentSpaces || []).map((s) => (
                                             <Column key={s.id}>
                                                 <Row centerY style={{ marginBottom: 10 }}>
                                                     <ImageTitle
@@ -164,7 +164,7 @@ const SpaceNavigationList = (props: {
                                 </Row>
                                 {space.expanded && (
                                     <Column scroll className={styles.childSpaces}>
-                                        {(space.DirectChildHolons || []).map((s) => (
+                                        {(space.DirectChildSpaces || []).map((s) => (
                                             <Column key={s.id}>
                                                 <Row centerY style={{ marginBottom: 10 }}>
                                                     <ImageTitle

@@ -52,7 +52,7 @@
     }
 }
 
-.ph-holon-shine {
+.ph-space-shine {
     animation: 0.8s ph-shine ease-in-out infinite;
     position: absolute;
     top: 0;
@@ -66,7 +66,7 @@
 
 $transitionSpeed: 300ms;
 
-.ph-child-holons {
+.ph-child-spaces {
     opacity: 0;
     z-index: -1;
     transition: all $transitionSpeed;
@@ -77,7 +77,7 @@ $transitionSpeed: 300ms;
     }
 }
 
-.child-holon-list {
+.child-space-list {
     opacity: 0;
     transition: all $transitionSpeed;
 

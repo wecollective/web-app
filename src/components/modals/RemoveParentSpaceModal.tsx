@@ -24,13 +24,13 @@ const RemoveParentSpaceModal = (props: { close: () => void }): JSX.Element => {
     const [showSuccessMessage, setShowSuccessMessage] = useState(false)
     const cookies = new Cookies()
 
-    const onlyOneParent = spaceData.DirectParentHolons.length === 1
-    const onlyParentIsRoot = onlyOneParent && spaceData.DirectParentHolons[0].id === 1
+    const onlyOneParent = spaceData.DirectParentSpaces.length === 1
+    const onlyParentIsRoot = onlyOneParent && spaceData.DirectParentSpaces[0].id === 1
 
     function findSpaces(query) {
         if (query.length < 1) setOptions([])
         else {
-            const filteredSpaces = spaceData.DirectParentHolons.filter(
+            const filteredSpaces = spaceData.DirectParentSpaces.filter(
                 (space) =>
                     space.handle.includes(query.toLowerCase()) ||
                     space.name.toLowerCase().includes(query.toLowerCase())
@@ -70,12 +70,12 @@ const RemoveParentSpaceModal = (props: { close: () => void }): JSX.Element => {
                         ])
                         break
                     case 'success': {
-                        const newParentSpaces = spaceData.DirectParentHolons.filter(
+                        const newParentSpaces = spaceData.DirectParentSpaces.filter(
                             (s) => s.id !== selectedSpace.id
                         )
                         setSpaceData({
                             ...spaceData,
-                            DirectParentHolons: newParentSpaces,
+                            DirectParentSpaces: newParentSpaces,
                         })
                         setShowSuccessMessage(true)
                         setTimeout(() => close(), 3000)

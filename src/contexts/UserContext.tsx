@@ -15,8 +15,8 @@ const defaults = {
         flagImagePath: null,
         coverImagePath: null,
         createdAt: null,
-        followedHolons: [],
-        moderatedHolons: [],
+        followedSpaces: [],
+        moderatedSpaces: [],
     },
     postFilters: {
         type: 'All Types',

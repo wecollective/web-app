@@ -17,8 +17,8 @@ export interface ISpace {
     totalRatings: number
     // includes
     Creator: Partial<IUser>
-    DirectChildHolons: Partial<ISpace[]>
-    DirectParentHolons: Partial<ISpace[]>
+    DirectChildSpaces: Partial<ISpace[]>
+    DirectParentSpaces: Partial<ISpace[]>
     SpaceAncestors: { handle: string }[]
 }
 

@@ -513,7 +513,7 @@ const PostCard = (props: {
             if (addingLike) {
                 data.accountHandle = accountData.handle
                 data.accountName = accountData.name
-                data.holonId = window.location.pathname.includes('/s/') ? spaceData.id : null
+                data.spaceId = window.location.pathname.includes('/s/') ? spaceData.id : null
             }
             const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
             axios
