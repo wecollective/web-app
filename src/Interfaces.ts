@@ -65,8 +65,8 @@ export interface IUser {
     totalPosts: number
     totalComments: number
     // includes
-    FollowedHolons: Partial<ISpace[]>
-    ModeratedHolons: Partial<ISpace[]>
+    FollowedSpaces: Partial<ISpace[]>
+    ModeratedSpaces: Partial<ISpace[]>
 }
 
 export interface IComment {

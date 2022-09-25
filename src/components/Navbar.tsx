@@ -394,7 +394,7 @@ const Navbar = (): JSX.Element => {
                                     <p className='grey'>Followed spaces</p>
                                     <Scrollbars style={{ marginTop: 10 }}>
                                         <Column>
-                                            {accountData.FollowedHolons.map((space) => (
+                                            {accountData.FollowedSpaces.map((space) => (
                                                 <ImageTitle
                                                     key={space.id}
                                                     type='space'

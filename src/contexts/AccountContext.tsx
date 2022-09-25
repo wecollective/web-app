@@ -14,8 +14,8 @@ const defaults = {
         bio: null,
         flagImagePath: null,
         unseenNotifications: 0,
-        FollowedHolons: [],
-        ModeratedHolons: [],
+        FollowedSpaces: [],
+        ModeratedSpaces: [],
     },
 }
 

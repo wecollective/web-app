@@ -208,14 +208,14 @@ const NotificationCard = (props: {
                         updateNotification(id, 'state', response)
                         if (response === 'accepted') {
                             const newModeratedSpaces = [
-                                ...accountData.ModeratedHolons,
+                                ...accountData.ModeratedSpaces,
                                 {
                                     handle: triggerSpace.handle,
                                     name: triggerSpace.name,
                                     flagImagePath: triggerSpace.flagImagePath,
                                 },
                             ]
-                            updateAccountData('ModeratedHolons', newModeratedSpaces)
+                            updateAccountData('ModeratedSpaces', newModeratedSpaces)
                         }
                         if (!seen) {
                             setSeen(true)

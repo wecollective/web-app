@@ -254,8 +254,8 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
 
     useEffect(() => {
         if (loggedIn) {
-            setIsFollowing(accountData.FollowedHolons.some((s) => s.id === spaceData.id))
-            setIsModerator(accountData.ModeratedHolons.some((s) => s.id === spaceData.id))
+            setIsFollowing(accountData.FollowedSpaces.some((s) => s.id === spaceData.id))
+            setIsModerator(accountData.ModeratedSpaces.some((s) => s.id === spaceData.id))
         } else {
             setIsFollowing(false)
             setIsModerator(false)

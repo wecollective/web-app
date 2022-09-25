@@ -20,7 +20,7 @@ import Cookies from 'universal-cookie'
 const SidebarSmall = (): JSX.Element | null => {
     const { accountData, updateAccountData, loggedIn } = useContext(AccountContext)
     const { selectedSpaceSubPage } = useContext(SpaceContext)
-    const { FollowedHolons: joinedSpaces } = accountData
+    const { FollowedSpaces: joinedSpaces } = accountData
 
     const [joinSpacesModalOpen, setJoinSpacesModalOpen] = useState(false)
     const [spaceOptions, setSpaceOptions] = useState<any[]>([])
@@ -60,7 +60,7 @@ const SidebarSmall = (): JSX.Element | null => {
             .then(() => {
                 const newJoinedSpaces = [...joinedSpaces]
                 selectedSpaces.forEach((space) => newJoinedSpaces.push(space))
-                updateAccountData('FollowedHolons', newJoinedSpaces)
+                updateAccountData('FollowedSpaces', newJoinedSpaces)
                 setLoading(false)
                 setSuccess(true)
             })

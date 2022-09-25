@@ -1196,7 +1196,7 @@ const CreatePostModal = (): JSX.Element => {
                             ...data,
                             ...res.data.post,
                             IndirectSpaces: res.data.indirectRelationships.map((item) => {
-                                return { id: item.holonId }
+                                return { id: item.spaceId }
                             }),
                             PostImages: res.data.images || [],
                             Event: res.data.event

@@ -95,19 +95,19 @@ const SpacePage = (): JSX.Element => {
                     .then(() => {
                         if (isFollowing) {
                             updateAccountData(
-                                'FollowedHolons',
-                                accountData.FollowedHolons.filter(
+                                'FollowedSpaces',
+                                accountData.FollowedSpaces.filter(
                                     (h) => h.handle !== spaceData.handle
                                 )
                             )
                         } else {
-                            const newFollowedSpaces = [...accountData.FollowedHolons]
+                            const newFollowedSpaces = [...accountData.FollowedSpaces]
                             newFollowedSpaces.push({
                                 handle: spaceData.handle,
                                 name: spaceData.name,
                                 flagImagePath: spaceData.flagImagePath,
                             })
-                            updateAccountData('FollowedHolons', newFollowedSpaces)
+                            updateAccountData('FollowedSpaces', newFollowedSpaces)
                         }
                         setJoinSpaceLoading(false)
                         setIsFollowing(!isFollowing)

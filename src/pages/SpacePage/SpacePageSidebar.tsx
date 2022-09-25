@@ -56,8 +56,8 @@ const SpacePageSidebar = (): JSX.Element => {
                     if (res.data === 'success') {
                         setIsFollowing(false)
                         updateAccountData(
-                            'FollowedHolons',
-                            accountData.FollowedHolons.filter((h) => h.handle !== spaceData.handle)
+                            'FollowedSpaces',
+                            accountData.FollowedSpaces.filter((h) => h.handle !== spaceData.handle)
                         )
                     }
                 })
@@ -73,13 +73,13 @@ const SpacePageSidebar = (): JSX.Element => {
                 .then((res) => {
                     if (res.data === 'success') {
                         setIsFollowing(true)
-                        const newFollowedSpaces = [...accountData.FollowedHolons]
+                        const newFollowedSpaces = [...accountData.FollowedSpaces]
                         newFollowedSpaces.push({
                             handle: spaceData.handle,
                             name: spaceData.name,
                             flagImagePath: spaceData.flagImagePath,
                         })
-                        updateAccountData('FollowedHolons', newFollowedSpaces)
+                        updateAccountData('FollowedSpaces', newFollowedSpaces)
                     }
                 })
                 .catch((error) => {

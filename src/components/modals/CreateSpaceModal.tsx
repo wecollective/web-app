@@ -103,8 +103,8 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                     }
                     setAccountData({
                         ...accountData,
-                        FollowedHolons: [...accountData.FollowedHolons, newSpaceData],
-                        ModeratedHolons: [...accountData.ModeratedHolons, newSpaceData],
+                        FollowedSpaces: [...accountData.FollowedSpaces, newSpaceData],
+                        ModeratedSpaces: [...accountData.ModeratedSpaces, newSpaceData],
                     })
                     if (res.data.message === 'pending-acceptance') {
                         setSuccessMessage('Space created and request sent to moderators')
