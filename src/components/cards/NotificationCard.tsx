@@ -242,35 +242,25 @@ const NotificationCard = (props: {
             setAlertModalOpen(true)
         } else {
             const data = {
-                notificationId: id,
-                notificationType: 'account',
-                accountHandle: accountData.handle,
-                accountName: accountData.name,
-                triggerUser,
-                childSpace: triggerSpace,
-                parentSpace: secondarySpace,
+                requestorId: triggerUser.id,
+                childId: triggerSpace.id,
+                parentId: secondarySpace.id,
                 response,
             }
-            const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
+            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
             axios
-                .post(`${config.apiURL}/respond-to-parent-space-request`, data, authHeader)
-                .then((res) => {
-                    if (res.data === 'success') {
-                        updateNotification(id, 'state', response)
-                        if (!seen) {
-                            setSeen(true)
-                            updateNotification(id, 'seen', true)
-                            updateAccountData(
-                                'unseenNotifications',
-                                accountData.unseenNotifications - 1
-                            )
-                        }
-                    } else {
-                        // handle errors
-                        console.log(res.data)
+                .post(`${config.apiURL}/respond-to-parent-space-request`, data, options)
+                .then(() => {
+                    updateNotification(id, 'state', response)
+                    if (!notification.seen) {
+                        updateNotification(id, 'seen', true)
+                        updateAccountData(
+                            'unseenNotifications',
+                            accountData.unseenNotifications - 1
+                        )
                     }
                 })
-                .catch((res) => console.log('res: ', res))
+                .catch((error) => console.log('error: ', error))
         }
     }
 

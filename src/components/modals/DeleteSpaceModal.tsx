@@ -26,28 +26,10 @@ const DeleteSpaceModal = (props: { close: () => void }): JSX.Element => {
         const data = { spaceId: spaceData.id }
         axios
             .post(`${config.apiURL}/delete-space`, data, authHeader)
-            .then((res) => {
+            .then(() => {
                 setLoading(false)
-                switch (res.data) {
-                    case 'invalid-auth-token':
-                        // setInputState('invalid')
-                        // setInputErrors(['Invalid auth token. Try logging in again.'])
-                        break
-                    case 'unauthorized':
-                        // setInputState('invalid')
-                        // setInputErrors([
-                        //     `Unauthorized. You must be a moderator of ${spaceData.name} to complete this action.`,
-                        // ])
-                        break
-                    case 'success': {
-                        // todo: remove deleted space from followed/moderted spaces in account
-                        setShowSuccessMessage(true)
-                        setTimeout(() => history.push(`/s/all`), 3000)
-                        break
-                    }
-                    default:
-                        break
-                }
+                setShowSuccessMessage(true)
+                setTimeout(() => history.push(`/s/all`), 3000)
             })
             .catch((error) => console.log(error))
     }

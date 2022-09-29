@@ -83,7 +83,7 @@ const PostCardRepostModal = (props: {
                 accountName: accountData.name,
                 postId: postData.id,
                 spaceId: window.location.pathname.includes('/s/') ? spaceData.id : null,
-                selectedSpaceIds: selectedSpaces.map((space) => space.id),
+                spaceIds: selectedSpaces.map((space) => space.id),
             }
             const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
             axios

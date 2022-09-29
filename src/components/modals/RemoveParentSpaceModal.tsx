@@ -1,8 +1,9 @@
 import Button from '@components/Button'
 import CloseButton from '@components/CloseButton'
+import Column from '@components/Column'
 import ImageTitle from '@components/ImageTitle'
-import LoadingWheel from '@components/LoadingWheel'
 import Modal from '@components/modals/Modal'
+import Row from '@components/Row'
 import SearchSelector from '@components/SearchSelector'
 import SuccessMessage from '@components/SuccessMessage'
 import { SpaceContext } from '@contexts/SpaceContext'
@@ -16,8 +17,6 @@ import Cookies from 'universal-cookie'
 const RemoveParentSpaceModal = (props: { close: () => void }): JSX.Element => {
     const { close } = props
     const { spaceData, setSpaceData } = useContext(SpaceContext)
-    const [inputState, setInputState] = useState<'default' | 'valid' | 'invalid'>('default')
-    const [inputErrors, setInputErrors] = useState<string[]>([])
     const [options, setOptions] = useState<any[]>([])
     const [selectedSpace, setSelectedSpace] = useState<any>(null)
     const [loading, setLoading] = useState(false)
@@ -50,107 +49,96 @@ const RemoveParentSpaceModal = (props: { close: () => void }): JSX.Element => {
         const accessToken = cookies.get('accessToken')
         const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
         const data = {
-            childSpaceId: spaceData.id,
-            parentSpaceId: selectedSpace.id,
+            childId: spaceData.id,
+            parentId: selectedSpace.id,
             fromChild: true,
         }
         axios
             .post(`${config.apiURL}/remove-parent-space`, data, authHeader)
-            .then((res) => {
+            .then(() => {
                 setLoading(false)
-                switch (res.data) {
-                    case 'invalid-auth-token':
-                        setInputState('invalid')
-                        setInputErrors(['Invalid auth token. Try logging in again.'])
-                        break
-                    case 'unauthorized':
-                        setInputState('invalid')
-                        setInputErrors([
-                            `Unauthorized. You must be a moderator of ${spaceData.name} to complete this action.`,
-                        ])
-                        break
-                    case 'success': {
-                        const newParentSpaces = spaceData.DirectParentSpaces.filter(
-                            (s) => s.id !== selectedSpace.id
-                        )
-                        setSpaceData({
-                            ...spaceData,
-                            DirectParentSpaces: newParentSpaces,
-                        })
-                        setShowSuccessMessage(true)
-                        setTimeout(() => close(), 3000)
-                        break
-                    }
-                    default:
-                        break
-                }
+                const newParentSpaces = spaceData.DirectParentSpaces.filter(
+                    (s) => s.id !== selectedSpace.id
+                )
+                setSpaceData({
+                    ...spaceData,
+                    DirectParentSpaces: newParentSpaces,
+                })
+                setShowSuccessMessage(true)
+                setTimeout(() => close(), 2000)
             })
             .catch((error) => console.log(error))
     }
 
     return (
         <Modal centered close={close} style={{ maxWidth: 600 }}>
-            <h1>Remove a parent space</h1>
-            {onlyParentIsRoot ? (
-                <>
-                    <p>
-                        The only parent you&apos;re connected to at the moment is the root space. To
-                        disconnect from there you need to attach to another parent first, otherwise
-                        your space won&apos;t appear anywhere on the site.
-                    </p>
-                    <Button onClick={close} text='OK' color='blue' />
-                </>
+            {showSuccessMessage ? (
+                <SuccessMessage text='Parent space removed' />
             ) : (
-                <>
-                    {onlyOneParent && (
-                        <p>
-                            &apos;{spaceData.name}&apos; only has one parent so it will be
-                            re-attached to the root space <Link to='/s/all/spaces'>all</Link> if you
-                            remove it.
-                        </p>
-                    )}
-                    <p>
-                        Once removed, new posts to &apos;{spaceData.name}&apos; will no longer
-                        appear in the removed parent space. (Old posts will remain where they were
-                        when posted)
-                    </p>
-                    <form onSubmit={removeParentSpace}>
-                        <SearchSelector
-                            type='space'
-                            title="Search for the parent space's name or handle below:"
-                            placeholder='name or handle...'
-                            state={inputState}
-                            errors={inputErrors}
-                            onSearchQuery={(query) => findSpaces(query)}
-                            onOptionSelected={(space) => selectSpace(space)}
-                            options={options}
-                        />
-                        {selectedSpace && (
-                            <div className={styles.selectedOptionWrapper}>
-                                <p>Selected space:</p>
-                                <div className={styles.selectedOption}>
-                                    <ImageTitle
-                                        type='space'
-                                        imagePath={selectedSpace.flagImagePath}
-                                        title={`${selectedSpace.name} (${selectedSpace.handle})`}
+                <Column centerX>
+                    <h1>Remove a parent space</h1>
+                    {onlyParentIsRoot ? (
+                        <Column centerX>
+                            <p style={{ marginBottom: 10 }}>
+                                The only parent you&apos;re connected to at the moment is the root
+                                space. To disconnect from there you need to attach to another parent
+                                first, otherwise your space won&apos;t appear anywhere on the site.
+                            </p>
+                            <Button onClick={close} text='OK' color='blue' />
+                        </Column>
+                    ) : (
+                        <Column centerX>
+                            {onlyOneParent && (
+                                <p>
+                                    &apos;{spaceData.name}&apos; only has one parent so it will be
+                                    re-attached to the root space{' '}
+                                    <Link to='/s/all/spaces'>all</Link> if you remove it.
+                                </p>
+                            )}
+                            <p>
+                                Once removed, new posts to &apos;{spaceData.name}&apos; will no
+                                longer appear in the removed parent space. (Old posts will remain
+                                where they were when posted)
+                            </p>
+                            <form onSubmit={removeParentSpace}>
+                                <SearchSelector
+                                    type='space'
+                                    title="Search for the parent space's name or handle below:"
+                                    placeholder='name or handle...'
+                                    onSearchQuery={(query) => findSpaces(query)}
+                                    onOptionSelected={(space) => selectSpace(space)}
+                                    options={options}
+                                    style={{ margin: '20px 0' }}
+                                />
+                                {selectedSpace && (
+                                    <div className={styles.selectedOptionWrapper}>
+                                        <p>Selected space:</p>
+                                        <div className={styles.selectedOption}>
+                                            <ImageTitle
+                                                type='space'
+                                                imagePath={selectedSpace.flagImagePath}
+                                                title={`${selectedSpace.name} (${selectedSpace.handle})`}
+                                            />
+                                            <CloseButton
+                                                size={17}
+                                                onClick={() => setSelectedSpace(null)}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                                <Row centerX style={{ marginTop: 20 }}>
+                                    <Button
+                                        submit
+                                        text='Remove parent space'
+                                        color='blue'
+                                        disabled={loading || !selectedSpace}
+                                        loading={loading}
                                     />
-                                    <CloseButton size={17} onClick={() => setSelectedSpace(null)} />
-                                </div>
-                            </div>
-                        )}
-                        <div className={styles.footer}>
-                            <Button
-                                submit
-                                text='Remove parent space'
-                                color='blue'
-                                style={{ marginRight: 10 }}
-                                disabled={loading || showSuccessMessage || !selectedSpace}
-                            />
-                            {loading && <LoadingWheel />}
-                            {showSuccessMessage && <SuccessMessage text='Parent space removed' />}
-                        </div>
-                    </form>
-                </>
+                                </Row>
+                            </form>
+                        </Column>
+                    )}
+                </Column>
             )}
         </Modal>
     )

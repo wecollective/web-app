@@ -18,6 +18,7 @@ const defaults = {
         totalPosts: 0,
         totalSpaces: 0,
         totalUsers: 0,
+        access: 'granted',
         Creator: {
             id: null,
             handle: null,
@@ -91,11 +92,16 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     const [spacePeoplePaginationOffset, setSpacePeoplePaginationOffset] = useState(0)
     const [spacePeoplePaginationHasMore, setSpacePeoplePaginationHasMore] = useState(true)
 
+    // todo: use authenticate token to grab space data and posts when logged in
     function getSpaceData(handle: string) {
         console.log(`SpaceContext: getSpaceData (${handle})`)
         setSpaceNotFound(false)
         axios
-            .get(`${config.apiURL}/space-data?handle=${handle}&accountId=${accountData.id}`)
+            .get(
+                `${config.apiURL}/space-data?handle=${handle}${
+                    accountData.id ? `&accountId=${accountData.id}` : ''
+                }`
+            )
             .then((res) => {
                 // todo: apply default people filters when set up
                 // setSpacePostsFilters()

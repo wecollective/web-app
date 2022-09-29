@@ -10,13 +10,14 @@ import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import axios from 'axios'
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 const InviteSpaceUsersModal = (props: { close: () => void }): JSX.Element => {
     const { close } = props
     const { accountData, setAlertMessage, setAlertModalOpen } = useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
+    const [usersWithAccess, setUsersWithAccess] = useState<number[]>([])
     const [suggestedUsers, setSuggestedUsers] = useState<any[]>([])
     const [selectedUsers, setSelectedUsers] = useState<any[]>([])
     const [loading, setLoading] = useState(false)
@@ -28,10 +29,7 @@ const InviteSpaceUsersModal = (props: { close: () => void }): JSX.Element => {
         else {
             const data = {
                 query,
-                blacklist: [
-                    ...spaceData.UsersWithAccess.map((u) => u.id),
-                    ...selectedUsers.map((user) => user.id),
-                ],
+                blacklist: [...usersWithAccess, ...selectedUsers.map((user) => user.id)],
             }
             axios
                 .post(`${config.apiURL}/find-people`, data)
@@ -76,6 +74,13 @@ const InviteSpaceUsersModal = (props: { close: () => void }): JSX.Element => {
                 .catch((error) => console.log(error))
         }
     }
+
+    useEffect(() => {
+        axios
+            .get(`${config.apiURL}/users-with-access?spaceId=${spaceData.id}`)
+            .then((res) => setUsersWithAccess(res.data))
+            .catch((error) => console.log(error))
+    }, [])
 
     return (
         <Modal centered close={close}>

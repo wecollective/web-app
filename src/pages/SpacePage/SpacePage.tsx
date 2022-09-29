@@ -45,24 +45,19 @@ const SpacePage = (): JSX.Element => {
     const {
         spaceData,
         getSpaceData,
+        setSpaceData,
         resetSpaceData,
         isModerator,
         isFollowing,
         setIsFollowing,
         setSelectedSpaceSubPage,
     } = useContext(SpaceContext)
-
     const [headerCollapsed, setHeaderColapsed] = useState(false)
     const [joinSpaceLoading, setJoinSpaceLoading] = useState(false)
-    const [accessPending, setAccessPending] = useState(false)
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]
     const subpage = location.pathname.split('/')[3]
-    const spaceChanging = spaceHandle !== spaceData.handle
-    const access =
-        !spaceData.privacy ||
-        spaceData.privacy === 'public' ||
-        spaceData.UsersWithAccess.find((u) => u.id === accountData.id)
+    const awaitingSpaceData = spaceHandle !== spaceData.handle
     const { clientWidth } = document.documentElement
     const mobileView = clientWidth < 900
     const tabletView = clientWidth >= 900 && clientWidth < 1200
@@ -88,7 +83,7 @@ const SpacePage = (): JSX.Element => {
         } else {
             setJoinSpaceLoading(true)
             const options = { headers: { Authorization: `Bearer ${accessToken}` } }
-            if (access) {
+            if (spaceData.access === 'granted') {
                 const data = { spaceId: spaceData.id, isFollowing }
                 axios
                     .post(`${config.apiURL}/toggle-join-space`, data, options)
@@ -123,7 +118,7 @@ const SpacePage = (): JSX.Element => {
                     .post(`${config.apiURL}/request-space-access`, data, options)
                     .then(() => {
                         setJoinSpaceLoading(false)
-                        setAccessPending(true)
+                        setSpaceData({ ...spaceData, access: 'pending' })
                     })
                     .catch((error) => console.log(error))
             }
@@ -131,15 +126,13 @@ const SpacePage = (): JSX.Element => {
     }
 
     function joinSpaceButtonText() {
-        if (access) return isFollowing ? 'Joined' : 'Join'
-        return accessPending ? 'Access requested' : 'Request access'
+        if (spaceData.access === 'granted') return isFollowing ? 'Joined' : 'Join'
+        return spaceData.access === 'pending' ? 'Access requested' : 'Request access'
     }
 
     useEffect(() => {
-        if (!accountDataLoading && spaceChanging) getSpaceData(spaceHandle)
+        if (!accountDataLoading && awaitingSpaceData) getSpaceData(spaceHandle)
     }, [accountDataLoading, spaceHandle])
-
-    useEffect(() => setAccessPending(spaceData.accessPending), [spaceData.id])
 
     useEffect(() => setSelectedSpaceSubPage(subpage), [location])
 
@@ -171,18 +164,27 @@ const SpacePage = (): JSX.Element => {
                             <h1>{spaceData.name}</h1>
                             <p className='grey'>s/{spaceData.handle}</p>
                         </Column>
-                        {spaceHandle !== 'all' && loggedIn && !mobileView && (
-                            <Row>
-                                <Button
-                                    icon={isFollowing ? <SuccessIconSVG /> : undefined}
-                                    text={joinSpaceButtonText()}
-                                    color='blue'
-                                    disabled={spaceChanging || accessPending}
-                                    loading={joinSpaceLoading}
-                                    onClick={joinSpace}
-                                />
-                            </Row>
-                        )}
+                        {spaceHandle !== 'all' &&
+                            loggedIn &&
+                            !mobileView &&
+                            spaceData.access !== 'blocked-by-ancestor' && (
+                                <Row>
+                                    <Button
+                                        icon={
+                                            isFollowing || spaceData.access === 'pending' ? (
+                                                <SuccessIconSVG />
+                                            ) : undefined
+                                        }
+                                        text={joinSpaceButtonText()}
+                                        color='blue'
+                                        disabled={
+                                            awaitingSpaceData || spaceData.access === 'pending'
+                                        }
+                                        loading={joinSpaceLoading}
+                                        onClick={joinSpace}
+                                    />
+                                </Row>
+                            )}
                     </Row>
                 </Row>
                 <Row centerX className={styles.tabRow}>
@@ -204,7 +206,7 @@ const SpacePage = (): JSX.Element => {
                 </Row>
             </Column>
             <Column centerX className={styles.content}>
-                {access ? (
+                {spaceData.access === 'granted' ? (
                     <Switch>
                         <Redirect from='/s/:spaceHandle/' to='/s/:spaceHandle/posts' exact />
                         <Route path='/s/:spaceHandle/about' component={SpacePageAbout} exact />

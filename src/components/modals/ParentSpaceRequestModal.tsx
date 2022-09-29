@@ -65,41 +65,22 @@ const ParentSpaceRequestModal = (props: { close: () => void }): JSX.Element => {
         const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
         if (accountIsModOfSelectedSpace) {
             // add parent space
-            const data = { spaceId: spaceData.id, parentSpaceId: selectedSpace.id }
+            const data = { childId: spaceData.id, parentId: selectedSpace.id }
             axios
                 .post(`${config.apiURL}/add-parent-space`, data, authHeader)
-                .then((res) => {
+                .then(() => {
                     setLoading(false)
-                    switch (res.data) {
-                        case 'invalid-auth-token':
-                            setInputState('invalid')
-                            setInputErrors(['Invalid auth token. Try logging in again.'])
-                            break
-                        case 'unauthorized':
-                            setInputState('invalid')
-                            setInputErrors([
-                                `Unauthorized. You must be a moderator of ${spaceData.name} to complete this action.`,
-                            ])
-                            break
-                        case 'success': {
-                            // remove root space if present
-                            const newParentSpaces = spaceData.DirectParentSpaces.filter(
-                                (s) => s.id !== 1
-                            )
-                            // add new parent space
-                            newParentSpaces.push(selectedSpace)
-                            // update space context
-                            setSpaceData({
-                                ...spaceData,
-                                DirectParentSpaces: newParentSpaces,
-                            })
-                            setShowSuccessMessage(true)
-                            setTimeout(() => close(), 3000)
-                            break
-                        }
-                        default:
-                            break
-                    }
+                    // remove root space if present
+                    const newParentSpaces = spaceData.DirectParentSpaces.filter((s) => s.id !== 1)
+                    // add new parent space
+                    newParentSpaces.push(selectedSpace)
+                    // update space context
+                    setSpaceData({
+                        ...spaceData,
+                        DirectParentSpaces: newParentSpaces,
+                    })
+                    setShowSuccessMessage(true)
+                    setTimeout(() => close(), 3000)
                 })
                 .catch((error) => console.log(error))
         } else {
@@ -107,34 +88,19 @@ const ParentSpaceRequestModal = (props: { close: () => void }): JSX.Element => {
             const data = {
                 accountHandle: accountData.handle,
                 accountName: accountData.name,
-                spaceId: spaceData.id,
-                spaceName: spaceData.name,
-                spaceHandle: spaceData.handle,
-                parentSpaceId: selectedSpace.id,
+                childId: spaceData.id,
+                childName: spaceData.name,
+                childHandle: spaceData.handle,
+                parentId: selectedSpace.id,
             }
             axios
                 .post(`${config.apiURL}/send-parent-space-request`, data, authHeader)
-                .then((res) => {
+                .then(() => {
                     setLoading(false)
-                    switch (res.data) {
-                        case 'invalid-auth-token':
-                            setInputState('invalid')
-                            setInputErrors(['Invalid auth token. Try logging in again.'])
-                            break
-                        case 'unauthorized':
-                            setInputState('invalid')
-                            setInputErrors([
-                                `Unauthorized. You must be a moderator of ${spaceData.name} to complete this action.`,
-                            ])
-                            break
-                        case 'success':
-                            setShowSuccessMessage(true)
-                            setTimeout(() => close(), 3000)
-                            break
-                        default:
-                            break
-                    }
+                    setShowSuccessMessage(true)
+                    setTimeout(() => close(), 2000)
                 })
+                .catch((error) => console.log(error))
         }
     }
 

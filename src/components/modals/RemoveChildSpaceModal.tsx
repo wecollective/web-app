@@ -46,40 +46,23 @@ const RemoveChildSpaceModal = (props: { close: () => void }): JSX.Element => {
         const accessToken = cookies.get('accessToken')
         const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
         const data = {
-            childSpaceId: selectedSpace.id,
-            parentSpaceId: spaceData.id,
+            childId: selectedSpace.id,
+            parentId: spaceData.id,
             fromChild: false,
         }
         axios
             .post(`${config.apiURL}/remove-parent-space`, data, authHeader)
-            .then((res) => {
+            .then(() => {
                 setLoading(false)
-                switch (res.data) {
-                    case 'invalid-auth-token':
-                        setInputState('invalid')
-                        setInputErrors(['Invalid auth token. Try logging in again.'])
-                        break
-                    case 'unauthorized':
-                        setInputState('invalid')
-                        setInputErrors([
-                            `Unauthorized. You must be a moderator of ${spaceData.name} to complete this action.`,
-                        ])
-                        break
-                    case 'success': {
-                        const newChildSpaces = spaceData.DirectChildSpaces.filter(
-                            (s) => s.id !== selectedSpace.id
-                        )
-                        setSpaceData({
-                            ...spaceData,
-                            DirectChildSpaces: newChildSpaces,
-                        })
-                        setShowSuccessMessage(true)
-                        setTimeout(() => close(), 3000)
-                        break
-                    }
-                    default:
-                        break
-                }
+                const newChildSpaces = spaceData.DirectChildSpaces.filter(
+                    (s) => s.id !== selectedSpace.id
+                )
+                setSpaceData({
+                    ...spaceData,
+                    DirectChildSpaces: newChildSpaces,
+                })
+                setShowSuccessMessage(true)
+                setTimeout(() => close(), 2000)
             })
             .catch((error) => console.log(error))
     }
