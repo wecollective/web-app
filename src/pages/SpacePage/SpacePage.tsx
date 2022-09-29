@@ -134,6 +134,10 @@ const SpacePage = (): JSX.Element => {
         if (!accountDataLoading && awaitingSpaceData) getSpaceData(spaceHandle)
     }, [accountDataLoading, spaceHandle])
 
+    useEffect(() => {
+        if (!awaitingSpaceData) getSpaceData(spaceHandle)
+    }, [loggedIn])
+
     useEffect(() => setSelectedSpaceSubPage(subpage), [location])
 
     useEffect(() => {
