@@ -876,7 +876,7 @@ const CreatePostModal = (): JSX.Element => {
                 flagImagePath: accountData.flagImagePath,
             },
             DirectSpaces: selectedSpaces.map((space) => {
-                return { ...space, type: 'post', state: 'active' }
+                return { ...space, state: 'active' }
             }),
             sourcePostId: createPostModalSettings.source ? createPostModalSettings.source.id : null,
             sourceCreatorId: createPostModalSettings.source

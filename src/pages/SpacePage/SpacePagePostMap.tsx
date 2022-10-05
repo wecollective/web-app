@@ -13,6 +13,7 @@ import styles from '@styles/pages/SpacePage/SpacePagePostMap.module.scss'
 import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
+import Cookies from 'universal-cookie'
 
 const SpacePagePostMap = (props: { postMapData: any; params: any }): JSX.Element => {
     const { postMapData, params } = props
@@ -32,13 +33,17 @@ const SpacePagePostMap = (props: { postMapData: any; params: any }): JSX.Element
     const arrowPoints = 'M 0 0 6 3 0 6 1.5 3'
     const gravitySlider = useRef<HTMLInputElement>(null)
     const gravityInput = useRef<HTMLInputElement>(null)
+    const cookies = new Cookies()
 
     function openPostModal(postId) {
         setSelectedPost(null)
         setPostModalOpen(true)
+        const accessToken = cookies.get('accessToken')
+        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
         axios
-            .get(`${config.apiURL}/post-data?accountId=${accountData.id}&postId=${postId}`)
+            .get(`${config.apiURL}/post-data?postId=${postId}`, options)
             .then((res) => setSelectedPost(res.data))
+            .catch((error) => console.log(error))
     }
 
     function findDomain() {

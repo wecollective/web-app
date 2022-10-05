@@ -202,6 +202,7 @@ export interface ISpaceContext {
     getPostMapData: (spaceId: number, params: any, limit: number) => void
     getSpaceSpaces: (spaceId: number, offset: number, limit: number, params: any) => void
     getSpaceMapData: (spaceId: number, params: any) => void
+    getSpaceMapChildren: (spaceId: number, offset: number, params: any) => any
     getSpacePeople: (spaceId: number, offset: number, limit: number, params: any) => void
 
     resetSpaceData: () => void
@@ -216,7 +217,7 @@ export interface IPostContext {
     postData: any
     setPostData: (payload: any) => void
     postDataLoading: boolean
-    postState: 'default' | 'deleted' | 'not-found'
+    postState: string
     // functions
     getPostData: (payload: number) => void
     resetPostContext: () => void

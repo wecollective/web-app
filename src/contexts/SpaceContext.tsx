@@ -3,6 +3,7 @@ import config from '@src/Config'
 import { ISpaceContext } from '@src/Interfaces'
 import axios from 'axios'
 import React, { createContext, useContext, useEffect, useState } from 'react'
+import Cookies from 'universal-cookie'
 
 export const SpaceContext = createContext<ISpaceContext>({} as ISpaceContext)
 
@@ -92,16 +93,16 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     const [spacePeoplePaginationOffset, setSpacePeoplePaginationOffset] = useState(0)
     const [spacePeoplePaginationHasMore, setSpacePeoplePaginationHasMore] = useState(true)
 
+    const cookies = new Cookies()
+
     // todo: use authenticate token to grab space data and posts when logged in
     function getSpaceData(handle: string) {
         console.log(`SpaceContext: getSpaceData (${handle})`)
+        const accessToken = cookies.get('accessToken')
+        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
         setSpaceNotFound(false)
         axios
-            .get(
-                `${config.apiURL}/space-data?handle=${handle}${
-                    accountData.id ? `&accountId=${accountData.id}` : ''
-                }`
-            )
+            .get(`${config.apiURL}/space-data?handle=${handle}`, options)
             .then((res) => {
                 // todo: apply default people filters when set up
                 // setSpacePostsFilters()
@@ -118,11 +119,12 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         const firstLoad = offset === 0
         if (firstLoad) setSpacePostsLoading(true)
         else setNextSpacePostsLoading(true)
+        const accessToken = cookies.get('accessToken')
+        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
         axios
             .get(
                 /* prettier-ignore */
-                `${config.apiURL}/space-posts?accountId=${accountData.id
-                }&spaceId=${spaceId
+                `${config.apiURL}/space-posts?spaceId=${spaceId
                 }&postType=${params.type
                 }&sortBy=${params.sortBy
                 }&sortOrder=${params.sortOrder
@@ -130,13 +132,12 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 }&depth=${params.depth
                 }&searchQuery=${params.searchQuery || ''
                 }&limit=${limit
-                }&offset=${offset}`
+                }&offset=${offset}`,
+                options
             )
             .then((res) => {
-                setSpacePosts(firstLoad ? res.data.posts : [...spacePosts, ...res.data.posts])
-                setTotalMatchingPosts(res.data.totalMatchingPosts)
-                // use total matching posts to work out if definitely more
-                setSpacePostsPaginationHasMore(res.data.posts.length === spacePostsPaginationLimit)
+                setSpacePosts(firstLoad ? res.data : [...spacePosts, ...res.data])
+                setSpacePostsPaginationHasMore(res.data.length === spacePostsPaginationLimit)
                 setSpacePostsPaginationOffset(offset + spacePostsPaginationLimit)
                 if (firstLoad) setSpacePostsLoading(false)
                 else setNextSpacePostsLoading(false)
@@ -145,11 +146,12 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
 
     function getPostMapData(spaceId, params, limit) {
         console.log(`SpaceContext: getPostMapData`, spaceId, params, limit)
+        const accessToken = cookies.get('accessToken')
+        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
         axios
             .get(
                 /* prettier-ignore */
-                `${config.apiURL}/post-map-data?accountId=${accountData.id
-                }&spaceId=${spaceId
+                `${config.apiURL}/post-map-data?spaceId=${spaceId
                 }&postType=${params.type
                 }&offset=${0
                 }&limit=${limit
@@ -157,7 +159,8 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 }&sortOrder=${params.sortOrder
                 }&timeRange=${params.timeRange
                 }&depth=${params.depth
-                }&searchQuery=${params.searchQuery || ''}`
+                }&searchQuery=${params.searchQuery || ''}`,
+                options
             )
             .then((res) => setPostMapData(res.data))
     }
@@ -167,18 +170,20 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         const firstLoad = offset === 0
         if (firstLoad) setSpaceSpacesLoading(true)
         else setNextSpaceSpacesLoading(true)
+        const accessToken = cookies.get('accessToken')
+        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
         axios
             .get(
                 /* prettier-ignore */
-                `${config.apiURL}/space-spaces?accountId=${accountData.id
-                }&spaceId=${spaceId
+                `${config.apiURL}/space-spaces?spaceId=${spaceId
                 }&timeRange=${params.timeRange
                 }&sortBy=${params.sortBy
                 }&sortOrder=${params.sortOrder
                 }&depth=${params.depth
                 }&searchQuery=${params.searchQuery || ''
                 }&limit=${limit
-                }&offset=${offset}`
+                }&offset=${offset}`,
+                options
             )
             .then((res) => {
                 setSpaceSpaces(firstLoad ? res.data : [...spaceSpaces, ...res.data])
@@ -191,6 +196,8 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
 
     function getSpaceMapData(spaceId, params) {
         console.log(`SpaceContext: getSpaceMapData`, params)
+        const accessToken = cookies.get('accessToken')
+        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
         axios
             .get(
                 /* prettier-ignore */
@@ -200,9 +207,29 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 }&sortOrder=${params.sortOrder
                 }&timeRange=${params.timeRange
                 }&depth=${params.depth
-                }&searchQuery=${params.searchQuery || ''}`
+                }&searchQuery=${params.searchQuery || ''}`,
+                options
             )
-            .then((res) => setSpaceMapData(res.data))
+            .then((res) => {
+                setSpaceMapData(res.data)
+            })
+            .catch((error) => console.log(error))
+    }
+
+    function getSpaceMapChildren(spaceId, offset, params) {
+        const accessToken = cookies.get('accessToken')
+        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+        return axios.get(
+            /* prettier-ignore */
+            `${config.apiURL}/space-map-data?spaceId=${spaceId
+                }&offset=${offset
+                }&sortBy=${params.sortBy
+                }&sortOrder=${params.sortOrder
+                }&timeRange=${params.timeRange
+                }&depth=${params.depth
+                }&searchQuery=${params.searchQuery || ''}`,
+            options
+        )
     }
 
     function getSpacePeople(spaceId, offset, limit, params) {
@@ -211,6 +238,8 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         if (firstLoad) setSpacePeopleLoading(true)
         else setNextSpacePeopleLoading(true)
         const isRootSpace = spaceId === 1
+        const accessToken = cookies.get('accessToken')
+        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
         axios
             .get(
                 /* prettier-ignore */
@@ -222,7 +251,8 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 }&timeRange=${params.timeRange
                 }&searchQuery=${params.searchQuery || ''
                 }&limit=${limit
-                }&offset=${offset}`
+                }&offset=${offset}`,
+                options
             )
             .then((res) => {
                 setSpacePeople(firstLoad ? res.data : [...spacePeople, ...res.data])
@@ -322,6 +352,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 getPostMapData,
                 getSpaceSpaces,
                 getSpaceMapData,
+                getSpaceMapChildren,
                 getSpacePeople,
 
                 resetSpaceData,

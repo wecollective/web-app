@@ -15,7 +15,9 @@ import { ReactComponent as SearchIcon } from '@svgs/search.svg'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
+import Cookies from 'universal-cookie'
 
+// todo: simply and clarify logic where possible, put some of it into functions
 const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }): JSX.Element => {
     const { onLocationChange, style } = props
     const { spaceData } = useContext(SpaceContext)
@@ -46,6 +48,7 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
     Object.keys(urlParams).forEach((param) => {
         params[param] = urlParams[param]
     })
+    const cookies = new Cookies()
 
     function getSuggestions(query) {
         setSearchQuery(query)
@@ -54,11 +57,12 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
             const route = `find-${searchType.toLowerCase()}`
             const data = {
                 query,
-                blacklist: [],
                 spaceId: searchConstraint ? spaceData.id : null,
             }
+            const accessToken = cookies.get('accessToken')
+            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
             axios
-                .post(`${config.apiURL}/${route}`, data)
+                .post(`${config.apiURL}/${route}`, data, options)
                 .then((res) => {
                     setSuggestionsLoading(false)
                     // if search query changed since request sent don't set options
@@ -74,7 +78,8 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
     function search(e) {
         e.preventDefault()
         setSuggestions([])
-        params.depth = `All Contained ${searchType}`
+        if (searchQuery) params.depth = `All Contained ${searchType}`
+        else params.depth = `Only Direct Descendents`
         history.push({
             pathname: `/${searchConstraint ? pageType : 's'}/${
                 searchConstraint ? handle : 'all'
@@ -105,7 +110,7 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
     useEffect(() => {
         setSearchQuery('')
         setSuggestions([])
-    }, [subpage])
+    }, [subpage, handle])
 
     // update suggestions if search type or constraint changed
     useEffect(() => {

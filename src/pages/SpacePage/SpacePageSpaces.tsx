@@ -11,7 +11,7 @@ import React, { useContext, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
 const SpacePageSpaces = (): JSX.Element => {
-    const { pageBottomReached } = useContext(AccountContext)
+    const { loggedIn, pageBottomReached } = useContext(AccountContext)
     const {
         spaceData,
         spaceNotFound,
@@ -44,7 +44,7 @@ const SpacePageSpaces = (): JSX.Element => {
                 getSpaceSpaces(spaceData.id, 0, spaceSpacesPaginationLimit, params)
             if (params.view === 'Map') getSpaceMapData(spaceData.id, params)
         }
-    }, [spaceData.handle, location])
+    }, [spaceData.handle, location, loggedIn])
 
     useEffect(() => {
         if (!spaceSpacesLoading && !nextSpaceSpacesLoading && spaceSpacesPaginationHasMore)

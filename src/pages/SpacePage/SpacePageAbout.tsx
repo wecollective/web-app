@@ -4,21 +4,36 @@ import ImageTitle from '@components/ImageTitle'
 import Row from '@components/Row'
 import { SpaceContext } from '@contexts/SpaceContext'
 import SpaceNotFound from '@pages/SpaceNotFound'
+import config from '@src/Config'
 import { dateCreated, timeSinceCreated } from '@src/Helpers'
 import styles from '@styles/pages/SpacePage/SpacePageAbout.module.scss'
-import React, { useContext } from 'react'
+import axios from 'axios'
+import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
 const SpacePageAbout = (): JSX.Element => {
     const { spaceData, spaceNotFound } = useContext(SpaceContext)
-    const { description, createdAt, Creator } = spaceData
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]
+    const [loading, setLoading] = useState(true)
+    const [data, setData] = useState<any>({})
+    const { description, createdAt, Creator } = data
+
+    useEffect(() => {
+        if (spaceData.handle === spaceHandle)
+            axios
+                .get(`${config.apiURL}/space-about?handle=${spaceHandle}`)
+                .then((res) => {
+                    setData(res.data)
+                    setLoading(false)
+                })
+                .catch((error) => console.log(error))
+    }, [spaceData.handle])
 
     if (spaceNotFound) return <SpaceNotFound />
     return (
         <Column centerX className={styles.wrapper}>
-            {spaceData.handle !== spaceHandle ? (
+            {loading ? (
                 <p>Space data loading... </p>
             ) : (
                 <Column className={styles.content}>

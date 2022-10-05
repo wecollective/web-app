@@ -15,14 +15,14 @@ import { useLocation } from 'react-router-dom'
 const PostPage = (): JSX.Element => {
     const location = useLocation()
     const postId = location.pathname.split('/')[2]
-    const { accountDataLoading } = useContext(AccountContext)
+    const { accountDataLoading, loggedIn } = useContext(AccountContext)
     const { getPostData, postData, postDataLoading, postState, resetPostContext } = useContext(
         PostContext
     )
 
     useEffect(() => {
         if (!accountDataLoading && postId !== postData.id) getPostData(postId)
-    }, [accountDataLoading, postId])
+    }, [accountDataLoading, postId, loggedIn])
 
     useEffect(() => () => resetPostContext(), [])
 
@@ -46,10 +46,11 @@ const PostPage = (): JSX.Element => {
                     <Column centerX centerY style={{ width: '100%', height: 300 }}>
                         <LoadingWheel />
                     </Column>
-                ) : !postData.id || postState !== 'default' ? (
+                ) : !postData.id || postState ? (
                     <Column centerX centerY style={{ width: '100%', height: 300 }}>
                         {postState === 'deleted' && <p>Post deleted...</p>}
                         {postState === 'not-found' && <p>Post not found...</p>}
+                        {postState === 'access-denied' && <p>Access denied...</p>}
                     </Column>
                 ) : (
                     <PostCard post={postData} location='post-page' />

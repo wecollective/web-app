@@ -4,20 +4,18 @@ import DraftText from '@components/draft-js/DraftText'
 import Row from '@components/Row'
 import StatButton from '@components/StatButton'
 import { SpaceContext } from '@contexts/SpaceContext'
-import config from '@src/Config'
 import styles from '@styles/pages/SpacePage/SpacePageSpaceMap.module.scss'
 import { ReactComponent as CommentIconSVG } from '@svgs/comment-solid.svg'
 import { ReactComponent as PostIconSVG } from '@svgs/edit-solid.svg'
 import { ReactComponent as ReactionIconSVG } from '@svgs/fire-alt-solid.svg'
 import { ReactComponent as UsersIconSVG } from '@svgs/users-solid.svg'
-import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 
 const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
     const { spaceMapData, params } = props
-    const { spaceData, setSpaceMapData } = useContext(SpaceContext)
+    const { spaceData, setSpaceMapData, getSpaceMapChildren } = useContext(SpaceContext)
     // const [width, setWidth] = useState<number | string>(700)
     const [firstRun, setFirstRun] = useState(true)
     const [highlightedSpace, setHighlightedSpace] = useState<any>(null)
@@ -29,9 +27,7 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
     const duration = 1000
 
     const findParent = (tree: any, itemId: string): any => {
-        if (tree.uuid === itemId) {
-            return tree
-        }
+        if (tree.uuid === itemId) return tree
         if (tree.children) {
             for (let i = 0; i < tree.children.length; i += 1) {
                 const match = findParent(tree.children[i], itemId)
@@ -61,6 +57,7 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
     }
 
     function findFill(d) {
+        // todo: update image if privacy changes during log-out/in
         const existingImage = d3.select(`#image-${d.data.id}`)
         if (existingImage.node()) {
             // scale and reposition existing image (if no imageCircle, transition size instantly)
@@ -86,8 +83,9 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
                 .attr('width', findRadius(d) * 2)
                 .attr('preserveAspectRatio', 'xMidYMid slice')
                 .attr('xlink:href', () => {
-                    if (d.data.isExpander) return '/icons/plus-icon.jpg'
-                    if (d.data.privacy === 'private') return '/icons/lock-icon.png'
+                    if (d.data.expander) return '/icons/plus-icon.jpg'
+                    if (d.data.privacy === 'private' && d.data.spaceAccess !== 'active')
+                        return '/icons/lock-icon.png'
                     return d.data.flagImagePath || '/icons/default-space-flag.jpg'
                 })
             // .on('error', () => {
@@ -291,28 +289,15 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
 
         interruptRunningTransitions(data)
 
-        // move out of update tree function ?
         function getChildren(node) {
-            axios
-                .get(
-                    /* prettier-ignore */
-                    `${config.apiURL}/space-map-data?spaceId=${node.data.id
-                    }&offset=${node.children.length - 1
-                    }&spaceType=${params.type
-                    }&sortBy=${params.sortBy
-                    }&sortOrder=${params.sortOrder
-                    }&timeRange=${params.timeRange
-                    }&depth=${params.depth
-                    }&searchQuery=${params.searchQuery || ''}`
-                )
+            getSpaceMapChildren(node.data.id, node.children.length - 1, params)
                 .then((res) => {
-                    // console.log(res)
                     const match = findParent(data, node.data.uuid)
-                    match.children = match.children.filter((child) => !child.isExpander)
-                    match.children.push(...res.data)
-                    // setSpaceMapData(_.cloneDeep(spaceMapData))
+                    match.children = match.children.filter((child) => !child.expander)
+                    match.children.push(...res.data.children)
                     updateTree(data, false)
                 })
+                .catch((error) => console.log(error))
         }
 
         function findTransitonId(d) {
@@ -526,7 +511,7 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
                             .on('mousedown', (d) => {
                                 setHighlightedSpace(null)
                                 if (!spaceTransitioning.current) {
-                                    if (d.data.isExpander) {
+                                    if (d.data.expander) {
                                         getChildren(d.parent)
                                     } else if (d.parent) {
                                         spaceTransitioning.current = true

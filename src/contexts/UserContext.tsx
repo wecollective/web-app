@@ -3,6 +3,7 @@ import config from '@src/Config'
 import { IPost, IUserContext } from '@src/Interfaces'
 import axios from 'axios'
 import React, { createContext, useContext, useEffect, useState } from 'react'
+import Cookies from 'universal-cookie'
 
 export const UserContext = createContext<IUserContext>({} as IUserContext)
 
@@ -30,7 +31,6 @@ const defaults = {
 
 function UserContextProvider({ children }: { children: JSX.Element }): JSX.Element {
     const { loggedIn, accountData } = useContext(AccountContext)
-
     const [isOwnAccount, setIsOwnAccount] = useState(false)
     const [selectedUserSubPage, setSelectedUserSubPage] = useState('')
     const [userData, setUserData] = useState(defaults.userData)
@@ -43,6 +43,7 @@ function UserContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
     const [userPostsPaginationLimit, setUserPostsPaginationLimit] = useState(10)
     const [userPostsPaginationOffset, setUserPostsPaginationOffset] = useState(0)
     const [userPostsPaginationHasMore, setUserPostsPaginationHasMore] = useState(false)
+    const cookies = new Cookies()
 
     function getUserData(userHandle, returnFunction) {
         console.log('UserContext: getUserData')
@@ -54,7 +55,7 @@ function UserContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
             })
             .catch((error) => {
                 if (error.response.status === 404) setUserNotFound(true)
-                else console.log('GET user-data error: ', error)
+                else console.log('error: ', error)
             })
     }
 
@@ -63,18 +64,20 @@ function UserContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
         const firstLoad = offset === 0
         if (firstLoad) setUserPostsLoading(true)
         else setNextUserPostsLoading(true)
+        const accessToken = cookies.get('accessToken')
+        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
         axios
             .get(
                 // prettier-ignore
-                `${config.apiURL}/user-posts?accountId=${accountData.id
-                }&userId=${userId
+                `${config.apiURL}/user-posts?userId=${userId
                 }&postType=${params.type
                 }&sortBy=${params.sortBy
                 }&sortOrder=${params.sortOrder
                 }&timeRange=${params.timeRange
                 }&searchQuery=${params.searchQuery || ''
                 }&limit=${limit
-                }&offset=${offset}`
+                }&offset=${offset}`,
+                options
             )
             .then((res) => {
                 setUserPosts(firstLoad ? res.data : [...userPosts, ...res.data])

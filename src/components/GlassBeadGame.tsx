@@ -2060,7 +2060,7 @@ const GlassBeadGame = (): JSX.Element => {
                 {beads.map((bead, beadIndex) => (
                     <Row
                         centerY
-                        key={`${bead.roomId}${bead.index}`}
+                        key={`${bead.id}${bead.index}`}
                         style={{ paddingRight: beads.length === beadIndex + 1 ? 20 : 0 }}
                     >
                         <BeadCard

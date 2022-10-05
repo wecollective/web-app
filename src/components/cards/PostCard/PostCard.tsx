@@ -166,9 +166,7 @@ const PostCard = (props: {
     const history = useHistory()
     const cookies = new Cookies()
     const isOwnPost = accountData && Creator && accountData.id === Creator.id
-    const postSpaces = DirectSpaces.filter((space) => space.type === 'post' && space.id !== 1) // vs. 'repost'. todo: apply filter on backend
-    const otherSpacesTitle = postSpaces
-        .map((s) => s.handle)
+    const otherSpacesTitle = DirectSpaces.map((s) => s.handle)
         .filter((s, i) => i !== 0)
         .join(', ')
 
@@ -602,26 +600,26 @@ const PostCard = (props: {
                         style={{ marginRight: 5 }}
                         shadow
                     />
-                    {postSpaces[0] && (
+                    {DirectSpaces[0] && (
                         <Row centerY>
                             <p className='grey'>to</p>
-                            {postSpaces[0].state === 'active' ? (
+                            {DirectSpaces[0].state === 'active' ? (
                                 <ImageTitle
                                     type='space'
-                                    imagePath={postSpaces[0].flagImagePath}
+                                    imagePath={DirectSpaces[0].flagImagePath}
                                     imageSize={32}
-                                    title={postSpaces[0].name}
+                                    title={DirectSpaces[0].name}
                                     fontSize={15}
-                                    link={`/s/${postSpaces[0].handle}/posts`}
+                                    link={`/s/${DirectSpaces[0].handle}/posts`}
                                     style={{ marginRight: 5 }}
                                     shadow
                                 />
                             ) : (
-                                <p className='grey'>{postSpaces[0].handle} (space deleted)</p>
+                                <p className='grey'>{DirectSpaces[0].handle} (space deleted)</p>
                             )}
                         </Row>
                     )}
-                    {postSpaces[1] && (
+                    {DirectSpaces[1] && (
                         <>
                             <button
                                 type='button'
@@ -629,12 +627,12 @@ const PostCard = (props: {
                                 title={otherSpacesTitle}
                                 onClick={() => setOtherSpacesModalOpen(true)}
                             >
-                                <p>+{postSpaces.length - 1}</p>
+                                <p>+{DirectSpaces.length - 1}</p>
                             </button>
                             {otherSpacesModalOpen && (
                                 <Modal centered close={() => setOtherSpacesModalOpen(false)}>
                                     <h2>Posted to</h2>
-                                    {postSpaces.map((space) => (
+                                    {DirectSpaces.map((space) => (
                                         <ImageTitle
                                             key={space.id}
                                             type='space'

@@ -50,52 +50,27 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
     function getAccountData() {
         console.log('AccountContext: getAccountData')
         const accessToken = cookies.get('accessToken')
-        const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
+        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
         if (!accessToken) setAccountDataLoading(false)
         else {
             axios
-                .get(`${config.apiURL}/account-data`, authHeader)
+                .get(`${config.apiURL}/account-data`, options)
                 .then((res) => {
-                    if (res.data !== 'invalid-auth-token') {
-                        setAccountData(res.data)
-                        setLoggedIn(true)
-                    }
+                    setAccountData(res.data)
+                    setLoggedIn(true)
                     setAccountDataLoading(false)
                 })
-                .catch((error) => console.log('GET account-data error: ', error))
+                .catch((error) => {
+                    // todo: handle errors
+                    console.log(error)
+                    setAccountDataLoading(false)
+                })
         }
     }
 
     function updateAccountData(key, payload) {
         setAccountData({ ...accountData, [key]: payload })
     }
-
-    // // todo: include offset and set up pagination, move to notifications page
-    // function getNotifications() {
-    //     console.log('AccountContext: getNotifications')
-    //     const accessToken = cookies.get('accessToken')
-    //     const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
-    //     if (!accessToken) setNotificationsLoading(false)
-    //     else {
-    //         axios
-    //             .get(`${config.apiURL}/account-notifications`, authHeader)
-    //             .then((res) => {
-    //                 console.log('res.data: ', res.data)
-    //                 setNotifications(res.data)
-    //                 setNotificationsLoading(false)
-    //             })
-    //             .catch((error) => console.log('GET account-notifications error: ', error))
-    //     }
-    // }
-
-    // function updateAccountNotification(id, key, payload) {
-    //     console.log(`AccountContext: updateAccountNotification(${id}, ${key}, ${payload})`)
-    //     const newNotifications = [...notifications]
-    //     const notification = newNotifications.find((n) => n.id === id)
-    //     notification[key] = payload
-    //     setNotifications(newNotifications)
-    //     console.log('newNotifications: ', newNotifications)
-    // }
 
     function logOut() {
         console.log('AccountContext: logOut')

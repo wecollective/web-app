@@ -54,27 +54,17 @@ const InviteSpaceModeratorModal = (props: { close: () => void }): JSX.Element =>
         }
         const accessToken = cookies.get('accessToken')
         const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
-        axios.post(`${config.apiURL}/invite-space-moderator`, data, authHeader).then((res) => {
-            setLoading(false)
-            switch (res.data) {
-                case 'invalid-auth-token':
-                    setInputState('invalid')
-                    setInputErrors(['Invalid auth token. Try logging in again.'])
-                    break
-                case 'unauthorized':
-                    setInputState('invalid')
-                    setInputErrors([
-                        `Unauthorized. You must be a moderator of ${spaceData.name} to complete this action.`,
-                    ])
-                    break
-                case 'success':
-                    setShowSuccessMessage(true)
-                    setTimeout(() => close(), 3000)
-                    break
-                default:
-                    break
-            }
-        })
+        axios
+            .post(`${config.apiURL}/invite-space-moderator`, data, authHeader)
+            .then(() => {
+                setLoading(false)
+                setShowSuccessMessage(true)
+                setTimeout(() => close(), 3000)
+            })
+            .catch((error) => {
+                // todo: handle errors
+                console.log(error)
+            })
     }
 
     return (

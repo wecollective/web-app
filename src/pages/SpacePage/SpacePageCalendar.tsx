@@ -15,6 +15,7 @@ import { ReactComponent as RightChevronSVG } from '@svgs/chevron-right-solid.svg
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
+import Cookies from 'universal-cookie'
 import { v4 as uuidv4 } from 'uuid'
 
 const SpacePageCalendar = (): JSX.Element => {
@@ -29,13 +30,17 @@ const SpacePageCalendar = (): JSX.Element => {
     const [loading, setLoading] = useState(true)
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]
+    const cookies = new Cookies()
 
     function openEventModal(postId) {
         setSelectedPost(null)
         setEventModalOpen(true)
+        const accessToken = cookies.get('accessToken')
+        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
         axios
-            .get(`${config.apiURL}/post-data?accountId=${accountData.id}&postId=${postId}`)
+            .get(`${config.apiURL}/post-data?postId=${postId}`, options)
             .then((res) => setSelectedPost(res.data))
+            .catch((error) => console.log(error))
     }
 
     useEffect(() => {
@@ -49,11 +54,14 @@ const SpacePageCalendar = (): JSX.Element => {
         setMonthText(monthNames[month])
         setYearText(year)
         if (spaceData.handle === spaceHandle) {
+            const accessToken = cookies.get('accessToken')
+            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
             axios
                 .get(
                     `${config.apiURL}/space-events?spaceHandle=${spaceHandle}&year=${year}&month=${
                         month + 1
-                    }`
+                    }`,
+                    options
                 )
                 .then((res) => {
                     // calculate month data

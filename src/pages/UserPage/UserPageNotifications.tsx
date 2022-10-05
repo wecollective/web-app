@@ -25,20 +25,24 @@ const UserPageNotifications = (): JSX.Element => {
 
     function getNotifications() {
         const accessToken = cookies.get('accessToken')
-        const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
+        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
         if (!accessToken) setNotificationsLoading(false)
         else {
             axios
-                .get(`${config.apiURL}/account-notifications`, authHeader)
+                .get(`${config.apiURL}/account-notifications`, options)
                 .then((res) => {
                     setNotifications(res.data)
                     setNotificationsLoading(false)
                     // mark notifications as seen
                     setAccountData({ ...accountData, unseenNotifications: 0 })
                     const ids = res.data.map((notification) => notification.id)
-                    axios.post(`${config.apiURL}/mark-notifications-seen`, ids, authHeader)
+                    axios.post(`${config.apiURL}/mark-notifications-seen`, ids, options)
                 })
-                .catch((error) => console.log('GET account-notifications error: ', error))
+                .catch((error) => {
+                    // todo: handle errors
+                    console.log(error)
+                    setNotificationsLoading(false)
+                })
         }
     }
 
