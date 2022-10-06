@@ -1,6 +1,6 @@
 import Column from '@components/Column'
+import DraftText from '@components/draft-js/DraftText'
 import FlagImage from '@components/FlagImage'
-import Markdown from '@components/Markdown'
 import Row from '@components/Row'
 import ShowMoreLess from '@components/ShowMoreLess'
 import StatButton from '@components/StatButton'
@@ -51,7 +51,7 @@ const HorizontalSpaceCard = (props: { space: any; style?: any }): JSX.Element =>
                 </Link>
                 <Row style={{ marginBottom: 10 }}>
                     <ShowMoreLess height={75}>
-                        <Markdown text={description} />
+                        <DraftText stringifiedDraft={description} />
                     </ShowMoreLess>
                 </Row>
                 <Row className={styles.stats}>
