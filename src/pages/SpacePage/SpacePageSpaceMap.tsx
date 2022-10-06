@@ -290,7 +290,12 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
         interruptRunningTransitions(data)
 
         function getChildren(node) {
-            getSpaceMapChildren(node.data.id, node.children.length - 1, params)
+            getSpaceMapChildren(
+                node.data.id,
+                node.children.length - 1,
+                params,
+                node.data.id === spaceData.id
+            )
                 .then((res) => {
                     const match = findParent(data, node.data.uuid)
                     match.children = match.children.filter((child) => !child.expander)

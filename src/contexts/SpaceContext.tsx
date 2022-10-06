@@ -207,7 +207,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 }&sortOrder=${params.sortOrder
                 }&timeRange=${params.timeRange
                 }&depth=${params.depth
-                }&searchQuery=${params.searchQuery || ''}`,
+                }&searchQuery=${params.searchQuery || ''}&isParent=${true}`,
                 options
             )
             .then((res) => {
@@ -216,7 +216,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
             .catch((error) => console.log(error))
     }
 
-    function getSpaceMapChildren(spaceId, offset, params) {
+    function getSpaceMapChildren(spaceId, offset, params, isParent) {
         const accessToken = cookies.get('accessToken')
         const options = { headers: { Authorization: `Bearer ${accessToken}` } }
         return axios.get(
@@ -227,7 +227,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 }&sortOrder=${params.sortOrder
                 }&timeRange=${params.timeRange
                 }&depth=${params.depth
-                }&searchQuery=${params.searchQuery || ''}`,
+                }&searchQuery=${params.searchQuery || ''}&isParent=${isParent}`,
             options
         )
     }

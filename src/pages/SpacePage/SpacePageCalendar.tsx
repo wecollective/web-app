@@ -19,7 +19,7 @@ import Cookies from 'universal-cookie'
 import { v4 as uuidv4 } from 'uuid'
 
 const SpacePageCalendar = (): JSX.Element => {
-    const { accountData } = useContext(AccountContext)
+    const { loggedIn } = useContext(AccountContext)
     const { spaceData, spaceNotFound } = useContext(SpaceContext)
     const [dateOffset, setDateOffset] = useState(0)
     const [monthText, setMonthText] = useState('')
@@ -106,7 +106,7 @@ const SpacePageCalendar = (): JSX.Element => {
                     setLoading(false)
                 })
         }
-    }, [spaceData.handle, dateOffset])
+    }, [spaceData.handle, dateOffset, loggedIn])
 
     if (spaceNotFound) return <SpaceNotFound />
     return (

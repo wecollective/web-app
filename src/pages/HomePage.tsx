@@ -14,6 +14,7 @@ import { ReactComponent as PollIcon } from '@svgs/poll-solid.svg'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
+import Cookies from 'universal-cookie'
 // todo: import logo and background images as SVG components
 // import { ReactComponent as BackgroundImageSVG } from '@svgs/earth.svg'
 
@@ -29,6 +30,7 @@ const Homepage = (): JSX.Element => {
     const urlParams = new URLSearchParams(window.location.search)
     const alert = urlParams.get('alert')
     const history = useHistory()
+    const cookies = new Cookies()
 
     const [highlights, setHighlights] = useState<any>(null)
     const cardData = [
@@ -125,7 +127,9 @@ const Homepage = (): JSX.Element => {
     }
 
     function getHomepageHighlights() {
-        axios.get(`${config.apiURL}/homepage-highlights`).then((res) => {
+        const accessToken = cookies.get('accessToken')
+        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+        axios.get(`${config.apiURL}/homepage-highlights`, options).then((res) => {
             setHighlights(res.data)
         })
     }
