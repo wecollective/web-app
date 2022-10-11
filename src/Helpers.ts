@@ -3,6 +3,10 @@ import { convertFromRaw, EditorState } from 'draft-js'
 import { v4 as uuidv4 } from 'uuid'
 
 // constants
+export const imageMBLimit = 10
+export const audioMBLimit = 25
+export const totalMBUploadLimit = 50
+
 export const weekDays = [
     'Monday',
     'Tuesday',

@@ -11,7 +11,14 @@ import Scrollbars from '@components/Scrollbars'
 import SuccessMessage from '@components/SuccessMessage'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
-import { defaultErrorState, findDraftLength, formatTimeMMSS, isValidUrl } from '@src/Helpers'
+import {
+    defaultErrorState,
+    findDraftLength,
+    formatTimeMMSS,
+    isValidUrl,
+    imageMBLimit,
+    audioMBLimit,
+} from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/NextBeadModal.module.scss'
 import { ReactComponent as ChevronLeftIcon } from '@svgs/chevron-left-solid.svg'
@@ -105,7 +112,6 @@ const NextBeadModal = (props: {
     const audioChunksRef = useRef<any>([])
     const recordingIntervalRef = useRef<any>(null)
     const timeLimitReachedRef = useRef(false)
-    const audioMBLimit = 5
 
     // images
     const [images, setImages] = useState<any[]>([])
@@ -113,7 +119,6 @@ const NextBeadModal = (props: {
     const [imageSizeError, setImageSizeError] = useState(false)
     const [toalImageSizeError, setTotalImageSizeError] = useState(false)
     const [imagePostError, setImagePostError] = useState(false)
-    const imageMBLimit = 6
     const totalImageSize =
         images.map((image) => (image.file ? image.file.size : 0)).reduce((a, b) => a + b, 0) /
         (1024 * 1024)

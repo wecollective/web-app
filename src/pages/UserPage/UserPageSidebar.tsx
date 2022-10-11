@@ -33,7 +33,6 @@ const UserPageSidebar = (): JSX.Element => {
                         shape='square'
                         id={id}
                         title='Add a new flag image'
-                        mbLimit={2}
                         onSaved={(imageURL) =>
                             setUserData({ ...userData, flagImagePath: imageURL })
                         }

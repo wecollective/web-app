@@ -3,6 +3,7 @@ import Input from '@components/Input'
 import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
 import config from '@src/Config'
+import { imageMBLimit } from '@src/Helpers'
 import styles from '@styles/components/modals/ImageUploadModal.module.scss'
 import axios from 'axios'
 import React, { useState } from 'react'
@@ -14,11 +15,10 @@ const ImageUploadModal = (props: {
     id: number
     title: string
     subTitle?: string
-    mbLimit?: number
     onSaved?: (imageURL: string) => void
     close: () => void
 }): JSX.Element => {
-    const { type, shape, id, title, subTitle, mbLimit, onSaved, close } = props
+    const { type, shape, id, title, subTitle, onSaved, close } = props
     const [imageFile, setImageFile] = useState<File>()
     const [imageURL, setImageURL] = useState('')
     const [imagePreviewURL, setImagePreviewURL] = useState('')
@@ -30,7 +30,7 @@ const ImageUploadModal = (props: {
         const input = document.getElementById('file-input') as HTMLInputElement
         if (input && input.files && input.files[0]) {
             setImageURL('')
-            if (input.files[0].size > mbLimit! * 1024 * 1024) {
+            if (input.files[0].size > imageMBLimit * 1024 * 1024) {
                 setImageSizeError(true)
                 setImagePreviewURL('')
                 setImageFile(undefined)
@@ -85,7 +85,7 @@ const ImageUploadModal = (props: {
                     alt=''
                 />
             )}
-            {imageSizeError && <p>Image too large. Max size: {mbLimit}MB</p>}
+            {imageSizeError && <p>Image too large. Max size: {imageMBLimit}MB</p>}
             <Row className={styles.fileUploadInput}>
                 <label htmlFor='file-input'>
                     {imageFile ? 'Change' : 'Upload'} image
@@ -119,7 +119,6 @@ const ImageUploadModal = (props: {
 
 ImageUploadModal.defaultProps = {
     subTitle: null,
-    mbLimit: 2,
     onSaved: null,
 }
 

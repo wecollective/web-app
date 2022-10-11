@@ -37,6 +37,9 @@ import {
     formatTimeMMSS,
     isValidUrl,
     pluralise,
+    imageMBLimit,
+    audioMBLimit,
+    totalMBUploadLimit,
 } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/CreatePostModal.module.scss'
@@ -208,7 +211,6 @@ const CreatePostModal = (): JSX.Element => {
     const [imageSizeError, setImageSizeError] = useState(false)
     const [toalImageSizeError, setTotalImageSizeError] = useState(false)
     const [imagePostError, setImagePostError] = useState(false)
-    const imageMBLimit = 6
     const totalImageSize =
         images.map((image) => (image.file ? image.file.size : 0)).reduce((a, b) => a + b, 0) /
         (1024 * 1024)
@@ -231,7 +233,6 @@ const CreatePostModal = (): JSX.Element => {
     const audioRecorderRef = useRef<any>(null)
     const audioChunksRef = useRef<any>([])
     const recordingIntervalRef = useRef<any>(null)
-    const audioMBLimit = 5
     const [audioForm, setAudioForm] = useState({
         text: {
             ...defaultErrorState,
@@ -435,7 +436,6 @@ const CreatePostModal = (): JSX.Element => {
 
     const [loading, setLoading] = useState(false)
     const [saved, setSaved] = useState(false)
-    const totalMBUploadLimit = 10
     const cookies = new Cookies()
 
     function findSpaces(query) {
