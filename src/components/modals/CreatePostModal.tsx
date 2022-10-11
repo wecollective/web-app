@@ -441,10 +441,12 @@ const CreatePostModal = (): JSX.Element => {
     function findSpaces(query) {
         if (!query) setSpaceOptions([])
         else {
+            const accessToken = cookies.get('accessToken')
+            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
             const blacklist = [...selectedSpaces.map((s) => s.id)]
             const data = { query, blacklist }
             axios
-                .post(`${config.apiURL}/find-spaces`, data)
+                .post(`${config.apiURL}/find-spaces`, data, options)
                 .then((res) => setSpaceOptions(res.data))
                 .catch((error) => console.log(error))
         }
