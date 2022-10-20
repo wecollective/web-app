@@ -1,0 +1,10 @@
+@import '@styles/Variables';
+
+.wrapper {
+    width: 100vw;
+    @include for-tablet-landscape-up {
+        padding: 50px;
+        width: auto;
+        min-width: 600px;
+    }
+}

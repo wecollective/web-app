@@ -32,18 +32,14 @@ import { AccountContext } from '@contexts/AccountContext'
 import { PostContext } from '@contexts/PostContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import { UserContext } from '@contexts/UserContext'
-import DraftTextEditor from '@src/components/draft-js/DraftTextEditor'
-import SuccessMessage from '@src/components/SuccessMessage'
+import EditPostModal from '@src/components/modals/EditPostModal'
 import config from '@src/Config'
 import {
     dateCreated,
-    defaultErrorState,
-    findDraftLength,
     formatTimeDHM,
     formatTimeHHDDMMSS,
     formatTimeHM,
     formatTimeMDYT,
-    isValid,
     pluralise,
     statTitle,
     timeSinceCreated,
@@ -149,20 +145,6 @@ const PostCard = (props: {
     const [commentsOpen, setCommentsOpen] = useState(location === 'post-page')
     const [deletePostModalOpen, setDeletePostModalOpen] = useState(false)
     const [editPostModalOpen, setEditPostModalOpen] = useState(false)
-    const [postEditLoading, setPostEditLoading] = useState(false)
-    const [postEditSaved, setPostEditSaved] = useState(false)
-    const [newText, setNewText] = useState({
-        ...defaultErrorState,
-        value: text,
-        validate: (v) => {
-            const errors: string[] = []
-            const totalCharacters = findDraftLength(v)
-            if (totalCharacters < 1) errors.push('Required')
-            if (totalCharacters > 5000) errors.push('Must be less than 5K characters')
-            return errors
-        },
-    })
-    const [mentions, setMentions] = useState<any[]>([])
     const mobileView = document.documentElement.clientWidth < 900
     const history = useHistory()
     const cookies = new Cookies()
@@ -268,41 +250,6 @@ const PostCard = (props: {
             // rounded up to nearest minute
             return `(${formatTimeDHM(Math.ceil(difference / 60) * 60)})`
         return null
-    }
-
-    function saveTextChanges() {
-        const accessToken = cookies.get('accessToken')
-        if (!accessToken) {
-            setAlertMessage('Log in again to edit your post')
-            setAlertModalOpen(true)
-        } else if (isValid(newText, setNewText)) {
-            setPostEditLoading(true)
-            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
-            const data = {
-                postId: id,
-                type,
-                text: newText.value,
-                mentions: mentions.map((m) => m.link),
-                creatorName: accountData.name,
-                creatorHandle: accountData.handle,
-            }
-            axios
-                .post(`${config.apiURL}/update-post-text`, data, options)
-                .then(() => {
-                    setPostData({
-                        ...postData,
-                        text: newText.value,
-                        updatedAt: new Date().toISOString(),
-                    })
-                    setPostEditSaved(true)
-                    setPostEditLoading(false)
-                    setTimeout(() => {
-                        setEditPostModalOpen(false)
-                        setPostEditSaved(false)
-                    }, 1000)
-                })
-                .catch((error) => console.log(error))
-        }
     }
 
     function openImageModal(imageId) {
@@ -1577,41 +1524,11 @@ const PostCard = (props: {
                 )}
             </Column>
             {editPostModalOpen && (
-                <Modal
-                    className={styles.editPostModal}
+                <EditPostModal
+                    postData={postData}
+                    setPostData={setPostData}
                     close={() => setEditPostModalOpen(false)}
-                    centered
-                >
-                    {postEditSaved ? (
-                        <SuccessMessage text='Changes saved' />
-                    ) : (
-                        <Column centerX style={{ width: '100%', maxWidth: 700 }}>
-                            <h1>Edit post text</h1>
-                            <DraftTextEditor
-                                type='post'
-                                stringifiedDraft={newText.value}
-                                maxChars={5000}
-                                onChange={(value, userMentions) => {
-                                    if (value !== newText.value)
-                                        setNewText((t) => {
-                                            return { ...t, value, state: 'default' }
-                                        })
-                                    setMentions(userMentions)
-                                }}
-                                state={newText.state}
-                                errors={newText.errors}
-                                style={{ marginBottom: 20 }}
-                            />
-                            <Button
-                                color='blue'
-                                text='Save changes'
-                                disabled={newText.value === text || postEditLoading}
-                                loading={postEditLoading}
-                                onClick={saveTextChanges}
-                            />
-                        </Column>
-                    )}
-                </Modal>
+                />
             )}
             {deletePostModalOpen && (
                 <DeletePostModal

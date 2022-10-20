@@ -32,18 +32,77 @@
     }
 
     .beadHeader {
+        position: relative;
+
         svg {
             width: 20px;
             height: 20px;
         }
-        .beadType > svg {
+
+        .beadType {
             opacity: 0.3;
         }
+
         .beadRelationship {
             all: unset;
             cursor: pointer;
             > svg {
                 color: $blue5;
+            }
+        }
+
+        .menuButton {
+            all: unset;
+            cursor: pointer;
+            padding-left: 10px;
+            display: flex;
+            align-items: center;
+
+            &:hover {
+                > svg {
+                    color: $grey6;
+                }
+            }
+
+            > svg {
+                color: $grey4;
+                width: 10px;
+                height: 22px;
+                transition: color 0.3s;
+            }
+        }
+
+        .menu {
+            position: absolute;
+            top: 30px;
+            right: 0;
+            background-color: white;
+            box-shadow: 0 0 7px 0 rgba(black, 0.15);
+            border-radius: 10px;
+            padding: 12px;
+            z-index: 5;
+
+            button {
+                all: unset;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+
+                &:not(:last-child) {
+                    margin-bottom: 10px;
+                }
+
+                &:hover > svg {
+                    color: $grey6;
+                }
+
+                > svg {
+                    width: 20px;
+                    height: 20px;
+                    margin-right: 8px;
+                    color: $grey5;
+                    transition: color 0.3s;
+                }
             }
         }
     }
