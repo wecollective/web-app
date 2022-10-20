@@ -18,6 +18,7 @@ import { useHistory, useLocation } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
 // todo: simply and clarify logic where possible, put some of it into functions
+// todo: include search query if in params
 const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }): JSX.Element => {
     const { onLocationChange, style } = props
     const { spaceData } = useContext(SpaceContext)
@@ -49,6 +50,7 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
         params[param] = urlParams[param]
     })
     const cookies = new Cookies()
+    // const [searchQuery, setSearchQuery] = useState(params.searchQuery)
 
     function getSuggestions(query) {
         setSearchQuery(query)
@@ -64,6 +66,7 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
             axios
                 .post(`${config.apiURL}/${route}`, data, options)
                 .then((res) => {
+                    // console.log('suggestions: ', res.data)
                     setSuggestionsLoading(false)
                     // if search query changed since request sent don't set options
                     setSearchQuery((s) => {
@@ -78,8 +81,8 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
     function search(e) {
         e.preventDefault()
         setSuggestions([])
-        if (searchQuery) params.depth = `All Contained ${searchType}`
-        else params.depth = `Only Direct Descendents`
+        if (searchType === 'Spaces')
+            params.depth = searchQuery ? 'All Contained Spaces' : 'Only Direct Descendents'
         history.push({
             pathname: `/${searchConstraint ? pageType : 's'}/${
                 searchConstraint ? handle : 'all'
@@ -90,8 +93,11 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
     }
 
     useEffect(() => {
-        if (firstRun) setFirstRun(false)
-        else {
+        if (firstRun) {
+            setFirstRun(false)
+            // setSearchQuery(params.searchQuery)
+            // console.log(params.searchQuery)
+        } else {
             // update search constraint
             const showSpaceConstraint =
                 pageType === 's' &&
@@ -104,11 +110,15 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
                 pageType === 's' && ['posts', 'spaces', 'people'].includes(subpage)
             const updateUserSearchType = pageType === 'u' && subpage === 'posts'
             if (updateSpaceSearchType || updateUserSearchType) setSearchType(capitalise(subpage))
+            // include search query if present
+            // console.log(params.searchQuery)
+            // if (params.searchQuery) setSearchQuery(params.searchQuery)
         }
     }, [location])
 
     useEffect(() => {
         setSearchQuery('')
+        // setSearchQuery(params.searchQuery)
         setSuggestions([])
     }, [subpage, handle])
 

@@ -151,6 +151,14 @@ const SpacePage = (): JSX.Element => {
 
     useEffect(() => () => resetSpaceData(), [])
 
+    // function updateDB() {
+    //     const accessToken = cookies.get('accessToken')
+    //     const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+    //     axios.get(`${config.apiURL}/db-update`, options).then((res) => {
+    //         console.log('res: ', res.data)
+    //     })
+    // }
+
     return (
         <Column centerX className={styles.wrapper}>
             <Column centerX className={`${styles.header} ${headerCollapsed && styles.collapsed}`}>
@@ -209,6 +217,7 @@ const SpacePage = (): JSX.Element => {
                     <PageTabs tabs={tabs} />
                 </Row>
             </Column>
+            {/* <Button text='update db' color='aqua' onClick={updateDB} /> */}
             <Column centerX className={styles.content}>
                 {spaceData.access === 'granted' ? (
                     <Switch>
