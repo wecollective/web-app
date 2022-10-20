@@ -14,9 +14,10 @@ const PostList = (props: {
     posts: any[]
     firstPostsloading: boolean
     nextPostsLoading: boolean
+    styling?: boolean
     style?: any
 }): JSX.Element => {
-    const { location, posts, firstPostsloading, nextPostsLoading, style } = props
+    const { location, posts, firstPostsloading, nextPostsLoading, styling, style } = props
     const { resetSpacePosts } = useContext(SpaceContext)
     const { resetUserPosts } = useContext(UserContext)
     const mobileView = document.documentElement.clientWidth < 900
@@ -36,7 +37,7 @@ const PostList = (props: {
             ) : posts.length ? (
                 <Column className={styles.posts}>
                     {posts.map((post) => (
-                        <PostCard post={post} key={post.id} location={location} />
+                        <PostCard post={post} key={post.id} location={location} styling={styling} />
                     ))}
                     {nextPostsLoading && (
                         <Row centerX style={{ marginTop: mobileView ? 15 : 0 }}>
@@ -54,6 +55,7 @@ const PostList = (props: {
 }
 
 PostList.defaultProps = {
+    styling: false,
     style: null,
 }
 

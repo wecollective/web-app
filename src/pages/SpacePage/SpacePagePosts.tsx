@@ -31,6 +31,8 @@ const SpacePagePosts = (): JSX.Element => {
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]
     const [showNavList, setShowNavList] = useState(false)
+    const wecoSpace =
+        spaceData.id && (spaceData.id === 51 || spaceData.SpaceAncestors.find((a) => a.id === 51))
 
     // calculate params
     const urlParams = Object.fromEntries(new URLSearchParams(location.search))
@@ -89,6 +91,7 @@ const SpacePagePosts = (): JSX.Element => {
                             posts={spacePosts}
                             firstPostsloading={spacePostsLoading}
                             nextPostsLoading={nextSpacePostsLoading}
+                            styling={wecoSpace}
                         />
                     </Row>
                 )}

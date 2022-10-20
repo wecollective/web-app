@@ -1,0 +1,28 @@
+@import '@styles/Variables';
+
+.wrapper {
+    position: absolute;
+    padding-bottom: 30px;
+
+    .content {
+        background-color: $bluegrey1;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        box-shadow: 0 0px 10px 0 rgba(10, 8, 72, 0.08);
+        z-index: 2;
+    }
+
+    .pointer {
+        width: 20px;
+        height: 20px;
+        background-color: $bluegrey1;
+        border-radius: 2px;
+        position: absolute;
+        left: calc(50% - 10px);
+        bottom: 20px;
+        transform: rotate(45deg);
+        box-shadow: 0 0px 10px 0 rgba(10, 8, 72, 0.14);
+        z-index: 1;
+    }
+}

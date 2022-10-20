@@ -1732,7 +1732,6 @@ const GlassBeadGame = (): JSX.Element => {
                     shape='circle'
                     id={gameData.id}
                     title='Add a new topic image'
-                    mbLimit={2}
                     onSaved={(imageURL) => signalNewTopicImage(imageURL)}
                     close={() => setTopicImageModalOpen(false)}
                 />

@@ -6,6 +6,7 @@ import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import { UserContext } from '@contexts/UserContext'
 import config from '@src/Config'
+import { imageMBLimit } from '@src/Helpers'
 import styles from '@styles/components/modals/ImageUploadModal.module.scss'
 import axios from 'axios'
 import React, { useContext, useState } from 'react'
@@ -23,7 +24,6 @@ const ImageUploadModal = (): JSX.Element => {
     const [imageSizeError, setImageSizeError] = useState(false)
     const [loading, setLoading] = useState(false)
     const cookies = new Cookies()
-    const mbLimit = 2
 
     const shape = imageUploadType.includes('cover') ? 'rectangle' : 'circle'
     const title = `Upload a new ${imageUploadType.includes('cover') ? 'cover' : 'flag'} image`
@@ -32,7 +32,7 @@ const ImageUploadModal = (): JSX.Element => {
         const input = document.getElementById('file-input') as HTMLInputElement
         if (input && input.files && input.files[0]) {
             setImageURL('')
-            if (input.files[0].size > mbLimit * 1024 * 1024) {
+            if (input.files[0].size > imageMBLimit * 1024 * 1024) {
                 setImageSizeError(true)
                 setImagePreviewURL('')
                 setImageFile(undefined)
@@ -106,7 +106,7 @@ const ImageUploadModal = (): JSX.Element => {
                     alt=''
                 />
             )}
-            {imageSizeError && <p>Image too large. Max size: {mbLimit}MB</p>}
+            {imageSizeError && <p>Image too large. Max size: {imageMBLimit}MB</p>}
             <Row className={styles.fileUploadInput}>
                 <label htmlFor='file-input'>
                     {imageFile ? 'Change' : 'Upload'} image
@@ -140,7 +140,6 @@ const ImageUploadModal = (): JSX.Element => {
 
 ImageUploadModal.defaultProps = {
     subTitle: null,
-    mbLimit: 2,
     onSaved: null,
 }
 

@@ -7,6 +7,7 @@ import styles from '@styles/components/modals/GBGBackgroundModal.module.scss'
 import axios from 'axios'
 import React, { useState } from 'react'
 import Cookies from 'universal-cookie'
+import { imageMBLimit } from '@src/Helpers'
 
 const GBGBackgroundModal = (props: {
     gameData: any
@@ -24,7 +25,6 @@ const GBGBackgroundModal = (props: {
     const [fileSizeError, setFileSizeError] = useState(false)
     const [loading, setLoading] = useState(false)
     const cookies = new Cookies()
-    const mbLimit = 2
 
     function resetState() {
         setImageFile(undefined)
@@ -44,7 +44,7 @@ const GBGBackgroundModal = (props: {
         if (input && input.files && input.files[0]) {
             setShowVideoPreview(false)
             resetState()
-            if (input.files[0].size > mbLimit! * 1024 * 1024) {
+            if (input.files[0].size > imageMBLimit * 1024 * 1024) {
                 setShowImagePreview(false)
                 setFileSizeError(true)
                 removeInputFiles()
@@ -116,7 +116,7 @@ const GBGBackgroundModal = (props: {
                 />
             )}
             <p>Upload an image from your device</p>
-            {fileSizeError && <p>Image too large. Max size: {mbLimit}MB</p>}
+            {fileSizeError && <p>Image too large. Max size: {imageMBLimit}MB</p>}
             <Row className={styles.fileUploadInput}>
                 <label htmlFor='file-input'>
                     {imageFile ? 'Change' : 'Upload'} image
