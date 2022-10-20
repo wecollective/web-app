@@ -10,7 +10,7 @@ import Row from '@components/Row'
 import { ReactComponent as SlidersIconSVG } from '@svgs/sliders-h-solid.svg'
 // import { ReactComponent as EyeIconSVG } from '@svgs/eye-solid.svg'
 
-const UserPagePostsHeader = (props: { params: any }): JSX.Element => {
+const PostsHeader = (props: { params: any }): JSX.Element => {
     const { params } = props
     const [filtersModalOpen, setFiltersModalOpen] = useState(false)
     const [filterParams, setFilterParams] = useState(params)
@@ -122,4 +122,4 @@ const UserPagePostsHeader = (props: { params: any }): JSX.Element => {
     )
 }
 
-export default UserPagePostsHeader
+export default PostsHeader

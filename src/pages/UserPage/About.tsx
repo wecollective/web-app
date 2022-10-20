@@ -4,11 +4,11 @@ import Row from '@components/Row'
 import { UserContext } from '@contexts/UserContext'
 import UserNotFound from '@pages/SpaceNotFound'
 import { dateCreated, timeSinceCreated } from '@src/Helpers'
-import styles from '@styles/pages/UserPage/UserPageAbout.module.scss'
+import styles from '@styles/pages/UserPage/About.module.scss'
 import React, { useContext } from 'react'
 import { useLocation } from 'react-router-dom'
 
-const UserPageAbout = (): JSX.Element => {
+const About = (): JSX.Element => {
     const { userData, userNotFound } = useContext(UserContext)
     const { handle, createdAt, bio } = userData
     const location = useLocation()
@@ -32,4 +32,4 @@ const UserPageAbout = (): JSX.Element => {
     )
 }
 
-export default UserPageAbout
+export default About

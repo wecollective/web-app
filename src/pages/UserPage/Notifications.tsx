@@ -4,13 +4,13 @@ import Column from '@components/Column'
 import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
 import config from '@src/Config'
-import styles from '@styles/pages/UserPage/UserPageNotifications.module.scss'
+import styles from '@styles/pages/UserPage/Notifications.module.scss'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
-const UserPageNotifications = (): JSX.Element => {
+const Notifications = (): JSX.Element => {
     const { accountData, accountDataLoading, setAccountData } = useContext(AccountContext)
     const { userData, getUserData, setSelectedUserSubPage, isOwnAccount } = useContext(UserContext)
     const cookies = new Cookies()
@@ -92,4 +92,4 @@ const UserPageNotifications = (): JSX.Element => {
     )
 }
 
-export default UserPageNotifications
+export default Notifications

@@ -8,11 +8,11 @@ import Row from '@components/Row'
 import ShowMoreLess from '@components/ShowMoreLess'
 import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
-import styles from '@styles/pages/UserPage/UserPageSettings.module.scss'
+import styles from '@styles/pages/UserPage/Settings.module.scss'
 import React, { useContext, useEffect, useState } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 
-const UserPageSettings = (): JSX.Element => {
+const Settings = (): JSX.Element => {
     const { accountData, accountDataLoading } = useContext(AccountContext)
     const { setSelectedUserSubPage, userData, getUserData, isOwnAccount } = useContext(UserContext)
     const { handle, name, bio, email } = accountData
@@ -91,4 +91,4 @@ const UserPageSettings = (): JSX.Element => {
     )
 }
 
-export default UserPageSettings
+export default Settings

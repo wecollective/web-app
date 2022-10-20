@@ -4,10 +4,10 @@ import ImageFade from '@components/ImageFade'
 import Markdown from '@components/Markdown'
 import ImageUploadModal from '@components/modals/ImageUploadModal'
 import { UserContext } from '@contexts/UserContext'
-import styles from '@styles/pages/UserPage/UserPageSidebar.module.scss'
+import styles from '@styles/pages/UserPage/Sidebar.module.scss'
 import React, { useContext, useState } from 'react'
 
-const UserPageSidebar = (): JSX.Element => {
+const Sidebar = (): JSX.Element => {
     const { userData, setUserData, isOwnAccount } = useContext(UserContext)
     const { id, handle, name, bio, flagImagePath } = userData
     const [imageUploadModalOpen, setImageUploadModalOpen] = useState(false)
@@ -49,4 +49,4 @@ const UserPageSidebar = (): JSX.Element => {
     )
 }
 
-export default UserPageSidebar
+export default Sidebar

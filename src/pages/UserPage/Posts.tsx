@@ -4,12 +4,12 @@ import Row from '@components/Row'
 import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
 import UserNotFound from '@pages/SpaceNotFound'
-import UserPagePostsHeader from '@pages/UserPage/UserPagePostsHeader'
-import styles from '@styles/pages/UserPage/UserPagePosts.module.scss'
+import PostsHeader from '@pages/UserPage/PostsHeader'
+import styles from '@styles/pages/UserPage/Posts.module.scss'
 import React, { useContext, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
-const UserPagePosts = (): JSX.Element => {
+const Posts = (): JSX.Element => {
     const { pageBottomReached, loggedIn } = useContext(AccountContext)
     const {
         userData,
@@ -59,7 +59,7 @@ const UserPagePosts = (): JSX.Element => {
     if (userNotFound) return <UserNotFound />
     return (
         <Column centerX className={styles.wrapper}>
-            <UserPagePostsHeader params={params} />
+            <PostsHeader params={params} />
             <Column className={styles.content}>
                 {params.view === 'List' && (
                     <Row className={styles.postListView}>
@@ -81,4 +81,4 @@ const UserPagePosts = (): JSX.Element => {
     )
 }
 
-export default UserPagePosts
+export default Posts
