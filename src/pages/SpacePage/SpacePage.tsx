@@ -24,6 +24,7 @@ import { ReactComponent as GovernanceIcon } from '@svgs/building-columns-solid.s
 import { ReactComponent as CalendarIcon } from '@svgs/calendar-days-solid.svg'
 import { ReactComponent as SuccessIconSVG } from '@svgs/check-circle-solid.svg'
 import { ReactComponent as SettingsIconSVG } from '@svgs/cog-solid.svg'
+import { ReactComponent as PostsIcon } from '@svgs/edit-solid.svg'
 import { ReactComponent as SpacesIcon } from '@svgs/overlapping-circles-thick.svg'
 import { ReactComponent as PeopleIcon } from '@svgs/users-solid.svg'
 import axios from 'axios'
@@ -67,12 +68,12 @@ const SpacePage = (): JSX.Element => {
         baseRoute: `/s/${spaceHandle}`,
         left: [
             { text: 'About', visible: true, icon: <AboutIcon /> },
-            {
-                text: 'Posts',
-                visible: true,
-                icon: <img alt='' src='/icons/object_cube.png' style={{ width: 30, height: 30 }} />,
-            },
-            // { text: 'Posts', visible: true, icon: <PostsIcon /> },
+            // {
+            //     text: 'Posts',
+            //     visible: true,
+            //     icon: <img alt='' src='/icons/object_cube.png' style={{ width: 30, height: 30 }} />,
+            // },
+            { text: 'Posts', visible: true, icon: <PostsIcon /> },
             { text: 'Spaces', visible: true, icon: <SpacesIcon /> },
             { text: 'People', visible: true, icon: <PeopleIcon /> },
             { text: 'Calendar', visible: true, icon: <CalendarIcon /> },
