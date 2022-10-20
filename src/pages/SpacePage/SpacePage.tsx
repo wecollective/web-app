@@ -28,11 +28,11 @@ import { ReactComponent as PostsIcon } from '@svgs/edit-solid.svg'
 import { ReactComponent as SpacesIcon } from '@svgs/overlapping-circles-thick.svg'
 import { ReactComponent as PeopleIcon } from '@svgs/users-solid.svg'
 import axios from 'axios'
+import * as d3 from 'd3'
 import React, { useContext, useEffect, useState } from 'react'
 import { Redirect, Route, Switch, useLocation } from 'react-router-dom'
-import Cookies from 'universal-cookie'
 import textures from 'textures'
-import * as d3 from 'd3'
+import Cookies from 'universal-cookie'
 
 const SpacePage = (): JSX.Element => {
     const {
@@ -68,8 +68,12 @@ const SpacePage = (): JSX.Element => {
         baseRoute: `/s/${spaceHandle}`,
         left: [
             { text: 'About', visible: true, icon: <AboutIcon /> },
-            { text: 'Posts', visible: true, icon: <img alt='' src='/icons/object_cube.png' style={{ width: 30, height: 30 }} /> },
-            // { text: 'Posts', visible: true, icon: <PostsIcon /> },
+            // {
+            //     text: 'Posts',
+            //     visible: true,
+            //     icon: <img alt='' src='/icons/object_cube.png' style={{ width: 30, height: 30 }} />,
+            // },
+            { text: 'Posts', visible: true, icon: <PostsIcon /> },
             { text: 'Spaces', visible: true, icon: <SpacesIcon /> },
             { text: 'People', visible: true, icon: <PeopleIcon /> },
             { text: 'Calendar', visible: true, icon: <CalendarIcon /> },
@@ -155,6 +159,14 @@ const SpacePage = (): JSX.Element => {
     }, [])
 
     useEffect(() => () => resetSpaceData(), [])
+
+    // function updateDB() {
+    //     const accessToken = cookies.get('accessToken')
+    //     const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+    //     axios.get(`${config.apiURL}/db-update`, options).then((res) => {
+    //         console.log('res: ', res.data)
+    //     })
+    // }
 
     const wecoSpace =
         spaceData.id && (spaceData.id === 51 || spaceData.SpaceAncestors.find((a) => a.id === 51))
@@ -242,6 +254,7 @@ const SpacePage = (): JSX.Element => {
                     <PageTabs tabs={tabs} />
                 </Row>
             </Column>
+            {/* <Button text='update db' color='aqua' onClick={updateDB} /> */}
             <Column centerX className={styles.content}>
                 {spaceData.access === 'granted' ? (
                     <Switch>

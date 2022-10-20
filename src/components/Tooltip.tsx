@@ -1,6 +1,6 @@
-import React from 'react'
 import Column from '@components/Column'
 import styles from '@styles/components/Tooltip.module.scss'
+import React from 'react'
 
 const Tooltip = (props: {
     children: any
