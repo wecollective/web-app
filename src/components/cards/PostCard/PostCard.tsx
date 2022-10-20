@@ -87,9 +87,10 @@ const PostCard = (props: {
     post: any
     index?: number
     location: 'post-page' | 'space-posts' | 'space-post-map' | 'user-posts' | 'preview'
+    styling?: boolean
     style?: any
 }): JSX.Element => {
-    const { post, index, location, style } = props
+    const { post, index, location, styling, style } = props
     const {
         accountData,
         loggedIn,
@@ -586,7 +587,11 @@ const PostCard = (props: {
     }, [postData])
 
     return (
-        <Column className={`${styles.post} ${styles[location]}`} key={id} style={style}>
+        <Column
+            className={`${styles.post} ${styles[location]} ${styling && styles.styling}`}
+            key={id}
+            style={style}
+        >
             {!!index && <div className={styles.index}>{index! + 1}</div>}
             <Row spaceBetween className={styles.header}>
                 <Row centerY className={styles.postSpaces}>
@@ -1621,6 +1626,7 @@ const PostCard = (props: {
 
 PostCard.defaultProps = {
     index: null,
+    styling: false,
     style: null,
 }
 

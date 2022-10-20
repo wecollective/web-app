@@ -31,6 +31,8 @@ import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { Redirect, Route, Switch, useLocation } from 'react-router-dom'
 import Cookies from 'universal-cookie'
+import textures from 'textures'
+import * as d3 from 'd3'
 
 const SpacePage = (): JSX.Element => {
     const {
@@ -66,7 +68,8 @@ const SpacePage = (): JSX.Element => {
         baseRoute: `/s/${spaceHandle}`,
         left: [
             { text: 'About', visible: true, icon: <AboutIcon /> },
-            { text: 'Posts', visible: true, icon: <PostsIcon /> },
+            { text: 'Posts', visible: true, icon: <img alt='' src='/icons/object_cube.png' style={{ width: 30, height: 30 }} /> },
+            // { text: 'Posts', visible: true, icon: <PostsIcon /> },
             { text: 'Spaces', visible: true, icon: <SpacesIcon /> },
             { text: 'People', visible: true, icon: <PeopleIcon /> },
             { text: 'Calendar', visible: true, icon: <CalendarIcon /> },
@@ -130,6 +133,7 @@ const SpacePage = (): JSX.Element => {
         return spaceData.access === 'pending' ? 'Access requested' : 'Request access'
     }
 
+    // todo: use promises in space context to get space data first, then content?
     useEffect(() => {
         if (!accountDataLoading && awaitingSpaceData) getSpaceData(spaceHandle)
     }, [accountDataLoading, spaceHandle])
@@ -140,6 +144,7 @@ const SpacePage = (): JSX.Element => {
 
     useEffect(() => setSelectedSpaceSubPage(subpage), [location])
 
+    // todo: combine with reset space data
     useEffect(() => {
         document.addEventListener('scroll', () => {
             setHeaderColapsed(window.pageYOffset > (mobileView ? 260 : 290))
@@ -151,8 +156,36 @@ const SpacePage = (): JSX.Element => {
 
     useEffect(() => () => resetSpaceData(), [])
 
+    const wecoSpace =
+        spaceData.id && (spaceData.id === 51 || spaceData.SpaceAncestors.find((a) => a.id === 51))
+    useEffect(() => {
+        if (wecoSpace) {
+            const texture = textures
+                .paths()
+                .d('hexagons')
+                .size(10)
+                .strokeWidth(0.2)
+                .stroke('#d8eaf2')
+            const svg = d3
+                .select(`#space-background`)
+                .append('svg')
+                .attr('width', '100%')
+                .attr('height', '100%')
+            // add texture to defs
+            svg.call(texture)
+            // create background
+            svg.append('rect')
+                .attr('width', '100%')
+                .attr('height', '100%')
+                .style('fill', texture.url())
+        } else {
+            d3.select(`#space-background`).select('svg').remove()
+        }
+    }, [spaceData.id])
+
     return (
         <Column centerX className={styles.wrapper}>
+            <div id='space-background' className={styles.background} />
             <Column centerX className={`${styles.header} ${headerCollapsed && styles.collapsed}`}>
                 <CoverImage type='space' image={spaceData.coverImagePath} canEdit={isModerator} />
                 <Row centerY className={styles.spaceData}>
