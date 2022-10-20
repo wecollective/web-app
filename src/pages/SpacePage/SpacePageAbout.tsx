@@ -17,7 +17,7 @@ const SpacePageAbout = (): JSX.Element => {
     const spaceHandle = location.pathname.split('/')[2]
     const [loading, setLoading] = useState(true)
     const [data, setData] = useState<any>({})
-    const { description, createdAt, Creator } = data
+    const { createdAt, Creator } = data
 
     useEffect(() => {
         if (spaceData.handle === spaceHandle)
@@ -37,7 +37,7 @@ const SpacePageAbout = (): JSX.Element => {
                 <p>Space data loading... </p>
             ) : (
                 <Column className={styles.content}>
-                    <DraftText stringifiedDraft={description || ''} />
+                    <DraftText stringifiedDraft={spaceData.description || ''} />
                     <Row centerY centerX className={styles.creation}>
                         <p>Created</p>
                         <p title={dateCreated(createdAt)}>{timeSinceCreated(createdAt)}</p>
