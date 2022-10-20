@@ -11,9 +11,11 @@ import ImageTitle from '@components/ImageTitle'
 import ImageModal from '@components/modals/ImageModal'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
+import { ReactComponent as EditIcon } from '@svgs/edit-solid.svg'
 import StatButton from '@components/StatButton'
 import { AccountContext } from '@contexts/AccountContext'
 import { handleImageError, statTitle } from '@src/Helpers'
+import CloseOnClickOutside from '@components/CloseOnClickOutside'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/cards/PostCard/StringBeadCard.module.scss'
 import { ReactComponent as CommentIcon } from '@svgs/comment-solid.svg'
@@ -25,6 +27,7 @@ import { ReactComponent as PauseIcon } from '@svgs/pause-solid.svg'
 import { ReactComponent as PlayIcon } from '@svgs/play-solid.svg'
 import { ReactComponent as SourceIcon } from '@svgs/right-to-bracket-solid.svg'
 import { ReactComponent as AudioIcon } from '@svgs/volume-high-solid.svg'
+import { ReactComponent as VerticalEllipsisIcon } from '@svgs/ellipsis-vertical-solid.svg'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
@@ -61,6 +64,8 @@ const StringBeadCard = (props: {
     const { accountData } = useContext(AccountContext)
     const [bead, setBead] = useState(sourceBeadData)
     const { totalLikes, totalComments, totalLinks, accountLike, accountComment, accountLink } = bead
+    const [menuOpen, setMenuOpen] = useState(false)
+    const [editPostModalOpen, setEditPostModalOpen] = useState(false)
     const [audioPlaying, setAudioPlaying] = useState(false)
     const [imageModalOpen, setImageModalOpen] = useState(false)
     const [likeModalOpen, setLikeModalOpen] = useState(false)
@@ -69,6 +74,7 @@ const StringBeadCard = (props: {
     const images = bead.PostImages ? bead.PostImages.sort((a, b) => a.index - b.index) : []
     const type = bead.type.replace('string-', '')
     const isSource = bead.Link && bead.Link.relationship === 'source'
+    const isOwnPost = accountData && bead.Creator && accountData.id === bead.Creator.id
     const showFooter =
         !['create-string-modal', 'next-bead-modal'].includes(location) &&
         postType !== 'glass-bead-game'
@@ -150,6 +156,34 @@ const StringBeadCard = (props: {
                         <SourceIcon />
                     </button>
                 )}
+                {/* {location !== 'preview' && isOwnPost && (
+                    <>
+                        <button
+                            type='button'
+                            className={styles.menuButton}
+                            onClick={() => setMenuOpen(!menuOpen)}
+                        >
+                            <VerticalEllipsisIcon />
+                        </button>
+                        {menuOpen && (
+                            <CloseOnClickOutside onClick={() => setMenuOpen(false)}>
+                                <Column className={styles.menu}>
+                                    {isOwnPost && (
+                                        <Column>
+                                            <button
+                                                type='button'
+                                                onClick={() => setEditPostModalOpen(true)}
+                                            >
+                                                <EditIcon />
+                                                Edit text
+                                            </button>
+                                        </Column>
+                                    )}
+                                </Column>
+                            </CloseOnClickOutside>
+                        )}
+                    </>
+                )} */}
             </Row>
             <Column centerY className={styles.beadContent}>
                 {type === 'text' && (
@@ -279,6 +313,43 @@ const StringBeadCard = (props: {
                     close={() => setLinkModalOpen(false)}
                 />
             )}
+            {/* {editPostModalOpen && (
+                <Modal
+                    className={styles.editPostModal}
+                    close={() => setEditPostModalOpen(false)}
+                    centered
+                >
+                    {postEditSaved ? (
+                        <SuccessMessage text='Changes saved' />
+                    ) : (
+                        <Column centerX style={{ width: '100%', maxWidth: 700 }}>
+                            <h1>Edit post text</h1>
+                            <DraftTextEditor
+                                type='post'
+                                stringifiedDraft={newText.value}
+                                maxChars={5000}
+                                onChange={(value, userMentions) => {
+                                    if (value !== newText.value)
+                                        setNewText((t) => {
+                                            return { ...t, value, state: 'default' }
+                                        })
+                                    setMentions(userMentions)
+                                }}
+                                state={newText.state}
+                                errors={newText.errors}
+                                style={{ marginBottom: 20 }}
+                            />
+                            <Button
+                                color='blue'
+                                text='Save changes'
+                                disabled={newText.value === text || postEditLoading}
+                                loading={postEditLoading}
+                                onClick={saveTextChanges}
+                            />
+                        </Column>
+                    )}
+                </Modal>
+            )} */}
         </Column>
     )
 }
