@@ -3,12 +3,12 @@ import DropDown from '@components/DropDown'
 import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
 import { getParamString } from '@src/Helpers'
-import styles from '@styles/pages/SpacePage/SpacePageHeader.module.scss'
+import styles from '@styles/pages/SpacePage/Header.module.scss'
 import { ReactComponent as SlidersIconSVG } from '@svgs/sliders-h-solid.svg'
 import React, { useEffect, useState } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 
-const SpacePagePeopleHeader = (props: { params: any }): JSX.Element => {
+const PeopleHeader = (props: { params: any }): JSX.Element => {
     const { params } = props
     const [filtersModalOpen, setFiltersModalOpen] = useState(false)
     const [filterParams, setFilterParams] = useState(params)
@@ -82,4 +82,4 @@ const SpacePagePeopleHeader = (props: { params: any }): JSX.Element => {
     )
 }
 
-export default SpacePagePeopleHeader
+export default PeopleHeader

@@ -6,7 +6,7 @@ import Scrollbars from '@components/Scrollbars'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
-import styles from '@styles/pages/SpacePage/SpaceNavigationList.module.scss'
+import styles from '@styles/pages/SpacePage/NavigationList.module.scss'
 import { ReactComponent as ArrowDownIconSVG } from '@svgs/arrow-down-solid.svg' // chevron-down-solid.svg'
 import { ReactComponent as ArrowUpIconSVG } from '@svgs/arrow-up-solid.svg' // chevron-up-solid.svg'
 import { ReactComponent as MinusIconSVG } from '@svgs/minus-solid.svg'
@@ -14,10 +14,7 @@ import { ReactComponent as PlusIconSVG } from '@svgs/plus.svg'
 import axios from 'axios'
 import React, { useContext } from 'react'
 
-const SpaceNavigationList = (props: {
-    onLocationChange?: () => void
-    style?: any
-}): JSX.Element => {
+const NavigationList = (props: { onLocationChange?: () => void; style?: any }): JSX.Element => {
     const { onLocationChange, style } = props
     const { accountData } = useContext(AccountContext)
     const { spaceData, setSpaceData, selectedSpaceSubPage } = useContext(SpaceContext)
@@ -193,9 +190,9 @@ const SpaceNavigationList = (props: {
     )
 }
 
-SpaceNavigationList.defaultProps = {
+NavigationList.defaultProps = {
     onLocationChange: null,
     style: null,
 }
 
-export default SpaceNavigationList
+export default NavigationList

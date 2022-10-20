@@ -2,11 +2,11 @@ import Column from '@components/Column'
 import TextLink from '@components/TextLink'
 import { SpaceContext } from '@contexts/SpaceContext'
 import SpaceNotFound from '@pages/SpaceNotFound'
-import styles from '@styles/pages/SpacePage/SpacePageGovernance.module.scss'
+import styles from '@styles/pages/SpacePage/Governance.module.scss'
 import React, { useContext } from 'react'
 import { useLocation } from 'react-router-dom'
 
-const SpacePageGovernance = (): JSX.Element => {
+const Governance = (): JSX.Element => {
     const { spaceData, spaceNotFound } = useContext(SpaceContext)
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]
@@ -68,4 +68,4 @@ const SpacePageGovernance = (): JSX.Element => {
     )
 }
 
-export default SpacePageGovernance
+export default Governance

@@ -9,13 +9,13 @@ import config from '@src/Config'
 import { getDraftPlainText } from '@src/Helpers'
 import { IPost } from '@src/Interfaces'
 import colors from '@styles/Colors.module.scss'
-import styles from '@styles/pages/SpacePage/SpacePagePostMap.module.scss'
+import styles from '@styles/pages/SpacePage/PostMap.module.scss'
 import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const SpacePagePostMap = (props: { postMapData: any; params: any }): JSX.Element => {
+const PostMap = (props: { postMapData: any; params: any }): JSX.Element => {
     const { postMapData, params } = props
     const { accountData } = useContext(AccountContext)
     const { spaceData, setPostMapData, getPostMapData } = useContext(SpaceContext)
@@ -761,4 +761,4 @@ const SpacePagePostMap = (props: { postMapData: any; params: any }): JSX.Element
     )
 }
 
-export default SpacePagePostMap
+export default PostMap

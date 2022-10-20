@@ -10,7 +10,7 @@ import Scrollbars from '@components/Scrollbars'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import { UserContext } from '@contexts/UserContext'
-import SpaceNavigationList from '@pages/SpacePage/SpaceNavigationList'
+import NavigationList from '@src/pages/SpacePage/NavigationList'
 import styles from '@styles/components/Navbar.module.scss'
 import { ReactComponent as BellIcon } from '@svgs/bell-solid.svg'
 import { ReactComponent as AboutIcon } from '@svgs/book-open-solid.svg'
@@ -259,7 +259,7 @@ const Navbar = (): JSX.Element => {
                                             </Link>
                                         )}
                                     </Column>
-                                    <SpaceNavigationList
+                                    <NavigationList
                                         onLocationChange={() => toggleHamburgerMenu()}
                                     />
                                 </>

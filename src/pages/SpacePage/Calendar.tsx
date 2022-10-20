@@ -9,7 +9,7 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import SpaceNotFound from '@pages/SpaceNotFound'
 import config from '@src/Config'
 import { formatTimeHM, monthNames, weekDays } from '@src/Helpers'
-import styles from '@styles/pages/SpacePage/SpacePageCalendar.module.scss'
+import styles from '@styles/pages/SpacePage/Calendar.module.scss'
 import { ReactComponent as LeftChevronSVG } from '@svgs/chevron-left-solid.svg'
 import { ReactComponent as RightChevronSVG } from '@svgs/chevron-right-solid.svg'
 import axios from 'axios'
@@ -18,7 +18,7 @@ import { useLocation } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 import { v4 as uuidv4 } from 'uuid'
 
-const SpacePageCalendar = (): JSX.Element => {
+const Calendar = (): JSX.Element => {
     const { loggedIn } = useContext(AccountContext)
     const { spaceData, spaceNotFound } = useContext(SpaceContext)
     const [dateOffset, setDateOffset] = useState(0)
@@ -185,4 +185,4 @@ const SpacePageCalendar = (): JSX.Element => {
     )
 }
 
-export default SpacePageCalendar
+export default Calendar

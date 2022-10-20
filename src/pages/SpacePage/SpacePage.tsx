@@ -7,17 +7,17 @@ import Row from '@components/Row'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import PageNotFound from '@pages/PageNotFound'
-import SpacePageAbout from '@pages/SpacePage/SpacePageAbout'
-import SpacePageCalendar from '@pages/SpacePage/SpacePageCalendar'
-import SpacePageGovernance from '@pages/SpacePage/SpacePageGovernance'
-import SpacePagePeople from '@pages/SpacePage/SpacePagePeople'
-import SpacePagePosts from '@pages/SpacePage/SpacePagePosts'
-import SpacePageRooms from '@pages/SpacePage/SpacePageRooms'
-import SpacePageSettings from '@pages/SpacePage/SpacePageSettings'
-import SpacePageSpaces from '@pages/SpacePage/SpacePageSpaces'
+import Settings from '@pages/SpacePage/Settings'
 import FlagImage from '@src/components/FlagImage'
 import config from '@src/Config'
 import { onPageBottomReached } from '@src/Helpers'
+import About from '@src/pages/SpacePage/About'
+import Calendar from '@src/pages/SpacePage/Calendar'
+import Governance from '@src/pages/SpacePage/Governance'
+import People from '@src/pages/SpacePage/People'
+import Posts from '@src/pages/SpacePage/Posts'
+import Rooms from '@src/pages/SpacePage/Rooms'
+import Spaces from '@src/pages/SpacePage/Spaces'
 import styles from '@styles/pages/SpacePage/SpacePage.module.scss'
 import { ReactComponent as AboutIcon } from '@svgs/book-open-solid.svg'
 import { ReactComponent as GovernanceIcon } from '@svgs/building-columns-solid.svg'
@@ -259,26 +259,14 @@ const SpacePage = (): JSX.Element => {
                 {spaceData.access === 'granted' ? (
                     <Switch>
                         <Redirect from='/s/:spaceHandle/' to='/s/:spaceHandle/posts' exact />
-                        <Route path='/s/:spaceHandle/about' component={SpacePageAbout} exact />
-                        <Route path='/s/:spaceHandle/posts' component={SpacePagePosts} exact />
-                        <Route path='/s/:spaceHandle/spaces' component={SpacePageSpaces} exact />
-                        <Route path='/s/:spaceHandle/people' component={SpacePagePeople} exact />
-                        <Route
-                            path='/s/:spaceHandle/calendar'
-                            component={SpacePageCalendar}
-                            exact
-                        />
-                        <Route path='/s/:spaceHandle/rooms' component={SpacePageRooms} exact />
-                        <Route
-                            path='/s/:spaceHandle/governance'
-                            component={SpacePageGovernance}
-                            exact
-                        />
-                        <Route
-                            path='/s/:spaceHandle/settings'
-                            component={SpacePageSettings}
-                            exact
-                        />
+                        <Route path='/s/:spaceHandle/about' component={About} exact />
+                        <Route path='/s/:spaceHandle/posts' component={Posts} exact />
+                        <Route path='/s/:spaceHandle/spaces' component={Spaces} exact />
+                        <Route path='/s/:spaceHandle/people' component={People} exact />
+                        <Route path='/s/:spaceHandle/calendar' component={Calendar} exact />
+                        <Route path='/s/:spaceHandle/rooms' component={Rooms} exact />
+                        <Route path='/s/:spaceHandle/governance' component={Governance} exact />
+                        <Route path='/s/:spaceHandle/settings' component={Settings} exact />
                         <Route component={PageNotFound} />
                     </Switch>
                 ) : (

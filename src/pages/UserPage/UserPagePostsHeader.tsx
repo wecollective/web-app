@@ -1,6 +1,6 @@
 import DropDown from '@components/DropDown'
 import { getParamString } from '@src/Helpers'
-import styles from '@styles/pages/SpacePage/SpacePageHeader.module.scss'
+import styles from '@styles/pages/SpacePage/Header.module.scss'
 import React, { useEffect, useState } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 // import Toggle from '@components/Toggle'

@@ -4,7 +4,7 @@ import DraftText from '@components/draft-js/DraftText'
 import Row from '@components/Row'
 import StatButton from '@components/StatButton'
 import { SpaceContext } from '@contexts/SpaceContext'
-import styles from '@styles/pages/SpacePage/SpacePageSpaceMap.module.scss'
+import styles from '@styles/pages/SpacePage/SpaceMap.module.scss'
 import { ReactComponent as CommentIconSVG } from '@svgs/comment-solid.svg'
 import { ReactComponent as PostIconSVG } from '@svgs/edit-solid.svg'
 import { ReactComponent as ReactionIconSVG } from '@svgs/fire-alt-solid.svg'
@@ -13,7 +13,7 @@ import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 
-const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
+const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
     const { spaceMapData, params } = props
     const { spaceData, setSpaceMapData, getSpaceMapChildren } = useContext(SpaceContext)
     // const [width, setWidth] = useState<number | string>(700)
@@ -952,4 +952,4 @@ const SpacePageSpaceMap = (props: { spaceMapData: any; params: any }): JSX.Eleme
     )
 }
 
-export default SpacePageSpaceMap
+export default SpaceMap

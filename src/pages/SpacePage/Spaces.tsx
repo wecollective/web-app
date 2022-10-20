@@ -4,13 +4,13 @@ import SpaceList from '@components/SpaceList'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import SpaceNotFound from '@pages/SpaceNotFound'
-import SpacePageSpaceMap from '@pages/SpacePage/SpacePageSpaceMap'
-import SpacePageSpacesHeader from '@pages/SpacePage/SpacePageSpacesHeader'
-import styles from '@styles/pages/SpacePage/SpacePageSpaces.module.scss'
+import SpaceMap from '@src/pages/SpacePage/SpaceMap'
+import SpacesHeader from '@src/pages/SpacePage/SpacesHeader'
+import styles from '@styles/pages/SpacePage/Spaces.module.scss'
 import React, { useContext, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
-const SpacePageSpaces = (): JSX.Element => {
+const Spaces = (): JSX.Element => {
     const { loggedIn, pageBottomReached } = useContext(AccountContext)
     const {
         spaceData,
@@ -59,7 +59,7 @@ const SpacePageSpaces = (): JSX.Element => {
     if (spaceNotFound) return <SpaceNotFound />
     return (
         <Column className={styles.wrapper}>
-            <SpacePageSpacesHeader params={params} />
+            <SpacesHeader params={params} />
             <Row centerX className={styles.content}>
                 {params.view === 'List' && (
                     <Column centerX className={styles.spaceListView}>
@@ -73,7 +73,7 @@ const SpacePageSpaces = (): JSX.Element => {
                 )}
                 {params.view === 'Map' && (
                     <Column className={styles.spaceMapView}>
-                        <SpacePageSpaceMap spaceMapData={spaceMapData} params={params} />
+                        <SpaceMap spaceMapData={spaceMapData} params={params} />
                     </Column>
                 )}
             </Row>
@@ -81,4 +81,4 @@ const SpacePageSpaces = (): JSX.Element => {
     )
 }
 
-export default SpacePageSpaces
+export default Spaces

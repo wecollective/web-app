@@ -1,11 +1,11 @@
 import Column from '@components/Column'
 import { SpaceContext } from '@contexts/SpaceContext'
 import SpaceNotFound from '@pages/SpaceNotFound'
-import styles from '@styles/pages/SpacePage/SpacePageAbout.module.scss'
+import styles from '@styles/pages/SpacePage/About.module.scss'
 import React, { useContext } from 'react'
 import { useLocation } from 'react-router-dom'
 
-const SpacePageRooms = (): JSX.Element => {
+const Rooms = (): JSX.Element => {
     const { spaceData, spaceNotFound } = useContext(SpaceContext)
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]
@@ -30,4 +30,4 @@ const SpacePageRooms = (): JSX.Element => {
     )
 }
 
-export default SpacePageRooms
+export default Rooms

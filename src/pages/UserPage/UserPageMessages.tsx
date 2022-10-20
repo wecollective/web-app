@@ -2,8 +2,8 @@ import { UserContext } from '@contexts/UserContext'
 import styles from '@styles/components/UserPageMessages.module.scss'
 import React, { useContext, useEffect } from 'react'
 // import PostCard from './PostCard'
-// import SpacePagePostsHeader from './SpacePagePostsHeader'
-// import SpacePagePostsPlaceholder from './SpacePagePostsPlaceholder'
+// import PostsHeader from './PostsHeader'
+// import PostsPlaceholder from './PostsPlaceholder'
 
 const UserPageMessages = (): JSX.Element => {
     const { setSelectedUserSubPage } = useContext(UserContext)

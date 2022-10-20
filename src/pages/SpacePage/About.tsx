@@ -6,12 +6,12 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import SpaceNotFound from '@pages/SpaceNotFound'
 import config from '@src/Config'
 import { dateCreated, timeSinceCreated } from '@src/Helpers'
-import styles from '@styles/pages/SpacePage/SpacePageAbout.module.scss'
+import styles from '@styles/pages/SpacePage/About.module.scss'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
-const SpacePageAbout = (): JSX.Element => {
+const About = (): JSX.Element => {
     const { spaceData, spaceNotFound } = useContext(SpaceContext)
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]
@@ -59,4 +59,4 @@ const SpacePageAbout = (): JSX.Element => {
     )
 }
 
-export default SpacePageAbout
+export default About

@@ -6,14 +6,14 @@ import Row from '@components/Row'
 import Toggle from '@components/Toggle'
 import { AccountContext } from '@contexts/AccountContext'
 import { getParamString } from '@src/Helpers'
-import styles from '@styles/pages/SpacePage/SpacePageHeader.module.scss'
+import styles from '@styles/pages/SpacePage/Header.module.scss'
 import { ReactComponent as EyeIconSVG } from '@svgs/eye-solid.svg'
 import { ReactComponent as PlusIconSVG } from '@svgs/plus.svg'
 import { ReactComponent as SlidersIconSVG } from '@svgs/sliders-h-solid.svg'
 import React, { useContext, useEffect, useState } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 
-const SpacePageSpacesHeader = (props: { params: any }): JSX.Element => {
+const SpacesHeader = (props: { params: any }): JSX.Element => {
     const { params } = props
     const { loggedIn, setAlertModalOpen, setAlertMessage } = useContext(AccountContext)
     const [createSpaceModalOpen, setCreateSpaceModalOpen] = useState(false)
@@ -153,4 +153,4 @@ const SpacePageSpacesHeader = (props: { params: any }): JSX.Element => {
     )
 }
 
-export default SpacePageSpacesHeader
+export default SpacesHeader

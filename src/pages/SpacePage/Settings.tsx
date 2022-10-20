@@ -15,11 +15,11 @@ import ShowMoreLess from '@components/ShowMoreLess'
 import { SpaceContext } from '@contexts/SpaceContext'
 import SpaceNotFound from '@pages/SpaceNotFound'
 import InviteSpaceUsersModal from '@src/components/modals/InviteSpaceUsersModal'
-import styles from '@styles/pages/SpacePage/SpacePageSettings.module.scss'
+import styles from '@styles/pages/SpacePage/Settings.module.scss'
 import React, { useContext, useEffect, useState } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 
-const SpacePageSettings = (): JSX.Element => {
+const Settings = (): JSX.Element => {
     const { spaceData, spaceNotFound, isModerator } = useContext(SpaceContext)
     const location = useLocation()
     const history = useHistory()
@@ -157,4 +157,4 @@ const SpacePageSettings = (): JSX.Element => {
     )
 }
 
-export default SpacePageSettings
+export default Settings

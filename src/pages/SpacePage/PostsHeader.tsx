@@ -8,12 +8,12 @@ import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
 import Toggle from '@components/Toggle'
 import { getParamString } from '@src/Helpers'
-import styles from '@styles/pages/SpacePage/SpacePageHeader.module.scss'
+import styles from '@styles/pages/SpacePage/Header.module.scss'
 import { ReactComponent as EyeIconSVG } from '@svgs/eye-solid.svg'
 import { ReactComponent as PlusIconSVG } from '@svgs/plus.svg'
 import { ReactComponent as SlidersIconSVG } from '@svgs/sliders-h-solid.svg'
 
-const SpacePagePostsHeader = (props: { params: any }): JSX.Element => {
+const PostsHeader = (props: { params: any }): JSX.Element => {
     const { params } = props
     const {
         loggedIn,
@@ -184,4 +184,4 @@ const SpacePagePostsHeader = (props: { params: any }): JSX.Element => {
     )
 }
 
-export default SpacePagePostsHeader
+export default PostsHeader

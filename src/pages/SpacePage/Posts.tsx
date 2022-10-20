@@ -4,14 +4,14 @@ import Row from '@components/Row'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import SpaceNotFound from '@pages/SpaceNotFound'
-import SpaceNavigationList from '@pages/SpacePage/SpaceNavigationList'
-import SpacePagePostMap from '@pages/SpacePage/SpacePagePostMap'
-import SpacePagePostsHeader from '@pages/SpacePage/SpacePagePostsHeader'
-import styles from '@styles/pages/SpacePage/SpacePagePosts.module.scss'
+import NavigationList from '@src/pages/SpacePage/NavigationList'
+import PostMap from '@src/pages/SpacePage/PostMap'
+import PostsHeader from '@src/pages/SpacePage/PostsHeader'
+import styles from '@styles/pages/SpacePage/Posts.module.scss'
 import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
-const SpacePagePosts = (): JSX.Element => {
+const Posts = (): JSX.Element => {
     const { pageBottomReached, loggedIn } = useContext(AccountContext)
     const {
         spaceData,
@@ -77,13 +77,13 @@ const SpacePagePosts = (): JSX.Element => {
     if (spaceNotFound) return <SpaceNotFound />
     return (
         <Column centerX className={styles.wrapper}>
-            <SpacePagePostsHeader params={params} />
+            <PostsHeader params={params} />
             <Column className={styles.content}>
                 {params.view === 'List' && (
                     <Row className={styles.postListView}>
                         {showNavList && (
                             <Column className={styles.spaceNavWrapper}>
-                                <SpaceNavigationList />
+                                <NavigationList />
                             </Column>
                         )}
                         <PostList
@@ -97,7 +97,7 @@ const SpacePagePosts = (): JSX.Element => {
                 )}
                 {params.view === 'Map' && (
                     <Column className={styles.postMapView}>
-                        <SpacePagePostMap postMapData={postMapData} params={params} />
+                        <PostMap postMapData={postMapData} params={params} />
                     </Column>
                 )}
             </Column>
@@ -105,4 +105,4 @@ const SpacePagePosts = (): JSX.Element => {
     )
 }
 
-export default SpacePagePosts
+export default Posts
