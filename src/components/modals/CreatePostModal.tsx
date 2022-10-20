@@ -7,7 +7,6 @@ import AudioVisualiser from '@components/AudioVisualiser'
 import Button from '@components/Button'
 import InquiryAnswer from '@components/cards/InquiryAnswer'
 import PostCard from '@components/cards/PostCard/PostCard'
-import PostCardUrlPreview from '@components/cards/PostCard/PostCardUrlPreview'
 import StringBeadCard from '@components/cards/PostCard/StringBeadCard'
 import CheckBox from '@components/CheckBox'
 import CloseButton from '@components/CloseButton'
@@ -25,20 +24,21 @@ import SuccessMessage from '@components/SuccessMessage'
 import Toggle from '@components/Toggle'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
+import UrlPreview from '@src/components/cards/PostCard/UrlPreview'
 import config from '@src/Config'
 import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import {
     allValid,
+    audioMBLimit,
     defaultBeadData,
     defaultErrorState,
     defaultPostData,
     findDraftLength,
     formatTimeDHM,
     formatTimeMMSS,
+    imageMBLimit,
     isValidUrl,
     pluralise,
-    imageMBLimit,
-    audioMBLimit,
     totalMBUploadLimit,
 } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
@@ -1523,7 +1523,7 @@ const CreatePostModal = (): JSX.Element => {
                                     />
                                     {urlData && (
                                         <Column className={styles.urlPreviewWrapper}>
-                                            <PostCardUrlPreview
+                                            <UrlPreview
                                                 url={urlForm1.url.value}
                                                 image={urlData.image}
                                                 domain={urlData.domain}
@@ -2385,7 +2385,7 @@ const CreatePostModal = (): JSX.Element => {
                                                     style={{ width: '100%' }}
                                                 />
                                                 {newBead.urlData && (
-                                                    <PostCardUrlPreview
+                                                    <UrlPreview
                                                         url={newBead.url}
                                                         image={newBead.urlData.image}
                                                         domain={newBead.urlData.domain}

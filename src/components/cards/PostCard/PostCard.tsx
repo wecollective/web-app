@@ -5,12 +5,6 @@ import AudioTimeSlider from '@components/AudioTimeSlider'
 import AudioVisualiser from '@components/AudioVisualiser'
 import Button from '@components/Button'
 import InquiryAnswer from '@components/cards/InquiryAnswer'
-import PostCardComments from '@components/cards/PostCard/PostCardComments'
-import PostCardLikeModal from '@components/cards/PostCard/PostCardLikeModal'
-import PostCardLinkModal from '@components/cards/PostCard/PostCardLinkModal'
-import PostCardRatingModal from '@components/cards/PostCard/PostCardRatingModal'
-import PostCardRepostModal from '@components/cards/PostCard/PostCardRepostModal'
-import PostCardUrlPreview from '@components/cards/PostCard/PostCardUrlPreview'
 import StringBeadCard from '@components/cards/PostCard/StringBeadCard'
 import CloseOnClickOutside from '@components/CloseOnClickOutside'
 import Column from '@components/Column'
@@ -32,6 +26,12 @@ import { AccountContext } from '@contexts/AccountContext'
 import { PostContext } from '@contexts/PostContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import { UserContext } from '@contexts/UserContext'
+import Comments from '@src/components/cards/PostCard/Comments'
+import LikeModal from '@src/components/cards/PostCard/LikeModal'
+import LinkModal from '@src/components/cards/PostCard/LinkModal'
+import RatingModal from '@src/components/cards/PostCard/RatingModal'
+import RepostModal from '@src/components/cards/PostCard/RepostModal'
+import UrlPreview from '@src/components/cards/PostCard/UrlPreview'
 import EditPostModal from '@src/components/modals/EditPostModal'
 import config from '@src/Config'
 import {
@@ -702,7 +702,7 @@ const PostCard = (props: {
                                 </ShowMoreLess>
                             </Column>
                         )}
-                        <PostCardUrlPreview
+                        <UrlPreview
                             url={url}
                             image={urlImage}
                             domain={urlDomain}
@@ -1371,7 +1371,7 @@ const PostCard = (props: {
                 )}
             </Column>
             {beadCommentsOpen && (
-                <PostCardComments
+                <Comments
                     postId={selectedBead.id}
                     type='bead'
                     location={location}
@@ -1446,28 +1446,28 @@ const PostCard = (props: {
                             />
                         )}
                         {likeModalOpen && (
-                            <PostCardLikeModal
+                            <LikeModal
                                 postData={postData}
                                 setPostData={setPostData}
                                 close={() => setLikeModalOpen(false)}
                             />
                         )}
                         {repostModalOpen && (
-                            <PostCardRepostModal
+                            <RepostModal
                                 postData={postData}
                                 setPostData={setPostData}
                                 close={() => setRepostModalOpen(false)}
                             />
                         )}
                         {ratingModalOpen && (
-                            <PostCardRatingModal
+                            <RatingModal
                                 postData={postData}
                                 setPostData={setPostData}
                                 close={() => setRatingModalOpen(false)}
                             />
                         )}
                         {linkModalOpen && (
-                            <PostCardLinkModal
+                            <LinkModal
                                 type='post'
                                 location={location}
                                 postData={postData}
@@ -1511,7 +1511,7 @@ const PostCard = (props: {
                     </Row>
                 </Row>
                 {commentsOpen && (
-                    <PostCardComments
+                    <Comments
                         postId={postData.id}
                         type='post'
                         location={location}

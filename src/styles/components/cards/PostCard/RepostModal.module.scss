@@ -1,0 +1,14 @@
+@import '@styles/Variables';
+
+.repost {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    margin-bottom: 10px;
+    > p {
+        color: $grey4;
+        font-size: 14px;
+        margin: 0 5px;
+    }
+}

@@ -12,7 +12,7 @@ import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const PostCardLikeModal = (props: {
+const LikeModal = (props: {
     close: () => void
     postData: any
     setPostData: (payload: any) => void
@@ -125,4 +125,4 @@ const PostCardLikeModal = (props: {
     )
 }
 
-export default PostCardLikeModal
+export default LikeModal

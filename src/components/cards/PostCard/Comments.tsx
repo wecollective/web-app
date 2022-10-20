@@ -11,7 +11,7 @@ import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const PostCardComments = (props: {
+const Comments = (props: {
     postId: number | undefined
     type: 'post' | 'bead'
     location: string
@@ -179,8 +179,8 @@ const PostCardComments = (props: {
     )
 }
 
-PostCardComments.defaultProps = {
+Comments.defaultProps = {
     style: null,
 }
 
-export default PostCardComments
+export default Comments

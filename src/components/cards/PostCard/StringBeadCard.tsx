@@ -2,8 +2,6 @@
 import AudioTimeSlider from '@components/AudioTimeSlider'
 import AudioVisualiser from '@components/AudioVisualiser'
 import BeadCardUrlPreview from '@components/cards/BeadCardUrlPreview'
-import PostCardLikeModal from '@components/cards/PostCard/PostCardLikeModal'
-import PostCardLinkModal from '@components/cards/PostCard/PostCardLinkModal'
 import CloseButton from '@components/CloseButton'
 import CloseOnClickOutside from '@components/CloseOnClickOutside'
 import Column from '@components/Column'
@@ -14,6 +12,8 @@ import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
 import StatButton from '@components/StatButton'
 import { AccountContext } from '@contexts/AccountContext'
+import LikeModal from '@src/components/cards/PostCard/LikeModal'
+import LinkModal from '@src/components/cards/PostCard/LinkModal'
 import EditPostModal from '@src/components/modals/EditPostModal'
 import { handleImageError, statTitle } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
@@ -300,14 +300,14 @@ const StringBeadCard = (props: {
                 />
             )}
             {likeModalOpen && (
-                <PostCardLikeModal
+                <LikeModal
                     close={() => setLikeModalOpen(false)}
                     postData={bead}
                     setPostData={setBead}
                 />
             )}
             {linkModalOpen && (
-                <PostCardLinkModal
+                <LinkModal
                     type='bead'
                     location={location}
                     postId={postId}

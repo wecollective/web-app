@@ -9,12 +9,12 @@ import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import { pluralise } from '@src/Helpers'
-import styles from '@styles/components/cards/PostCard/PostCardRatingModal.module.scss'
+import styles from '@styles/components/cards/PostCard/RatingModal.module.scss'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const PostCardRatingModal = (props: {
+const RatingModal = (props: {
     close: () => void
     postData: any
     setPostData: (payload: any) => void
@@ -190,4 +190,4 @@ const PostCardRatingModal = (props: {
     )
 }
 
-export default PostCardRatingModal
+export default RatingModal

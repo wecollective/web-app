@@ -11,12 +11,12 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import { UserContext } from '@contexts/UserContext'
 import config from '@src/Config'
 import { allValid, defaultErrorState, pluralise } from '@src/Helpers'
-import styles from '@styles/components/cards/PostCard/PostCardLinkModal.module.scss'
+import styles from '@styles/components/cards/PostCard/LinkModal.module.scss'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const PostCardLinkModal = (props: {
+const LinkModal = (props: {
     type: 'post' | 'bead'
     location: string
     postId?: number // required for beads
@@ -350,8 +350,8 @@ const PostCardLinkModal = (props: {
     )
 }
 
-PostCardLinkModal.defaultProps = {
+LinkModal.defaultProps = {
     postId: null,
 }
 
-export default PostCardLinkModal
+export default LinkModal

@@ -1,7 +1,7 @@
-import styles from '@styles/components/cards/PostCard/PostCardPlaceholder.module.scss'
+import styles from '@styles/components/cards/PostCard/Placeholder.module.scss'
 import React from 'react'
 
-const PostCardPlaceholder = (): JSX.Element => {
+const Placeholder = (): JSX.Element => {
     // todo: re-write
     return (
         <div className={styles.PHPost}>
@@ -38,4 +38,4 @@ const PostCardPlaceholder = (): JSX.Element => {
     )
 }
 
-export default PostCardPlaceholder
+export default Placeholder

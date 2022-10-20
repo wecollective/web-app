@@ -10,12 +10,12 @@ import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import { pluralise } from '@src/Helpers'
-import styles from '@styles/components/cards/PostCard/PostCardRepostModal.module.scss'
+import styles from '@styles/components/cards/PostCard/RepostModal.module.scss'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const PostCardRepostModal = (props: {
+const RepostModal = (props: {
     close: () => void
     postData: any
     setPostData: (payload: any) => void
@@ -219,4 +219,4 @@ const PostCardRepostModal = (props: {
     )
 }
 
-export default PostCardRepostModal
+export default RepostModal

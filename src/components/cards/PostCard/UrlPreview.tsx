@@ -1,11 +1,11 @@
 import Column from '@components/Column'
 import Row from '@components/Row'
 import { handleImageError } from '@src/Helpers'
-import styles from '@styles/components/cards/PostCard/PostCardUrlPreview.module.scss'
+import styles from '@styles/components/cards/PostCard/UrlPreview.module.scss'
 import { ReactComponent as LinkIconSVG } from '@svgs/link-solid.svg'
 import React from 'react'
 
-const PostCardUrlPreview = (props: {
+const UrlPreview = (props: {
     url: string
     image: string | null
     domain: string | null
@@ -48,8 +48,8 @@ const PostCardUrlPreview = (props: {
     )
 }
 
-PostCardUrlPreview.defaultProps = {
+UrlPreview.defaultProps = {
     style: null,
 }
 
-export default PostCardUrlPreview
+export default UrlPreview
