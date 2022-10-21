@@ -10,8 +10,7 @@ import SpaceNotFound from '@pages/SpaceNotFound'
 import config from '@src/Config'
 import { formatTimeHM, monthNames, weekDays } from '@src/Helpers'
 import styles from '@styles/pages/SpacePage/Calendar.module.scss'
-import { ReactComponent as LeftChevronSVG } from '@svgs/chevron-left-solid.svg'
-import { ReactComponent as RightChevronSVG } from '@svgs/chevron-right-solid.svg'
+import { ChevronLeftIcon, ChevronRightIcon } from '@svgs/all'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
@@ -114,13 +113,13 @@ const Calendar = (): JSX.Element => {
             <Column centerX className={styles.header}>
                 <Row spaceBetween centerY className={styles.month}>
                     <button type='button' onClick={() => setDateOffset(dateOffset - 1)}>
-                        <LeftChevronSVG />
+                        <ChevronLeftIcon />
                     </button>
                     <h1>
                         {monthText} {yearText}
                     </h1>
                     <button type='button' onClick={() => setDateOffset(dateOffset + 1)}>
-                        <RightChevronSVG />
+                        <ChevronRightIcon />
                     </button>
                 </Row>
                 <Row className={styles.days}>

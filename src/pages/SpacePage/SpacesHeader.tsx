@@ -7,9 +7,7 @@ import Toggle from '@components/Toggle'
 import { AccountContext } from '@contexts/AccountContext'
 import { getParamString } from '@src/Helpers'
 import styles from '@styles/pages/SpacePage/Header.module.scss'
-import { ReactComponent as EyeIconSVG } from '@svgs/eye-solid.svg'
-import { ReactComponent as PlusIconSVG } from '@svgs/plus.svg'
-import { ReactComponent as SlidersIconSVG } from '@svgs/sliders-h-solid.svg'
+import { EyeIcon, PlusIcon, SlidersIcon } from '@svgs/all'
 import React, { useContext, useEffect, useState } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 
@@ -38,21 +36,21 @@ const SpacesHeader = (props: { params: any }): JSX.Element => {
     return (
         <Row centerY centerX className={styles.wrapper}>
             <Button
-                icon={smallMobileView ? <PlusIconSVG /> : undefined}
+                icon={smallMobileView ? <PlusIcon /> : undefined}
                 text={smallMobileView ? '' : 'New space'}
                 color='blue'
                 onClick={openCreateSpaceModal}
                 style={{ marginRight: 10 }}
             />
             <Button
-                icon={<SlidersIconSVG />}
+                icon={<SlidersIcon />}
                 text={mobileView ? '' : 'Filters'}
                 color='aqua'
                 style={{ marginRight: 10 }}
                 onClick={() => setFiltersModalOpen(true)}
             />
             <Button
-                icon={<EyeIconSVG />}
+                icon={<EyeIcon />}
                 text={mobileView ? '' : 'Lenses'}
                 color='purple'
                 onClick={() => setLensesModalOpen(true)}

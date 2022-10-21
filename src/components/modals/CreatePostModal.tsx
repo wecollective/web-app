@@ -43,23 +43,25 @@ import {
 } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/CreatePostModal.module.scss'
-import { ReactComponent as EventIcon } from '@svgs/calendar-days-solid.svg'
-import { ReactComponent as GBGIcon } from '@svgs/castalia-logo.svg'
-import { ReactComponent as ChevronDownIcon } from '@svgs/chevron-down-solid.svg'
-import { ReactComponent as ChevronLeftIcon } from '@svgs/chevron-left-solid.svg'
-import { ReactComponent as ChevronRightIcon } from '@svgs/chevron-right-solid.svg'
-import { ReactComponent as ChevronUpIcon } from '@svgs/chevron-up-solid.svg'
-import { ReactComponent as DNAIcon } from '@svgs/dna.svg'
-import { ReactComponent as TextIcon } from '@svgs/font-solid.svg'
-import { ReactComponent as ImageIcon } from '@svgs/image-solid.svg'
-import { ReactComponent as UrlIcon } from '@svgs/link-solid.svg'
-import { ReactComponent as WeaveIcon } from '@svgs/multiplayer-string-icon.svg'
-import { ReactComponent as PauseIcon } from '@svgs/pause-solid.svg'
-import { ReactComponent as PlayIcon } from '@svgs/play-solid.svg'
-import { ReactComponent as PlusIcon } from '@svgs/plus.svg'
-import { ReactComponent as InquiryIcon } from '@svgs/square-poll-vertical-solid.svg'
-import { ReactComponent as StringIcon } from '@svgs/string-icon.svg'
-import { ReactComponent as AudioIcon } from '@svgs/volume-high-solid.svg'
+import {
+    AudioIcon,
+    CalendarIcon,
+    CastaliaIcon,
+    ChevronDownIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    ChevronUpIcon,
+    DNAIcon,
+    ImageIcon,
+    InquiryIcon,
+    LinkIcon,
+    PauseIcon,
+    PlayIcon,
+    PlusIcon,
+    StringIcon,
+    TextIcon,
+    WeaveIcon,
+} from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
 import flatpickr from 'flatpickr'
@@ -79,7 +81,7 @@ const postTypes = [
         name: 'Url',
         description: `**Url**: Add a URL and we'll scrape its meta-data to display on the post.`,
         steps: ['Post Type: URL', 'URL', 'Description (optional)', 'Spaces', 'Create'],
-        icon: <UrlIcon />,
+        icon: <LinkIcon />,
     },
     {
         name: 'Image',
@@ -97,7 +99,7 @@ const postTypes = [
         name: 'Event',
         description: `**Event**: Schedule an event with a start and end time to be displayed in your spaces calendar. Mark yourself as 'going' or 'interested' to receive a notification just before the event starts.`,
         steps: ['Post Type: Event', 'Title', 'Description (optional)', 'Date', 'Spaces', 'Create'],
-        icon: <EventIcon />,
+        icon: <CalendarIcon />,
     },
     {
         name: 'Inquiry',
@@ -124,7 +126,7 @@ const postTypes = [
             'Spaces',
             'Create',
         ],
-        icon: <GBGIcon />,
+        icon: <CastaliaIcon />,
     },
     {
         name: 'String',
@@ -2327,7 +2329,7 @@ const CreatePostModal = (): JSX.Element => {
                                             }`}
                                             onClick={() => setNewBead({ ...newBead, type: 'url' })}
                                         >
-                                            <UrlIcon />
+                                            <LinkIcon />
                                         </button>
                                         <button
                                             type='button'

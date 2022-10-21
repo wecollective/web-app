@@ -7,9 +7,7 @@ import Row from '@components/Row'
 import { AccountContext } from '@contexts/AccountContext'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/cards/BeadCard.module.scss'
-import { ReactComponent as PauseIconSVG } from '@svgs/pause-solid.svg'
-import { ReactComponent as PlayIconSVG } from '@svgs/play-solid.svg'
-import { ReactComponent as ShareIcon } from '@svgs/share-from-square-solid.svg'
+import { PauseIcon, PlayIcon, ShareIcon } from '@svgs/all'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useState } from 'react'
 
@@ -99,7 +97,7 @@ const BeadCard = (props: {
                     aria-label='toggle-audio'
                     onClick={() => toggleBeadAudio(index)}
                 >
-                    {audioPlaying ? <PauseIconSVG /> : <PlayIconSVG />}
+                    {audioPlaying ? <PauseIcon /> : <PlayIcon />}
                 </button>
             </Row>
             <AudioTimeSlider

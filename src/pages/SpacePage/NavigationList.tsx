@@ -7,10 +7,7 @@ import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import styles from '@styles/pages/SpacePage/NavigationList.module.scss'
-import { ReactComponent as ArrowDownIconSVG } from '@svgs/arrow-down-solid.svg' // chevron-down-solid.svg'
-import { ReactComponent as ArrowUpIconSVG } from '@svgs/arrow-up-solid.svg' // chevron-up-solid.svg'
-import { ReactComponent as MinusIconSVG } from '@svgs/minus-solid.svg'
-import { ReactComponent as PlusIconSVG } from '@svgs/plus.svg'
+import { ArrowDownIcon, ArrowUpIcon, MinusIcon, PlusIcon } from '@svgs/all'
 import axios from 'axios'
 import React, { useContext } from 'react'
 
@@ -57,7 +54,7 @@ const NavigationList = (props: { onLocationChange?: () => void; style?: any }): 
             {parentSpaces.length > 0 && (
                 <Column className={styles.spaces}>
                     <Row>
-                        <ArrowUpIconSVG />
+                        <ArrowUpIcon />
                         <p>Parent spaces</p>
                     </Row>
                     <Column>
@@ -82,13 +79,7 @@ const NavigationList = (props: { onLocationChange?: () => void; style?: any }): 
                                         {space.loading ? (
                                             <LoadingWheel size={20} style={{ marginLeft: 7 }} />
                                         ) : (
-                                            <>
-                                                {space.expanded ? (
-                                                    <MinusIconSVG />
-                                                ) : (
-                                                    <PlusIconSVG />
-                                                )}
-                                            </>
+                                            <>{space.expanded ? <MinusIcon /> : <PlusIcon />}</>
                                         )}
                                     </button>
                                 </Row>
@@ -122,7 +113,7 @@ const NavigationList = (props: { onLocationChange?: () => void; style?: any }): 
             {childSpaces.length > 0 && (
                 <Column className={styles.spaces}>
                     <Row>
-                        <ArrowDownIconSVG />
+                        <ArrowDownIcon />
                         <p>Child spaces</p>
                     </Row>
                     <Column>
@@ -148,13 +139,7 @@ const NavigationList = (props: { onLocationChange?: () => void; style?: any }): 
                                             {space.loading ? (
                                                 <LoadingWheel size={20} style={{ marginLeft: 7 }} />
                                             ) : (
-                                                <>
-                                                    {space.expanded ? (
-                                                        <MinusIconSVG />
-                                                    ) : (
-                                                        <PlusIconSVG />
-                                                    )}
-                                                </>
+                                                <>{space.expanded ? <MinusIcon /> : <PlusIcon />}</>
                                             )}
                                         </button>
                                     )}

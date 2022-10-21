@@ -12,10 +12,7 @@ import Notifications from '@src/pages/UserPage/Notifications'
 import Posts from '@src/pages/UserPage/Posts'
 import Settings from '@src/pages/UserPage/Settings'
 import styles from '@styles/pages/UserPage/UserPage.module.scss'
-import { ReactComponent as BellIcon } from '@svgs/bell-solid.svg'
-import { ReactComponent as AboutIcon } from '@svgs/book-open-solid.svg'
-import { ReactComponent as SettingsIcon } from '@svgs/cog-solid.svg'
-import { ReactComponent as PostsIcon } from '@svgs/edit-solid.svg'
+import { AboutIcon, BellIcon, PostIcon, SettingsIcon } from '@svgs/all'
 import React, { useContext, useEffect, useState } from 'react'
 import { Redirect, Route, Switch, useLocation } from 'react-router-dom'
 
@@ -40,7 +37,7 @@ const UserPage = (): JSX.Element => {
         baseRoute: `/u/${userHandle}`,
         left: [
             { text: 'About', visible: true, icon: <AboutIcon /> },
-            { text: 'Posts', visible: true, icon: <PostsIcon /> },
+            { text: 'Posts', visible: true, icon: <PostIcon /> },
             { text: 'Notifications', visible: isOwnAccount, icon: <BellIcon /> },
         ],
         right: [

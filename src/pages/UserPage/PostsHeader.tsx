@@ -7,8 +7,7 @@ import { useHistory, useLocation } from 'react-router-dom'
 import Button from '@components/Button'
 import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
-import { ReactComponent as SlidersIconSVG } from '@svgs/sliders-h-solid.svg'
-// import { ReactComponent as EyeIconSVG } from '@svgs/eye-solid.svg'
+import { SlidersIcon } from '@svgs/all'
 
 const PostsHeader = (props: { params: any }): JSX.Element => {
     const { params } = props
@@ -23,7 +22,7 @@ const PostsHeader = (props: { params: any }): JSX.Element => {
     return (
         <Row centerY centerX className={styles.wrapper}>
             <Button
-                icon={<SlidersIconSVG />}
+                icon={<SlidersIcon />}
                 text={mobileView ? '' : 'Filters'}
                 color='aqua'
                 style={{ marginRight: 10 }}

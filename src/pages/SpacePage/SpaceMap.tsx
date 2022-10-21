@@ -5,10 +5,7 @@ import Row from '@components/Row'
 import StatButton from '@components/StatButton'
 import { SpaceContext } from '@contexts/SpaceContext'
 import styles from '@styles/pages/SpacePage/SpaceMap.module.scss'
-import { ReactComponent as CommentIconSVG } from '@svgs/comment-solid.svg'
-import { ReactComponent as PostIconSVG } from '@svgs/edit-solid.svg'
-import { ReactComponent as ReactionIconSVG } from '@svgs/fire-alt-solid.svg'
-import { ReactComponent as UsersIconSVG } from '@svgs/users-solid.svg'
+import { CommentIcon, PostIcon, ReactionIcon, UsersIcon } from '@svgs/all'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useHistory } from 'react-router-dom'
@@ -926,19 +923,19 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
                             />
                             <Row className={styles.stats}>
                                 <StatButton
-                                    icon={<UsersIconSVG />}
+                                    icon={<UsersIcon />}
                                     text={highlightedSpace.totalFollowers}
                                 />
                                 <StatButton
-                                    icon={<PostIconSVG />}
+                                    icon={<PostIcon />}
                                     text={highlightedSpace.totalPosts}
                                 />
                                 <StatButton
-                                    icon={<CommentIconSVG />}
+                                    icon={<CommentIcon />}
                                     text={highlightedSpace.totalComments}
                                 />
                                 <StatButton
-                                    icon={<ReactionIconSVG />}
+                                    icon={<ReactionIcon />}
                                     text={highlightedSpace.totalReactions}
                                 />
                             </Row>

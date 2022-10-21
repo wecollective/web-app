@@ -1,5 +1,5 @@
 import styles from '@styles/components/CheckBox.module.scss'
-import { ReactComponent as CheckIcon } from '@svgs/check-solid.svg'
+import { CheckIcon } from '@svgs/all'
 import React from 'react'
 import { v4 as uuidv4 } from 'uuid'
 

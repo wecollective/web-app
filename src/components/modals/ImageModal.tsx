@@ -5,8 +5,7 @@ import Row from '@components/Row'
 import ShowMoreLess from '@components/ShowMoreLess'
 import { handleImageError } from '@src/Helpers'
 import styles from '@styles/components/modals/ImageModal.module.scss'
-import { ReactComponent as ChevronLeftSVG } from '@svgs/chevron-left-solid.svg'
-import { ReactComponent as ChevronRightSVG } from '@svgs/chevron-right-solid.svg'
+import { ChevronLeftIcon, ChevronRightIcon } from '@svgs/all'
 import React from 'react'
 
 const ImageModal = (props: {
@@ -26,7 +25,7 @@ const ImageModal = (props: {
             <Row centerY>
                 {selectedImage.index !== 0 && (
                     <button type='button' onClick={() => toggleImage(-1)}>
-                        <ChevronLeftSVG />
+                        <ChevronLeftIcon />
                     </button>
                 )}
                 <Column centerX>
@@ -52,7 +51,7 @@ const ImageModal = (props: {
                 </Column>
                 {selectedImage.index !== images.length - 1 && (
                     <button type='button' onClick={() => toggleImage(1)}>
-                        <ChevronRightSVG />
+                        <ChevronRightIcon />
                     </button>
                 )}
             </Row>

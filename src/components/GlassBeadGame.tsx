@@ -27,19 +27,21 @@ import {
     timeSinceCreated,
 } from '@src/Helpers'
 import styles from '@styles/components/GlassBeadGame.module.scss'
-import { ReactComponent as CastaliaIconSVG } from '@svgs/castalia-logo.svg'
-import { ReactComponent as ChevronDownIconSVG } from '@svgs/chevron-down-solid.svg'
-import { ReactComponent as ChevronUpIconSVG } from '@svgs/chevron-up-solid.svg'
-import { ReactComponent as CommentIconSVG } from '@svgs/comment-solid.svg'
-import { ReactComponent as CurvedDNASVG } from '@svgs/curved-dna.svg'
-import { ReactComponent as DNAIconSVG } from '@svgs/dna.svg'
-import { ReactComponent as EditIconSVG } from '@svgs/edit-solid.svg'
-import { ReactComponent as LockIconSVG } from '@svgs/lock-solid.svg'
-import { ReactComponent as AudioSlashIconSVG } from '@svgs/microphone-slash-solid.svg'
-import { ReactComponent as AudioIconSVG } from '@svgs/microphone-solid.svg'
-import { ReactComponent as RefreshIconSVG } from '@svgs/repost.svg'
-import { ReactComponent as VideoSlashIconSVG } from '@svgs/video-slash-solid.svg'
-import { ReactComponent as VideoIconSVG } from '@svgs/video-solid.svg'
+import {
+    AudioIcon,
+    AudioSlashIcon,
+    CastaliaIcon,
+    ChevronDownIcon,
+    ChevronUpIcon,
+    CommentIcon,
+    CurvedDNAIcon,
+    DNAIcon,
+    EditIcon,
+    LockIcon,
+    RepostIcon,
+    VideoIcon,
+    VideoSlashIcon,
+} from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
@@ -165,7 +167,7 @@ const Video = (props) => {
     } = props
     return (
         <div className={`${styles.videoWrapper} ${size}`}>
-            {audioOnly && <AudioIconSVG />}
+            {audioOnly && <AudioIcon />}
             <video id={id} muted autoPlay playsInline>
                 <track kind='captions' />
             </video>
@@ -179,18 +181,18 @@ const Video = (props) => {
             {id === 'your-video' ? (
                 <div className={styles.videoButtons}>
                     <button type='button' onClick={toggleAudio}>
-                        {audioEnabled ? <AudioIconSVG /> : <AudioSlashIconSVG />}
+                        {audioEnabled ? <AudioIcon /> : <AudioSlashIcon />}
                     </button>
                     {!audioOnly && (
                         <button type='button' onClick={toggleVideo}>
-                            {videoEnabled ? <VideoIconSVG /> : <VideoSlashIconSVG />}
+                            {videoEnabled ? <VideoIcon /> : <VideoSlashIcon />}
                         </button>
                     )}
                 </div>
             ) : (
                 <div className={styles.videoButtons}>
                     <button type='button' onClick={() => refreshStream(id, user)}>
-                        <RefreshIconSVG />
+                        <RepostIcon />
                     </button>
                 </div>
             )}
@@ -369,7 +371,7 @@ const GameSettingsModal = (props) => {
                                             type='button'
                                             onClick={() => updatePlayerPosition(i, i - 1)}
                                         >
-                                            <ChevronUpIconSVG />
+                                            <ChevronUpIcon />
                                         </button>
                                     )}
                                     {i < players.length - 1 && (
@@ -377,7 +379,7 @@ const GameSettingsModal = (props) => {
                                             type='button'
                                             onClick={() => updatePlayerPosition(i, i + 1)}
                                         >
-                                            <ChevronDownIconSVG />
+                                            <ChevronDownIcon />
                                         </button>
                                     )}
                                 </div>
@@ -1742,21 +1744,21 @@ const GlassBeadGame = (): JSX.Element => {
                     onClick={() => updateMobileTab('comments')}
                     className={`${mobileTab === 'comments' && styles.selected}`}
                 >
-                    <CommentIconSVG />
+                    <CommentIcon />
                 </button>
                 <button
                     type='button'
                     onClick={() => updateMobileTab('game')}
                     className={`${mobileTab === 'game' && styles.selected}`}
                 >
-                    <CastaliaIconSVG />
+                    <CastaliaIcon />
                 </button>
                 <button
                     type='button'
                     onClick={() => updateMobileTab('videos')}
                     className={`${mobileTab === 'videos' && styles.selected}`}
                 >
-                    <VideoIconSVG />
+                    <VideoIcon />
                 </button>
             </Row>
             <Row
@@ -1789,7 +1791,7 @@ const GlassBeadGame = (): JSX.Element => {
                         onClick={() => setShowComments(!showComments)}
                         type='button'
                     >
-                        <ChevronUpIconSVG transform={`rotate(${showComments ? 270 : 90})`} />
+                        <ChevronUpIcon transform={`rotate(${showComments ? 270 : 90})`} />
                     </button>
                 </Column>
                 <Column
@@ -1830,7 +1832,7 @@ const GlassBeadGame = (): JSX.Element => {
                         <Column className={styles.gameControls}>
                             {gameData.locked && (
                                 <Row centerY className={styles.gameLocked}>
-                                    <LockIconSVG />
+                                    <LockIcon />
                                     <p>Game locked</p>
                                 </Row>
                             )}
@@ -1911,7 +1913,7 @@ const GlassBeadGame = (): JSX.Element => {
                         />
                     )}
                     <Column centerX className={styles.timerColumn}>
-                        <CurvedDNASVG
+                        <CurvedDNAIcon
                             className={`${styles.curvedDNA} ${beads.length && styles.withBeads}`}
                         />
                         <Row centerY className={styles.topicText}>
@@ -1922,7 +1924,7 @@ const GlassBeadGame = (): JSX.Element => {
                                     allowedTo('change-topic-text') && setTopicTextModalOpen(true)
                                 }
                             >
-                                <EditIconSVG />
+                                <EditIcon />
                             </button>
                         </Row>
                         <Row centerY centerX className={styles.topicImage}>
@@ -2072,7 +2074,7 @@ const GlassBeadGame = (): JSX.Element => {
                         />
                         {beads.length > beadIndex + 1 && (
                             <Row centerY className={styles.beadDivider}>
-                                <DNAIconSVG />
+                                <DNAIcon />
                             </Row>
                         )}
                     </Row>

@@ -11,7 +11,7 @@ import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import styles from '@styles/components/SidebarSmall.module.scss'
-import { ReactComponent as PlusIconSVG } from '@svgs/plus.svg'
+import { PlusIcon } from '@svgs/all'
 import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -87,7 +87,7 @@ const SidebarSmall = (): JSX.Element | null => {
                         type='button'
                         onClick={() => setJoinSpacesModalOpen(true)}
                     >
-                        <PlusIconSVG />
+                        <PlusIcon />
                     </button>
                 </Column>
             </Column>

@@ -1,5 +1,5 @@
 import styles from '@styles/components/CloseButton.module.scss'
-import { ReactComponent as TimesIconSVG } from '@svgs/times-solid.svg'
+import { TimesIcon } from '@svgs/all'
 import React from 'react'
 
 const CloseButton = (props: { size: number; onClick: () => void; style?: any }): JSX.Element => {
@@ -12,7 +12,7 @@ const CloseButton = (props: { size: number; onClick: () => void; style?: any }):
             onClick={onClick}
             style={{ ...style, width: size, height: size }}
         >
-            <TimesIconSVG width={size} height={size} />
+            <TimesIcon width={size} height={size} />
         </button>
     )
 }

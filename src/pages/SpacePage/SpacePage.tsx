@@ -19,14 +19,16 @@ import Posts from '@src/pages/SpacePage/Posts'
 import Rooms from '@src/pages/SpacePage/Rooms'
 import Spaces from '@src/pages/SpacePage/Spaces'
 import styles from '@styles/pages/SpacePage/SpacePage.module.scss'
-import { ReactComponent as AboutIcon } from '@svgs/book-open-solid.svg'
-import { ReactComponent as GovernanceIcon } from '@svgs/building-columns-solid.svg'
-import { ReactComponent as CalendarIcon } from '@svgs/calendar-days-solid.svg'
-import { ReactComponent as SuccessIconSVG } from '@svgs/check-circle-solid.svg'
-import { ReactComponent as SettingsIconSVG } from '@svgs/cog-solid.svg'
-import { ReactComponent as PostsIcon } from '@svgs/edit-solid.svg'
-import { ReactComponent as SpacesIcon } from '@svgs/overlapping-circles-thick.svg'
-import { ReactComponent as PeopleIcon } from '@svgs/users-solid.svg'
+import {
+    AboutIcon,
+    CalendarIcon,
+    GovernanceIcon,
+    PostIcon,
+    SettingsIcon,
+    SpacesIcon,
+    SuccessIcon,
+    UsersIcon,
+} from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useState } from 'react'
@@ -73,13 +75,13 @@ const SpacePage = (): JSX.Element => {
             //     visible: true,
             //     icon: <img alt='' src='/icons/object_cube.png' style={{ width: 30, height: 30 }} />,
             // },
-            { text: 'Posts', visible: true, icon: <PostsIcon /> },
+            { text: 'Posts', visible: true, icon: <PostIcon /> },
             { text: 'Spaces', visible: true, icon: <SpacesIcon /> },
-            { text: 'People', visible: true, icon: <PeopleIcon /> },
+            { text: 'People', visible: true, icon: <UsersIcon /> },
             { text: 'Calendar', visible: true, icon: <CalendarIcon /> },
             { text: 'Governance', visible: true, icon: <GovernanceIcon /> },
         ],
-        right: [{ text: 'Settings', visible: isModerator, icon: <SettingsIconSVG /> }],
+        right: [{ text: 'Settings', visible: isModerator, icon: <SettingsIcon /> }],
     }
 
     function joinSpace() {
@@ -221,7 +223,7 @@ const SpacePage = (): JSX.Element => {
                                     <Button
                                         icon={
                                             isFollowing || spaceData.access === 'pending' ? (
-                                                <SuccessIconSVG />
+                                                <SuccessIcon />
                                             ) : undefined
                                         }
                                         text={joinSpaceButtonText()}

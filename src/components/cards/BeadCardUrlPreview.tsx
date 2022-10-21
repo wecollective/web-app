@@ -2,7 +2,7 @@ import Column from '@components/Column'
 import Row from '@components/Row'
 import { handleImageError } from '@src/Helpers'
 import styles from '@styles/components/cards/BeadCardUrlPreview.module.scss'
-import { ReactComponent as LinkIconSVG } from '@svgs/link-solid.svg'
+import { LinkIcon } from '@svgs/all'
 import React from 'react'
 
 const BeadCardUrlPreview = (props: {
@@ -33,7 +33,7 @@ const BeadCardUrlPreview = (props: {
                         {description && <p>{description}</p>}
                         {domain && (
                             <Row centerY centerX className={styles.domain}>
-                                <LinkIconSVG />
+                                <LinkIcon />
                                 <p>{domain}</p>
                             </Row>
                         )}

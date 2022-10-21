@@ -45,34 +45,36 @@ import {
     timeSinceCreated,
     timeSinceCreatedShort,
 } from '@src/Helpers'
+import {
+    ArrowRightIcon,
+    AudioIcon,
+    CalendarIcon,
+    CastaliaIcon,
+    ClockIcon,
+    CommentIcon,
+    DeleteIcon,
+    DNAIcon,
+    EditIcon,
+    ExpandIcon,
+    ImageIcon,
+    InquiryIcon,
+    LikeIcon,
+    LinkIcon,
+    PauseIcon,
+    PlayIcon,
+    PlusIcon,
+    PrismIcon,
+    RepostIcon,
+    StarIcon,
+    StringIcon,
+    SuccessIcon,
+    TextIcon,
+    UsersIcon,
+    VerticalEllipsisIcon,
+    WeaveIcon,
+} from '@src/svgs/all'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
-import { ReactComponent as ArrowRightIcon } from '@svgs/arrow-alt-circle-right-solid.svg'
-import { ReactComponent as EventIcon } from '@svgs/calendar-days-solid.svg'
-import { ReactComponent as GBGIcon } from '@svgs/castalia-logo.svg'
-import { ReactComponent as SuccessIcon } from '@svgs/check-circle-solid.svg'
-import { ReactComponent as ClockIcon } from '@svgs/clock-solid.svg'
-import { ReactComponent as CommentIcon } from '@svgs/comment-solid.svg'
-import { ReactComponent as DNAIcon } from '@svgs/dna.svg'
-import { ReactComponent as EditIcon } from '@svgs/edit-solid.svg'
-import { ReactComponent as VerticalEllipsisIcon } from '@svgs/ellipsis-vertical-solid.svg'
-import { ReactComponent as ExpandIcon } from '@svgs/expand-icon.svg'
-import { ReactComponent as TextIcon } from '@svgs/font-solid.svg'
-import { ReactComponent as ImageIcon } from '@svgs/image-solid.svg'
-import { ReactComponent as LikeIcon } from '@svgs/like.svg'
-import { ReactComponent as LinkIcon } from '@svgs/link-solid.svg'
-import { ReactComponent as WeaveIcon } from '@svgs/multiplayer-string-icon.svg'
-import { ReactComponent as PauseIcon } from '@svgs/pause-solid.svg'
-import { ReactComponent as PlayIcon } from '@svgs/play-solid.svg'
-import { ReactComponent as PlusIcon } from '@svgs/plus.svg'
-import { ReactComponent as PrismIcon } from '@svgs/prism-icon.svg'
-import { ReactComponent as RepostIcon } from '@svgs/repost.svg'
-import { ReactComponent as InquiryIcon } from '@svgs/square-poll-vertical-solid.svg'
-import { ReactComponent as RatingIcon } from '@svgs/star-solid.svg'
-import { ReactComponent as StringIcon } from '@svgs/string-icon.svg'
-import { ReactComponent as DeleteIcon } from '@svgs/trash-can-solid.svg'
-import { ReactComponent as UsersIcon } from '@svgs/users-solid.svg'
-import { ReactComponent as AudioIcon } from '@svgs/volume-high-solid.svg'
 import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
@@ -348,11 +350,11 @@ const PostCard = (props: {
             case 'audio':
                 return <AudioIcon />
             case 'event':
-                return <EventIcon />
+                return <CalendarIcon />
             case 'inquiry':
                 return <InquiryIcon />
             case 'glass-bead-game':
-                return <GBGIcon />
+                return <CastaliaIcon />
             case 'string':
                 return <StringIcon />
             case 'weave':
@@ -1419,7 +1421,7 @@ const PostCard = (props: {
                             onClick={() => setRepostModalOpen(true)}
                         />
                         <StatButton
-                            icon={<RatingIcon />}
+                            icon={<StarIcon />}
                             iconSize={20}
                             text={totalRatings}
                             title={statTitle('Rating', totalRatings || 0)}

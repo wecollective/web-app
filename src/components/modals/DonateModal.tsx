@@ -1,6 +1,6 @@
 import Modal from '@components/modals/Modal'
 import styles from '@styles/components/modals/DonateModal.module.scss'
-import { ReactComponent as DonateIconSVG } from '@svgs/donate-solid.svg'
+import { DonateIcon } from '@svgs/all'
 import React from 'react'
 
 const DonateModal = (props: { close: () => void }): JSX.Element => {
@@ -8,7 +8,7 @@ const DonateModal = (props: { close: () => void }): JSX.Element => {
 
     return (
         <Modal close={close} style={{ minWidth: 350 }} centered>
-            <DonateIconSVG className={styles.donateIcon} />
+            <DonateIcon className={styles.donateIcon} />
             <p>Help support the development of weco.io</p>
             <p>
                 <b>ETH:</b> 0x1019665603CcF936932E38cab3370bcDb89f82eE

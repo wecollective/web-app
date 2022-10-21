@@ -1,8 +1,6 @@
 import Row from '@components/Row'
 import styles from '@styles/components/FlagImagePlaceholder.module.scss'
-import { ReactComponent as PostIconSVG } from '@svgs/edit-solid.svg'
-import { ReactComponent as UserIconSVG } from '@svgs/user-solid.svg'
-import { ReactComponent as UsersIconSVG } from '@svgs/users-solid.svg'
+import { PostIcon, UserIcon, UsersIcon } from '@svgs/all'
 import React from 'react'
 
 const FlagImagePlaceholder = (props: { type: 'space' | 'user' | 'post' }): JSX.Element => {
@@ -12,15 +10,15 @@ const FlagImagePlaceholder = (props: { type: 'space' | 'user' | 'post' }): JSX.E
     let iconWidth
     switch (type) {
         case 'space':
-            iconSVG = <UsersIconSVG />
+            iconSVG = <UsersIcon />
             iconWidth = '60%'
             break
         case 'user':
-            iconSVG = <UserIconSVG />
+            iconSVG = <UserIcon />
             iconWidth = '45%'
             break
         case 'post':
-            iconSVG = <PostIconSVG />
+            iconSVG = <PostIcon />
             iconWidth = '50%'
             break
         default:

@@ -12,22 +12,24 @@ import SuccessMessage from '@components/SuccessMessage'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
 import {
+    audioMBLimit,
     defaultErrorState,
     findDraftLength,
     formatTimeMMSS,
-    isValidUrl,
     imageMBLimit,
-    audioMBLimit,
+    isValidUrl,
 } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/NextBeadModal.module.scss'
-import { ReactComponent as ChevronLeftIcon } from '@svgs/chevron-left-solid.svg'
-import { ReactComponent as ChevronRightIcon } from '@svgs/chevron-right-solid.svg'
-import { ReactComponent as TextIcon } from '@svgs/font-solid.svg'
-import { ReactComponent as ImageIcon } from '@svgs/image-solid.svg'
-import { ReactComponent as UrlIcon } from '@svgs/link-solid.svg'
-import { ReactComponent as PlusIcon } from '@svgs/plus.svg'
-import { ReactComponent as AudioIcon } from '@svgs/volume-high-solid.svg'
+import {
+    AudioIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    ImageIcon,
+    LinkIcon,
+    PlusIcon,
+    TextIcon,
+} from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
 import getBlobDuration from 'get-blob-duration'
@@ -388,7 +390,7 @@ const NextBeadModal = (props: {
                                 className={`${newBead.type === 'url' && styles.selected}`}
                                 onClick={() => setNewBead({ ...newBead, type: 'url' })}
                             >
-                                <UrlIcon />
+                                <LinkIcon />
                             </button>
                         )}
                         {allowedBeadTypes.includes('Audio') && (

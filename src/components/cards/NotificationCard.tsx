@@ -7,21 +7,23 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import { dateCreated, timeSinceCreated } from '@src/Helpers'
 import styles from '@styles/components/cards/NotificationCard.module.scss'
-import { ReactComponent as AtIcon } from '@svgs/at-solid.svg'
-import { ReactComponent as BabyIcon } from '@svgs/baby-solid.svg'
-import { ReactComponent as BellIcon } from '@svgs/bell-solid.svg'
-import { ReactComponent as SuccessIcon } from '@svgs/check-circle-solid.svg'
-import { ReactComponent as CommentIcon } from '@svgs/comment-solid.svg'
-import { ReactComponent as EnvelopeIcon } from '@svgs/envelope-solid.svg'
-import { ReactComponent as LinkIcon } from '@svgs/link-solid.svg'
-import { ReactComponent as WeaveIcon } from '@svgs/multiplayer-string-icon.svg'
-import { ReactComponent as OverlappingCirclesIcon } from '@svgs/overlapping-circles-thick.svg'
-import { ReactComponent as RetweetIcon } from '@svgs/retweet-solid.svg'
-import { ReactComponent as InquiryIcon } from '@svgs/square-poll-vertical-solid.svg'
-import { ReactComponent as StarIcon } from '@svgs/star-solid.svg'
-import { ReactComponent as StringIcon } from '@svgs/string-icon.svg'
-import { ReactComponent as ThumbsUpIcon } from '@svgs/thumbs-up-solid.svg'
-import { ReactComponent as FailIcon } from '@svgs/times-circle-regular.svg'
+import {
+    AtIcon,
+    BabyIcon,
+    BellIcon,
+    CommentIcon,
+    EnvelopeIcon,
+    FailIcon,
+    InquiryIcon,
+    LinkIcon,
+    RetweetIcon,
+    SpacesIcon,
+    StarIcon,
+    StringIcon,
+    SuccessIcon,
+    ThumbsUpIcon,
+    WeaveIcon,
+} from '@svgs/all'
 import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import Cookies from 'universal-cookie'
@@ -397,7 +399,7 @@ const NotificationCard = (props: {
                     )}
 
                     {type === 'parent-space-request' && (
-                        <Content typeIcon={<OverlappingCirclesIcon />}>
+                        <Content typeIcon={<SpacesIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>wants to make</p>
                             <ImageNameLink type='space' data={triggerSpace} />
@@ -412,7 +414,7 @@ const NotificationCard = (props: {
                     )}
 
                     {type === 'parent-space-request-response' && (
-                        <Content typeIcon={<OverlappingCirclesIcon />}>
+                        <Content typeIcon={<SpacesIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>{state} your request to make</p>
                             <ImageNameLink type='space' data={triggerSpace} />
@@ -424,7 +426,7 @@ const NotificationCard = (props: {
                     )}
 
                     {type === 'space-invite' && (
-                        <Content typeIcon={<OverlappingCirclesIcon />}>
+                        <Content typeIcon={<SpacesIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>invited you to join</p>
                             <ImageNameLink type='space' data={triggerSpace} />
@@ -437,7 +439,7 @@ const NotificationCard = (props: {
                     )}
 
                     {type === 'space-invite-response' && (
-                        <Content typeIcon={<OverlappingCirclesIcon />}>
+                        <Content typeIcon={<SpacesIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>{state} your invitation to join</p>
                             <ImageNameLink type='space' data={triggerSpace} />
@@ -446,7 +448,7 @@ const NotificationCard = (props: {
                     )}
 
                     {type === 'space-access-request' && (
-                        <Content typeIcon={<OverlappingCirclesIcon />}>
+                        <Content typeIcon={<SpacesIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>requested access to</p>
                             <ImageNameLink type='space' data={triggerSpace} />
@@ -459,7 +461,7 @@ const NotificationCard = (props: {
                     )}
 
                     {type === 'space-access-response' && (
-                        <Content typeIcon={<OverlappingCirclesIcon />}>
+                        <Content typeIcon={<SpacesIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>{state} your request to access</p>
                             <ImageNameLink type='space' data={triggerSpace} />
@@ -468,7 +470,7 @@ const NotificationCard = (props: {
                     )}
 
                     {type === 'mod-invite' && (
-                        <Content typeIcon={<OverlappingCirclesIcon />}>
+                        <Content typeIcon={<SpacesIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>invited you to moderate</p>
                             <ImageNameLink type='space' data={triggerSpace} />
@@ -481,7 +483,7 @@ const NotificationCard = (props: {
                     )}
 
                     {type === 'mod-invite-response' && (
-                        <Content typeIcon={<OverlappingCirclesIcon />}>
+                        <Content typeIcon={<SpacesIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>{state} your invitation to moderate</p>
                             <ImageNameLink type='space' data={triggerSpace} />
@@ -490,7 +492,7 @@ const NotificationCard = (props: {
                     )}
 
                     {type === 'mod-removed' && (
-                        <Content typeIcon={<OverlappingCirclesIcon />}>
+                        <Content typeIcon={<SpacesIcon />}>
                             {you ? <p>You</p> : <ImageNameLink type='user' data={triggerUser} />}
                             <p>just removed you from moderating</p>
                             <ImageNameLink type='space' data={triggerSpace} />
@@ -630,7 +632,7 @@ const NotificationCard = (props: {
             {location === 'space' && (
                 <>
                     {type === 'parent-space-request' && (
-                        <Content typeIcon={<OverlappingCirclesIcon />}>
+                        <Content typeIcon={<SpacesIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>wants to make</p>
                             <ImageNameLink type='space' data={triggerSpace} />

@@ -2,7 +2,7 @@ import Column from '@components/Column'
 import Row from '@components/Row'
 import { handleImageError } from '@src/Helpers'
 import styles from '@styles/components/cards/PostCard/UrlPreview.module.scss'
-import { ReactComponent as LinkIconSVG } from '@svgs/link-solid.svg'
+import { LinkIcon } from '@svgs/all'
 import React from 'react'
 
 const UrlPreview = (props: {
@@ -33,7 +33,7 @@ const UrlPreview = (props: {
                         {description && <p>{description}</p>}
                         {domain && (
                             <Row centerY className={styles.domain}>
-                                <LinkIconSVG />
+                                <LinkIcon />
                                 <p>{domain}</p>
                             </Row>
                         )}

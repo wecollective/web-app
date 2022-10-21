@@ -6,8 +6,7 @@ import ShowMoreLess from '@components/ShowMoreLess'
 import StatButton from '@components/StatButton'
 import { statTitle } from '@src/Helpers'
 import styles from '@styles/components/cards/VerticalUserCard.module.scss'
-import { ReactComponent as CommentIconSVG } from '@svgs/comment-solid.svg'
-import { ReactComponent as PostIconSVG } from '@svgs/edit-solid.svg'
+import { CommentIcon, PostIcon } from '@svgs/all'
 import React from 'react'
 import { Link } from 'react-router-dom'
 
@@ -45,13 +44,13 @@ const VerticalUserCard = (props: { user: any; style?: any }): JSX.Element => {
             </Column>
             <Row centerY centerX className={styles.footer}>
                 <StatButton
-                    icon={<PostIconSVG />}
+                    icon={<PostIcon />}
                     text={totalPosts}
                     // text={`${totalPosts} Post${pluralise(totalPosts)}`}
                     title={statTitle('Post', totalPosts)}
                 />
                 <StatButton
-                    icon={<CommentIconSVG />}
+                    icon={<CommentIcon />}
                     text={totalComments}
                     // text={`${totalComments} Comment${pluralise(totalComments)}`}
                     title={statTitle('Comment', totalComments)}

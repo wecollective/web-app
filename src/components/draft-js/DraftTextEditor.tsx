@@ -1,6 +1,11 @@
 /* eslint-disable jsx-a11y/anchor-has-content */
 /* eslint-disable react/jsx-props-no-spreading */
+import Button from '@components/Button'
+import Mention from '@components/draft-js/Mention'
+import Suggestion from '@components/draft-js/Suggestion'
+import FlagImage from '@components/FlagImage'
 import Row from '@components/Row'
+import { AccountContext } from '@contexts/AccountContext'
 import createLinkPlugin, { defaultTheme as anchorTheme } from '@draft-js-plugins/anchor'
 import {
     BlockquoteButton,
@@ -22,13 +27,7 @@ import createToolbarPlugin from '@draft-js-plugins/static-toolbar'
 import createTextAlignmentPlugin from '@draft-js-plugins/text-alignment'
 import config from '@src/Config'
 import styles from '@styles/components/draft-js/DraftText.module.scss'
-// import { ReactComponent as SuccessIconSVG } from '@svgs/check-circle-solid.svg'
-import Button from '@components/Button'
-import Mention from '@components/draft-js/Mention'
-import Suggestion from '@components/draft-js/Suggestion'
-import FlagImage from '@components/FlagImage'
-import { AccountContext } from '@contexts/AccountContext'
-import { ReactComponent as DangerIconSVG } from '@svgs/exclamation-circle-solid.svg'
+import { DangerIcon } from '@svgs/all'
 import axios from 'axios'
 import { ContentState, convertFromRaw, convertToRaw, EditorState } from 'draft-js'
 import React, { useContext, useEffect, useRef, useState } from 'react'
@@ -250,8 +249,8 @@ const DraftTextEditor = (props: {
                     className={`${styles.stats} ${state === 'invalid' && styles.error}`}
                 >
                     <Row className={styles.errors}>
-                        {state === 'invalid' && <DangerIconSVG />}
-                        {/* {state === 'valid' && <SuccessIconSVG />} */}
+                        {state === 'invalid' && <DangerIcon />}
+                        {/* {state === 'valid' && <SuccessIcon />} */}
                         {state === 'invalid' && errors!.map((error) => <p key={error}>{error}</p>)}
                     </Row>
                     <p>

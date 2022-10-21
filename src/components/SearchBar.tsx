@@ -1,5 +1,5 @@
 import styles from '@styles/components/SearchBar.module.scss'
-import { ReactComponent as SearchIcon } from '@svgs/search.svg'
+import { SearchIcon } from '@svgs/all'
 import React, { useState } from 'react'
 
 const SearchBar = (props: {

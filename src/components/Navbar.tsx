@@ -12,19 +12,21 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import { UserContext } from '@contexts/UserContext'
 import NavigationList from '@src/pages/SpacePage/NavigationList'
 import styles from '@styles/components/Navbar.module.scss'
-import { ReactComponent as BellIcon } from '@svgs/bell-solid.svg'
-import { ReactComponent as AboutIcon } from '@svgs/book-open-solid.svg'
-import { ReactComponent as GovernanceIcon } from '@svgs/building-columns-solid.svg'
-import { ReactComponent as CalendarIcon } from '@svgs/calendar-days-solid.svg'
-import { ReactComponent as ChevronDownIcon } from '@svgs/chevron-down-solid.svg'
-import { ReactComponent as SettingsIcon } from '@svgs/cog-solid.svg'
-import { ReactComponent as PostsIcon } from '@svgs/edit-solid.svg'
-import { ReactComponent as SpacesIcon } from '@svgs/overlapping-circles-thick.svg'
-import { ReactComponent as SearchIcon } from '@svgs/search.svg'
-import { ReactComponent as TreeIcon } from '@svgs/tree-icon.svg'
-import { ReactComponent as UserIcon } from '@svgs/user-solid.svg'
-import { ReactComponent as PeopleIcon } from '@svgs/users-solid.svg'
-import { ReactComponent as WecoLogo } from '@svgs/weco-logo.svg'
+import {
+    AboutIcon,
+    BellIcon,
+    CalendarIcon,
+    ChevronDownIcon,
+    GovernanceIcon,
+    PostIcon,
+    SearchIcon,
+    SettingsIcon,
+    SpacesIcon,
+    TreeIcon,
+    UserIcon,
+    UsersIcon,
+    WecoLogo,
+} from '@svgs/all'
 import React, { useContext, useState } from 'react'
 import { Link, useHistory, useLocation } from 'react-router-dom'
 
@@ -200,7 +202,7 @@ const Navbar = (): JSX.Element => {
                                         to={`/u/${userData.handle}/posts`}
                                         onClick={() => toggleHamburgerMenu()}
                                     >
-                                        <PostsIcon />
+                                        <PostIcon />
                                         <p>Posts</p>
                                     </Link>
                                 </Column>
@@ -218,7 +220,7 @@ const Navbar = (): JSX.Element => {
                                             to={`/s/${spaceData.handle}/posts`}
                                             onClick={() => toggleHamburgerMenu()}
                                         >
-                                            <PostsIcon />
+                                            <PostIcon />
                                             <p>Posts</p>
                                         </Link>
                                         <Link
@@ -232,7 +234,7 @@ const Navbar = (): JSX.Element => {
                                             to={`/s/${spaceData.handle}/people`}
                                             onClick={() => toggleHamburgerMenu()}
                                         >
-                                            <PeopleIcon />
+                                            <UsersIcon />
                                             <p>People</p>
                                         </Link>
                                         <Link
@@ -290,7 +292,7 @@ const Navbar = (): JSX.Element => {
                     {exploreDropDownOpen && (
                         <div className={styles.exploreDropDown}>
                             <Link to='/s/all/posts'>
-                                <PostsIcon />
+                                <PostIcon />
                                 <p>Posts</p>
                             </Link>
                             <Link to='/s/all/spaces'>
@@ -298,7 +300,7 @@ const Navbar = (): JSX.Element => {
                                 <p>Spaces</p>
                             </Link>
                             <Link to='/s/all/people'>
-                                <PeopleIcon />
+                                <UsersIcon />
                                 <p>People</p>
                             </Link>
                             <Link to='/s/all/calendar'>
@@ -373,7 +375,7 @@ const Navbar = (): JSX.Element => {
                                             to={`/u/${accountData.handle}/posts`}
                                             onClick={() => toggleAccountMenu()}
                                         >
-                                            <PostsIcon />
+                                            <PostIcon />
                                             <p>Posts</p>
                                         </Link>
                                         <Link
@@ -437,7 +439,7 @@ const Navbar = (): JSX.Element => {
                                         <p>Profile</p>
                                     </Link>
                                     <Link to={`/u/${accountData.handle}/posts`}>
-                                        <PostsIcon />
+                                        <PostIcon />
                                         <p>Posts</p>
                                     </Link>
                                     <Link to={`/u/${accountData.handle}/notifications`}>

@@ -5,13 +5,7 @@ import Row from '@components/Row'
 import Tooltip from '@components/Tooltip'
 import { AccountContext } from '@contexts/AccountContext'
 import styles from '@styles/components/Toolbar.module.scss'
-import { ReactComponent as AppsIcon } from '@svgs/apps-grid-icon.svg'
-import { ReactComponent as PostIcon } from '@svgs/edit-solid.svg'
-import { ReactComponent as EyeIcon } from '@svgs/eye-solid.svg'
-import { ReactComponent as SpaceIcon } from '@svgs/overlapping-circles-thick.svg'
-import { ReactComponent as PlusIcon } from '@svgs/plus.svg'
-import { ReactComponent as SlidersIcon } from '@svgs/sliders-h-solid.svg'
-import { ReactComponent as UserIcon } from '@svgs/user-solid.svg'
+import { AppsIcon, EyeIcon, PlusIcon, PostIcon, SlidersIcon, SpacesIcon, UserIcon } from '@svgs/all'
 import React, { useContext } from 'react'
 
 const Toolbar = (): JSX.Element => {
@@ -26,7 +20,7 @@ const Toolbar = (): JSX.Element => {
                         <p>Create space</p>
                     </Tooltip>
                 </CircleButton>
-                <CircleButton size={45} icon={<SpaceIcon />} style={{ marginRight: 10 }}>
+                <CircleButton size={45} icon={<SpacesIcon />} style={{ marginRight: 10 }}>
                     <Tooltip top={40} width={180} centered>
                         {accountData.FollowedSpaces.slice(0, 5).map((space, index) => (
                             <ImageTitle

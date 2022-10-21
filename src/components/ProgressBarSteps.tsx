@@ -1,7 +1,7 @@
 import Column from '@components/Column'
 import Row from '@components/Row'
 import styles from '@styles/components/ProgressBarSteps.module.scss'
-import { ReactComponent as TickIcon } from '@svgs/check-solid.svg'
+import { CheckIcon } from '@svgs/all'
 import React from 'react'
 
 const ProgressBarSteps = (props: {
@@ -29,7 +29,7 @@ const ProgressBarSteps = (props: {
                                 index > currentStep - 1 && styles.todo
                             } ${index < currentStep - 1 && styles.done}`}
                         >
-                            {index < currentStep - 1 ? <TickIcon /> : <p>{index + 1}</p>}
+                            {index < currentStep - 1 ? <CheckIcon /> : <p>{index + 1}</p>}
                         </Column>
                         {index < steps.length - 1 && (
                             <Column

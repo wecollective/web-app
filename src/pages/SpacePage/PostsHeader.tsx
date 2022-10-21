@@ -9,9 +9,7 @@ import Row from '@components/Row'
 import Toggle from '@components/Toggle'
 import { getParamString } from '@src/Helpers'
 import styles from '@styles/pages/SpacePage/Header.module.scss'
-import { ReactComponent as EyeIconSVG } from '@svgs/eye-solid.svg'
-import { ReactComponent as PlusIconSVG } from '@svgs/plus.svg'
-import { ReactComponent as SlidersIconSVG } from '@svgs/sliders-h-solid.svg'
+import { EyeIcon, PlusIcon, SlidersIcon } from '@svgs/all'
 
 const PostsHeader = (props: { params: any }): JSX.Element => {
     const { params } = props
@@ -45,7 +43,7 @@ const PostsHeader = (props: { params: any }): JSX.Element => {
     return (
         <Row centerY centerX className={styles.wrapper}>
             <Button
-                icon={smallMobileView ? <PlusIconSVG /> : undefined}
+                icon={smallMobileView ? <PlusIcon /> : undefined}
                 text={smallMobileView ? '' : 'New post'}
                 color='blue'
                 onClick={() => openCreatePostModal()}
@@ -60,14 +58,14 @@ const PostsHeader = (props: { params: any }): JSX.Element => {
                 />
             )} */}
             <Button
-                icon={<SlidersIconSVG />}
+                icon={<SlidersIcon />}
                 text={mobileView ? '' : 'Filters'}
                 color='aqua'
                 onClick={() => setFiltersModalOpen(true)}
                 style={{ marginRight: 10 }}
             />
             <Button
-                icon={<EyeIconSVG />}
+                icon={<EyeIcon />}
                 text={mobileView ? '' : 'Lenses'}
                 color='purple'
                 onClick={() => setLensesModalOpen(true)}

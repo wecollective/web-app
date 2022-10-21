@@ -18,17 +18,19 @@ import EditPostModal from '@src/components/modals/EditPostModal'
 import { handleImageError, statTitle } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/cards/PostCard/StringBeadCard.module.scss'
-import { ReactComponent as CommentIcon } from '@svgs/comment-solid.svg'
-import { ReactComponent as EditIcon } from '@svgs/edit-solid.svg'
-import { ReactComponent as VerticalEllipsisIcon } from '@svgs/ellipsis-vertical-solid.svg'
-import { ReactComponent as TextIcon } from '@svgs/font-solid.svg'
-import { ReactComponent as ImageIcon } from '@svgs/image-solid.svg'
-import { ReactComponent as LikeIcon } from '@svgs/like.svg'
-import { ReactComponent as LinkIcon } from '@svgs/link-solid.svg'
-import { ReactComponent as PauseIcon } from '@svgs/pause-solid.svg'
-import { ReactComponent as PlayIcon } from '@svgs/play-solid.svg'
-import { ReactComponent as SourceIcon } from '@svgs/right-to-bracket-solid.svg'
-import { ReactComponent as AudioIcon } from '@svgs/volume-high-solid.svg'
+import {
+    AudioIcon,
+    CommentIcon,
+    EditIcon,
+    ImageIcon,
+    LikeIcon,
+    LinkIcon,
+    PauseIcon,
+    PlayIcon,
+    SourceIcon,
+    TextIcon,
+    VerticalEllipsisIcon,
+} from '@svgs/all'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'

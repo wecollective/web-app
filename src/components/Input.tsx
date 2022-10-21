@@ -1,8 +1,7 @@
 import LoadingWheel from '@components/LoadingWheel'
 import { resizeTextArea } from '@src/Helpers'
 import styles from '@styles/components/Input.module.scss'
-import { ReactComponent as SuccessIconSVG } from '@svgs/check-circle-solid.svg'
-import { ReactComponent as DangerIconSVG } from '@svgs/exclamation-circle-solid.svg'
+import { DangerIcon, SuccessIcon } from '@svgs/all'
 import React from 'react'
 
 const Input = (props: {
@@ -72,8 +71,8 @@ const Input = (props: {
                     />
                 )}
                 <div className={styles.stateIcon}>
-                    {state === 'invalid' && <DangerIconSVG />}
-                    {state === 'valid' && <SuccessIconSVG />}
+                    {state === 'invalid' && <DangerIcon />}
+                    {state === 'valid' && <SuccessIcon />}
                     {loading && <LoadingWheel size={30} style={{ marginTop: -5 }} />}
                 </div>
             </div>

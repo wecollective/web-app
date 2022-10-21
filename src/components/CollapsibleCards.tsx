@@ -3,7 +3,7 @@ import Column from '@components/Column'
 import Markdown from '@components/Markdown'
 import Row from '@components/Row'
 import styles from '@styles/components/CollapsibleCards.module.scss'
-import { ReactComponent as ChevronDownIcon } from '@svgs/chevron-down-solid.svg'
+import { ChevronDownIcon } from '@svgs/all'
 import React, { useState } from 'react'
 
 const Card = (props: {

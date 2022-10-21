@@ -6,10 +6,7 @@ import ShowMoreLess from '@components/ShowMoreLess'
 import StatButton from '@components/StatButton'
 import { statTitle } from '@src/Helpers'
 import styles from '@styles/components/cards/HorizontalSpaceCard.module.scss'
-import { ReactComponent as CommentIconSVG } from '@svgs/comment-solid.svg'
-import { ReactComponent as PostIconSVG } from '@svgs/edit-solid.svg'
-import { ReactComponent as ReactionIconSVG } from '@svgs/fire-alt-solid.svg'
-import { ReactComponent as UsersIconSVG } from '@svgs/users-solid.svg'
+import { CommentIcon, PostIcon, ReactionIcon, UsersIcon } from '@svgs/all'
 import React from 'react'
 import { Link } from 'react-router-dom'
 
@@ -56,22 +53,22 @@ const HorizontalSpaceCard = (props: { space: any; style?: any }): JSX.Element =>
                 </Row>
                 <Row className={styles.stats}>
                     <StatButton
-                        icon={<UsersIconSVG />}
+                        icon={<UsersIcon />}
                         text={totalFollowers}
                         title={statTitle('Follower', totalFollowers)}
                     />
                     <StatButton
-                        icon={<PostIconSVG />}
+                        icon={<PostIcon />}
                         text={totalPosts}
                         title={statTitle('Post', totalPosts)}
                     />
                     <StatButton
-                        icon={<CommentIconSVG />}
+                        icon={<CommentIcon />}
                         text={totalComments}
                         title={statTitle('Comment', totalComments)}
                     />
                     <StatButton
-                        icon={<ReactionIconSVG />}
+                        icon={<ReactionIcon />}
                         text={totalReactions}
                         title={statTitle('Reaction', totalReactions)}
                     />
