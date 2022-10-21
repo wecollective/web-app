@@ -5,12 +5,12 @@ import PageTabs from '@components/PageTabs'
 import Row from '@components/Row'
 import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
-import UserPageAbout from '@pages/UserPage/UserPageAbout'
-import UserPageNotifications from '@pages/UserPage/UserPageNotifications'
-import UserPagePosts from '@pages/UserPage/UserPagePosts'
-import UserPageSettings from '@pages/UserPage/UserPageSettings'
 import FlagImage from '@src/components/FlagImage'
 import { onPageBottomReached } from '@src/Helpers'
+import About from '@src/pages/UserPage/About'
+import Notifications from '@src/pages/UserPage/Notifications'
+import Posts from '@src/pages/UserPage/Posts'
+import Settings from '@src/pages/UserPage/Settings'
 import styles from '@styles/pages/UserPage/UserPage.module.scss'
 import { ReactComponent as BellIcon } from '@svgs/bell-solid.svg'
 import { ReactComponent as AboutIcon } from '@svgs/book-open-solid.svg'
@@ -116,14 +116,10 @@ const UserPage = (): JSX.Element => {
             <Column centerX className={styles.content}>
                 <Switch>
                     <Redirect from='/u/:userHandle/' to='/u/:userHandle/about' exact />
-                    <Route path='/u/:userHandle/about' component={UserPageAbout} exact />
-                    <Route path='/u/:userHandle/posts' component={UserPagePosts} exact />
-                    <Route
-                        path='/u/:userHandle/notifications'
-                        component={UserPageNotifications}
-                        exact
-                    />
-                    <Route path='/u/:userHandle/settings' component={UserPageSettings} exact />
+                    <Route path='/u/:userHandle/about' component={About} exact />
+                    <Route path='/u/:userHandle/posts' component={Posts} exact />
+                    <Route path='/u/:userHandle/notifications' component={Notifications} exact />
+                    <Route path='/u/:userHandle/settings' component={Settings} exact />
                 </Switch>
             </Column>
         </Column>

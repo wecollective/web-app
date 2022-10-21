@@ -2,23 +2,25 @@
 import AudioTimeSlider from '@components/AudioTimeSlider'
 import AudioVisualiser from '@components/AudioVisualiser'
 import BeadCardUrlPreview from '@components/cards/BeadCardUrlPreview'
-import PostCardLikeModal from '@components/cards/PostCard/PostCardLikeModal'
-import PostCardLinkModal from '@components/cards/PostCard/PostCardLinkModal'
 import CloseButton from '@components/CloseButton'
+import CloseOnClickOutside from '@components/CloseOnClickOutside'
 import Column from '@components/Column'
 import DraftText from '@components/draft-js/DraftText'
 import ImageTitle from '@components/ImageTitle'
 import ImageModal from '@components/modals/ImageModal'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
-import { ReactComponent as EditIcon } from '@svgs/edit-solid.svg'
 import StatButton from '@components/StatButton'
 import { AccountContext } from '@contexts/AccountContext'
+import LikeModal from '@src/components/cards/PostCard/LikeModal'
+import LinkModal from '@src/components/cards/PostCard/LinkModal'
+import EditPostModal from '@src/components/modals/EditPostModal'
 import { handleImageError, statTitle } from '@src/Helpers'
-import CloseOnClickOutside from '@components/CloseOnClickOutside'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/cards/PostCard/StringBeadCard.module.scss'
 import { ReactComponent as CommentIcon } from '@svgs/comment-solid.svg'
+import { ReactComponent as EditIcon } from '@svgs/edit-solid.svg'
+import { ReactComponent as VerticalEllipsisIcon } from '@svgs/ellipsis-vertical-solid.svg'
 import { ReactComponent as TextIcon } from '@svgs/font-solid.svg'
 import { ReactComponent as ImageIcon } from '@svgs/image-solid.svg'
 import { ReactComponent as LikeIcon } from '@svgs/like.svg'
@@ -27,7 +29,6 @@ import { ReactComponent as PauseIcon } from '@svgs/pause-solid.svg'
 import { ReactComponent as PlayIcon } from '@svgs/play-solid.svg'
 import { ReactComponent as SourceIcon } from '@svgs/right-to-bracket-solid.svg'
 import { ReactComponent as AudioIcon } from '@svgs/volume-high-solid.svg'
-import { ReactComponent as VerticalEllipsisIcon } from '@svgs/ellipsis-vertical-solid.svg'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
@@ -127,7 +128,7 @@ const StringBeadCard = (props: {
             style={{ ...style, backgroundColor: bead.color }}
         >
             {/* <div className={styles.watermark} /> */}
-            <Row spaceBetween className={styles.beadHeader}>
+            <Row spaceBetween centerY className={styles.beadHeader}>
                 {postType && ['glass-bead-game', 'weave'].includes(postType) && (
                     <ImageTitle
                         type='user'
@@ -138,7 +139,9 @@ const StringBeadCard = (props: {
                         style={{ marginRight: 10 }}
                     />
                 )}
-                <div className={styles.beadType}>{findBeadIcon(type)}</div>
+                <Row centerX centerY className={styles.beadType}>
+                    {findBeadIcon(type)}
+                </Row>
                 {removeBead && bead.Link.relationship !== 'source' && (
                     <CloseButton size={20} onClick={() => removeBead(beadIndex)} />
                 )}
@@ -156,8 +159,8 @@ const StringBeadCard = (props: {
                         <SourceIcon />
                     </button>
                 )}
-                {/* {location !== 'preview' && isOwnPost && (
-                    <>
+                {location !== 'preview' && isOwnPost && type === 'text' && (
+                    <Row>
                         <button
                             type='button'
                             className={styles.menuButton}
@@ -182,8 +185,8 @@ const StringBeadCard = (props: {
                                 </Column>
                             </CloseOnClickOutside>
                         )}
-                    </>
-                )} */}
+                    </Row>
+                )}
             </Row>
             <Column centerY className={styles.beadContent}>
                 {type === 'text' && (
@@ -297,14 +300,14 @@ const StringBeadCard = (props: {
                 />
             )}
             {likeModalOpen && (
-                <PostCardLikeModal
+                <LikeModal
                     close={() => setLikeModalOpen(false)}
                     postData={bead}
                     setPostData={setBead}
                 />
             )}
             {linkModalOpen && (
-                <PostCardLinkModal
+                <LinkModal
                     type='bead'
                     location={location}
                     postId={postId}
@@ -313,43 +316,13 @@ const StringBeadCard = (props: {
                     close={() => setLinkModalOpen(false)}
                 />
             )}
-            {/* {editPostModalOpen && (
-                <Modal
-                    className={styles.editPostModal}
+            {editPostModalOpen && (
+                <EditPostModal
+                    postData={bead}
+                    setPostData={setBead}
                     close={() => setEditPostModalOpen(false)}
-                    centered
-                >
-                    {postEditSaved ? (
-                        <SuccessMessage text='Changes saved' />
-                    ) : (
-                        <Column centerX style={{ width: '100%', maxWidth: 700 }}>
-                            <h1>Edit post text</h1>
-                            <DraftTextEditor
-                                type='post'
-                                stringifiedDraft={newText.value}
-                                maxChars={5000}
-                                onChange={(value, userMentions) => {
-                                    if (value !== newText.value)
-                                        setNewText((t) => {
-                                            return { ...t, value, state: 'default' }
-                                        })
-                                    setMentions(userMentions)
-                                }}
-                                state={newText.state}
-                                errors={newText.errors}
-                                style={{ marginBottom: 20 }}
-                            />
-                            <Button
-                                color='blue'
-                                text='Save changes'
-                                disabled={newText.value === text || postEditLoading}
-                                loading={postEditLoading}
-                                onClick={saveTextChanges}
-                            />
-                        </Column>
-                    )}
-                </Modal>
-            )} */}
+                />
+            )}
         </Column>
     )
 }

@@ -5,12 +5,6 @@ import AudioTimeSlider from '@components/AudioTimeSlider'
 import AudioVisualiser from '@components/AudioVisualiser'
 import Button from '@components/Button'
 import InquiryAnswer from '@components/cards/InquiryAnswer'
-import PostCardComments from '@components/cards/PostCard/PostCardComments'
-import PostCardLikeModal from '@components/cards/PostCard/PostCardLikeModal'
-import PostCardLinkModal from '@components/cards/PostCard/PostCardLinkModal'
-import PostCardRatingModal from '@components/cards/PostCard/PostCardRatingModal'
-import PostCardRepostModal from '@components/cards/PostCard/PostCardRepostModal'
-import PostCardUrlPreview from '@components/cards/PostCard/PostCardUrlPreview'
 import StringBeadCard from '@components/cards/PostCard/StringBeadCard'
 import CloseOnClickOutside from '@components/CloseOnClickOutside'
 import Column from '@components/Column'
@@ -32,18 +26,20 @@ import { AccountContext } from '@contexts/AccountContext'
 import { PostContext } from '@contexts/PostContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import { UserContext } from '@contexts/UserContext'
-import DraftTextEditor from '@src/components/draft-js/DraftTextEditor'
-import SuccessMessage from '@src/components/SuccessMessage'
+import Comments from '@src/components/cards/PostCard/Comments'
+import LikeModal from '@src/components/cards/PostCard/LikeModal'
+import LinkModal from '@src/components/cards/PostCard/LinkModal'
+import RatingModal from '@src/components/cards/PostCard/RatingModal'
+import RepostModal from '@src/components/cards/PostCard/RepostModal'
+import UrlPreview from '@src/components/cards/PostCard/UrlPreview'
+import EditPostModal from '@src/components/modals/EditPostModal'
 import config from '@src/Config'
 import {
     dateCreated,
-    defaultErrorState,
-    findDraftLength,
     formatTimeDHM,
     formatTimeHHDDMMSS,
     formatTimeHM,
     formatTimeMDYT,
-    isValid,
     pluralise,
     statTitle,
     timeSinceCreated,
@@ -149,20 +145,6 @@ const PostCard = (props: {
     const [commentsOpen, setCommentsOpen] = useState(location === 'post-page')
     const [deletePostModalOpen, setDeletePostModalOpen] = useState(false)
     const [editPostModalOpen, setEditPostModalOpen] = useState(false)
-    const [postEditLoading, setPostEditLoading] = useState(false)
-    const [postEditSaved, setPostEditSaved] = useState(false)
-    const [newText, setNewText] = useState({
-        ...defaultErrorState,
-        value: text,
-        validate: (v) => {
-            const errors: string[] = []
-            const totalCharacters = findDraftLength(v)
-            if (totalCharacters < 1) errors.push('Required')
-            if (totalCharacters > 5000) errors.push('Must be less than 5K characters')
-            return errors
-        },
-    })
-    const [mentions, setMentions] = useState<any[]>([])
     const mobileView = document.documentElement.clientWidth < 900
     const history = useHistory()
     const cookies = new Cookies()
@@ -268,41 +250,6 @@ const PostCard = (props: {
             // rounded up to nearest minute
             return `(${formatTimeDHM(Math.ceil(difference / 60) * 60)})`
         return null
-    }
-
-    function saveTextChanges() {
-        const accessToken = cookies.get('accessToken')
-        if (!accessToken) {
-            setAlertMessage('Log in again to edit your post')
-            setAlertModalOpen(true)
-        } else if (isValid(newText, setNewText)) {
-            setPostEditLoading(true)
-            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
-            const data = {
-                postId: id,
-                type,
-                text: newText.value,
-                mentions: mentions.map((m) => m.link),
-                creatorName: accountData.name,
-                creatorHandle: accountData.handle,
-            }
-            axios
-                .post(`${config.apiURL}/update-post-text`, data, options)
-                .then(() => {
-                    setPostData({
-                        ...postData,
-                        text: newText.value,
-                        updatedAt: new Date().toISOString(),
-                    })
-                    setPostEditSaved(true)
-                    setPostEditLoading(false)
-                    setTimeout(() => {
-                        setEditPostModalOpen(false)
-                        setPostEditSaved(false)
-                    }, 1000)
-                })
-                .catch((error) => console.log(error))
-        }
     }
 
     function openImageModal(imageId) {
@@ -755,7 +702,7 @@ const PostCard = (props: {
                                 </ShowMoreLess>
                             </Column>
                         )}
-                        <PostCardUrlPreview
+                        <UrlPreview
                             url={url}
                             image={urlImage}
                             domain={urlDomain}
@@ -1424,7 +1371,7 @@ const PostCard = (props: {
                 )}
             </Column>
             {beadCommentsOpen && (
-                <PostCardComments
+                <Comments
                     postId={selectedBead.id}
                     type='bead'
                     location={location}
@@ -1499,28 +1446,28 @@ const PostCard = (props: {
                             />
                         )}
                         {likeModalOpen && (
-                            <PostCardLikeModal
+                            <LikeModal
                                 postData={postData}
                                 setPostData={setPostData}
                                 close={() => setLikeModalOpen(false)}
                             />
                         )}
                         {repostModalOpen && (
-                            <PostCardRepostModal
+                            <RepostModal
                                 postData={postData}
                                 setPostData={setPostData}
                                 close={() => setRepostModalOpen(false)}
                             />
                         )}
                         {ratingModalOpen && (
-                            <PostCardRatingModal
+                            <RatingModal
                                 postData={postData}
                                 setPostData={setPostData}
                                 close={() => setRatingModalOpen(false)}
                             />
                         )}
                         {linkModalOpen && (
-                            <PostCardLinkModal
+                            <LinkModal
                                 type='post'
                                 location={location}
                                 postData={postData}
@@ -1564,7 +1511,7 @@ const PostCard = (props: {
                     </Row>
                 </Row>
                 {commentsOpen && (
-                    <PostCardComments
+                    <Comments
                         postId={postData.id}
                         type='post'
                         location={location}
@@ -1577,41 +1524,11 @@ const PostCard = (props: {
                 )}
             </Column>
             {editPostModalOpen && (
-                <Modal
-                    className={styles.editPostModal}
+                <EditPostModal
+                    postData={postData}
+                    setPostData={setPostData}
                     close={() => setEditPostModalOpen(false)}
-                    centered
-                >
-                    {postEditSaved ? (
-                        <SuccessMessage text='Changes saved' />
-                    ) : (
-                        <Column centerX style={{ width: '100%', maxWidth: 700 }}>
-                            <h1>Edit post text</h1>
-                            <DraftTextEditor
-                                type='post'
-                                stringifiedDraft={newText.value}
-                                maxChars={5000}
-                                onChange={(value, userMentions) => {
-                                    if (value !== newText.value)
-                                        setNewText((t) => {
-                                            return { ...t, value, state: 'default' }
-                                        })
-                                    setMentions(userMentions)
-                                }}
-                                state={newText.state}
-                                errors={newText.errors}
-                                style={{ marginBottom: 20 }}
-                            />
-                            <Button
-                                color='blue'
-                                text='Save changes'
-                                disabled={newText.value === text || postEditLoading}
-                                loading={postEditLoading}
-                                onClick={saveTextChanges}
-                            />
-                        </Column>
-                    )}
-                </Modal>
+                />
             )}
             {deletePostModalOpen && (
                 <DeletePostModal

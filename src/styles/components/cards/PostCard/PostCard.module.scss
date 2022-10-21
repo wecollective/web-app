@@ -11,12 +11,12 @@
 
     &.styling {
         cursor: pointer;
-        border: 2px solid rgba(0,0,0,0.10);
+        border: 2px solid rgba(0, 0, 0, 0.1);
         box-shadow: none;
 
         &:hover {
             background-color: rgb(249, 253, 255); //white;
-            border: 2px solid rgba(0,0,0,0.35);
+            border: 2px solid rgba(0, 0, 0, 0.35);
         }
 
         @include for-tablet-portrait-up {
@@ -492,15 +492,6 @@
                     }
                 }
             }
-        }
-    }
-
-    .editPostModal {
-        width: 100vw;
-        @include for-tablet-landscape-up {
-            padding: 50px;
-            width: auto;
-            min-width: 600px;
         }
     }
 }
