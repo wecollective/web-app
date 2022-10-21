@@ -1,0 +1,12 @@
+@import '@styles/Variables';
+
+.playButton {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    width: 20px;
+    height: 20px;
+    color: #82bdff; // $blue5;
+    margin-right: 10px;
+    flex-shrink: 0;
+}

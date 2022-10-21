@@ -1,0 +1,84 @@
+@import '@styles/Variables';
+
+.images {
+    padding: 7px;
+    margin-top: 10px;
+
+    .image {
+        position: relative;
+        &:not(:last-child) {
+            margin-right: 10px;
+        }
+
+        > button {
+            all: unset;
+            cursor: pointer;
+
+            > img {
+                border-radius: 5px;
+                object-fit: cover;
+                margin-bottom: 10px;
+                box-shadow: 0 0 7px 0 rgba(10, 8, 72, 0.1);
+            }
+        }
+
+        > p {
+            text-align: center;
+            overflow-wrap: break-word;
+        }
+
+        &.large {
+            > button > img {
+                max-width: 100%;
+                max-height: 450px;
+            }
+            > p {
+                width: 100%;
+            }
+        }
+
+        &.medium {
+            > button > img {
+                width: 300px;
+                height: 300px;
+            }
+            > p {
+                width: 300px;
+            }
+        }
+
+        &.small {
+            > button > img {
+                width: 225px;
+                height: 225px;
+            }
+            > p {
+                width: 225px;
+            }
+        }
+    }
+}
+
+.selectedImage {
+    > button {
+        all: unset;
+        cursor: pointer;
+        > svg {
+            color: $grey3;
+            width: 25px;
+            height: 25px;
+            &:hover {
+                color: $grey4;
+            }
+            transition: color 0.5s;
+        }
+    }
+    > div {
+        margin: 0 10px;
+        > img {
+            max-width: calc(100vw - 200px);
+            max-height: calc(100vh - 200px);
+            margin-bottom: 20px;
+        }
+    }
+}

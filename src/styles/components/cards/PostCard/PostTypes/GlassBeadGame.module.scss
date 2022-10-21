@@ -1,0 +1,67 @@
+@import '@styles/Variables';
+
+.topicImage {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
+    object-fit: cover;
+    margin-right: 10px;
+}
+
+.topicTitle {
+    h1 {
+        margin-bottom: 0;
+        font-size: 24px;
+        line-height: 24px;
+    }
+}
+
+.noSavedBeads {
+    margin: 10px 0;
+    color: $grey4;
+}
+
+.playAllButton {
+    all: unset;
+    cursor: pointer;
+}
+
+.eventTimes {
+    margin-bottom: 10px;
+    svg {
+        width: 20px;
+        height: 20px;
+        color: $grey4;
+    }
+
+    svg,
+    p {
+        margin-right: 5px;
+    }
+
+    p {
+        font-size: 14px;
+    }
+}
+
+.beadDraw {
+    padding: 15px 15px 10px 15px;
+    margin-bottom: -5px;
+    background-color: $grey1;
+    border-radius: 20px;
+}
+
+.beadDivider {
+    width: 35px;
+    opacity: 1;
+    animation-name: fadeInOpacity;
+    animation-timing-function: ease-in;
+    animation-duration: 2s;
+
+    > svg {
+        transform: rotate(90deg);
+        height: 35px;
+        color: $bluegrey2;
+    }
+}

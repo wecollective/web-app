@@ -40,14 +40,7 @@ const StringBeadCard = (props: {
     postId?: number
     postType?: string
     beadIndex: number
-    location:
-        | 'preview'
-        | 'create-string-modal'
-        | 'next-bead-modal'
-        | 'post-page'
-        | 'space-posts'
-        | 'space-post-map'
-        | 'user-posts'
+    location: string
     selected?: boolean
     toggleBeadComments?: () => void
     removeBead?: (beadIndex: number) => void
