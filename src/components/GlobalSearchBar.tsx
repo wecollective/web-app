@@ -164,7 +164,7 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
                             onClick={() => {
                                 history.push(
                                     `/${searchType === 'Spaces' ? 's' : 'u'}/${option.handle}/${
-                                        searchType === 'People' ? 'posts' : subpage
+                                        searchType === 'People' ? 'posts' : subpage || ''
                                     }`
                                 )
                                 setSuggestions([])
