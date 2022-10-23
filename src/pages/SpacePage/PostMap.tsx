@@ -127,7 +127,7 @@ const PostMap = (props: { postMapData: any; params: any }): JSX.Element => {
                             // fall back on placeholder
                             newImage.attr(
                                 'xlink:href',
-                                '/images/placeholders/broken-image-left.jpg'
+                                `${config.publicAssets}/images/placeholders/broken-image-left.jpg`
                             )
                         }
                     })
@@ -668,7 +668,7 @@ const PostMap = (props: { postMapData: any; params: any }): JSX.Element => {
                     >
                         <img
                             className={styles.keyButton}
-                            src='/icons/key-solid.svg'
+                            src={`${config.publicAssets}/icons/key-solid.svg`}
                             aria-label='key'
                         />
                     </div>

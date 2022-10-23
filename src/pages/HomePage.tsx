@@ -32,21 +32,21 @@ const Homepage = (): JSX.Element => {
     const cardData = [
         {
             text: '# New ways of organising information',
-            imagePath: '/images/information.jpg',
+            imagePath: `${config.publicAssets}/images/information.jpg`,
             children: [
                 {
                     text: '# Organise spaces holonically',
-                    imagePath: '/images/holarchy.jpg',
+                    imagePath: `${config.publicAssets}/images/holarchy.jpg`,
                     children: [],
                 },
                 {
                     text: '# Navigate spaces visually',
-                    imagePath: '/images/tree.jpg',
+                    imagePath: `${config.publicAssets}/images/tree.jpg`,
                     children: [],
                 },
                 {
                     text: '# Link posts together',
-                    imagePath: '/images/string.jpg',
+                    imagePath: `${config.publicAssets}/images/string.jpg`,
                     children: [],
                 },
             ],
@@ -57,24 +57,24 @@ const Homepage = (): JSX.Element => {
             children: [
                 {
                     text: '# Play with time',
-                    imagePath: '/images/time.jpg',
+                    imagePath: `${config.publicAssets}/images/time.jpg`,
                     children: [],
                 },
                 {
                     text: '# Process ideas collectively (Soon<sup>TM</sup>)',
-                    imagePath: '/images/process.jpg',
+                    imagePath: `${config.publicAssets}/images/process.jpg`,
                     children: [],
                 },
                 {
                     text: '# Design beautiful information (Soon<sup>TM</sup>)',
-                    imagePath: '/images/design.jpg',
+                    imagePath: `${config.publicAssets}/images/design.jpg`,
                     children: [],
                 },
             ],
         },
         {
             text: '# New ways of being together',
-            imagePath: '/images/being.jpg',
+            imagePath: `${config.publicAssets}/images/being.jpg`,
             children: [
                 {
                     text: '# Cooperatively owned (Soon<sup>TM</sup>)',
@@ -146,11 +146,18 @@ const Homepage = (): JSX.Element => {
             <Column className={styles.background}>
                 <div className={styles.sky} />
                 <div className={styles.earthImage}>
-                    <img src='/images/homepage-earth.svg' alt='background wave svg' />
+                    <img
+                        src={`${config.publicAssets}/images/homepage-earth.svg`}
+                        alt='background wave svg'
+                    />
                 </div>
             </Column>
             <Column centerX className={styles.content}>
-                <img className={styles.logo} src='/images/new-logo.svg' alt='weco logo' />
+                <img
+                    className={styles.logo}
+                    src={`${config.publicAssets}/images/new-logo.svg`}
+                    alt='weco logo'
+                />
                 <h1>
                     we
                     <span className='roboto'>{`{`}</span>

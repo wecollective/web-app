@@ -13,6 +13,7 @@ const config = {
     turnServerUrl: process.env.REACT_APP_TURN_SERVER_URL,
     turnServerUsername: process.env.REACT_APP_TURN_SERVER_USERNAME,
     turnServerPassword: process.env.REACT_APP_TURN_SERVER_PASSWORD,
+    publicAssets: process.env.REACT_APP_PUBLIC_ASSETS_URL,
 }
 
 export default config

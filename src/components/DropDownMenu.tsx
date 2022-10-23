@@ -1,4 +1,5 @@
 import CloseOnClickOutside from '@components/CloseOnClickOutside'
+import config from '@src/Config'
 import styles from '@styles/components/DropDownMenu.module.scss'
 import React, { useState } from 'react'
 
@@ -33,7 +34,7 @@ const DropDownMenu = (props: {
                         {selectedOption}
                         <img
                             className={styles.icon}
-                            src='/icons/sort-down-solid.svg'
+                            src={`${config.publicAssets}/icons/sort-down-solid.svg`}
                             aria-label='drop-down'
                         />
                     </div>

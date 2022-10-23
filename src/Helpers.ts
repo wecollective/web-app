@@ -1,4 +1,5 @@
 /* eslint-disable no-control-regex */
+import config from '@src/Config'
 import { convertFromRaw, EditorState } from 'draft-js'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -346,7 +347,7 @@ export function handleImageError(e: any, image: string): void {
     if (!e.target.src.includes('https://') && !e.target.src.includes('//images.weserv.nl/')) {
         e.target.src = `//images.weserv.nl/?url=${image}`
     } else {
-        e.target.src = '/images/placeholders/broken-image.jpg'
+        e.target.src = `${config.publicAssets}/images/placeholders/broken-image.jpg`
     }
 }
 

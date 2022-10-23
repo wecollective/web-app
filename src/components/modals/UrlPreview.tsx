@@ -1,3 +1,4 @@
+import config from '@src/Config'
 import styles from '@styles/components/UrlPreview.module.scss'
 import React from 'react'
 
@@ -26,7 +27,7 @@ const UrlPreview = (props: {
                 <div className={styles.container}>
                     <img
                         className={styles.loadingImage}
-                        src='/images/cube-loading.gif'
+                        src={`${config.publicAssets}/images/cube-loading.gif`}
                         aria-label='loading'
                     />
                 </div>
@@ -51,7 +52,7 @@ const UrlPreview = (props: {
                             <a className={styles.domain} href={url}>
                                 <img
                                     className={styles.icon}
-                                    src='/icons/link-solid.svg'
+                                    src={`${config.publicAssets}/icons/link-solid.svg`}
                                     aria-label='url domain'
                                 />
                                 <div className={styles.domainText}>{urlDomain}</div>

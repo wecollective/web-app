@@ -1,3 +1,4 @@
+import config from '@src/Config'
 import styles from '@styles/components/SideBarButton.module.scss'
 import React from 'react'
 import { Link } from 'react-router-dom'
@@ -25,7 +26,11 @@ const SideBarButton = (props: {
                 style={{ marginBottom }}
                 onClick={handleClick}
             >
-                <img className={styles.icon} src={`/icons/${icon}`} alt={`${text} button`} />
+                <img
+                    className={styles.icon}
+                    src={`${config.publicAssets}/icons/${icon}`}
+                    alt={`${text} button`}
+                />
                 <span className={styles.text}>{text}</span>
                 {total !== undefined && (
                     <div className={styles.numberWrapper}>
@@ -45,7 +50,11 @@ const SideBarButton = (props: {
             onClick={handleClick}
             onKeyDown={handleClick}
         >
-            <img className={styles.icon} src={`/icons/${icon}`} alt={`${text} button`} />
+            <img
+                className={styles.icon}
+                src={`${config.publicAssets}/icons/${icon}`}
+                alt={`${text} button`}
+            />
             <span className={styles.text}>{text}</span>
         </div>
     )

@@ -1,6 +1,7 @@
+import config from '@src/Config'
 // image paths
-const arc = '/images/archetopics/'
-const lim = '/images/liminal/'
+const arc = `${config.publicAssets}/images/archetopics/`
+const lim = `${config.publicAssets}/images/liminal/`
 
 export default {
     archetopics: [

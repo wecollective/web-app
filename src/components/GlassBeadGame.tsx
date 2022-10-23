@@ -470,9 +470,9 @@ const GlassBeadGame = (): JSX.Element => {
 
     const history = useHistory()
     const largeScreen = document.body.clientWidth >= 900
-    const roomIntro = new Audio('/audio/room-intro.mp3')
-    const highMetalTone = new Audio('/audio/hi-metal-tone.mp3')
-    const lowMetalTone = new Audio('/audio/lo-metal-tone.mp3')
+    const roomIntro = new Audio(`${config.publicAssets}/audio/room-intro.mp3`)
+    const highMetalTone = new Audio(`${config.publicAssets}/audio/hi-metal-tone.mp3`)
+    const lowMetalTone = new Audio(`${config.publicAssets}/audio/lo-metal-tone.mp3`)
     const arcWidth = 20
     const gameArcRadius = 180
     // const turnArcRadius = 180
@@ -1104,71 +1104,72 @@ const GlassBeadGame = (): JSX.Element => {
     // }, [])
 
     function addPlayButtonToCenterBead() {
-        Promise.all([d3.xml('/icons/play-solid.svg'), d3.xml('/icons/pause-solid.svg')]).then(
-            ([play, pause]) => {
-                const timerBead = d3.select('#timer-bead')
-                timerBead.node().append(play.documentElement)
-                timerBead.node().append(pause.documentElement)
-                timerBead
-                    .selectAll('svg')
-                    .attr('width', 60)
-                    .attr('height', 60)
-                    .attr('x', -30)
-                    .attr('y', -30)
-                    // .style('color', '#000')
-                    .style('cursor', 'pointer')
+        Promise.all([
+            d3.xml(`${config.publicAssets}/icons/play-solid.svg`),
+            d3.xml(`${config.publicAssets}/icons/pause-solid.svg`),
+        ]).then(([play, pause]) => {
+            const timerBead = d3.select('#timer-bead')
+            timerBead.node().append(play.documentElement)
+            timerBead.node().append(pause.documentElement)
+            timerBead
+                .selectAll('svg')
+                .attr('width', 60)
+                .attr('height', 60)
+                .attr('x', -30)
+                .attr('y', -30)
+                // .style('color', '#000')
+                .style('cursor', 'pointer')
 
-                const playButton = d3.select(timerBead.selectAll('svg').nodes()[0])
-                const pauseButton = d3.select(timerBead.selectAll('svg').nodes()[1])
-                playButton
-                    .attr('id', 'play-button')
-                    .attr('display', 'flex')
-                    .classed('transitioning', true)
-                    .style('opacity', 0)
-                    .on('mouseover', () => {
-                        if (!playButton.classed('transitioning'))
-                            playButton.transition().duration(300).style('color', '#444')
-                    })
-                    .on('mouseout', () => {
-                        if (!playButton.classed('transitioning'))
-                            playButton.transition().duration(300).style('color', '#000')
-                    })
-                    .on('mousedown', () => {
-                        playButton.attr('display', 'none')
-                        pauseButton.attr('display', 'flex')
-                        const audio = d3
-                            .select(`#gbg-bead-${postData.id}-${liveBeadIndexRef.current}-gbg`)
-                            .select('audio')
-                            .node()
-                        if (audio) audio.play()
-                    })
-                    .transition()
-                    .duration(1000)
-                    .style('opacity', 1)
-                    .on('end', () => playButton.classed('transitioning', false))
-                pauseButton
-                    .attr('id', 'pause-button')
-                    .attr('display', 'none')
-                    .classed('transitioning', false)
-                    .on('mouseover', () => {
-                        if (!pauseButton.classed('transitioning'))
-                            pauseButton.transition().duration(300).style('color', '#444')
-                    })
-                    .on('mouseout', () => {
-                        if (!pauseButton.classed('transitioning'))
-                            pauseButton.transition().duration(300).style('color', '#000')
-                    })
-                    .on('mousedown', () => {
-                        pauseButton.attr('display', 'none')
-                        playButton.attr('display', 'flex')
-                        const audio = d3
-                            .select(`#gbg-bead-${postData.id}-${liveBeadIndexRef.current}-gbg`)
-                            .select('audio')
-                            .node()
-                        if (audio) audio.pause()
-                    })
-            }
-        )
+            const playButton = d3.select(timerBead.selectAll('svg').nodes()[0])
+            const pauseButton = d3.select(timerBead.selectAll('svg').nodes()[1])
+            playButton
+                .attr('id', 'play-button')
+                .attr('display', 'flex')
+                .classed('transitioning', true)
+                .style('opacity', 0)
+                .on('mouseover', () => {
+                    if (!playButton.classed('transitioning'))
+                        playButton.transition().duration(300).style('color', '#444')
+                })
+                .on('mouseout', () => {
+                    if (!playButton.classed('transitioning'))
+                        playButton.transition().duration(300).style('color', '#000')
+                })
+                .on('mousedown', () => {
+                    playButton.attr('display', 'none')
+                    pauseButton.attr('display', 'flex')
+                    const audio = d3
+                        .select(`#gbg-bead-${postData.id}-${liveBeadIndexRef.current}-gbg`)
+                        .select('audio')
+                        .node()
+                    if (audio) audio.play()
+                })
+                .transition()
+                .duration(1000)
+                .style('opacity', 1)
+                .on('end', () => playButton.classed('transitioning', false))
+            pauseButton
+                .attr('id', 'pause-button')
+                .attr('display', 'none')
+                .classed('transitioning', false)
+                .on('mouseover', () => {
+                    if (!pauseButton.classed('transitioning'))
+                        pauseButton.transition().duration(300).style('color', '#444')
+                })
+                .on('mouseout', () => {
+                    if (!pauseButton.classed('transitioning'))
+                        pauseButton.transition().duration(300).style('color', '#000')
+                })
+                .on('mousedown', () => {
+                    pauseButton.attr('display', 'none')
+                    playButton.attr('display', 'flex')
+                    const audio = d3
+                        .select(`#gbg-bead-${postData.id}-${liveBeadIndexRef.current}-gbg`)
+                        .select('audio')
+                        .node()
+                    if (audio) audio.pause()
+                })
+        })
     }
 
     function addEventListenersToBead(beadIndex) {
@@ -1673,7 +1674,7 @@ const GlassBeadGame = (): JSX.Element => {
             .append('image')
             .attr('id', 'wave-form-image')
             .attr('height', 120)
-            .attr('xlink:href', '/icons/gbg/sound-wave.png')
+            .attr('xlink:href', `${config.publicAssets}/icons/gbg/sound-wave.png`)
 
         timerBead
             .append('rect')

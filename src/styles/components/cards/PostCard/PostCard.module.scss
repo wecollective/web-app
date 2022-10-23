@@ -264,7 +264,7 @@
 // }
 
 // .pinFlag {
-//     background-image: url(/icons/pin-01.png);
+//     background-image: url(`${config.publicAssets}/icons/pin-01.png`);
 //     background-position: center;
 //     background-repeat: no-repeat;
 //     background-size: cover;

@@ -137,7 +137,7 @@ const GlassBeadGame = (props: {
                     )}
                 </Column>
             </Row>
-            {Event && (
+            {event && (
                 <Column>
                     <Row wrap centerY className={styles.eventTimes}>
                         <ClockIcon />

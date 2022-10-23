@@ -4,6 +4,7 @@ import DraftText from '@components/draft-js/DraftText'
 import Row from '@components/Row'
 import StatButton from '@components/StatButton'
 import { SpaceContext } from '@contexts/SpaceContext'
+import config from '@src/Config'
 import styles from '@styles/pages/SpacePage/SpaceMap.module.scss'
 import { CommentIcon, PostIcon, ReactionIcon, UsersIcon } from '@svgs/all'
 import * as d3 from 'd3'
@@ -80,10 +81,13 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
                 .attr('width', findRadius(d) * 2)
                 .attr('preserveAspectRatio', 'xMidYMid slice')
                 .attr('xlink:href', () => {
-                    if (d.data.expander) return '/icons/plus-icon.jpg'
+                    if (d.data.expander) return `${config.publicAssets}/icons/plus-icon.jpg`
                     if (d.data.privacy === 'private' && d.data.spaceAccess !== 'active')
-                        return '/icons/lock-icon.png'
-                    return d.data.flagImagePath || '/icons/default-space-flag.jpg'
+                        return `${config.publicAssets}/icons/lock-icon.png`
+                    return (
+                        d.data.flagImagePath ||
+                        `${config.publicAssets}/icons/default-space-flag.jpg`
+                    )
                 })
             // .on('error', () => {
             //     const newImage = d3.select(`#image-${d.id}`)
@@ -92,7 +96,7 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
             //         newImage.attr('xlink:href', `//images.weserv.nl/?url=${d.urlImage}`)
             //     } else {
             //         // fall back on placeholder
-            //         newImage.attr('xlink:href', '/images/placeholders/broken-image-left.jpg')
+            //         newImage.attr('xlink:href', `${config.publicAssets}/images/placeholders/broken-image-left.jpg')
             //     }
             // })
         }
@@ -817,8 +821,8 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
                             .append('svg:image')
                             .attr('xlink:href', (d) => {
                                 return d.data.collapsed === true
-                                    ? '/icons/plus.svg'
-                                    : '/icons/minus-solid.svg'
+                                    ? `${config.publicAssets}/icons/plus.svg`
+                                    : `${config.publicAssets}/icons/minus-solid.svg`
                             })
                             .classed('node-button', true)
                             .attr('id', (d) => `node-button-${d.data.id}`)
@@ -851,8 +855,8 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
                                 .duration(duration)
                                 .attr('xlink:href', (d) => {
                                     return d.data.collapsed === true
-                                        ? '/icons/plus.svg'
-                                        : '/icons/minus-solid.svg'
+                                        ? `${config.publicAssets}/icons/plus.svg`
+                                        : `${config.publicAssets}/icons/minus-solid.svg`
                                 })
                                 .attr('transform', (d) => {
                                     return `translate(${d.x},${d.y})`
