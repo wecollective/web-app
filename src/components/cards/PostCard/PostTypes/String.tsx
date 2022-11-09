@@ -15,9 +15,10 @@ const String = (props: {
     location: string
 }): JSX.Element => {
     const { postData, setPostData, location } = props
-    const { id, text, StringPosts: stringPosts } = postData
+    const { id, text, StringPosts } = postData
     const [selectedBead, setSelectedBead] = useState<any>(null)
     const [beadCommentsOpen, setBeadCommentsOpen] = useState(false)
+    const stringPosts = StringPosts && StringPosts.sort((a, b) => a.Link.index - b.Link.index)
 
     return (
         <Column>
