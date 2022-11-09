@@ -1,4 +1,3 @@
-/* eslint-disable no-return-assign */
 /* eslint-disable prefer-destructuring */
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
@@ -305,7 +304,9 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         }
     }, [spaceData.id, loggedIn])
 
-    useEffect(() => (currentSpaceHandleRef.current = location.pathname.split('/')[2]), [location])
+    useEffect(() => {
+        currentSpaceHandleRef.current = location.pathname.split('/')[2]
+    }, [location])
 
     return (
         <SpaceContext.Provider
