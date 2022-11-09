@@ -1104,72 +1104,71 @@ const GlassBeadGame = (): JSX.Element => {
     // }, [])
 
     function addPlayButtonToCenterBead() {
-        Promise.all([
-            d3.xml(`${config.publicAssets}/icons/play-solid.svg`),
-            d3.xml(`${config.publicAssets}/icons/pause-solid.svg`),
-        ]).then(([play, pause]) => {
-            const timerBead = d3.select('#timer-bead')
-            timerBead.node().append(play.documentElement)
-            timerBead.node().append(pause.documentElement)
-            timerBead
-                .selectAll('svg')
-                .attr('width', 60)
-                .attr('height', 60)
-                .attr('x', -30)
-                .attr('y', -30)
-                // .style('color', '#000')
-                .style('cursor', 'pointer')
+        Promise.all([d3.xml('/icons/play-solid.svg'), d3.xml('/icons/pause-solid.svg')]).then(
+            ([play, pause]) => {
+                const timerBead = d3.select('#timer-bead')
+                timerBead.node().append(play.documentElement)
+                timerBead.node().append(pause.documentElement)
+                timerBead
+                    .selectAll('svg')
+                    .attr('width', 60)
+                    .attr('height', 60)
+                    .attr('x', -30)
+                    .attr('y', -30)
+                    // .style('color', '#000')
+                    .style('cursor', 'pointer')
 
-            const playButton = d3.select(timerBead.selectAll('svg').nodes()[0])
-            const pauseButton = d3.select(timerBead.selectAll('svg').nodes()[1])
-            playButton
-                .attr('id', 'play-button')
-                .attr('display', 'flex')
-                .classed('transitioning', true)
-                .style('opacity', 0)
-                .on('mouseover', () => {
-                    if (!playButton.classed('transitioning'))
-                        playButton.transition().duration(300).style('color', '#444')
-                })
-                .on('mouseout', () => {
-                    if (!playButton.classed('transitioning'))
-                        playButton.transition().duration(300).style('color', '#000')
-                })
-                .on('mousedown', () => {
-                    playButton.attr('display', 'none')
-                    pauseButton.attr('display', 'flex')
-                    const audio = d3
-                        .select(`#gbg-bead-${postData.id}-${liveBeadIndexRef.current}-gbg`)
-                        .select('audio')
-                        .node()
-                    if (audio) audio.play()
-                })
-                .transition()
-                .duration(1000)
-                .style('opacity', 1)
-                .on('end', () => playButton.classed('transitioning', false))
-            pauseButton
-                .attr('id', 'pause-button')
-                .attr('display', 'none')
-                .classed('transitioning', false)
-                .on('mouseover', () => {
-                    if (!pauseButton.classed('transitioning'))
-                        pauseButton.transition().duration(300).style('color', '#444')
-                })
-                .on('mouseout', () => {
-                    if (!pauseButton.classed('transitioning'))
-                        pauseButton.transition().duration(300).style('color', '#000')
-                })
-                .on('mousedown', () => {
-                    pauseButton.attr('display', 'none')
-                    playButton.attr('display', 'flex')
-                    const audio = d3
-                        .select(`#gbg-bead-${postData.id}-${liveBeadIndexRef.current}-gbg`)
-                        .select('audio')
-                        .node()
-                    if (audio) audio.pause()
-                })
-        })
+                const playButton = d3.select(timerBead.selectAll('svg').nodes()[0])
+                const pauseButton = d3.select(timerBead.selectAll('svg').nodes()[1])
+                playButton
+                    .attr('id', 'play-button')
+                    .attr('display', 'flex')
+                    .classed('transitioning', true)
+                    .style('opacity', 0)
+                    .on('mouseover', () => {
+                        if (!playButton.classed('transitioning'))
+                            playButton.transition().duration(300).style('color', '#444')
+                    })
+                    .on('mouseout', () => {
+                        if (!playButton.classed('transitioning'))
+                            playButton.transition().duration(300).style('color', '#000')
+                    })
+                    .on('mousedown', () => {
+                        playButton.attr('display', 'none')
+                        pauseButton.attr('display', 'flex')
+                        const audio = d3
+                            .select(`#gbg-bead-${postData.id}-${liveBeadIndexRef.current}-gbg`)
+                            .select('audio')
+                            .node()
+                        if (audio) audio.play()
+                    })
+                    .transition()
+                    .duration(1000)
+                    .style('opacity', 1)
+                    .on('end', () => playButton.classed('transitioning', false))
+                pauseButton
+                    .attr('id', 'pause-button')
+                    .attr('display', 'none')
+                    .classed('transitioning', false)
+                    .on('mouseover', () => {
+                        if (!pauseButton.classed('transitioning'))
+                            pauseButton.transition().duration(300).style('color', '#444')
+                    })
+                    .on('mouseout', () => {
+                        if (!pauseButton.classed('transitioning'))
+                            pauseButton.transition().duration(300).style('color', '#000')
+                    })
+                    .on('mousedown', () => {
+                        pauseButton.attr('display', 'none')
+                        playButton.attr('display', 'flex')
+                        const audio = d3
+                            .select(`#gbg-bead-${postData.id}-${liveBeadIndexRef.current}-gbg`)
+                            .select('audio')
+                            .node()
+                        if (audio) audio.pause()
+                    })
+            }
+        )
     }
 
     function addEventListenersToBead(beadIndex) {
