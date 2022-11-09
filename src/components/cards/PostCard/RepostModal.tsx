@@ -90,26 +90,12 @@ const RepostModal = (props: {
             const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
             axios
                 .post(`${config.apiURL}/repost-post`, data, authHeader)
-                .then((res) => {
+                .then(() => {
                     setPostData({
                         ...postData,
                         totalReactions: postData.totalReactions + selectedSpaces.length,
                         totalReposts: postData.totalReposts + selectedSpaces.length,
                         accountRepost: true,
-                        DirectSpaces: [
-                            ...postData.DirectSpaces,
-                            ...selectedSpaces.map((space) => {
-                                return { id: space.id }
-                            }),
-                        ],
-                        IndirectSpaces: [
-                            ...postData.IndirectSpaces,
-                            ...res.data.indirectRelationships
-                                .filter((id) => id !== null)
-                                .map((id) => {
-                                    return { id }
-                                }),
-                        ],
                     })
                     close()
                 })
