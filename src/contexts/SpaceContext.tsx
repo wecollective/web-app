@@ -1,8 +1,11 @@
+/* eslint-disable no-return-assign */
+/* eslint-disable prefer-destructuring */
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
 import { ISpaceContext } from '@src/Interfaces'
 import axios from 'axios'
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
 export const SpaceContext = createContext<ISpaceContext>({} as ISpaceContext)
@@ -93,7 +96,9 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     const [spacePeoplePaginationOffset, setSpacePeoplePaginationOffset] = useState(0)
     const [spacePeoplePaginationHasMore, setSpacePeoplePaginationHasMore] = useState(true)
 
+    const currentSpaceHandleRef = useRef('')
     const cookies = new Cookies()
+    const location = useLocation()
 
     // todo: use authenticate token to grab space data and posts when logged in
     function getSpaceData(handle: string) {
@@ -136,11 +141,13 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 options
             )
             .then((res) => {
-                setSpacePosts(firstLoad ? res.data : [...spacePosts, ...res.data])
-                setSpacePostsPaginationHasMore(res.data.length === spacePostsPaginationLimit)
-                setSpacePostsPaginationOffset(offset + spacePostsPaginationLimit)
-                if (firstLoad) setSpacePostsLoading(false)
-                else setNextSpacePostsLoading(false)
+                if (currentSpaceHandleRef.current === spaceData.handle) {
+                    setSpacePosts(firstLoad ? res.data : [...spacePosts, ...res.data])
+                    setSpacePostsPaginationHasMore(res.data.length === spacePostsPaginationLimit)
+                    setSpacePostsPaginationOffset(offset + spacePostsPaginationLimit)
+                    if (firstLoad) setSpacePostsLoading(false)
+                    else setNextSpacePostsLoading(false)
+                }
             })
     }
 
@@ -297,6 +304,8 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
             setIsModerator(false)
         }
     }, [spaceData.id, loggedIn])
+
+    useEffect(() => (currentSpaceHandleRef.current = location.pathname.split('/')[2]), [location])
 
     return (
         <SpaceContext.Provider
