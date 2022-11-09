@@ -23,13 +23,13 @@ const UpdateSpaceHandleModal = (props: { close: () => void }): JSX.Element => {
     function updateSpaceName(e) {
         e.preventDefault()
         const unChanged = inputValue === spaceData.name
-        const invalid = inputValue.length < 1 || inputValue.length > 30
+        const invalid = inputValue.length < 1 || inputValue.length > 50
         if (unChanged) {
             setInputState('invalid')
             setInputErrors([`Already saved as '${inputValue}'`])
         } else if (invalid) {
             setInputState('invalid')
-            setInputErrors(['Must be between 1 and 30 characters'])
+            setInputErrors(['Must be between 1 and 50 characters'])
         } else {
             setInputState('valid')
             setLoading(true)

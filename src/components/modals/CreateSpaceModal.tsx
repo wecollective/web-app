@@ -47,7 +47,7 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
             validate: (v) => {
                 const errors: string[] = []
                 if (!v) errors.push('Required')
-                if (v.length > 30) errors.push('Must be less than 30 characters')
+                if (v.length > 50) errors.push('Must be less than 50 characters')
                 return errors
             },
         },
