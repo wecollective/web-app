@@ -4,8 +4,8 @@ import Mention from '@components/draft-js/Mention'
 import Markdown from '@components/Markdown'
 import createLinkPlugin from '@draft-js-plugins/anchor'
 import Editor from '@draft-js-plugins/editor'
-import createEmojiPlugin, { defaultTheme } from '@draft-js-plugins/emoji'
-import '@draft-js-plugins/emoji/lib/plugin.css'
+// import createEmojiPlugin, { defaultTheme } from '@draft-js-plugins/emoji'
+// import '@draft-js-plugins/emoji/lib/plugin.css'
 import createLinkifyPlugin from '@draft-js-plugins/linkify'
 import createMentionPlugin from '@draft-js-plugins/mention'
 import '@draft-js-plugins/mention/lib/plugin.css'
@@ -29,17 +29,17 @@ const DraftText = (props: {
             mentionComponent: Mention,
         })
     )
-    const [emojiPlugin] = useState(
-        createEmojiPlugin({
-            theme: {
-                ...defaultTheme,
-                emojiSelectButton: styles.emojiSelectButton,
-                emojiSelectButtonPressed: `${styles.emojiSelectButton} ${styles.selected}`,
-                emojiSelectPopover: styles.emojiSelectPopover,
-            },
-            // useNativeArt: true,
-        })
-    )
+    // const [emojiPlugin] = useState(
+    //     createEmojiPlugin({
+    //         theme: {
+    //             ...defaultTheme,
+    //             emojiSelectButton: styles.emojiSelectButton,
+    //             emojiSelectButtonPressed: `${styles.emojiSelectButton} ${styles.selected}`,
+    //             emojiSelectPopover: styles.emojiSelectPopover,
+    //         },
+    //         // useNativeArt: true,
+    //     })
+    // )
     const [textAlignmentPlugin] = useState(
         createTextAlignmentPlugin({
             theme: {
@@ -57,7 +57,7 @@ const DraftText = (props: {
             component: (linkifyProps) => <a {...linkifyProps} />,
         })
     )
-    const plugins = [textAlignmentPlugin, mentionPlugin, emojiPlugin, linkPlugin, linkifyPlugin]
+    const plugins = [textAlignmentPlugin, mentionPlugin, linkPlugin, linkifyPlugin] // emojiPlugin
     const editorRef = useRef<any>(null)
 
     useEffect(() => {

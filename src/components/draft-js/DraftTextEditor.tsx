@@ -18,8 +18,8 @@ import {
     UnorderedListButton,
 } from '@draft-js-plugins/buttons'
 import Editor from '@draft-js-plugins/editor'
-import createEmojiPlugin, { defaultTheme as emojiTheme } from '@draft-js-plugins/emoji'
-import '@draft-js-plugins/emoji/lib/plugin.css'
+// import createEmojiPlugin, { defaultTheme as emojiTheme } from '@draft-js-plugins/emoji'
+// import '@draft-js-plugins/emoji/lib/plugin.css'
 import createLinkifyPlugin from '@draft-js-plugins/linkify'
 import createMentionPlugin from '@draft-js-plugins/mention'
 import '@draft-js-plugins/mention/lib/plugin.css'
@@ -69,17 +69,17 @@ const DraftTextEditor = (props: {
             mentionComponent: Mention,
         })
     )
-    const [emojiPlugin] = useState(
-        createEmojiPlugin({
-            theme: {
-                ...emojiTheme,
-                emojiSelectButton: styles.emojiSelectButton,
-                emojiSelectButtonPressed: `${styles.emojiSelectButton} ${styles.selected}`,
-                emojiSelectPopover: styles.emojiSelectPopover,
-            },
-            // useNativeArt: true,
-        })
-    )
+    // const [emojiPlugin] = useState(
+    //     createEmojiPlugin({
+    //         theme: {
+    //             ...emojiTheme,
+    //             emojiSelectButton: styles.emojiSelectButton,
+    //             emojiSelectButtonPressed: `${styles.emojiSelectButton} ${styles.selected}`,
+    //             emojiSelectPopover: styles.emojiSelectPopover,
+    //         },
+    //         // useNativeArt: true,
+    //     })
+    // )
     const [textAlignmentPlugin] = useState(
         createTextAlignmentPlugin({
             theme: {
@@ -109,7 +109,7 @@ const DraftTextEditor = (props: {
         toolbarPlugin,
         textAlignmentPlugin,
         mentionPlugin,
-        emojiPlugin,
+        // emojiPlugin,
         linkPlugin,
         linkifyPlugin,
     ]
@@ -119,7 +119,7 @@ const DraftTextEditor = (props: {
     const [toolbarKey, setToolbarKey] = useState(0)
     const editorRef = useRef<any>(null)
 
-    const { EmojiSuggestions, EmojiSelect } = emojiPlugin
+    // const { EmojiSuggestions, EmojiSelect } = emojiPlugin
     const { TextAlignment } = textAlignmentPlugin as any
     const { LinkButton } = linkPlugin
     const { Toolbar } = toolbarPlugin
@@ -197,10 +197,10 @@ const DraftTextEditor = (props: {
                     </Row>
                 )}
             </Toolbar>
-            <div className={styles.emojiButtonWrapper}>
+            {/* <div className={styles.emojiButtonWrapper}>
                 <EmojiSelect closeOnEmojiSelect />
                 <EmojiSuggestions />
-            </div>
+            </div> */}
             {editorState && (
                 <Row>
                     {type === 'comment' && (
