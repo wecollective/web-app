@@ -16,6 +16,8 @@ import { AboutIcon, BellIcon, PostIcon, SettingsIcon } from '@svgs/all'
 import React, { useContext, useEffect, useState } from 'react'
 import { Redirect, Route, Switch, useLocation } from 'react-router-dom'
 
+// todo: load UserNotFound component here instead of in each subpage?
+
 const UserPage = (): JSX.Element => {
     const { accountDataLoading, setPageBottomReached, loggedIn } = useContext(AccountContext)
     const {
