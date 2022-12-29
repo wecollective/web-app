@@ -3,19 +3,19 @@ import ImageTitle from '@components/ImageTitle'
 import LoadingWheel from '@components/LoadingWheel'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
-import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import styles from '@styles/pages/SpacePage/NavigationList.module.scss'
 import { ArrowDownIcon, ArrowUpIcon, MinusIcon, PlusIcon } from '@svgs/all'
 import axios from 'axios'
 import React, { useContext } from 'react'
+import Cookies from 'universal-cookie'
 
 const NavigationList = (props: { onLocationChange?: () => void; style?: any }): JSX.Element => {
     const { onLocationChange, style } = props
-    const { accountData } = useContext(AccountContext)
     const { spaceData, setSpaceData, selectedSpaceSubPage } = useContext(SpaceContext)
     const { DirectParentSpaces: parentSpaces, DirectChildSpaces: childSpaces } = spaceData
+    const cookies = new Cookies()
 
     function expandSpace(type, spaceId) {
         // todo: use local space arrays instead of mutating spaceData in context
@@ -33,12 +33,12 @@ const NavigationList = (props: { onLocationChange?: () => void; style?: any }): 
         } else {
             newSpace.loading = true
             setSpaceData({ ...spaceData, [key]: newSpaces })
+            const accessToken = cookies.get('accessToken')
+            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
             const filters =
                 'timeRange=AllTime&sortBy=Likes&sortOrder=Descending&depth=Only Direct Descendants&offset=0'
             axios
-                .get(
-                    `${config.apiURL}/space-spaces?accountId=${accountData.id}&spaceId=${spaceId}&${filters}`
-                )
+                .get(`${config.apiURL}/space-spaces?spaceId=${spaceId}&${filters}`, options)
                 .then((res) => {
                     newSpace[key] = res.data
                     newSpace.expanded = true
