@@ -6,7 +6,7 @@ const Text = (props: { postData: any }): JSX.Element => {
     const { postData } = props
     const { text } = postData
     return (
-        <ShowMoreLess height={150}>
+        <ShowMoreLess height={300}>
             <DraftText stringifiedDraft={text} />
         </ShowMoreLess>
     )

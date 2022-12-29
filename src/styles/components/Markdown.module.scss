@@ -11,6 +11,7 @@
     font-weight: 400;
     text-decoration: none;
     overflow-wrap: break-word;
+    word-break: break-word;
     // transition-property: color;
     // transition-duration: 2s;
     &.showFullText {
@@ -35,7 +36,7 @@
         margin-bottom: 15px;
     }
     h2 {
-        line-height: 20px;
+        line-height: 25px;
         margin-bottom: 15px;
     }
     h3 {
