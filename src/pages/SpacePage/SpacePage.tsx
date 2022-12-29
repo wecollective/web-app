@@ -1,7 +1,9 @@
+/* eslint-disable no-nested-ternary */
 import Button from '@components/Button'
 import Column from '@components/Column'
 import CoverImage from '@components/CoverImage'
 import EditableFlagImage from '@components/EditableFlagImage'
+import Input from '@components/Input'
 import PageTabs from '@components/PageTabs'
 import Row from '@components/Row'
 import { AccountContext } from '@contexts/AccountContext'
@@ -9,6 +11,7 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import PageNotFound from '@pages/PageNotFound'
 import Settings from '@pages/SpacePage/Settings'
 import FlagImage from '@src/components/FlagImage'
+import SuccessMessage from '@src/components/SuccessMessage'
 import config from '@src/Config'
 import { onPageBottomReached } from '@src/Helpers'
 import About from '@src/pages/SpacePage/About'
@@ -77,6 +80,46 @@ const SpacePage = (): JSX.Element => {
             { text: 'Governance', visible: true, icon: <GovernanceIcon /> },
         ],
         right: [{ text: 'Settings', visible: isModerator, icon: <SettingsIcon /> }],
+    }
+
+    type errorState = 'default' | 'valid' | 'invalid'
+
+    const [mmEmail, setMMEmail] = useState('')
+    const [mmEmailState, setMMEmailState] = useState<errorState>('default')
+    const [mmEmailErrors, setMMEmailErrors] = useState<string[]>([])
+    const [mmPassword, setMMPassword] = useState('')
+    const [mmPasswordState, setMMPasswordState] = useState<errorState>('default')
+    const [mmPasswordErrors, setMMPasswordErrors] = useState<string[]>([])
+    const [mmPassword2, setMMPassword2] = useState('')
+    const [mmPassword2State, setMMPassword2State] = useState<errorState>('default')
+    const [mmPassword2Errors, setMMPassword2Errors] = useState<string[]>([])
+    const [mmLoading, setMMLoading] = useState(false)
+    const [success, setSuccess] = useState(false)
+
+    function verifyEmail() {
+        setMMLoading(true)
+        setMMEmailState(mmEmail ? 'valid' : 'invalid')
+        setMMEmailErrors(mmEmail ? [] : ['Required'])
+        setMMPasswordState(mmPassword ? 'valid' : 'invalid')
+        setMMPasswordErrors(mmPassword ? [] : ['Required'])
+        setMMPassword2State(mmPassword2 && mmPassword2 === mmPassword ? 'valid' : 'invalid')
+        setMMPassword2Errors(
+            mmPassword2 && mmPassword2 === mmPassword ? [] : ['Must match new password']
+        )
+        if (mmEmail && mmPassword && mmPassword2 === mmPassword) {
+            axios
+                .post(`${config.apiURL}/verfiy-mm-email`, { mmEmail, mmPassword })
+                .then(() => {
+                    setSuccess(true)
+                    setMMLoading(false)
+                })
+                .catch((error) => {
+                    const { message } = error.response.data
+                    setMMEmailState('invalid')
+                    setMMEmailErrors([message])
+                    setMMLoading(false)
+                })
+        } else setMMLoading(false)
     }
 
     function joinSpace() {
@@ -167,6 +210,7 @@ const SpacePage = (): JSX.Element => {
 
     const wecoSpace =
         spaceData.id && (spaceData.id === 51 || spaceData.SpaceAncestors.find((a) => a.id === 51))
+
     useEffect(() => {
         if (wecoSpace) {
             const texture = textures
@@ -267,7 +311,69 @@ const SpacePage = (): JSX.Element => {
                         <Route component={PageNotFound} />
                     </Switch>
                 ) : (
-                    <p>No access!</p>
+                    <Column centerX style={{ zIndex: 40 }}>
+                        <p>No access!</p>
+                        {spaceHandle === 'the-metamodern-forum' && (
+                            <Column centerX style={{ marginTop: 20 }}>
+                                <h2>Log in or reclaim your old metamodern forum account</h2>
+                                <Input
+                                    title='Email:'
+                                    type='email'
+                                    style={{ marginBottom: 10 }}
+                                    disabled={mmLoading}
+                                    state={mmEmailState}
+                                    errors={mmEmailErrors}
+                                    value={mmEmail}
+                                    onChange={(v) => {
+                                        setMMEmail(v)
+                                        setMMEmailState('default')
+                                        setMMEmailErrors([])
+                                    }}
+                                />
+                                <Input
+                                    title='New password:'
+                                    type='password'
+                                    style={{ marginBottom: 10 }}
+                                    disabled={mmLoading}
+                                    state={mmPasswordState}
+                                    errors={mmPasswordErrors}
+                                    value={mmPassword}
+                                    onChange={(v) => {
+                                        setMMPassword(v)
+                                        setMMPasswordState('default')
+                                        setMMPasswordErrors([])
+                                    }}
+                                />
+                                <Input
+                                    title='Confirm new password:'
+                                    type='password'
+                                    style={{ marginBottom: 20 }}
+                                    disabled={mmLoading}
+                                    state={mmPassword2State}
+                                    errors={mmPassword2Errors}
+                                    value={mmPassword2}
+                                    onChange={(v) => {
+                                        setMMPassword2(v)
+                                        setMMPassword2State('default')
+                                        setMMPassword2Errors([])
+                                    }}
+                                />
+                                <Button
+                                    text='Send verification email'
+                                    color='blue'
+                                    disabled={mmLoading}
+                                    loading={mmLoading}
+                                    onClick={verifyEmail}
+                                    style={{ marginBottom: 20 }}
+                                />
+                                {success && (
+                                    <SuccessMessage
+                                        text={`Success! We've sent you a verification email. Follow the instructions there to reclaim your account.`}
+                                    />
+                                )}
+                            </Column>
+                        )}
+                    </Column>
                 )}
             </Column>
         </Column>
