@@ -38,7 +38,7 @@ const Comment = (props: {
                             {`• ${timeSinceCreated(createdAt)}`}
                         </p>
                     </Row>
-                    <ShowMoreLess height={150} gradientColor='grey'>
+                    <ShowMoreLess height={250} gradientColor='grey'>
                         <DraftText stringifiedDraft={text} markdownStyles={styles.markdown} />
                     </ShowMoreLess>
                 </Column>
