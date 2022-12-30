@@ -13,20 +13,32 @@
             width: auto;
         }
 
-        .postListView {
+        .postList {
             width: 100%;
             @include for-desktop-small-up {
-                width: 1200px;
+                width: 800px;
             }
+        }
 
-            .spaceNavWrapper {
-                flex-shrink: 0;
-                position: sticky !important;
-                top: 120px;
-                align-self: flex-start;
-                max-height: calc(100vh - 195px);
-                width: 200px;
-            }
+        .spaceNavWrapper {
+            flex-shrink: 0;
+            position: sticky !important;
+            top: 120px;
+            left: 0;
+            align-self: flex-start;
+            max-height: calc(100vh - 195px);
+            min-width: 200px;
+        }
+
+        .topContributorsWrapper {
+            flex-shrink: 0;
+            position: sticky !important;
+            top: 120px;
+            left: 0;
+            align-self: flex-start;
+            max-height: calc(100vh - 195px);
+            min-width: 200px;
+            margin-left: 20px;
         }
 
         .postMapView {

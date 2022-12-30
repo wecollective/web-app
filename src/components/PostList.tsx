@@ -14,10 +14,19 @@ const PostList = (props: {
     posts: any[]
     firstPostsloading: boolean
     nextPostsLoading: boolean
+    className?: string
     styling?: boolean
     style?: any
 }): JSX.Element => {
-    const { location, posts, firstPostsloading, nextPostsLoading, styling, style } = props
+    const {
+        location,
+        posts,
+        firstPostsloading,
+        nextPostsLoading,
+        className,
+        styling,
+        style,
+    } = props
     const { resetSpacePosts } = useContext(SpaceContext)
     const { resetUserPosts } = useContext(UserContext)
     const mobileView = document.documentElement.clientWidth < 900
@@ -31,7 +40,7 @@ const PostList = (props: {
     )
 
     return (
-        <Column className={styles.wrapper} style={style}>
+        <Column className={`${styles.wrapper} ${className}`} style={style}>
             {firstPostsloading ? (
                 <PostListPlaceholder />
             ) : posts.length ? (
@@ -55,6 +64,7 @@ const PostList = (props: {
 }
 
 PostList.defaultProps = {
+    className: null,
     styling: false,
     style: null,
 }

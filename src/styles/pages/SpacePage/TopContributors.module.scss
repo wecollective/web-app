@@ -1,0 +1,29 @@
+@import '@styles/App.scss';
+
+.wrapper {
+    width: 100%;
+
+    .header {
+        svg {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            color: $grey4;
+        }
+        p {
+            color: $grey5;
+        }
+    }
+
+    .stats {
+        svg {
+            width: 15px;
+            height: 15px;
+            color: $grey4;
+            margin-right: 3px;
+        }
+        p {
+            color: $grey5;
+        }
+    }
+}

@@ -7,6 +7,7 @@ import SpaceNotFound from '@pages/SpaceNotFound'
 import NavigationList from '@src/pages/SpacePage/NavigationList'
 import PostMap from '@src/pages/SpacePage/PostMap'
 import PostsHeader from '@src/pages/SpacePage/PostsHeader'
+import TopContributors from '@src/pages/SpacePage/TopContributors'
 import styles from '@styles/pages/SpacePage/Posts.module.scss'
 import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
@@ -30,7 +31,7 @@ const Posts = (): JSX.Element => {
     } = useContext(SpaceContext)
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]
-    const [showNavList, setShowNavList] = useState(false)
+    const [largeScreen, setLargeScreen] = useState(false)
     const wecoSpace =
         spaceData.id && (spaceData.id === 51 || spaceData.SpaceAncestors.find((a) => a.id === 51))
 
@@ -68,9 +69,9 @@ const Posts = (): JSX.Element => {
     }, [pageBottomReached])
 
     useEffect(() => {
-        setShowNavList(document.documentElement.clientWidth >= 900)
+        setLargeScreen(document.documentElement.clientWidth >= 1200)
         window.addEventListener('resize', () =>
-            setShowNavList(document.documentElement.clientWidth >= 900)
+            setLargeScreen(document.documentElement.clientWidth >= 1200)
         )
     }, [])
 
@@ -80,8 +81,8 @@ const Posts = (): JSX.Element => {
             <PostsHeader params={params} />
             <Column className={styles.content}>
                 {params.view === 'List' && (
-                    <Row className={styles.postListView}>
-                        {showNavList && (
+                    <Row centerX style={{ width: '100%' }}>
+                        {largeScreen && (
                             <Column className={styles.spaceNavWrapper}>
                                 <NavigationList />
                             </Column>
@@ -91,8 +92,14 @@ const Posts = (): JSX.Element => {
                             posts={spacePosts}
                             firstPostsloading={spacePostsLoading}
                             nextPostsLoading={nextSpacePostsLoading}
+                            className={styles.postList}
                             styling={wecoSpace}
                         />
+                        {largeScreen && (
+                            <Column className={styles.topContributorsWrapper}>
+                                <TopContributors />
+                            </Column>
+                        )}
                     </Row>
                 )}
                 {params.view === 'Map' && (
