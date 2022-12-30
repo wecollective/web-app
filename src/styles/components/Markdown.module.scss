@@ -69,10 +69,10 @@
         background-color: #ddd;
     }
     pre {
-        padding: 20px;
-        background-color: #f6f8fa;
+        padding: 10px;
+        background-color: $grey2;
         border-radius: 5px;
-        margin: 15px 0;
+        margin: 10px 0;
         code {
             padding: 0;
             background-color: none;
@@ -81,10 +81,12 @@
         }
     }
     code {
-        padding: 5px 10px;
-        background-color: #f6f8fa;
+        font-family: monospace;
+        padding: 5px;
+        margin: 0 5px;
+        background-color: $grey2;
         border-radius: 5px;
-        line-height: 40px;
+        line-height: 30px;
     }
     blockquote {
         margin: 0 0 20px 0;

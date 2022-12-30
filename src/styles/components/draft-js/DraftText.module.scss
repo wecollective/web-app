@@ -21,15 +21,16 @@
         color: $grey6;
     }
 
-    code,
+    // code blocks
     pre {
         font-family: monospace;
         > div {
             margin: 10px 0;
             padding: 10px;
             border-radius: 5px;
-            background-color: $grey1;
+            background-color: $grey2;
             font-family: inherit;
+            line-height: 20px;
         }
     }
 

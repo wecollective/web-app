@@ -126,6 +126,17 @@ const DraftTextEditor = (props: {
     const { Toolbar } = toolbarPlugin
     const { MentionSuggestions } = mentionPlugin
 
+    const styleMap = {
+        CODE: {
+            fontFamily: 'monospace',
+            padding: 5,
+            margin: '0 5px',
+            borderRadius: 5,
+            backgroundColor: '#ededef',
+            lineHeight: '30px',
+        },
+    }
+
     function onEditorStateChange(newEditorState) {
         setEditorState(newEditorState)
         const contentState = newEditorState.getCurrentContent()
@@ -199,6 +210,7 @@ const DraftTextEditor = (props: {
                             editorState={editorState}
                             onChange={onEditorStateChange}
                             plugins={plugins}
+                            customStyleMap={styleMap}
                             ref={(element) => {
                                 editorRef.current = element
                             }}

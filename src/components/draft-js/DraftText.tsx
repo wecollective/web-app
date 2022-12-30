@@ -60,6 +60,17 @@ const DraftText = (props: {
     const plugins = [textAlignmentPlugin, mentionPlugin, linkPlugin, linkifyPlugin] // emojiPlugin
     const editorRef = useRef<any>(null)
 
+    const styleMap = {
+        CODE: {
+            fontFamily: 'monospace',
+            padding: 5,
+            margin: '0 5px',
+            borderRadius: 5,
+            backgroundColor: '#ededef',
+            lineHeight: '30px',
+        },
+    }
+
     useEffect(() => {
         // isDraft boolean used as temporary solution until old markdown converted to draft
         const isDraft = stringifiedDraft && stringifiedDraft.slice(0, 10) === `{"blocks":`
@@ -78,6 +89,7 @@ const DraftText = (props: {
                     editorState={editorState}
                     onChange={(newState) => setEditorState(newState)}
                     plugins={plugins}
+                    customStyleMap={styleMap}
                     readOnly
                     ref={(element) => {
                         editorRef.current = element
