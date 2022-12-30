@@ -30,6 +30,7 @@ const RepostModal = (props: {
     } = useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
     const [reposts, setReposts] = useState<any[]>([])
+    const [indirectSpaces, setIndirectSpaces] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [responseLoading, setResponseLoading] = useState(false)
     const [spaceOptions, setSpaceOptions] = useState<any[]>([])
@@ -39,11 +40,15 @@ const RepostModal = (props: {
         ? `${reposts.length} repost${pluralise(reposts.length)}`
         : 'No reposts yet...'
 
-    function getReposts() {
-        axios
-            .get(`${config.apiURL}/post-reposts?postId=${postData.id}`)
-            .then((res) => {
-                setReposts(res.data)
+    async function getRepostData() {
+        const getReposts = await axios.get(`${config.apiURL}/post-reposts?postId=${postData.id}`)
+        const getIndirectSpaces = await axios.get(
+            `${config.apiURL}/post-indirect-spaces?postId=${postData.id}`
+        )
+        Promise.all([getReposts, getIndirectSpaces])
+            .then((responses) => {
+                setReposts(responses[0].data)
+                setIndirectSpaces(responses[1].data)
                 setLoading(false)
             })
             .catch((error) => console.log(error))
@@ -56,7 +61,7 @@ const RepostModal = (props: {
             const options = { headers: { Authorization: `Bearer ${accessToken}` } }
             const blacklist = [
                 ...postData.DirectSpaces.map((s) => s.id),
-                ...postData.IndirectSpaces.map((s) => s.id),
+                ...indirectSpaces.map((s) => s.id),
                 ...selectedSpaces.map((s) => s.id),
             ]
             const data = { query, blacklist }
@@ -107,7 +112,9 @@ const RepostModal = (props: {
         }
     }
 
-    useEffect(() => getReposts(), [])
+    useEffect(() => {
+        getRepostData()
+    }, [])
 
     return (
         <Modal close={close} style={{ width: 400 }} centered>
