@@ -208,17 +208,18 @@ const NotificationCard = (props: {
                     if (res.status === 200) {
                         // update account context
                         updateNotification(id, 'state', response)
-                        if (response === 'accepted') {
-                            const newModeratedSpaces = [
-                                ...accountData.ModeratedSpaces,
-                                {
-                                    handle: triggerSpace.handle,
-                                    name: triggerSpace.name,
-                                    flagImagePath: triggerSpace.flagImagePath,
-                                },
-                            ]
-                            updateAccountData('ModeratedSpaces', newModeratedSpaces)
-                        }
+                        // todo: update if/when required
+                        // if (response === 'accepted') {
+                        //     const newModeratedSpaces = [
+                        //         ...accountData.ModeratedSpaces,
+                        //         {
+                        //             handle: triggerSpace.handle,
+                        //             name: triggerSpace.name,
+                        //             flagImagePath: triggerSpace.flagImagePath,
+                        //         },
+                        //     ]
+                        //     updateAccountData('ModeratedSpaces', newModeratedSpaces)
+                        // }
                         if (!seen) {
                             setSeen(true)
                             // todo: remove updateNotification function when notifications fetched on component mount

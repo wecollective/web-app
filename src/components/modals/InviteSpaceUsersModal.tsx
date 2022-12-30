@@ -2,6 +2,7 @@ import Button from '@components/Button'
 import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
 import ImageTitle from '@components/ImageTitle'
+import LoadingWheel from '@components/LoadingWheel'
 import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
 import SearchSelector from '@components/SearchSelector'
@@ -17,6 +18,7 @@ const InviteSpaceUsersModal = (props: { close: () => void }): JSX.Element => {
     const { close } = props
     const { accountData, setAlertMessage, setAlertModalOpen } = useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
+    const [usersWithAccessLoaded, setUsersWithAccessLoaded] = useState(false)
     const [usersWithAccess, setUsersWithAccess] = useState<number[]>([])
     const [suggestedUsers, setSuggestedUsers] = useState<any[]>([])
     const [selectedUsers, setSelectedUsers] = useState<any[]>([])
@@ -47,8 +49,7 @@ const InviteSpaceUsersModal = (props: { close: () => void }): JSX.Element => {
         setSelectedUsers(selectedUsers.filter((u) => u.id !== userId))
     }
 
-    function sendInvites(e) {
-        e.preventDefault()
+    function sendInvites() {
         const accessToken = cookies.get('accessToken')
         if (!accessToken) {
             setAlertMessage('Your session has run out. Please log in again to invite users.')
@@ -78,7 +79,10 @@ const InviteSpaceUsersModal = (props: { close: () => void }): JSX.Element => {
     useEffect(() => {
         axios
             .get(`${config.apiURL}/users-with-access?spaceId=${spaceData.id}`)
-            .then((res) => setUsersWithAccess(res.data))
+            .then((res) => {
+                setUsersWithAccess(res.data)
+                setUsersWithAccessLoaded(true)
+            })
             .catch((error) => console.log(error))
     }, [])
 
@@ -98,15 +102,19 @@ const InviteSpaceUsersModal = (props: { close: () => void }): JSX.Element => {
                             fontSize={24}
                         />
                     </Column>
-                    <form onSubmit={sendInvites}>
-                        <SearchSelector
-                            type='user'
-                            title='Search for their name or handle below'
-                            placeholder='name or handle...'
-                            onSearchQuery={(query) => findUsers(query)}
-                            onOptionSelected={(user) => addUser(user)}
-                            options={suggestedUsers}
-                        />
+                    <Column centerX>
+                        {usersWithAccessLoaded ? (
+                            <SearchSelector
+                                type='user'
+                                title='Search for their name or handle below'
+                                placeholder='name or handle...'
+                                onSearchQuery={(query) => findUsers(query)}
+                                onOptionSelected={(user) => addUser(user)}
+                                options={suggestedUsers}
+                            />
+                        ) : (
+                            <LoadingWheel />
+                        )}
                         {selectedUsers.length > 0 && (
                             <Column centerX style={{ marginTop: 20 }}>
                                 <p>Selected people:</p>
@@ -132,10 +140,10 @@ const InviteSpaceUsersModal = (props: { close: () => void }): JSX.Element => {
                                 color='blue'
                                 disabled={loading || !selectedUsers.length}
                                 loading={loading}
-                                submit
+                                onClick={sendInvites}
                             />
                         </Row>
-                    </form>
+                    </Column>
                 </Column>
             )}
         </Modal>

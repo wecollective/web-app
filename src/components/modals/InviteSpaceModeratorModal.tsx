@@ -1,5 +1,6 @@
 import Button from '@components/Button'
 import CloseButton from '@components/CloseButton'
+import Column from '@components/Column'
 import ImageTitle from '@components/ImageTitle'
 import LoadingWheel from '@components/LoadingWheel'
 import Modal from '@components/modals/Modal'
@@ -10,15 +11,15 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import styles from '@styles/components/modals/Modal.module.scss'
 import axios from 'axios'
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 const InviteSpaceModeratorModal = (props: { close: () => void }): JSX.Element => {
     const { close } = props
     const { accountData } = useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
-    const [inputState, setInputState] = useState<'default' | 'valid' | 'invalid'>('default')
-    const [inputErrors, setInputErrors] = useState<string[]>([])
+    const [moderatorsLoaded, setModeratorsLoaded] = useState(false)
+    const [moderators, setModerators] = useState<any[]>([])
     const [options, setOptions] = useState<any[]>([])
     const [selectedUser, setSelectedUser] = useState<any>(null)
     const [loading, setLoading] = useState(false)
@@ -28,7 +29,7 @@ const InviteSpaceModeratorModal = (props: { close: () => void }): JSX.Element =>
     function findUsers(query) {
         if (query.length < 1) setOptions([])
         else {
-            const data = { query, blacklist: spaceData.Moderators.map((user) => user.id) }
+            const data = { query, blacklist: moderators.map((m) => m.id) }
             axios
                 .post(`${config.apiURL}/find-people`, data)
                 .then((res) => setOptions(res.data))
@@ -41,8 +42,7 @@ const InviteSpaceModeratorModal = (props: { close: () => void }): JSX.Element =>
         setSelectedUser(user)
     }
 
-    function inviteSpaceModerator(e) {
-        e.preventDefault()
+    function inviteSpaceModerator() {
         setLoading(true)
         const data = {
             accountHandle: accountData.handle,
@@ -67,20 +67,33 @@ const InviteSpaceModeratorModal = (props: { close: () => void }): JSX.Element =>
             })
     }
 
+    // todo: potentially retrieve on settings page load as used in multiple modals
+    useEffect(() => {
+        axios
+            .get(`${config.apiURL}/space-mods?spaceId=${spaceData.id}`)
+            .then((res) => {
+                setModerators(res.data)
+                setModeratorsLoaded(true)
+            })
+            .catch((error) => console.log(error))
+    }, [])
+
     return (
         <Modal centered close={close}>
             <h1>Invite someone to moderate &apos;{spaceData.name}&apos;</h1>
-            <form onSubmit={inviteSpaceModerator}>
-                <SearchSelector
-                    type='user'
-                    title='Search for their name or handle below'
-                    placeholder='name or handle...'
-                    state={inputState}
-                    errors={inputErrors}
-                    onSearchQuery={(query) => findUsers(query)}
-                    onOptionSelected={(user) => selectUser(user)}
-                    options={options}
-                />
+            <Column centerX>
+                {moderatorsLoaded ? (
+                    <SearchSelector
+                        type='user'
+                        title='Search for their name or handle below'
+                        placeholder='name or handle...'
+                        onSearchQuery={(query) => findUsers(query)}
+                        onOptionSelected={(user) => selectUser(user)}
+                        options={options}
+                    />
+                ) : (
+                    <LoadingWheel />
+                )}
                 {selectedUser && (
                     <div className={styles.selectedOptionWrapper}>
                         <p>Selected user:</p>
@@ -100,12 +113,12 @@ const InviteSpaceModeratorModal = (props: { close: () => void }): JSX.Element =>
                         color='blue'
                         style={{ marginRight: 10 }}
                         disabled={loading || showSuccessMessage || !selectedUser}
-                        submit
+                        onClick={inviteSpaceModerator}
                     />
                     {loading && <LoadingWheel />}
                     {showSuccessMessage && <SuccessMessage text='Invite sent!' />}
                 </div>
-            </form>
+            </Column>
         </Modal>
     )
 }

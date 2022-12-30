@@ -19,8 +19,6 @@ const ParentSpaceRequestModal = (props: { close: () => void }): JSX.Element => {
     const { spaceData, setSpaceData } = useContext(SpaceContext)
     const [blacklist, setBlacklist] = useState<string[]>([])
     const [blacklistRetrieved, setBlacklistRetrieved] = useState(false)
-    const [inputState, setInputState] = useState<'default' | 'valid' | 'invalid'>('default')
-    const [inputErrors, setInputErrors] = useState<string[]>([])
     const [options, setOptions] = useState<any[]>([])
     const [selectedSpace, setSelectedSpace] = useState<any>(null)
     const [loading, setLoading] = useState(false)
@@ -53,9 +51,9 @@ const ParentSpaceRequestModal = (props: { close: () => void }): JSX.Element => {
         }
     }
 
-    function selectSpace(user) {
+    function selectSpace(space) {
         setOptions([])
-        setSelectedSpace(user)
+        setSelectedSpace(space)
     }
 
     function sendParentSpaceRequest(e) {
@@ -122,8 +120,6 @@ const ParentSpaceRequestModal = (props: { close: () => void }): JSX.Element => {
                     type='space'
                     title="Search for the parent space's name or handle below:"
                     placeholder='name or handle...'
-                    state={inputState}
-                    errors={inputErrors}
                     onSearchQuery={(query) => findSpaces(query)}
                     onOptionSelected={(space) => selectSpace(space)}
                     options={options}

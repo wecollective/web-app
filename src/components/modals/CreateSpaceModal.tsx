@@ -18,9 +18,7 @@ import Cookies from 'universal-cookie'
 
 const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
     const { close } = props
-    const { accountData, setAccountData, setAlertModalOpen, setAlertMessage } = useContext(
-        AccountContext
-    )
+    const { accountData, setAlertModalOpen, setAlertMessage } = useContext(AccountContext)
     const {
         isModerator,
         spaceData,
@@ -101,11 +99,11 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                         name: name.value,
                         description: description.value,
                     }
-                    setAccountData({
-                        ...accountData,
-                        FollowedSpaces: [...accountData.FollowedSpaces, newSpaceData],
-                        ModeratedSpaces: [...accountData.ModeratedSpaces, newSpaceData],
-                    })
+                    // todo: update followed spaces if visible on page when required
+                    // setAccountData({
+                    //     ...accountData,
+                    //     FollowedSpaces: [...accountData.FollowedSpaces, newSpaceData],
+                    // })
                     if (res.data.message === 'pending-acceptance') {
                         setSuccessMessage('Space created and request sent to moderators')
                     } else {

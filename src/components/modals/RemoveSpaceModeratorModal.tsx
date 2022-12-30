@@ -1,5 +1,6 @@
 import Button from '@components/Button'
 import CloseButton from '@components/CloseButton'
+import Column from '@components/Column'
 import ImageTitle from '@components/ImageTitle'
 import LoadingWheel from '@components/LoadingWheel'
 import Modal from '@components/modals/Modal'
@@ -10,13 +11,15 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import styles from '@styles/components/modals/Modal.module.scss'
 import axios from 'axios'
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 const RemoveSpaceModeratorModal = (props: { close: () => void }): JSX.Element => {
     const { close } = props
     const { accountData } = useContext(AccountContext)
     const { spaceData, setSpaceData } = useContext(SpaceContext)
+    const [moderatorsLoaded, setModeratorsLoaded] = useState(false)
+    const [moderators, setModerators] = useState<any[]>([])
     const [inputState, setInputState] = useState<'default' | 'valid' | 'invalid'>('default')
     const [inputErrors, setInputErrors] = useState<string[]>([])
     const [options, setOptions] = useState<any[]>([])
@@ -28,7 +31,7 @@ const RemoveSpaceModeratorModal = (props: { close: () => void }): JSX.Element =>
     function findModerators(query) {
         if (query.length < 1) setOptions([])
         else {
-            const filteredModerators = spaceData.Moderators.filter(
+            const filteredModerators = moderators.filter(
                 (mod) =>
                     mod.handle.includes(query.toLowerCase()) ||
                     mod.name.toLowerCase().includes(query.toLowerCase())
@@ -42,8 +45,7 @@ const RemoveSpaceModeratorModal = (props: { close: () => void }): JSX.Element =>
         setSelectedModerator(moderator)
     }
 
-    function removeSpaceModerator(e) {
-        e.preventDefault()
+    function removeSpaceModerator() {
         setLoading(true)
         const data = {
             accountHandle: accountData.handle,
@@ -84,20 +86,35 @@ const RemoveSpaceModeratorModal = (props: { close: () => void }): JSX.Element =>
         })
     }
 
+    // todo: potentially retrieve on settings page load as used in multiple modals
+    useEffect(() => {
+        axios
+            .get(`${config.apiURL}/space-mods?spaceId=${spaceData.id}`)
+            .then((res) => {
+                setModerators(res.data)
+                setModeratorsLoaded(true)
+            })
+            .catch((error) => console.log(error))
+    }, [])
+
     return (
         <Modal centered close={close}>
             <h1>Remove a moderator from &apos;{spaceData.name}&apos;</h1>
-            <form onSubmit={removeSpaceModerator}>
-                <SearchSelector
-                    type='user'
-                    title='Search for their name or handle below'
-                    placeholder='name or handle...'
-                    state={inputState}
-                    errors={inputErrors}
-                    onSearchQuery={(query) => findModerators(query)}
-                    onOptionSelected={(user) => selectModerator(user)}
-                    options={options}
-                />
+            <Column centerX>
+                {moderatorsLoaded ? (
+                    <SearchSelector
+                        type='user'
+                        title='Search for their name or handle below'
+                        placeholder='name or handle...'
+                        state={inputState}
+                        errors={inputErrors}
+                        onSearchQuery={(query) => findModerators(query)}
+                        onOptionSelected={(user) => selectModerator(user)}
+                        options={options}
+                    />
+                ) : (
+                    <LoadingWheel />
+                )}
                 {selectedModerator && (
                     <div className={styles.selectedOptionWrapper}>
                         <p>Selected user:</p>
@@ -117,12 +134,12 @@ const RemoveSpaceModeratorModal = (props: { close: () => void }): JSX.Element =>
                         color='blue'
                         style={{ marginRight: 10 }}
                         disabled={loading || showSuccessMessage || !selectedModerator}
-                        submit
+                        onClick={removeSpaceModerator}
                     />
                     {loading && <LoadingWheel />}
                     {showSuccessMessage && <SuccessMessage text='Moderator removed' />}
                 </div>
-            </form>
+            </Column>
         </Modal>
     )
 }

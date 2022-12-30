@@ -135,22 +135,23 @@ const SpacePage = (): JSX.Element => {
                 axios
                     .post(`${config.apiURL}/toggle-join-space`, data, options)
                     .then(() => {
-                        if (isFollowing) {
-                            updateAccountData(
-                                'FollowedSpaces',
-                                accountData.FollowedSpaces.filter(
-                                    (h) => h.handle !== spaceData.handle
-                                )
-                            )
-                        } else {
-                            const newFollowedSpaces = [...accountData.FollowedSpaces]
-                            newFollowedSpaces.push({
-                                handle: spaceData.handle,
-                                name: spaceData.name,
-                                flagImagePath: spaceData.flagImagePath,
-                            })
-                            updateAccountData('FollowedSpaces', newFollowedSpaces)
-                        }
+                        // todo: update followed spaces if visible on page when required
+                        // if (isFollowing) {
+                        //     updateAccountData(
+                        //         'FollowedSpaces',
+                        //         accountData.FollowedSpaces.filter(
+                        //             (h) => h.handle !== spaceData.handle
+                        //         )
+                        //     )
+                        // } else {
+                        //     const newFollowedSpaces = [...accountData.FollowedSpaces]
+                        //     newFollowedSpaces.push({
+                        //         handle: spaceData.handle,
+                        //         name: spaceData.name,
+                        //         flagImagePath: spaceData.flagImagePath,
+                        //     })
+                        //     updateAccountData('FollowedSpaces', newFollowedSpaces)
+                        // }
                         setJoinSpaceLoading(false)
                         setIsFollowing(!isFollowing)
                     })
@@ -241,42 +242,46 @@ const SpacePage = (): JSX.Element => {
             <div id='space-background' className={styles.background} />
             <Column centerX className={`${styles.header} ${headerCollapsed && styles.collapsed}`}>
                 <CoverImage type='space' image={spaceData.coverImagePath} canEdit={isModerator} />
-                <Row centerY className={styles.spaceData}>
-                    <EditableFlagImage
-                        type='space'
-                        size={120}
-                        imagePath={spaceData.flagImagePath}
-                        canEdit={isModerator}
-                        className={styles.flagImageLarge}
-                    />
-                    <Row centerY style={{ height: 50 }}>
-                        <Column className={styles.spaceName}>
-                            <h1>{spaceData.name}</h1>
-                            <p className='grey'>s/{spaceData.handle}</p>
-                        </Column>
-                        {spaceHandle !== 'all' &&
-                            loggedIn &&
-                            !mobileView &&
-                            spaceData.access !== 'blocked-by-ancestor' && (
-                                <Row>
-                                    <Button
-                                        icon={
-                                            isFollowing || spaceData.access === 'pending' ? (
-                                                <SuccessIcon />
-                                            ) : undefined
-                                        }
-                                        text={joinSpaceButtonText()}
-                                        color='blue'
-                                        disabled={
-                                            awaitingSpaceData || spaceData.access === 'pending'
-                                        }
-                                        loading={joinSpaceLoading}
-                                        onClick={joinSpace}
-                                    />
-                                </Row>
-                            )}
+                {awaitingSpaceData ? (
+                    <Row centerY style={{ height: 72 }} />
+                ) : (
+                    <Row centerY className={styles.spaceData}>
+                        <EditableFlagImage
+                            type='space'
+                            size={120}
+                            imagePath={spaceData.flagImagePath}
+                            canEdit={isModerator}
+                            className={styles.flagImageLarge}
+                        />
+                        <Row centerY style={{ height: 50 }}>
+                            <Column className={styles.spaceName}>
+                                <h1>{spaceData.name}</h1>
+                                <p className='grey'>s/{spaceData.handle}</p>
+                            </Column>
+                            {spaceHandle !== 'all' &&
+                                loggedIn &&
+                                !mobileView &&
+                                spaceData.access !== 'blocked-by-ancestor' && (
+                                    <Row>
+                                        <Button
+                                            icon={
+                                                isFollowing || spaceData.access === 'pending' ? (
+                                                    <SuccessIcon />
+                                                ) : undefined
+                                            }
+                                            text={joinSpaceButtonText()}
+                                            color='blue'
+                                            disabled={
+                                                awaitingSpaceData || spaceData.access === 'pending'
+                                            }
+                                            loading={joinSpaceLoading}
+                                            onClick={joinSpace}
+                                        />
+                                    </Row>
+                                )}
+                        </Row>
                     </Row>
-                </Row>
+                )}
                 <Row centerX className={styles.tabRow}>
                     <Row centerY className={styles.spaceDataSmall}>
                         <FlagImage

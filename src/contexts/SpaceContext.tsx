@@ -22,6 +22,8 @@ const defaults = {
         totalSpaces: 0,
         totalUsers: 0,
         access: 'granted',
+        isModerator: false,
+        isFollowing: false,
         Creator: {
             id: null,
             handle: null,
@@ -296,8 +298,8 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
 
     useEffect(() => {
         if (loggedIn) {
-            setIsFollowing(accountData.FollowedSpaces.some((s) => s.id === spaceData.id))
-            setIsModerator(accountData.ModeratedSpaces.some((s) => s.id === spaceData.id))
+            setIsFollowing(spaceData.isFollowing)
+            setIsModerator(spaceData.isModerator)
         } else {
             setIsFollowing(false)
             setIsModerator(false)

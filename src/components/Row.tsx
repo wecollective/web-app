@@ -2,7 +2,7 @@ import styles from '@styles/components/Row.module.scss'
 import React from 'react'
 
 const Row = (props: {
-    children: any
+    children?: any
     style?: any
     className?: any
     id?: string
@@ -42,6 +42,7 @@ const Row = (props: {
 }
 
 Row.defaultProps = {
+    children: null,
     style: null,
     className: false,
     id: null,
