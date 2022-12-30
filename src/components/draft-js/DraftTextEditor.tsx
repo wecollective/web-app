@@ -1,6 +1,8 @@
 /* eslint-disable jsx-a11y/anchor-has-content */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/jsx-props-no-spreading */
 import Button from '@components/Button'
+import Column from '@components/Column'
 import Mention from '@components/draft-js/Mention'
 import Suggestion from '@components/draft-js/Suggestion'
 import FlagImage from '@components/FlagImage'
@@ -116,7 +118,6 @@ const DraftTextEditor = (props: {
     const [suggestions, setSuggestions] = useState([])
     const [showSuggestions, setShowSuggestions] = useState(false)
     const [characterLength, setCharacterLength] = useState(0)
-    const [toolbarKey, setToolbarKey] = useState(0)
     const editorRef = useRef<any>(null)
 
     // const { EmojiSuggestions, EmojiSelect } = emojiPlugin
@@ -156,11 +157,6 @@ const DraftTextEditor = (props: {
             .catch((error) => console.log(error))
     }
 
-    function focus() {
-        editorRef.current.focus()
-        setToolbarKey(toolbarKey + 1)
-    }
-
     useEffect(() => {
         // isDraft boolean used as temporary solution until old markdown converted to draft
         const isDraft = stringifiedDraft && stringifiedDraft.slice(0, 10) === `{"blocks":`
@@ -179,39 +175,25 @@ const DraftTextEditor = (props: {
                 styles[state || 'default']
             }`}
             style={style}
+            role='button'
+            tabIndex={0}
+            onClick={() => editorRef.current && editorRef.current.focus()}
         >
-            <Toolbar key={toolbarKey}>
-                {(externalProps) => (
-                    <Row wrap style={{ paddingRight: 40 }}>
-                        <BoldButton {...externalProps} />
-                        <ItalicButton {...externalProps} />
-                        <UnderlineButton {...externalProps} />
-                        <CodeButton {...externalProps} />
-                        {/* <div className={styles.separator} /> */}
-                        <UnorderedListButton {...externalProps} />
-                        <OrderedListButton {...externalProps} />
-                        <BlockquoteButton {...externalProps} />
-                        <CodeBlockButton {...externalProps} />
-                        <TextAlignment {...externalProps} />
-                        <LinkButton {...externalProps} />
-                    </Row>
-                )}
-            </Toolbar>
-            {/* <div className={styles.emojiButtonWrapper}>
-                <EmojiSelect closeOnEmojiSelect />
-                <EmojiSuggestions />
-            </div> */}
-            {editorState && (
-                <Row>
-                    {type === 'comment' && (
-                        <FlagImage
-                            type='user'
-                            size={35}
-                            imagePath={accountData.flagImagePath}
-                            style={{ marginTop: 10 }}
-                        />
-                    )}
-                    <button className={styles.editorWrapper} type='button' onClick={focus}>
+            <Column className={styles.reverseColumn}>
+                {/* <div className={styles.emojiButtonWrapper}>
+                    <EmojiSelect closeOnEmojiSelect />
+                    <EmojiSuggestions />
+                </div> */}
+                {editorState && (
+                    <Row>
+                        {type === 'comment' && (
+                            <FlagImage
+                                type='user'
+                                size={35}
+                                imagePath={accountData.flagImagePath}
+                                style={{ marginTop: 10 }}
+                            />
+                        )}
                         <Editor
                             placeholder='Enter text...'
                             editorState={editorState}
@@ -221,19 +203,36 @@ const DraftTextEditor = (props: {
                                 editorRef.current = element
                             }}
                         />
-                    </button>
-                    {type === 'comment' && (
-                        <Button
-                            color='blue'
-                            size='medium-large'
-                            text='Add'
-                            loading={submitLoading}
-                            onClick={onSubmit}
-                            style={{ marginTop: 10 }}
-                        />
+                        {type === 'comment' && (
+                            <Button
+                                color='blue'
+                                size='medium-large'
+                                text='Add'
+                                loading={submitLoading}
+                                onClick={onSubmit}
+                                style={{ marginTop: 10 }}
+                            />
+                        )}
+                    </Row>
+                )}
+                <Toolbar>
+                    {(externalProps) => (
+                        <Row wrap style={{ paddingRight: 40 }}>
+                            <BoldButton {...externalProps} />
+                            <ItalicButton {...externalProps} />
+                            <UnderlineButton {...externalProps} />
+                            <CodeButton {...externalProps} />
+                            {/* <div className={styles.separator} /> */}
+                            <UnorderedListButton {...externalProps} />
+                            <OrderedListButton {...externalProps} />
+                            <BlockquoteButton {...externalProps} />
+                            <CodeBlockButton {...externalProps} />
+                            <TextAlignment {...externalProps} />
+                            <LinkButton {...externalProps} />
+                        </Row>
                     )}
-                </Row>
-            )}
+                </Toolbar>
+            </Column>
             <MentionSuggestions
                 onSearchChange={onSearchChange}
                 suggestions={suggestions}

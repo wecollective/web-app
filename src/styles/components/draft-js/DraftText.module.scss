@@ -38,6 +38,11 @@
         padding-inline-start: 40px;
     }
 
+    .reverseColumn {
+        // used to display toolbar above editor but load it after (to prevent button '.active' class bug)
+        flex-direction: column-reverse;
+    }
+
     // editor styling
     &.editable {
         background-color: white;
@@ -150,48 +155,48 @@
         }
     }
 
-    .emojiButtonWrapper {
-        position: absolute;
-        top: 5px;
-        right: 0;
-        z-index: 5;
+    // .emojiButtonWrapper {
+    //     position: absolute;
+    //     top: 5px;
+    //     right: 0;
+    //     z-index: 5;
 
-        .emojiSelectButton {
-            border: 1px solid $grey2;
-            border-radius: 5px;
-            background-color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 32px;
-            width: 32px;
-            margin-right: 5px;
-            cursor: pointer;
-            font-size: 20px;
-            padding-bottom: 6px;
+    //     .emojiSelectButton {
+    //         border: 1px solid $grey2;
+    //         border-radius: 5px;
+    //         background-color: white;
+    //         display: flex;
+    //         justify-content: center;
+    //         align-items: center;
+    //         height: 32px;
+    //         width: 32px;
+    //         margin-right: 5px;
+    //         cursor: pointer;
+    //         font-size: 20px;
+    //         padding-bottom: 6px;
 
-            &:hover {
-                background-color: $grey1;
-            }
+    //         &:hover {
+    //             background-color: $grey1;
+    //         }
 
-            &.selected {
-                background-color: $grey1;
-            }
-        }
+    //         &.selected {
+    //             background-color: $grey1;
+    //         }
+    //     }
 
-        .emojiSelectPopover {
-            position: absolute;
-            background-color: white;
-            top: 42px;
-            left: -270px;
-            box-shadow: 0 1px 10px 0 rgba(10, 8, 72, 0.2);
-            border-radius: 5px;
+    //     .emojiSelectPopover {
+    //         position: absolute;
+    //         background-color: white;
+    //         top: 42px;
+    //         left: -270px;
+    //         box-shadow: 0 1px 10px 0 rgba(10, 8, 72, 0.2);
+    //         border-radius: 5px;
 
-            ul {
-                padding: 0;
-            }
-        }
-    }
+    //         ul {
+    //             padding: 0;
+    //         }
+    //     }
+    // }
 
     .editorWrapper {
         all: unset;
