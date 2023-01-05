@@ -62,6 +62,7 @@ import { ReactComponent as FailIcon } from '@svgs/times-circle-regular.svg'
 import { ReactComponent as TimesIcon } from '@svgs/times-solid.svg'
 import { ReactComponent as DeleteIcon } from '@svgs/trash-can-solid.svg'
 import { ReactComponent as TreeIcon } from '@svgs/tree-icon.svg'
+import { ReactComponent as TrophyIcon } from '@svgs/trophy-solid.svg'
 import { ReactComponent as UserIcon } from '@svgs/user-solid.svg'
 import { ReactComponent as UsersIcon } from '@svgs/users-solid.svg'
 import { ReactComponent as VideoSlashIcon } from '@svgs/video-slash-solid.svg'
@@ -140,4 +141,5 @@ export {
     ArrowDownIcon,
     ArrowUpIcon,
     MinusIcon,
+    TrophyIcon,
 }

@@ -5,7 +5,7 @@ import Scrollbars from '@components/Scrollbars'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import styles from '@styles/pages/SpacePage/TopContributors.module.scss'
-import { LikeIcon, StarIcon } from '@svgs/all'
+import { LikeIcon, StarIcon, TrophyIcon } from '@svgs/all'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
@@ -41,10 +41,9 @@ const TopContributors = (): JSX.Element => {
                         <p>Top contributors</p>
                     </Row>
                     <Column>
-                        {topContributors.map((user) => (
-                            <Row centerY style={{ marginTop: 10 }}>
+                        {topContributors.map((user, index) => (
+                            <Row key={user.id} centerY style={{ marginTop: 10 }}>
                                 <ImageTitle
-                                    key={user.id}
                                     type='space'
                                     imagePath={user.flagImagePath}
                                     title={user.name}
@@ -57,6 +56,7 @@ const TopContributors = (): JSX.Element => {
                                 <Row centerY className={styles.stats}>
                                     <LikeIcon />
                                     <p>{user.likesReceived}</p>
+                                    {index === 0 && <TrophyIcon />}
                                 </Row>
                             </Row>
                         ))}

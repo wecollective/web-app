@@ -16,14 +16,15 @@
     }
 
     .stats {
-        svg {
+        > svg {
             width: 15px;
             height: 15px;
             color: $grey4;
             margin-right: 3px;
         }
-        p {
+        > p {
             color: $grey5;
+            margin-right: 10px;
         }
     }
 }
