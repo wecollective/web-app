@@ -1,6 +1,7 @@
 import Button from '@components/Button'
 import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
+import FlagImage from '@components/FlagImage'
 import ImageTitle from '@components/ImageTitle'
 import LoadingWheel from '@components/LoadingWheel'
 import Modal from '@components/modals/Modal'
@@ -35,6 +36,8 @@ const RepostModal = (props: {
     const [responseLoading, setResponseLoading] = useState(false)
     const [spaceOptions, setSpaceOptions] = useState<any[]>([])
     const [selectedSpaces, setSelectedSpaces] = useState<any[]>([])
+    const [checkingPrivacyAccess, setCheckingPrivacyAccess] = useState(false)
+    const [spaceRestrictions, setSpaceRestrictions] = useState<any | null>(null)
     const cookies = new Cookies()
     const headerText = reposts.length
         ? `${reposts.length} repost${pluralise(reposts.length)}`
@@ -54,17 +57,24 @@ const RepostModal = (props: {
             .catch((error) => console.log(error))
     }
 
+    function findAllSpaceIds() {
+        const ids = [
+            ...reposts.map((r) => r.Space.id),
+            ...postData.DirectSpaces.map((s) => s.id),
+            ...indirectSpaces.map((s) => s.id),
+            ...selectedSpaces.map((s) => s.id),
+        ]
+        const filteredIds = [...Array.from(new Set(ids))]
+        return filteredIds
+    }
+
     function findSpaces(query) {
         if (!query) setSpaceOptions([])
         else {
             const accessToken = cookies.get('accessToken')
             const options = { headers: { Authorization: `Bearer ${accessToken}` } }
-            const blacklist = [
-                ...postData.DirectSpaces.map((s) => s.id),
-                ...indirectSpaces.map((s) => s.id),
-                ...selectedSpaces.map((s) => s.id),
-            ]
-            const data = { query, blacklist }
+            const blacklist = findAllSpaceIds()
+            const data = { query, blacklist, spaceAccessRequired: true }
             axios
                 .post(`${config.apiURL}/find-spaces`, data, options)
                 .then((res) => setSpaceOptions(res.data))
@@ -72,12 +82,94 @@ const RepostModal = (props: {
         }
     }
 
+    function checkPrivacyAccess(space) {
+        // check privacy access for selected space
+        setCheckingPrivacyAccess(true)
+        const otherSpaceIds = findAllSpaceIds()
+        const data = { newSpaceId: space.id, otherSpaceIds }
+        axios
+            .post(`${config.apiURL}/post-space-privacy-check`, data)
+            .then((res) => {
+                const { blockedByNewSpace, blockedByOtherSpaces, otherSpaces } = res.data
+                if (blockedByNewSpace || blockedByOtherSpaces) {
+                    setSpaceRestrictions({
+                        blockedByNewSpace,
+                        blockedByOtherSpaces,
+                        otherSpaces,
+                        newSpace: space,
+                    })
+                } else setSelectedSpaces((s) => [...s, space])
+                setCheckingPrivacyAccess(false)
+            })
+            .catch((error) => console.log(error))
+    }
+
+    function findBlockedByMessage() {
+        const { blockedByNewSpace, blockedByOtherSpaces, newSpace, otherSpaces } = spaceRestrictions
+        if (blockedByNewSpace) {
+            return (
+                <Column centerX className='warningContainer'>
+                    <div style={{ display: 'inline' }}>
+                        <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+                            <FlagImage type='space' imagePath={newSpace.flagImagePath} size={27} />
+                        </div>{' '}
+                        <b>{newSpace.name}</b> is blocked because it has restricted access and the
+                        following other spaces the post appears{' '}
+                        {selectedSpaces.length > 0 && `(or will appear)`} in exist outside of that
+                        access bubble:
+                    </div>
+                    <Column>
+                        {otherSpaces.map((s) => (
+                            <ImageTitle
+                                key={s.id}
+                                type='space'
+                                imagePath={s.flagImagePath}
+                                title={`${s.name} (s/${s.handle})`}
+                                fontSize={16}
+                                style={{ marginTop: 10 }}
+                            />
+                        ))}
+                    </Column>
+                </Column>
+            )
+        }
+        if (blockedByOtherSpaces) {
+            return (
+                <Column centerX className='warningContainer'>
+                    <div style={{ display: 'inline' }}>
+                        <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+                            <FlagImage type='space' imagePath={newSpace.flagImagePath} size={27} />
+                        </div>{' '}
+                        <b>{newSpace.name}</b> is blocked because the following other spaces the
+                        post appears {selectedSpaces.length > 0 && `(or will appear)`} in have
+                        restricted access and it exists outside of their access bubble:
+                    </div>
+                    <Column>
+                        {otherSpaces.map((s) => (
+                            <ImageTitle
+                                key={s.id}
+                                type='space'
+                                imagePath={s.flagImagePath}
+                                title={`${s.name} (s/${s.handle})`}
+                                fontSize={16}
+                                style={{ marginTop: 10 }}
+                            />
+                        ))}
+                    </Column>
+                </Column>
+            )
+        }
+        return null
+    }
+
     function addSpace(space) {
         setSpaceOptions([])
-        setSelectedSpaces((s) => [...s, space])
+        setSpaceRestrictions(null)
+        checkPrivacyAccess(space)
     }
 
     function removeSpace(spaceId) {
+        setSpaceRestrictions(null)
         setSelectedSpaces((s) => [...s.filter((space) => space.id !== spaceId)])
     }
 
@@ -117,7 +209,7 @@ const RepostModal = (props: {
     }, [])
 
     return (
-        <Modal close={close} style={{ width: 400 }} centered>
+        <Modal close={close} style={{ width: 600 }} centered>
             {loading ? (
                 <LoadingWheel />
             ) : (
@@ -182,6 +274,20 @@ const RepostModal = (props: {
                                         </Row>
                                     ))}
                                 </Row>
+                            )}
+                            {checkingPrivacyAccess ? (
+                                <Row style={{ marginBottom: 20 }}>
+                                    <p style={{ marginRight: 10 }}>Checking privacy access</p>
+                                    <LoadingWheel size={25} />
+                                </Row>
+                            ) : (
+                                <Column>
+                                    {spaceRestrictions && (
+                                        <Column style={{ marginBottom: 20, maxWidth: 500 }}>
+                                            {findBlockedByMessage()}
+                                        </Column>
+                                    )}
+                                </Column>
                             )}
                             <Button
                                 text='Repost'

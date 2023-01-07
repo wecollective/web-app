@@ -101,6 +101,16 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     const cookies = new Cookies()
     const location = useLocation()
 
+    function updateSpaceUserStatus(space) {
+        if (loggedIn) {
+            setIsFollowing(space.isFollowing)
+            setIsModerator(space.isModerator)
+        } else {
+            setIsFollowing(false)
+            setIsModerator(false)
+        }
+    }
+
     // todo: use authenticate token to grab space data and posts when logged in
     function getSpaceData(handle: string) {
         console.log(`SpaceContext: getSpaceData (${handle})`)
@@ -110,9 +120,11 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         axios
             .get(`${config.apiURL}/space-data?handle=${handle}`, options)
             .then((res) => {
+                // console.log('space-data: ', res.data)
                 // todo: apply default people filters when set up
                 // setSpacePostsFilters()
                 // setDefaultPeopleFilters()
+                updateSpaceUserStatus(res.data)
                 setSpaceData(res.data)
             })
             .catch((error) => {
@@ -272,6 +284,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     }
 
     function resetSpaceData() {
+        // console.log('resetSpaceData')
         setSpaceData(defaults.spaceData)
     }
 
@@ -296,15 +309,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         setSpacePeoplePaginationHasMore(true)
     }
 
-    useEffect(() => {
-        if (loggedIn) {
-            setIsFollowing(spaceData.isFollowing)
-            setIsModerator(spaceData.isModerator)
-        } else {
-            setIsFollowing(false)
-            setIsModerator(false)
-        }
-    }, [spaceData.id, loggedIn])
+    useEffect(() => updateSpaceUserStatus(spaceData), [loggedIn])
 
     useEffect(() => {
         currentSpaceHandleRef.current = location.pathname.split('/')[2]

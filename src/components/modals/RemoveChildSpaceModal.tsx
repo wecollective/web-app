@@ -1,7 +1,7 @@
 import Button from '@components/Button'
 import CloseButton from '@components/CloseButton'
+import Column from '@components/Column'
 import ImageTitle from '@components/ImageTitle'
-import LoadingWheel from '@components/LoadingWheel'
 import Modal from '@components/modals/Modal'
 import SearchSelector from '@components/SearchSelector'
 import SuccessMessage from '@components/SuccessMessage'
@@ -14,9 +14,7 @@ import Cookies from 'universal-cookie'
 
 const RemoveChildSpaceModal = (props: { close: () => void }): JSX.Element => {
     const { close } = props
-    const { spaceData, setSpaceData } = useContext(SpaceContext)
-    const [inputState, setInputState] = useState<'default' | 'valid' | 'invalid'>('default')
-    const [inputErrors, setInputErrors] = useState<string[]>([])
+    const { spaceData } = useContext(SpaceContext)
     const [options, setOptions] = useState<any[]>([])
     const [selectedSpace, setSelectedSpace] = useState<any>(null)
     const [loading, setLoading] = useState(false)
@@ -26,18 +24,21 @@ const RemoveChildSpaceModal = (props: { close: () => void }): JSX.Element => {
     function findSpaces(query) {
         if (query.length < 1) setOptions([])
         else {
-            const filteredSpaces = spaceData.DirectChildSpaces.filter(
-                (space) =>
-                    space.handle.includes(query.toLowerCase()) ||
-                    space.name.toLowerCase().includes(query.toLowerCase())
-            )
-            setOptions(filteredSpaces)
+            const accessToken = cookies.get('accessToken')
+            const headerOptions = { headers: { Authorization: `Bearer ${accessToken}` } }
+            axios
+                .get(
+                    `${config.apiURL}/find-child-spaces?spaceId=${spaceData.id}&query=${query}`,
+                    headerOptions
+                )
+                .then((res) => setOptions(res.data))
+                .catch((error) => console.log(error))
         }
     }
 
-    function selectSpace(user) {
+    function selectSpace(space) {
         setOptions([])
-        setSelectedSpace(user)
+        setSelectedSpace(space)
     }
 
     function removeChildSpace(e) {
@@ -51,18 +52,11 @@ const RemoveChildSpaceModal = (props: { close: () => void }): JSX.Element => {
             fromChild: false,
         }
         axios
-            .post(`${config.apiURL}/remove-parent-space`, data, authHeader)
+            .post(`${config.apiURL}/remove-parent-relationship`, data, authHeader)
             .then(() => {
                 setLoading(false)
-                const newChildSpaces = spaceData.DirectChildSpaces.filter(
-                    (s) => s.id !== selectedSpace.id
-                )
-                setSpaceData({
-                    ...spaceData,
-                    DirectChildSpaces: newChildSpaces,
-                })
                 setShowSuccessMessage(true)
-                setTimeout(() => close(), 2000)
+                setTimeout(() => close(), 1000)
             })
             .catch((error) => console.log(error))
     }
@@ -70,17 +64,19 @@ const RemoveChildSpaceModal = (props: { close: () => void }): JSX.Element => {
     return (
         <Modal centered close={close} style={{ maxWidth: 600 }}>
             <h1>Remove a child space from &apos;{spaceData.name}&apos;</h1>
-            <p>
-                Once removed, new posts to the removed child space will no longer appear in &apos;
-                {spaceData.name}&apos;. (Old posts will remain where they were when posted)
-            </p>
+            <Column style={{ marginBottom: 20 }}>
+                <p style={{ marginBottom: 10 }}>
+                    Once removed, new posts to the selected child space will no longer appear in
+                    &apos;
+                    {spaceData.name}&apos;.
+                </p>
+                <p>Old posts will remain where they were when posted.</p>
+            </Column>
             <form onSubmit={removeChildSpace}>
                 <SearchSelector
                     type='space'
                     title="Search for the child space's name or handle below:"
                     placeholder='name or handle...'
-                    state={inputState}
-                    errors={inputErrors}
                     onSearchQuery={(query) => findSpaces(query)}
                     onOptionSelected={(space) => selectSpace(space)}
                     options={options}
@@ -103,10 +99,10 @@ const RemoveChildSpaceModal = (props: { close: () => void }): JSX.Element => {
                         submit
                         text='Remove child space'
                         color='blue'
-                        style={{ marginRight: 10 }}
+                        loading={loading}
                         disabled={loading || showSuccessMessage || !selectedSpace}
+                        style={{ marginRight: 10 }}
                     />
-                    {loading && <LoadingWheel />}
                     {showSuccessMessage && <SuccessMessage text='Child space removed' />}
                 </div>
             </form>

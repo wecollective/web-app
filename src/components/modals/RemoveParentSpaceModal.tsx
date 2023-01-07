@@ -54,7 +54,7 @@ const RemoveParentSpaceModal = (props: { close: () => void }): JSX.Element => {
             fromChild: true,
         }
         axios
-            .post(`${config.apiURL}/remove-parent-space`, data, authHeader)
+            .post(`${config.apiURL}/remove-parent-relationship`, data, authHeader)
             .then(() => {
                 setLoading(false)
                 const newParentSpaces = spaceData.DirectParentSpaces.filter(
@@ -88,18 +88,20 @@ const RemoveParentSpaceModal = (props: { close: () => void }): JSX.Element => {
                         </Column>
                     ) : (
                         <Column centerX>
-                            {onlyOneParent && (
-                                <p>
-                                    &apos;{spaceData.name}&apos; only has one parent so it will be
-                                    re-attached to the root space{' '}
-                                    <Link to='/s/all/spaces'>all</Link> if you remove it.
+                            <Column>
+                                {onlyOneParent && (
+                                    <p style={{ marginBottom: 10 }}>
+                                        &apos;{spaceData.name}&apos; only has one parent so it will
+                                        be re-attached to the root space{' '}
+                                        <Link to='/s/all/spaces'>all</Link> if you remove it.
+                                    </p>
+                                )}
+                                <p style={{ marginBottom: 10 }}>
+                                    Once removed, new posts to &apos;{spaceData.name}&apos; will no
+                                    longer appear in the removed parent space.
                                 </p>
-                            )}
-                            <p>
-                                Once removed, new posts to &apos;{spaceData.name}&apos; will no
-                                longer appear in the removed parent space. (Old posts will remain
-                                where they were when posted)
-                            </p>
+                                <p>Old posts will remain where they were when posted.</p>
+                            </Column>
                             <form onSubmit={removeParentSpace}>
                                 <SearchSelector
                                     type='space'

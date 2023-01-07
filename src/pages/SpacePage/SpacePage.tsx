@@ -4,6 +4,7 @@ import Column from '@components/Column'
 import CoverImage from '@components/CoverImage'
 import EditableFlagImage from '@components/EditableFlagImage'
 import Input from '@components/Input'
+import Modal from '@components/modals/Modal'
 import PageTabs from '@components/PageTabs'
 import Row from '@components/Row'
 import { AccountContext } from '@contexts/AccountContext'
@@ -60,7 +61,9 @@ const SpacePage = (): JSX.Element => {
         setSelectedSpaceSubPage,
     } = useContext(SpaceContext)
     const [headerCollapsed, setHeaderColapsed] = useState(false)
-    const [joinSpaceLoading, setJoinSpaceLoading] = useState(false)
+    const [accessRequestLoading, setAccessRequestLoading] = useState(false)
+    const [followSpaceLoading, setFollowSpaceLoading] = useState(false)
+    const [followingModalOpen, setFollowingModalOpen] = useState(false)
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]
     const subpage = location.pathname.split('/')[3]
@@ -96,6 +99,76 @@ const SpacePage = (): JSX.Element => {
     const [mmLoading, setMMLoading] = useState(false)
     const [success, setSuccess] = useState(false)
 
+    function showAccessButton() {
+        return (
+            loggedIn &&
+            spaceData.privacy === 'private' &&
+            ['blocked', 'pending'].includes(spaceData.access)
+        )
+    }
+
+    function findAccessIcon() {
+        if (spaceData.access === 'pending') return <SuccessIcon />
+        return undefined
+    }
+
+    function findAccessText() {
+        if (spaceData.access === 'pending') return 'Access requested'
+        if (spaceData.access === 'blocked') return 'Request access'
+        return ''
+    }
+
+    function requestAccess() {
+        const accessToken = cookies.get('accessToken')
+        if (!accessToken) {
+            setAlertMessage('Your session has run out. Please log in again.')
+            setAlertModalOpen(true)
+        } else {
+            setAccessRequestLoading(true)
+            const data = {
+                accountHandle: accountData.handle,
+                accountName: accountData.name,
+                spaceId: spaceData.id,
+            }
+            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+            axios
+                .post(`${config.apiURL}/request-space-access`, data, options)
+                .then(() => {
+                    setAccessRequestLoading(false)
+                    setSpaceData({ ...spaceData, access: 'pending' })
+                })
+                .catch((error) => console.log(error))
+        }
+    }
+
+    function showFollowingButton() {
+        return loggedIn && spaceData.access === 'granted' && spaceHandle !== 'all'
+    }
+
+    function toggleFollowing() {
+        const accessToken = cookies.get('accessToken')
+        if (!accessToken) {
+            setAlertMessage('Your session has run out. Please log in again.')
+            setAlertModalOpen(true)
+        } else {
+            setFollowSpaceLoading(true)
+            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+            const data = { spaceId: spaceData.id, isFollowing }
+            axios
+                .post(`${config.apiURL}/toggle-follow-space`, data, options)
+                .then(() => {
+                    setFollowSpaceLoading(false)
+                    setIsFollowing(!isFollowing)
+                })
+                .catch((error) => console.log(error))
+        }
+    }
+
+    function followButtonClick() {
+        if (isFollowing) setFollowingModalOpen(true)
+        else toggleFollowing()
+    }
+
     function verifyEmail() {
         setMMLoading(true)
         setMMEmailState(mmEmail ? 'valid' : 'invalid')
@@ -122,62 +195,6 @@ const SpacePage = (): JSX.Element => {
         } else setMMLoading(false)
     }
 
-    function joinSpace() {
-        const accessToken = cookies.get('accessToken')
-        if (!accessToken) {
-            setAlertMessage('Your session has run out. Please log in again.')
-            setAlertModalOpen(true)
-        } else {
-            setJoinSpaceLoading(true)
-            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
-            if (spaceData.access === 'granted') {
-                const data = { spaceId: spaceData.id, isFollowing }
-                axios
-                    .post(`${config.apiURL}/toggle-join-space`, data, options)
-                    .then(() => {
-                        // todo: update followed spaces if visible on page when required
-                        // if (isFollowing) {
-                        //     updateAccountData(
-                        //         'FollowedSpaces',
-                        //         accountData.FollowedSpaces.filter(
-                        //             (h) => h.handle !== spaceData.handle
-                        //         )
-                        //     )
-                        // } else {
-                        //     const newFollowedSpaces = [...accountData.FollowedSpaces]
-                        //     newFollowedSpaces.push({
-                        //         handle: spaceData.handle,
-                        //         name: spaceData.name,
-                        //         flagImagePath: spaceData.flagImagePath,
-                        //     })
-                        //     updateAccountData('FollowedSpaces', newFollowedSpaces)
-                        // }
-                        setJoinSpaceLoading(false)
-                        setIsFollowing(!isFollowing)
-                    })
-                    .catch((error) => console.log(error))
-            } else {
-                const data = {
-                    accountHandle: accountData.handle,
-                    accountName: accountData.name,
-                    spaceId: spaceData.id,
-                }
-                axios
-                    .post(`${config.apiURL}/request-space-access`, data, options)
-                    .then(() => {
-                        setJoinSpaceLoading(false)
-                        setSpaceData({ ...spaceData, access: 'pending' })
-                    })
-                    .catch((error) => console.log(error))
-            }
-        }
-    }
-
-    function joinSpaceButtonText() {
-        if (spaceData.access === 'granted') return isFollowing ? 'Joined' : 'Join'
-        return spaceData.access === 'pending' ? 'Access requested' : 'Request access'
-    }
-
     // todo: use promises in space context to get space data first, then content?
     useEffect(() => {
         if (!accountDataLoading && awaitingSpaceData) getSpaceData(spaceHandle)
@@ -200,14 +217,6 @@ const SpacePage = (): JSX.Element => {
     }, [])
 
     useEffect(() => () => resetSpaceData(), [])
-
-    // function updateDB() {
-    //     const accessToken = cookies.get('accessToken')
-    //     const options = { headers: { Authorization: `Bearer ${accessToken}` } }
-    //     axios.get(`${config.apiURL}/db-update`, options).then((res) => {
-    //         console.log('res: ', res.data)
-    //     })
-    // }
 
     const wecoSpace =
         spaceData.id && (spaceData.id === 51 || spaceData.SpaceAncestors.find((a) => a.id === 51))
@@ -258,27 +267,31 @@ const SpacePage = (): JSX.Element => {
                                 <h1>{spaceData.name}</h1>
                                 <p className='grey'>s/{spaceData.handle}</p>
                             </Column>
-                            {spaceHandle !== 'all' &&
-                                loggedIn &&
-                                !mobileView &&
-                                spaceData.access !== 'blocked-by-ancestor' && (
-                                    <Row>
-                                        <Button
-                                            icon={
-                                                isFollowing || spaceData.access === 'pending' ? (
-                                                    <SuccessIcon />
-                                                ) : undefined
-                                            }
-                                            text={joinSpaceButtonText()}
-                                            color='blue'
-                                            disabled={
-                                                awaitingSpaceData || spaceData.access === 'pending'
-                                            }
-                                            loading={joinSpaceLoading}
-                                            onClick={joinSpace}
-                                        />
-                                    </Row>
-                                )}
+                            {showAccessButton() && (
+                                <Button
+                                    icon={findAccessIcon()}
+                                    text={findAccessText()}
+                                    color='aqua'
+                                    loading={accessRequestLoading}
+                                    disabled={
+                                        awaitingSpaceData ||
+                                        spaceData.access === 'pending' ||
+                                        accessRequestLoading
+                                    }
+                                    onClick={requestAccess}
+                                    style={{ marginRight: 10 }}
+                                />
+                            )}
+                            {showFollowingButton() && (
+                                <Button
+                                    icon={isFollowing ? <SuccessIcon /> : undefined}
+                                    text={isFollowing ? 'Following' : 'Follow'}
+                                    color='blue'
+                                    loading={followSpaceLoading}
+                                    disabled={awaitingSpaceData || followSpaceLoading}
+                                    onClick={followButtonClick}
+                                />
+                            )}
                         </Row>
                     </Row>
                 )}
@@ -300,7 +313,6 @@ const SpacePage = (): JSX.Element => {
                     <PageTabs tabs={tabs} />
                 </Row>
             </Column>
-            {/* <Button text='update db' color='aqua' onClick={updateDB} /> */}
             <Column centerX className={styles.content}>
                 {spaceData.access === 'granted' ? (
                     <Switch>
@@ -317,12 +329,17 @@ const SpacePage = (): JSX.Element => {
                     </Switch>
                 ) : (
                     <Column centerX style={{ zIndex: 40 }}>
-                        <p>No access!</p>
+                        <h2>Access blocked!</h2>
+                        {!loggedIn && <p>Log in to request access</p>}
                         {spaceHandle === 'the-metamodern-forum' && (
-                            <Column centerX style={{ marginTop: 20 }}>
-                                <h2>Log in or reclaim your old metamodern forum account</h2>
+                            <Column centerX style={{ marginTop: 20, maxWidth: 500 }}>
+                                <p style={{ marginBottom: 20 }}>
+                                    {loggedIn ? 'If' : 'Or if'} you previously had an account at{' '}
+                                    <b>forum.metamoderna.org</b> you can reclaim it using your old
+                                    metamodern forum email below:
+                                </p>
                                 <Input
-                                    title='Email:'
+                                    title='Old metamodern forum email'
                                     type='email'
                                     style={{ marginBottom: 10 }}
                                     disabled={mmLoading}
@@ -336,7 +353,7 @@ const SpacePage = (): JSX.Element => {
                                     }}
                                 />
                                 <Input
-                                    title='New password:'
+                                    title='New password'
                                     type='password'
                                     style={{ marginBottom: 10 }}
                                     disabled={mmLoading}
@@ -350,7 +367,7 @@ const SpacePage = (): JSX.Element => {
                                     }}
                                 />
                                 <Input
-                                    title='Confirm new password:'
+                                    title='Confirm new password'
                                     type='password'
                                     style={{ marginBottom: 20 }}
                                     disabled={mmLoading}
@@ -381,6 +398,27 @@ const SpacePage = (): JSX.Element => {
                     </Column>
                 )}
             </Column>
+            {followingModalOpen && (
+                <Modal centered close={() => setFollowingModalOpen(false)}>
+                    <h1>Are you sure you want to unfollow this space?</h1>
+                    <Row centerX style={{ marginTop: 10 }}>
+                        <Button
+                            text='Yes'
+                            color='red'
+                            onClick={() => {
+                                toggleFollowing()
+                                setFollowingModalOpen(false)
+                            }}
+                            style={{ marginRight: 10 }}
+                        />
+                        <Button
+                            text='No'
+                            color='blue'
+                            onClick={() => setFollowingModalOpen(false)}
+                        />
+                    </Row>
+                </Modal>
+            )}
         </Column>
     )
 }

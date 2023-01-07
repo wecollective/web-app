@@ -1,14 +1,16 @@
 import Button from '@components/Button'
 import CloseButton from '@components/CloseButton'
+import Column from '@components/Column'
+import FlagImage from '@components/FlagImage'
 import ImageTitle from '@components/ImageTitle'
 import LoadingWheel from '@components/LoadingWheel'
 import Modal from '@components/modals/Modal'
+import Row from '@components/Row'
 import SearchSelector from '@components/SearchSelector'
 import SuccessMessage from '@components/SuccessMessage'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
-import styles from '@styles/components/modals/Modal.module.scss'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
@@ -21,14 +23,15 @@ const ParentSpaceRequestModal = (props: { close: () => void }): JSX.Element => {
     const [blacklistRetrieved, setBlacklistRetrieved] = useState(false)
     const [options, setOptions] = useState<any[]>([])
     const [selectedSpace, setSelectedSpace] = useState<any>(null)
+    const [checkingPrivacyAccess, setCheckingPrivacyAccess] = useState(false)
+    const [blockedBy, setBlockedBy] = useState<any | null>(null)
+    const [modOfSelectedSpace, setModOfSelectedSpace] = useState(false)
     const [loading, setLoading] = useState(false)
     const [showSuccessMessage, setShowSuccessMessage] = useState(false)
     const cookies = new Cookies()
 
-    const accountIsModOfSelectedSpace =
-        selectedSpace && selectedSpace.Moderators.map((m) => m.id).includes(accountData.id)
-
     function getParentSpaceBlacklist() {
+        // blacklist: root space 'all', current space, existing parents, all descendents (to prevent loops)
         axios
             .get(`${config.apiURL}/parent-space-blacklist?spaceId=${spaceData.id}`)
             .then((res) => {
@@ -39,6 +42,7 @@ const ParentSpaceRequestModal = (props: { close: () => void }): JSX.Element => {
     }
 
     function findSpaces(query) {
+        // find non-blacklisted spaces (checks for ancestor access)
         if (query.length < 1) setOptions([])
         else if (blacklistRetrieved) {
             const accessToken = cookies.get('accessToken')
@@ -51,23 +55,151 @@ const ParentSpaceRequestModal = (props: { close: () => void }): JSX.Element => {
         }
     }
 
-    function selectSpace(space) {
-        setOptions([])
-        setSelectedSpace(space)
+    function checkPrivacyAccess(parentSpace) {
+        // check privacy access for selected space
+        setCheckingPrivacyAccess(true)
+        setBlockedBy(null)
+        const data = { childId: spaceData.id, parent: parentSpace }
+        axios
+            .post(`${config.apiURL}/parent-space-privacy-check`, data)
+            .then((res) => {
+                const { childBlockedBy, parentBlockedBy } = res.data
+                if (childBlockedBy.length || parentBlockedBy.length)
+                    setBlockedBy({ childBlockedBy, parentBlockedBy })
+                else setBlockedBy(null)
+                setCheckingPrivacyAccess(false)
+            })
+            .catch((error) => console.log(error))
     }
 
-    function sendParentSpaceRequest(e) {
-        e.preventDefault()
+    function findBlockedByMessage() {
+        const { childBlockedBy, parentBlockedBy } = blockedBy
+        if (childBlockedBy.length) {
+            return (
+                <Column centerX className='warningContainer'>
+                    <div style={{ display: 'inline' }}>
+                        This connection is blocked because{' '}
+                        <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+                            <FlagImage type='space' imagePath={spaceData.flagImagePath} size={27} />
+                        </div>{' '}
+                        <b>{spaceData.name}</b> exists within the following private spaces:
+                    </div>
+                    <Column>
+                        {childBlockedBy.map((s) => (
+                            <ImageTitle
+                                key={s.id}
+                                type='space'
+                                imagePath={s.flagImagePath}
+                                title={`${s.name} (s/${s.handle})`}
+                                fontSize={16}
+                                style={{ marginTop: 10 }}
+                            />
+                        ))}
+                    </Column>
+                </Column>
+            )
+        }
+        if (parentBlockedBy.length) {
+            const blockedBySelectedSpace = parentBlockedBy.find((s) => s.id === selectedSpace.id)
+            if (blockedBySelectedSpace) {
+                return (
+                    <Column className='warningContainer'>
+                        <div style={{ display: 'inline' }}>
+                            This connection is blocked because{' '}
+                            <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+                                <FlagImage
+                                    type='space'
+                                    imagePath={selectedSpace.flagImagePath}
+                                    size={27}
+                                />
+                            </div>{' '}
+                            <b>{selectedSpace.name}</b> is private
+                        </div>
+                    </Column>
+                )
+            }
+            return (
+                <Column centerX className='warningContainer'>
+                    <div style={{ display: 'inline' }}>
+                        This connection is blocked because{' '}
+                        <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+                            <FlagImage
+                                type='space'
+                                imagePath={selectedSpace.flagImagePath}
+                                size={27}
+                            />
+                        </div>{' '}
+                        <b>{selectedSpace.name}</b> exists within the following private spaces:
+                    </div>
+                    <Column>
+                        {parentBlockedBy.map((s) => (
+                            <ImageTitle
+                                key={s.id}
+                                type='space'
+                                imagePath={s.flagImagePath}
+                                title={`${s.name} (s/${s.handle})`}
+                                fontSize={16}
+                                style={{ marginTop: 10 }}
+                            />
+                        ))}
+                    </Column>
+                </Column>
+            )
+        }
+        return null
+    }
+
+    function findAccessMessage() {
+        if (modOfSelectedSpace) {
+            return (
+                <Column centerX className='successContainer'>
+                    <div style={{ display: 'inline' }}>
+                        This connection is allowed and you're a moderator of{' '}
+                        <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+                            <FlagImage
+                                type='space'
+                                imagePath={selectedSpace.flagImagePath}
+                                size={27}
+                            />
+                        </div>{' '}
+                        <b>{selectedSpace.name}</b> so it can be connected immediatley
+                    </div>
+                </Column>
+            )
+        }
+        return (
+            <Column centerX className='successContainer'>
+                <div style={{ display: 'inline' }}>
+                    This connection is allowed but you're not a moderator of{' '}
+                    <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+                        <FlagImage type='space' imagePath={selectedSpace.flagImagePath} size={27} />
+                    </div>{' '}
+                    <b>{selectedSpace.name}</b> so a request will be sent to its moderators first.
+                    Until they accept it your new space will be attached to the root space 's/all'
+                </div>
+            </Column>
+        )
+    }
+
+    function selectSpace(space) {
+        setOptions([])
+        setModOfSelectedSpace(space.Moderators.map((m) => m.id).includes(accountData.id))
+        setSelectedSpace(space)
+        checkPrivacyAccess(space)
+    }
+
+    function addParentSpace() {
         setLoading(true)
         const accessToken = cookies.get('accessToken')
         const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
-        if (accountIsModOfSelectedSpace) {
+        if (modOfSelectedSpace) {
             // add parent space
             const data = { childId: spaceData.id, parentId: selectedSpace.id }
             axios
                 .post(`${config.apiURL}/add-parent-space`, data, authHeader)
                 .then(() => {
                     setLoading(false)
+                    // todo: review as DirectParents not necessary present...
                     // remove root space if present
                     const newParentSpaces = spaceData.DirectParentSpaces.filter((s) => s.id !== 1)
                     // add new parent space
@@ -107,15 +239,15 @@ const ParentSpaceRequestModal = (props: { close: () => void }): JSX.Element => {
     return (
         <Modal centered close={close} style={{ maxWidth: 600 }}>
             <h1>Add a new parent space</h1>
-            <p>
-                If you&apos;re a moderator of the selected space it will be connected automatically
-                otherwise a request will be sent to the spaces moderators.
-            </p>
-            <p>
-                Once added, posts to &apos;{spaceData.name}&apos; will then appear in that parent
-                space and any parent spaces above it.
-            </p>
-            <form onSubmit={sendParentSpaceRequest}>
+            <div style={{ display: 'inline', marginBottom: 20 }}>
+                Once connected, new posts to{' '}
+                <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+                    <FlagImage type='space' imagePath={spaceData.flagImagePath} size={27} />
+                </div>{' '}
+                <b>{spaceData.name}</b> will appear in the selected parent space and all of its
+                ancestors (unless blocked by privacy settings).
+            </div>
+            <Column centerX>
                 <SearchSelector
                     type='space'
                     title="Search for the parent space's name or handle below:"
@@ -125,43 +257,52 @@ const ParentSpaceRequestModal = (props: { close: () => void }): JSX.Element => {
                     options={options}
                 />
                 {selectedSpace && (
-                    <div className={styles.selectedOptionWrapper}>
-                        <p>Selected space:</p>
-                        <div className={styles.selectedOption}>
+                    <Column centerX style={{ marginTop: 20 }}>
+                        <p>Selected parent space:</p>
+                        <Row centerY style={{ margin: '10px 0 20px 0' }}>
                             <ImageTitle
-                                type='user'
+                                type='space'
                                 imagePath={selectedSpace.flagImagePath}
-                                title={`${selectedSpace.name} (${selectedSpace.handle})`}
+                                title={`${selectedSpace.name} (s/${selectedSpace.handle})`}
+                                fontSize={16}
+                                style={{ marginRight: 10 }}
                             />
                             <CloseButton size={17} onClick={() => setSelectedSpace(null)} />
-                        </div>
-                        {accountIsModOfSelectedSpace ? (
-                            <p className='success'>You are a moderator of this space</p>
+                        </Row>
+                        {checkingPrivacyAccess ? (
+                            <Row>
+                                <p style={{ marginRight: 10 }}>Checking privacy access</p>
+                                <LoadingWheel size={25} />
+                            </Row>
                         ) : (
-                            <p className='danger'>You are not a moderator of this space</p>
+                            <Column>
+                                {blockedBy ? findBlockedByMessage() : findAccessMessage()}
+                            </Column>
                         )}
-                    </div>
+                    </Column>
                 )}
-                <div className={styles.footer}>
+                <Column centerX style={{ marginTop: 30 }}>
                     <Button
-                        text={accountIsModOfSelectedSpace ? 'Add parent space' : 'Send request'}
+                        text={modOfSelectedSpace ? 'Connect parent space' : 'Send request'}
                         color='blue'
                         style={{ marginRight: 10 }}
-                        disabled={loading || showSuccessMessage || !selectedSpace}
-                        submit
+                        disabled={
+                            loading ||
+                            showSuccessMessage ||
+                            !selectedSpace ||
+                            checkingPrivacyAccess ||
+                            blockedBy
+                        }
+                        loading={loading}
+                        onClick={addParentSpace}
                     />
-                    {loading && <LoadingWheel />}
                     {showSuccessMessage && (
                         <SuccessMessage
-                            text={
-                                accountIsModOfSelectedSpace
-                                    ? 'Parent space added!'
-                                    : 'Request sent!'
-                            }
+                            text={modOfSelectedSpace ? 'Parent space connected!' : 'Request sent!'}
                         />
                     )}
-                </div>
-            </form>
+                </Column>
+            </Column>
         </Modal>
     )
 }

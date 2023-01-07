@@ -12,8 +12,10 @@ import CheckBox from '@components/CheckBox'
 import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
 import DraftTextEditor from '@components/draft-js/DraftTextEditor'
+import FlagImage from '@components/FlagImage'
 import ImageTitle from '@components/ImageTitle'
 import Input from '@components/Input'
+import LoadingWheel from '@components/LoadingWheel'
 import Markdown from '@components/Markdown'
 import Modal from '@components/modals/Modal'
 import ProgressBarSteps from '@components/ProgressBarSteps'
@@ -172,6 +174,8 @@ const CreatePostModal = (): JSX.Element => {
     const [steps, setSteps] = useState<string[]>(['Post Type', 'Text', 'Spaces', 'Create'])
     const [currentStep, setCurrentStep] = useState(initialStep)
     const [mentions, setMentions] = useState<any[]>([])
+    const [checkingPrivacyAccess, setCheckingPrivacyAccess] = useState(false)
+    const [spaceRestrictions, setSpaceRestrictions] = useState<any | null>(null)
 
     // todo: set up validateItem function and remove unnecessary object nesting in state
     // text
@@ -446,7 +450,7 @@ const CreatePostModal = (): JSX.Element => {
             const accessToken = cookies.get('accessToken')
             const options = { headers: { Authorization: `Bearer ${accessToken}` } }
             const blacklist = [...selectedSpaces.map((s) => s.id)]
-            const data = { query, blacklist }
+            const data = { query, blacklist, spaceAccessRequired: true }
             axios
                 .post(`${config.apiURL}/find-spaces`, data, options)
                 .then((res) => setSpaceOptions(res.data))
@@ -454,13 +458,91 @@ const CreatePostModal = (): JSX.Element => {
         }
     }
 
+    function checkPrivacyAccess(space) {
+        // check privacy access for selected space
+        setCheckingPrivacyAccess(true)
+        const data = { newSpaceId: space.id, otherSpaceIds: selectedSpaces.map((s) => s.id) }
+        axios
+            .post(`${config.apiURL}/post-space-privacy-check`, data)
+            .then((res) => {
+                const { blockedByNewSpace, blockedByOtherSpaces, otherSpaces } = res.data
+                if (blockedByNewSpace || blockedByOtherSpaces) {
+                    setSpaceRestrictions({
+                        blockedByNewSpace,
+                        blockedByOtherSpaces,
+                        otherSpaces,
+                        newSpace: space,
+                    })
+                } else setSelectedSpaces((s) => [...s, space])
+                setCheckingPrivacyAccess(false)
+            })
+            .catch((error) => console.log(error))
+    }
+
+    function findBlockedByMessage() {
+        const { blockedByNewSpace, blockedByOtherSpaces, newSpace, otherSpaces } = spaceRestrictions
+        if (blockedByNewSpace) {
+            return (
+                <Column centerX className='warningContainer'>
+                    <div style={{ display: 'inline' }}>
+                        <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+                            <FlagImage type='space' imagePath={newSpace.flagImagePath} size={27} />
+                        </div>{' '}
+                        <b>{newSpace.name}</b> is blocked because it has restricted access and the
+                        following spaces would leak the post outside of that access bubble:
+                    </div>
+                    <Column>
+                        {otherSpaces.map((s) => (
+                            <ImageTitle
+                                key={s.id}
+                                type='space'
+                                imagePath={s.flagImagePath}
+                                title={`${s.name} (s/${s.handle})`}
+                                fontSize={16}
+                                style={{ marginTop: 10 }}
+                            />
+                        ))}
+                    </Column>
+                </Column>
+            )
+        }
+        if (blockedByOtherSpaces) {
+            return (
+                <Column centerX className='warningContainer'>
+                    <div style={{ display: 'inline' }}>
+                        <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+                            <FlagImage type='space' imagePath={newSpace.flagImagePath} size={27} />
+                        </div>{' '}
+                        <b>{newSpace.name}</b> is blocked because the following spaces have
+                        restricted access and it would leak the post outside of their access bubble:
+                    </div>
+                    <Column>
+                        {otherSpaces.map((s) => (
+                            <ImageTitle
+                                key={s.id}
+                                type='space'
+                                imagePath={s.flagImagePath}
+                                title={`${s.name} (s/${s.handle})`}
+                                fontSize={16}
+                                style={{ marginTop: 10 }}
+                            />
+                        ))}
+                    </Column>
+                </Column>
+            )
+        }
+        return null
+    }
+
     function addSpace(space) {
         setSpaceOptions([])
         setSelectedSpacesError(false)
-        setSelectedSpaces((s) => [...s, space])
+        setSpaceRestrictions(null)
+        checkPrivacyAccess(space)
     }
 
     function removeSpace(spaceId) {
+        setSpaceRestrictions(null)
         setSelectedSpaces((s) => [...s.filter((space) => space.id !== spaceId)])
     }
 
@@ -855,6 +937,7 @@ const CreatePostModal = (): JSX.Element => {
         if (currentStep === steps.length - 1) {
             if (selectedSpaces.length) setCurrentStep(steps.length)
             else setSelectedSpacesError(true)
+            setSpaceRestrictions(null)
         }
     }
 
@@ -1081,6 +1164,7 @@ const CreatePostModal = (): JSX.Element => {
             creatorName: accountData.name,
             creatorHandle: accountData.handle,
             spaceIds:
+                // remove root space if other spaces present
                 selectedSpaces.length > 1
                     ? selectedSpaces.filter((s) => s.id !== 1).map((s) => s.id)
                     : selectedSpaces.map((s) => s.id),
@@ -1199,9 +1283,6 @@ const CreatePostModal = (): JSX.Element => {
                         const newPost = {
                             ...data,
                             ...res.data.post,
-                            IndirectSpaces: res.data.indirectRelationships.map((item) => {
-                                return { id: item.spaceId }
-                            }),
                             PostImages: res.data.images || [],
                             Event: res.data.event
                                 ? {
@@ -3329,30 +3410,50 @@ const CreatePostModal = (): JSX.Element => {
                                 style={{ margin: '20px 0' }}
                             />
                             {selectedSpaces.length > 0 && (
-                                <Row centerX wrap style={{ marginBottom: 20, maxWidth: 400 }}>
-                                    {selectedSpaces.map((space) => (
-                                        <Row
-                                            key={space.id}
-                                            centerY
-                                            style={{ margin: '0 10px 10px 0' }}
-                                        >
-                                            <ImageTitle
-                                                type='space'
-                                                imagePath={space.flagImagePath}
-                                                title={`${space.name} (${space.handle})`}
-                                                imageSize={35}
-                                                fontSize={16}
-                                                style={{ marginRight: 5 }}
-                                            />
-                                            <CloseButton
-                                                size={17}
-                                                onClick={() => removeSpace(space.id)}
-                                            />
-                                        </Row>
-                                    ))}
-                                </Row>
+                                <Column centerX>
+                                    <Row centerX wrap style={{ marginBottom: 20, maxWidth: 400 }}>
+                                        {selectedSpaces.map((space) => (
+                                            <Row
+                                                key={space.id}
+                                                centerY
+                                                style={{ margin: '0 10px 10px 0' }}
+                                            >
+                                                <ImageTitle
+                                                    type='space'
+                                                    imagePath={space.flagImagePath}
+                                                    title={`${space.name} (${space.handle})`}
+                                                    imageSize={35}
+                                                    fontSize={16}
+                                                    style={{ marginRight: 5 }}
+                                                />
+                                                <CloseButton
+                                                    size={17}
+                                                    onClick={() => removeSpace(space.id)}
+                                                />
+                                            </Row>
+                                        ))}
+                                    </Row>
+                                </Column>
                             )}
-                            {selectedSpacesError && <p className='danger'>No spaces selected</p>}
+                            {checkingPrivacyAccess ? (
+                                <Row style={{ marginBottom: 20 }}>
+                                    <p style={{ marginRight: 10 }}>Checking privacy access</p>
+                                    <LoadingWheel size={25} />
+                                </Row>
+                            ) : (
+                                <Column>
+                                    {spaceRestrictions && (
+                                        <Column style={{ marginBottom: 20, maxWidth: 500 }}>
+                                            {findBlockedByMessage()}
+                                        </Column>
+                                    )}
+                                </Column>
+                            )}
+                            {selectedSpacesError && (
+                                <p className='danger' style={{ marginBottom: 20 }}>
+                                    No spaces selected
+                                </p>
+                            )}
                         </Column>
                     )}
 
