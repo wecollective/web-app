@@ -45,7 +45,7 @@ const NextBeadModal = (props: {
     setPostData: (data: any) => void
     close: () => void
 }): JSX.Element => {
-    const { accountData } = useContext(AccountContext)
+    const { accountData, setAlertMessage, setAlertModalOpen } = useContext(AccountContext)
     const { postData, setPostData, close } = props
     const { id, Weave, StringPlayers, StringPosts } = postData
     const {
@@ -179,7 +179,10 @@ const NextBeadModal = (props: {
                 setAudioSizeError(true)
                 resetAudioState()
                 setNewBead({ ...defaultBead, type: newBead.type })
-            } else if (duration > audioTimeLimit + 1 || duration < audioTimeLimit - 1) {
+            } else if (
+                audioTimeLimit &&
+                (duration > audioTimeLimit + 1 || duration < audioTimeLimit - 1)
+            ) {
                 setAudioTimeError(true)
                 resetAudioState()
                 setNewBead({ ...defaultBead, type: newBead.type })
@@ -289,11 +292,14 @@ const NextBeadModal = (props: {
     }
 
     function saveBead() {
-        if (newBead.type === 'image' && totalImageSize >= totalMBUploadLimit) {
+        const accessToken = cookies.get('accessToken')
+        if (!accessToken) {
+            setAlertMessage('Your session has run out. Please log in again.')
+            setAlertModalOpen(true)
+        } else if (newBead.type === 'image' && totalImageSize >= totalMBUploadLimit) {
             setTotalImageSizeError(true)
         } else {
             setLoading(true)
-            const accessToken = cookies.get('accessToken')
             const options = { headers: { Authorization: `Bearer ${accessToken}` } }
             const beadData = {
                 creatorName: accountData.name,
@@ -363,6 +369,13 @@ const NextBeadModal = (props: {
                         ],
                     })
                     setTimeout(() => close(), 1000)
+                })
+                .catch((error) => {
+                    console.log('error: ', error)
+                    if (error.response.status === 401) {
+                        setAlertMessage('Your session has run out. Please log in again.')
+                        setAlertModalOpen(true)
+                    }
                 })
         }
     }
