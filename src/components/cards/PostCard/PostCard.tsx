@@ -103,6 +103,7 @@ const PostCard = (props: {
     const history = useHistory()
     const cookies = new Cookies()
     const isOwnPost = accountData && Creator && accountData.id === Creator.id
+    const directSpaces = DirectSpaces.filter((s) => s.id !== 1)
     const otherSpacesTitle = DirectSpaces.map((s) => s.handle)
         .filter((s, i) => i !== 0)
         .join(', ')
@@ -189,26 +190,26 @@ const PostCard = (props: {
                         style={{ marginRight: 5 }}
                         shadow
                     />
-                    {DirectSpaces[0] && (
+                    {directSpaces[0] && (
                         <Row centerY>
                             <p className='grey'>to</p>
-                            {DirectSpaces[0].state === 'active' ? (
+                            {directSpaces[0].state === 'active' ? (
                                 <ImageTitle
                                     type='space'
-                                    imagePath={DirectSpaces[0].flagImagePath}
+                                    imagePath={directSpaces[0].flagImagePath}
                                     imageSize={32}
-                                    title={DirectSpaces[0].name}
+                                    title={directSpaces[0].name}
                                     fontSize={15}
-                                    link={`/s/${DirectSpaces[0].handle}/posts`}
+                                    link={`/s/${directSpaces[0].handle}/posts`}
                                     style={{ marginRight: 5 }}
                                     shadow
                                 />
                             ) : (
-                                <p className='grey'>{DirectSpaces[0].handle} (space deleted)</p>
+                                <p className='grey'>{directSpaces[0].handle} (space deleted)</p>
                             )}
                         </Row>
                     )}
-                    {DirectSpaces[1] && (
+                    {directSpaces[1] && (
                         <>
                             <button
                                 type='button'
@@ -216,12 +217,12 @@ const PostCard = (props: {
                                 title={otherSpacesTitle}
                                 onClick={() => setOtherSpacesModalOpen(true)}
                             >
-                                <p>+{DirectSpaces.length - 1}</p>
+                                <p>+{directSpaces.length - 1}</p>
                             </button>
                             {otherSpacesModalOpen && (
                                 <Modal centered close={() => setOtherSpacesModalOpen(false)}>
                                     <h2>Posted to</h2>
-                                    {DirectSpaces.map((space) => (
+                                    {directSpaces.map((space) => (
                                         <ImageTitle
                                             key={space.id}
                                             type='space'

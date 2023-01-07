@@ -19,6 +19,7 @@ const Space = (props: {
     expand: (space: any, type: 'parent' | 'child') => void
     onLocationChange: (() => void) | undefined
 }): JSX.Element => {
+    // recursive component used to render space trees in the NavigationList component below
     const { space, type, selectedSubPage, expand, onLocationChange } = props
     const { handle, name, flagImagePath, children, totalChildren, expanded, loading } = space
     return (
@@ -82,11 +83,11 @@ const NavigationList = (props: { onLocationChange?: () => void; style?: any }): 
         const accessToken = cookies.get('accessToken')
         const options = { headers: { Authorization: `Bearer ${accessToken}` } }
         const getParentSpaces = await axios.get(
-            `${config.apiURL}/parent-spaces?spaceId=${spaceData.id}`,
+            `${config.apiURL}/nav-list-parent-spaces?spaceId=${spaceData.id}`,
             options
         )
         const getChildSpaces = await axios.get(
-            `${config.apiURL}/child-spaces?spaceId=${spaceData.id}`,
+            `${config.apiURL}/nav-list-child-spaces?spaceId=${spaceData.id}`,
             options
         )
         Promise.all([getParentSpaces, getChildSpaces])
@@ -99,7 +100,7 @@ const NavigationList = (props: { onLocationChange?: () => void; style?: any }): 
     }
 
     function findSpace(spaces: any[], id: number) {
-        // traverse the tree to find matching space
+        // recursively traverses the space tree to find a matching space
         const match = spaces.find((s) => s.id === id)
         if (match) return match
         for (let i = 0; i < spaces.length; i += 1) {
@@ -130,7 +131,7 @@ const NavigationList = (props: { onLocationChange?: () => void; style?: any }): 
             const accessToken = cookies.get('accessToken')
             const options = { headers: { Authorization: `Bearer ${accessToken}` } }
             axios
-                .get(`${config.apiURL}/child-spaces?spaceId=${id}`, options)
+                .get(`${config.apiURL}/nav-list-child-spaces?spaceId=${id}`, options)
                 .then((res) => {
                     newSpace.children = res.data
                     newSpace.expanded = true

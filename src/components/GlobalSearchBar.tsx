@@ -60,13 +60,13 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
             const data = {
                 query,
                 spaceId: searchConstraint ? spaceData.id : null,
+                spaceAccessRequired: false,
             }
             const accessToken = cookies.get('accessToken')
             const options = { headers: { Authorization: `Bearer ${accessToken}` } }
             axios
                 .post(`${config.apiURL}/${route}`, data, options)
                 .then((res) => {
-                    // console.log('suggestions: ', res.data)
                     setSuggestionsLoading(false)
                     // if search query changed since request sent don't set options
                     setSearchQuery((s) => {

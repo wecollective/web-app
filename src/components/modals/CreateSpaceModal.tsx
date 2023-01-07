@@ -22,7 +22,7 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
     const {
         isModerator,
         spaceData,
-        setSpaceData,
+        // setSpaceData,
         spaceSpaces,
         setSpaceSpaces,
         spaceMapData,
@@ -81,7 +81,6 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                 accountName: accountData.name,
                 accountHandle: accountData.handle,
                 parentId: spaceData.id,
-                authorizedToAttachParent: authorized,
                 handle: handle.value,
                 name: name.value,
                 description: description.value,
@@ -99,18 +98,9 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                         name: name.value,
                         description: description.value,
                     }
-                    // todo: update followed spaces if visible on page when required
-                    // setAccountData({
-                    //     ...accountData,
-                    //     FollowedSpaces: [...accountData.FollowedSpaces, newSpaceData],
-                    // })
                     if (res.data.message === 'pending-acceptance') {
                         setSuccessMessage('Space created and request sent to moderators')
                     } else {
-                        setSpaceData({
-                            ...spaceData,
-                            DirectChildSpaces: [newSpaceData, ...spaceData.DirectChildSpaces],
-                        })
                         setSpaceMapData({
                             ...spaceMapData,
                             children: [newSpaceData, ...spaceMapData.children],
@@ -121,9 +111,13 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                     setTimeout(() => close(), 3000)
                 })
                 .catch((error) => {
+                    console.log(error)
                     if (!error.response) console.log(error)
                     else {
                         const { message } = error.response.data
+                        if (message === 'not-logged-in') {
+                            // todo: show not-logged-in message
+                        }
                         if (message === 'handle-taken')
                             setFormData({
                                 ...formData,
@@ -133,6 +127,7 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                                     errors: ['Handle already taken'],
                                 },
                             })
+                        setLoading(false)
                     }
                 })
         }

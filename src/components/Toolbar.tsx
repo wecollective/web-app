@@ -11,6 +11,8 @@ import React, { useContext } from 'react'
 const Toolbar = (): JSX.Element => {
     const { accountData } = useContext(AccountContext)
 
+    // todo: grab followed spaces when needed
+
     return (
         <Row centerY centerX className={styles.wrapper}>
             <Row centerY centerX className={styles.container}>

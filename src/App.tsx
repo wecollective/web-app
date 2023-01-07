@@ -1,6 +1,5 @@
 import Modals from '@components/modals/Modals'
 import Navbar from '@components/Navbar'
-import SidebarSmall from '@components/SidebarSmall'
 import ContextProviders from '@contexts/ContextProviders'
 import CoopPage from '@pages/CoopPage'
 import FeaturesPage from '@pages/FeaturesPage'
@@ -19,7 +18,7 @@ const App = (): JSX.Element => {
             <ContextProviders>
                 <Modals />
                 <Navbar />
-                <SidebarSmall />
+                {/* <SidebarSmall /> */}
                 <Switch>
                     <Route path='/' exact component={HomePage} />
                     <Route path='/features' exact component={FeaturesPage} />

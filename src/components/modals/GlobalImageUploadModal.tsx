@@ -79,6 +79,7 @@ const ImageUploadModal = (): JSX.Element => {
             data.append('image', imageFile)
             options.headers['Content-Type'] = 'multipart/form-data'
         }
+        // todo: needs auth check like on ImageUploadModal
         axios
             .post(
                 `${config.apiURL}/image-upload?type=${imageUploadType}&id=${

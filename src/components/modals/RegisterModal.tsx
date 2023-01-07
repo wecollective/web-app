@@ -2,6 +2,7 @@ import Button from '@components/Button'
 import Input from '@components/Input'
 import LoadingWheel from '@components/LoadingWheel'
 import Modal from '@components/modals/Modal'
+import Row from '@components/Row'
 import SuccessMessage from '@components/SuccessMessage'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
@@ -197,7 +198,9 @@ const RegisterModal = (props: { close: () => void }): JSX.Element => {
                 />
                 {loading && <LoadingWheel />}
                 {showSuccessMessage && (
-                    <SuccessMessage text="Success! We've sent you an email. Follow the instructions there to complete the registration process." />
+                    <Row style={{ marginBottom: 20 }}>
+                        <SuccessMessage text="Success! We've sent you an email. Follow the instructions there to complete the registration process." />
+                    </Row>
                 )}
                 <p>
                     Already registered?{' '}

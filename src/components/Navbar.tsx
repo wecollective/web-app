@@ -6,7 +6,6 @@ import FlagImage from '@components/FlagImage'
 import GlobalSearchBar from '@components/GlobalSearchBar'
 import ImageTitle from '@components/ImageTitle'
 import Row from '@components/Row'
-import Scrollbars from '@components/Scrollbars'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import { UserContext } from '@contexts/UserContext'
@@ -51,6 +50,8 @@ const Navbar = (): JSX.Element => {
     const otherUsersPage =
         location.pathname.split('/')[1] === 'u' &&
         location.pathname.split('/')[2] !== accountData.handle
+
+    // todo: grab followed spaces when needed
 
     function rotateButton() {
         const homeButton = document.getElementById('home-button')
@@ -169,7 +170,7 @@ const Navbar = (): JSX.Element => {
                                     />
                                 )}
                             </Column>
-                            <Row centerY className={styles.hamburgerMenuHeader}>
+                            {/* <Row centerY className={styles.hamburgerMenuHeader}>
                                 <FlagImage
                                     type={otherUsersPage ? 'user' : 'space'}
                                     size={80}
@@ -188,7 +189,7 @@ const Navbar = (): JSX.Element => {
                                             : `s/${spaceData.handle}`}
                                     </p>
                                 </Column>
-                            </Row>
+                            </Row> */}
                             {otherUsersPage ? (
                                 <Column className={styles.hamburgerMenuTabs}>
                                     <Link
@@ -393,7 +394,7 @@ const Navbar = (): JSX.Element => {
                                             <p>Settings</p>
                                         </Link>
                                     </Column>
-                                    <p className='grey'>Followed spaces</p>
+                                    {/* <p className='grey'>Followed spaces</p>
                                     <Scrollbars style={{ marginTop: 10 }}>
                                         <Column>
                                             {accountData.FollowedSpaces.map((space) => (
@@ -410,7 +411,7 @@ const Navbar = (): JSX.Element => {
                                                 />
                                             ))}
                                         </Column>
-                                    </Scrollbars>
+                                    </Scrollbars> */}
                                 </Column>
                             </>
                         )}
