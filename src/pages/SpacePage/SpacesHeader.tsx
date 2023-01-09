@@ -63,15 +63,7 @@ const SpacesHeader = (props: { params: any }): JSX.Element => {
                     <h1>Space Filters</h1>
                     <DropDown
                         title='Sort By'
-                        options={[
-                            'Followers',
-                            'Posts',
-                            'Comments',
-                            'Date',
-                            'Reactions',
-                            'Likes',
-                            'Ratings',
-                        ]}
+                        options={['Followers', 'Posts', 'Comments', 'Date', 'Likes', 'Ratings']}
                         selectedOption={filterParams.sortBy}
                         setSelectedOption={(value) =>
                             setFilterParams({ ...filterParams, sortBy: value })
