@@ -21,7 +21,18 @@ const Space = (props: {
 }): JSX.Element => {
     // recursive component used to render space trees in the NavigationList component below
     const { space, type, selectedSubPage, expand, onLocationChange } = props
-    const { handle, name, flagImagePath, children, totalChildren, expanded, loading } = space
+    const {
+        handle,
+        name,
+        flagImagePath,
+        privacy,
+        spaceAccess,
+        children,
+        totalChildren,
+        expanded,
+        loading,
+    } = space
+    const showExpander = totalChildren > 0 && (privacy === 'public' || spaceAccess === 'active')
     return (
         <Column>
             <Row centerY style={{ marginBottom: 10 }}>
@@ -35,7 +46,7 @@ const Space = (props: {
                     onClick={() => onLocationChange && onLocationChange()}
                     wrapText
                 />
-                {totalChildren > 0 && (
+                {showExpander && (
                     <button
                         className={styles.expandButton}
                         type='button'
