@@ -7,10 +7,15 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import styles from '@styles/pages/SpacePage/SpaceMap.module.scss'
 import { CommentIcon, PostIcon, ReactionIcon, UsersIcon } from '@svgs/all'
+import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 
+// todo: big clean up!
+// + big clean up! removed unused code + simplify
+// + create private space overlay and fade on hover
+// + load space data on hover
 const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
     const { spaceMapData, params } = props
     const { spaceData, setSpaceMapData, getSpaceMapChildren } = useContext(SpaceContext)
@@ -23,6 +28,12 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
     const circleRadius = 25
     const maxTextLength = 14
     const duration = 1000
+
+    function getHighlightedSpaceData(space) {
+        axios.get(`${config.apiURL}/space-map-space-data?spaceId=${space.id}`).then((res) => {
+            setHighlightedSpace({ ...space, ...res.data })
+        })
+    }
 
     const findParent = (tree: any, itemId: string): any => {
         if (tree.uuid === itemId) return tree
@@ -113,7 +124,7 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
         // console.log('resetTreePosition')
         const svg = d3.select('#space-map-svg')
         const svgWidth = parseInt(svg.style('width'), 10)
-        const svgHeight = parseInt(svg.style('height'), 10)
+        // const svgHeight = parseInt(svg.style('height'), 10)
         const yOffset = spaceData.DirectParentSpaces!.length ? 180 : 80
         // d3.select('#post-map-svg')
         //     .transition()
@@ -300,7 +311,7 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
                 .then((res) => {
                     const match = findParent(data, node.data.uuid)
                     match.children = match.children.filter((child) => !child.expander)
-                    match.children.push(...res.data.children)
+                    match.children.push(...res.data)
                     updateTree(data, false)
                 })
                 .catch((error) => console.log(error))
@@ -496,7 +507,7 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
                                         )
                                         .attr('r', findRadius(d) + 6)
                                     // display space info
-                                    setHighlightedSpace(d.data)
+                                    getHighlightedSpaceData(d.data)
                                     const { top, left } = node.node().getBoundingClientRect()
                                     setHighlightedSpacePosition({ top, left })
                                 }
@@ -567,7 +578,7 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
                                             )
                                             .attr('r', findRadius(d) + 6)
                                         // display space info
-                                        setHighlightedSpace(d.data)
+                                        getHighlightedSpaceData(d.data)
                                         const { top, left } = node2.node().getBoundingClientRect()
                                         setHighlightedSpacePosition({ top, left })
                                     }
