@@ -6,7 +6,7 @@ import StatButton from '@components/StatButton'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import styles from '@styles/pages/SpacePage/SpaceMap.module.scss'
-import { CommentIcon, PostIcon, ReactionIcon, UsersIcon } from '@svgs/all'
+import { CommentIcon, PostIcon, UsersIcon } from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
@@ -22,6 +22,7 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
     // const [width, setWidth] = useState<number | string>(700)
     const [firstRun, setFirstRun] = useState(true)
     const [highlightedSpace, setHighlightedSpace] = useState<any>(null)
+    const [showSpaceModal, setShowSpaceModal] = useState(false)
     const [highlightedSpacePosition, setHighlightedSpacePosition] = useState<any>({})
     const spaceTransitioning = useRef<boolean>(false)
     const history = useHistory()
@@ -508,6 +509,7 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
                                         .attr('r', findRadius(d) + 6)
                                     // display space info
                                     getHighlightedSpaceData(d.data)
+                                    setShowSpaceModal(true)
                                     const { top, left } = node.node().getBoundingClientRect()
                                     setHighlightedSpacePosition({ top, left })
                                 }
@@ -522,10 +524,12 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
                                         .attr('fill', '#aaa')
                                         .attr('r', findRadius(d) + 2)
                                     // hide space info
+                                    setShowSpaceModal(false)
                                     setHighlightedSpace(null)
                                 }
                             })
                             .on('mousedown', (d) => {
+                                setShowSpaceModal(false)
                                 setHighlightedSpace(null)
                                 if (!spaceTransitioning.current) {
                                     if (d.data.expander) {
@@ -578,6 +582,7 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
                                             )
                                             .attr('r', findRadius(d) + 6)
                                         // display space info
+                                        setShowSpaceModal(true)
                                         getHighlightedSpaceData(d.data)
                                         const { top, left } = node2.node().getBoundingClientRect()
                                         setHighlightedSpacePosition({ top, left })
@@ -596,6 +601,7 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
                                             .attr('fill', '#aaa')
                                             .attr('r', findRadius(d) + 2)
                                         // hide space info
+                                        setShowSpaceModal(false)
                                         setHighlightedSpace(null)
                                     }
                                 })
@@ -924,7 +930,7 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
 
     return (
         <div id='canvas' className={styles.canvas}>
-            {highlightedSpace && (
+            {showSpaceModal && highlightedSpace && (
                 <Column className={styles.spaceInfoModal} style={findModalPosition()}>
                     <div className={styles.pointer} />
                     <h1>{highlightedSpace.name}</h1>
@@ -948,10 +954,6 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
                                 <StatButton
                                     icon={<CommentIcon />}
                                     text={highlightedSpace.totalComments}
-                                />
-                                <StatButton
-                                    icon={<ReactionIcon />}
-                                    text={highlightedSpace.totalReactions}
                                 />
                             </Row>
                         </>
