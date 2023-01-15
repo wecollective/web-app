@@ -186,7 +186,7 @@ const PostCard = (props: {
                         imageSize={32}
                         title={Creator.name}
                         fontSize={15}
-                        link={`/u/${Creator.handle}`}
+                        link={`/u/${Creator.handle}/posts`}
                         style={{ marginRight: 5 }}
                         shadow
                     />

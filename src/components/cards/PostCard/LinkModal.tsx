@@ -244,14 +244,14 @@ const LinkModal = (props: {
                                         type='user'
                                         imagePath={link.Creator.flagImagePath}
                                         title={link.Creator.name}
-                                        link={`/u/${link.Creator.handle}`}
+                                        link={`/u/${link.Creator.handle}/posts`}
                                     />
                                     <p>linked from</p>
                                     <ImageTitle
                                         type='user'
                                         imagePath={link.PostA.Creator.flagImagePath}
                                         title={`${link.PostA.Creator.name}'s`}
-                                        link={`/u/${link.PostA.Creator.handle}`}
+                                        link={`/u/${link.PostA.Creator.handle}/posts`}
                                     />
                                     <TextLink text='post' link={`/p/${link.PostA.id}`} />
                                     {link.Creator.id === accountData.id && (
@@ -277,14 +277,14 @@ const LinkModal = (props: {
                                         type='user'
                                         imagePath={link.Creator.flagImagePath}
                                         title={link.Creator.name}
-                                        link={`/u/${link.Creator.handle}`}
+                                        link={`/u/${link.Creator.handle}/posts`}
                                     />
                                     <p>linked to</p>
                                     <ImageTitle
                                         type='user'
                                         imagePath={link.PostB.Creator.flagImagePath}
                                         title={`${link.PostB.Creator.name}'s`}
-                                        link={`/u/${link.PostB.Creator.handle}`}
+                                        link={`/u/${link.PostB.Creator.handle}/posts`}
                                     />
                                     <TextLink text='post' link={`/p/${link.PostB.id}`} />
                                     {link.Creator.id === accountData.id && (

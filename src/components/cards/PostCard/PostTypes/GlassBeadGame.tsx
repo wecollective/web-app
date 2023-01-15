@@ -177,7 +177,7 @@ const GlassBeadGame = (props: {
                                         type='user'
                                         imagePath={user.flagImagePath}
                                         title={user.name}
-                                        link={`/u/${user.handle}`}
+                                        link={`/u/${user.handle}/posts`}
                                         style={{ marginBottom: 10 }}
                                     />
                                 ))}
@@ -194,7 +194,7 @@ const GlassBeadGame = (props: {
                                         type='user'
                                         imagePath={user.flagImagePath}
                                         title={user.name}
-                                        link={`/u/${user.handle}`}
+                                        link={`/u/${user.handle}/posts`}
                                         style={{ marginBottom: 10 }}
                                     />
                                 ))}

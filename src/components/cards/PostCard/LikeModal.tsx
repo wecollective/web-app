@@ -91,7 +91,7 @@ const LikeModal = (props: {
                                     type='user'
                                     imagePath={like.Creator.flagImagePath}
                                     title={like.Creator.name}
-                                    link={`/u/${like.Creator.handle}`}
+                                    link={`/u/${like.Creator.handle}/posts`}
                                     style={{ marginBottom: 10 }}
                                 />
                             ))}

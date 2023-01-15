@@ -223,7 +223,7 @@ const RepostModal = (props: {
                                         type='user'
                                         imagePath={repost.Creator.flagImagePath}
                                         title={repost.Creator.name}
-                                        link={`/u/${repost.Creator.handle}`}
+                                        link={`/u/${repost.Creator.handle}/posts`}
                                     />
                                     <p>to</p>
                                     <ImageTitle

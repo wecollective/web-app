@@ -158,7 +158,7 @@ const Event = (props: { postData: any; setPostData: (data: any) => void }): JSX.
                                 type='user'
                                 imagePath={user.flagImagePath}
                                 title={user.name}
-                                link={`/u/${user.handle}`}
+                                link={`/u/${user.handle}/posts`}
                                 style={{ marginBottom: 10 }}
                             />
                         ))}
@@ -175,7 +175,7 @@ const Event = (props: { postData: any; setPostData: (data: any) => void }): JSX.
                                 type='user'
                                 imagePath={user.flagImagePath}
                                 title={user.name}
-                                link={`/u/${user.handle}`}
+                                link={`/u/${user.handle}/posts`}
                                 style={{ marginBottom: 10 }}
                             />
                         ))}

@@ -47,7 +47,7 @@ const TopContributors = (): JSX.Element => {
                                     type='space'
                                     imagePath={user.flagImagePath}
                                     title={user.name}
-                                    link={`/u/${user.handle}`}
+                                    link={`/u/${user.handle}/posts`}
                                     fontSize={14}
                                     imageSize={35}
                                     wrapText

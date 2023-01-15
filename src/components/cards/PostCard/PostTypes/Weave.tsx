@@ -122,7 +122,7 @@ const Weave = (props: {
                                     title={`${currentPlayer.name}'s move: ${
                                         stringPosts.length + 1
                                     }/${weave.numberOfTurns * stringPlayers.length}`}
-                                    link={`/u/${currentPlayer.handle}`}
+                                    link={`/u/${currentPlayer.handle}/posts`}
                                 />
                             ) : (
                                 <p>Game finished</p>
@@ -222,7 +222,7 @@ const Weave = (props: {
                                         type='user'
                                         imagePath={currentPlayer.flagImagePath}
                                         title={`${currentPlayer.name}...`}
-                                        link={`/u/${currentPlayer.handle}`}
+                                        link={`/u/${currentPlayer.handle}/posts`}
                                         style={{ margin: '0 5px' }}
                                     />
                                 </Column>

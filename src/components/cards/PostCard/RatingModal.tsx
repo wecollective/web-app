@@ -139,7 +139,7 @@ const RatingModal = (props: {
                                         type='user'
                                         imagePath={rating.Creator.flagImagePath}
                                         title={rating.Creator.name}
-                                        link={`/u/${rating.Creator.handle}`}
+                                        link={`/u/${rating.Creator.handle}/posts`}
                                     />
                                     <div className={styles.scoreBar}>
                                         <div style={{ width: `${rating.value}%` }} />
