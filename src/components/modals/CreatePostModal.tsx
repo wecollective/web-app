@@ -1262,7 +1262,11 @@ const CreatePostModal = (): JSX.Element => {
                     setLoading(false)
                     setSaved(true)
                     setCurrentStep(steps.length + 1)
-                    if (selectedSpaces.map((space) => space.id).includes(spaceData.id)) {
+                    const allPostSpaceIds = [
+                        ...selectedSpaces.map((space) => space.id),
+                        ...res.data.indirectRelationships.map((r) => r.spaceId),
+                    ]
+                    if (allPostSpaceIds.includes(spaceData.id)) {
                         let stringPosts = [] as any[]
                         if (res.data.string)
                             stringPosts = [
