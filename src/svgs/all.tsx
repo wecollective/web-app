@@ -47,6 +47,7 @@ import { ReactComponent as PlusIcon } from '@svgs/plus.svg'
 import { ReactComponent as PollIcon } from '@svgs/poll-solid.svg'
 import { ReactComponent as PostIcon } from '@svgs/post-icon.svg'
 import { ReactComponent as PrismIcon } from '@svgs/prism-icon.svg'
+import { ReactComponent as HelpIcon } from '@svgs/question-solid.svg'
 import { ReactComponent as RepostIcon } from '@svgs/repost.svg'
 import { ReactComponent as RetweetIcon } from '@svgs/retweet-solid.svg'
 import { ReactComponent as SourceIcon } from '@svgs/right-to-bracket-solid.svg'
@@ -142,4 +143,5 @@ export {
     ArrowUpIcon,
     MinusIcon,
     TrophyIcon,
+    HelpIcon,
 }

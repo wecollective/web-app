@@ -5,10 +5,14 @@ import Column from '@components/Column'
 import FlagImage from '@components/FlagImage'
 import GlobalSearchBar from '@components/GlobalSearchBar'
 import ImageTitle from '@components/ImageTitle'
+import Input from '@components/Input'
+import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
+import SuccessMessage from '@components/SuccessMessage'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import { UserContext } from '@contexts/UserContext'
+import config from '@src/Config'
 import NavigationList from '@src/pages/SpacePage/NavigationList'
 import styles from '@styles/components/Navbar.module.scss'
 import {
@@ -17,6 +21,7 @@ import {
     CalendarIcon,
     ChevronDownIcon,
     GovernanceIcon,
+    HelpIcon,
     PostIcon,
     SearchIcon,
     SettingsIcon,
@@ -26,8 +31,10 @@ import {
     UsersIcon,
     WecoLogo,
 } from '@svgs/all'
+import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import { Link, useHistory, useLocation } from 'react-router-dom'
+import Cookies from 'universal-cookie'
 
 const Navbar = (): JSX.Element => {
     const {
@@ -45,8 +52,13 @@ const Navbar = (): JSX.Element => {
     const [searchDropDownOpen, setSearchDropDownOpen] = useState(false)
     const [exploreDropDownOpen, setExploreDropDownOpen] = useState(false)
     const [profileDropDownOpen, setProfileDropDownOpen] = useState(false)
+    const [helpModalOpen, setHelpModalOpen] = useState(false)
+    const [helpMessage, setHelpMessage] = useState('')
+    const [helpMessageLoading, setHelpMessageLoading] = useState(false)
+    const [helpMessageSent, setHelpMessageSent] = useState(false)
     const history = useHistory()
     const location = useLocation()
+    const cookies = new Cookies()
     const otherUsersPage =
         location.pathname.split('/')[1] === 'u' &&
         location.pathname.split('/')[2] !== accountData.handle
@@ -120,6 +132,25 @@ const Navbar = (): JSX.Element => {
                 setTimeout(() => menu.classList.add(styles.entering), 50)
             }
         }
+    }
+
+    function sendHelpMessage() {
+        setHelpMessageLoading(true)
+        const accessToken = cookies.get('accessToken')
+        const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
+        const data = { helpMessage }
+        axios
+            .post(`${config.apiURL}/help-message`, data, authHeader)
+            .then(() => {
+                setHelpMessageLoading(false)
+                setHelpMessageSent(true)
+                setTimeout(() => {
+                    setHelpModalOpen(false)
+                    setHelpMessageSent(false)
+                    setHelpMessage('')
+                }, 2000)
+            })
+            .catch((error) => console.log(error))
     }
 
     return (
@@ -415,6 +446,15 @@ const Navbar = (): JSX.Element => {
                                 </Column>
                             </>
                         )}
+                        <div>
+                            <button
+                                className={styles.helpButton}
+                                type='button'
+                                onClick={() => setHelpModalOpen(true)}
+                            >
+                                <HelpIcon />
+                            </button>
+                        </div>
                     </Row>
                     <Row centerY className={styles.desktopRight}>
                         <div
@@ -462,13 +502,49 @@ const Navbar = (): JSX.Element => {
                                 </div>
                             )}
                         </div>
+                        <button
+                            className={styles.helpButton}
+                            type='button'
+                            onClick={() => setHelpModalOpen(true)}
+                        >
+                            <HelpIcon />
+                        </button>
                     </Row>
                 </>
             ) : (
-                <Row centerY style={{ marginRight: 10 }}>
-                    <Button text='Log in' color='blue' onClick={() => setLogInModalOpen(true)} />
+                <Row centerY>
+                    <Button
+                        text='Log in'
+                        color='blue'
+                        onClick={() => setLogInModalOpen(true)}
+                        style={{ marginRight: 10 }}
+                    />
                     {/* <Button text='Donate' color='purple' onClick={() => setDonateModalOpen(true)} /> */}
                 </Row>
+            )}
+            {helpModalOpen && (
+                <Modal centered close={() => setHelpModalOpen(false)}>
+                    <h1>Have a question or run into a bug?</h1>
+                    <p>Let us know and we'll get back to you ASAP</p>
+                    <Input
+                        type='text-area'
+                        rows={6}
+                        value={helpMessage}
+                        onChange={(v) => setHelpMessage(v)}
+                        style={{ marginBottom: 20 }}
+                    />
+                    <Button
+                        text='Send message'
+                        color='blue'
+                        disabled={!helpMessage || helpMessageLoading}
+                        loading={helpMessageLoading}
+                        onClick={sendHelpMessage}
+                        style={{ marginBottom: 10 }}
+                    />
+                    {helpMessageSent && (
+                        <SuccessMessage text='Message sent! Thanks for reaching out.' />
+                    )}
+                </Modal>
             )}
         </Row>
     )
