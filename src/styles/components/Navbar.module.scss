@@ -409,7 +409,7 @@
             padding: 0;
             border: none;
             cursor: pointer;
-            padding-right: 20px;
+            padding-right: 10px;
 
             > p {
                 color: $grey5;
@@ -426,7 +426,7 @@
 
             .profileDropDown {
                 position: absolute;
-                right: 60px;
+                right: 0;
                 top: 50px;
                 background-color: $black2;
                 padding: 10px 20px 15px 15px;
@@ -498,25 +498,6 @@
                     color: white;
                 }
             }
-        }
-    }
-
-    .helpButton {
-        all: unset;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 40px;
-        height: 40px;
-        background-color: $grey2;
-        border-radius: 50%;
-        margin-right: 10px;
-
-        > svg {
-            width: 25px;
-            height: 25px;
-            color: $grey5;
         }
     }
 }

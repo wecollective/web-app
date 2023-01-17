@@ -1,3 +1,4 @@
+import GlobalHelpButton from '@components/GlobalHelpButton'
 import Modals from '@components/modals/Modals'
 import Navbar from '@components/Navbar'
 import ContextProviders from '@contexts/ContextProviders'
@@ -18,6 +19,7 @@ const App = (): JSX.Element => {
             <ContextProviders>
                 <Modals />
                 <Navbar />
+                <GlobalHelpButton />
                 {/* <SidebarSmall /> */}
                 <Switch>
                     <Route path='/' exact component={HomePage} />

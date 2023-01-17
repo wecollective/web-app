@@ -1,0 +1,26 @@
+@import '@styles/Variables';
+
+.wrapper {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    z-index: 200;
+
+    .helpButton {
+        all: unset;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background-color: $blue9;
+        border-radius: 50%;
+
+        > svg {
+            width: 20px;
+            height: 20px;
+            color: $grey7;
+        }
+    }
+}
