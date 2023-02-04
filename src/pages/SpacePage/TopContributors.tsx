@@ -5,7 +5,7 @@ import Scrollbars from '@components/Scrollbars'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import styles from '@styles/pages/SpacePage/TopContributors.module.scss'
-import { LikeIcon, StarIcon, TrophyIcon } from '@svgs/all'
+import { LikeIcon, RankingIcon, TrophyIcon } from '@svgs/all'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
@@ -37,7 +37,7 @@ const TopContributors = (): JSX.Element => {
             {!loading && (
                 <Column>
                     <Row className={styles.header}>
-                        <StarIcon />
+                        <RankingIcon />
                         <p>Top contributors</p>
                     </Row>
                     <Column>
