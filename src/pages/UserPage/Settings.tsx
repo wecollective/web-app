@@ -1,6 +1,7 @@
 import Button from '@components/Button'
 import Column from '@components/Column'
 import DraftText from '@components/draft-js/DraftText'
+import DeleteAccountModal from '@components/modals/DeleteAccountModal'
 import UpdateUserBioModal from '@components/modals/UpdateUserBioModal'
 import UpdateUserEmailModal from '@components/modals/UpdateUserEmailModal'
 import UpdateUserNameModal from '@components/modals/UpdateUserNameModal'
@@ -20,6 +21,7 @@ const Settings = (): JSX.Element => {
     const [userNameModalOpen, setUserNameModalOpen] = useState(false)
     const [userBioModalOpen, setUserBioModalOpen] = useState(false)
     const [userEmailModalOpen, setUserEmailModalOpen] = useState(false)
+    const [deleteAccountModalOpen, setDeleteAccountModalOpen] = useState(false)
 
     const history = useHistory()
     const location = useLocation()
@@ -85,6 +87,15 @@ const Settings = (): JSX.Element => {
                             <UpdateUserEmailModal close={() => setUserEmailModalOpen(false)} />
                         )}
                     </Row>
+                    <Button
+                        text='Delete account'
+                        color='red'
+                        onClick={() => setDeleteAccountModalOpen(true)}
+                        style={{ marginTop: 20 }}
+                    />
+                    {deleteAccountModalOpen && (
+                        <DeleteAccountModal close={() => setDeleteAccountModalOpen(false)} />
+                    )}
                 </Column>
             )}
         </Column>

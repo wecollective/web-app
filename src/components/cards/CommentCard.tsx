@@ -18,7 +18,7 @@ const Comment = (props: {
     removeComment: (commentId: number, parentCommentId: number | null) => void
 }): JSX.Element => {
     const { comment, parentCommentId, toggleReplyInput, removeComment } = props
-    const { id, text, createdAt, Creator } = comment
+    const { id, text, state, createdAt, Creator } = comment
     const { loggedIn, accountData } = useContext(AccountContext)
     const [deleteCommentModalOpen, setDeleteCommentModalOpen] = useState(false)
     const isOwnComment = Creator.id === accountData.id
@@ -31,9 +31,13 @@ const Comment = (props: {
                 </Link>
                 <Column className={styles.text}>
                     <Row style={{ marginBottom: 2 }}>
-                        <Link to={`/u/${Creator.handle}`} style={{ marginRight: 5 }}>
-                            <p style={{ fontWeight: 600 }}>{Creator.name}</p>
-                        </Link>
+                        {state === 'account-deleted' ? (
+                            <p style={{ marginRight: 5 }}>[Account deleted]</p>
+                        ) : (
+                            <Link to={`/u/${Creator.handle}`} style={{ marginRight: 5 }}>
+                                <p style={{ fontWeight: 600 }}>{Creator.name}</p>
+                            </Link>
+                        )}
                         <p className='grey' title={dateCreated(createdAt)}>
                             {`• ${timeSinceCreated(createdAt)}`}
                         </p>

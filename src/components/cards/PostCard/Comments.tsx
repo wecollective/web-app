@@ -39,6 +39,10 @@ const Comments = (props: {
     const [editorKey, setEditoryKey] = useState(0)
     const [mentions, setMentions] = useState<any[]>([])
     const cookies = new Cookies()
+    const filteredComments = comments.filter((c) => {
+        // remove deleted comments with no replies
+        return c.state === 'visible' || c.Replies.length
+    })
 
     // todo: rethink component structure, add multi-layer nesting
 
@@ -164,7 +168,7 @@ const Comments = (props: {
             )}
             {comments.length > 0 && (
                 <Column>
-                    {comments.map((comment) => (
+                    {filteredComments.map((comment) => (
                         <CommentCard
                             key={comment.id}
                             comment={comment}
