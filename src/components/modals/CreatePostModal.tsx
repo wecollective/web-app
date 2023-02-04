@@ -1539,7 +1539,7 @@ const CreatePostModal = (): JSX.Element => {
                     )}
 
                     {currentStep === 1 && (
-                        <Column centerX style={{ maxWidth: 500 }}>
+                        <Column centerX style={{ maxWidth: 600 }}>
                             <p>Choose a post type:</p>
                             <Row wrap centerX style={{ margin: '20px 0' }}>
                                 {postTypes.map((type) => (

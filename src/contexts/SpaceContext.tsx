@@ -214,6 +214,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
             })
     }
 
+    // todo: consider merging getSpaceMapData and getSpaceMapChildren as both use the same space-map-data route
     function getSpaceMapData(spaceId, params) {
         console.log(`SpaceContext: getSpaceMapData`, params)
         const accessToken = cookies.get('accessToken')
@@ -227,7 +228,8 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 }&sortOrder=${params.sortOrder
                 }&timeRange=${params.timeRange
                 }&depth=${params.depth
-                }&searchQuery=${params.searchQuery || ''}&isParent=${true}`,
+                }&searchQuery=${params.searchQuery || ''
+                }&isParent=${true}`,
                 options
             )
             .then((res) => {
@@ -247,7 +249,8 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 }&sortOrder=${params.sortOrder
                 }&timeRange=${params.timeRange
                 }&depth=${params.depth
-                }&searchQuery=${params.searchQuery || ''}&isParent=${isParent}`,
+                }&searchQuery=${params.searchQuery || ''
+                }&isParent=${isParent}`,
             options
         )
     }

@@ -175,7 +175,6 @@ const ParentSpaceRequestModal = (props: { close: () => void }): JSX.Element => {
                         <FlagImage type='space' imagePath={selectedSpace.flagImagePath} size={27} />
                     </div>{' '}
                     <b>{selectedSpace.name}</b> so a request will be sent to its moderators first.
-                    Until they accept it your new space will be attached to the root space 's/all'
                 </div>
             </Column>
         )
@@ -285,7 +284,7 @@ const ParentSpaceRequestModal = (props: { close: () => void }): JSX.Element => {
                     <Button
                         text={modOfSelectedSpace ? 'Connect parent space' : 'Send request'}
                         color='blue'
-                        style={{ marginRight: 10 }}
+                        style={{ marginBottom: 20 }}
                         disabled={
                             loading ||
                             showSuccessMessage ||

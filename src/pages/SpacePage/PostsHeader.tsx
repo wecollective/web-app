@@ -102,7 +102,7 @@ const PostsHeader = (props: { params: any }): JSX.Element => {
                     />
                     <DropDown
                         title={filterParams.view === 'Map' ? 'Size By' : 'Sort By'}
-                        options={['Likes', 'Comments', 'Reposts', 'Ratings', 'Date']}
+                        options={['Date', 'Likes', 'Comments', 'Reposts', 'Ratings', 'Links']}
                         selectedOption={filterParams.sortBy}
                         setSelectedOption={(payload) =>
                             setFilterParams({ ...filterParams, sortBy: payload })
