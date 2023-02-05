@@ -1,3 +1,5 @@
+/* eslint-disable no-nested-ternary */
+/* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-param-reassign */
 import Column from '@components/Column'
 import DraftText from '@components/draft-js/DraftText'
@@ -19,32 +21,61 @@ import { useHistory } from 'react-router-dom'
 const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
     const { spaceMapData, params } = props
     const { spaceData, setSpaceMapData, getSpaceMapChildren } = useContext(SpaceContext)
-    // const [width, setWidth] = useState<number | string>(700)
     const [firstRun, setFirstRun] = useState(true)
-    const [highlightedSpace, setHighlightedSpace] = useState<any>(null)
     const [showSpaceModal, setShowSpaceModal] = useState(false)
+    const [highlightedSpace, setHighlightedSpace] = useState<any>(null)
     const [highlightedSpacePosition, setHighlightedSpacePosition] = useState<any>({})
     const spaceTransitioning = useRef<boolean>(false)
     const history = useHistory()
     const circleRadius = 25
     const maxTextLength = 14
     const duration = 1000
+    const zoom = d3
+        .zoom()
+        .on('zoom', () =>
+            d3.select('#space-map-master-group').attr('transform', d3.event.transform)
+        )
 
     function getHighlightedSpaceData(space) {
-        axios.get(`${config.apiURL}/space-map-space-data?spaceId=${space.id}`).then((res) => {
-            setHighlightedSpace({ ...space, ...res.data })
-        })
+        axios
+            .get(`${config.apiURL}/space-map-space-data?spaceId=${space.id}`)
+            .then((res) => setHighlightedSpace({ ...space, ...res.data }))
+            .catch((error) => console.log(error))
     }
 
-    const findParent = (tree: any, itemId: string): any => {
-        if (tree.uuid === itemId) return tree
+    function findSpace(tree: any, id: string) {
+        // recursive function, traverses the tree to find a space using its uuid
+        if (tree.uuid === id) return tree
         if (tree.children) {
             for (let i = 0; i < tree.children.length; i += 1) {
-                const match = findParent(tree.children[i], itemId)
+                const match = findSpace(tree.children[i], id)
                 if (match) return match
             }
         }
         return null
+    }
+
+    function findTransitonId(d) {
+        // space id used during space transitions (allows duplicates)
+        if (spaceTransitioning.current) return d.data.id
+        // unique id used when expanding spaces (no duplicates)
+        return d.data.uuid
+    }
+
+    function getChildren(data, node) {
+        getSpaceMapChildren(
+            node.data.id,
+            node.children.length - 1,
+            params,
+            node.data.id === spaceData.id
+        )
+            .then((res) => {
+                const match = findSpace(data, node.data.uuid)
+                match.children = match.children.filter((child) => !child.expander)
+                match.children.push(...res.data)
+                updateTree(data, false)
+            })
+            .catch((error) => console.log(error))
     }
 
     function toggleChildren(d) {
@@ -58,6 +89,7 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
     }
 
     function findRadius(d) {
+        // double sized circle for main space
         if (d.data.id === spaceData.id) return circleRadius * 2
         return circleRadius
     }
@@ -114,12 +146,6 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
         }
         return `url(#pattern-${d.data.id})`
     }
-
-    const zoom = d3
-        .zoom()
-        .on('zoom', () =>
-            d3.select('#space-map-master-group').attr('transform', d3.event.transform)
-        )
 
     function resetTreePosition() {
         // console.log('resetTreePosition')
@@ -183,275 +209,123 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
         // }, duration + 500)
     }
 
-    function createCanvas() {
-        const width = '100%'
-        const height = '100%' // window.innerHeight - (window.innerWidth < 1500 ? 250 : 330)
-        const yOffset = spaceData.DirectParentSpaces.length ? 180 : 80
-        const svg = d3
-            .select('#canvas')
-            .append('svg')
-            .attr('id', 'space-map-svg')
-            .attr('width', width)
-            .attr('height', height)
-        // .attr('transform', () => {
-        //     const newWidth = parseInt(d3.select('#space-map-svg').style('width'), 10)
-        //     return `translate(${newWidth / 2},${yOffset})`
-        // })
-
-        const newWidth = parseInt(svg.style('width'), 10)
-
-        svg.append('defs').attr('id', 'imgdefs')
-
-        const masterGroup = svg.append('g').attr('id', 'space-map-master-group')
-
-        masterGroup.append('g').attr('id', 'link-group')
-        masterGroup
-            .append('g')
-            .attr('id', 'parent-link-group')
-            .attr('transform', `translate(0,0),rotate(180,0,0)`)
-        masterGroup
-            .append('g')
-            .attr('id', 'parent-node-group')
-            .attr('transform', `translate(0,0),rotate(180,0,0)`)
-        masterGroup.append('g').attr('id', 'node-group')
-
-        svg.call(zoom)
-        svg.call(zoom.transform, d3.zoomIdentity.translate(newWidth / 2, yOffset))
-    }
-
-    // function updateCanvasSize() {
-    //     d3.select('#canvas').style('width', width)
-    //     d3.select('#space-map-svg').attr('width', width)
-
-    //     // const offset = spaceData.id
-    //     // console.log(spaceData)
-
-    //     // const newWidth = parseInt(d3.select('#space-map-svg').style('width'), 10)
-    //     // const transform = `translate(${newWidth / 2},${yOffset})`
-    //     // const parentTransform = `translate(${newWidth / 2},${yOffset}),rotate(180,0,0)`
-    //     const transform = `translate(0,0)`
-    //     const parentTransform = `translate(0,0),rotate(180,0,0)`
-
-    //     d3.select('#link-group').attr('transform', transform)
-    //     d3.select('#node-group').attr('transform', transform)
-    //     d3.select('#parent-link-group').attr('transform', parentTransform)
-    //     d3.select('#parent-node-group').attr('transform', parentTransform)
-    // }
-
-    function interruptRunningTransitions(data) {
-        d3.selectAll('.background-circle').each((d) => {
-            if (!findParent(data, d.data.id)) {
-                d3.select(`#background-circle-${d.data.id}`).interrupt('background-circle-enter')
-            }
-        })
-        d3.selectAll('.image-background-circle').each((d) => {
-            if (!findParent(data, d.data.id)) {
-                d3.select(`#image-background-circle-${d.data.id}`).interrupt(
-                    'image-background-circle-enter'
-                )
-            }
-        })
-        d3.selectAll('.image-circle').each((d) => {
-            if (!findParent(data, d.data.id)) {
-                d3.select(`#image-circle-${d.data.id}`).interrupt('image-circle-enter')
-            }
-        })
-        d3.selectAll('.node-text').each((d) => {
-            if (!findParent(data, d.data.id)) {
-                d3.select(`#node-text-${d.data.id}`).interrupt('node-text-enter')
-            }
-        })
-    }
-
-    function updateTree(data, resetPosition) {
-        if (resetPosition) resetTreePosition()
-
-        setTimeout(() => {
-            d3.selectAll('.background-circle').classed('transitioning', false)
-            spaceTransitioning.current = false
-        }, duration + 100)
-
-        // create parent tree
-        const parents = d3.hierarchy(data, (d) => {
-            return d.DirectParentSpaces
-        })
-        const parentTree = d3
-            .tree()
-            .nodeSize([50, 130])
-            .separation(() => {
-                return 2 // ((a, b) => { return a.parent == b.parent ? 2 : 1 })
-            })
-        parentTree(parents).links()
-        const parentLinks = parents.descendants().slice(1)
-        const parentNodes = parents.descendants().slice(1)
-
-        // create main tree
-        const root = d3.hierarchy(data, (d) => {
-            return d.children
-        })
-        const tree = d3
-            .tree()
-            .nodeSize([50, 200])
-            .separation(() => {
-                return 2 // ((a, b) => { return a.parent == b.parent ? 2 : 1 })
-            })
-
-        tree(root).links()
-        const links = root.descendants().slice(1)
-        const nodes = root.descendants()
-
-        interruptRunningTransitions(data)
-
-        function getChildren(node) {
-            getSpaceMapChildren(
-                node.data.id,
-                node.children.length - 1,
-                params,
-                node.data.id === spaceData.id
+    function createLinkArrows(nodeData, isParent) {
+        const { id } = nodeData.data
+        // add arrow to links
+        const arrow = d3
+            .select(`#${isParent ? 'parent' : 'child'}-link-group`)
+            .append('path')
+            .attr('id', `arrow-${id}`)
+            .attr('opacity', 0)
+            .attr('transform', () =>
+                isParent ? 'translate(0, 2.5),rotate(180,0,0)' : 'translate(0, -2.5)'
             )
-                .then((res) => {
-                    const match = findParent(data, node.data.uuid)
-                    match.children = match.children.filter((child) => !child.expander)
-                    match.children.push(...res.data)
-                    updateTree(data, false)
-                })
-                .catch((error) => console.log(error))
-        }
+            .attr('d', 'M 0 0 L 5 2.5 L 0 5 z')
+            .style('fill', '#ccc')
+        // position arrow at half way point along line
+        arrow
+            .append('animateMotion')
+            .attr('calcMode', 'linear')
+            .attr('dur', 'infinite')
+            .attr('repeatCount', 'infinite')
+            .attr('rotate', 'auto')
+            .attr('keyPoints', () => {
+                if (isParent) return '0.35;0.35'
+                return '0.5;0.5'
+            })
+            .attr('keyTimes', '0.0;1.0')
+            .append('mpath')
+            .attr('xlink:href', `#line-${id}`)
+        // fade in arrows
+        arrow.transition().duration(duration).attr('opacity', 1)
+    }
 
-        function findTransitonId(d) {
-            // space id used during space transitions (allows duplicates)
-            if (spaceTransitioning.current) return d.data.id
-            // unique id used when expanding spaces (no duplicates)
-            return d.data.uuid
-        }
-
-        // const newWidth = parseInt(d3.select('#space-map-svg').style('width'), 10)
-        // const transform = `translate(${newWidth / 2},${
-        //     data.DirectParentSpaces.length ? yOffset : 80
-        // })`
-
-        // d3.select('#link-group').transition().duration(duration).attr('transform', transform)
-        // d3.select('#node-group').transition().duration(duration).attr('transform', transform)
-
-        // const parentTransform = `translate(${newWidth / 2},${
-        //     data.DirectParentSpaces.length ? yOffset : 80
-        // }),rotate(180,0,0)`
-
-        // d3.select('#parent-link-group')
-        //     .transition()
-        //     .duration(duration)
-        //     .attr('transform', parentTransform)
-        // d3.select('#parent-node-group')
-        //     .transition()
-        //     .duration(duration)
-        //     .attr('transform', parentTransform)
-
-        function createLinkArrows(nodeData, isParent) {
-            const { id } = nodeData.data
-            // add arrow to links
-            const arrow = d3
-                .select(`#${isParent ? 'parent-' : ''}link-group`)
-                .append('path')
-                .attr('id', `arrow-${id}`)
-                .attr('opacity', 0)
-                .attr('transform', () => {
-                    if (isParent) return 'translate(0, 2.5),rotate(180,0,0)'
-                    return 'translate(0, -2.5)'
-                })
-                .attr('d', 'M 0 0 L 5 2.5 L 0 5 z')
-                .style('fill', '#ccc')
-            // position arrow at half way point along line
-            arrow
-                .append('animateMotion')
-                .attr('calcMode', 'linear')
-                .attr('dur', 'infinite')
-                .attr('repeatCount', 'infinite')
-                .attr('rotate', 'auto')
-                .attr('keyPoints', () => {
-                    if (isParent) return '0.35;0.35'
-                    return '0.5;0.5'
-                })
-                .attr('keyTimes', '0.0;1.0')
-                .append('mpath')
-                .attr('xlink:href', `#line-${id}`)
-            // fade in arrows
-            arrow.transition().duration(duration).attr('opacity', 1)
-        }
-
-        function createLinks(linkGroup, linkData) {
-            const isParent = linkGroup === '#parent-link-group'
-            d3.select(linkGroup)
-                .selectAll('.link')
-                .data(linkData, (d) => findTransitonId(d))
-                .join(
-                    (enter) =>
-                        enter
-                            .append('path')
-                            .classed('link', true)
-                            .attr('id', (d) => `line-${d.data.id}`)
-                            .attr('stroke', 'black')
-                            .attr('fill', 'none')
-                            .attr('opacity', 0)
+    function createLinks(linkGroup, linkData) {
+        const isParent = linkGroup === '#parent-link-group'
+        d3.select(linkGroup)
+            .selectAll('.link')
+            .data(linkData, (d) => findTransitonId(d))
+            .join(
+                (enter) =>
+                    enter
+                        .append('path')
+                        .classed('link', true)
+                        .attr('id', (d) => `line-${d.data.id}`)
+                        .attr('stroke', 'black')
+                        .attr('fill', 'none')
+                        .attr('opacity', 0)
+                        .attr('d', (d) => {
+                            return `M${d.x},${d.y}C${d.x},${(d.y + d.parent.y) / 2} ${d.parent.x},${
+                                (d.y + d.parent.y) / 2
+                            } ${d.parent.x},${d.parent.y}`
+                        })
+                        .call((node) => {
+                            node.transition()
+                                .duration(duration)
+                                .attr('opacity', 0.2)
+                                .on('end', (d) => createLinkArrows(d, isParent))
+                        }),
+                (update) =>
+                    update.call((node) =>
+                        node
+                            .transition('link-update')
+                            .duration(duration)
                             .attr('d', (d) => {
                                 return `M${d.x},${d.y}C${d.x},${(d.y + d.parent.y) / 2} ${
                                     d.parent.x
                                 },${(d.y + d.parent.y) / 2} ${d.parent.x},${d.parent.y}`
                             })
-                            .call((node) => {
-                                node.transition()
-                                    .duration(duration)
-                                    .attr('opacity', 0.2)
-                                    .on('end', (d) => createLinkArrows(d, isParent))
-                            }),
-                    (update) =>
-                        update.call((node) =>
-                            node
-                                .transition('link-update')
-                                .duration(duration)
-                                .attr('d', (d) => {
-                                    return `M${d.x},${d.y}C${d.x},${(d.y + d.parent.y) / 2} ${
-                                        d.parent.x
-                                    },${(d.y + d.parent.y) / 2} ${d.parent.x},${d.parent.y}`
-                                })
-                                .on('start', (d) => d3.select(`#arrow-${d.data.id}`).remove())
-                                .on('end', (d) => createLinkArrows(d, isParent))
-                        ),
-                    (exit) =>
-                        exit.call((node) =>
-                            node
-                                .transition()
-                                .duration(duration / 2)
-                                .attr('opacity', 0)
-                                .on('start', (d) => d3.select(`#arrow-${d.data.id}`).remove())
-                                .remove()
-                        )
-                )
-        }
+                            .on('start', (d) => d3.select(`#arrow-${d.data.id}`).remove())
+                            .on('end', (d) => createLinkArrows(d, isParent))
+                    ),
+                (exit) =>
+                    exit.call((node) =>
+                        node
+                            .transition()
+                            .duration(duration / 2)
+                            .attr('opacity', 0)
+                            .on('start', (d) => d3.select(`#arrow-${d.data.id}`).remove())
+                            .remove()
+                    )
+            )
+    }
 
-        function findStartRadius(d, name, isParent, offset) {
-            // if parent and match, return match radius
-            const match = d3.select(`#${isParent ? '' : 'parent-'}${name}-${d.data.id}`)
-            if (match.node()) return match.attr('r')
-            return findRadius(d) + offset
-        }
+    function findStartRadius(d, name, isParent, offset) {
+        // if (name === 'background-circle') {
+        //     const match = d3.select(`#${name}-id-${d.data.id}`)
+        //     return match.attr('r') || findRadius(d) + offset
+        // }
+        // if parent and match, return match radius
+        const match = d3.select(`#${isParent ? '' : 'parent-'}${name}-${d.data.id}`)
+        if (match.node()) return match.attr('r')
+        return findRadius(d) + offset
+    }
 
-        function findStartOpacity(d, name, isParent) {
-            // if parent and match, start at full opacity
-            const match = d3.select(`#${isParent ? '' : 'parent-'}${name}-${d.data.id}`)
-            if (match.node()) return 1
-            return 0
-        }
+    function findStartOpacity(d, name, isParent?) {
+        // if (name === 'background-circle') {
+        //     const match = d3.select(`#${name}-id-${d.data.id}`)
+        //     return match.attr('opacity') ? 1 : 0
+        // }
+        // if parent and match, start at full opacity
+        const match = d3.select(`#${isParent ? '' : 'parent-'}${name}-${d.data.id}`)
+        if (match.node()) return 1
+        return 0
+    }
 
-        function findStartFontSize(d, name, isParent) {
-            // if parent and match, return match font size
-            const match = d3.select(`#${isParent ? '' : 'parent-'}${name}-${d.data.id}`)
-            if (match.node()) return match.attr('font-size')
-            return isRoot(d) ? 16 : 12
-        }
+    function findStartFontSize(d, name, isParent) {
+        // if (name === 'background-circle') {
+        //     const match = d3.select(`#${name}-id-${d.data.id}`)
+        //     return match.node() ? match.attr('font-size') : isRoot(d) ? 16 : 12
+        // }
+        // if parent and match, return match font size
+        const match = d3.select(`#${isParent ? '' : 'parent-'}${name}-${d.data.id}`)
+        if (match.node()) return match.attr('font-size')
+        return isRoot(d) ? 16 : 12
+    }
 
-        function findStartTransform(d, name, isParent) {
-            // if parent, rotate transform
-            // if also match, copy and invert translation then remove match
+    function findStartTransform(d, name, isParent) {
+        if (name === 'background-circle') {
+            // const match = d3.select(`#${name}-id-${d.data.id}`)
             const match = d3.select(`#${isParent ? '' : 'parent-'}${name}-${d.data.id}`)
             if (match.node()) {
                 const t = match.attr('transform').split(/[(,)]/)
@@ -462,45 +336,142 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
             }
             return `translate(${d.x},${d.y})${isParent ? ',rotate(180,0,0)' : ''}`
         }
+        // if parent, rotate transform
+        // if also match, copy and invert translation then remove match
+        const match = d3.select(`#${isParent ? '' : 'parent-'}${name}-${d.data.id}`)
+        if (match.node()) {
+            // console.log('match: ', match.node())
+            const t = match.attr('transform').split(/[(,)]/)
+            const x = +t[1]
+            const y = +t[2]
+            match.remove()
+            return `translate(${-x || 0},${-y || 0})${isParent ? ',rotate(180,0,0)' : ''}`
+        }
+        return `translate(${d.x},${d.y})${isParent ? ',rotate(180,0,0)' : ''}`
+    }
 
-        function createBackgroundCircles(nodeGroup, nodeData) {
-            const isParent = nodeGroup === '#parent-node-group'
-            d3.select(nodeGroup)
-                .selectAll('.background-circle')
-                .data(nodeData, (d) => findTransitonId(d))
-                .join(
-                    (enter) =>
-                        enter
-                            .append('circle')
-                            .classed('background-circle', true)
-                            .classed('transitioning', (d) => {
-                                const match = d3.select(
-                                    `#${isParent ? '' : 'parent-'}background-circle-${d.data.id}`
-                                )
-                                if (match.node()) return true
-                                return false
-                            })
-                            .attr(
-                                'id',
-                                (d) => `${isParent ? 'parent-' : ''}background-circle-${d.data.id}`
+    // todo: id should use uuid, class should include space id
+    function createBackgroundCircles(data, nodeGroup, nodeData) {
+        const isParent = nodeGroup === '#parent-node-group'
+        d3.select(nodeGroup)
+            .selectAll('.background-circle')
+            .data(nodeData, (d) => findTransitonId(d))
+            .join(
+                (enter) =>
+                    enter
+                        .append('circle')
+                        .attr(
+                            'id',
+                            (d) => `${isParent ? 'parent-' : ''}background-circle-${d.data.id}`
+                        )
+                        // .classed('background-circle', true)
+                        // .classed('transitioning', (d) => {
+                        //     const match = d3.select(
+                        //         `#${isParent ? '' : 'parent-'}background-circle-${d.data.id}`
+                        //     )
+                        //     if (match.node()) return true
+                        //     return false
+                        // })
+                        // .attr('id', (d) => `background-circle-id-${d.data.id}`)
+                        .attr('class', (d) => {
+                            const classes = [
+                                'background-circle',
+                                `background-circle-uuid-${d.data.uuid}`,
+                            ]
+                            const match = d3.select(`#background-circle-id-${d.data.id}`)
+                            if (match.node()) classes.push('transitioning')
+                            return classes.join(' ')
+                        })
+                        .attr('opacity', (d) => findStartOpacity(d, 'background-circle', isParent))
+                        .attr('r', (d) => findStartRadius(d, 'background-circle', isParent, 2))
+                        .attr('fill', '#aaa')
+                        .attr('stroke-width', 3)
+                        .attr('transform', (d) =>
+                            findStartTransform(d, 'background-circle', isParent)
+                        )
+                        .style('cursor', 'pointer')
+                        .on('mouseover', (d) => {
+                            // const circle = d3.select(`#background-circle-id-${d.data.id}`)
+                            const circle = d3.select(
+                                `#${isParent ? 'parent-' : ''}background-circle-${d.data.id}`
                             )
-                            .attr('opacity', (d) =>
-                                findStartOpacity(d, 'background-circle', isParent)
+                            // const circle = d3.select(`.background-circle-uuid-${d.data.uuid}`)
+                            if (!circle.classed('transitioning')) {
+                                // highlight node
+                                circle
+                                    .transition()
+                                    .duration(duration / 5)
+                                    .attr(
+                                        'fill',
+                                        d.data.id === spaceData.id ? '#61f287' : '#8ad1ff'
+                                    )
+                                    .attr('r', findRadius(d) + 6)
+                                // display space info
+                                getHighlightedSpaceData(d.data)
+                                setShowSpaceModal(true)
+                                const { top, left } = circle.node().getBoundingClientRect()
+                                setHighlightedSpacePosition({ top, left })
+                            }
+                        })
+                        .on('mouseout', (d) => {
+                            // const circle = d3.select(`#background-circle-id-${d.data.id}`)
+                            const circle = d3.select(
+                                `#${isParent ? 'parent-' : ''}background-circle-${d.data.id}`
                             )
-                            .attr('r', (d) => findStartRadius(d, 'background-circle', isParent, 2))
-                            .attr('fill', '#aaa')
-                            .attr('stroke-width', 3)
-                            .attr('transform', (d) =>
-                                findStartTransform(d, 'background-circle', isParent)
-                            )
-                            .style('cursor', 'pointer')
+                            if (!circle.classed('transitioning')) {
+                                circle
+                                    .transition()
+                                    .duration(duration / 2)
+                                    .attr('fill', '#aaa')
+                                    .attr('r', findRadius(d) + 2)
+                                // hide space info
+                                setShowSpaceModal(false)
+                                setHighlightedSpace(null)
+                            }
+                        })
+                        .on('mousedown', (d) => {
+                            setShowSpaceModal(false)
+                            setHighlightedSpace(null)
+                            if (!spaceTransitioning.current) {
+                                if (d.data.expander) getChildren(data, d.parent)
+                                else if (d.parent) {
+                                    spaceTransitioning.current = true
+                                    history.push(`/s/${d.data.handle}/spaces`)
+                                    d3.selectAll('.background-circle').classed(
+                                        'transitioning',
+                                        true
+                                    )
+                                } else history.push(`/s/${d.data.handle}/posts`)
+                            }
+                        })
+                        .call((node) =>
+                            node
+                                .transition('background-circle-enter')
+                                .duration(duration)
+                                .attr('opacity', 1)
+                                .attr('r', (d) => findRadius(d) + 2)
+                                .attr('transform', (d) => `translate(${d.x},${d.y})`)
+                                .on('end', () => {
+                                    // console.log('end')
+                                    // d3.selectAll('.background-circle').classed(
+                                    //     'transitioning',
+                                    //     false
+                                    // )
+                                    // spaceTransitioning.current = false
+                                })
+                        ),
+                (update) =>
+                    update.call((node) =>
+                        node
                             .on('mouseover', (d) => {
-                                const node = d3.select(
+                                // const circle = d3.select(`#background-circle-id-${d.data.id}`)
+                                const circle = d3.select(
                                     `#${isParent ? 'parent-' : ''}background-circle-${d.data.id}`
                                 )
-                                if (!node.classed('transitioning')) {
+                                if (circle.node() && !circle.classed('transitioning')) {
                                     // highlight node
-                                    node.transition()
+                                    circle
+                                        .transition()
                                         .duration(duration / 5)
                                         .attr(
                                             'fill',
@@ -508,18 +479,20 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
                                         )
                                         .attr('r', findRadius(d) + 6)
                                     // display space info
-                                    getHighlightedSpaceData(d.data)
                                     setShowSpaceModal(true)
-                                    const { top, left } = node.node().getBoundingClientRect()
+                                    getHighlightedSpaceData(d.data)
+                                    const { top, left } = circle.node().getBoundingClientRect()
                                     setHighlightedSpacePosition({ top, left })
                                 }
                             })
                             .on('mouseout', (d) => {
-                                const node = d3.select(
+                                // const circle = d3.select(`#background-circle-id-${d.data.id}`)
+                                const circle = d3.select(
                                     `#${isParent ? 'parent-' : ''}background-circle-${d.data.id}`
                                 )
-                                if (!node.classed('transitioning')) {
-                                    node.transition()
+                                if (circle.node() && !circle.classed('transitioning')) {
+                                    circle
+                                        .transition()
                                         .duration(duration / 2)
                                         .attr('fill', '#aaa')
                                         .attr('r', findRadius(d) + 2)
@@ -528,235 +501,193 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
                                     setHighlightedSpace(null)
                                 }
                             })
-                            .on('mousedown', (d) => {
-                                setShowSpaceModal(false)
-                                setHighlightedSpace(null)
-                                if (!spaceTransitioning.current) {
-                                    if (d.data.expander) {
-                                        getChildren(d.parent)
-                                    } else if (d.parent) {
-                                        spaceTransitioning.current = true
-                                        history.push(`/s/${d.data.handle}/spaces`)
-                                        d3.selectAll('.background-circle').classed(
-                                            'transitioning',
-                                            true
-                                        )
-                                    } else {
-                                        history.push(`/s/${d.data.handle}/posts`)
-                                    }
-                                }
-                            })
-                            .call((node) =>
-                                node
-                                    .transition('background-circle-enter')
-                                    .duration(duration)
-                                    .attr('opacity', 1)
-                                    .attr('r', (d) => findRadius(d) + 2)
-                                    .attr('transform', (d) => `translate(${d.x},${d.y})`)
-                                    .on('end', () => {
-                                        // console.log('end')
-                                        // d3.selectAll('.background-circle').classed(
-                                        //     'transitioning',
-                                        //     false
-                                        // )
-                                        // spaceTransitioning.current = false
-                                    })
-                            ),
-                    (update) =>
-                        update.call((node) =>
-                            node
-                                .on('mouseover', (d) => {
-                                    const node2 = d3.select(
-                                        `#${isParent ? 'parent-' : ''}background-circle-${
-                                            d.data.id
-                                        }`
-                                    )
-                                    if (node2.node() && !node2.classed('transitioning')) {
-                                        // highlight node
-                                        node2
-                                            .transition()
-                                            .duration(duration / 5)
-                                            .attr(
-                                                'fill',
-                                                d.data.id === spaceData.id ? '#61f287' : '#8ad1ff'
-                                            )
-                                            .attr('r', findRadius(d) + 6)
-                                        // display space info
-                                        setShowSpaceModal(true)
-                                        getHighlightedSpaceData(d.data)
-                                        const { top, left } = node2.node().getBoundingClientRect()
-                                        setHighlightedSpacePosition({ top, left })
-                                    }
-                                })
-                                .on('mouseout', (d) => {
-                                    const node2 = d3.select(
-                                        `#${isParent ? 'parent-' : ''}background-circle-${
-                                            d.data.id
-                                        }`
-                                    )
-                                    if (node2.node() && !node2.classed('transitioning')) {
-                                        node2
-                                            .transition()
-                                            .duration(duration / 2)
-                                            .attr('fill', '#aaa')
-                                            .attr('r', findRadius(d) + 2)
-                                        // hide space info
-                                        setShowSpaceModal(false)
-                                        setHighlightedSpace(null)
-                                    }
-                                })
-                                .transition('background-circle-update')
-                                .duration(duration)
-                                .attr('r', (d) => findRadius(d) + 2)
-                                .attr('transform', (d) => `translate(${d.x},${d.y})`)
-                        ),
-                    (exit) =>
-                        exit.call((node) =>
-                            node
-                                .transition('background-circle-exit')
-                                .duration(duration / 2)
-                                .attr('opacity', 0)
-                                .remove()
-                        )
-                )
-        }
+                            .transition('background-circle-update')
+                            .duration(duration)
+                            .attr('r', (d) => findRadius(d) + 2)
+                            .attr('transform', (d) => `translate(${d.x},${d.y})`)
+                    ),
+                (exit) =>
+                    exit.call((node) =>
+                        node
+                            .transition('background-circle-exit')
+                            .duration(duration / 2)
+                            .attr('opacity', 0)
+                            .remove()
+                    )
+            )
+    }
 
-        function createImageBackgrounds(nodeGroup, nodeData) {
-            const isParent = nodeGroup === '#parent-node-group'
-            d3.select(nodeGroup)
-                .selectAll('.image-background-circle')
-                .data(nodeData, (d) => findTransitonId(d))
-                .join(
-                    (enter) =>
-                        enter
-                            .append('circle')
-                            .classed('image-background-circle', true)
-                            .attr(
-                                'id',
-                                (d) =>
-                                    `${isParent ? 'parent-' : ''}image-background-circle-${
-                                        d.data.id
-                                    }`
-                            )
-                            .attr('opacity', (d) =>
-                                findStartOpacity(d, 'image-background-circle', isParent)
-                            )
-                            .attr('r', (d) =>
-                                findStartRadius(d, 'image-background-circle', isParent, -0.1)
-                            )
-                            .attr('pointer-events', 'none')
-                            .style('fill', 'white')
-                            .attr('transform', (d) =>
-                                findStartTransform(d, 'image-background-circle', isParent)
-                            )
-                            .call((node) =>
-                                node
-                                    // .transition('image-background-circle-enter')
-                                    .transition()
-                                    .duration(duration)
-                                    .attr('opacity', 1)
-                                    .attr('transform', (d) => `translate(${d.x},${d.y})`)
-                                    .attr('r', (d) => findRadius(d) - 0.1)
-                            ),
-                    (update) =>
-                        update.call((node) =>
+    function createImageBackgrounds(nodeGroup, nodeData) {
+        const isParent = nodeGroup === '#parent-node-group'
+        d3.select(nodeGroup)
+            .selectAll('.image-background-circle')
+            .data(nodeData, (d) => findTransitonId(d))
+            .join(
+                (enter) =>
+                    enter
+                        .append('circle')
+                        .classed('image-background-circle', true)
+                        .attr(
+                            'id',
+                            (d) =>
+                                `${isParent ? 'parent-' : ''}image-background-circle-${d.data.id}`
+                        )
+                        .attr('opacity', (d) =>
+                            findStartOpacity(d, 'image-background-circle', isParent)
+                        )
+                        .attr('r', (d) =>
+                            findStartRadius(d, 'image-background-circle', isParent, -0.1)
+                        )
+                        .attr('pointer-events', 'none')
+                        .style('fill', 'white')
+                        .attr('transform', (d) =>
+                            findStartTransform(d, 'image-background-circle', isParent)
+                        )
+                        .call((node) =>
                             node
-                                // .transition('image-background-circle-update')
+                                // .transition('image-background-circle-enter')
                                 .transition()
                                 .duration(duration)
+                                .attr('opacity', 1)
+                                .attr('transform', (d) => `translate(${d.x},${d.y})`)
                                 .attr('r', (d) => findRadius(d) - 0.1)
+                        ),
+                (update) =>
+                    update.call((node) =>
+                        node
+                            // .transition('image-background-circle-update')
+                            .transition()
+                            .duration(duration)
+                            .attr('r', (d) => findRadius(d) - 0.1)
+                            .attr('transform', (d) => {
+                                return `translate(${d.x},${d.y})`
+                            })
+                    ),
+                (exit) =>
+                    exit.call((node) =>
+                        node
+                            // .transition('image-background-circle-exit')
+                            .transition()
+                            .duration(duration / 2)
+                            .attr('opacity', 0)
+                            .remove()
+                    )
+            )
+    }
+
+    function createImages(nodeGroup, nodeData) {
+        const isParent = nodeGroup === '#parent-node-group'
+        d3.select(nodeGroup)
+            .selectAll('.image-circle')
+            .data(nodeData, (d) => findTransitonId(d))
+            .join(
+                (enter) =>
+                    enter
+                        .append('circle')
+                        .classed('image-circle', true)
+                        .attr('id', (d) => `image-circle-${d.data.id}`)
+                        .attr('id', (d) => `${isParent ? 'parent-' : ''}image-circle-${d.data.id}`)
+                        .attr('opacity', (d) => findStartOpacity(d, 'image-circle', isParent))
+                        .attr('r', (d) => findStartRadius(d, 'image-circle', isParent, 0))
+                        .attr('pointer-events', 'none')
+                        .style('fill', (d) => findFill(d))
+                        .attr('transform', (d) => findStartTransform(d, 'image-circle', isParent))
+                        .call((node) =>
+                            node
+                                .transition('image-circle-enter')
+                                .duration(duration)
+                                .attr('opacity', 1)
+                                .attr('r', (d) => findRadius(d))
                                 .attr('transform', (d) => {
+                                    if (isParent) return `translate(${d.x},${d.y}),rotate(180,0,0)`
                                     return `translate(${d.x},${d.y})`
                                 })
                         ),
-                    (exit) =>
-                        exit.call((node) =>
+                (update) =>
+                    update.call(
+                        (node) =>
                             node
-                                // .transition('image-background-circle-exit')
-                                .transition()
-                                .duration(duration / 2)
-                                .attr('opacity', 0)
-                                .remove()
-                        )
-                )
-        }
+                                .transition('image-circle-update')
+                                .duration(duration)
+                                .attr('r', (d) => findRadius(d))
+                                .style('fill', (d) => findFill(d))
+                                .attr('transform', (d) => {
+                                    if (isParent) return `translate(${d.x},${d.y}),rotate(180,0,0)`
+                                    return `translate(${d.x},${d.y})`
+                                })
+                        // .attr('transform', (d) =>
+                        //     findStartTransform(d, 'image-circle', isParent)
+                        // )
+                        // .attr('transform', (d) => {
+                        //     return `translate(${d.x},${d.y})`
+                        // })
+                    ),
+                (exit) =>
+                    exit.call((node) =>
+                        node
+                            .transition('image-circle-exit')
+                            .duration(duration / 2)
+                            .attr('opacity', 0)
+                            .remove()
+                    )
+            )
+    }
 
-        function createImages(nodeGroup, nodeData) {
-            const isParent = nodeGroup === '#parent-node-group'
-            d3.select(nodeGroup)
-                .selectAll('.image-circle')
-                .data(nodeData, (d) => findTransitonId(d))
-                .join(
-                    (enter) =>
-                        enter
-                            .append('circle')
-                            .classed('image-circle', true)
-                            .attr('id', (d) => `image-circle-${d.data.id}`)
-                            .attr(
-                                'id',
-                                (d) => `${isParent ? 'parent-' : ''}image-circle-${d.data.id}`
+    function createText(nodeGroup, nodeData) {
+        const isParent = nodeGroup === '#parent-node-group'
+        d3.select(nodeGroup)
+            .selectAll('.node-text')
+            .data(nodeData, (d) => findTransitonId(d))
+            .join(
+                (enter) =>
+                    enter
+                        .append('text')
+                        .classed('node-text', true)
+                        .attr('id', (d) => `${isParent ? 'parent-' : ''}node-text-${d.data.id}`)
+                        .text((d) => {
+                            const croppedText =
+                                d.data.name && d.data.name.length > maxTextLength
+                                    ? `${d.data.name.substring(0, maxTextLength - 3)}...`
+                                    : d.data.name
+                            return isRoot(d) ? d.data.name : croppedText
+                        })
+                        .attr('font-size', (d) => findStartFontSize(d, 'node-text', isParent)) // (isRoot(d) ? 16 : 12))
+                        .attr('opacity', (d) => findStartOpacity(d, 'node-text', isParent))
+                        .attr('text-anchor', 'middle')
+                        .attr('dominant-baseline', 'central')
+                        .attr('y', (d) => {
+                            const match = d3.select(
+                                `#${isParent ? '' : 'parent-'}node-text-${d.data.id}`
                             )
-                            .attr('opacity', (d) => findStartOpacity(d, 'image-circle', isParent))
-                            .attr('r', (d) => findStartRadius(d, 'image-circle', isParent, 0))
-                            .attr('pointer-events', 'none')
-                            .style('fill', (d) => findFill(d))
-                            .attr('transform', (d) =>
-                                findStartTransform(d, 'image-circle', isParent)
-                            )
-                            .call((node) =>
-                                node
-                                    .transition('image-circle-enter')
-                                    .duration(duration)
-                                    .attr('opacity', 1)
-                                    .attr('r', (d) => findRadius(d))
-                                    .attr('transform', (d) => {
-                                        if (isParent)
-                                            return `translate(${d.x},${d.y}),rotate(180,0,0)`
-                                        return `translate(${d.x},${d.y})`
-                                    })
-                            ),
-                    (update) =>
-                        update.call(
-                            (node) =>
-                                node
-                                    .transition('image-circle-update')
-                                    .duration(duration)
-                                    .attr('r', (d) => findRadius(d))
-                                    .style('fill', (d) => findFill(d))
-                                    .attr('transform', (d) => {
-                                        if (isParent)
-                                            return `translate(${d.x},${d.y}),rotate(180,0,0)`
-                                        return `translate(${d.x},${d.y})`
-                                    })
-                            // .attr('transform', (d) =>
-                            //     findStartTransform(d, 'image-circle', isParent)
-                            // )
-                            // .attr('transform', (d) => {
-                            //     return `translate(${d.x},${d.y})`
-                            // })
+                            if (match.node()) return match.attr('y')
+                            return isRoot(d) ? -65 : -40
+                        })
+                        .attr('x', 0)
+                        .attr('transform', (d) => findStartTransform(d, 'node-text', isParent))
+                        .call((node) =>
+                            node
+                                .transition('node-text-enter')
+                                .duration(duration)
+                                .attr('opacity', 1)
+                                .attr('y', (d) => (isRoot(d) ? -65 : -40))
+                                .attr('font-size', (d) => (isRoot(d) ? 16 : 12))
+                                .attr('transform', (d) => {
+                                    if (isParent) return `translate(${d.x},${d.y}),rotate(180,0,0)`
+                                    return `translate(${d.x},${d.y})`
+                                })
                         ),
-                    (exit) =>
-                        exit.call((node) =>
-                            node
-                                .transition('image-circle-exit')
-                                .duration(duration / 2)
-                                .attr('opacity', 0)
-                                .remove()
-                        )
-                )
-        }
-
-        function createText(nodeGroup, nodeData) {
-            const isParent = nodeGroup === '#parent-node-group'
-            d3.select(nodeGroup)
-                .selectAll('.node-text')
-                .data(nodeData, (d) => findTransitonId(d))
-                .join(
-                    (enter) =>
-                        enter
-                            .append('text')
-                            .classed('node-text', true)
-                            .attr('id', (d) => `${isParent ? 'parent-' : ''}node-text-${d.data.id}`)
+                (update) =>
+                    update.call((node) =>
+                        node
+                            .transition('node-text-update')
+                            .duration(duration)
+                            .attr('y', (d) => (isRoot(d) ? -65 : -40))
+                            .attr('font-size', (d) => (isRoot(d) ? 16 : 12))
+                            .attr('transform', (d) => {
+                                return `translate(${d.x},${d.y})${
+                                    isParent ? ',rotate(180,0,0)' : ''
+                                }`
+                            })
                             .text((d) => {
                                 const croppedText =
                                     d.data.name && d.data.name.length > maxTextLength
@@ -764,142 +695,190 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
                                         : d.data.name
                                 return isRoot(d) ? d.data.name : croppedText
                             })
-                            .attr('font-size', (d) => findStartFontSize(d, 'node-text', isParent)) // (isRoot(d) ? 16 : 12))
-                            .attr('opacity', (d) => findStartOpacity(d, 'node-text', isParent))
-                            .attr('text-anchor', 'middle')
-                            .attr('dominant-baseline', 'central')
-                            .attr('y', (d) => {
-                                const match = d3.select(
-                                    `#${isParent ? '' : 'parent-'}node-text-${d.data.id}`
-                                )
-                                if (match.node()) return match.attr('y')
-                                return isRoot(d) ? -65 : -40
-                            })
-                            .attr('x', 0)
-                            .attr('transform', (d) => findStartTransform(d, 'node-text', isParent))
-                            .call((node) =>
-                                node
-                                    .transition('node-text-enter')
-                                    .duration(duration)
-                                    .attr('opacity', 1)
-                                    .attr('y', (d) => (isRoot(d) ? -65 : -40))
-                                    .attr('font-size', (d) => (isRoot(d) ? 16 : 12))
-                                    .attr('transform', (d) => {
-                                        if (isParent)
-                                            return `translate(${d.x},${d.y}),rotate(180,0,0)`
-                                        return `translate(${d.x},${d.y})`
-                                    })
-                            ),
-                    (update) =>
-                        update.call((node) =>
-                            node
-                                .transition('node-text-update')
-                                .duration(duration)
-                                .attr('y', (d) => (isRoot(d) ? -65 : -40))
-                                .attr('font-size', (d) => (isRoot(d) ? 16 : 12))
-                                .attr('transform', (d) => {
-                                    return `translate(${d.x},${d.y})${
-                                        isParent ? ',rotate(180,0,0)' : ''
-                                    }`
-                                })
-                                .text((d) => {
-                                    const croppedText =
-                                        d.data.name && d.data.name.length > maxTextLength
-                                            ? `${d.data.name.substring(0, maxTextLength - 3)}...`
-                                            : d.data.name
-                                    return isRoot(d) ? d.data.name : croppedText
-                                })
-                        ),
-                    (exit) =>
-                        exit.call((node) =>
-                            node
-                                .transition('node-text-exit')
-                                .duration(duration / 2)
-                                .attr('opacity', 0)
-                                .remove()
-                        )
-                )
-        }
+                    ),
+                (exit) =>
+                    exit.call((node) =>
+                        node
+                            .transition('node-text-exit')
+                            .duration(duration / 2)
+                            .attr('opacity', 0)
+                            .remove()
+                    )
+            )
+    }
 
-        function createPlusMinusButtons(nodeGroup, nodeData) {
-            d3.select(nodeGroup)
-                .selectAll('.node-button')
-                .data(nodeData, (d) => d.data.uuid)
-                .join(
-                    (enter) =>
-                        enter
-                            .filter((d) => {
-                                return (
-                                    d.data.totalResults > 0 &&
-                                    d.depth > 0 &&
-                                    d.data.privacy !== 'private'
-                                )
-                            })
-                            .append('svg:image')
-                            .attr('xlink:href', (d) => {
-                                return d.data.collapsed === true
+    function createPlusMinusButtons(data, nodeGroup, nodeData) {
+        d3.select(nodeGroup)
+            .selectAll('.node-button')
+            .data(nodeData, (d) => d.data.uuid)
+            .join(
+                (enter) =>
+                    enter
+                        .filter((d) => {
+                            const notMainSpace = d.data.id !== spaceData.id
+                            const hasChildren = d.data.totalResults || d.data.totalChildren
+                            const accessGranted = d.data.privacy === 'public' || d.data.spaceAccess
+                            return notMainSpace && hasChildren && accessGranted
+                        })
+                        .append('svg:image')
+                        .attr('xlink:href', (d) =>
+                            d.data.collapsed // ? plusIcon : minusIcon
+                                ? `${config.publicAssets}/icons/plus-solid.svg`
+                                : `${config.publicAssets}/icons/minus-solid.svg`
+                        )
+                        .classed('node-button', true)
+                        .attr('id', (d) => `node-button-${d.data.id}`)
+                        .attr('opacity', 0)
+                        .attr('width', 15)
+                        .attr('height', 15)
+                        .attr('y', -7)
+                        .attr('x', 32)
+                        .attr('transform', (d) => `translate(${d.x},${d.y})`)
+                        .style('cursor', 'pointer')
+                        .on('click', (d) => {
+                            const match = findSpace(data, d.data.uuid)
+                            if (d.data.collapsed === true) match.collapsed = false
+                            else match.collapsed = true
+                            toggleChildren(match)
+                            updateTree(data, false)
+                        })
+                        .call((node) =>
+                            node
+                                .transition('node-button-enter')
+                                .duration(duration)
+                                .attr('opacity', 0.15)
+                        ),
+                (update) =>
+                    update.call((node) =>
+                        node
+                            .transition('node-text-update')
+                            .duration(duration)
+                            .attr('xlink:href', (d) =>
+                                d.data.collapsed
                                     ? `${config.publicAssets}/icons/plus.svg`
                                     : `${config.publicAssets}/icons/minus-solid.svg`
-                            })
-                            .classed('node-button', true)
-                            .attr('id', (d) => `node-button-${d.data.id}`)
-                            .attr('opacity', 0)
-                            .attr('width', 15)
-                            .attr('height', 15)
-                            .attr('y', -7)
-                            .attr('x', 32)
+                            )
                             .attr('transform', (d) => {
                                 return `translate(${d.x},${d.y})`
                             })
-                            .style('cursor', 'pointer')
-                            .on('click', (d) => {
-                                const match = findParent(data, d.data.uuid)
-                                if (d.data.collapsed === true) match.collapsed = false
-                                else match.collapsed = true
-                                toggleChildren(match)
-                                updateTree(data, false)
-                            })
-                            .call((node) =>
-                                node
-                                    .transition('node-button-enter')
-                                    .duration(duration)
-                                    .attr('opacity', 0.15)
-                            ),
-                    (update) =>
-                        update.call((node) =>
-                            node
-                                .transition('node-text-update')
-                                .duration(duration)
-                                .attr('xlink:href', (d) => {
-                                    return d.data.collapsed === true
-                                        ? `${config.publicAssets}/icons/plus.svg`
-                                        : `${config.publicAssets}/icons/minus-solid.svg`
-                                })
-                                .attr('transform', (d) => {
-                                    return `translate(${d.x},${d.y})`
-                                })
-                        ),
-                    (exit) =>
-                        exit.call((node) =>
-                            node
-                                .transition('node-text-exit')
-                                .duration(duration / 2)
-                                .attr('opacity', 0)
-                                .remove()
-                        )
+                    ),
+                (exit) =>
+                    exit.call((node) =>
+                        node
+                            .transition('node-text-exit')
+                            .duration(duration / 2)
+                            .attr('opacity', 0)
+                            .remove()
+                    )
+            )
+    }
+
+    function createCanvas() {
+        let width: string | number = '100%'
+        const height = '100%' // window.innerHeight - (window.innerWidth < 1500 ? 250 : 330)
+        const yOffset = spaceData.DirectParentSpaces.length ? 180 : 80
+        const svg = d3
+            .select('#canvas')
+            .append('svg')
+            .attr('id', 'space-map-svg')
+            .attr('width', width)
+            .attr('height', height)
+
+        width = parseInt(svg.style('width'), 10)
+
+        svg.append('defs').attr('id', 'imgdefs')
+
+        const masterGroup = svg.append('g').attr('id', 'space-map-master-group')
+
+        masterGroup.append('g').attr('id', 'child-link-group')
+        masterGroup
+            .append('g')
+            .attr('id', 'parent-link-group')
+            .attr('transform', `translate(0,0),rotate(180,0,0)`)
+        masterGroup
+            .append('g')
+            .attr('id', 'parent-node-group')
+            .attr('transform', `translate(0,0),rotate(180,0,0)`)
+        masterGroup.append('g').attr('id', 'child-node-group')
+
+        svg.call(zoom)
+        svg.call(zoom.transform, d3.zoomIdentity.translate(width / 2, yOffset))
+    }
+
+    function interruptRunningTransitions(data) {
+        // only effects children atm
+        d3.selectAll('.background-circle').each((d) => {
+            if (!findSpace(data, d.data.id)) {
+                d3.select(`#background-circle-${d.data.id}`).interrupt('background-circle-enter')
+                // d3.select(`#parent-background-circle-${d.data.id}`).interrupt(
+                //     'background-circle-enter'
+                // )
+            }
+        })
+        d3.selectAll('.image-background-circle').each((d) => {
+            if (!findSpace(data, d.data.id)) {
+                d3.select(`#image-background-circle-${d.data.id}`).interrupt(
+                    'image-background-circle-enter'
                 )
-        }
+            }
+        })
+        d3.selectAll('.image-circle').each((d) => {
+            if (!findSpace(data, d.data.id)) {
+                d3.select(`#image-circle-${d.data.id}`).interrupt('image-circle-enter')
+            }
+        })
+        d3.selectAll('.node-text').each((d) => {
+            if (!findSpace(data, d.data.id)) {
+                d3.select(`#node-text-${d.data.id}`).interrupt('node-text-enter')
+            }
+        })
+    }
 
-        createLinks('#link-group', links)
+    function updateTree(data, resetPosition) {
+        if (resetPosition) resetTreePosition()
+
+        console.log('tree data: ', data)
+
+        // todo: do automatically on end, not using timeout
+        setTimeout(() => {
+            d3.selectAll('.background-circle').classed('transitioning', false)
+            spaceTransitioning.current = false
+        }, duration + 100)
+
+        // build parent tree
+        const parents = d3.hierarchy(data, (d) => d.DirectParentSpaces)
+        const parentTree = d3
+            .tree()
+            .nodeSize([50, 130])
+            .separation(() => 2)
+        parentTree(parents).links()
+        const parentLinks = parents.descendants().slice(1)
+        const parentNodes = parents.descendants().slice(1)
+
+        // build main tree
+        const root = d3.hierarchy(data, (d) => d.children)
+        const tree = d3
+            .tree()
+            .nodeSize([50, 200])
+            .separation(() => 2)
+
+        tree(root).links()
+        const links = root.descendants().slice(1)
+        const nodes = root.descendants()
+
+        interruptRunningTransitions(data)
+
+        // create links
+        createLinks('#child-link-group', links)
         createLinks('#parent-link-group', parentLinks)
-
-        createBackgroundCircles('#node-group', nodes)
-        createImageBackgrounds('#node-group', nodes)
-        createImages('#node-group', nodes)
-        createText('#node-group', nodes)
-        createPlusMinusButtons('#node-group', nodes)
-
-        createBackgroundCircles('#parent-node-group', parentNodes)
+        // create child spaces
+        createBackgroundCircles(data, '#child-node-group', nodes)
+        createImageBackgrounds('#child-node-group', nodes)
+        createImages('#child-node-group', nodes)
+        createText('#child-node-group', nodes)
+        createPlusMinusButtons(data, '#child-node-group', nodes)
+        // create parent spaces
+        createBackgroundCircles(data, '#parent-node-group', parentNodes)
         createImageBackgrounds('#parent-node-group', parentNodes)
         createImages('#parent-node-group', parentNodes)
         createText('#parent-node-group', parentNodes)
@@ -934,7 +913,9 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
                 <Column className={styles.spaceInfoModal} style={findModalPosition()}>
                     <div className={styles.pointer} />
                     <h1>{highlightedSpace.name}</h1>
-                    {highlightedSpace.handle ? (
+                    {highlightedSpace.expander ? (
+                        <h2 style={{ marginTop: 5 }}>Click to expand</h2>
+                    ) : (
                         <>
                             <h2>s/{highlightedSpace.handle}</h2>
                             <DraftText
@@ -957,8 +938,6 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
                                 />
                             </Row>
                         </>
-                    ) : (
-                        <h2 style={{ marginTop: 5 }}>Click to expand</h2>
                     )}
                 </Column>
             )}
@@ -967,3 +946,27 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
 }
 
 export default SpaceMap
+
+// function updateCanvasSize() {
+//     d3.select('#canvas').style('width', width)
+//     d3.select('#space-map-svg').attr('width', width)
+
+//     // const offset = spaceData.id
+//     // console.log(spaceData)
+
+//     // const newWidth = parseInt(d3.select('#space-map-svg').style('width'), 10)
+//     // const transform = `translate(${newWidth / 2},${yOffset})`
+//     // const parentTransform = `translate(${newWidth / 2},${yOffset}),rotate(180,0,0)`
+//     const transform = `translate(0,0)`
+//     const parentTransform = `translate(0,0),rotate(180,0,0)`
+
+//     d3.select('#link-group').attr('transform', transform)
+//     d3.select('#child-node-group').attr('transform', transform)
+//     d3.select('#parent-link-group').attr('transform', parentTransform)
+//     d3.select('#parent-node-group').attr('transform', parentTransform)
+// }
+
+// .attr('transform', () => {
+//     const newWidth = parseInt(d3.select('#space-map-svg').style('width'), 10)
+//     return `translate(${newWidth / 2},${yOffset})`
+// })
