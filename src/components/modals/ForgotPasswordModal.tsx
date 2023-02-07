@@ -1,10 +1,10 @@
 import Button from '@components/Button'
 import Input from '@components/Input'
-import LoadingWheel from '@components/LoadingWheel'
 import Modal from '@components/modals/Modal'
 import SuccessMessage from '@components/SuccessMessage'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
+import { defaultErrorState, isValid } from '@src/Helpers'
 import styles from '@styles/components/modals/Modal.module.scss'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
@@ -12,49 +12,40 @@ import { useGoogleReCaptcha } from 'react-google-recaptcha-v3'
 
 const ForgotPasswordModal = (props: { close: () => void }): JSX.Element => {
     const { close } = props
-    const { getAccountData, setLogInModalOpen } = useContext(AccountContext)
+    const { setLogInModalOpen } = useContext(AccountContext)
     const { executeRecaptcha } = useGoogleReCaptcha()
-
-    type InputState = 'default' | 'valid' | 'invalid'
-
-    const [email, setEmail] = useState('')
-    const [emailState, setEmailState] = useState<InputState>('default')
-    const [emailErrors, setEmailErrors] = useState<string[]>([])
-
+    // todo: add email regex
+    const [email, setEmail] = useState({
+        value: '',
+        validate: (v) => (!v ? ['Required'] : []),
+        ...defaultErrorState,
+    })
     const [loading, setLoading] = useState(false)
-    const [showSuccessMessage, setShowSuccessMessage] = useState(false)
+    const [success, setSuccess] = useState(false)
 
-    function sendResetLink(e) {
+    async function sendResetLink(e) {
         e.preventDefault()
-        // todo: add email regex
-        const invalidEmail = email.length < 1
-        setEmailState(invalidEmail ? 'invalid' : 'valid')
-        setEmailErrors(invalidEmail ? ['Required'] : [])
-        if (!invalidEmail) {
+        if (isValid(email, setEmail)) {
             setLoading(true)
-            executeRecaptcha('resetPasswordRequest').then((reCaptchaToken) => {
-                const data = { reCaptchaToken, email }
-                axios
-                    .post(`${config.apiURL}/reset-password-request`, data)
-                    .then(() => {
-                        setLoading(false)
-                        setShowSuccessMessage(true)
-                        // setTimeout(() => close(), 1000)
-                    })
-                    .catch((error) => {
-                        setLoading(false)
-                        const { message } = error.response.data
-                        console.log(error.response.data)
-                        switch (message) {
-                            case 'User not found':
-                                setEmailState('invalid')
-                                setEmailErrors([message])
-                                break
-                            default:
-                                break
-                        }
-                    })
-            })
+            const reCaptchaToken = await executeRecaptcha('resetPasswordRequest')
+            const data = { reCaptchaToken, email: email.value }
+            axios
+                .post(`${config.apiURL}/reset-password-request`, data)
+                .then(() => {
+                    setLoading(false)
+                    setSuccess(true)
+                })
+                .catch((error) => {
+                    setLoading(false)
+                    switch (error.response.data.message) {
+                        case 'User not found':
+                            setEmail({ ...email, state: 'invalid', errors: ['User not found'] })
+                            break
+                        default:
+                            console.log(error)
+                            break
+                    }
+                })
         }
     }
 
@@ -62,6 +53,7 @@ const ForgotPasswordModal = (props: { close: () => void }): JSX.Element => {
         // make recaptcha flag visible
         const recaptchaBadge = document.getElementsByClassName('grecaptcha-badge')[0] as HTMLElement
         recaptchaBadge.style.visibility = 'visible'
+        recaptchaBadge.style.zIndex = '500'
         return () => {
             recaptchaBadge.style.visibility = 'hidden'
         }
@@ -69,45 +61,43 @@ const ForgotPasswordModal = (props: { close: () => void }): JSX.Element => {
 
     return (
         <Modal close={close} centered>
-            <h1>Reset password</h1>
-            <form onSubmit={sendResetLink}>
-                <Input
-                    type='email'
-                    title='Email'
-                    placeholder='email...'
-                    style={{ marginBottom: 10 }}
-                    state={emailState}
-                    errors={emailErrors}
-                    value={email}
-                    onChange={(newValue) => {
-                        setEmailState('default')
-                        setEmail(newValue)
-                    }}
-                />
-                <Button
-                    text='Send reset link'
-                    color='blue'
-                    style={{ margin: '20px 0 20px 0' }}
-                    disabled={loading || showSuccessMessage || emailState === 'invalid'}
-                    submit
-                />
-                {loading && <LoadingWheel />}
-                {showSuccessMessage && (
-                    <SuccessMessage text="Success! We've sent you an email with a link to reset your password." />
-                )}
-                <p>
+            {success ? (
+                <SuccessMessage text="Success! We've sent you an email with a link to reset your password." />
+            ) : (
+                <form onSubmit={sendResetLink} style={{ maxWidth: 400, textAlign: 'center' }}>
+                    <h1>Forgot your password?</h1>
+                    <p>
+                        Enter your email and we&apos;ll message you with a link to create a new one
+                    </p>
+                    <Input
+                        type='email'
+                        placeholder='email...'
+                        state={email.state}
+                        errors={email.errors}
+                        value={email.value}
+                        onChange={(v) => setEmail({ ...email, state: 'default', value: v })}
+                        style={{ margin: '10px 0' }}
+                    />
+                    <Button
+                        text='Send reset link'
+                        color='blue'
+                        loading={loading}
+                        disabled={loading || email.state === 'invalid'}
+                        style={{ margin: '20px 0 20px 0' }}
+                        submit
+                    />
                     <button
                         type='button'
                         className={styles.textButton}
                         onClick={() => {
-                            setLogInModalOpen(true)
                             close()
+                            setLogInModalOpen(true)
                         }}
                     >
                         Return to log in
                     </button>
-                </p>
-            </form>
+                </form>
+            )}
         </Modal>
     )
 }

@@ -21,7 +21,7 @@ const Homepage = (): JSX.Element => {
         setAlertModalOpen,
         setLogInModalOpen,
         setResetPasswordModalOpen,
-        setResetPasswordModalToken,
+        setResetPasswordToken,
     } = useContext(AccountContext)
     const urlParams = new URLSearchParams(window.location.search)
     const alert = urlParams.get('alert')
@@ -102,23 +102,23 @@ const Homepage = (): JSX.Element => {
     function showRedirectAlerts() {
         if (alert === 'verify-email') {
             axios
-                .post(`${config.apiURL}/verify-email`, {
-                    token: urlParams.get('token'),
+                .post(`${config.apiURL}/verify-email`, { token: urlParams.get('token') })
+                .then(() => {
+                    setAlertMessage(
+                        'Success! Your email has been verified. Log in to start using your account.'
+                    )
+                    setAlertModalOpen(true)
                 })
-                .then((res) => {
-                    if (setAlertMessage) {
-                        if (res.data === 'success')
-                            setAlertMessage(
-                                'Success! Your email has been verified. Log in to start using your account.'
-                            )
-                        else setAlertMessage(res.data)
+                .catch((error) => {
+                    if (error.response.status === 404) {
+                        setAlertMessage('Sorry, that email verification token has expired')
                         setAlertModalOpen(true)
-                    }
+                    } else console.log(error)
                 })
         }
         if (alert === 'reset-password') {
             setResetPasswordModalOpen(true)
-            setResetPasswordModalToken(urlParams.get('token'))
+            setResetPasswordToken(urlParams.get('token'))
         }
     }
 

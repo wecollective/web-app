@@ -6,16 +6,16 @@ import React, { useContext } from 'react'
 const AlertModal = (): JSX.Element => {
     const { setAlertModalOpen, alertMessage, setLogInModalOpen } = useContext(AccountContext)
 
-    const logIn = () => {
+    function logIn() {
         setLogInModalOpen(true)
         setAlertModalOpen(false)
     }
 
     return (
-        <Modal close={() => setAlertModalOpen(false)} centered>
+        <Modal close={() => setAlertModalOpen(false)} centered style={{ maxWidth: 600 }}>
             <h1 style={{ textAlign: 'center' }}>{alertMessage}</h1>
             {alertMessage.includes('Log in') ? (
-                <Button text='Log in' color='blue' onClick={() => logIn()} />
+                <Button text='Log in' color='blue' onClick={logIn} />
             ) : (
                 <Button text='Ok' color='blue' onClick={() => setAlertModalOpen(false)} />
             )}

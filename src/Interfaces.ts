@@ -138,8 +138,8 @@ export interface IAccountContext {
     setImageUploadType: (payload: string) => void
     resetPasswordModalOpen: boolean
     setResetPasswordModalOpen: (payload: boolean) => void
-    resetPasswordModalToken: string | null
-    setResetPasswordModalToken: (payload: string | null) => void
+    resetPasswordToken: string | null
+    setResetPasswordToken: (payload: string | null) => void
     donateModalOpen: boolean
     setDonateModalOpen: (payload: boolean) => void
     pageBottomReached: boolean

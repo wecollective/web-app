@@ -1,75 +1,138 @@
+import Button from '@components/Button'
+import Column from '@components/Column'
+import Input from '@components/Input'
 import Modal from '@components/modals/Modal'
+import SuccessMessage from '@components/SuccessMessage'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
-import styles from '@styles/components/modals/ResetPasswordModal.module.scss'
+import { allValid, defaultErrorState } from '@src/Helpers'
 import axios from 'axios'
 import React, { useContext, useState } from 'react'
 
 const ResetPasswordModal = (): JSX.Element => {
-    const { setResetPasswordModalOpen, resetPasswordModalToken } = useContext(AccountContext)
-
-    const [newPassword, setNewPassword] = useState('')
-    const [newPassword2, setNewPassword2] = useState('')
-    const [newPasswordError, setNewPasswordError] = useState(false)
-    const [newPassword2Error, setNewPassword2Error] = useState(false)
-    const [flashMessage, setFlashMessage] = useState('')
+    const { setResetPasswordModalOpen, resetPasswordToken, setLogInModalOpen } = useContext(
+        AccountContext
+    )
+    const [formData, setFormData] = useState<any>({
+        password: {
+            value: '',
+            validate: (v) => (!v ? ['Required'] : []),
+            ...defaultErrorState,
+        },
+        confirmPassword: {
+            value: '',
+            ...defaultErrorState,
+        },
+    })
+    const { password, confirmPassword } = formData
+    const [loading, setLoading] = useState(false)
+    const [success, setSuccess] = useState(false)
+    const [errorMessage, setErrorMessage] = useState('')
 
     function resetPassword() {
-        const invalidNewPassword = newPassword.length === 0
-        const invalidNewPassword2 = newPassword2 !== newPassword
-        if (invalidNewPassword) setNewPasswordError(true)
-        if (invalidNewPassword2) {
-            setNewPassword2Error(true)
-            setFlashMessage(`Passwords don't match`)
+        // add new password to validate function
+        const newFormData = {
+            ...formData,
+            confirmPassword: {
+                ...confirmPassword,
+                validate: (v) => {
+                    if (!v) return ['Required']
+                    if (v !== password.value) return ['Must match new password']
+                    return []
+                },
+            },
         }
-        if (!invalidNewPassword && !invalidNewPassword2) {
+        setFormData(newFormData)
+        if (allValid(newFormData, setFormData)) {
+            setLoading(true)
+            const data = { password: password.value, token: resetPasswordToken }
             axios
-                .post(`${config.apiURL}/reset-password`, {
-                    token: resetPasswordModalToken,
-                    newPassword,
+                .post(`${config.apiURL}/reset-password`, data)
+                .then(() => {
+                    setSuccess(true)
+                    setLoading(false)
                 })
-                .then((res) => {
-                    if (res.data === 'success') setFlashMessage('Success! Password updated.')
-                    if (res.data === 'invalid-token') setFlashMessage('Invalid token')
+                .catch((error) => {
+                    if (error.response.status === 404)
+                        setErrorMessage('Sorry, your password reset token has expired')
+                    else console.log(error)
+                    setLoading(false)
                 })
         }
     }
 
     return (
         <Modal centered close={() => setResetPasswordModalOpen(false)}>
-            <h1>Reset your password</h1>
-            {flashMessage.length > 0 && <span className={styles.flashMessage}>{flashMessage}</span>}
-            <input
-                className={`wecoInput mt-10 mb-10 ${newPasswordError && 'error'}`}
-                placeholder='New password'
-                type='password'
-                value={newPassword}
-                onChange={(e) => {
-                    setNewPassword(e.target.value)
-                    setNewPasswordError(false)
-                    setFlashMessage('')
-                }}
-            />
-            <input
-                className={`wecoInput mb-30 ${newPassword2Error && 'error'}`}
-                placeholder='Confirm new password'
-                type='password'
-                value={newPassword2}
-                onChange={(e) => {
-                    setNewPassword2(e.target.value)
-                    setNewPassword2Error(false)
-                    setFlashMessage('')
-                }}
-            />
-            <div
-                className='wecoButton'
-                role='button'
-                tabIndex={0}
-                onClick={() => resetPassword()}
-                onKeyDown={() => resetPassword()}
-            >
-                Reset password
-            </div>
+            {success ? (
+                <Column centerX>
+                    <SuccessMessage text='Success! Password updated' />
+                    <Button
+                        text='Log in'
+                        color='blue'
+                        onClick={() => {
+                            setResetPasswordModalOpen(false)
+                            setLogInModalOpen(true)
+                        }}
+                        style={{ marginTop: 20 }}
+                    />
+                </Column>
+            ) : (
+                <Column centerX>
+                    <h1>Reset your password</h1>
+                    <Input
+                        type='password'
+                        title='New password'
+                        placeholder='password...'
+                        state={password.state}
+                        errors={password.errors}
+                        value={password.value}
+                        onChange={(newValue) => {
+                            setFormData({
+                                ...formData,
+                                password: {
+                                    ...password,
+                                    state: 'default',
+                                    value: newValue,
+                                },
+                            })
+                        }}
+                        style={{ marginBottom: 10 }}
+                        autoFill
+                    />
+                    <Input
+                        type='password'
+                        title='Confirm password'
+                        placeholder='password...'
+                        state={confirmPassword.state}
+                        errors={confirmPassword.errors}
+                        value={confirmPassword.value}
+                        onChange={(newValue) => {
+                            setFormData({
+                                ...formData,
+                                confirmPassword: {
+                                    ...confirmPassword,
+                                    state: 'default',
+                                    value: newValue,
+                                },
+                            })
+                        }}
+                        style={{ marginBottom: 30 }}
+                        autoFill
+                    />
+                    {errorMessage.length > 0 && (
+                        <p className='danger' style={{ marginBottom: 30 }}>
+                            {errorMessage}
+                        </p>
+                    )}
+                    <Button
+                        text='Reset password'
+                        color='blue'
+                        loading={loading}
+                        disabled={loading || errorMessage.length > 0}
+                        onClick={resetPassword}
+                    />
+                </Column>
+            )}
         </Modal>
     )
 }

@@ -42,7 +42,7 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
     const [imageUploadModalOpen, setImageUploadModalOpen] = useState(false)
     const [imageUploadType, setImageUploadType] = useState('')
     const [resetPasswordModalOpen, setResetPasswordModalOpen] = useState(false)
-    const [resetPasswordModalToken, setResetPasswordModalToken] = useState<string | null>('')
+    const [resetPasswordToken, setResetPasswordToken] = useState<string | null>('')
     const [donateModalOpen, setDonateModalOpen] = useState(false)
 
     const cookies = new Cookies()
@@ -53,6 +53,7 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
         const options = { headers: { Authorization: `Bearer ${accessToken}` } }
         if (!accessToken) setAccountDataLoading(false)
         else {
+            setAccountDataLoading(true)
             axios
                 .get(`${config.apiURL}/account-data`, options)
                 .then((res) => {
@@ -61,9 +62,9 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                     setAccountDataLoading(false)
                 })
                 .catch((error) => {
+                    setAccountDataLoading(false)
                     // todo: handle errors
                     console.log(error)
-                    setAccountDataLoading(false)
                 })
         }
     }
@@ -117,8 +118,8 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                 setImageUploadType,
                 resetPasswordModalOpen,
                 setResetPasswordModalOpen,
-                resetPasswordModalToken,
-                setResetPasswordModalToken,
+                resetPasswordToken,
+                setResetPasswordToken,
                 donateModalOpen,
                 setDonateModalOpen,
                 pageBottomReached,

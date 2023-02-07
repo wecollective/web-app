@@ -13,12 +13,12 @@ const Input = (props: {
     state?: 'default' | 'valid' | 'invalid'
     errors?: string[]
     value?: string | number
-    onChange?: (payload: string) => void
     rows?: number
     style?: any
     disabled?: boolean
     loading?: boolean
     autoFill?: boolean
+    onChange?: (payload: string) => void
 }): JSX.Element => {
     const {
         type,
@@ -29,22 +29,19 @@ const Input = (props: {
         state,
         errors,
         value,
-        onChange,
         rows,
         style,
         disabled,
         loading,
         autoFill,
+        onChange,
     } = props
 
     return (
-        <div
-            className={`${styles.wrapper} ${disabled && styles.disabled} ${state && styles.state}`}
-            style={style}
-        >
+        <div className={`${styles.wrapper} ${disabled && styles.disabled}`} style={style}>
             {title && <h1>{title}</h1>}
             {state === 'invalid' && errors && errors.map((error) => <h2 key={error}>{error}</h2>)}
-            <div className={styles[state || 'default']}>
+            <div className={`${styles.inputWrapper} ${styles[state || 'default']}`}>
                 {prefix && <span>{prefix}</span>}
                 {type === 'text-area' ? (
                     <textarea
