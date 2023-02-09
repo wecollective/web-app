@@ -5,7 +5,7 @@ import Modal from '@components/modals/Modal'
 import SuccessMessage from '@components/SuccessMessage'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
-import { allValid, defaultErrorState } from '@src/Helpers'
+import { allValid, defaultErrorState, updateFormItem } from '@src/Helpers'
 import axios from 'axios'
 import React, { useContext, useState } from 'react'
 
@@ -29,8 +29,13 @@ const ResetPasswordModal = (): JSX.Element => {
     const [success, setSuccess] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
 
+    function updateItem(item, value) {
+        setErrorMessage('')
+        updateFormItem(formData, setFormData, item, value)
+    }
+
     function resetPassword() {
-        // add new password to validate function
+        //  add password to confirmPassword validate function
         const newFormData = {
             ...formData,
             confirmPassword: {
@@ -86,16 +91,7 @@ const ResetPasswordModal = (): JSX.Element => {
                         state={password.state}
                         errors={password.errors}
                         value={password.value}
-                        onChange={(newValue) => {
-                            setFormData({
-                                ...formData,
-                                password: {
-                                    ...password,
-                                    state: 'default',
-                                    value: newValue,
-                                },
-                            })
-                        }}
+                        onChange={(v) => updateItem('password', v)}
                         style={{ marginBottom: 10 }}
                         autoFill
                     />
@@ -106,16 +102,7 @@ const ResetPasswordModal = (): JSX.Element => {
                         state={confirmPassword.state}
                         errors={confirmPassword.errors}
                         value={confirmPassword.value}
-                        onChange={(newValue) => {
-                            setFormData({
-                                ...formData,
-                                confirmPassword: {
-                                    ...confirmPassword,
-                                    state: 'default',
-                                    value: newValue,
-                                },
-                            })
-                        }}
+                        onChange={(v) => updateItem('confirmPassword', v)}
                         style={{ marginBottom: 30 }}
                         autoFill
                     />

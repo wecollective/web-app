@@ -5,7 +5,7 @@ import Modal from '@components/modals/Modal'
 import SuccessMessage from '@components/SuccessMessage'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
-import { allValid, defaultErrorState } from '@src/Helpers'
+import { allValid, defaultErrorState, invalidateFormItem, updateFormItem } from '@src/Helpers'
 import styles from '@styles/components/modals/Modal.module.scss'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
@@ -41,6 +41,15 @@ const LogInModal = (props: { close: () => void }): JSX.Element => {
     const location = useLocation()
     const history = useHistory()
 
+    function updateItem(item, value) {
+        setErrorMessage('')
+        updateFormItem(formData, setFormData, item, value)
+    }
+
+    function invalidateItem(item, error) {
+        invalidateFormItem(formData, setFormData, item, error)
+    }
+
     async function logIn(e) {
         e.preventDefault()
         if (allValid(formData, setFormData)) {
@@ -70,24 +79,10 @@ const LogInModal = (props: { close: () => void }): JSX.Element => {
                     setLoading(false)
                     switch (error.response.data.message) {
                         case 'User not found':
-                            setFormData({
-                                ...formData,
-                                emailOrHandle: {
-                                    ...emailOrHandle,
-                                    state: 'invalid',
-                                    errors: ['User not found'],
-                                },
-                            })
+                            invalidateItem('emailOrHandle', 'User not found')
                             break
                         case 'Incorrect password':
-                            setFormData({
-                                ...formData,
-                                password: {
-                                    ...password,
-                                    state: 'invalid',
-                                    errors: ['Incorrect password'],
-                                },
-                            })
+                            invalidateItem('password', 'Incorrect password')
                             break
                         case 'Recaptcha failed':
                             setErrorMessage('reCAPTCHA test failed')
@@ -150,17 +145,7 @@ const LogInModal = (props: { close: () => void }): JSX.Element => {
                             state={emailOrHandle.state}
                             errors={emailOrHandle.errors}
                             value={emailOrHandle.value}
-                            onChange={(newValue) => {
-                                setErrorMessage('')
-                                setFormData({
-                                    ...formData,
-                                    emailOrHandle: {
-                                        ...emailOrHandle,
-                                        state: 'default',
-                                        value: newValue,
-                                    },
-                                })
-                            }}
+                            onChange={(v) => updateItem('emailOrHandle', v)}
                             style={{ marginBottom: 10 }}
                             autoFill
                         />
@@ -171,17 +156,7 @@ const LogInModal = (props: { close: () => void }): JSX.Element => {
                             state={password.state}
                             errors={password.errors}
                             value={password.value}
-                            onChange={(newValue) => {
-                                setErrorMessage('')
-                                setFormData({
-                                    ...formData,
-                                    password: {
-                                        ...password,
-                                        state: 'default',
-                                        value: newValue,
-                                    },
-                                })
-                            }}
+                            onChange={(v) => updateItem('password', v)}
                             style={{ marginBottom: 30 }}
                             autoFill
                         />

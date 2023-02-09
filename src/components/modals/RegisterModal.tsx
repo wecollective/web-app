@@ -58,7 +58,7 @@ const RegisterModal = (props: { close: () => void }): JSX.Element => {
         confirmPassword.state,
     ].includes('invalid')
 
-    function updateValue(item, value) {
+    function updateItem(item, value) {
         setErrorMessage('')
         updateFormItem(formData, setFormData, item, value)
     }
@@ -140,7 +140,7 @@ const RegisterModal = (props: { close: () => void }): JSX.Element => {
                         errors={handle.errors}
                         value={handle.value}
                         onChange={(v) =>
-                            updateValue('handle', v.toLowerCase().replace(/[^a-z0-9]/g, '-'))
+                            updateItem('handle', v.toLowerCase().replace(/[^a-z0-9]/g, '-'))
                         }
                         style={{ marginBottom: 10 }}
                     />
@@ -151,7 +151,7 @@ const RegisterModal = (props: { close: () => void }): JSX.Element => {
                         state={name.state}
                         errors={name.errors}
                         value={name.value}
-                        onChange={(v) => updateValue('name', v)}
+                        onChange={(v) => updateItem('name', v)}
                         style={{ marginBottom: 10 }}
                     />
                     <Input
@@ -161,7 +161,7 @@ const RegisterModal = (props: { close: () => void }): JSX.Element => {
                         state={email.state}
                         errors={email.errors}
                         value={email.value}
-                        onChange={(v) => updateValue('email', v)}
+                        onChange={(v) => updateItem('email', v)}
                         style={{ marginBottom: 10 }}
                     />
                     <Input
@@ -171,7 +171,7 @@ const RegisterModal = (props: { close: () => void }): JSX.Element => {
                         state={password.state}
                         errors={password.errors}
                         value={password.value}
-                        onChange={(v) => updateValue('password', v)}
+                        onChange={(v) => updateItem('password', v)}
                         style={{ marginBottom: 10 }}
                     />
                     <Input
@@ -181,7 +181,7 @@ const RegisterModal = (props: { close: () => void }): JSX.Element => {
                         state={confirmPassword.state}
                         errors={confirmPassword.errors}
                         value={confirmPassword.value}
-                        onChange={(v) => updateValue('confirmPassword', v)}
+                        onChange={(v) => updateItem('confirmPassword', v)}
                         style={{ marginBottom: 10 }}
                     />
                     {errorMessage.length > 0 && (
