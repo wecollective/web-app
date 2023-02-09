@@ -10,7 +10,14 @@ import Toggle from '@components/Toggle'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
-import { allValid, defaultErrorState, defaultSpaceData, findDraftLength } from '@src/Helpers'
+import {
+    allValid,
+    defaultErrorState,
+    defaultSpaceData,
+    findDraftLength,
+    invalidateFormItem,
+    updateFormItem,
+} from '@src/Helpers'
 import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -22,7 +29,6 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
     const {
         isModerator,
         spaceData,
-        // setSpaceData,
         spaceSpaces,
         setSpaceSpaces,
         spaceMapData,
@@ -30,7 +36,6 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
     } = useContext(SpaceContext)
     const [formData, setFormData] = useState({
         handle: {
-            ...defaultErrorState,
             value: '',
             validate: (v) => {
                 const errors: string[] = []
@@ -38,9 +43,9 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                 if (v.length > 30) errors.push('Must be less than 30 characters')
                 return errors
             },
+            ...defaultErrorState,
         },
         name: {
-            ...defaultErrorState,
             value: '',
             validate: (v) => {
                 const errors: string[] = []
@@ -48,9 +53,9 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                 if (v.length > 50) errors.push('Must be less than 50 characters')
                 return errors
             },
+            ...defaultErrorState,
         },
         description: {
-            ...defaultErrorState,
             value: '',
             validate: (v) => {
                 const errors: string[] = []
@@ -59,15 +64,21 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                 if (totalCharacters > 5000) errors.push('Must be less than 5K characters')
                 return errors
             },
+            ...defaultErrorState,
         },
     })
     const { handle, name, description } = formData
     const [privateSpace, setPrivateSpace] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [success, setSuccess] = useState(false)
     const [successMessage, setSuccessMessage] = useState('')
 
     const cookies = new Cookies()
     const authorized = isModerator || spaceData.id === 1
+
+    function updateItem(item, value) {
+        updateFormItem(formData, setFormData, item, value)
+    }
 
     function createSpace(e) {
         e.preventDefault()
@@ -78,6 +89,7 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
         } else if (allValid(formData, setFormData)) {
             setLoading(true)
             const data = {
+                // todo: get account details server side?
                 accountName: accountData.name,
                 accountHandle: accountData.handle,
                 parentId: spaceData.id,
@@ -91,51 +103,46 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                 .post(`${config.apiURL}/create-space`, data, options)
                 .then((res) => {
                     setLoading(false)
-                    const newSpaceData = {
-                        ...defaultSpaceData,
-                        id: res.data.spaceId,
-                        handle: handle.value,
-                        name: name.value,
-                        description: description.value,
-                    }
                     if (res.data.message === 'pending-acceptance') {
                         setSuccessMessage('Space created and request sent to moderators')
+                        setSuccess(true)
                     } else {
+                        const newSpaceData = {
+                            ...defaultSpaceData,
+                            id: res.data.spaceId,
+                            handle: handle.value,
+                            name: name.value,
+                            description: description.value,
+                        }
                         setSpaceMapData({
                             ...spaceMapData,
                             children: [newSpaceData, ...spaceMapData.children],
                         })
                         setSpaceSpaces([newSpaceData, ...spaceSpaces])
                         setSuccessMessage(`Space created and attached to '${spaceData.name}'`)
+                        setSuccess(true)
                     }
                     setTimeout(() => close(), 3000)
                 })
                 .catch((error) => {
-                    console.log(error)
-                    if (!error.response) console.log(error)
-                    else {
-                        const { message } = error.response.data
-                        if (message === 'not-logged-in') {
-                            // todo: show not-logged-in message
-                        }
-                        if (message === 'handle-taken')
-                            setFormData({
-                                ...formData,
-                                handle: {
-                                    ...formData.handle,
-                                    state: 'invalid',
-                                    errors: ['Handle already taken'],
-                                },
-                            })
-                        setLoading(false)
+                    switch (error.response.data.message) {
+                        case 'handle-taken':
+                            invalidateFormItem(formData, setFormData, 'handle', 'Handle taken')
+                            break
+                        case 'not-logged-in':
+                            break
+                        default:
+                            console.log(error)
+                            break
                     }
+                    setLoading(false)
                 })
         }
     }
 
     return (
-        <Modal close={close} centered confirmClose style={{ maxWidth: 600 }}>
-            {successMessage.length > 0 ? (
+        <Modal close={close} centered confirmClose={!success} style={{ maxWidth: 600 }}>
+            {success ? (
                 <SuccessMessage text={successMessage} />
             ) : (
                 <Column>
@@ -151,18 +158,17 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                     </Column>
                     {!authorized && (
                         <Column>
-                            <p>You&apos;re not authorised to create a space here automatically.</p>
-                            <br />
-                            <p>
+                            <p style={{ marginBottom: 10 }}>
+                                You&apos;re not authorised to create a space here automatically.
+                            </p>
+                            <p style={{ marginBottom: 10 }}>
                                 If you want, you can create it anyway and a request will be sent to{' '}
                                 {spaceData.name}&apos;s moderators.
                             </p>
-                            <br />
-                            <p>
+                            <p style={{ marginBottom: 10 }}>
                                 Until it&apos;s accepted by them your space will appear in the root
                                 space <Link to='/s/all/spaces'>s/all</Link>.
                             </p>
-                            <br />
                         </Column>
                     )}
                     <p>
@@ -189,16 +195,9 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                             value={handle.value}
                             state={handle.state}
                             errors={handle.errors}
-                            onChange={(value) => {
-                                setFormData({
-                                    ...formData,
-                                    handle: {
-                                        ...formData.handle,
-                                        value: value.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-                                        state: 'default',
-                                    },
-                                })
-                            }}
+                            onChange={(v) =>
+                                updateItem('handle', v.toLowerCase().replace(/[^a-z0-9]/g, '-'))
+                            }
                             style={{ marginBottom: 20 }}
                         />
                         <Input
@@ -208,16 +207,7 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                             value={name.value}
                             state={name.state}
                             errors={name.errors}
-                            onChange={(value) => {
-                                setFormData({
-                                    ...formData,
-                                    name: {
-                                        ...formData.name,
-                                        value,
-                                        state: 'default',
-                                    },
-                                })
-                            }}
+                            onChange={(v) => updateItem('name', v)}
                             style={{ marginBottom: 20 }}
                         />
                         <Column style={{ width: '100%', marginBottom: 40 }}>
@@ -226,16 +216,7 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                                 type='post'
                                 stringifiedDraft={description.value}
                                 maxChars={5000}
-                                onChange={(value) => {
-                                    setFormData({
-                                        ...formData,
-                                        description: {
-                                            ...formData.description,
-                                            value,
-                                            state: 'default',
-                                        },
-                                    })
-                                }}
+                                onChange={(v) => updateItem('description', v)}
                                 state={description.state}
                                 errors={description.errors}
                             />

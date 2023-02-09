@@ -97,10 +97,10 @@ const RegisterModal = (props: { close: () => void }): JSX.Element => {
                 .catch((error) => {
                     setLoading(false)
                     switch (error.response.data.message) {
-                        case 'Handle already taken':
+                        case 'Handle taken':
                             invalidateFormItem(formData, setFormData, 'handle', 'Handle taken')
                             break
-                        case 'Email already taken':
+                        case 'Email taken':
                             invalidateFormItem(formData, setFormData, 'email', 'Email taken')
                             break
                         case 'Recaptcha failed':
