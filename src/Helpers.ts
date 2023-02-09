@@ -308,6 +308,38 @@ export function isValid(item: any, setItem: (newItem: any) => void): boolean {
     return valid
 }
 
+export function updateFormItem(
+    form: any,
+    setForm: (newForm: any) => void,
+    item: string,
+    value: any
+): void {
+    setForm({
+        ...form,
+        [item]: {
+            ...form[item],
+            state: 'default',
+            value,
+        },
+    })
+}
+
+export function invalidateFormItem(
+    form: any,
+    setForm: (newForm: any) => void,
+    item: string,
+    error: string
+): void {
+    setForm({
+        ...form,
+        [item]: {
+            ...form[item],
+            state: 'invalid',
+            errors: [error],
+        },
+    })
+}
+
 export function notNull(value: number | null): number | false {
     return value !== null ? value : false
 }
