@@ -1,12 +1,16 @@
 import Button from '@components/Button'
 import Input from '@components/Input'
-import LoadingWheel from '@components/LoadingWheel'
 import Modal from '@components/modals/Modal'
-import Row from '@components/Row'
 import SuccessMessage from '@components/SuccessMessage'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
-import { isValidEmail } from '@src/Helpers'
+import {
+    allValid,
+    defaultErrorState,
+    invalidateFormItem,
+    isValidEmail,
+    updateFormItem,
+} from '@src/Helpers'
 import styles from '@styles/components/modals/Modal.module.scss'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
@@ -16,97 +20,97 @@ const RegisterModal = (props: { close: () => void }): JSX.Element => {
     const { close } = props
     const { setLogInModalOpen } = useContext(AccountContext)
     const { executeRecaptcha } = useGoogleReCaptcha()
-
-    type InputState = 'default' | 'valid' | 'invalid'
-
-    const [handle, setHandle] = useState('')
-    const [handleState, setHandleState] = useState<InputState>('default')
-    const [handleErrors, setHandleErrors] = useState<string[]>([])
-
-    const [name, setName] = useState('')
-    const [nameState, setNameState] = useState<InputState>('default')
-    const [nameErrors, setNameErrors] = useState<string[]>([])
-
-    const [email, setEmail] = useState('')
-    const [emailState, setEmailState] = useState<InputState>('default')
-    const [emailErrors, setEmailErrors] = useState<string[]>([])
-
-    const [password, setPassword] = useState('')
-    const [passwordState, setPasswordState] = useState<InputState>('default')
-    const [passwordErrors, setPasswordErrors] = useState<string[]>([])
-
-    const [confirmPassword, setConfirmPassword] = useState('')
-    const [confirmPasswordState, setConfirmPasswordState] = useState<InputState>('default')
-    const [confirmPasswordErrors, setConfirmPasswordErrors] = useState<string[]>([])
-
-    const [generalErrorMessages, setGeneralErrorMessages] = useState<string[]>([])
+    const [formData, setFormData] = useState({
+        handle: {
+            value: '',
+            validate: (v) => (!v || v.length > 30 ? ['Must be between 1 and 30 characters'] : []),
+            ...defaultErrorState,
+        },
+        name: {
+            value: '',
+            validate: (v) => (!v || v.length > 30 ? ['Must be between 1 and 30 characters'] : []),
+            ...defaultErrorState,
+        },
+        email: {
+            value: '',
+            validate: (v) => (!isValidEmail(v) ? ['Must be a valid email'] : []),
+            ...defaultErrorState,
+        },
+        password: {
+            value: '',
+            validate: (v) => (!v ? ['Required'] : []),
+            ...defaultErrorState,
+        },
+        confirmPassword: {
+            value: '',
+            ...defaultErrorState,
+        },
+    })
+    const { handle, name, email, password, confirmPassword } = formData
     const [loading, setLoading] = useState(false)
-    const [showSuccessMessage, setShowSuccessMessage] = useState(false)
+    const [success, setSuccess] = useState(false)
+    const [errorMessage, setErrorMessage] = useState('')
+    const errors = [
+        name.state,
+        handle.state,
+        email.state,
+        password.state,
+        confirmPassword.state,
+    ].includes('invalid')
 
-    const errors =
-        nameState === 'invalid' ||
-        handleState === 'invalid' ||
-        emailState === 'invalid' ||
-        passwordState === 'invalid' ||
-        confirmPasswordState === 'invalid'
+    function updateValue(item, value) {
+        setErrorMessage('')
+        updateFormItem(formData, setFormData, item, value)
+    }
 
-    // todo: use updated validation approach
-    function register(e) {
+    async function register(e) {
         e.preventDefault()
-        const invalidHandle = handle.length < 1 || handle.length > 30
-        const invalidName = name.length < 1 || name.length > 30
-        const invalidEmail = !isValidEmail(email)
-        const invalidPassword = password.length < 1
-        const invalidConfirmPassword = confirmPassword.length < 1 || confirmPassword !== password
-        setHandleState(invalidHandle ? 'invalid' : 'valid')
-        setHandleErrors(invalidHandle ? ['Must be between 1 and 30 characters.'] : [])
-        setNameState(invalidName ? 'invalid' : 'valid')
-        setNameErrors(invalidName ? ['Must be between 1 and 30 characters.'] : [])
-        setEmailState(invalidEmail ? 'invalid' : 'valid')
-        setEmailErrors(invalidEmail ? ['Required'] : [])
-        setPasswordState(invalidPassword ? 'invalid' : 'valid')
-        setPasswordErrors(invalidPassword ? ['Required'] : [])
-        setConfirmPasswordState(invalidConfirmPassword ? 'invalid' : 'valid')
-        setConfirmPasswordErrors(invalidConfirmPassword ? ['Must match password'] : [])
-        if (
-            !invalidHandle &&
-            !invalidName &&
-            !invalidEmail &&
-            !invalidPassword &&
-            !invalidConfirmPassword
-        ) {
+        // add password to confirmPassword validate function
+        const newFormData = {
+            ...formData,
+            confirmPassword: {
+                ...confirmPassword,
+                validate: (v) => {
+                    if (!v) return ['Required']
+                    if (v !== password.value) return ['Must match password']
+                    return []
+                },
+            },
+        }
+        setFormData(newFormData)
+        if (allValid(newFormData, setFormData)) {
             setLoading(true)
-            executeRecaptcha('register').then((reCaptchaToken) => {
-                const data = { reCaptchaToken, handle, name, email, password }
-                axios
-                    .post(`${config.apiURL}/register`, data)
-                    .then(() => {
-                        setLoading(false)
-                        setShowSuccessMessage(true)
-                        // setTimeout(() => close(), 1000)
-                    })
-                    .catch((error) => {
-                        setLoading(false)
-                        switch (error.response.data.message) {
-                            case 'Recaptcha request failed':
-                                setGeneralErrorMessages(['Recaptcha request failed'])
-                                break
-                            case 'Recaptcha score < 0.5':
-                                setGeneralErrorMessages(['Recaptcha score < 0.5'])
-                                break
-                            case 'Handle already taken':
-                                setHandleState('invalid')
-                                setHandleErrors(['Already taken'])
-                                break
-                            case 'Email already taken':
-                                setEmailState('invalid')
-                                setEmailErrors(['Already taken'])
-                                break
-                            default:
-                                break
-                        }
-                    })
-            })
+            const reCaptchaToken = await executeRecaptcha('login')
+            const data = {
+                reCaptchaToken,
+                handle: handle.value,
+                name: name.value,
+                email: email.value,
+                password: password.value,
+            }
+            axios
+                .post(`${config.apiURL}/register`, data)
+                .then(() => {
+                    setLoading(false)
+                    setSuccess(true)
+                })
+                .catch((error) => {
+                    setLoading(false)
+                    switch (error.response.data.message) {
+                        case 'Handle already taken':
+                            invalidateFormItem(formData, setFormData, 'handle', 'Handle taken')
+                            break
+                        case 'Email already taken':
+                            invalidateFormItem(formData, setFormData, 'email', 'Email taken')
+                            break
+                        case 'Recaptcha failed':
+                            setErrorMessage('reCAPTCHA test failed')
+                            break
+                        default:
+                            console.log(error)
+                            break
+                    }
+                })
         }
     }
 
@@ -114,108 +118,100 @@ const RegisterModal = (props: { close: () => void }): JSX.Element => {
         // make recaptcha flag visible
         const recaptchaBadge = document.getElementsByClassName('grecaptcha-badge')[0] as HTMLElement
         recaptchaBadge.style.visibility = 'visible'
+        recaptchaBadge.style.zIndex = '500'
         return () => {
             recaptchaBadge.style.visibility = 'hidden'
         }
     })
 
     return (
-        <Modal close={close} centered confirmClose>
-            <h1>Create a new account</h1>
-            <form onSubmit={register}>
-                <Input
-                    type='text'
-                    title='Handle (the unique name used in your profiles URL)'
-                    prefix='weco.io/u/'
-                    placeholder='handle...'
-                    style={{ marginBottom: 10 }}
-                    state={handleState}
-                    errors={handleErrors}
-                    value={handle}
-                    onChange={(newValue) => {
-                        setHandleState('default')
-                        setHandle(newValue.toLowerCase().replace(/[^a-z0-9]/g, '-'))
-                    }}
-                />
-                <Input
-                    type='text'
-                    title='Visible name (max 30 characters)'
-                    placeholder='name...'
-                    style={{ marginBottom: 10 }}
-                    state={nameState}
-                    errors={nameErrors}
-                    value={name}
-                    onChange={(newValue) => {
-                        setNameState('default')
-                        setName(newValue)
-                    }}
-                />
-                <Input
-                    type='email'
-                    title='Email'
-                    placeholder='email...'
-                    style={{ marginBottom: 10 }}
-                    state={emailState}
-                    errors={emailErrors}
-                    value={email}
-                    onChange={(newValue) => {
-                        setEmailState('default')
-                        setEmail(newValue)
-                    }}
-                />
-                <Input
-                    type='password'
-                    title='Password'
-                    placeholder='password...'
-                    style={{ marginBottom: 10 }}
-                    state={passwordState}
-                    errors={passwordErrors}
-                    value={password}
-                    onChange={(newValue) => {
-                        setPasswordState('default')
-                        setPassword(newValue)
-                    }}
-                />
-                <Input
-                    type='password'
-                    title='Confirm password'
-                    placeholder='password...'
-                    style={{ marginBottom: 10 }}
-                    state={confirmPasswordState}
-                    errors={confirmPasswordErrors}
-                    value={confirmPassword}
-                    onChange={(newValue) => {
-                        setConfirmPasswordState('default')
-                        setConfirmPassword(newValue)
-                    }}
-                />
-                <Button
-                    text='Create account'
-                    color='blue'
-                    style={{ margin: '20px 0 20px 0' }}
-                    disabled={loading || showSuccessMessage || errors}
-                    submit
-                />
-                {loading && <LoadingWheel />}
-                {showSuccessMessage && (
-                    <Row style={{ marginBottom: 20 }}>
-                        <SuccessMessage text="Success! We've sent you an email. Follow the instructions there to complete the registration process." />
-                    </Row>
-                )}
-                <p>
-                    Already registered?{' '}
-                    <button
-                        type='button'
-                        className={styles.textButton}
-                        onClick={() => {
-                            setLogInModalOpen(true)
-                            close()
-                        }}
-                    >
-                        Log in
-                    </button>
-                </p>
-            </form>
+        <Modal close={close} centered confirmClose={!success}>
+            {success ? (
+                <SuccessMessage text="Success! We've sent you an email. Follow the instructions there to complete the registration process." />
+            ) : (
+                <form onSubmit={register}>
+                    <h1>Create a new account</h1>
+                    <Input
+                        type='text'
+                        title='Handle (the unique name used in your profiles URL)'
+                        prefix='weco.io/u/'
+                        placeholder='handle...'
+                        state={handle.state}
+                        errors={handle.errors}
+                        value={handle.value}
+                        onChange={(v) =>
+                            updateValue('handle', v.toLowerCase().replace(/[^a-z0-9]/g, '-'))
+                        }
+                        style={{ marginBottom: 10 }}
+                    />
+                    <Input
+                        type='text'
+                        title='Visible name (max 30 characters)'
+                        placeholder='name...'
+                        state={name.state}
+                        errors={name.errors}
+                        value={name.value}
+                        onChange={(v) => updateValue('name', v)}
+                        style={{ marginBottom: 10 }}
+                    />
+                    <Input
+                        type='email'
+                        title='Email'
+                        placeholder='email...'
+                        state={email.state}
+                        errors={email.errors}
+                        value={email.value}
+                        onChange={(v) => updateValue('email', v)}
+                        style={{ marginBottom: 10 }}
+                    />
+                    <Input
+                        type='password'
+                        title='Password'
+                        placeholder='password...'
+                        state={password.state}
+                        errors={password.errors}
+                        value={password.value}
+                        onChange={(v) => updateValue('password', v)}
+                        style={{ marginBottom: 10 }}
+                    />
+                    <Input
+                        type='password'
+                        title='Confirm password'
+                        placeholder='password...'
+                        state={confirmPassword.state}
+                        errors={confirmPassword.errors}
+                        value={confirmPassword.value}
+                        onChange={(v) => updateValue('confirmPassword', v)}
+                        style={{ marginBottom: 10 }}
+                    />
+                    {errorMessage.length > 0 && (
+                        <p className='danger' style={{ marginBottom: 20 }}>
+                            {errorMessage}
+                        </p>
+                    )}
+                    <Button
+                        text='Create account'
+                        color='aqua'
+                        disabled={loading || errors}
+                        loading={loading}
+                        style={{ margin: '20px 0 20px 0' }}
+                        submit
+                    />
+                    <p>
+                        Already registered?{' '}
+                        <button
+                            type='button'
+                            className={styles.textButton}
+                            onClick={() => {
+                                setLogInModalOpen(true)
+                                close()
+                            }}
+                        >
+                            Log in
+                        </button>
+                    </p>
+                </form>
+            )}
         </Modal>
     )
 }
