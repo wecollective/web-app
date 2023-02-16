@@ -275,19 +275,19 @@ const PostCard = (props: {
                 </Row>
                 <Row centerY>
                     {location !== 'preview' && (
-                        <p className='grey'>
-                            {mobileView ? '' : 'ID: '}
-                            {id}
-                        </p>
+                        <Row>
+                            <p className='grey'>ID:</p>
+                            <p style={{ margin: 0 }}>{id}</p>
+                        </Row>
                     )}
-                    <Column
+                    {/* <Column
                         centerX
                         centerY
                         className={`${styles.postType} ${styles[type]}`}
                         title={type}
                     >
                         {findPostTypeIcon(type)}
-                    </Column>
+                    </Column> */}
                     {location !== 'preview' && isOwnPost && (
                         <>
                             <button
@@ -375,7 +375,13 @@ const PostCard = (props: {
                             title={statTitle('Comment', totalComments || 0)}
                             // color={accountComment && 'blue'}
                             disabled={location === 'preview'}
-                            onClick={() => setCommentsOpen(!commentsOpen)}
+                            onClick={() => {
+                                if (loggedIn || totalComments) setCommentsOpen(!commentsOpen)
+                                else {
+                                    setAlertMessage('Log in to comment on posts')
+                                    setAlertModalOpen(true)
+                                }
+                            }}
                         />
                         <StatButton
                             icon={<RepostIcon />}

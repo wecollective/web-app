@@ -28,15 +28,29 @@
         background-image: linear-gradient(to bottom, transparent, $grey1);
     }
 }
-.showMoreLessButton {
-    height: 16px;
-    width: 16px;
-    margin: 10px 0 5px 0; // 5px 0 10px 0;
+.button {
+    all: unset;
     cursor: pointer;
+    height: 30px;
+    width: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
     &.expanded {
         transform: rotate(180deg);
     }
-    > svg > path {
-        fill: $grey4;
+
+    &:hover {
+        > svg {
+            color: $grey6;
+        }
+    }
+
+    > svg {
+        color: $grey4;
+        height: 20px;
+        width: 20px;
+        transition: color 0.3s;
     }
 }

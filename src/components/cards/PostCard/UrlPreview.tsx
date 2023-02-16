@@ -19,12 +19,16 @@ const UrlPreview = (props: {
 
     return (
         <a className={styles.wrapper} style={style} href={url} target='_blank' rel='noreferrer'>
-            {image && (
+            {image ? (
                 <img
                     src={image}
                     onError={(e) => handleImageError(e, image)}
                     aria-label='URL image'
                 />
+            ) : (
+                <Column centerX centerY className={styles.urlIcon}>
+                    <LinkIcon />
+                </Column>
             )}
             <Column>
                 {availableMetaData ? (
@@ -33,7 +37,6 @@ const UrlPreview = (props: {
                         {description && <p>{description}</p>}
                         {domain && (
                             <Row centerY className={styles.domain}>
-                                <LinkIcon />
                                 <p>{domain}</p>
                             </Row>
                         )}

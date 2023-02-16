@@ -11,7 +11,7 @@ const Url = (props: { postData: any }): JSX.Element => {
         <Column>
             {text && (
                 <Column style={{ marginBottom: 10 }}>
-                    <ShowMoreLess height={150}>
+                    <ShowMoreLess height={300}>
                         <DraftText stringifiedDraft={text} />
                     </ShowMoreLess>
                 </Column>

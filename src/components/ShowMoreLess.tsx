@@ -9,7 +9,6 @@ const ShowMoreLess = (props: {
     children: any
 }): JSX.Element => {
     const { height, gradientColor, style, children } = props
-
     const [overflow, setOverflow] = useState(false)
     const [expanded, setExpanded] = useState(false)
     const contentRef = useRef<HTMLDivElement>(null)
@@ -57,16 +56,13 @@ const ShowMoreLess = (props: {
                 )}
             </div>
             {overflow && (
-                <div
-                    className={`${styles.showMoreLessButton} ${expanded && styles.expanded}`}
-                    role='button'
-                    tabIndex={0}
-                    aria-label='showMoreLess'
+                <button
+                    className={`${styles.button} ${expanded && styles.expanded}`}
+                    type='button'
                     onClick={showMoreLess}
-                    onKeyDown={showMoreLess}
                 >
                     <ChevronDownIcon />
-                </div>
+                </button>
             )}
         </div>
     )

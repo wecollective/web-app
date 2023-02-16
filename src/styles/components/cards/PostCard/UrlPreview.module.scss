@@ -6,6 +6,11 @@
     border-radius: 5px;
     background-color: $grey1;
     overflow: hidden;
+    transition: background-color 0.3s;
+
+    &:hover {
+        background-color: $grey2;
+    }
 
     > img {
         width: 200px;
@@ -14,6 +19,15 @@
         border-bottom-left-radius: 5px;
         object-fit: cover;
         flex-shrink: 0;
+    }
+
+    .urlIcon {
+        margin-left: 12px;
+        color: $grey6;
+        > svg {
+            width: 20px;
+            height: 20px;
+        }
     }
 
     p {
