@@ -17,9 +17,13 @@ import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const Event = (props: { postData: any; setPostData: (data: any) => void }): JSX.Element => {
-    const { postData, setPostData } = props
-    const { id, text, location, Event: event } = postData
+const Event = (props: {
+    postData: any
+    setPostData: (data: any) => void
+    location: string
+}): JSX.Element => {
+    const { postData, setPostData, location } = props
+    const { id, text, Event: event } = postData
     const { accountData, setAlertMessage, setAlertModalOpen } = useContext(AccountContext)
     const [goingModalOpen, setGoingModalOpen] = useState(false)
     const [interestedModalOpen, setInterestedModalOpen] = useState(false)

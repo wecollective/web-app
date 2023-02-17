@@ -116,7 +116,8 @@ const Inquiry = (props: {
 
     function voteDisabled() {
         const weighted = inquiry.type === 'weighted-choice'
-        if (loggedIn && location !== 'preview') {
+        if (location === 'preview') return true
+        if (loggedIn) {
             if (weighted) {
                 if (!voteChanged || totalUsedPoints !== 100) return true
             } else if (!voteChanged || !newInquiryAnswers.find((a) => a.accountVote)) {

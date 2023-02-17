@@ -52,6 +52,7 @@ const LogInModal = (props: { close: () => void }): JSX.Element => {
 
     async function logIn(e) {
         e.preventDefault()
+        setShowResendVerificationEmail(false)
         if (allValid(formData, setFormData)) {
             setLoading(true)
             const reCaptchaToken = await executeRecaptcha('login')

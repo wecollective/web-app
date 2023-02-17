@@ -26,24 +26,24 @@ import config from '@src/Config'
 import { dateCreated, statTitle, timeSinceCreated, timeSinceCreatedShort } from '@src/Helpers'
 import {
     ArrowRightIcon,
-    AudioIcon,
-    CalendarIcon,
-    CastaliaIcon,
+    // AudioIcon,
+    // CalendarIcon,
+    // CastaliaIcon,
     CommentIcon,
     DeleteIcon,
     EditIcon,
     ExpandIcon,
-    ImageIcon,
-    InquiryIcon,
+    // ImageIcon,
+    // InquiryIcon,
     LikeIcon,
     LinkIcon,
-    PrismIcon,
+    // PrismIcon,
     RepostIcon,
     StarIcon,
     StringIcon,
-    TextIcon,
+    // TextIcon,
+    // WeaveIcon,
     VerticalEllipsisIcon,
-    WeaveIcon,
 } from '@src/svgs/all'
 import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
 import axios from 'axios'
@@ -108,32 +108,32 @@ const PostCard = (props: {
         .filter((s, i) => i !== 0)
         .join(', ')
 
-    function findPostTypeIcon(postType) {
-        switch (postType) {
-            case 'text':
-                return <TextIcon />
-            case 'url':
-                return <LinkIcon />
-            case 'image':
-                return <ImageIcon />
-            case 'audio':
-                return <AudioIcon />
-            case 'event':
-                return <CalendarIcon />
-            case 'inquiry':
-                return <InquiryIcon />
-            case 'glass-bead-game':
-                return <CastaliaIcon />
-            case 'string':
-                return <StringIcon />
-            case 'weave':
-                return <WeaveIcon />
-            case 'prism':
-                return <PrismIcon />
-            default:
-                return null
-        }
-    }
+    // function findPostTypeIcon(postType) {
+    //     switch (postType) {
+    //         case 'text':
+    //             return <TextIcon />
+    //         case 'url':
+    //             return <LinkIcon />
+    //         case 'image':
+    //             return <ImageIcon />
+    //         case 'audio':
+    //             return <AudioIcon />
+    //         case 'event':
+    //             return <CalendarIcon />
+    //         case 'inquiry':
+    //             return <InquiryIcon />
+    //         case 'glass-bead-game':
+    //             return <CastaliaIcon />
+    //         case 'string':
+    //             return <StringIcon />
+    //         case 'weave':
+    //             return <WeaveIcon />
+    //         case 'prism':
+    //             return <PrismIcon />
+    //         default:
+    //             return null
+    //     }
+    // }
 
     const urlParams = Object.fromEntries(new URLSearchParams(useLocation().search))
     const params = { ...spacePostsFilters }
@@ -330,7 +330,9 @@ const PostCard = (props: {
                 {['url', 'string-url'].includes(type) && <Url postData={postData} />}
                 {['image', 'string-image'].includes(type) && <Image postData={postData} />}
                 {['audio', 'string-audio'].includes(type) && <Audio postData={postData} />}
-                {type === 'event' && <Event postData={postData} setPostData={setPostData} />}
+                {type === 'event' && (
+                    <Event postData={postData} setPostData={setPostData} location={location} />
+                )}
                 {type === 'inquiry' && (
                     <Inquiry
                         postData={postData}

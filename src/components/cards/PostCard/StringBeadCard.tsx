@@ -154,34 +154,37 @@ const StringBeadCard = (props: {
                         <SourceIcon />
                     </button>
                 )}
-                {location !== 'preview' && isOwnPost && type === 'text' && (
-                    <Row>
-                        <button
-                            type='button'
-                            className={styles.menuButton}
-                            onClick={() => setMenuOpen(!menuOpen)}
-                        >
-                            <VerticalEllipsisIcon />
-                        </button>
-                        {menuOpen && (
-                            <CloseOnClickOutside onClick={() => setMenuOpen(false)}>
-                                <Column className={styles.menu}>
-                                    {isOwnPost && (
-                                        <Column>
-                                            <button
-                                                type='button'
-                                                onClick={() => setEditPostModalOpen(true)}
-                                            >
-                                                <EditIcon />
-                                                Edit text
-                                            </button>
-                                        </Column>
-                                    )}
-                                </Column>
-                            </CloseOnClickOutside>
-                        )}
-                    </Row>
-                )}
+                {!['create-string-modal', 'next-bead-modal', 'preview'].includes(location) &&
+                    bead.Link.relationship !== 'source' &&
+                    isOwnPost &&
+                    type === 'text' && (
+                        <Row>
+                            <button
+                                type='button'
+                                className={styles.menuButton}
+                                onClick={() => setMenuOpen(!menuOpen)}
+                            >
+                                <VerticalEllipsisIcon />
+                            </button>
+                            {menuOpen && (
+                                <CloseOnClickOutside onClick={() => setMenuOpen(false)}>
+                                    <Column className={styles.menu}>
+                                        {isOwnPost && (
+                                            <Column>
+                                                <button
+                                                    type='button'
+                                                    onClick={() => setEditPostModalOpen(true)}
+                                                >
+                                                    <EditIcon />
+                                                    Edit text
+                                                </button>
+                                            </Column>
+                                        )}
+                                    </Column>
+                                </CloseOnClickOutside>
+                            )}
+                        </Row>
+                    )}
             </Row>
             <Column centerY className={styles.beadContent}>
                 {type === 'text' && (

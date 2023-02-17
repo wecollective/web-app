@@ -162,8 +162,8 @@ const Comments = (props: {
                 />
             )}
             {commentsLoading && (
-                <Row centerX style={{ margin: '20px 0' }}>
-                    <LoadingWheel />
+                <Row centerX style={{ margin: '10px 0' }}>
+                    <LoadingWheel size={30} />
                 </Row>
             )}
             {comments.length > 0 && (
