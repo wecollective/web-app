@@ -9,38 +9,37 @@ import React, { useState } from 'react'
 import Cookies from 'universal-cookie'
 
 const DeleteCommentModal = (props: {
-    commentId: number
-    parentCommentId: number | null
+    comment: any
+    removeComment: (comment: any) => void
     close: () => void
-    removeComment: (commentId: number, parentCommentId: number | null) => void
 }): JSX.Element => {
-    const { commentId, parentCommentId, close, removeComment } = props
+    const { comment, removeComment, close } = props
     const [loading, setLoading] = useState(false)
     const [success, setSuccess] = useState(false)
     const cookies = new Cookies()
 
     function deleteComment() {
         setLoading(true)
-        const accessToken = cookies.get('accessToken')
-        if (!accessToken) close()
-        else {
-            const data = { commentId }
-            const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
-            axios
-                .post(`${config.apiURL}/delete-comment`, data, authHeader)
-                .then(() => {
-                    setLoading(false)
-                    setSuccess(true)
-                    removeComment(commentId, parentCommentId)
-                    setTimeout(() => close(), 1000)
-                })
-                .catch((error) => console.log(error))
-        }
+        const data = { commentId: comment.id }
+        const authHeader = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .post(`${config.apiURL}/delete-comment`, data, authHeader)
+            .then(() => {
+                setLoading(false)
+                setSuccess(true)
+                setTimeout(() => {
+                    removeComment(comment)
+                    close()
+                }, 1000)
+            })
+            .catch((error) => console.log(error))
     }
 
     return (
         <Modal close={close} centered>
-            {!success ? (
+            {success ? (
+                <SuccessMessage text='Comment deleted!' />
+            ) : (
                 <Column centerX>
                     <h1>Are you sure you want to delete your comment?</h1>
                     <Row>
@@ -54,8 +53,6 @@ const DeleteCommentModal = (props: {
                         <Button text='Cancel' color='blue' onClick={close} />
                     </Row>
                 </Column>
-            ) : (
-                <SuccessMessage text='Comment deleted!' />
             )}
         </Modal>
     )

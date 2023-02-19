@@ -16,7 +16,7 @@ import Row from '@components/Row'
 import StatButton from '@components/StatButton'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
-import Comments from '@src/components/cards/PostCard/Comments'
+import Comments from '@src/components/cards/Comments/Comments'
 import LikeModal from '@src/components/cards/PostCard/LikeModal'
 import LinkModal from '@src/components/cards/PostCard/LinkModal'
 import RatingModal from '@src/components/cards/PostCard/RatingModal'
@@ -489,8 +489,8 @@ const PostCard = (props: {
                 {commentsOpen && (
                     <Comments
                         postId={postData.id}
-                        type='post'
-                        location={location}
+                        // type='post'
+                        // location={location}
                         totalComments={totalComments}
                         incrementTotalComments={(value) =>
                             setPostData({ ...postData, totalComments: totalComments + value })

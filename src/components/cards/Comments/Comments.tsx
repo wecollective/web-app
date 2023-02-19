@@ -1,0 +1,111 @@
+import CommentInput from '@components/cards/Comments/CommentInput'
+import CommentWrapper from '@components/cards/Comments/CommentWrapper'
+import Column from '@components/Column'
+import LoadingWheel from '@components/LoadingWheel'
+import Row from '@components/Row'
+import { AccountContext } from '@contexts/AccountContext'
+import config from '@src/Config'
+import axios from 'axios'
+import React, { useContext, useEffect, useState } from 'react'
+
+const Comments = (props: {
+    postId: number
+    type?: string
+    location?: string
+    totalComments: number
+    incrementTotalComments: (value: number) => void
+    style?: any
+}): JSX.Element => {
+    const { postId, type, location, totalComments, incrementTotalComments, style } = props
+    const { accountData, loggedIn } = useContext(AccountContext)
+    const [comments, setComments] = useState<any[]>([])
+    const [loading, setLoading] = useState(false)
+    const filteredComments = comments.filter((c) => {
+        // remove deleted comments with no replies
+        return c.state === 'visible' || c.Replies.length
+    })
+
+    function getComments() {
+        setLoading(true)
+        axios
+            .get(`${config.apiURL}/post-comments?postId=${postId}`)
+            .then((res) => {
+                setComments(res.data)
+                setLoading(false)
+            })
+            .catch((error) => console.log(error))
+    }
+
+    function addComment(comment) {
+        const { parentCommentId } = comment
+        const newComment = { ...comment, Creator: accountData, Replies: [] }
+        if (!parentCommentId) setComments([...comments, newComment])
+        else {
+            const newComments = [...comments]
+            const parentComment = newComments.find((c) => c.id === parentCommentId)
+            parentComment.Replies.push(newComment)
+            setComments(newComments)
+        }
+        incrementTotalComments(1)
+    }
+
+    function removeComment(comment) {
+        const { id, parentCommentId } = comment
+        incrementTotalComments(-1)
+        if (!parentCommentId) {
+            // if comment to remove has replies, remove data instead of comment
+            const newComments = [...comments]
+            const commentToRemove = newComments.find((c) => c.id === id)
+            if (commentToRemove.Replies) {
+                commentToRemove.text = null
+                commentToRemove.state = 'deleted'
+                setComments(newComments)
+            } else setComments([...comments.filter((c) => c.id !== id)])
+        } else {
+            const newComments = [...comments]
+            const parentComment = newComments.find((c) => c.id === parentCommentId)
+            parentComment.Replies = parentComment.Replies.filter((c) => c.id !== id)
+            setComments(newComments)
+        }
+    }
+
+    useEffect(() => {
+        setComments([])
+        if (totalComments) getComments()
+    }, [postId])
+
+    return (
+        <Column style={style}>
+            {loggedIn && (
+                <CommentInput
+                    id={`comment-input-${postId}`}
+                    postId={postId}
+                    addComment={addComment}
+                />
+            )}
+            {loading ? (
+                <Row centerX style={{ margin: '10px 0' }}>
+                    <LoadingWheel size={30} />
+                </Row>
+            ) : (
+                filteredComments.map((comment) => (
+                    <CommentWrapper
+                        key={comment.id}
+                        postId={postId}
+                        comment={comment}
+                        addComment={addComment}
+                        removeComment={removeComment}
+                    />
+                ))
+            )}
+        </Column>
+    )
+}
+
+Comments.defaultProps = {
+    type: null,
+    location: null,
+    style: null,
+}
+
+export default Comments

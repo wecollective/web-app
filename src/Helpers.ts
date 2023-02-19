@@ -399,3 +399,9 @@ export function getDraftPlainText(stringifiedDraft: string): string {
     }
     return stringifiedDraft
 }
+
+export function scrollToElement(element: HTMLElement): void {
+    const yOffset = window.screen.height / 2.3
+    const top = element.getBoundingClientRect().top + window.pageYOffset - yOffset
+    window.scrollTo({ top, behavior: 'smooth' })
+}
