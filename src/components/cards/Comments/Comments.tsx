@@ -5,8 +5,10 @@ import LoadingWheel from '@components/LoadingWheel'
 import Row from '@components/Row'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
+import { scrollToElement } from '@src/Helpers'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 
 const Comments = (props: {
     postId: number
@@ -20,6 +22,7 @@ const Comments = (props: {
     const { accountData, loggedIn } = useContext(AccountContext)
     const [comments, setComments] = useState<any[]>([])
     const [loading, setLoading] = useState(false)
+    const urlParams = Object.fromEntries(new URLSearchParams(useLocation().search))
     const filteredComments = comments.filter((c) => {
         // remove deleted comments with no replies
         return c.state === 'visible' || c.Replies.length
@@ -32,6 +35,11 @@ const Comments = (props: {
             .then((res) => {
                 setComments(res.data)
                 setLoading(false)
+                // if commentId in urlParams, scroll to comment
+                if (urlParams.commentId) {
+                    const comment = document.getElementById(`comment-${urlParams.commentId}`)
+                    if (comment) setTimeout(() => scrollToElement(comment), 500)
+                }
             })
             .catch((error) => console.log(error))
     }

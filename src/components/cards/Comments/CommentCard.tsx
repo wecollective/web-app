@@ -22,7 +22,7 @@ const CommentCard = (props: {
     const isOwnComment = Creator.id === accountData.id
 
     return (
-        <Column className={styles.comment}>
+        <Column id={`comment-${comment.id}`} className={styles.comment}>
             <Row>
                 <Link to={`/u/${Creator.handle}`}>
                     <FlagImage type='user' size={30} imagePath={Creator.flagImagePath} />
