@@ -3,24 +3,22 @@ import Column from '@components/Column'
 import DraftTextEditor from '@components/draft-js/DraftTextEditor'
 import Modal from '@components/modals/Modal'
 import SuccessMessage from '@components/SuccessMessage'
-import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
 import { defaultErrorState, findDraftLength, isValid } from '@src/Helpers'
-import styles from '@styles/components/modals/EditPostModal.module.scss'
+import styles from '@styles/components/cards/Comments/EditCommentModal.module.scss'
 import axios from 'axios'
-import React, { useContext, useState } from 'react'
+import React, { useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const EditPostModal = (props: {
-    postData: any
-    setPostData: (data: any) => void
+const EditCommentModal = (props: {
+    comment: any
+    editComment: (comment: any, newComment: any) => void
     close: () => void
 }): JSX.Element => {
-    const { postData, setPostData, close } = props
-    const { accountData } = useContext(AccountContext)
+    const { comment, editComment, close } = props
     const [newText, setNewText] = useState({
         ...defaultErrorState,
-        value: postData.text,
+        value: comment.text,
         validate: (v) => {
             const errors: string[] = []
             const totalCharacters = findDraftLength(v)
@@ -44,24 +42,20 @@ const EditPostModal = (props: {
             setLoading(true)
             const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
             const data = {
-                postId: postData.id,
-                type: postData.type,
+                postId: comment.postId,
+                commentId: comment.id,
                 text: newText.value,
                 mentions: mentions.map((m) => m.link),
-                creatorName: accountData.name,
-                creatorHandle: accountData.handle,
             }
             axios
-                .post(`${config.apiURL}/update-post`, data, options)
+                .post(`${config.apiURL}/update-comment`, data, options)
                 .then(() => {
-                    setPostData({
-                        ...postData,
-                        text: newText.value,
-                        updatedAt: new Date().toISOString(),
-                    })
                     setSuccess(true)
                     setLoading(false)
-                    setTimeout(() => close(), 1000)
+                    setTimeout(() => {
+                        editComment(comment, newText.value)
+                        close()
+                    }, 1000)
                 })
                 .catch((error) => console.log(error))
         }
@@ -73,7 +67,7 @@ const EditPostModal = (props: {
                 <SuccessMessage text='Changes saved' />
             ) : (
                 <Column centerX style={{ width: '100%', maxWidth: 700 }}>
-                    <h1>Edit post text</h1>
+                    <h1>Edit comment</h1>
                     <DraftTextEditor
                         type='post'
                         stringifiedDraft={newText.value}
@@ -86,7 +80,7 @@ const EditPostModal = (props: {
                     <Button
                         color='blue'
                         text='Save changes'
-                        disabled={newText.value === postData.text || loading}
+                        disabled={newText.value === comment.text || loading}
                         loading={loading}
                         onClick={saveChanges}
                     />
@@ -96,4 +90,4 @@ const EditPostModal = (props: {
     )
 }
 
-export default EditPostModal
+export default EditCommentModal

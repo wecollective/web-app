@@ -5,13 +5,14 @@ import { scrollToElement } from '@src/Helpers'
 import React, { useState } from 'react'
 
 const CommentWrapper = (props: {
-    postId: number
     comment: any
+    postId: number
     highlightedCommentId: any
     addComment: (newComment: string) => void
     removeComment: (comment: any) => void
+    editComment: (comment: any, newComment: any) => void
 }): JSX.Element => {
-    const { postId, comment, highlightedCommentId, addComment, removeComment } = props
+    const { comment, postId, highlightedCommentId, addComment, removeComment, editComment } = props
     const [replyId, setReplyId] = useState(0)
     const [replyInputOpen, setReplyInputOpen] = useState(false)
 
@@ -28,8 +29,9 @@ const CommentWrapper = (props: {
             <CommentCard
                 comment={comment}
                 highlighted={highlightedCommentId === comment.id}
-                toggleReplyInput={() => toggleReplyInput()}
+                toggleReplyInput={toggleReplyInput}
                 removeComment={removeComment}
+                editComment={editComment}
             />
             <Column style={{ marginLeft: 36 }}>
                 {comment.Replies.map((reply) => (
@@ -39,6 +41,7 @@ const CommentWrapper = (props: {
                         highlighted={highlightedCommentId === reply.id}
                         toggleReplyInput={() => toggleReplyInput(reply.id)}
                         removeComment={removeComment}
+                        editComment={editComment}
                     />
                 ))}
                 {replyInputOpen && (

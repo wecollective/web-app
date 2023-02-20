@@ -1,3 +1,4 @@
+import EditCommentModal from '@components/cards/Comments/EditCommentModal'
 import Column from '@components/Column'
 import DraftText from '@components/draft-js/DraftText'
 import FlagImage from '@components/FlagImage'
@@ -15,10 +16,12 @@ const CommentCard = (props: {
     highlighted: boolean
     toggleReplyInput: () => void
     removeComment: (comment: any) => void
+    editComment: (comment: any, newComment: any) => void
 }): JSX.Element => {
-    const { comment, highlighted, toggleReplyInput, removeComment } = props
-    const { text, state, createdAt, Creator } = comment
+    const { comment, highlighted, toggleReplyInput, removeComment, editComment } = props
+    const { text, state, createdAt, updatedAt, Creator } = comment
     const { loggedIn, accountData } = useContext(AccountContext)
+    const [editCommentModalOpen, setEditCommentModalOpen] = useState(false)
     const [deleteCommentModalOpen, setDeleteCommentModalOpen] = useState(false)
     const isOwnComment = Creator.id === accountData.id
 
@@ -34,7 +37,7 @@ const CommentCard = (props: {
                 >
                     <FlagImage type='user' size={30} imagePath={Creator.flagImagePath} />
                 </Link>
-                <Column className={styles.text}>
+                <Column className={styles.content}>
                     <Row style={{ marginBottom: 2 }}>
                         {state === 'account-deleted' ? (
                             <p className='grey' style={{ marginRight: 5 }}>
@@ -48,15 +51,26 @@ const CommentCard = (props: {
                         <p className='grey' title={dateCreated(createdAt)}>
                             {`• ${timeSinceCreated(createdAt)}`}
                         </p>
+                        {createdAt !== updatedAt && (
+                            <p
+                                className='grey'
+                                title={`Edited at ${dateCreated(updatedAt)}`}
+                                style={{ paddingLeft: 5 }}
+                            >
+                                *
+                            </p>
+                        )}
                     </Row>
-                    <ShowMoreLess height={250} gradientColor='grey'>
-                        <DraftText
-                            stringifiedDraft={state === 'deleted' ? '[comment deleted]' : text}
-                            markdownStyles={`${styles.markdown} ${
-                                state === 'deleted' && styles.deleted
-                            }`}
-                        />
-                    </ShowMoreLess>
+                    {state !== 'account-deleted' && (
+                        <ShowMoreLess height={250} gradientColor='grey'>
+                            <DraftText
+                                stringifiedDraft={state === 'deleted' ? '[comment deleted]' : text}
+                                markdownStyles={`${styles.markdown} ${
+                                    state === 'deleted' && styles.deleted
+                                }`}
+                            />
+                        </ShowMoreLess>
+                    )}
                 </Column>
             </Row>
             {loggedIn && state === 'visible' && (
@@ -65,11 +79,23 @@ const CommentCard = (props: {
                         Reply
                     </button>
                     {isOwnComment && (
-                        <button type='button' onClick={() => setDeleteCommentModalOpen(true)}>
-                            Delete
-                        </button>
+                        <>
+                            <button type='button' onClick={() => setEditCommentModalOpen(true)}>
+                                Edit
+                            </button>
+                            <button type='button' onClick={() => setDeleteCommentModalOpen(true)}>
+                                Delete
+                            </button>
+                        </>
                     )}
                 </Row>
+            )}
+            {editCommentModalOpen && (
+                <EditCommentModal
+                    comment={comment}
+                    editComment={editComment}
+                    close={() => setEditCommentModalOpen(false)}
+                />
             )}
             {deleteCommentModalOpen && (
                 <DeleteCommentModal

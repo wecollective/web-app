@@ -61,7 +61,7 @@ const Comments = (props: {
         const { id, parentCommentId } = comment
         incrementTotalComments(-1)
         if (!parentCommentId) {
-            // if comment to remove has replies, remove data instead of comment
+            // if comment to remove has replies, update data instead of removing
             const newComments = [...comments]
             const commentToRemove = newComments.find((c) => c.id === id)
             if (commentToRemove.Replies) {
@@ -75,6 +75,21 @@ const Comments = (props: {
             parentComment.Replies = parentComment.Replies.filter((c) => c.id !== id)
             setComments(newComments)
         }
+    }
+
+    function editComment(comment, newText) {
+        const { id, parentCommentId } = comment
+        const newComments = [...comments]
+        let editedComment
+        if (parentCommentId) {
+            const parentComment = newComments.find((c) => c.id === parentCommentId)
+            editedComment = parentComment.Replies.find((c) => c.id === id)
+        } else {
+            editedComment = comments.find((c) => c.id === id)
+        }
+        editedComment.text = newText
+        editedComment.updatedAt = new Date().toISOString()
+        setComments(newComments)
     }
 
     useEffect(() => {
@@ -104,6 +119,7 @@ const Comments = (props: {
                         highlightedCommentId={+urlParams.commentId}
                         addComment={addComment}
                         removeComment={removeComment}
+                        editComment={editComment}
                     />
                 ))
             )}

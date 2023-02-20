@@ -51,7 +51,7 @@ const CommentInput = (props: {
                 mentions: mentions.map((m) => m.link),
             }
             axios
-                .post(`${config.apiURL}/submit-comment`, data, options)
+                .post(`${config.apiURL}/create-comment`, data, options)
                 .then((res) => {
                     addComment(res.data)
                     if (close) close()

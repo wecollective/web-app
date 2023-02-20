@@ -3,12 +3,16 @@
 .wrapper {
     margin-bottom: 10px;
 
-    .text {
+    .content {
         margin-left: 6px;
-        background-color: $grey1;
         border-radius: 15px;
         padding: 6px 12px;
         font-size: 14px;
+        background-color: $grey1;
+    }
+
+    &.highlighted .content {
+        background-color: $blue7;
     }
 
     .buttons {
@@ -28,12 +32,6 @@
 
         &.deleted {
             color: $grey4;
-        }
-    }
-
-    &.highlighted {
-        .text {
-            background-color: $blue7;
         }
     }
 }
