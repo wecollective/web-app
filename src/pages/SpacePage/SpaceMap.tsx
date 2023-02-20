@@ -243,30 +243,33 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
     }
 
     function plusMinusMouseDown(d) {
-        const match = findSpaceByUUID(spaceMapData, d.data.uuid)
-        if (d.data.collapsed) {
-            // expand children
-            match.collapsed = false
-            if (match.hiddenChildren) {
-                // show hidden children
-                match.children = match.hiddenChildren
-                match.hiddenChildren = null
-                updateMap(false)
+        if (!spaceTransitioning.current) {
+            spaceTransitioning.current = true
+            const match = findSpaceByUUID(spaceMapData, d.data.uuid)
+            if (d.data.collapsed) {
+                // expand children
+                match.collapsed = false
+                if (match.hiddenChildren) {
+                    // show hidden children
+                    match.children = match.hiddenChildren
+                    match.hiddenChildren = null
+                    updateMap(false)
+                } else {
+                    // get new children
+                    getSpaceMapChildren(d.data.id, 0, params, false)
+                        .then((res) => {
+                            match.children.push(...res.data.children)
+                            updateMap(false)
+                        })
+                        .catch((error) => console.log(error))
+                }
             } else {
-                // get new children
-                getSpaceMapChildren(d.data.id, 0, params, false)
-                    .then((res) => {
-                        match.children.push(...res.data.children)
-                        updateMap(false)
-                    })
-                    .catch((error) => console.log(error))
+                // collapse children
+                match.collapsed = true
+                match.hiddenChildren = match.children
+                match.children = null
+                updateMap(false)
             }
-        } else {
-            // collapse children
-            match.collapsed = true
-            match.hiddenChildren = match.children
-            match.children = null
-            updateMap(false)
         }
     }
 
