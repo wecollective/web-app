@@ -138,7 +138,6 @@ const NotificationCard = (props: {
     const { spaceData } = useContext(SpaceContext)
     const [seen, setSeen] = useState(notification.seen)
     const cookies = new Cookies()
-    const you = triggerUser && accountData.id === triggerUser.id
 
     function respondToSpaceInvite(response) {
         const accessToken = cookies.get('accessToken')

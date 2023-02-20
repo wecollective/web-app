@@ -12,17 +12,21 @@ import { Link } from 'react-router-dom'
 
 const CommentCard = (props: {
     comment: any
+    highlighted: boolean
     toggleReplyInput: () => void
     removeComment: (comment: any) => void
 }): JSX.Element => {
-    const { comment, toggleReplyInput, removeComment } = props
+    const { comment, highlighted, toggleReplyInput, removeComment } = props
     const { text, state, createdAt, Creator } = comment
     const { loggedIn, accountData } = useContext(AccountContext)
     const [deleteCommentModalOpen, setDeleteCommentModalOpen] = useState(false)
     const isOwnComment = Creator.id === accountData.id
 
     return (
-        <Column id={`comment-${comment.id}`} className={styles.comment}>
+        <Column
+            id={`comment-${comment.id}`}
+            className={`${styles.wrapper} ${highlighted && styles.highlighted}`}
+        >
             <Row>
                 <Link to={`/u/${Creator.handle}`}>
                     <FlagImage type='user' size={30} imagePath={Creator.flagImagePath} />

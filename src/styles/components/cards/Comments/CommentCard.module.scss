@@ -1,6 +1,6 @@
 @import '@styles/Variables';
 
-.comment {
+.wrapper {
     margin-bottom: 10px;
 
     .text {
@@ -25,5 +25,11 @@
 
     .markdown {
         font-size: 14px;
+    }
+
+    &.highlighted {
+        .text {
+            background-color: $blue7;
+        }
     }
 }

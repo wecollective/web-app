@@ -7,10 +7,11 @@ import React, { useState } from 'react'
 const CommentWrapper = (props: {
     postId: number
     comment: any
+    highlightedCommentId: any
     addComment: (newComment: string) => void
     removeComment: (comment: any) => void
 }): JSX.Element => {
-    const { postId, comment, addComment, removeComment } = props
+    const { postId, comment, highlightedCommentId, addComment, removeComment } = props
     const [replyId, setReplyId] = useState(0)
     const [replyInputOpen, setReplyInputOpen] = useState(false)
 
@@ -26,6 +27,7 @@ const CommentWrapper = (props: {
         <Column>
             <CommentCard
                 comment={comment}
+                highlighted={highlightedCommentId === comment.id}
                 toggleReplyInput={() => toggleReplyInput()}
                 removeComment={removeComment}
             />
@@ -34,6 +36,7 @@ const CommentWrapper = (props: {
                     <CommentCard
                         key={reply.id}
                         comment={reply}
+                        highlighted={highlightedCommentId === reply.id}
                         toggleReplyInput={() => toggleReplyInput(reply.id)}
                         removeComment={removeComment}
                     />

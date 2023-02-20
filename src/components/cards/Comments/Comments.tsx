@@ -101,6 +101,7 @@ const Comments = (props: {
                         key={comment.id}
                         postId={postId}
                         comment={comment}
+                        highlightedCommentId={+urlParams.commentId}
                         addComment={addComment}
                         removeComment={removeComment}
                     />
