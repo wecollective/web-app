@@ -12,7 +12,7 @@ import Cookies from 'universal-cookie'
 
 const EditCommentModal = (props: {
     comment: any
-    editComment: (comment: any, newComment: any) => void
+    editComment: (comment: any, newText: string) => void
     close: () => void
 }): JSX.Element => {
     const { comment, editComment, close } = props

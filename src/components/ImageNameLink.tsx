@@ -15,9 +15,14 @@ const ImageNameLink = (props: {
     const { type, data, onClick } = props
     const route = `/${type[0]}/${data.handle}`
     return (
-        <Link className={styles.container} to={route} onClick={onClick}>
+        <Link
+            className={styles.container}
+            to={route}
+            onClick={onClick}
+            style={{ pointerEvents: data.handle ? 'auto' : 'none' }}
+        >
             <FlagImage type={type} size={30} imagePath={data.flagImagePath} />
-            <p>{data.name}</p>
+            {data.handle ? <p>{data.name}</p> : <p className='grey'>[Account deleted]</p>}
         </Link>
     )
 }

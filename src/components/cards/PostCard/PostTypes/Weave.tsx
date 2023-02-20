@@ -14,6 +14,7 @@ import styles from '@styles/components/cards/PostCard/PostTypes/Weave.module.scs
 import { DNAIcon, PlusIcon, UsersIcon } from '@svgs/all'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 
+// todo: clean up logic when GBG refactored
 const Weave = (props: {
     postData: any
     setPostData: (data: any) => void
@@ -50,11 +51,12 @@ const Weave = (props: {
             ? weave.numberOfTurns * stringPlayers.length
             : weave.numberOfMoves
     const movesLeft = stringPosts.length < totalMoves
-    const waitingForPlayer = weave.privacy === 'only-selected-users' && movesLeft
+    const waitingForPlayer =
+        weave.privacy === 'only-selected-users' && movesLeft && currentPlayer.state !== 'deleted'
     const nextMoveAvailable =
         weave.privacy === 'all-users-allowed'
             ? movesLeft
-            : movesLeft && currentPlayer.id === accountData.id
+            : movesLeft && currentPlayer.id === accountData.id && currentPlayer.state !== 'deleted'
 
     useEffect(() => {
         if (weave.nextMoveDeadline && !deadlinePassed()) {
@@ -113,23 +115,26 @@ const Weave = (props: {
                                 />
                             </Row>
                         )}
-                    {playersReady && weave.state !== 'cancelled' && (
-                        <Row>
-                            {movesLeft ? (
-                                <ImageTitle
-                                    type='user'
-                                    imagePath={currentPlayer.flagImagePath}
-                                    title={`${currentPlayer.name}'s move: ${
-                                        stringPosts.length + 1
-                                    }/${weave.numberOfTurns * stringPlayers.length}`}
-                                    link={`/u/${currentPlayer.handle}/posts`}
-                                />
-                            ) : (
-                                <p>Game finished</p>
-                            )}
-                        </Row>
-                    )}
-                    {weave.state === 'cancelled' && <p>Game cancelled</p>}
+                    {playersReady &&
+                        weave.state !== 'cancelled' &&
+                        currentPlayer.state !== 'deleted' && (
+                            <Row>
+                                {movesLeft ? (
+                                    <ImageTitle
+                                        type='user'
+                                        imagePath={currentPlayer.flagImagePath}
+                                        title={`${currentPlayer.name}'s move: ${
+                                            stringPosts.length + 1
+                                        }/${weave.numberOfTurns * stringPlayers.length}`}
+                                        link={`/u/${currentPlayer.handle}/posts`}
+                                    />
+                                ) : (
+                                    <p>Game finished</p>
+                                )}
+                            </Row>
+                        )}
+                    {weave.state === 'cancelled' ||
+                        (currentPlayer.state === 'deleted' && <p>Game cancelled</p>)}
                 </Row>
             ) : (
                 <Row spaceBetween centerY style={{ marginBottom: 10, color: '#acacae' }}>

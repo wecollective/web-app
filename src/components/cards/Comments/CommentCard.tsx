@@ -16,7 +16,7 @@ const CommentCard = (props: {
     highlighted: boolean
     toggleReplyInput: () => void
     removeComment: (comment: any) => void
-    editComment: (comment: any, newComment: any) => void
+    editComment: (comment: any, newText: string) => void
 }): JSX.Element => {
     const { comment, highlighted, toggleReplyInput, removeComment, editComment } = props
     const { text, state, createdAt, updatedAt, Creator } = comment

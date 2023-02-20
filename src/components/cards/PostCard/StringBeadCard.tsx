@@ -67,14 +67,26 @@ const StringBeadCard = (props: {
     const [likeModalOpen, setLikeModalOpen] = useState(false)
     const [linkModalOpen, setLinkModalOpen] = useState(false)
     const [selectedImage, setSelectedImage] = useState<any>(null)
+    const history = useHistory()
     const images = bead.PostImages ? bead.PostImages.sort((a, b) => a.index - b.index) : []
     const type = bead.type.replace('string-', '')
     const isSource = bead.Link && bead.Link.relationship === 'source'
     const isOwnPost = accountData && bead.Creator && accountData.id === bead.Creator.id
+    const showDropDown =
+        isOwnPost &&
+        type === 'text' &&
+        bead.Link.relationship !== 'source' &&
+        !['create-string-modal', 'next-bead-modal', 'preview'].includes(location)
+
     const showFooter =
-        !['create-string-modal', 'next-bead-modal'].includes(location) &&
-        postType !== 'glass-bead-game'
-    const history = useHistory()
+        bead.state !== 'account-deleted' &&
+        postType !== 'glass-bead-game' &&
+        !['create-string-modal', 'next-bead-modal'].includes(location)
+
+    function findUserTitle() {
+        if (bead.state === 'account-deleted') return '[Account deleted]'
+        return isOwnPost ? 'You' : bead.Creator.name
+    }
 
     function findBeadIcon(beadType) {
         switch (beadType) {
@@ -123,12 +135,12 @@ const StringBeadCard = (props: {
             style={{ ...style, backgroundColor: bead.color }}
         >
             {/* <div className={styles.watermark} /> */}
-            <Row spaceBetween centerY className={styles.beadHeader}>
+            <Row spaceBetween centerY className={styles.header}>
                 {postType && ['glass-bead-game', 'weave'].includes(postType) && (
                     <ImageTitle
                         type='user'
                         imagePath={bead.Creator.flagImagePath}
-                        title={bead.Creator.id === accountData.id ? 'You' : bead.Creator.name}
+                        title={findUserTitle()}
                         fontSize={12}
                         imageSize={20}
                         style={{ marginRight: 10 }}
@@ -154,112 +166,115 @@ const StringBeadCard = (props: {
                         <SourceIcon />
                     </button>
                 )}
-                {!['create-string-modal', 'next-bead-modal', 'preview'].includes(location) &&
-                    bead.Link.relationship !== 'source' &&
-                    isOwnPost &&
-                    type === 'text' && (
-                        <Row>
-                            <button
-                                type='button'
-                                className={styles.menuButton}
-                                onClick={() => setMenuOpen(!menuOpen)}
-                            >
-                                <VerticalEllipsisIcon />
-                            </button>
-                            {menuOpen && (
-                                <CloseOnClickOutside onClick={() => setMenuOpen(false)}>
-                                    <Column className={styles.menu}>
-                                        {isOwnPost && (
-                                            <Column>
-                                                <button
-                                                    type='button'
-                                                    onClick={() => setEditPostModalOpen(true)}
-                                                >
-                                                    <EditIcon />
-                                                    Edit text
-                                                </button>
-                                            </Column>
-                                        )}
-                                    </Column>
-                                </CloseOnClickOutside>
-                            )}
-                        </Row>
-                    )}
-            </Row>
-            <Column centerY className={styles.beadContent}>
-                {type === 'text' && (
-                    <Scrollbars>
-                        <DraftText stringifiedDraft={bead.text} />
-                    </Scrollbars>
-                )}
-                {type === 'url' && (
-                    <Scrollbars>
-                        <BeadCardUrlPreview
-                            url={bead.url}
-                            image={bead.urlImage}
-                            domain={bead.urlDomain}
-                            title={bead.urlTitle}
-                            description={bead.urlDescription}
-                        />
-                    </Scrollbars>
-                )}
-                {type === 'audio' && (
-                    <Column key={beadIndex} spaceBetween style={{ height: '100%' }}>
-                        <AudioVisualiser
-                            audioElementId={`string-bead-audio-${postId}-${beadIndex}-${location}`}
-                            audioURL={bead.url}
-                            staticBars={400}
-                            staticColor={colors.audioVisualiserColor}
-                            dynamicBars={60}
-                            dynamicColor={colors.audioVisualiserColor}
-                            style={{
-                                width: '100%',
-                                height: 150,
-                                marginTop: showFooter ? 10 : 20,
-                            }}
-                        />
-                        <Row centerY>
-                            <button
-                                className={styles.playButton}
-                                type='button'
-                                onClick={() => toggleBeadAudio(beadIndex)}
-                            >
-                                {audioPlaying ? <PauseIcon /> : <PlayIcon />}
-                            </button>
-                            <AudioTimeSlider
-                                audioElementId={`string-bead-audio-${postId}-${beadIndex}-${location}`}
-                                audioURL={bead.url}
-                                location='space-posts'
-                                onPlay={() => setAudioPlaying(true)}
-                                onPause={() => setAudioPlaying(false)}
-                                onEnded={() => toggleBeadAudio(beadIndex + 1, true)}
-                            />
-                        </Row>
-                    </Column>
-                )}
-                {type === 'image' && (
-                    <Row centerX>
-                        <Scrollbars style={{ paddingBottom: 5 }} className='row'>
-                            {images.map((image, i) => (
-                                <button
-                                    className={styles.image}
-                                    key={i}
-                                    type='button'
-                                    onClick={() => openImageModal(image.id)}
-                                >
-                                    <img
-                                        src={image.url}
-                                        onError={(e) => handleImageError(e, image.url)}
-                                        alt=''
-                                    />
-                                </button>
-                            ))}
-                        </Scrollbars>
+                {showDropDown && (
+                    <Row>
+                        <button
+                            type='button'
+                            className={styles.menuButton}
+                            onClick={() => setMenuOpen(!menuOpen)}
+                        >
+                            <VerticalEllipsisIcon />
+                        </button>
+                        {menuOpen && (
+                            <CloseOnClickOutside onClick={() => setMenuOpen(false)}>
+                                <Column className={styles.menu}>
+                                    {isOwnPost && (
+                                        <Column>
+                                            <button
+                                                type='button'
+                                                onClick={() => setEditPostModalOpen(true)}
+                                            >
+                                                <EditIcon />
+                                                Edit text
+                                            </button>
+                                        </Column>
+                                    )}
+                                </Column>
+                            </CloseOnClickOutside>
+                        )}
                     </Row>
                 )}
-            </Column>
+            </Row>
+            {bead.state === 'account-deleted' ? (
+                <Column centerY centerX style={{ height: '100%' }}>
+                    <p className='grey'>[Account deleted]</p>
+                </Column>
+            ) : (
+                <Column centerY className={styles.content}>
+                    {type === 'text' && (
+                        <Scrollbars>
+                            <DraftText stringifiedDraft={bead.text} />
+                        </Scrollbars>
+                    )}
+                    {type === 'url' && (
+                        <Scrollbars>
+                            <BeadCardUrlPreview
+                                url={bead.url}
+                                image={bead.urlImage}
+                                domain={bead.urlDomain}
+                                title={bead.urlTitle}
+                                description={bead.urlDescription}
+                            />
+                        </Scrollbars>
+                    )}
+                    {type === 'audio' && (
+                        <Column key={beadIndex} spaceBetween style={{ height: '100%' }}>
+                            <AudioVisualiser
+                                audioElementId={`string-bead-audio-${postId}-${beadIndex}-${location}`}
+                                audioURL={bead.url}
+                                staticBars={400}
+                                staticColor={colors.audioVisualiserColor}
+                                dynamicBars={60}
+                                dynamicColor={colors.audioVisualiserColor}
+                                style={{
+                                    width: '100%',
+                                    height: 150,
+                                    marginTop: showFooter ? 10 : 20,
+                                }}
+                            />
+                            <Row centerY>
+                                <button
+                                    className={styles.playButton}
+                                    type='button'
+                                    onClick={() => toggleBeadAudio(beadIndex)}
+                                >
+                                    {audioPlaying ? <PauseIcon /> : <PlayIcon />}
+                                </button>
+                                <AudioTimeSlider
+                                    audioElementId={`string-bead-audio-${postId}-${beadIndex}-${location}`}
+                                    audioURL={bead.url}
+                                    location='space-posts'
+                                    onPlay={() => setAudioPlaying(true)}
+                                    onPause={() => setAudioPlaying(false)}
+                                    onEnded={() => toggleBeadAudio(beadIndex + 1, true)}
+                                />
+                            </Row>
+                        </Column>
+                    )}
+                    {type === 'image' && (
+                        <Row centerX>
+                            <Scrollbars style={{ paddingBottom: 5 }} className='row'>
+                                {images.map((image, i) => (
+                                    <button
+                                        className={styles.image}
+                                        key={i}
+                                        type='button'
+                                        onClick={() => openImageModal(image.id)}
+                                    >
+                                        <img
+                                            src={image.url}
+                                            onError={(e) => handleImageError(e, image.url)}
+                                            alt=''
+                                        />
+                                    </button>
+                                ))}
+                            </Scrollbars>
+                        </Row>
+                    )}
+                </Column>
+            )}
             {showFooter && (
-                <Row spaceBetween className={styles.beadFooter}>
+                <Row spaceBetween className={styles.footer}>
                     <StatButton
                         icon={<LikeIcon />}
                         iconSize={20}

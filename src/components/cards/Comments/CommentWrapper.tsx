@@ -10,7 +10,7 @@ const CommentWrapper = (props: {
     highlightedCommentId: any
     addComment: (newComment: string) => void
     removeComment: (comment: any) => void
-    editComment: (comment: any, newComment: any) => void
+    editComment: (comment: any, newText: string) => void
 }): JSX.Element => {
     const { comment, postId, highlightedCommentId, addComment, removeComment, editComment } = props
     const [replyId, setReplyId] = useState(0)
