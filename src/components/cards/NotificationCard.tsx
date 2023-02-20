@@ -118,14 +118,13 @@ const NotificationCard = (props: {
     location: 'account' | 'space'
     updateNotification: (id, key, payload) => void
 }): JSX.Element => {
-    // todo: add location prop: 'account' | 'space'
     const { notification, location, updateNotification } = props
     const {
         id,
         type,
         state,
         postId,
-        // commentId,
+        commentId,
         triggerUser,
         triggerSpace,
         secondarySpace,
@@ -306,7 +305,7 @@ const NotificationCard = (props: {
 
                     {type === 'post-like' && (
                         <Content typeIcon={<ThumbsUpIcon />}>
-                            {you ? <p>You</p> : <ImageNameLink type='user' data={triggerUser} />}
+                            <ImageNameLink type='user' data={triggerUser} />
                             <p>liked your</p>
                             <TextLink text='post' link={`/p/${postId}`} />
                             {triggerSpace && <p>in</p>}
@@ -317,9 +316,9 @@ const NotificationCard = (props: {
 
                     {type === 'post-comment' && (
                         <Content typeIcon={<CommentIcon />}>
-                            {you ? <p>You</p> : <ImageNameLink type='user' data={triggerUser} />}
+                            <ImageNameLink type='user' data={triggerUser} />
                             <p>commented on your</p>
-                            <TextLink text='post' link={`/p/${postId}`} />
+                            <TextLink text='post' link={`/p/${postId}?commentId=${commentId}`} />
                             {triggerSpace && <p>in</p>}
                             {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
                             <CreatedAt date={createdAt} />
@@ -328,7 +327,7 @@ const NotificationCard = (props: {
 
                     {type === 'post-repost' && (
                         <Content typeIcon={<RetweetIcon />}>
-                            {you ? <p>You</p> : <ImageNameLink type='user' data={triggerUser} />}
+                            <ImageNameLink type='user' data={triggerUser} />
                             <p>reposted your</p>
                             <TextLink text='post' link={`/p/${postId}`} />
                             {triggerSpace && <p>in</p>}
@@ -339,7 +338,7 @@ const NotificationCard = (props: {
 
                     {type === 'post-rating' && (
                         <Content typeIcon={<StarIcon />}>
-                            {you ? <p>You</p> : <ImageNameLink type='user' data={triggerUser} />}
+                            <ImageNameLink type='user' data={triggerUser} />
                             <p>rated your</p>
                             <TextLink text='post' link={`/p/${postId}`} />
                             {triggerSpace && <p>in</p>}
@@ -350,7 +349,7 @@ const NotificationCard = (props: {
 
                     {type === 'post-link' && (
                         <Content typeIcon={<LinkIcon />}>
-                            {you ? <p>You</p> : <ImageNameLink type='user' data={triggerUser} />}
+                            <ImageNameLink type='user' data={triggerUser} />
                             <p>linked your</p>
                             <TextLink text='post' link={`/p/${postId}`} />
                             {/* todo: add postAId and postBId columns in the database so secondary post can be linked */}
@@ -381,9 +380,9 @@ const NotificationCard = (props: {
 
                     {type === 'comment-reply' && (
                         <Content typeIcon={<CommentIcon />}>
-                            {you ? <p>You</p> : <ImageNameLink type='user' data={triggerUser} />}
+                            <ImageNameLink type='user' data={triggerUser} />
                             <p>replied to your</p>
-                            <TextLink text='comment' link={`/p/${postId}`} />
+                            <TextLink text='comment' link={`/p/${postId}?commentId=${commentId}`} />
                             {triggerSpace && <p>in</p>}
                             {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
                             <CreatedAt date={createdAt} />
@@ -394,7 +393,7 @@ const NotificationCard = (props: {
                         <Content typeIcon={<AtIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>just mentioned you in a</p>
-                            <TextLink text='comment' link={`/p/${postId}`} />
+                            <TextLink text='comment' link={`/p/${postId}?commentId=${commentId}`} />
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}
@@ -494,7 +493,7 @@ const NotificationCard = (props: {
 
                     {type === 'mod-removed' && (
                         <Content typeIcon={<SpacesIcon />}>
-                            {you ? <p>You</p> : <ImageNameLink type='user' data={triggerUser} />}
+                            <ImageNameLink type='user' data={triggerUser} />
                             <p>just removed you from moderating</p>
                             <ImageNameLink type='space' data={triggerSpace} />
                             <CreatedAt date={createdAt} />
