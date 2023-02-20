@@ -28,7 +28,10 @@ const CommentCard = (props: {
             className={`${styles.wrapper} ${highlighted && styles.highlighted}`}
         >
             <Row>
-                <Link to={`/u/${Creator.handle}`}>
+                <Link
+                    to={`/u/${Creator.handle}`}
+                    style={{ pointerEvents: Creator.handle ? 'auto' : 'none' }}
+                >
                     <FlagImage type='user' size={30} imagePath={Creator.flagImagePath} />
                 </Link>
                 <Column className={styles.text}>
@@ -49,7 +52,9 @@ const CommentCard = (props: {
                     <ShowMoreLess height={250} gradientColor='grey'>
                         <DraftText
                             stringifiedDraft={state === 'deleted' ? '[comment deleted]' : text}
-                            markdownStyles={styles.markdown}
+                            markdownStyles={`${styles.markdown} ${
+                                state === 'deleted' && styles.deleted
+                            }`}
                         />
                     </ShowMoreLess>
                 </Column>

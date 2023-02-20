@@ -25,6 +25,10 @@
 
     .markdown {
         font-size: 14px;
+
+        &.deleted {
+            color: $grey4;
+        }
     }
 
     &.highlighted {
