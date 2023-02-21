@@ -222,10 +222,10 @@ const StringBeadCard = (props: {
                             <AudioVisualiser
                                 audioElementId={`string-bead-audio-${postId}-${beadIndex}-${location}`}
                                 audioURL={bead.url}
-                                staticBars={400}
-                                staticColor={colors.audioVisualiserColor}
-                                dynamicBars={60}
-                                dynamicColor={colors.audioVisualiserColor}
+                                staticBars={200}
+                                staticColor={colors.audioVisualiserStatic}
+                                dynamicBars={100}
+                                dynamicColor={colors.audioVisualiserDynamic}
                                 style={{
                                     width: '100%',
                                     height: 150,

@@ -127,7 +127,7 @@ const AudioVisualiser = (props: {
                         .attr('y', height / 2)
                         .attr('width', width / totalBars)
                         .attr('fill', dynamicColor)
-                        .style('opacity', 0.5)
+                        .style('opacity', 1)
                 }
 
                 const renderVisualizer = () => {
