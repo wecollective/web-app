@@ -17,9 +17,19 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
     const parentNodes = useRef<any>(null)
     const childNodes = useRef<any>(null)
 
-    const zoom = d3
-        .zoom()
-        .on('zoom', () => d3.select('#master-group').attr('transform', d3.event.transform))
+    const zoom = d3.zoom().on('zoom', () => {
+        d3.select('#master-group').attr('transform', d3.event.transform)
+        // scale circle and text attributes
+        const scale = d3.event.transform.k
+        d3.selectAll('.circle').attr('stroke-width', 1 / scale)
+        d3.selectAll('.text')
+            .attr('font-size', 16 / scale)
+            .attr('y', (d) => d.y - d.r - 15 / scale)
+            .attr('opacity', (d) => {
+                if (scale > 7) return 1
+                return d.r > 30 / scale ? 1 : 0
+            })
+    })
 
     const colorScale = d3
         .scaleLinear()
@@ -32,8 +42,13 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
         const svgWidth = parseInt(svg.style('width'), 10)
         const svgHeight = parseInt(svg.style('height'), 10)
         const x = svgWidth / 2 - circleRadius.current
-        const y = svgHeight / 2 - circleRadius.current + 50
-        svg.transition().duration(duration).call(zoom.transform, d3.zoomIdentity.translate(x, y))
+        const y = svgHeight / 2 - circleRadius.current
+        const hasParents =
+            spaceMapData.DirectParentSpaces && spaceMapData.DirectParentSpaces.length > 0
+        const yOffset = hasParents ? 50 : 0
+        svg.transition()
+            .duration(duration)
+            .call(zoom.transform, d3.zoomIdentity.translate(x, y + yOffset))
     }
 
     function buildCanvas() {
@@ -57,54 +72,13 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
         svg.call(zoom)
     }
 
-    function hasMatchingAncestor(circle, selectedCircle) {
-        // recursively check parents for selectedCircle
-        if (!circle.parent) return false
-        if (circle.parent.data.id === selectedCircle.data.id) return true
-        return hasMatchingAncestor(circle.parent, selectedCircle)
-    }
-
     function onCircleClick(circle) {
         d3.event.stopPropagation()
         transitioning.current = true
-        // navigate to new space
-        if (circle.data.id !== childNodes.current[0].data.id)
-            history.push(`/s/${circle.data.handle}/spaces`)
-        // transition to new circle
-        const svg = d3.select('#circle-packing-svg')
-        const svgWidth = parseInt(svg.style('width'), 10)
-        const svgHeight = parseInt(svg.style('height'), 10)
-        const scale = (circleRadius.current * 2) / (circle.r * 2)
-        const x = svgWidth / 2 / scale - circle.x
-        const y = svgHeight / 2 / scale - circle.y + 50
-        // transition circle stroke width
-        d3.selectAll('.circle')
-            .transition('circle-transition')
-            .duration(transitionDuration)
-            .attr('stroke-width', 1 / scale)
-        // transition font size
-        d3.selectAll('.text')
-            .transition('text-transition')
-            .duration(transitionDuration)
-            .attr('font-size', 16 / scale)
-            .attr('y', (da) => da.y - da.r - 15 / scale)
-        // fade out all external nodes
-        d3.selectAll('.circle,.text')
-            .filter((d) => {
-                if (d.depth <= circle.depth && d.data.id !== circle.data.id) return true
-                return d.data.id !== circle.data.id && !hasMatchingAncestor(d, circle)
-            })
-            .transition('fade-transition')
-            .duration(transitionDuration)
-            .attr('opacity', 0.25)
-        // // zoom to new circle
-        svg.transition()
-            .duration(transitionDuration)
-            .call(zoom.transform, d3.zoomIdentity.scale(scale).translate(x, y))
-            .on('end', () => {
-                // buildTree(spaceMapData)
-                // transitioning.current = false
-            })
+        // if main circle, reset position
+        if (circle.data.id === childNodes.current[0].data.id) resetPosition(transitionDuration)
+        // else, navigate to new space
+        else history.push(`/s/${circle.data.handle}/spaces`)
     }
 
     function createParentCircles() {
@@ -184,19 +158,43 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
         d3.select('#circle-group')
             .selectAll('.text')
             .data(childNodes.current, (d) => d.data.id)
-            .join('text')
-            // .filter((d) => {
-            //     return d.depth < 2 // && d.children && d.data.totalLikes > 15
-            // })
-            .classed('text', true)
-            .text((d) => d.data.name)
-            .attr('font-size', 16)
-            .attr('pointer-events', 'none')
-            .attr('opacity', 1)
-            .attr('text-anchor', 'middle')
-            .attr('dominant-baseline', 'central')
-            .attr('y', (d) => d.y - d.r - 15)
-            .attr('x', (d) => d.x)
+            .join(
+                (enter) =>
+                    enter
+                        .append('text')
+                        .classed('text', true)
+                        .text((d) => d.data.name)
+                        .attr('font-size', 16)
+                        .attr('pointer-events', 'none')
+                        .attr('opacity', 0)
+                        .attr('text-anchor', 'middle')
+                        .attr('dominant-baseline', 'central')
+                        .attr('y', (d) => d.y - d.r - 15)
+                        .attr('x', (d) => d.x)
+                        .call((node) =>
+                            node
+                                .transition()
+                                .duration(transitionDuration)
+                                .attr('opacity', (d) => (d.r > 30 ? 1 : 0))
+                        ),
+                (update) =>
+                    update.call((node) =>
+                        node
+                            .transition()
+                            .duration(transitionDuration)
+                            .attr('y', (d) => d.y - d.r - 15)
+                            .attr('x', (d) => d.x)
+                            .attr('opacity', (d) => (d.r > 30 ? 1 : 0))
+                    ),
+                (exit) =>
+                    exit.call((node) =>
+                        node
+                            .transition()
+                            .duration(transitionDuration / 2)
+                            .attr('opacity', 0)
+                            .remove()
+                    )
+            )
     }
 
     function buildNodeTree() {
@@ -225,7 +223,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
     }
 
     function buildTree() {
-        resetPosition(0)
+        resetPosition(childNodes.current ? transitionDuration : 0)
         buildNodeTree()
         createParentCircles()
         createParentCircleText()
@@ -243,3 +241,46 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
 }
 
 export default CirclePacking
+
+// function hasMatchingAncestor(circle, selectedCircle) {
+//     // recursively check parents for selectedCircle
+//     if (!circle.parent) return false
+//     if (circle.parent.data.id === selectedCircle.data.id) return true
+//     return hasMatchingAncestor(circle.parent, selectedCircle)
+// }
+
+// // zoom to new circle
+// const svg = d3.select('#circle-packing-svg')
+// const svgWidth = parseInt(svg.style('width'), 10)
+// const svgHeight = parseInt(svg.style('height'), 10)
+// const scale = (circleRadius.current * 2) / (circle.r * 2)
+// const x = svgWidth / 2 / scale - circle.x
+// const y = svgHeight / 2 / scale - circle.y + 50
+// // transition circle stroke width
+// d3.selectAll('.circle')
+//     .transition('circle-transition')
+//     .duration(transitionDuration)
+//     .attr('stroke-width', 1 / scale)
+// // transition font size
+// d3.selectAll('.text')
+//     .transition('text-transition')
+//     .duration(transitionDuration)
+//     .attr('font-size', 16 / scale)
+//     .attr('y', (da) => da.y - da.r - 15 / scale)
+// // fade out all external nodes
+// d3.selectAll('.circle,.text')
+//     .filter((d) => {
+//         if (d.depth <= circle.depth && d.data.id !== circle.data.id) return true
+//         return d.data.id !== circle.data.id && !hasMatchingAncestor(d, circle)
+//     })
+//     .transition('fade-transition')
+//     .duration(transitionDuration)
+//     .attr('opacity', 0.25)
+// // // zoom master group
+// svg.transition()
+//     .duration(transitionDuration)
+//     .call(zoom.transform, d3.zoomIdentity.scale(scale).translate(x, y))
+//     .on('end', () => {
+//         // buildTree(spaceMapData)
+//         // transitioning.current = false
+//     })
