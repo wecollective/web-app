@@ -11,8 +11,8 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
     const { spaceData, setSpaceMapData, getSpaceMapChildren } = useContext(SpaceContext)
     const history = useHistory()
     const { sortBy, sortOrder } = params
-    const mainCircleCize = 700
     const transitionDuration = 1000
+    const circleRadius = useRef(0)
     const transitioning = useRef(false)
     const parentNodes = useRef<any>(null)
     const childNodes = useRef<any>(null)
@@ -31,8 +31,8 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
         const svg = d3.select('#circle-packing-svg')
         const svgWidth = parseInt(svg.style('width'), 10)
         const svgHeight = parseInt(svg.style('height'), 10)
-        const x = svgWidth / 2 - mainCircleCize / 2
-        const y = svgHeight / 2 - mainCircleCize / 2
+        const x = svgWidth / 2 - circleRadius.current
+        const y = svgHeight / 2 - circleRadius.current + 50
         svg.transition().duration(duration).call(zoom.transform, d3.zoomIdentity.translate(x, y))
     }
 
@@ -45,12 +45,13 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             .attr('height', '100%')
             .style('display', 'block')
             .on('click', () => resetPosition(transitionDuration))
+        circleRadius.current = parseInt(svg.style('height'), 10) / 2 - 80
         // const yOffset = spaceData.DirectParentSpaces.length ? 180 : 80
         const masterGroup = svg.append('g').attr('id', 'master-group')
         masterGroup
             .append('g')
             .attr('id', 'parent-circle-group')
-            .attr('transform', `translate(${mainCircleCize / 2},-100)`)
+            .attr('transform', `translate(${circleRadius.current},-200)`)
         masterGroup.append('g').attr('id', 'circle-group')
         // .attr('transform', `translate(0,${yOffset})`)
         svg.call(zoom)
@@ -73,9 +74,9 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
         const svg = d3.select('#circle-packing-svg')
         const svgWidth = parseInt(svg.style('width'), 10)
         const svgHeight = parseInt(svg.style('height'), 10)
-        const scale = mainCircleCize / (circle.r * 2)
+        const scale = (circleRadius.current * 2) / (circle.r * 2)
         const x = svgWidth / 2 / scale - circle.x
-        const y = svgHeight / 2 / scale - circle.y
+        const y = svgHeight / 2 / scale - circle.y + 50
         // transition circle stroke width
         d3.selectAll('.circle')
             .transition('circle-transition')
@@ -112,7 +113,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             .data(parentNodes.current)
             .join('circle')
             .classed('parent-circle', true)
-            .attr('r', 30)
+            .attr('r', 25)
             .attr('stroke', '#000')
             .attr('stroke-width', 1)
             .attr('cursor', 'pointer')
@@ -136,7 +137,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             .attr('opacity', 1)
             .attr('text-anchor', 'middle')
             .attr('dominant-baseline', 'central')
-            .attr('y', (d) => d.y - 45)
+            .attr('y', (d) => d.y - 40)
             .attr('x', (d) => d.x)
     }
 
@@ -214,7 +215,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             .sort((a, b) => b.totalLikes - a.totalLikes)
         const newChildNodes = d3
             .pack()
-            .size([mainCircleCize, mainCircleCize])
+            .size([circleRadius.current * 2, circleRadius.current * 2])
             .padding(30)(hierarchy)
             .descendants()
         // todo: update UUIDs
