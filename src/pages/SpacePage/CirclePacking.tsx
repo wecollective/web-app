@@ -2,6 +2,7 @@
 /* eslint-disable react/no-this-in-sfc */
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
+import colors from '@styles/Colors.module.scss'
 import styles from '@styles/pages/SpacePage/CirclePacking.module.scss'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef } from 'react'
@@ -22,7 +23,8 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
         d3.select('#master-group').attr('transform', d3.event.transform)
         // scale circle and text attributes
         const scale = d3.event.transform.k
-        d3.selectAll('.circle,.circle-background').attr('stroke-width', 1 / scale)
+        d3.selectAll('.circle').attr('stroke-width', 1 / scale)
+        d3.selectAll('.circle-image').attr('r', (d) => d.r - 2 / scale)
         d3.selectAll('.text')
             .attr('font-size', 16 / scale)
             .attr('y', (d) => d.y - d.r - 15 / scale)
@@ -51,6 +53,9 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             .transition()
             .duration(duration)
             .call(zoom.transform, d3.zoomIdentity.translate(x, y + yOffset))
+            .on('end', () => {
+                transitioning.current = false
+            })
     }
 
     function buildCanvas() {
@@ -79,55 +84,92 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
 
     function findFill(d) {
         // check if image already exists in defs
-        // const existingImage = d3.select(`#image-${d.data.uuid}`)
-        // const circle = d3.select(`#${type}-image-circle-${d.data.uuid}`)
-        // if (existingImage.node()) {
-        //     // check image size matches circle start size
-        //     const matchingSizes = existingImage.attr('height') / 2 === +circle.attr('r')
-        //     // only include duration if circle present and matching sizes
-        //     existingImage
-        //         .transition()
-        //         .duration(circle.node() && matchingSizes ? duration : 0)
-        //         .attr('height', findRadius(d) * 2)
-        //         .attr('width', findRadius(d) * 2)
-        // } else {
-        // create new pattern
-        if (d.r < 20) return colorScale(d.depth + 1)
-        const pattern = d3
-            .select('#imgdefs')
-            .append('pattern')
-            .attr('id', `pattern-${d.data.id}`)
-            .attr('height', 1)
-            .attr('width', 1)
-        // append new image to pattern
-        pattern
-            .append('image')
-            .attr('id', `image-${d.data.uuid}`)
-            .attr('height', d.r * 2)
-            .attr('width', d.r * 2)
-            .attr('preserveAspectRatio', 'xMidYMid slice')
-            .attr('xlink:href', () => {
-                const expanderIcon = `${config.publicAssets}/icons/plus-icon.jpg`
-                const defaultImage = `${config.publicAssets}/icons/default-space-flag.jpg`
-                return d.data.expander ? expanderIcon : d.data.flagImagePath || defaultImage
-            })
-            .on('error', () => {
-                // try image proxy
-                const newImage = d3.select(`#image-${d.data.uuid}`)
-                const proxyURL = '//images.weserv.nl/'
-                if (!newImage.attr('xlink:href').includes(proxyURL)) {
-                    newImage.attr('xlink:href', `${proxyURL}?url=${d.data.flagImagePath}`)
-                } else {
-                    // fall back on placeholder
-                    const placeholderURL = 'images/placeholders/broken-image.jpg'
-                    newImage.attr('xlink:href', `${config.publicAssets}/${placeholderURL}`)
-                }
-            })
-        // }
+        const existingImage = d3.select(`#image-${d.data.id}`)
+        const circle = d3.select(`#circle-image-${d.data.id}`)
+        if (existingImage.node()) {
+            // check image size matches circle start size
+            const matchingSizes = existingImage.attr('height') / 2 === +circle.attr('r')
+            // only include duration if circle present and matching sizes
+            existingImage
+                .transition()
+                .duration(circle.node() && matchingSizes ? transitionDuration : 0)
+                .attr('height', d.r * 2)
+                .attr('width', d.r * 2)
+        } else {
+            // create new pattern
+            const pattern = d3
+                .select('#imgdefs')
+                .append('pattern')
+                .attr('id', `pattern-${d.data.id}`)
+                .attr('height', 1)
+                .attr('width', 1)
+            // append new image to pattern
+            pattern
+                .append('image')
+                .attr('id', `image-${d.data.id}`)
+                .attr('height', d.r * 2)
+                .attr('width', d.r * 2)
+                .attr('preserveAspectRatio', 'xMidYMid slice')
+                .attr('xlink:href', () => {
+                    const defaultImage = `${config.publicAssets}/icons/default-space-flag.jpg`
+                    return d.data.flagImagePath || defaultImage
+                    // const expanderIcon = `${config.publicAssets}/icons/plus-icon.jpg`
+                    // const defaultImage = `${config.publicAssets}/icons/default-space-flag.jpg`
+                    // return d.data.expander ? expanderIcon : d.data.flagImagePath || defaultImage
+                })
+                .on('error', () => {
+                    // try image proxy
+                    const newImage = d3.select(`#image-${d.data.id}`)
+                    const proxyURL = '//images.weserv.nl/'
+                    if (!newImage.attr('xlink:href').includes(proxyURL)) {
+                        newImage.attr('xlink:href', `${proxyURL}?url=${d.data.flagImagePath}`)
+                    } else {
+                        // fall back on placeholder
+                        const placeholderURL = 'images/placeholders/broken-image.jpg'
+                        newImage.attr('xlink:href', `${config.publicAssets}/${placeholderURL}`)
+                    }
+                })
+        }
         return `url(#pattern-${d.data.id})`
     }
 
-    function onCircleClick(circle) {
+    function circleMouseOver(d) {
+        d3.event.stopPropagation()
+        if (!transitioning.current) {
+            const circle = d3.select(`#circle-${d.data.id}`)
+            const image = d3.select(`#circle-image-${d.data.id}`)
+            const zoomScale = d3.zoomTransform(d3.select('#master-group').node()).k
+            circle
+                .transition()
+                .duration(transitionDuration / 3)
+                .attr('stroke-width', 5 / zoomScale)
+                .attr('stroke', 'white')
+            image
+                .transition()
+                .duration(transitionDuration / 2)
+                .attr('opacity', 1)
+        }
+    }
+
+    function circleMouseOut(d) {
+        d3.event.stopPropagation()
+        if (!transitioning.current) {
+            const circle = d3.select(`#circle-${d.data.id}`)
+            const image = d3.select(`#circle-image-${d.data.id}`)
+            const zoomScale = d3.zoomTransform(d3.select('#master-group').node()).k
+            circle
+                .transition()
+                .duration(transitionDuration / 3)
+                .attr('stroke-width', 1 / zoomScale)
+                .attr('stroke', colors.cpGrey)
+            image
+                .transition()
+                .duration(transitionDuration / 2)
+                .attr('opacity', 0)
+        }
+    }
+
+    function circleMouseDown(circle) {
         d3.event.stopPropagation()
         transitioning.current = true
         // if main circle, reset position
@@ -148,7 +190,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             .attr('cursor', 'pointer')
             .attr('transform', (d) => `translate(${d.x},${d.y})`)
             .attr('fill', (d) => colorScale(d.depth + 1))
-            .on('click', (d) => onCircleClick(d))
+            .on('mousedown', (d) => circleMouseDown(d))
             .transition()
             .duration(transitionDuration)
             .attr('opacity', 1)
@@ -170,81 +212,83 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             .attr('x', (d) => d.x)
     }
 
-    function createCircleBackgrounds() {
-        d3.select('#circle-group')
-            .selectAll('.circle-background')
-            .data(childNodes.current, (d) => d.data.id)
-            .join(
-                (enter) =>
-                    enter
-                        .append('circle')
-                        .classed('circle-background', true)
-                        .attr('r', (d) => d.r)
-                        .attr('stroke', '#000')
-                        .attr('stroke-width', 1)
-                        .attr('pointer-events', 'none')
-                        .attr('transform', (d) => `translate(${d.x},${d.y})`)
-                        .attr('opacity', 0)
-                        .attr('fill', (d) => colorScale(d.depth + 1))
-                        .call((node) =>
-                            node.transition().duration(transitionDuration).attr('opacity', 0.3)
-                        ),
-                (update) =>
-                    update.call((node) =>
-                        node
-                            .transition()
-                            .duration(transitionDuration)
-                            .attr('r', (d) => d.r)
-                            .attr('fill', (d) => colorScale(d.depth + 1))
-                            .attr('transform', (d) => `translate(${d.x},${d.y})`)
-                    ),
-                (exit) =>
-                    exit.call((node) =>
-                        node
-                            .transition()
-                            .duration(transitionDuration / 2)
-                            .attr('opacity', 0)
-                            .remove()
-                    )
-            )
-    }
-
     function createCircles() {
         d3.select('#circle-group')
-            .selectAll('.circle')
+            .selectAll('.circle-group')
             .data(childNodes.current, (d) => d.data.id)
             .join(
-                (enter) =>
-                    enter
+                (enter) => {
+                    const group = enter
+                        .append('g')
+                        .attr('id', (d) => `circle-group-${d.data.id}`)
+                        .classed('circle-group', true)
+                        .attr('transform', (d) => `translate(${d.x},${d.y})`)
+                    // add circle
+                    group
                         .append('circle')
+                        .attr('id', (d) => `circle-${d.data.id}`)
                         .classed('circle', true)
                         .attr('r', (d) => d.r)
-                        .attr('stroke', '#000')
+                        .attr('stroke', colors.cpGrey)
                         .attr('stroke-width', 1)
+                        .attr('opacity', 0)
                         .attr('cursor', 'pointer')
-                        .attr('transform', (d) => `translate(${d.x},${d.y})`)
+                        .attr('fill', (d) => colorScale(d.depth + 1))
+                        .on('mouseover', (d) => circleMouseOver(d))
+                        .on('mouseout', (d) => circleMouseOut(d))
+                        .on('click', (d) => circleMouseDown(d))
+                        .call((circle) =>
+                            circle.transition().duration(transitionDuration).attr('opacity', 1)
+                        )
+                    // add image
+                    group
+                        .append('circle')
+                        .attr('id', (d) => `circle-image-${d.data.id}`)
+                        .classed('circle-image', true)
+                        .attr('r', (d) => d.r - 2)
+                        // .attr('stroke', colors.cpGrey)
+                        // .attr('stroke-width', 1)
+                        .attr('pointer-events', 'none')
+                        .attr('opacity', 0)
                         .attr('fill', (d) => findFill(d))
-                        .on('click', (d) => onCircleClick(d))
-                        .call((node) =>
-                            node.transition().duration(transitionDuration).attr('opacity', 1)
-                        ),
-                (update) =>
-                    update.call((node) =>
-                        node
-                            .transition()
-                            .duration(transitionDuration)
-                            .attr('r', (d) => d.r)
-                            .attr('fill', (d) => findFill(d))
-                            .attr('transform', (d) => `translate(${d.x},${d.y})`)
-                    ),
-                (exit) =>
-                    exit.call((node) =>
-                        node
-                            .transition()
-                            .duration(transitionDuration / 2)
-                            .attr('opacity', 0)
-                            .remove()
-                    )
+
+                    return group
+                },
+                (update) => {
+                    update
+                        .transition()
+                        .duration(transitionDuration)
+                        .attr('transform', (d) => `translate(${d.x},${d.y})`)
+
+                    update
+                        .select('.circle')
+                        .on('mouseover', (d) => circleMouseOver(d))
+                        .on('mouseout', (d) => circleMouseOut(d))
+                        .on('click', (d) => circleMouseDown(d))
+                        .transition()
+                        .duration(transitionDuration)
+                        .attr('r', (d) => d.r)
+                        .attr('fill', (d) => colorScale(d.depth + 1))
+
+                    update
+                        .select('.circle-image')
+                        .transition()
+                        .duration(transitionDuration)
+                        .attr('r', (d) => d.r)
+                        .attr('fill', (d) => findFill(d))
+
+                    return update
+                },
+                (exit) => {
+                    exit.transition()
+                        .duration(transitionDuration / 2)
+                        .remove()
+                    exit.select('.circle')
+                        .transition()
+                        .duration(transitionDuration / 2)
+                        .attr('opacity', 0)
+                    return exit
+                }
             )
     }
 
@@ -270,7 +314,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
                             node
                                 .transition()
                                 .duration(transitionDuration)
-                                .attr('opacity', (d) => (d.r > 30 ? 1 : 0))
+                                .attr('opacity', (d) => (d.r > 30 && d.depth < 2 ? 1 : 0))
                         ),
                 (update) =>
                     update.call((node) =>
@@ -280,7 +324,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
                             .attr('font-weight', (d) => (d.data.id === spaceMapData.id ? 800 : 400))
                             .attr('y', (d) => d.y - d.r - 15)
                             .attr('x', (d) => d.x)
-                            .attr('opacity', (d) => (d.r > 30 ? 1 : 0))
+                            .attr('opacity', (d) => (d.r > 30 && d.depth < 2 ? 1 : 0))
                     ),
                 (exit) =>
                     exit.call((node) =>
@@ -324,8 +368,11 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
         createParentCircles()
         createParentCircleText()
         createCircles()
-        createCircleBackgrounds()
         createCircleText()
+        // mark transition complete after duration
+        setTimeout(() => {
+            transitioning.current = false
+        }, transitionDuration)
     }
 
     useEffect(() => buildCanvas(), [])
