@@ -25,8 +25,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
         d3.select('#master-group').attr('transform', d3.event.transform)
         // scale circle and text attributes
         const scale = d3.event.transform.k
-        d3.selectAll('.circle').attr('stroke-width', 1 / scale)
-        d3.selectAll('.circle-image').attr('r', (d) => d.r - 2 / scale)
+        d3.selectAll('.circle,.circle-image').attr('stroke-width', 1 / scale)
         d3.selectAll('.text')
             .attr('font-size', 16 / scale)
             .attr('y', (d) => d.y - d.r - 15 / scale)
@@ -149,6 +148,8 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             image
                 .transition()
                 .duration(transitionDuration / 2)
+                .attr('stroke-width', 5 / zoomScale)
+                .attr('stroke', 'white')
                 .attr('opacity', 1)
         }
     }
@@ -167,6 +168,8 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             image
                 .transition()
                 .duration(transitionDuration / 2)
+                .attr('stroke-width', 1 / zoomScale)
+                .attr('stroke', colors.cpGrey)
                 .attr('opacity', 0)
         }
     }
@@ -250,9 +253,9 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
                         .append('circle')
                         .attr('id', (d) => `circle-image-${d.data.uuid}`)
                         .classed('circle-image', true)
-                        .attr('r', (d) => d.r - 2)
-                        // .attr('stroke', colors.cpGrey)
-                        // .attr('stroke-width', 1)
+                        .attr('r', (d) => d.r)
+                        .attr('stroke', colors.cpGrey)
+                        .attr('stroke-width', 1)
                         .attr('pointer-events', 'none')
                         .attr('opacity', 0)
                         .attr('fill', (d) => findFill(d))
