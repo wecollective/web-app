@@ -83,7 +83,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
         svg.call(zoom)
     }
 
-    function findFill(d) {
+    function findFill(d, radius) {
         // check if image already exists in defs
         const existingImage = d3.select(`#image-${d.data.uuid}`)
         const circle = d3.select(`#circle-image-${d.data.uuid}`)
@@ -94,8 +94,8 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             existingImage
                 .transition()
                 .duration(circle.node() && matchingSizes ? transitionDuration : 0)
-                .attr('height', d.r * 2)
-                .attr('width', d.r * 2)
+                .attr('height', radius * 2)
+                .attr('width', radius * 2)
         } else {
             // create new pattern
             const pattern = d3
@@ -108,8 +108,8 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             pattern
                 .append('image')
                 .attr('id', `image-${d.data.uuid}`)
-                .attr('height', d.r * 2)
-                .attr('width', d.r * 2)
+                .attr('height', radius * 2)
+                .attr('width', radius * 2)
                 .attr('preserveAspectRatio', 'xMidYMid slice')
                 .attr('xlink:href', () => {
                     const defaultImage = `${config.publicAssets}/icons/default-space-flag.jpg`
@@ -147,7 +147,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
                 .attr('stroke', 'white')
             image
                 .transition()
-                .duration(transitionDuration / 2)
+                .duration(transitionDuration / 3)
                 .attr('stroke-width', 5 / zoomScale)
                 .attr('stroke', 'white')
                 .attr('opacity', 1)
@@ -191,13 +191,14 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             .selectAll('.parent-circle')
             .data(parentNodes.current)
             .join('circle')
+            .attr('id', (d) => `circle-image-${d.data.uuid}`)
             .classed('parent-circle', true)
             .attr('r', 25)
-            .attr('stroke', '#000')
+            .attr('stroke', colors.cpGrey)
             .attr('stroke-width', 1)
             .attr('cursor', 'pointer')
             .attr('transform', (d) => `translate(${d.x},${d.y})`)
-            .attr('fill', (d) => colorScale(d.depth + 1))
+            .attr('fill', (d) => findFill(d, 25))
             .on('mousedown', (d) => circleMouseDown(d))
             .transition()
             .duration(transitionDuration)
@@ -258,7 +259,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
                         .attr('stroke-width', 1)
                         .attr('pointer-events', 'none')
                         .attr('opacity', 0)
-                        .attr('fill', (d) => findFill(d))
+                        .attr('fill', (d) => findFill(d, d.r))
 
                     return group
                 },
@@ -283,7 +284,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
                         .transition()
                         .duration(transitionDuration)
                         .attr('r', (d) => d.r)
-                        .attr('fill', (d) => findFill(d))
+                        .attr('fill', (d) => findFill(d, d.r))
 
                     return update
                 },
