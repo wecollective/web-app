@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable react/no-this-in-sfc */
 import { SpaceContext } from '@contexts/SpaceContext'
@@ -5,12 +6,13 @@ import config from '@src/Config'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/pages/SpacePage/CirclePacking.module.scss'
 import * as d3 from 'd3'
-import React, { useContext, useEffect, useRef } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 
 const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element => {
     const { spaceMapData, params } = props
     const { spaceData, setSpaceMapData, getSpaceMapChildren } = useContext(SpaceContext)
+    const [clickedSpaceUUID, setClickedSpaceUUID] = useState('')
     const history = useHistory()
     const { sortBy, sortOrder } = params
     const transitionDuration = 1000
@@ -84,8 +86,8 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
 
     function findFill(d) {
         // check if image already exists in defs
-        const existingImage = d3.select(`#image-${d.data.id}`)
-        const circle = d3.select(`#circle-image-${d.data.id}`)
+        const existingImage = d3.select(`#image-${d.data.uuid}`)
+        const circle = d3.select(`#circle-image-${d.data.uuid}`)
         if (existingImage.node()) {
             // check image size matches circle start size
             const matchingSizes = existingImage.attr('height') / 2 === +circle.attr('r')
@@ -100,13 +102,13 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             const pattern = d3
                 .select('#imgdefs')
                 .append('pattern')
-                .attr('id', `pattern-${d.data.id}`)
+                .attr('id', `pattern-${d.data.uuid}`)
                 .attr('height', 1)
                 .attr('width', 1)
             // append new image to pattern
             pattern
                 .append('image')
-                .attr('id', `image-${d.data.id}`)
+                .attr('id', `image-${d.data.uuid}`)
                 .attr('height', d.r * 2)
                 .attr('width', d.r * 2)
                 .attr('preserveAspectRatio', 'xMidYMid slice')
@@ -119,7 +121,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
                 })
                 .on('error', () => {
                     // try image proxy
-                    const newImage = d3.select(`#image-${d.data.id}`)
+                    const newImage = d3.select(`#image-${d.data.uuid}`)
                     const proxyURL = '//images.weserv.nl/'
                     if (!newImage.attr('xlink:href').includes(proxyURL)) {
                         newImage.attr('xlink:href', `${proxyURL}?url=${d.data.flagImagePath}`)
@@ -130,14 +132,14 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
                     }
                 })
         }
-        return `url(#pattern-${d.data.id})`
+        return `url(#pattern-${d.data.uuid})`
     }
 
     function circleMouseOver(d) {
         d3.event.stopPropagation()
         if (!transitioning.current) {
-            const circle = d3.select(`#circle-${d.data.id}`)
-            const image = d3.select(`#circle-image-${d.data.id}`)
+            const circle = d3.select(`#circle-${d.data.uuid}`)
+            const image = d3.select(`#circle-image-${d.data.uuid}`)
             const zoomScale = d3.zoomTransform(d3.select('#master-group').node()).k
             circle
                 .transition()
@@ -154,8 +156,8 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
     function circleMouseOut(d) {
         d3.event.stopPropagation()
         if (!transitioning.current) {
-            const circle = d3.select(`#circle-${d.data.id}`)
-            const image = d3.select(`#circle-image-${d.data.id}`)
+            const circle = d3.select(`#circle-${d.data.uuid}`)
+            const image = d3.select(`#circle-image-${d.data.uuid}`)
             const zoomScale = d3.zoomTransform(d3.select('#master-group').node()).k
             circle
                 .transition()
@@ -175,7 +177,10 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
         // if main circle, reset position
         if (circle.data.id === childNodes.current[0].data.id) resetPosition(transitionDuration)
         // else, navigate to new space
-        else history.push(`/s/${circle.data.handle}/spaces`)
+        else {
+            setClickedSpaceUUID(circle.data.uuid)
+            history.push(`/s/${circle.data.handle}/spaces`)
+        }
     }
 
     function createParentCircles() {
@@ -215,18 +220,18 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
     function createCircles() {
         d3.select('#circle-group')
             .selectAll('.circle-group')
-            .data(childNodes.current, (d) => d.data.id)
+            .data(childNodes.current, (d) => d.data.uuid)
             .join(
                 (enter) => {
                     const group = enter
                         .append('g')
-                        .attr('id', (d) => `circle-group-${d.data.id}`)
+                        .attr('id', (d) => `circle-group-${d.data.uuid}`)
                         .classed('circle-group', true)
                         .attr('transform', (d) => `translate(${d.x},${d.y})`)
                     // add circle
                     group
                         .append('circle')
-                        .attr('id', (d) => `circle-${d.data.id}`)
+                        .attr('id', (d) => `circle-${d.data.uuid}`)
                         .classed('circle', true)
                         .attr('r', (d) => d.r)
                         .attr('stroke', colors.cpGrey)
@@ -243,7 +248,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
                     // add image
                     group
                         .append('circle')
-                        .attr('id', (d) => `circle-image-${d.data.id}`)
+                        .attr('id', (d) => `circle-image-${d.data.uuid}`)
                         .classed('circle-image', true)
                         .attr('r', (d) => d.r - 2)
                         // .attr('stroke', colors.cpGrey)
@@ -295,7 +300,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
     function createCircleText() {
         d3.select('#circle-group')
             .selectAll('.text')
-            .data(childNodes.current, (d) => d.data.id)
+            .data(childNodes.current, (d) => d.data.uuid)
             .join(
                 (enter) =>
                     enter
@@ -337,6 +342,28 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             )
     }
 
+    function findSpaceById(tree: any, id: number) {
+        // recursive function, traverses the node tree to find a space using its space id
+        if (tree.data.id === id) return tree
+        if (tree.children) {
+            for (let i = 0; i < tree.children.length; i += 1) {
+                const match = findSpaceById(tree.children[i], id)
+                if (match) return match
+            }
+        }
+        return null
+    }
+
+    function recursivelyAddUUIDS(oldSpace, newSpace) {
+        newSpace.data.uuid = oldSpace.data.uuid
+        if (newSpace.children && oldSpace.children) {
+            newSpace.children.forEach((child) => {
+                const match = oldSpace.children.find((c) => c.data.id === child.data.id)
+                if (match) recursivelyAddUUIDS(match, child)
+            })
+        }
+    }
+
     function buildNodeTree() {
         // build parent nodes
         const parents = d3.hierarchy(spaceMapData, (d) => d.DirectParentSpaces)
@@ -356,8 +383,26 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             .size([circleRadius.current * 2, circleRadius.current * 2])
             .padding(30)(hierarchy)
             .descendants()
-        // todo: update UUIDs
-        // todo: zoom to new space
+        // update UUIDs for transitions
+        const oldSpace = childNodes.current && childNodes.current[0]
+        if (oldSpace) {
+            const newSpace = newChildNodes[0]
+            if (oldSpace.data.id === newSpace.data.id) {
+                recursivelyAddUUIDS(oldSpace, newSpace)
+            } else {
+                // if navigation from click, use uuid to ensure the correct space is chosen, otherwise just the space id
+                const id = clickedSpaceUUID || newSpace.data.id
+                const idType = clickedSpaceUUID ? 'uuid' : 'id'
+                const oldChild = childNodes.current.find((s) => s.data[idType] === id)
+                if (oldChild) recursivelyAddUUIDS(oldChild, newSpace)
+                else {
+                    // if new space neither old parent or child, search for matching spaces by id
+                    const matchingChild = findSpaceById(newSpace, oldSpace.data.id)
+                    if (matchingChild) recursivelyAddUUIDS(oldSpace, matchingChild)
+                }
+            }
+        }
+        setClickedSpaceUUID('')
         parentNodes.current = newParentNodes
         childNodes.current = newChildNodes
     }
