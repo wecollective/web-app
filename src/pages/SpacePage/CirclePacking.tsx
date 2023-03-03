@@ -17,7 +17,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
     const { sortBy, sortOrder } = params
     const transitionDuration = 1000
     const circleRadius = useRef(0)
-    const transitioning = useRef(false)
+    const transitioning = useRef(true)
     const parentNodes = useRef<any>(null)
     const childNodes = useRef<any>(null)
 
@@ -141,16 +141,23 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             const image = d3.select(`#circle-image-${d.data.uuid}`)
             const zoomScale = d3.zoomTransform(d3.select('#master-group').node()).k
             circle
-                .transition()
+                .transition('circle-mouse-over')
                 .duration(transitionDuration / 3)
                 .attr('stroke-width', 5 / zoomScale)
-                .attr('stroke', 'white')
+                .attr('stroke', colors.cpBlue)
             image
-                .transition()
+                .transition('image-mouse-over')
                 .duration(transitionDuration / 3)
                 .attr('stroke-width', 5 / zoomScale)
-                .attr('stroke', 'white')
+                .attr('stroke', colors.cpBlue)
                 .attr('opacity', 1)
+            // highlight other circles
+            d3.selectAll(`.circle-${d.data.id},.circle-image-${d.data.id}`)
+                .filter((c) => c.data.uuid !== d.data.uuid)
+                .transition('circles-mouse-over')
+                .duration(transitionDuration / 3)
+                .attr('stroke', colors.cpPurple)
+                .attr('stroke-width', 5 / zoomScale)
         }
     }
 
@@ -161,16 +168,22 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             const image = d3.select(`#circle-image-${d.data.uuid}`)
             const zoomScale = d3.zoomTransform(d3.select('#master-group').node()).k
             circle
-                .transition()
+                .transition('circle-mouse-out')
                 .duration(transitionDuration / 3)
                 .attr('stroke-width', 1 / zoomScale)
                 .attr('stroke', colors.cpGrey)
             image
-                .transition()
+                .transition('image-mouse-out')
                 .duration(transitionDuration / 2)
                 .attr('stroke-width', 1 / zoomScale)
                 .attr('stroke', colors.cpGrey)
                 .attr('opacity', 0)
+            // fade out all highlighted circles
+            d3.selectAll(`.circle-${d.data.id},.circle-image-${d.data.id}`)
+                .transition('circles-mouse-out')
+                .duration(transitionDuration / 3)
+                .attr('stroke', colors.cpGrey)
+                .attr('stroke-width', 1 / zoomScale)
         }
     }
 
@@ -227,6 +240,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             .data(childNodes.current, (d) => d.data.uuid)
             .join(
                 (enter) => {
+                    // create group
                     const group = enter
                         .append('g')
                         .attr('id', (d) => `circle-group-${d.data.uuid}`)
@@ -236,7 +250,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
                     group
                         .append('circle')
                         .attr('id', (d) => `circle-${d.data.uuid}`)
-                        .classed('circle', true)
+                        .attr('class', (d) => `circle circle-${d.data.id}`)
                         .attr('r', (d) => d.r)
                         .attr('stroke', colors.cpGrey)
                         .attr('stroke-width', 1)
@@ -247,13 +261,16 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
                         .on('mouseout', (d) => circleMouseOut(d))
                         .on('click', (d) => circleMouseDown(d))
                         .call((circle) =>
-                            circle.transition().duration(transitionDuration).attr('opacity', 1)
+                            circle
+                                .transition('circle-enter')
+                                .duration(transitionDuration)
+                                .attr('opacity', 1)
                         )
                     // add image
                     group
                         .append('circle')
                         .attr('id', (d) => `circle-image-${d.data.uuid}`)
-                        .classed('circle-image', true)
+                        .attr('class', (d) => `circle-image circle-image-${d.data.id}`)
                         .attr('r', (d) => d.r)
                         .attr('stroke', colors.cpGrey)
                         .attr('stroke-width', 1)
@@ -265,7 +282,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
                 },
                 (update) => {
                     update
-                        .transition()
+                        .transition('group-update')
                         .duration(transitionDuration)
                         .attr('transform', (d) => `translate(${d.x},${d.y})`)
 
@@ -274,14 +291,14 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
                         .on('mouseover', (d) => circleMouseOver(d))
                         .on('mouseout', (d) => circleMouseOut(d))
                         .on('click', (d) => circleMouseDown(d))
-                        .transition()
+                        .transition('circle-update')
                         .duration(transitionDuration)
                         .attr('r', (d) => d.r)
                         .attr('fill', (d) => colorScale(d.depth + 1))
 
                     update
                         .select('.circle-image')
-                        .transition()
+                        .transition('circle-image-update')
                         .duration(transitionDuration)
                         .attr('r', (d) => d.r)
                         .attr('fill', (d) => findFill(d, d.r))
@@ -289,11 +306,11 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
                     return update
                 },
                 (exit) => {
-                    exit.transition()
+                    exit.transition('group-exit')
                         .duration(transitionDuration / 2)
                         .remove()
                     exit.select('.circle')
-                        .transition()
+                        .transition('circle-exit')
                         .duration(transitionDuration / 2)
                         .attr('opacity', 0)
                     return exit
