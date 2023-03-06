@@ -2,21 +2,31 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable react/no-this-in-sfc */
+import Column from '@components/Column'
+import DraftText from '@components/draft-js/DraftText'
+import Row from '@components/Row'
+import StatButton from '@components/StatButton'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/pages/SpacePage/CirclePacking.module.scss'
+import { CommentIcon, LockIcon, PostIcon, UsersIcon } from '@svgs/all'
+import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 
 const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element => {
     const { spaceMapData, params } = props
+    const { sortBy, sortOrder } = params
     const { spaceData, setSpaceMapData, getSpaceMapChildren } = useContext(SpaceContext)
     const [clickedSpaceUUID, setClickedSpaceUUID] = useState('')
+    const [showSpaceModal, setShowSpaceModal] = useState(false)
+    const [highlightedSpace, setHighlightedSpace] = useState<any>(null)
+    const [mouseCoordinates, setMouseCoordinates] = useState({ x: 0, y: 0 })
     const history = useHistory()
-    const { sortBy, sortOrder } = params
     const transitionDuration = 1000
+    const maxTextLength = 20
     const circleRadius = useRef(0)
     const transitioning = useRef(true)
     const parentNodes = useRef<any>(null)
@@ -42,6 +52,27 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             })
     })
 
+    function isRoot(circle) {
+        return circle.data.uuid === childNodes.current[0].data.uuid
+    }
+
+    function isHoveredCircle(circle, d) {
+        return circle.data.uuid === d.data.uuid
+    }
+
+    function findCircleText(d) {
+        const { name } = d.data
+        if (name.length < maxTextLength || isRoot(d)) return name
+        return `${name.substring(0, maxTextLength - 3)}...`
+    }
+
+    function getHighlightedSpaceData(space) {
+        axios
+            .get(`${config.apiURL}/space-map-space-data?spaceId=${space.id}`)
+            .then((res) => setHighlightedSpace({ ...space, ...res.data }))
+            .catch((error) => console.log(error))
+    }
+
     function resetPosition(duration) {
         transitioning.current = true
         // calculate center position
@@ -53,36 +84,12 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
         const hasParents =
             spaceMapData.DirectParentSpaces && spaceMapData.DirectParentSpaces.length > 0
         const yOffset = hasParents ? 50 : 0
-        // transition to new position
-        svg.transition('reset-position')
+        // update SVG click function with latest coordinates and transition to new position
+        svg.on('click', () => resetPosition(transitionDuration))
+            .transition('reset-position')
             .duration(duration)
             .call(zoom.transform, d3.zoomIdentity.translate(x, y + yOffset))
             .on('end', () => (transitioning.current = false))
-    }
-
-    function buildCanvas() {
-        const svg = d3
-            .select('#canvas')
-            .append('svg')
-            .attr('id', 'circle-packing-svg')
-            .attr('width', '100%')
-            .attr('height', '100%')
-            .style('display', 'block')
-            .on('click', () => !transitioning.current && resetPosition(transitionDuration))
-        // create defs
-        svg.append('defs').attr('id', 'imgdefs')
-        // set circle radius based on screen height
-        circleRadius.current = parseInt(svg.style('height'), 10) / 2 - 80
-        // create groups
-        const masterGroup = svg.append('g').attr('id', 'master-group')
-        masterGroup
-            .append('g')
-            .attr('id', 'parent-circle-group')
-            .attr('transform', `translate(${circleRadius.current},-215)`)
-        masterGroup.append('g').attr('id', 'circle-groups')
-        masterGroup.append('g').attr('id', 'text-group')
-        // initiate zoom functionality (disable double click)
-        svg.call(zoom).on('dblclick.zoom', null)
     }
 
     function findFill(d, radius) {
@@ -136,14 +143,6 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
         return `url(#pattern-${d.data.uuid})`
     }
 
-    function isRoot(circle) {
-        return circle.data.uuid === childNodes.current[0].data.uuid
-    }
-
-    function isHoveredCircle(circle, d) {
-        return circle.data.uuid === d.data.uuid
-    }
-
     function circleMouseOver(circle) {
         d3.event.stopPropagation()
         if (!transitioning.current) {
@@ -156,6 +155,9 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
                 .attr('stroke', (d) => colors[isHoveredCircle(circle, d) ? 'cpBlue' : 'cpPurple'])
                 .attr('stroke-width', 5 / zoomScale)
                 .attr('opacity', 1)
+            // display space info
+            getHighlightedSpaceData(circle.data)
+            setShowSpaceModal(true)
         }
     }
 
@@ -176,6 +178,9 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
                 .transition('circles-fade-out')
                 .duration(transitionDuration / 3)
                 .attr('opacity', 0)
+            // hide space info
+            setShowSpaceModal(false)
+            setHighlightedSpace(null)
         }
     }
 
@@ -338,13 +343,14 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
                         .append('text')
                         .attr('id', (d) => `circle-text-${d.data.uuid}`)
                         .attr('class', (d) => `circle-text circle-text-${d.data.id}`)
-                        .text((d) => d.data.name)
-                        .attr('font-size', (d) => (isRoot(d) ? 24 : 16))
-                        .attr('font-weight', (d) => (isRoot(d) ? 800 : 400))
+                        .text((d) => findCircleText(d))
                         .attr('pointer-events', 'none')
-                        .attr('opacity', 0)
                         .attr('text-anchor', 'middle')
                         .attr('dominant-baseline', 'central')
+                        .attr('opacity', 0)
+                        .attr('font-size', (d) => (isRoot(d) ? 24 : 16))
+                        .attr('font-weight', (d) => (isRoot(d) ? 800 : 400))
+                        .style('text-shadow', '0 0 3px white')
                         .attr('y', (d) => d.y - d.r - (isRoot(d) ? 25 : 15))
                         .attr('x', (d) => d.x)
                         .call((node) =>
@@ -396,7 +402,38 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
         }
     }
 
-    function buildNodeTree() {
+    function buildCanvas() {
+        const svg = d3
+            .select('#canvas')
+            .append('svg')
+            .attr('id', 'circle-packing-svg')
+            .attr('width', '100%')
+            .attr('height', '100%')
+            .style('display', 'block')
+            .on('click', () => !transitioning.current && resetPosition(transitionDuration))
+            .on('mousemove', () => {
+                // keep track of mouse coordinates for space info modal
+                const { pageX, pageY } = d3.event
+                const { y } = d3.select('#circle-packing-svg').node().getBoundingClientRect()
+                setMouseCoordinates({ x: pageX + 15, y: pageY + y - 456 })
+            })
+        // create defs
+        svg.append('defs').attr('id', 'imgdefs')
+        // set circle radius based on screen height
+        circleRadius.current = parseInt(svg.style('height'), 10) / 2 - 80
+        // create groups
+        const masterGroup = svg.append('g').attr('id', 'master-group')
+        masterGroup
+            .append('g')
+            .attr('id', 'parent-circle-group')
+            .attr('transform', `translate(${circleRadius.current},-210)`)
+        masterGroup.append('g').attr('id', 'circle-groups')
+        masterGroup.append('g').attr('id', 'text-group')
+        // initiate zoom functionality (disable double click)
+        svg.call(zoom).on('dblclick.zoom', null)
+    }
+
+    function buildNodeTrees() {
         // build parent tree nodes
         const parents = d3.hierarchy(spaceMapData, (d) => d.DirectParentSpaces)
         const newParentNodes = d3
@@ -413,7 +450,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
         const newChildNodes = d3
             .pack()
             .size([circleRadius.current * 2, circleRadius.current * 2])
-            .padding(10)(hierarchy)
+            .padding(20)(hierarchy)
             .descendants()
         // update UUIDs for transitions
         const oldSpace = childNodes.current && childNodes.current[0]
@@ -441,7 +478,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
 
     function buildTree() {
         resetPosition(childNodes.current ? transitionDuration : 0)
-        buildNodeTree()
+        buildNodeTrees()
         createParentCircles()
         createParentCircleText()
         createCircles()
@@ -458,7 +495,48 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
         if (spaceMapData.id) buildTree()
     }, [spaceMapData])
 
-    return <div id='canvas' className={styles.canvas} />
+    return (
+        <div id='canvas' className={styles.canvas}>
+            {showSpaceModal && highlightedSpace && (
+                <Column
+                    className={styles.spaceInfoModal}
+                    style={{ top: mouseCoordinates.y, left: mouseCoordinates.x }}
+                >
+                    <div className={styles.pointer} />
+                    <Row centerY className={styles.title}>
+                        {highlightedSpace.privacy === 'private' && <LockIcon />}
+                        <h1>{highlightedSpace.name}</h1>
+                    </Row>
+                    {highlightedSpace.expander ? (
+                        <h2 style={{ marginTop: 5 }}>Click to expand</h2>
+                    ) : (
+                        <>
+                            <h2>s/{highlightedSpace.handle}</h2>
+                            <DraftText
+                                stringifiedDraft={highlightedSpace.description}
+                                className={styles.draft}
+                                markdownStyles={styles.markdown}
+                            />
+                            <Row className={styles.stats}>
+                                <StatButton
+                                    icon={<UsersIcon />}
+                                    text={highlightedSpace.totalFollowers}
+                                />
+                                <StatButton
+                                    icon={<PostIcon />}
+                                    text={highlightedSpace.totalPosts}
+                                />
+                                <StatButton
+                                    icon={<CommentIcon />}
+                                    text={highlightedSpace.totalComments}
+                                />
+                            </Row>
+                        </>
+                    )}
+                </Column>
+            )}
+        </div>
+    )
 }
 
 export default CirclePacking
