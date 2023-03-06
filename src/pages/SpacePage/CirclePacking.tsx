@@ -1,3 +1,4 @@
+/* eslint-disable no-return-assign */
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable react/no-this-in-sfc */
@@ -21,27 +22,29 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
     const parentNodes = useRef<any>(null)
     const childNodes = useRef<any>(null)
 
-    const zoom = d3.zoom().on('zoom', () => {
-        d3.select('#master-group').attr('transform', d3.event.transform)
-        // scale circle and text attributes
-        const scale = d3.event.transform.k
-        d3.selectAll('.circle,.circle-image').attr('stroke-width', 1 / scale)
-        d3.selectAll('.text')
-            .attr('font-size', 16 / scale)
-            .attr('y', (d) => d.y - d.r - 15 / scale)
-            .attr('opacity', (d) => {
-                if (scale > 7) return 1
-                return d.r > 30 / scale ? 1 : 0
-            })
-    })
-
     const colorScale = d3
         .scaleLinear()
         .domain([0, 5])
         .range(['hsl(152,80%,80%)', 'hsl(228,30%,40%)'])
         .interpolate(d3.interpolateHcl)
 
+    const zoom = d3.zoom().on('zoom', () => {
+        d3.select('#master-group').attr('transform', d3.event.transform)
+        // scale circle and text attributes
+        const scale = d3.event.transform.k
+        d3.selectAll('.circle,.circle-image').attr('stroke-width', 1 / scale)
+        d3.selectAll('.circle-text')
+            .attr('font-size', (d) => (isRoot(d) ? 20 : 16) / scale)
+            .attr('y', (d) => d.y - d.r - (isRoot(d) ? 25 : 15) / scale)
+            .attr('opacity', (d) => {
+                if (scale > 7) return 1
+                return d.r > 30 / scale ? 1 : 0
+            })
+    })
+
     function resetPosition(duration) {
+        transitioning.current = true
+        // calculate center position
         const svg = d3.select('#circle-packing-svg')
         const svgWidth = parseInt(svg.style('width'), 10)
         const svgHeight = parseInt(svg.style('height'), 10)
@@ -50,13 +53,11 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
         const hasParents =
             spaceMapData.DirectParentSpaces && spaceMapData.DirectParentSpaces.length > 0
         const yOffset = hasParents ? 50 : 0
-        svg.on('click', () => resetPosition(transitionDuration))
-            .transition()
+        // transition to new position
+        svg.transition('reset-position')
             .duration(duration)
             .call(zoom.transform, d3.zoomIdentity.translate(x, y + yOffset))
-            .on('end', () => {
-                transitioning.current = false
-            })
+            .on('end', () => (transitioning.current = false))
     }
 
     function buildCanvas() {
@@ -67,7 +68,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             .attr('width', '100%')
             .attr('height', '100%')
             .style('display', 'block')
-            .on('click', () => resetPosition(transitionDuration))
+            .on('click', () => !transitioning.current && resetPosition(transitionDuration))
         // create defs
         svg.append('defs').attr('id', 'imgdefs')
         // set circle radius based on screen height
@@ -77,10 +78,11 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
         masterGroup
             .append('g')
             .attr('id', 'parent-circle-group')
-            .attr('transform', `translate(${circleRadius.current},-200)`)
-        masterGroup.append('g').attr('id', 'circle-group')
-        // .attr('transform', `translate(0,${yOffset})`)
-        svg.call(zoom)
+            .attr('transform', `translate(${circleRadius.current},-215)`)
+        masterGroup.append('g').attr('id', 'circle-groups')
+        masterGroup.append('g').attr('id', 'text-group')
+        // initiate zoom functionality (disable double click)
+        svg.call(zoom).on('dblclick.zoom', null)
     }
 
     function findFill(d, radius) {
@@ -134,6 +136,10 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
         return `url(#pattern-${d.data.uuid})`
     }
 
+    function isRoot(circle) {
+        return circle.data.uuid === childNodes.current[0].data.uuid
+    }
+
     function isHoveredCircle(circle, d) {
         return circle.data.uuid === d.data.uuid
     }
@@ -175,14 +181,15 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
 
     function circleClick(circle) {
         d3.event.stopPropagation()
-        circleMouseOut(circle)
-        transitioning.current = true
-        // if main circle, reset position
-        if (circle.data.id === childNodes.current[0].data.id) resetPosition(transitionDuration)
-        // else, navigate to new space
-        else {
-            setClickedSpaceUUID(circle.data.uuid)
-            history.push(`/s/${circle.data.handle}/spaces`)
+        if (!transitioning.current) {
+            circleMouseOut(circle)
+            // if main circle, reset position
+            if (circle.data.id === childNodes.current[0].data.id) resetPosition(transitionDuration)
+            // else, navigate to new space
+            else {
+                setClickedSpaceUUID(circle.data.uuid)
+                history.push(`/s/${circle.data.handle}/spaces`)
+            }
         }
     }
 
@@ -222,7 +229,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
     }
 
     function createCircles() {
-        d3.select('#circle-group')
+        d3.select('#circle-groups')
             .selectAll('.circle-group')
             .data(childNodes.current, (d) => d.data.uuid)
             .join(
@@ -231,7 +238,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
                     const group = enter
                         .append('g')
                         .attr('id', (d) => `circle-group-${d.data.uuid}`)
-                        .classed('circle-group', true)
+                        .attr('class', (d) => `circle-group circle-group-${d.data.id}`)
                         .attr('transform', (d) => `translate(${d.x},${d.y})`)
                     // add circle
                     group
@@ -275,15 +282,15 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
                         .attr('pointer-events', 'none')
                         .attr('opacity', 0)
                         .attr('fill', (d) => findFill(d, d.r))
-
                     return group
                 },
                 (update) => {
+                    // update group position
                     update
                         .transition('group-update')
                         .duration(transitionDuration)
                         .attr('transform', (d) => `translate(${d.x},${d.y})`)
-
+                    // update circles
                     update
                         .select('.circle')
                         .on('mouseover', (d) => circleMouseOver(d))
@@ -293,20 +300,19 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
                         .duration(transitionDuration)
                         .attr('r', (d) => d.r)
                         .attr('fill', (d) => colorScale(d.depth + 1))
-
+                    // update backgrounds
                     update
                         .select('.circle-background')
                         .transition('circle-background-update')
                         .duration(transitionDuration)
                         .attr('r', (d) => d.r)
-
+                    // update images
                     update
                         .select('.circle-image')
                         .transition('circle-image-update')
                         .duration(transitionDuration)
                         .attr('r', (d) => d.r)
                         .attr('fill', (d) => findFill(d, d.r))
-
                     return update
                 },
                 (exit) => {
@@ -323,43 +329,44 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
     }
 
     function createCircleText() {
-        d3.select('#circle-group')
-            .selectAll('.text')
+        d3.select('#text-group')
+            .selectAll('.circle-text')
             .data(childNodes.current, (d) => d.data.uuid)
             .join(
                 (enter) =>
                     enter
                         .append('text')
-                        .classed('text', true)
+                        .attr('id', (d) => `circle-text-${d.data.uuid}`)
+                        .attr('class', (d) => `circle-text circle-text-${d.data.id}`)
                         .text((d) => d.data.name)
-                        .attr('font-size', 16)
-                        .attr('font-weight', (d) => (d.data.id === spaceMapData.id ? 800 : 400))
+                        .attr('font-size', (d) => (isRoot(d) ? 24 : 16))
+                        .attr('font-weight', (d) => (isRoot(d) ? 800 : 400))
                         .attr('pointer-events', 'none')
                         .attr('opacity', 0)
                         .attr('text-anchor', 'middle')
                         .attr('dominant-baseline', 'central')
-                        .attr('y', (d) => d.y - d.r - 15)
+                        .attr('y', (d) => d.y - d.r - (isRoot(d) ? 25 : 15))
                         .attr('x', (d) => d.x)
                         .call((node) =>
                             node
-                                .transition()
+                                .transition('text-enter')
                                 .duration(transitionDuration)
                                 .attr('opacity', (d) => (d.r > 30 && d.depth < 2 ? 1 : 0))
                         ),
                 (update) =>
                     update.call((node) =>
                         node
-                            .transition()
+                            .transition('text-update')
                             .duration(transitionDuration)
                             .attr('font-weight', (d) => (d.data.id === spaceMapData.id ? 800 : 400))
-                            .attr('y', (d) => d.y - d.r - 15)
+                            .attr('y', (d) => d.y - d.r - (isRoot(d) ? 25 : 15))
                             .attr('x', (d) => d.x)
                             .attr('opacity', (d) => (d.r > 30 && d.depth < 2 ? 1 : 0))
                     ),
                 (exit) =>
                     exit.call((node) =>
                         node
-                            .transition()
+                            .transition('text-exit')
                             .duration(transitionDuration / 2)
                             .attr('opacity', 0)
                             .remove()
