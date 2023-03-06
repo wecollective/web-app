@@ -134,58 +134,48 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
         return `url(#pattern-${d.data.uuid})`
     }
 
-    function circleMouseOver(d) {
+    function isHoveredCircle(circle, d) {
+        return circle.data.uuid === d.data.uuid
+    }
+
+    function circleMouseOver(circle) {
         d3.event.stopPropagation()
         if (!transitioning.current) {
-            const circle = d3.select(`#circle-${d.data.uuid}`)
-            const image = d3.select(`#circle-image-${d.data.uuid}`)
             const zoomScale = d3.zoomTransform(d3.select('#master-group').node()).k
-            // highlight circle
-            circle
-                .transition('circle-mouse-over')
-                .duration(transitionDuration / 3)
-                .attr('stroke-width', 5 / zoomScale)
-                .attr('stroke', colors.cpBlue)
-            // highlight image
-            image
-                .transition('image-mouse-over')
-                .duration(transitionDuration / 3)
-                .attr('stroke-width', 5 / zoomScale)
-                .attr('stroke', colors.cpBlue)
-                .attr('opacity', 1)
-            // highlight matching circles and images
-            d3.selectAll(`.circle-${d.data.id},.circle-image-${d.data.id}`)
-                .filter((c) => c.data.uuid !== d.data.uuid)
+            d3.selectAll(
+                `.circle-${circle.data.id},.circle-background-${circle.data.id},.circle-image-${circle.data.id}`
+            )
                 .transition('circles-mouse-over')
                 .duration(transitionDuration / 3)
-                .attr('stroke', colors.cpPurple)
+                .attr('stroke', (d) => colors[isHoveredCircle(circle, d) ? 'cpBlue' : 'cpPurple'])
                 .attr('stroke-width', 5 / zoomScale)
                 .attr('opacity', 1)
         }
     }
 
-    function circleMouseOut(d) {
+    function circleMouseOut(circle) {
         d3.event.stopPropagation()
         if (!transitioning.current) {
             const zoomScale = d3.zoomTransform(d3.select('#master-group').node()).k
-            // fade out all highlighted circles
-            d3.selectAll(`.circle-${d.data.id}`)
+            // remove stroke highlight
+            d3.selectAll(
+                `.circle-${circle.data.id},.circle-background-${circle.data.id},.circle-image-${circle.data.id}`
+            )
                 .transition('circles-mouse-out')
                 .duration(transitionDuration / 3)
                 .attr('stroke', colors.cpGrey)
                 .attr('stroke-width', 1 / zoomScale)
-            // fade out all highlighted images
-            d3.selectAll(`.circle-image-${d.data.id}`)
-                .transition('images-mouse-out')
+            // fade out circle backgrounds and images
+            d3.selectAll(`.circle-background-${circle.data.id},.circle-image-${circle.data.id}`)
+                .transition('circles-fade-out')
                 .duration(transitionDuration / 3)
-                .attr('stroke-width', 1 / zoomScale)
-                .attr('stroke', colors.cpGrey)
                 .attr('opacity', 0)
         }
     }
 
-    function circleMouseDown(circle) {
+    function circleClick(circle) {
         d3.event.stopPropagation()
+        circleMouseOut(circle)
         transitioning.current = true
         // if main circle, reset position
         if (circle.data.id === childNodes.current[0].data.id) resetPosition(transitionDuration)
@@ -209,7 +199,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             .attr('cursor', 'pointer')
             .attr('transform', (d) => `translate(${d.x},${d.y})`)
             .attr('fill', (d) => findFill(d, 25))
-            .on('mousedown', (d) => circleMouseDown(d))
+            .on('click', (d) => circleClick(d))
             .transition()
             .duration(transitionDuration)
             .attr('opacity', 1)
@@ -256,13 +246,24 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
                         .attr('fill', (d) => colorScale(d.depth + 1))
                         .on('mouseover', (d) => circleMouseOver(d))
                         .on('mouseout', (d) => circleMouseOut(d))
-                        .on('click', (d) => circleMouseDown(d))
+                        .on('click', (d) => circleClick(d))
                         .call((circle) =>
                             circle
                                 .transition('circle-enter')
                                 .duration(transitionDuration)
                                 .attr('opacity', 1)
                         )
+                    // add background for transparent images
+                    group
+                        .append('circle')
+                        .attr('id', (d) => `circle-background-${d.data.uuid}`)
+                        .attr('class', (d) => `circle-background circle-background-${d.data.id}`)
+                        .attr('r', (d) => d.r)
+                        .attr('fill', 'white')
+                        .attr('stroke', colors.cpGrey)
+                        .attr('stroke-width', 1)
+                        .attr('pointer-events', 'none')
+                        .attr('opacity', 0)
                     // add image
                     group
                         .append('circle')
@@ -287,11 +288,17 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
                         .select('.circle')
                         .on('mouseover', (d) => circleMouseOver(d))
                         .on('mouseout', (d) => circleMouseOut(d))
-                        .on('click', (d) => circleMouseDown(d))
+                        .on('click', (d) => circleClick(d))
                         .transition('circle-update')
                         .duration(transitionDuration)
                         .attr('r', (d) => d.r)
                         .attr('fill', (d) => colorScale(d.depth + 1))
+
+                    update
+                        .select('.circle-background')
+                        .transition('circle-background-update')
+                        .duration(transitionDuration)
+                        .attr('r', (d) => d.r)
 
                     update
                         .select('.circle-image')
