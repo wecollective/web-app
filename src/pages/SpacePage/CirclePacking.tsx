@@ -433,6 +433,28 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
         svg.call(zoom).on('dblclick.zoom', null)
     }
 
+    function findDomain(d) {
+        const children = d.parent ? d.parent.children : spaceMapData.children
+        let dMin = 0
+        let dMax
+        if (sortBy === 'Date') {
+            dMin = d3.min(children.map((child) => Date.parse(child.createdAt)))
+            dMax = d3.max(children.map((child) => Date.parse(child.createdAt)))
+        } else {
+            dMax = d3.max(children.map((child) => child[`total${sortBy}`]))
+        }
+        return sortOrder === 'Descending' ? [dMin, dMax] : [dMax, dMin]
+    }
+
+    function findSum(d) {
+        const pointScale = d3
+            .scaleLinear()
+            .domain(findDomain(d)) // data values spread
+            .range([10, 100]) // radius size spread
+        const points = sortBy === 'Date' ? Date.parse(d.createdAt) : d[`total${sortBy}`]
+        return pointScale(points) > 10 ? pointScale(points) : 10
+    }
+
     function buildNodeTrees() {
         // build parent tree nodes
         const parents = d3.hierarchy(spaceMapData, (d) => d.DirectParentSpaces)
@@ -443,10 +465,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             .descendants()
             .slice(1)
         // build circle packed child nodes
-        const hierarchy = d3
-            .hierarchy(spaceMapData)
-            .sum((d) => d.totalLikes || 1)
-            .sort((a, b) => b.totalLikes - a.totalLikes)
+        const hierarchy = d3.hierarchy(spaceMapData).sum((d) => findSum(d))
         const newChildNodes = d3
             .pack()
             .size([circleRadius.current * 2, circleRadius.current * 2])
@@ -489,7 +508,10 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
         }, transitionDuration)
     }
 
-    useEffect(() => buildCanvas(), [])
+    useEffect(() => {
+        buildCanvas()
+        return () => setSpaceMapData({})
+    }, [])
 
     useEffect(() => {
         if (spaceMapData.id) buildTree()
