@@ -140,50 +140,47 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             const circle = d3.select(`#circle-${d.data.uuid}`)
             const image = d3.select(`#circle-image-${d.data.uuid}`)
             const zoomScale = d3.zoomTransform(d3.select('#master-group').node()).k
+            // highlight circle
             circle
                 .transition('circle-mouse-over')
                 .duration(transitionDuration / 3)
                 .attr('stroke-width', 5 / zoomScale)
                 .attr('stroke', colors.cpBlue)
+            // highlight image
             image
                 .transition('image-mouse-over')
                 .duration(transitionDuration / 3)
                 .attr('stroke-width', 5 / zoomScale)
                 .attr('stroke', colors.cpBlue)
                 .attr('opacity', 1)
-            // highlight other circles
+            // highlight matching circles and images
             d3.selectAll(`.circle-${d.data.id},.circle-image-${d.data.id}`)
                 .filter((c) => c.data.uuid !== d.data.uuid)
                 .transition('circles-mouse-over')
                 .duration(transitionDuration / 3)
                 .attr('stroke', colors.cpPurple)
                 .attr('stroke-width', 5 / zoomScale)
+                .attr('opacity', 1)
         }
     }
 
     function circleMouseOut(d) {
         d3.event.stopPropagation()
         if (!transitioning.current) {
-            const circle = d3.select(`#circle-${d.data.uuid}`)
-            const image = d3.select(`#circle-image-${d.data.uuid}`)
             const zoomScale = d3.zoomTransform(d3.select('#master-group').node()).k
-            circle
-                .transition('circle-mouse-out')
-                .duration(transitionDuration / 3)
-                .attr('stroke-width', 1 / zoomScale)
-                .attr('stroke', colors.cpGrey)
-            image
-                .transition('image-mouse-out')
-                .duration(transitionDuration / 2)
-                .attr('stroke-width', 1 / zoomScale)
-                .attr('stroke', colors.cpGrey)
-                .attr('opacity', 0)
             // fade out all highlighted circles
-            d3.selectAll(`.circle-${d.data.id},.circle-image-${d.data.id}`)
+            d3.selectAll(`.circle-${d.data.id}`)
                 .transition('circles-mouse-out')
                 .duration(transitionDuration / 3)
                 .attr('stroke', colors.cpGrey)
                 .attr('stroke-width', 1 / zoomScale)
+            // fade out all highlighted images
+            d3.selectAll(`.circle-image-${d.data.id}`)
+                .transition('images-mouse-out')
+                .duration(transitionDuration / 3)
+                .attr('stroke-width', 1 / zoomScale)
+                .attr('stroke', colors.cpGrey)
+                .attr('opacity', 0)
         }
     }
 
@@ -386,7 +383,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
     }
 
     function buildNodeTree() {
-        // build parent nodes
+        // build parent tree nodes
         const parents = d3.hierarchy(spaceMapData, (d) => d.DirectParentSpaces)
         const newParentNodes = d3
             .tree()
@@ -394,7 +391,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             .separation(() => 3)(parents)
             .descendants()
             .slice(1)
-        // build child nodes
+        // build circle packed child nodes
         const hierarchy = d3
             .hierarchy(spaceMapData)
             .sum((d) => d.totalLikes || 1)
@@ -402,7 +399,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
         const newChildNodes = d3
             .pack()
             .size([circleRadius.current * 2, circleRadius.current * 2])
-            .padding(30)(hierarchy)
+            .padding(10)(hierarchy)
             .descendants()
         // update UUIDs for transitions
         const oldSpace = childNodes.current && childNodes.current[0]
