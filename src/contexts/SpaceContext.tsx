@@ -49,7 +49,7 @@ const defaults = {
         sortOrder: 'Descending',
         timeRange: 'All Time',
         depth: 'Only Direct Descendants',
-        lens: 'CirclePacking',
+        lens: 'Circles',
     },
     peopleFilters: {
         sortBy: 'Date',
@@ -237,7 +237,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
             )
             .then((res) => {
                 if (params.lens === 'Tree') setSpaceTreeData(res.data)
-                if (params.lens === 'CirclePacking') setSpaceCircleData(res.data)
+                if (params.lens === 'Circles') setSpaceCircleData(res.data)
             })
             .catch((error) => console.log(error))
     }

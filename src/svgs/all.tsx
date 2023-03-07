@@ -55,6 +55,9 @@ import { ReactComponent as SourceIcon } from '@svgs/right-to-bracket-solid.svg'
 import { ReactComponent as SearchIcon } from '@svgs/search.svg'
 import { ReactComponent as ShareIcon } from '@svgs/share-from-square-solid.svg'
 import { ReactComponent as SlidersIcon } from '@svgs/sliders-h-solid.svg'
+import { ReactComponent as SpaceCirclesIcon } from '@svgs/space-circles-icon.svg'
+import { ReactComponent as SpaceListIcon } from '@svgs/space-list-icon.svg'
+import { ReactComponent as SpaceTreeIcon } from '@svgs/space-tree-icon.svg'
 import { ReactComponent as LoadingWheelIcon } from '@svgs/spinner.svg'
 import { ReactComponent as InquiryIcon } from '@svgs/square-poll-vertical-solid.svg'
 import { ReactComponent as StarIcon } from '@svgs/star-solid.svg'
@@ -146,4 +149,7 @@ export {
     TrophyIcon,
     HelpIcon,
     RankingIcon,
+    SpaceCirclesIcon,
+    SpaceTreeIcon,
+    SpaceListIcon,
 }

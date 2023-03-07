@@ -9,14 +9,14 @@ import StatButton from '@components/StatButton'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import colors from '@styles/Colors.module.scss'
-import styles from '@styles/pages/SpacePage/CirclePacking.module.scss'
+import styles from '@styles/pages/SpacePage/SpaceCircles.module.scss'
 import { CommentIcon, LockIcon, PostIcon, UsersIcon } from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 
-const CirclePacking = (props: { spaceCircleData: any; params: any }): JSX.Element => {
+const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element => {
     const { spaceCircleData, params } = props
     const { sortBy, sortOrder } = params
     const { setSpaceCircleData } = useContext(SpaceContext)
@@ -417,7 +417,7 @@ const CirclePacking = (props: { spaceCircleData: any; params: any }): JSX.Elemen
                 // keep track of mouse coordinates for space info modal
                 const { pageX, pageY } = d3.event
                 const { y } = d3.select('#circle-packing-svg').node().getBoundingClientRect()
-                setMouseCoordinates({ x: pageX + 15, y: pageY + y - 456 })
+                setMouseCoordinates({ x: pageX + 20, y: pageY + y - 456 })
             })
         // create defs
         svg.append('defs').attr('id', 'imgdefs')
@@ -563,7 +563,7 @@ const CirclePacking = (props: { spaceCircleData: any; params: any }): JSX.Elemen
     )
 }
 
-export default CirclePacking
+export default SpaceCircles
 
 // function hasMatchingAncestor(circle, selectedCircle) {
 //     // recursively check parents for selectedCircle

@@ -3,11 +3,17 @@ import DropDown from '@components/DropDown'
 import CreateSpaceModal from '@components/modals/CreateSpaceModal'
 import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
-import Toggle from '@components/Toggle'
 import { AccountContext } from '@contexts/AccountContext'
 import { getParamString } from '@src/Helpers'
 import styles from '@styles/pages/SpacePage/Header.module.scss'
-import { EyeIcon, PlusIcon, SlidersIcon } from '@svgs/all'
+import {
+    EyeIcon,
+    PlusIcon,
+    SlidersIcon,
+    SpaceCirclesIcon,
+    SpaceListIcon,
+    SpaceTreeIcon,
+} from '@svgs/all'
 import React, { useContext, useEffect, useState } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 
@@ -21,7 +27,6 @@ const SpacesHeader = (props: { params: any }): JSX.Element => {
     const location = useLocation()
     const history = useHistory()
     const mobileView = document.documentElement.clientWidth < 900
-    const smallMobileView = document.documentElement.clientWidth < 400
 
     function openCreateSpaceModal() {
         if (loggedIn) setCreateSpaceModalOpen(true)
@@ -31,13 +36,21 @@ const SpacesHeader = (props: { params: any }): JSX.Element => {
         }
     }
 
+    function changeLens(type) {
+        history.push({
+            pathname: location.pathname,
+            search: getParamString(params, 'lens', type),
+        })
+        setLensesModalOpen(false)
+    }
+
     useEffect(() => setFilterParams(params), [params])
 
     return (
         <Row centerY centerX className={styles.wrapper}>
             <Button
-                icon={smallMobileView ? <PlusIcon /> : undefined}
-                text={smallMobileView ? '' : 'New space'}
+                icon={<PlusIcon />}
+                text={mobileView ? '' : 'New space'}
                 color='blue'
                 onClick={openCreateSpaceModal}
                 style={{ marginRight: 10 }}
@@ -119,24 +132,38 @@ const SpacesHeader = (props: { params: any }): JSX.Element => {
             )}
             {lensesModalOpen && (
                 <Modal centered close={() => setLensesModalOpen(false)}>
-                    <h1>Space Lenses</h1>
+                    <Row centerY className={styles.header}>
+                        <h1>Space Lenses</h1>
+                        <EyeIcon />
+                    </Row>
+
                     <p>Choose how to display the spaces</p>
-                    <Toggle
-                        leftText='List'
-                        rightText='Map'
-                        positionLeft={params.view === 'List'}
-                        onClick={() => {
-                            history.push({
-                                pathname: location.pathname,
-                                search: getParamString(
-                                    params,
-                                    'view',
-                                    params.view === 'Map' ? 'List' : 'Map'
-                                ),
-                            })
-                            setLensesModalOpen(false)
-                        }}
-                    />
+                    <div className={styles.lensOptions}>
+                        <button
+                            type='button'
+                            onClick={() => changeLens('Circles')}
+                            className={`${params.lens === 'Circles' && styles.selected}`}
+                        >
+                            <SpaceCirclesIcon />
+                            <p>Circles</p>
+                        </button>
+                        <button
+                            type='button'
+                            onClick={() => changeLens('Tree')}
+                            className={`${params.lens === 'Tree' && styles.selected}`}
+                        >
+                            <SpaceTreeIcon />
+                            <p>Tree</p>
+                        </button>
+                        <button
+                            type='button'
+                            onClick={() => changeLens('List')}
+                            className={`${params.lens === 'List' && styles.selected}`}
+                        >
+                            <SpaceListIcon />
+                            <p>List</p>
+                        </button>
+                    </div>
                 </Modal>
             )}
         </Row>

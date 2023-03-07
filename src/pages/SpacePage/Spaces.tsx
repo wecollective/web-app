@@ -3,7 +3,7 @@ import Row from '@components/Row'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import SpaceNotFound from '@pages/SpaceNotFound'
-import CirclePacking from '@src/pages/SpacePage/CirclePacking'
+import SpaceCircles from '@src/pages/SpacePage/SpaceCircles'
 import SpaceList from '@src/pages/SpacePage/SpaceList'
 import SpacesHeader from '@src/pages/SpacePage/SpacesHeader'
 import SpaceTree from '@src/pages/SpacePage/SpaceTree'
@@ -61,9 +61,9 @@ const Spaces = (): JSX.Element => {
         <Column className={styles.wrapper}>
             <SpacesHeader params={params} />
             <Row centerX className={styles.content}>
-                {params.lens === 'CirclePacking' && (
+                {params.lens === 'Circles' && (
                     <Column className={styles.spaceMapView}>
-                        <CirclePacking spaceCircleData={spaceCircleData} params={params} />
+                        <SpaceCircles spaceCircleData={spaceCircleData} params={params} />
                     </Column>
                 )}
                 {params.lens === 'Tree' && (
