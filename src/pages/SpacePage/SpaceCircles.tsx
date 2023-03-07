@@ -39,11 +39,11 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
         .interpolate(d3.interpolateHcl)
 
     const zoom = d3.zoom().on('zoom', () => {
-        d3.select('#master-group').attr('transform', d3.event.transform)
+        d3.select('#sc-master-group').attr('transform', d3.event.transform)
         // scale circle and text attributes
         const scale = d3.event.transform.k
-        d3.selectAll('.circle,.circle-image').attr('stroke-width', 1 / scale)
-        d3.selectAll('.circle-text')
+        d3.selectAll('.sc-circle,.sc-circle-image').attr('stroke-width', 1 / scale)
+        d3.selectAll('.sc-circle-text')
             .attr('font-size', (d) => (isRoot(d) ? 20 : 16) / scale)
             .attr('y', (d) => d.y - d.r - (isRoot(d) ? 25 : 15) / scale)
             .attr('opacity', (d) => {
@@ -76,7 +76,7 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
     function resetPosition(duration) {
         transitioning.current = true
         // calculate center position
-        const svg = d3.select('#circle-packing-svg')
+        const svg = d3.select('#sc-svg')
         const svgWidth = parseInt(svg.style('width'), 10)
         const svgHeight = parseInt(svg.style('height'), 10)
         const x = svgWidth / 2 - circleRadius.current
@@ -94,8 +94,8 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
 
     function findFill(d, radius) {
         // check if image already exists in defs
-        const existingImage = d3.select(`#image-${d.data.uuid}`)
-        const circle = d3.select(`#circle-image-${d.data.uuid}`)
+        const existingImage = d3.select(`#sc-image-${d.data.uuid}`)
+        const circle = d3.select(`#sc-circle-image-${d.data.uuid}`)
         if (existingImage.node()) {
             // check image size matches circle start size
             const matchingSizes = existingImage.attr('height') / 2 === +circle.attr('r')
@@ -108,28 +108,27 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
         } else {
             // create new pattern
             const pattern = d3
-                .select('#imgdefs')
+                .select('#sc-imgdefs')
                 .append('pattern')
-                .attr('id', `pattern-${d.data.uuid}`)
+                .attr('id', `sc-pattern-${d.data.uuid}`)
                 .attr('height', 1)
                 .attr('width', 1)
             // append new image to pattern
             pattern
                 .append('image')
-                .attr('id', `image-${d.data.uuid}`)
+                .attr('id', `sc-image-${d.data.uuid}`)
                 .attr('height', radius * 2)
                 .attr('width', radius * 2)
                 .attr('preserveAspectRatio', 'xMidYMid slice')
-                .attr('xlink:href', () => {
-                    const defaultImage = `${config.publicAssets}/icons/default-space-flag.jpg`
-                    return d.data.flagImagePath || defaultImage
-                    // const expanderIcon = `${config.publicAssets}/icons/plus-icon.jpg`
-                    // const defaultImage = `${config.publicAssets}/icons/default-space-flag.jpg`
-                    // return d.data.expander ? expanderIcon : d.data.flagImagePath || defaultImage
-                })
+                .attr(
+                    'xlink:href',
+                    () =>
+                        d.data.flagImagePath ||
+                        `${config.publicAssets}/icons/default-space-flag.jpg`
+                )
                 .on('error', () => {
                     // try image proxy
-                    const newImage = d3.select(`#image-${d.data.uuid}`)
+                    const newImage = d3.select(`#sc-image-${d.data.uuid}`)
                     const proxyURL = '//images.weserv.nl/'
                     if (!newImage.attr('xlink:href').includes(proxyURL)) {
                         newImage.attr('xlink:href', `${proxyURL}?url=${d.data.flagImagePath}`)
@@ -140,15 +139,15 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
                     }
                 })
         }
-        return `url(#pattern-${d.data.uuid})`
+        return `url(#sc-pattern-${d.data.uuid})`
     }
 
     function circleMouseOver(circle) {
         d3.event.stopPropagation()
         if (!transitioning.current) {
-            const zoomScale = d3.zoomTransform(d3.select('#master-group').node()).k
+            const zoomScale = d3.zoomTransform(d3.select('#sc-master-group').node()).k
             d3.selectAll(
-                `.parent-circle-${circle.data.id},.circle-${circle.data.id},.circle-background-${circle.data.id},.circle-image-${circle.data.id}`
+                `.sc-parent-circle-${circle.data.id},.sc-circle-${circle.data.id},.sc-circle-background-${circle.data.id},.sc-circle-image-${circle.data.id}`
             )
                 .transition('circles-mouse-over')
                 .duration(transitionDuration / 3)
@@ -164,17 +163,19 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
     function circleMouseOut(circle) {
         d3.event.stopPropagation()
         if (!transitioning.current) {
-            const zoomScale = d3.zoomTransform(d3.select('#master-group').node()).k
+            const zoomScale = d3.zoomTransform(d3.select('#sc-master-group').node()).k
             // remove stroke highlight
             d3.selectAll(
-                `.parent-circle-${circle.data.id},.circle-${circle.data.id},.circle-background-${circle.data.id},.circle-image-${circle.data.id}`
+                `.sc-parent-circle-${circle.data.id},.sc-circle-${circle.data.id},.sc-circle-background-${circle.data.id},.sc-circle-image-${circle.data.id}`
             )
                 .transition('circles-mouse-out')
                 .duration(transitionDuration / 3)
                 .attr('stroke', colors.cpGrey)
                 .attr('stroke-width', 1 / zoomScale)
             // fade out circle backgrounds and images
-            d3.selectAll(`.circle-background-${circle.data.id},.circle-image-${circle.data.id}`)
+            d3.selectAll(
+                `.sc-circle-background-${circle.data.id},.sc-circle-image-${circle.data.id}`
+            )
                 .transition('circles-fade-out')
                 .duration(transitionDuration / 3)
                 .attr('opacity', 0)
@@ -199,12 +200,12 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
     }
 
     function createParentCircles() {
-        d3.select('#parent-circle-group')
-            .selectAll('.parent-circle')
+        d3.select('#sc-parent-circle-group')
+            .selectAll('.sc-parent-circle')
             .data(parentNodes.current)
             .join('circle')
-            .attr('id', (d) => `parent-circle-${d.data.uuid}`)
-            .attr('class', (d) => `parent-circle parent-circle-${d.data.id}`)
+            .attr('id', (d) => `sc-parent-circle-${d.data.uuid}`)
+            .attr('class', (d) => `sc-parent-circle sc-parent-circle-${d.data.id}`)
             .attr('r', 25)
             .attr('stroke', colors.cpGrey)
             .attr('stroke-width', 1)
@@ -220,11 +221,11 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
     }
 
     function createParentCircleText() {
-        d3.select('#parent-circle-group')
-            .selectAll('.parent-text')
+        d3.select('#sc-parent-circle-group')
+            .selectAll('.sc-parent-text')
             .data(parentNodes.current)
             .join('text')
-            .classed('parent-text', true)
+            .classed('sc-parent-text', true)
             .text((d) => d.data.name)
             .attr('font-size', 16)
             .attr('pointer-events', 'none')
@@ -236,22 +237,22 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
     }
 
     function createCircles() {
-        d3.select('#circle-groups')
-            .selectAll('.circle-group')
+        d3.select('#sc-circle-groups')
+            .selectAll('.sc-circle-group')
             .data(childNodes.current, (d) => d.data.uuid)
             .join(
                 (enter) => {
                     // create group
                     const group = enter
                         .append('g')
-                        .attr('id', (d) => `circle-group-${d.data.uuid}`)
-                        .attr('class', (d) => `circle-group circle-group-${d.data.id}`)
+                        .attr('id', (d) => `sc-circle-group-${d.data.uuid}`)
+                        .attr('class', (d) => `sc-circle-group sc-circle-group-${d.data.id}`)
                         .attr('transform', (d) => `translate(${d.x},${d.y})`)
                     // add circle
                     group
                         .append('circle')
-                        .attr('id', (d) => `circle-${d.data.uuid}`)
-                        .attr('class', (d) => `circle circle-${d.data.id}`)
+                        .attr('id', (d) => `sc-circle-${d.data.uuid}`)
+                        .attr('class', (d) => `sc-circle sc-circle-${d.data.id}`)
                         .attr('r', (d) => d.r)
                         .attr('stroke', colors.cpGrey)
                         .attr('stroke-width', 1)
@@ -270,8 +271,11 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
                     // add background for transparent images
                     group
                         .append('circle')
-                        .attr('id', (d) => `circle-background-${d.data.uuid}`)
-                        .attr('class', (d) => `circle-background circle-background-${d.data.id}`)
+                        .attr('id', (d) => `sc-circle-background-${d.data.uuid}`)
+                        .attr(
+                            'class',
+                            (d) => `sc-circle-background sc-circle-background-${d.data.id}`
+                        )
                         .attr('r', (d) => d.r)
                         .attr('fill', 'white')
                         .attr('stroke', colors.cpGrey)
@@ -281,8 +285,8 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
                     // add image
                     group
                         .append('circle')
-                        .attr('id', (d) => `circle-image-${d.data.uuid}`)
-                        .attr('class', (d) => `circle-image circle-image-${d.data.id}`)
+                        .attr('id', (d) => `sc-circle-image-${d.data.uuid}`)
+                        .attr('class', (d) => `sc-circle-image sc-circle-image-${d.data.id}`)
                         .attr('r', (d) => d.r)
                         .attr('stroke', colors.cpGrey)
                         .attr('stroke-width', 1)
@@ -299,7 +303,7 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
                         .attr('transform', (d) => `translate(${d.x},${d.y})`)
                     // update circles
                     update
-                        .select('.circle')
+                        .select('.sc-circle')
                         .on('mouseover', (d) => circleMouseOver(d))
                         .on('mouseout', (d) => circleMouseOut(d))
                         .on('click', (d) => circleClick(d))
@@ -309,13 +313,13 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
                         .attr('fill', (d) => colorScale(d.depth + 1))
                     // update backgrounds
                     update
-                        .select('.circle-background')
+                        .select('.sc-circle-background')
                         .transition('circle-background-update')
                         .duration(transitionDuration)
                         .attr('r', (d) => d.r)
                     // update images
                     update
-                        .select('.circle-image')
+                        .select('.sc-circle-image')
                         .transition('circle-image-update')
                         .duration(transitionDuration)
                         .attr('r', (d) => d.r)
@@ -326,7 +330,7 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
                     exit.transition('group-exit')
                         .duration(transitionDuration / 2)
                         .remove()
-                    exit.select('.circle')
+                    exit.select('.sc-circle')
                         .transition('circle-exit')
                         .duration(transitionDuration / 2)
                         .attr('opacity', 0)
@@ -336,15 +340,15 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
     }
 
     function createCircleText() {
-        d3.select('#text-group')
-            .selectAll('.circle-text')
+        d3.select('#sc-text-group')
+            .selectAll('.sc-circle-text')
             .data(childNodes.current, (d) => d.data.uuid)
             .join(
                 (enter) =>
                     enter
                         .append('text')
-                        .attr('id', (d) => `circle-text-${d.data.uuid}`)
-                        .attr('class', (d) => `circle-text circle-text-${d.data.id}`)
+                        .attr('id', (d) => `sc-circle-text-${d.data.uuid}`)
+                        .attr('class', (d) => `sc-circle-text sc-circle-text-${d.data.id}`)
                         .text((d) => findCircleText(d))
                         .attr('pointer-events', 'none')
                         .attr('text-anchor', 'middle')
@@ -408,9 +412,9 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
 
     function buildCanvas() {
         const svg = d3
-            .select('#canvas')
+            .select('#sc-canvas')
             .append('svg')
-            .attr('id', 'circle-packing-svg')
+            .attr('id', 'sc-svg')
             .attr('width', '100%')
             .attr('height', '100%')
             .style('display', 'block')
@@ -418,21 +422,21 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
             .on('mousemove', () => {
                 // keep track of mouse coordinates for space info modal
                 const { pageX, pageY } = d3.event
-                const { y } = d3.select('#circle-packing-svg').node().getBoundingClientRect()
+                const { y } = d3.select('#sc-svg').node().getBoundingClientRect()
                 setMouseCoordinates({ x: pageX + 20, y: pageY + y - 456 })
             })
         // create defs
-        svg.append('defs').attr('id', 'imgdefs')
+        svg.append('defs').attr('id', 'sc-imgdefs')
         // set circle radius based on screen height
         circleRadius.current = parseInt(svg.style('height'), 10) / 2 - 80
         // create groups
-        const masterGroup = svg.append('g').attr('id', 'master-group')
+        const masterGroup = svg.append('g').attr('id', 'sc-master-group')
         masterGroup
             .append('g')
-            .attr('id', 'parent-circle-group')
+            .attr('id', 'sc-parent-circle-group')
             .attr('transform', `translate(${circleRadius.current},-210)`)
-        masterGroup.append('g').attr('id', 'circle-groups')
-        masterGroup.append('g').attr('id', 'text-group')
+        masterGroup.append('g').attr('id', 'sc-circle-groups')
+        masterGroup.append('g').attr('id', 'sc-text-group')
         // initiate zoom functionality (disable double click)
         svg.call(zoom).on('dblclick.zoom', null)
     }
@@ -522,7 +526,7 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
     }, [spaceCircleData])
 
     return (
-        <div id='canvas' className={styles.canvas}>
+        <div id='sc-canvas' className={styles.canvas}>
             {showSpaceModal && highlightedSpace && (
                 <Column
                     className={styles.spaceInfoModal}
@@ -575,7 +579,7 @@ export default SpaceCircles
 // }
 
 // // zoom to new circle
-// const svg = d3.select('#circle-packing-svg')
+// const svg = d3.select('#sc-svg')
 // const svgWidth = parseInt(svg.style('width'), 10)
 // const svgHeight = parseInt(svg.style('height'), 10)
 // const scale = (circleRadius.current * 2) / (circle.r * 2)

@@ -672,7 +672,7 @@ const SpaceTree = (props: { spaceTreeData: any; params: any }): JSX.Element => {
         const height = '100%'
         const yOffset = spaceData.DirectParentSpaces.length ? 180 : 80
         const svg = d3
-            .select('#canvas')
+            .select('#space-tree-canvas')
             .append('svg')
             .attr('id', 'space-tree-svg')
             .attr('width', width)
@@ -845,7 +845,7 @@ const SpaceTree = (props: { spaceTreeData: any; params: any }): JSX.Element => {
     }, [spaceTreeData])
 
     return (
-        <div id='canvas' className={styles.canvas}>
+        <div id='space-tree-canvas' className={styles.canvas}>
             {showSpaceModal && highlightedSpace && (
                 <Column className={styles.spaceInfoModal} style={findModalPosition()}>
                     <div className={styles.pointer} />
