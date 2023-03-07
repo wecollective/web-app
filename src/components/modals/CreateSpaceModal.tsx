@@ -29,10 +29,10 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
     const {
         isModerator,
         spaceData,
-        spaceSpaces,
-        setSpaceSpaces,
-        spaceMapData,
-        setSpaceMapData,
+        spaceListData,
+        setSpaceListData,
+        spaceTreeData,
+        setSpaceTreeData,
     } = useContext(SpaceContext)
     const [formData, setFormData] = useState({
         handle: {
@@ -114,11 +114,11 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                             name: name.value,
                             description: description.value,
                         }
-                        setSpaceMapData({
-                            ...spaceMapData,
-                            children: [newSpaceData, ...spaceMapData.children],
+                        setSpaceTreeData({
+                            ...spaceTreeData,
+                            children: [newSpaceData, ...spaceTreeData.children],
                         })
-                        setSpaceSpaces([newSpaceData, ...spaceSpaces])
+                        setSpaceListData([newSpaceData, ...spaceListData])
                         setSuccessMessage(`Space created and attached to '${spaceData.name}'`)
                         setSuccess(true)
                     }

@@ -1,11 +1,12 @@
 import Column from '@components/Column'
 import Row from '@components/Row'
-import SpaceList from '@components/SpaceList'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import SpaceNotFound from '@pages/SpaceNotFound'
-import SpaceMap from '@src/pages/SpacePage/SpaceMap'
+import CirclePacking from '@src/pages/SpacePage/CirclePacking'
+import SpaceList from '@src/pages/SpacePage/SpaceList'
 import SpacesHeader from '@src/pages/SpacePage/SpacesHeader'
+import SpaceTree from '@src/pages/SpacePage/SpaceTree'
 import styles from '@styles/pages/SpacePage/Spaces.module.scss'
 import React, { useContext, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
@@ -15,12 +16,13 @@ const Spaces = (): JSX.Element => {
     const {
         spaceData,
         spaceNotFound,
-        spaceSpaces,
-        getSpaceSpaces,
+        spaceListData,
+        getSpaceListData,
         spaceSpacesLoading,
         setSpaceSpacesLoading,
         nextSpaceSpacesLoading,
-        spaceMapData,
+        spaceCircleData,
+        spaceTreeData,
         getSpaceMapData,
         spaceSpacesFilters,
         spaceSpacesPaginationOffset,
@@ -39,16 +41,14 @@ const Spaces = (): JSX.Element => {
 
     useEffect(() => {
         if (spaceData.handle !== spaceHandle) setSpaceSpacesLoading(true)
-        else {
-            if (params.view === 'List')
-                getSpaceSpaces(spaceData.id, 0, spaceSpacesPaginationLimit, params)
-            if (params.view === 'Map') getSpaceMapData(spaceData.id, params)
-        }
+        else if (params.lens === 'List')
+            getSpaceListData(spaceData.id, 0, spaceSpacesPaginationLimit, params)
+        else getSpaceMapData(spaceData.id, params)
     }, [spaceData.handle, location, loggedIn])
 
     useEffect(() => {
         if (!spaceSpacesLoading && !nextSpaceSpacesLoading && spaceSpacesPaginationHasMore)
-            getSpaceSpaces(
+            getSpaceListData(
                 spaceData.id,
                 spaceSpacesPaginationOffset,
                 spaceSpacesPaginationLimit,
@@ -61,19 +61,24 @@ const Spaces = (): JSX.Element => {
         <Column className={styles.wrapper}>
             <SpacesHeader params={params} />
             <Row centerX className={styles.content}>
-                {params.view === 'List' && (
+                {params.lens === 'CirclePacking' && (
+                    <Column className={styles.spaceMapView}>
+                        <CirclePacking spaceCircleData={spaceCircleData} params={params} />
+                    </Column>
+                )}
+                {params.lens === 'Tree' && (
+                    <Column className={styles.spaceMapView}>
+                        <SpaceTree spaceTreeData={spaceTreeData} params={params} />
+                    </Column>
+                )}
+                {params.lens === 'List' && (
                     <Column centerX className={styles.spaceListView}>
                         <SpaceList
                             location='space-spaces'
-                            spaces={spaceSpaces}
+                            spaces={spaceListData}
                             firstSpacesloading={spaceSpacesLoading}
                             nextSpacesLoading={nextSpaceSpacesLoading}
                         />
-                    </Column>
-                )}
-                {params.view === 'Map' && (
-                    <Column className={styles.spaceMapView}>
-                        <SpaceMap spaceMapData={spaceMapData} params={params} />
                     </Column>
                 )}
             </Row>

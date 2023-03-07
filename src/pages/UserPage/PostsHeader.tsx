@@ -53,7 +53,7 @@ const PostsHeader = (props: { params: any }): JSX.Element => {
                         style={{ marginBottom: 20 }}
                     />
                     <DropDown
-                        title={filterParams.view === 'Map' ? 'Size By' : 'Sort By'}
+                        title={filterParams.lens === 'Map' ? 'Size By' : 'Sort By'}
                         options={['Reactions', 'Likes', 'Reposts', 'Ratings', 'Comments', 'Date']}
                         selectedOption={filterParams.sortBy}
                         setSelectedOption={(value) =>
@@ -62,7 +62,7 @@ const PostsHeader = (props: { params: any }): JSX.Element => {
                         style={{ marginBottom: 20 }}
                     />
                     <DropDown
-                        title={filterParams.view === 'Map' ? 'Size Order' : 'Sort Order'}
+                        title={filterParams.lens === 'Map' ? 'Size Order' : 'Sort Order'}
                         options={['Descending', 'Ascending']}
                         selectedOption={filterParams.sortOrder}
                         setSelectedOption={(value) =>
@@ -112,8 +112,8 @@ const PostsHeader = (props: { params: any }): JSX.Element => {
                     <Toggle
                         leftText='List'
                         rightText='Map'
-                        positionLeft={params.view === 'List'}
-                        onClick={() => applyParam('view', params.view === 'Map' ? 'List' : 'Map')}
+                        positionLeft={params.lens === 'List'}
+                        onClick={() => applyParam('view', params.lens === 'Map' ? 'List' : 'Map')}
                     />
                 </Modal>
             )} */}

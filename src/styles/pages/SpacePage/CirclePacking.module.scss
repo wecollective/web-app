@@ -2,4 +2,72 @@
 
 .canvas {
     height: 100%;
+
+    .spaceInfoModal {
+        position: fixed;
+        max-width: 500px;
+        max-height: 400px;
+        background-color: $black2;
+        color: white;
+        padding: 20px;
+        border-radius: 5px;
+        pointer-events: none;
+
+        .pointer {
+            width: 15px;
+            height: 15px;
+            background-color: $black2;
+            border-radius: 2px;
+            position: absolute;
+            left: -5px;
+            top: 25px;
+            transform: rotate(45deg);
+        }
+
+        .title {
+            > svg {
+                width: 18px;
+                height: 18px;
+                margin-right: 5px;
+            }
+            > h1 {
+                font-size: 18px;
+                line-height: 18px;
+                margin: 0;
+            }
+        }
+
+        > h2 {
+            font-size: 16px;
+            margin: 0;
+            color: rgb(160, 160, 160);
+        }
+        > p {
+            font-size: 12px;
+        }
+
+        .draft {
+            overflow: hidden;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .markdown {
+            color: white;
+            font-size: 14px;
+            line-height: 18px;
+            overflow: hidden;
+
+            img {
+                max-width: 200px;
+            }
+        }
+
+        .stats {
+            color: rgb(160, 160, 160);
+            > button {
+                margin-right: 15px;
+            }
+        }
+    }
 }

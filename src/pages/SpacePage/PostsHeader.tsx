@@ -101,7 +101,7 @@ const PostsHeader = (props: { params: any }): JSX.Element => {
                         style={{ marginBottom: 20 }}
                     />
                     <DropDown
-                        title={filterParams.view === 'Map' ? 'Size By' : 'Sort By'}
+                        title={filterParams.lens === 'Map' ? 'Size By' : 'Sort By'}
                         options={['Date', 'Likes', 'Comments', 'Reposts', 'Ratings', 'Links']}
                         selectedOption={filterParams.sortBy}
                         setSelectedOption={(payload) =>
@@ -110,7 +110,7 @@ const PostsHeader = (props: { params: any }): JSX.Element => {
                         style={{ marginBottom: 20 }}
                     />
                     <DropDown
-                        title={filterParams.view === 'Map' ? 'Size Order' : 'Sort Order'}
+                        title={filterParams.lens === 'Map' ? 'Size Order' : 'Sort Order'}
                         options={['Descending', 'Ascending']}
                         selectedOption={filterParams.sortOrder}
                         setSelectedOption={(payload) =>
@@ -163,14 +163,14 @@ const PostsHeader = (props: { params: any }): JSX.Element => {
                     <Toggle
                         leftText='List'
                         rightText='Map'
-                        positionLeft={params.view === 'List'}
+                        positionLeft={params.lens === 'List'}
                         onClick={() => {
                             history.push({
                                 pathname: location.pathname,
                                 search: getParamString(
                                     params,
-                                    'view',
-                                    params.view === 'Map' ? 'List' : 'Map'
+                                    'lens',
+                                    params.lens === 'Map' ? 'List' : 'Map'
                                 ),
                             })
                             setLensesModalOpen(false)

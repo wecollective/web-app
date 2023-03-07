@@ -30,7 +30,7 @@ const HorizontalSpaceCard = (props: { space: any; style?: any }): JSX.Element =>
 
     return (
         <Row className={styles.wrapper} style={style}>
-            <Link to={`/s/${handle}/spaces?view=List`} className={styles.images}>
+            <Link to={`/s/${handle}/spaces?lens=List`} className={styles.images}>
                 <div className={styles.coverImage} style={{ backgroundImage }} />
                 <FlagImage
                     className={styles.flagImage}
@@ -42,7 +42,7 @@ const HorizontalSpaceCard = (props: { space: any; style?: any }): JSX.Element =>
                 />
             </Link>
             <Column className={styles.content}>
-                <Link to={`/s/${handle}/spaces?view=List`}>
+                <Link to={`/s/${handle}/spaces?lens=List`}>
                     <h1>{name}</h1>
                     <h2>s/{handle}</h2>
                 </Link>

@@ -182,14 +182,16 @@ export interface ISpaceContext {
     postMapData: any
     setPostMapData: (paylod: any) => void
 
-    spaceSpaces: any[] // ISpace[]
-    setSpaceSpaces: (payload: any[]) => void
+    spaceCircleData: any
+    setSpaceCircleData: (paylod: any) => void
+    spaceTreeData: any
+    setSpaceTreeData: (paylod: any) => void
+    spaceListData: any[]
+    setSpaceListData: (payload: any[]) => void
     spaceSpacesFilters: any
     spaceSpacesPaginationLimit: number
     spaceSpacesPaginationOffset: number
     spaceSpacesPaginationHasMore: boolean
-    spaceMapData: any
-    setSpaceMapData: (paylod: any) => void
 
     spacePeople: any[]
     defaultPeopleFilters: any
@@ -200,14 +202,14 @@ export interface ISpaceContext {
     getSpaceData: (handle: string, callback?: any) => void
     getSpacePosts: (spaceId: number, offset: number, limit: number, params: any) => void
     getPostMapData: (spaceId: number, params: any, limit: number) => void
-    getSpaceSpaces: (spaceId: number, offset: number, limit: number, params: any) => void
+    getSpaceListData: (spaceId: number, offset: number, limit: number, params: any) => void
     getSpaceMapData: (spaceId: number, params: any) => void
     getSpaceMapChildren: (spaceId: number, offset: number, params: any, isParent: boolean) => any
     getSpacePeople: (spaceId: number, offset: number, limit: number, params: any) => void
 
     resetSpaceData: () => void
     resetSpacePosts: () => void
-    resetSpaceSpaces: () => void
+    resetSpaceListData: () => void
     resetSpacePeople: () => void
 }
 

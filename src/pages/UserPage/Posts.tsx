@@ -37,9 +37,9 @@ const Posts = (): JSX.Element => {
     useEffect(() => {
         if (userData.handle !== userHandle) setUserPostsLoading(true)
         else {
-            if (params.view === 'List')
+            if (params.lens === 'List')
                 getUserPosts(userData.id, 0, userPostsPaginationLimit, params)
-            if (params.view === 'Map') {
+            if (params.lens === 'Map') {
                 // getPostMapData(spaceData.id, params)
             }
         }
@@ -61,7 +61,7 @@ const Posts = (): JSX.Element => {
         <Column centerX className={styles.wrapper}>
             <PostsHeader params={params} />
             <Column className={styles.content}>
-                {params.view === 'List' && (
+                {params.lens === 'List' && (
                     <Row className={styles.postListView}>
                         <PostList
                             location='user-posts'
@@ -71,7 +71,7 @@ const Posts = (): JSX.Element => {
                         />
                     </Row>
                 )}
-                {/* {params.view === 'Map' && (
+                {/* {params.lens === 'Map' && (
                     <Column className={styles.postMapView}>
                         <UserPagePostMap />
                     </Column>

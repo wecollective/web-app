@@ -16,10 +16,10 @@ import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 
-const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element => {
-    const { spaceMapData, params } = props
+const CirclePacking = (props: { spaceCircleData: any; params: any }): JSX.Element => {
+    const { spaceCircleData, params } = props
     const { sortBy, sortOrder } = params
-    const { spaceData, setSpaceMapData, getSpaceMapChildren } = useContext(SpaceContext)
+    const { setSpaceCircleData } = useContext(SpaceContext)
     const [clickedSpaceUUID, setClickedSpaceUUID] = useState('')
     const [showSpaceModal, setShowSpaceModal] = useState(false)
     const [highlightedSpace, setHighlightedSpace] = useState<any>(null)
@@ -82,7 +82,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
         const x = svgWidth / 2 - circleRadius.current
         const y = svgHeight / 2 - circleRadius.current
         const hasParents =
-            spaceMapData.DirectParentSpaces && spaceMapData.DirectParentSpaces.length > 0
+            spaceCircleData.DirectParentSpaces && spaceCircleData.DirectParentSpaces.length > 0
         const yOffset = hasParents ? 50 : 0
         // update SVG click function with latest coordinates and transition to new position
         svg.on('click', () => resetPosition(transitionDuration))
@@ -364,7 +364,9 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
                         node
                             .transition('text-update')
                             .duration(transitionDuration)
-                            .attr('font-weight', (d) => (d.data.id === spaceMapData.id ? 800 : 400))
+                            .attr('font-weight', (d) =>
+                                d.data.id === spaceCircleData.id ? 800 : 400
+                            )
                             .attr('y', (d) => d.y - d.r - (isRoot(d) ? 25 : 15))
                             .attr('x', (d) => d.x)
                             .attr('opacity', (d) => (d.r > 30 && d.depth < 2 ? 1 : 0))
@@ -434,7 +436,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
     }
 
     function findDomain(d) {
-        const children = d.parent ? d.parent.children : spaceMapData.children
+        const children = d.parent ? d.parent.children : spaceCircleData.children
         let dMin = 0
         let dMax
         if (sortBy === 'Date') {
@@ -457,7 +459,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
 
     function buildNodeTrees() {
         // build parent tree nodes
-        const parents = d3.hierarchy(spaceMapData, (d) => d.DirectParentSpaces)
+        const parents = d3.hierarchy(spaceCircleData, (d) => d.DirectParentSpaces)
         const newParentNodes = d3
             .tree()
             .nodeSize([50, 130])
@@ -465,7 +467,7 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
             .descendants()
             .slice(1)
         // build circle packed child nodes
-        const hierarchy = d3.hierarchy(spaceMapData).sum((d) => findSum(d))
+        const hierarchy = d3.hierarchy(spaceCircleData).sum((d) => findSum(d))
         const newChildNodes = d3
             .pack()
             .size([circleRadius.current * 2, circleRadius.current * 2])
@@ -510,12 +512,12 @@ const CirclePacking = (props: { spaceMapData: any; params: any }): JSX.Element =
 
     useEffect(() => {
         buildCanvas()
-        return () => setSpaceMapData({})
+        return () => setSpaceCircleData({})
     }, [])
 
     useEffect(() => {
-        if (spaceMapData.id) buildTree()
-    }, [spaceMapData])
+        if (spaceCircleData.id) buildTree()
+    }, [spaceCircleData])
 
     return (
         <div id='canvas' className={styles.canvas}>
@@ -602,6 +604,6 @@ export default CirclePacking
 //     .duration(transitionDuration)
 //     .call(zoom.transform, d3.zoomIdentity.scale(scale).translate(x, y))
 //     .on('end', () => {
-//         // buildTree(spaceMapData)
+//         // buildTree(spaceCircleData)
 //         // transitioning.current = false
 //     })

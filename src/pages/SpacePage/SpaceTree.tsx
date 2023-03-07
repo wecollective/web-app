@@ -6,16 +6,16 @@ import Row from '@components/Row'
 import StatButton from '@components/StatButton'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
-import styles from '@styles/pages/SpacePage/SpaceMap.module.scss'
+import styles from '@styles/pages/SpacePage/SpaceTree.module.scss'
 import { CommentIcon, LockIcon, PostIcon, UsersIcon } from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 
-const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
-    const { spaceMapData, params } = props
-    const { spaceData, setSpaceMapData, getSpaceMapChildren } = useContext(SpaceContext)
+const SpaceTree = (props: { spaceTreeData: any; params: any }): JSX.Element => {
+    const { spaceTreeData, params } = props
+    const { spaceData, setSpaceTreeData, getSpaceMapChildren } = useContext(SpaceContext)
     const [clickedSpaceUUID, setClickedSpaceUUID] = useState('')
     const [showSpaceModal, setShowSpaceModal] = useState(false)
     const [highlightedSpace, setHighlightedSpace] = useState<any>(null)
@@ -32,7 +32,7 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
     const zoom = d3
         .zoom()
         .on('zoom', () =>
-            d3.select('#space-map-master-group').attr('transform', d3.event.transform)
+            d3.select('#space-tree-master-group').attr('transform', d3.event.transform)
         )
 
     function getHighlightedSpaceData(space) {
@@ -228,16 +228,16 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
                 const isParent = d.parent.data.id === spaceData.id
                 getSpaceMapChildren(spaceId, offset, params, isParent)
                     .then((res) => {
-                        const parent = findSpaceByUUID(spaceMapData, d.parent.data.uuid)
+                        const parent = findSpaceByUUID(spaceTreeData, d.parent.data.uuid)
                         parent.children = parent.children.filter((child) => !child.expander)
                         parent.children.push(...res.data)
-                        updateMap(false)
+                        updateTree(false)
                     })
                     .catch((error) => console.log(error))
             } else {
                 // otherwise navigate to new space
                 setClickedSpaceUUID(d.data.uuid)
-                history.push(`/s/${d.data.handle}/spaces`)
+                history.push(`/s/${d.data.handle}/spaces?lens=Tree`)
             }
         }
     }
@@ -245,7 +245,7 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
     function plusMinusMouseDown(d) {
         if (!spaceTransitioning.current) {
             spaceTransitioning.current = true
-            const match = findSpaceByUUID(spaceMapData, d.data.uuid)
+            const match = findSpaceByUUID(spaceTreeData, d.data.uuid)
             if (d.data.collapsed) {
                 // expand children
                 match.collapsed = false
@@ -253,13 +253,13 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
                     // show hidden children
                     match.children = match.hiddenChildren
                     match.hiddenChildren = null
-                    updateMap(false)
+                    updateTree(false)
                 } else {
                     // get new children
                     getSpaceMapChildren(d.data.id, 0, params, false)
                         .then((res) => {
                             match.children.push(...res.data.children)
-                            updateMap(false)
+                            updateTree(false)
                         })
                         .catch((error) => console.log(error))
                 }
@@ -268,7 +268,7 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
                 match.collapsed = true
                 match.hiddenChildren = match.children
                 match.children = null
-                updateMap(false)
+                updateTree(false)
             }
         }
     }
@@ -674,7 +674,7 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
         const svg = d3
             .select('#canvas')
             .append('svg')
-            .attr('id', 'space-map-svg')
+            .attr('id', 'space-tree-svg')
             .attr('width', width)
             .attr('height', height)
         width = parseInt(svg.style('width'), 10)
@@ -694,7 +694,7 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
             .attr('preserveAspectRatio', 'xMidYMid slice')
             .attr('xlink:href', `${config.publicAssets}/images/lock-image-2.png`)
         // build master groups
-        const masterGroup = svg.append('g').attr('id', 'space-map-master-group')
+        const masterGroup = svg.append('g').attr('id', 'space-tree-master-group')
         masterGroup.append('g').attr('id', 'child-link-group')
         masterGroup
             .append('g')
@@ -706,13 +706,13 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
             .attr('transform', `translate(0,0),rotate(180,0,0)`)
         masterGroup.append('g').attr('id', 'child-node-group')
         // set up zoom
-        svg.call(zoom)
+        svg.call(zoom).on('dblclick.zoom', null)
         svg.call(zoom.transform, d3.zoomIdentity.translate(width / 2, yOffset))
     }
 
     function findModalPosition() {
         if (highlightedSpacePosition.left) {
-            const zoomScale = d3.zoomTransform(d3.select('#space-map-master-group').node()).k
+            const zoomScale = d3.zoomTransform(d3.select('#space-tree-master-group').node()).k
             const isMainSpace = highlightedSpace.id === spaceData.id
             const top = highlightedSpacePosition.top + zoomScale * (isMainSpace ? 52 : 26) - 30
             const left = highlightedSpacePosition.left + zoomScale * (isMainSpace ? 115 : 65) + 10
@@ -733,7 +733,7 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
 
     function buildTrees(resetPosition) {
         // build new parent tree
-        const parents = d3.hierarchy(spaceMapData, (d) => d.DirectParentSpaces)
+        const parents = d3.hierarchy(spaceTreeData, (d) => d.DirectParentSpaces)
         const parentTree = d3
             .tree()
             .nodeSize([50, 130])
@@ -743,7 +743,7 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
         const newParentNodes = parents.descendants().slice(1)
 
         // build new child tree
-        const root = d3.hierarchy(spaceMapData, (d) => d.children)
+        const root = d3.hierarchy(spaceTreeData, (d) => d.children)
         const tree = d3
             .tree()
             .nodeSize([50, 200])
@@ -804,15 +804,15 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
     }
 
     function resetTreePosition() {
-        const svg = d3.select('#space-map-svg')
+        const svg = d3.select('#space-tree-svg')
         const svgWidth = parseInt(svg.style('width'), 10)
-        const yOffset = spaceMapData && spaceMapData.DirectParentSpaces.length ? 180 : 80
+        const yOffset = spaceTreeData && spaceTreeData.DirectParentSpaces.length ? 180 : 80
         svg.transition()
             .duration(duration)
             .call(zoom.transform, d3.zoomIdentity.scale(1).translate(svgWidth / 2, yOffset))
     }
 
-    function updateMap(resetPosition) {
+    function updateTree(resetPosition) {
         if (resetPosition) resetTreePosition()
         buildTrees(resetPosition)
         // create parent tree elements
@@ -837,12 +837,12 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
 
     useEffect(() => {
         createCanvas()
-        return () => setSpaceMapData({})
+        return () => setSpaceTreeData({})
     }, [])
 
     useEffect(() => {
-        if (spaceMapData.id) updateMap(true)
-    }, [spaceMapData])
+        if (spaceTreeData.id) updateTree(true)
+    }, [spaceTreeData])
 
     return (
         <div id='canvas' className={styles.canvas}>
@@ -885,4 +885,4 @@ const SpaceMap = (props: { spaceMapData: any; params: any }): JSX.Element => {
     )
 }
 
-export default SpaceMap
+export default SpaceTree

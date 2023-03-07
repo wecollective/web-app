@@ -45,9 +45,9 @@ const Posts = (): JSX.Element => {
     useEffect(() => {
         if (spaceData.handle !== spaceHandle) setSpacePostsLoading(true)
         else {
-            if (params.view === 'List')
+            if (params.lens === 'List')
                 getSpacePosts(spaceData.id, 0, spacePostsPaginationLimit, params)
-            if (params.view === 'Map') getPostMapData(spaceData.id, params, 50)
+            if (params.lens === 'Map') getPostMapData(spaceData.id, params, 50)
         }
     }, [spaceData.handle, location, loggedIn])
 
@@ -80,11 +80,13 @@ const Posts = (): JSX.Element => {
         <Column centerX className={styles.wrapper}>
             <PostsHeader params={params} />
             <Column className={styles.content}>
-                {params.view === 'List' && (
+                {params.lens === 'List' && (
                     <Row centerX style={{ width: '100%' }}>
                         {largeScreen && (
                             <Column className={styles.spaceNavWrapper}>
+                                {/* <Column> */}
                                 <NavigationList />
+                                {/* </Column> */}
                             </Column>
                         )}
                         <PostList
@@ -102,7 +104,7 @@ const Posts = (): JSX.Element => {
                         )}
                     </Row>
                 )}
-                {params.view === 'Map' && (
+                {params.lens === 'Map' && (
                     <Column className={styles.postMapView}>
                         <PostMap postMapData={postMapData} params={params} />
                     </Column>

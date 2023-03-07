@@ -25,7 +25,7 @@ const defaults = {
         sortOrder: 'Descending',
         timeRange: 'All Time',
         searchQuery: '',
-        view: 'List',
+        lens: 'List',
     },
 }
 

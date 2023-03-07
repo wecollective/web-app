@@ -41,7 +41,7 @@ const defaults = {
         sortOrder: 'Descending',
         timeRange: 'All Time',
         depth: 'All Contained Posts',
-        view: 'List',
+        lens: 'List',
     },
     spaceFilters: {
         type: 'All Types',
@@ -49,7 +49,7 @@ const defaults = {
         sortOrder: 'Descending',
         timeRange: 'All Time',
         depth: 'Only Direct Descendants',
-        view: 'Map',
+        lens: 'CirclePacking',
     },
     peopleFilters: {
         sortBy: 'Date',
@@ -60,13 +60,11 @@ const defaults = {
 
 function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Element {
     const { accountData, loggedIn } = useContext(AccountContext)
-
     const [spaceData, setSpaceData] = useState(defaults.spaceData)
     const [isFollowing, setIsFollowing] = useState(false)
     const [isModerator, setIsModerator] = useState(false)
     const [selectedSpaceSubPage, setSelectedSpaceSubPage] = useState('')
     const [fullScreen, setFullScreen] = useState(true)
-
     // loading state
     const [spaceNotFound, setSpaceNotFound] = useState(false)
     const [spacePostsLoading, setSpacePostsLoading] = useState(true)
@@ -75,7 +73,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     const [nextSpaceSpacesLoading, setNextSpaceSpacesLoading] = useState(false)
     const [spacePeopleLoading, setSpacePeopleLoading] = useState(true)
     const [nextSpacePeopleLoading, setNextSpacePeopleLoading] = useState(false)
-
+    // space posts
     const [spacePosts, setSpacePosts] = useState<any[]>([])
     const [totalMatchingPosts, setTotalMatchingPosts] = useState(0)
     const [spacePostsFilters, setSpacePostsFilters] = useState(defaults.postFilters)
@@ -83,14 +81,15 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     const [spacePostsPaginationOffset, setSpacePostsPaginationOffset] = useState(0)
     const [spacePostsPaginationHasMore, setSpacePostsPaginationHasMore] = useState(true)
     const [postMapData, setPostMapData] = useState<any>({})
-
-    const [spaceSpaces, setSpaceSpaces] = useState<any[]>([])
+    // space spaces
+    const [spaceCircleData, setSpaceCircleData] = useState<any>({})
+    const [spaceTreeData, setSpaceTreeData] = useState<any>({})
+    const [spaceListData, setSpaceListData] = useState<any[]>([])
     const [spaceSpacesFilters, setSpaceSpacesFilters] = useState(defaults.spaceFilters)
     const [spaceSpacesPaginationLimit, setSpaceSpacesPaginationLimit] = useState(10)
     const [spaceSpacesPaginationOffset, setSpaceSpacesPaginationOffset] = useState(0)
     const [spaceSpacesPaginationHasMore, setSpaceSpacesPaginationHasMore] = useState(true)
-    const [spaceMapData, setSpaceMapData] = useState<any>({})
-
+    // space people
     const [spacePeople, setSpacePeople] = useState<any[]>([])
     const [defaultPeopleFilters, setDefaultPeopleFilters] = useState(defaults.peopleFilters)
     const [spacePeoplePaginationLimit, setSpacePeoplePaginationLimit] = useState(20)
@@ -128,7 +127,10 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 setSpaceData(res.data)
             })
             .catch((error) => {
-                if (error.response.status === 404) setSpaceNotFound(true)
+                if (error.response) {
+                    if (error.response.status === 404) setSpaceNotFound(true)
+                }
+                console.log(error)
             })
     }
 
@@ -185,8 +187,8 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
             .then((res) => setPostMapData(res.data))
     }
 
-    function getSpaceSpaces(spaceId, offset, limit, params) {
-        console.log(`SpaceContext: getSpaceSpaces (${offset + 1} to ${offset + limit})`)
+    function getSpaceListData(spaceId, offset, limit, params) {
+        console.log(`SpaceContext: getSpaceListData (${offset + 1} to ${offset + limit})`)
         const firstLoad = offset === 0
         if (firstLoad) setSpaceSpacesLoading(true)
         else setNextSpaceSpacesLoading(true)
@@ -206,7 +208,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 options
             )
             .then((res) => {
-                setSpaceSpaces(firstLoad ? res.data : [...spaceSpaces, ...res.data])
+                setSpaceListData(firstLoad ? res.data : [...spaceListData, ...res.data])
                 setSpaceSpacesPaginationHasMore(res.data.length === spaceSpacesPaginationLimit)
                 setSpaceSpacesPaginationOffset(offset + spaceSpacesPaginationLimit)
                 if (firstLoad) setSpaceSpacesLoading(false)
@@ -215,14 +217,15 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     }
 
     // todo: consider merging getSpaceMapData and getSpaceMapChildren as both use the same space-map-data route
+    // todo: use post request and pass in params as object
     function getSpaceMapData(spaceId, params) {
-        console.log(`SpaceContext: getSpaceMapData`, params)
-        const accessToken = cookies.get('accessToken')
-        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+        console.log(`SpaceContext: getSpaceMapData`)
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
             .get(
                 /* prettier-ignore */
                 `${config.apiURL}/space-map-data?spaceId=${spaceId
+                }&lens=${params.lens
                 }&offset=${0
                 }&sortBy=${params.sortBy
                 }&sortOrder=${params.sortOrder
@@ -233,14 +236,14 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 options
             )
             .then((res) => {
-                setSpaceMapData(res.data)
+                if (params.lens === 'Tree') setSpaceTreeData(res.data)
+                if (params.lens === 'CirclePacking') setSpaceCircleData(res.data)
             })
             .catch((error) => console.log(error))
     }
 
     function getSpaceMapChildren(spaceId, offset, params, isParent) {
-        const accessToken = cookies.get('accessToken')
-        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         return axios.get(
             /* prettier-ignore */
             `${config.apiURL}/space-map-data?spaceId=${spaceId
@@ -287,7 +290,6 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     }
 
     function resetSpaceData() {
-        // console.log('resetSpaceData')
         setSpaceData(defaults.spaceData)
     }
 
@@ -298,8 +300,8 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         setSpacePostsPaginationHasMore(true)
     }
 
-    function resetSpaceSpaces() {
-        setSpaceSpaces([])
+    function resetSpaceListData() {
+        setSpaceListData([])
         setSpaceSpacesPaginationLimit(10)
         setSpaceSpacesPaginationOffset(0)
         setSpaceSpacesPaginationHasMore(true)
@@ -352,14 +354,16 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 postMapData,
                 setPostMapData,
 
-                spaceSpaces,
-                setSpaceSpaces,
+                spaceCircleData,
+                setSpaceCircleData,
+                spaceTreeData,
+                setSpaceTreeData,
+                spaceListData,
+                setSpaceListData,
                 spaceSpacesFilters,
                 spaceSpacesPaginationLimit,
                 spaceSpacesPaginationOffset,
                 spaceSpacesPaginationHasMore,
-                spaceMapData,
-                setSpaceMapData,
 
                 spacePeople,
                 defaultPeopleFilters,
@@ -370,14 +374,14 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 getSpaceData,
                 getSpacePosts,
                 getPostMapData,
-                getSpaceSpaces,
+                getSpaceListData,
                 getSpaceMapData,
                 getSpaceMapChildren,
                 getSpacePeople,
 
                 resetSpaceData,
                 resetSpacePosts,
-                resetSpaceSpaces,
+                resetSpaceListData,
                 resetSpacePeople,
             }}
         >
