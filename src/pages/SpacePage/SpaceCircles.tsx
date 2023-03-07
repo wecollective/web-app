@@ -148,7 +148,7 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
         if (!transitioning.current) {
             const zoomScale = d3.zoomTransform(d3.select('#master-group').node()).k
             d3.selectAll(
-                `.circle-${circle.data.id},.circle-background-${circle.data.id},.circle-image-${circle.data.id}`
+                `.parent-circle-${circle.data.id},.circle-${circle.data.id},.circle-background-${circle.data.id},.circle-image-${circle.data.id}`
             )
                 .transition('circles-mouse-over')
                 .duration(transitionDuration / 3)
@@ -167,7 +167,7 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
             const zoomScale = d3.zoomTransform(d3.select('#master-group').node()).k
             // remove stroke highlight
             d3.selectAll(
-                `.circle-${circle.data.id},.circle-background-${circle.data.id},.circle-image-${circle.data.id}`
+                `.parent-circle-${circle.data.id},.circle-${circle.data.id},.circle-background-${circle.data.id},.circle-image-${circle.data.id}`
             )
                 .transition('circles-mouse-out')
                 .duration(transitionDuration / 3)
@@ -203,14 +203,16 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
             .selectAll('.parent-circle')
             .data(parentNodes.current)
             .join('circle')
-            .attr('id', (d) => `circle-image-${d.data.uuid}`)
-            .classed('parent-circle', true)
+            .attr('id', (d) => `parent-circle-${d.data.uuid}`)
+            .attr('class', (d) => `parent-circle parent-circle-${d.data.id}`)
             .attr('r', 25)
             .attr('stroke', colors.cpGrey)
             .attr('stroke-width', 1)
             .attr('cursor', 'pointer')
             .attr('transform', (d) => `translate(${d.x},${d.y})`)
             .attr('fill', (d) => findFill(d, 25))
+            .on('mouseover', (d) => circleMouseOver(d))
+            .on('mouseout', (d) => circleMouseOut(d))
             .on('click', (d) => circleClick(d))
             .transition()
             .duration(transitionDuration)
