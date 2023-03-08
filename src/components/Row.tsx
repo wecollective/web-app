@@ -13,18 +13,8 @@ const Row = (props: {
     wrap?: boolean
     scroll?: boolean
 }): JSX.Element => {
-    const {
-        children,
-        style,
-        className,
-        id,
-        title,
-        centerX,
-        centerY,
-        spaceBetween,
-        wrap,
-        scroll,
-    } = props
+    const { children, style, className, id, title, centerX, centerY, spaceBetween, wrap, scroll } =
+        props
 
     const classes = [styles.wrapper]
     if (className) classes.unshift(className)

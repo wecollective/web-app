@@ -30,39 +30,41 @@ const String = (props: {
                 </Column>
             )}
             <Row centerX>
-                <Scrollbars className={`${styles.beadDraw} row`}>
-                    {stringPosts.map((bead, i) => (
-                        <Row key={bead.id}>
-                            <StringBeadCard
-                                bead={bead}
-                                postId={id}
-                                postType={postData.type}
-                                beadIndex={i}
-                                location={location}
-                                selected={selectedBead && selectedBead.id === bead.id}
-                                toggleBeadComments={() => {
-                                    if (beadCommentsOpen) {
-                                        if (bead.id !== selectedBead.id) setSelectedBead(bead)
-                                        else setBeadCommentsOpen(false)
-                                    } else {
-                                        setSelectedBead(bead)
-                                        setBeadCommentsOpen(true)
-                                    }
-                                }}
-                                style={{
-                                    marginRight:
-                                        stringPosts.length > 2 && i === stringPosts.length - 1
-                                            ? 15
-                                            : 0,
-                                }}
-                            />
-                            {i < stringPosts.length - 1 && (
-                                <Row centerY className={styles.beadDivider}>
-                                    <DNAIcon />
-                                </Row>
-                            )}
-                        </Row>
-                    ))}
+                <Scrollbars className={styles.beadDraw}>
+                    <Row>
+                        {stringPosts.map((bead, i) => (
+                            <Row key={bead.id}>
+                                <StringBeadCard
+                                    bead={bead}
+                                    postId={id}
+                                    postType={postData.type}
+                                    beadIndex={i}
+                                    location={location}
+                                    selected={selectedBead && selectedBead.id === bead.id}
+                                    toggleBeadComments={() => {
+                                        if (beadCommentsOpen) {
+                                            if (bead.id !== selectedBead.id) setSelectedBead(bead)
+                                            else setBeadCommentsOpen(false)
+                                        } else {
+                                            setSelectedBead(bead)
+                                            setBeadCommentsOpen(true)
+                                        }
+                                    }}
+                                    style={{
+                                        marginRight:
+                                            stringPosts.length > 2 && i === stringPosts.length - 1
+                                                ? 15
+                                                : 0,
+                                    }}
+                                />
+                                {i < stringPosts.length - 1 && (
+                                    <Row centerY className={styles.beadDivider}>
+                                        <DNAIcon />
+                                    </Row>
+                                )}
+                            </Row>
+                        ))}
+                    </Row>
                 </Scrollbars>
             </Row>
             {beadCommentsOpen && (

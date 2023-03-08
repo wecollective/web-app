@@ -414,13 +414,8 @@ const GameSettingsModal = (props) => {
 }
 
 const GlassBeadGame = (): JSX.Element => {
-    const {
-        loggedIn,
-        accountData,
-        accountDataLoading,
-        setAlertModalOpen,
-        setAlertMessage,
-    } = useContext(AccountContext)
+    const { loggedIn, accountData, accountDataLoading, setAlertModalOpen, setAlertMessage } =
+        useContext(AccountContext)
     const { postData, postDataLoading } = useContext(PostContext)
 
     const [gameData, setGameData] = useState<any>(gameDefaults)
@@ -2056,29 +2051,31 @@ const GlassBeadGame = (): JSX.Element => {
             <Scrollbars
                 className={`${styles.beads} ${!beads.length && styles.hidden} ${
                     (gameData.backgroundImage || gameData.backgroundVideo) && styles.transparent
-                } row`}
+                }`}
             >
-                {beads.map((bead, beadIndex) => (
-                    <Row
-                        centerY
-                        key={`${bead.id}${bead.index}`}
-                        style={{ paddingRight: beads.length === beadIndex + 1 ? 20 : 0 }}
-                    >
-                        <BeadCard
-                            postId={postData.id}
-                            location='gbg'
-                            bead={bead}
-                            index={beadIndex + 1}
-                            highlight={liveBeadIndexRef.current === beadIndex + 1}
-                            className={styles.bead}
-                        />
-                        {beads.length > beadIndex + 1 && (
-                            <Row centerY className={styles.beadDivider}>
-                                <DNAIcon />
-                            </Row>
-                        )}
-                    </Row>
-                ))}
+                <Row centerY style={{ height: '100%' }}>
+                    {beads.map((bead, beadIndex) => (
+                        <Row
+                            centerY
+                            key={`${bead.id}${bead.index}`}
+                            style={{ paddingRight: beads.length === beadIndex + 1 ? 20 : 0 }}
+                        >
+                            <BeadCard
+                                postId={postData.id}
+                                location='gbg'
+                                bead={bead}
+                                index={beadIndex + 1}
+                                highlight={liveBeadIndexRef.current === beadIndex + 1}
+                                className={styles.bead}
+                            />
+                            {beads.length > beadIndex + 1 && (
+                                <Row centerY className={styles.beadDivider}>
+                                    <DNAIcon />
+                                </Row>
+                            )}
+                        </Row>
+                    ))}
+                </Row>
             </Scrollbars>
         </Column>
     )

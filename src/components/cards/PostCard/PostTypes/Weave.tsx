@@ -160,82 +160,87 @@ const Weave = (props: {
             )}
             {playersReady && weave.state !== 'cancelled' && (
                 <Row centerX>
-                    <Scrollbars className={`${styles.beadDraw} row`}>
-                        {stringPosts.map((bead, i) => (
-                            <Row key={bead.id}>
-                                <StringBeadCard
-                                    bead={bead}
-                                    postId={id}
-                                    postType={postData.type}
-                                    beadIndex={i}
-                                    location={location}
-                                    selected={selectedBead && selectedBead.id === bead.id}
-                                    toggleBeadComments={() => {
-                                        if (beadCommentsOpen) {
-                                            if (bead.id !== selectedBead.id) setSelectedBead(bead)
-                                            else setBeadCommentsOpen(false)
-                                        } else {
-                                            setSelectedBead(bead)
-                                            setBeadCommentsOpen(true)
-                                        }
-                                    }}
-                                    style={{
-                                        marginRight:
-                                            i === stringPosts.length - 1 &&
-                                            !movesLeft &&
-                                            stringPosts.length > 2
-                                                ? 15
-                                                : 0,
-                                    }}
-                                />
-                                {(i < stringPosts.length - 1 || movesLeft) && (
-                                    <Row centerY className={styles.beadDivider}>
-                                        <DNAIcon />
-                                    </Row>
-                                )}
-                            </Row>
-                        ))}
-                        {nextMoveAvailable ? (
-                            <button
-                                type='button'
-                                className={styles.newBeadButton}
-                                onClick={() => {
-                                    if (!loggedIn) {
-                                        setAlertMessage('Log in to create the bead')
-                                        setAlertModalOpen(true)
-                                    } else if (location !== 'preview') setNextBeadModalOpen(true)
-                                }}
-                                style={{ marginRight: stringPosts.length > 1 ? 15 : 0 }}
-                            >
-                                <PlusIcon />
-                                <p>
-                                    Click to create the {stringPosts.length ? 'next' : 'first'} bead
-                                </p>
-                            </button>
-                        ) : (
-                            waitingForPlayer && (
-                                <Column
-                                    centerX
-                                    centerY
-                                    className={styles.pendingBead}
-                                    style={{
-                                        marginRight: stringPosts.length > 1 ? 15 : 0,
-                                    }}
-                                >
-                                    <p>Waiting for</p>
-                                    <ImageTitle
-                                        type='user'
-                                        imagePath={currentPlayer.flagImagePath}
-                                        title={`${currentPlayer.name}...`}
-                                        link={`/u/${currentPlayer.handle}/posts`}
-                                        style={{ margin: '0 5px' }}
+                    <Scrollbars className={styles.beadDraw}>
+                        <Row>
+                            {stringPosts.map((bead, i) => (
+                                <Row key={bead.id}>
+                                    <StringBeadCard
+                                        bead={bead}
+                                        postId={id}
+                                        postType={postData.type}
+                                        beadIndex={i}
+                                        location={location}
+                                        selected={selectedBead && selectedBead.id === bead.id}
+                                        toggleBeadComments={() => {
+                                            if (beadCommentsOpen) {
+                                                if (bead.id !== selectedBead.id)
+                                                    setSelectedBead(bead)
+                                                else setBeadCommentsOpen(false)
+                                            } else {
+                                                setSelectedBead(bead)
+                                                setBeadCommentsOpen(true)
+                                            }
+                                        }}
+                                        style={{
+                                            marginRight:
+                                                i === stringPosts.length - 1 &&
+                                                !movesLeft &&
+                                                stringPosts.length > 2
+                                                    ? 15
+                                                    : 0,
+                                        }}
                                     />
-                                </Column>
-                            )
-                        )}
-                        {(stringPosts.length > 2 || (stringPosts.length > 1 && movesLeft)) && (
-                            <span style={{ marginLeft: -7, width: 7, flexShrink: 0 }} />
-                        )}
+                                    {(i < stringPosts.length - 1 || movesLeft) && (
+                                        <Row centerY className={styles.beadDivider}>
+                                            <DNAIcon />
+                                        </Row>
+                                    )}
+                                </Row>
+                            ))}
+                            {nextMoveAvailable ? (
+                                <button
+                                    type='button'
+                                    className={styles.newBeadButton}
+                                    onClick={() => {
+                                        if (!loggedIn) {
+                                            setAlertMessage('Log in to create the bead')
+                                            setAlertModalOpen(true)
+                                        } else if (location !== 'preview')
+                                            setNextBeadModalOpen(true)
+                                    }}
+                                    style={{ marginRight: stringPosts.length > 1 ? 15 : 0 }}
+                                >
+                                    <PlusIcon />
+                                    <p>
+                                        Click to create the {stringPosts.length ? 'next' : 'first'}{' '}
+                                        bead
+                                    </p>
+                                </button>
+                            ) : (
+                                waitingForPlayer && (
+                                    <Column
+                                        centerX
+                                        centerY
+                                        className={styles.pendingBead}
+                                        style={{
+                                            marginRight: stringPosts.length > 1 ? 15 : 0,
+                                        }}
+                                    >
+                                        <p>Waiting for</p>
+                                        <ImageTitle
+                                            type='user'
+                                            imagePath={currentPlayer.flagImagePath}
+                                            title={`${currentPlayer.name}...`}
+                                            link={`/u/${currentPlayer.handle}/posts`}
+                                            style={{ margin: '0 5px' }}
+                                        />
+                                    </Column>
+                                )
+                            )}
+                            {(stringPosts.length > 2 || (stringPosts.length > 1 && movesLeft)) && (
+                                <span style={{ marginLeft: -7, width: 7, flexShrink: 0 }} />
+                            )}
+                        </Row>
                     </Scrollbars>
                 </Row>
             )}

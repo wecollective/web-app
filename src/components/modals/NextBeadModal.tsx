@@ -571,62 +571,68 @@ const NextBeadModal = (props: {
                                 </Row>
                                 <Row centerX style={{ width: '100%' }}>
                                     {images.length > 0 && (
-                                        <Scrollbars className={`${styles.beadImages} row`}>
-                                            {images.map((image, index) => (
-                                                <Column className={styles.image} key={index}>
-                                                    <CloseButton
-                                                        size={20}
-                                                        onClick={() => removeImage(index)}
-                                                    />
-                                                    <img
-                                                        src={
-                                                            image.url ||
-                                                            URL.createObjectURL(image.file)
-                                                        }
-                                                        alt=''
-                                                    />
-                                                    {image.caption && <p>{image.caption}</p>}
-                                                    <Row centerY style={{ width: 180 }}>
-                                                        <Input
-                                                            type='text'
-                                                            placeholder={`${
-                                                                image.caption ? 'change' : 'add'
-                                                            } caption...`}
-                                                            value={image.newCaption}
-                                                            onChange={(v) =>
-                                                                updateNewCaption(index, v)
+                                        <Scrollbars className={styles.beadImages}>
+                                            <Row>
+                                                {images.map((image, index) => (
+                                                    <Column className={styles.image} key={index}>
+                                                        <CloseButton
+                                                            size={20}
+                                                            onClick={() => removeImage(index)}
+                                                        />
+                                                        <img
+                                                            src={
+                                                                image.url ||
+                                                                URL.createObjectURL(image.file)
                                                             }
-                                                            style={{ marginRight: 5 }}
+                                                            alt=''
                                                         />
-                                                        <Button
-                                                            icon={<PlusIcon />}
-                                                            color='grey'
-                                                            onClick={() => updateCaption(index)}
-                                                            style={{
-                                                                padding: '0 10px',
-                                                            }}
-                                                        />
-                                                    </Row>
-                                                    <Row centerX className={styles.itemFooter}>
-                                                        {index !== 0 && (
-                                                            <button
-                                                                type='button'
-                                                                onClick={() => moveImage(index, -1)}
-                                                            >
-                                                                <ChevronLeftIcon />
-                                                            </button>
-                                                        )}
-                                                        {index < images.length - 1 && (
-                                                            <button
-                                                                type='button'
-                                                                onClick={() => moveImage(index, 1)}
-                                                            >
-                                                                <ChevronRightIcon />
-                                                            </button>
-                                                        )}
-                                                    </Row>
-                                                </Column>
-                                            ))}
+                                                        {image.caption && <p>{image.caption}</p>}
+                                                        <Row centerY style={{ width: 180 }}>
+                                                            <Input
+                                                                type='text'
+                                                                placeholder={`${
+                                                                    image.caption ? 'change' : 'add'
+                                                                } caption...`}
+                                                                value={image.newCaption}
+                                                                onChange={(v) =>
+                                                                    updateNewCaption(index, v)
+                                                                }
+                                                                style={{ marginRight: 5 }}
+                                                            />
+                                                            <Button
+                                                                icon={<PlusIcon />}
+                                                                color='grey'
+                                                                onClick={() => updateCaption(index)}
+                                                                style={{
+                                                                    padding: '0 10px',
+                                                                }}
+                                                            />
+                                                        </Row>
+                                                        <Row centerX className={styles.itemFooter}>
+                                                            {index !== 0 && (
+                                                                <button
+                                                                    type='button'
+                                                                    onClick={() =>
+                                                                        moveImage(index, -1)
+                                                                    }
+                                                                >
+                                                                    <ChevronLeftIcon />
+                                                                </button>
+                                                            )}
+                                                            {index < images.length - 1 && (
+                                                                <button
+                                                                    type='button'
+                                                                    onClick={() =>
+                                                                        moveImage(index, 1)
+                                                                    }
+                                                                >
+                                                                    <ChevronRightIcon />
+                                                                </button>
+                                                            )}
+                                                        </Row>
+                                                    </Column>
+                                                ))}
+                                            </Row>
                                         </Scrollbars>
                                     )}
                                 </Row>

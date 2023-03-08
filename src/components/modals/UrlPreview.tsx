@@ -11,15 +11,8 @@ const UrlPreview = (props: {
     urlDescription: string
     urlFlashMessage: string
 }): JSX.Element => {
-    const {
-        url,
-        urlLoading,
-        urlImage,
-        urlDomain,
-        urlTitle,
-        urlDescription,
-        urlFlashMessage,
-    } = props
+    const { url, urlLoading, urlImage, urlDomain, urlTitle, urlDescription, urlFlashMessage } =
+        props
 
     return (
         <>

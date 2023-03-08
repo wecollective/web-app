@@ -2,7 +2,7 @@ import styles from '@styles/components/Column.module.scss'
 import React from 'react'
 
 const Column = (props: {
-    children: any
+    children?: any
     style?: any
     className?: any
     id?: string
@@ -29,6 +29,7 @@ const Column = (props: {
 }
 
 Column.defaultProps = {
+    children: null,
     style: null,
     className: false,
     id: null,

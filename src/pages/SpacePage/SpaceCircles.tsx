@@ -38,10 +38,10 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
         .range(['hsl(152,80%,80%)', 'hsl(228,30%,40%)'])
         .interpolate(d3.interpolateHcl)
 
-    const zoom = d3.zoom().on('zoom', () => {
-        d3.select('#sc-master-group').attr('transform', d3.event.transform)
+    const zoom = d3.zoom().on('zoom', (event) => {
+        d3.select('#sc-master-group').attr('transform', event.transform)
         // scale circle and text attributes
-        const scale = d3.event.transform.k
+        const scale = event.transform.k
         d3.selectAll('.sc-circle,.sc-circle-image').attr('stroke-width', 1 / scale)
         d3.selectAll('.sc-circle-text')
             .attr('font-size', (d) => (isRoot(d) ? 20 : 16) / scale)
@@ -142,8 +142,8 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
         return `url(#sc-pattern-${d.data.uuid})`
     }
 
-    function circleMouseOver(circle) {
-        d3.event.stopPropagation()
+    function circleMouseOver(event, circle) {
+        event.stopPropagation()
         if (!transitioning.current) {
             const zoomScale = d3.zoomTransform(d3.select('#sc-master-group').node()).k
             d3.selectAll(
@@ -160,8 +160,8 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
         }
     }
 
-    function circleMouseOut(circle) {
-        d3.event.stopPropagation()
+    function circleMouseOut(event, circle) {
+        event.stopPropagation()
         if (!transitioning.current) {
             const zoomScale = d3.zoomTransform(d3.select('#sc-master-group').node()).k
             // remove stroke highlight
@@ -185,10 +185,10 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
         }
     }
 
-    function circleClick(circle) {
-        d3.event.stopPropagation()
+    function circleClick(event, circle) {
+        event.stopPropagation()
         if (!transitioning.current) {
-            circleMouseOut(circle)
+            circleMouseOut(event, circle)
             // if main circle, reset position
             if (circle.data.id === childNodes.current[0].data.id) resetPosition(transitionDuration)
             // else, navigate to new space
@@ -212,9 +212,9 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
             .attr('cursor', 'pointer')
             .attr('transform', (d) => `translate(${d.x},${d.y})`)
             .attr('fill', (d) => findFill(d, 25))
-            .on('mouseover', (d) => circleMouseOver(d))
-            .on('mouseout', (d) => circleMouseOut(d))
-            .on('click', (d) => circleClick(d))
+            .on('mouseover', circleMouseOver)
+            .on('mouseout', circleMouseOut)
+            .on('click', circleClick)
             .transition()
             .duration(transitionDuration)
             .attr('opacity', 1)
@@ -259,9 +259,9 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
                         .attr('opacity', 0)
                         .attr('cursor', 'pointer')
                         .attr('fill', (d) => colorScale(d.depth + 1))
-                        .on('mouseover', (d) => circleMouseOver(d))
-                        .on('mouseout', (d) => circleMouseOut(d))
-                        .on('click', (d) => circleClick(d))
+                        .on('mouseover', circleMouseOver)
+                        .on('mouseout', circleMouseOut)
+                        .on('click', circleClick)
                         .call((circle) =>
                             circle
                                 .transition('circle-enter')
@@ -304,9 +304,9 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
                     // update circles
                     update
                         .select('.sc-circle')
-                        .on('mouseover', (d) => circleMouseOver(d))
-                        .on('mouseout', (d) => circleMouseOut(d))
-                        .on('click', (d) => circleClick(d))
+                        .on('mouseover', circleMouseOver)
+                        .on('mouseout', circleMouseOut)
+                        .on('click', circleClick)
                         .transition('circle-update')
                         .duration(transitionDuration)
                         .attr('r', (d) => d.r)
@@ -419,9 +419,9 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
             .attr('height', '100%')
             .style('display', 'block')
             .on('click', () => !transitioning.current && resetPosition(transitionDuration))
-            .on('mousemove', () => {
+            .on('mousemove', (event) => {
                 // keep track of mouse coordinates for space info modal
-                const { pageX, pageY } = d3.event
+                const { pageX, pageY } = event
                 const { y } = d3.select('#sc-svg').node().getBoundingClientRect()
                 setMouseCoordinates({ x: pageX + 20, y: pageY + y - 456 })
             })

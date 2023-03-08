@@ -11,15 +11,8 @@ const AudioVisualiser = (props: {
     dynamicColor: string
     style?: any
 }): JSX.Element => {
-    const {
-        audioElementId,
-        audioURL,
-        staticBars,
-        staticColor,
-        dynamicBars,
-        dynamicColor,
-        style,
-    } = props
+    const { audioElementId, audioURL, staticBars, staticColor, dynamicBars, dynamicColor, style } =
+        props
 
     const offlineAudioContext = useRef<OfflineAudioContext | null>(null)
     const audioContext = useRef<AudioContext | null>(null)

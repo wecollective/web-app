@@ -39,9 +39,9 @@ const Audio = (props: { postData: any }): JSX.Element => {
                 audioElementId={`post-audio-${id}-${location}`}
                 audioURL={url}
                 staticBars={1200}
-                staticColor={colors.audioVisualiserColor}
+                staticColor={colors.audioVisualiserStatic}
                 dynamicBars={160}
-                dynamicColor={colors.audioVisualiserColor}
+                dynamicColor={colors.audioVisualiserDynamic}
                 style={{ height: 80, margin: '20px 0 10px 0' }}
             />
             <Row centerY>

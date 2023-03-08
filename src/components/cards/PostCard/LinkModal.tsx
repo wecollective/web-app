@@ -25,13 +25,8 @@ const LinkModal = (props: {
     close: () => void
 }): JSX.Element => {
     const { type, location, postId, postData, setPostData, close } = props
-    const {
-        loggedIn,
-        accountData,
-        setLogInModalOpen,
-        setAlertMessage,
-        setAlertModalOpen,
-    } = useContext(AccountContext)
+    const { loggedIn, accountData, setLogInModalOpen, setAlertMessage, setAlertModalOpen } =
+        useContext(AccountContext)
     const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
     const { userPosts, setUserPosts } = useContext(UserContext)
     const [incomingLinks, setIncomingLinks] = useState<any[]>([])

@@ -20,13 +20,8 @@ import { Redirect, Route, Switch, useLocation } from 'react-router-dom'
 
 const UserPage = (): JSX.Element => {
     const { accountDataLoading, setPageBottomReached, loggedIn } = useContext(AccountContext)
-    const {
-        userData,
-        getUserData,
-        resetUserData,
-        isOwnAccount,
-        setSelectedUserSubPage,
-    } = useContext(UserContext)
+    const { userData, getUserData, resetUserData, isOwnAccount, setSelectedUserSubPage } =
+        useContext(UserContext)
 
     const [headerCollapsed, setHeaderColapsed] = useState(false)
     const location = useLocation()

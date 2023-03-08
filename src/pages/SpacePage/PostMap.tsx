@@ -202,8 +202,8 @@ const PostMap = (props: { postMapData: any; params: any }): JSX.Element => {
         return linkData
     }
 
-    const zoom = d3.zoom().on('zoom', () => {
-        d3.select('#post-map-master-group').attr('transform', d3.event.transform)
+    const zoom = d3.zoom().on('zoom', (event) => {
+        d3.select('#post-map-master-group').attr('transform', event.transform)
     })
 
     function createCanvas() {
@@ -263,8 +263,8 @@ const PostMap = (props: { postMapData: any; params: any }): JSX.Element => {
         )
 
         // listen for 'p' keypress during node drag to pin or unpin selected node
-        d3.select('body').on('keydown', () => {
-            if (d3.event.keyCode === 80) {
+        d3.select('body').on('keydown', (event) => {
+            if (event.keyCode === 80) {
                 const activeDrag = d3.select('.active-drag')
                 if (activeDrag.node()) {
                     if (activeDrag.classed('pinned')) {
@@ -379,25 +379,25 @@ const PostMap = (props: { postMapData: any; params: any }): JSX.Element => {
             .nodes(data)
             .on('tick', updateSimulation)
 
-        function dragStarted(d) {
+        function dragStarted(event, d) {
             const node = d3.select(`#post-map-node-${d.id}`)
             node.classed('active-drag', true)
-            if (!d3.event.active) {
+            if (!event.active) {
                 d.fx = d.x
                 d.fy = d.y
             }
             simulation.alpha(1)
         }
 
-        function dragged(d) {
-            d.fx = d3.event.x
-            d.fy = d3.event.y
+        function dragged(event, d) {
+            d.fx = event.x
+            d.fy = event.y
         }
 
-        function dragEnded(d) {
+        function dragEnded(event, d) {
             const node = d3.select(`#post-map-node-${d.id}`)
             node.classed('active-drag', false)
-            if (!d3.event.active && !node.classed('pinned')) {
+            if (!event.active && !node.classed('pinned')) {
                 d.fx = null
                 d.fy = null
             }
@@ -440,14 +440,14 @@ const PostMap = (props: { postMapData: any; params: any }): JSX.Element => {
                         .style('stroke', findStroke)
                         .style('stroke-width', 2)
                         .attr('opacity', 0)
-                        .on('click', (e) => {
+                        .on('click', (event, d) => {
                             simulation.alpha(1)
-                            openPostModal(e.id)
+                            openPostModal(d.id)
                             d3.selectAll('.post-map-node')
                                 .transition()
                                 .duration(200)
                                 .style('stroke-width', 2)
-                            d3.select(d3.event.target)
+                            d3.select(event.target)
                                 .transition()
                                 .duration(200)
                                 .style('stroke-width', 6)

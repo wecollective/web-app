@@ -16,7 +16,7 @@ const ContextProviders = (props: { children: any }): JSX.Element => {
                 <SpaceContextProvider>
                     <UserContextProvider>
                         <PostContextProvider>
-                            <GoogleReCaptchaProvider reCaptchaKey={config.recaptchaSiteKey}>
+                            <GoogleReCaptchaProvider reCaptchaKey={config.recaptchaSiteKey || ''}>
                                 {children}
                             </GoogleReCaptchaProvider>
                         </PostContextProvider>

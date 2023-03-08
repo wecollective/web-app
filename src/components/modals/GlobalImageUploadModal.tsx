@@ -13,9 +13,8 @@ import React, { useContext, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 const ImageUploadModal = (): JSX.Element => {
-    const { setImageUploadModalOpen, imageUploadType, accountData, setAccountData } = useContext(
-        AccountContext
-    )
+    const { setImageUploadModalOpen, imageUploadType, accountData, setAccountData } =
+        useContext(AccountContext)
     const { spaceData, setSpaceData } = useContext(SpaceContext)
     const { userData, setUserData } = useContext(UserContext)
     const [imageFile, setImageFile] = useState<File>()

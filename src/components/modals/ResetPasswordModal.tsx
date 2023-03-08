@@ -10,9 +10,8 @@ import axios from 'axios'
 import React, { useContext, useState } from 'react'
 
 const ResetPasswordModal = (): JSX.Element => {
-    const { setResetPasswordModalOpen, resetPasswordToken, setLogInModalOpen } = useContext(
-        AccountContext
-    )
+    const { setResetPasswordModalOpen, resetPasswordToken, setLogInModalOpen } =
+        useContext(AccountContext)
     const [formData, setFormData] = useState<any>({
         password: {
             value: '',

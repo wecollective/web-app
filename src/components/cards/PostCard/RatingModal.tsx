@@ -20,13 +20,8 @@ const RatingModal = (props: {
     setPostData: (payload: any) => void
 }): JSX.Element => {
     const { close, postData, setPostData } = props
-    const {
-        loggedIn,
-        accountData,
-        setLogInModalOpen,
-        setAlertMessage,
-        setAlertModalOpen,
-    } = useContext(AccountContext)
+    const { loggedIn, accountData, setLogInModalOpen, setAlertMessage, setAlertModalOpen } =
+        useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
     const [ratings, setRatings] = useState<any[]>([])
     const [newRating, setNewRating] = useState(100)

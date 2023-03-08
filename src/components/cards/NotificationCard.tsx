@@ -132,9 +132,8 @@ const NotificationCard = (props: {
         createdAt,
     } = notification
 
-    const { accountData, updateAccountData, setAlertMessage, setAlertModalOpen } = useContext(
-        AccountContext
-    )
+    const { accountData, updateAccountData, setAlertMessage, setAlertModalOpen } =
+        useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
     const [seen, setSeen] = useState(notification.seen)
     const cookies = new Cookies()

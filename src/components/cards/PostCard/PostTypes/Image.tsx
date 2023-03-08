@@ -47,19 +47,21 @@ const Image = (props: { postData: any }): JSX.Element => {
                         </Column>
                     </Row>
                 ) : (
-                    <Scrollbars className={`${styles.images} row`}>
-                        {images.map((image) => (
-                            <Column
-                                centerX
-                                className={`${styles.image} ${styles[findImageSize()]}`}
-                                key={image.index}
-                            >
-                                <button type='button' onClick={() => openImageModal(image.id)}>
-                                    <img src={image.url} alt='' />
-                                </button>
-                                {image.caption && <p>{image.caption}</p>}
-                            </Column>
-                        ))}
+                    <Scrollbars className={styles.images}>
+                        <Row>
+                            {images.map((image) => (
+                                <Column
+                                    centerX
+                                    className={`${styles.image} ${styles[findImageSize()]}`}
+                                    key={image.index}
+                                >
+                                    <button type='button' onClick={() => openImageModal(image.id)}>
+                                        <img src={image.url} alt='' />
+                                    </button>
+                                    {image.caption && <p>{image.caption}</p>}
+                                </Column>
+                            ))}
+                        </Row>
                     </Scrollbars>
                 )}
             </Row>

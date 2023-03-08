@@ -18,13 +18,8 @@ const LikeModal = (props: {
     setPostData: (payload: any) => void
 }): JSX.Element => {
     const { close, postData, setPostData } = props
-    const {
-        loggedIn,
-        accountData,
-        setLogInModalOpen,
-        setAlertMessage,
-        setAlertModalOpen,
-    } = useContext(AccountContext)
+    const { loggedIn, accountData, setLogInModalOpen, setAlertMessage, setAlertModalOpen } =
+        useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
     const [likes, setLikes] = useState<any[]>([])
     const [loading, setLoading] = useState(true)

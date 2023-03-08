@@ -31,8 +31,8 @@ const SpaceTree = (props: { spaceTreeData: any; params: any }): JSX.Element => {
     const duration = 1000
     const zoom = d3
         .zoom()
-        .on('zoom', () =>
-            d3.select('#space-tree-master-group').attr('transform', d3.event.transform)
+        .on('zoom', (event) =>
+            d3.select('#space-tree-master-group').attr('transform', event.transform)
         )
 
     function getHighlightedSpaceData(space) {
@@ -382,9 +382,9 @@ const SpaceTree = (props: { spaceTreeData: any; params: any }): JSX.Element => {
                         .attr('stroke-width', 3)
                         .attr('transform', (d) => findStartTransform(d, 'background-circle', type))
                         .style('cursor', 'pointer')
-                        .on('mouseover', (d) => circleMouseOver(d, type))
-                        .on('mouseout', (d) => circleMouseOut(d))
-                        .on('mousedown', (d) => circleMouseDown(d))
+                        .on('mouseover', (e, d) => circleMouseOver(d, type))
+                        .on('mouseout', (e, d) => circleMouseOut(d))
+                        .on('mousedown', (e, d) => circleMouseDown(d))
                         .call((node) =>
                             node
                                 .transition('background-circle-enter')
@@ -396,9 +396,9 @@ const SpaceTree = (props: { spaceTreeData: any; params: any }): JSX.Element => {
                 (update) =>
                     update.call((node) =>
                         node
-                            .on('mouseover', (d) => circleMouseOver(d, type))
-                            .on('mouseout', (d) => circleMouseOut(d))
-                            .on('mousedown', (d) => circleMouseDown(d))
+                            .on('mouseover', (e, d) => circleMouseOver(d, type))
+                            .on('mouseout', (e, d) => circleMouseOut(d))
+                            .on('mousedown', (e, d) => circleMouseDown(d))
                             .transition('background-circle-update')
                             .duration(duration)
                             .attr('r', (d) => findRadius(d) + 2)
@@ -587,7 +587,7 @@ const SpaceTree = (props: { spaceTreeData: any; params: any }): JSX.Element => {
                         .attr('x', 32)
                         .attr('transform', (d) => `translate(${d.x},${d.y})`)
                         .style('cursor', 'pointer')
-                        .on('mousedown', (d) => plusMinusMouseDown(d))
+                        .on('mousedown', (e, d) => plusMinusMouseDown(d))
                         .call((node) =>
                             node
                                 .transition('node-button-enter')
@@ -610,7 +610,7 @@ const SpaceTree = (props: { spaceTreeData: any; params: any }): JSX.Element => {
                                 return access
                             })
                             .attr('pointer-events', (d) => (isRoot(d) ? 'none' : 'auto'))
-                            .on('mousedown', (d) => plusMinusMouseDown(d))
+                            .on('mousedown', (e, d) => plusMinusMouseDown(d))
                             .transition('node-text-update')
                             .duration(duration)
                             .attr('xlink:href', (d) => plusMinusImage(d))

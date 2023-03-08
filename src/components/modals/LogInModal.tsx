@@ -14,9 +14,8 @@ import { useHistory, useLocation } from 'react-router-dom'
 
 const LogInModal = (props: { close: () => void }): JSX.Element => {
     const { close } = props
-    const { getAccountData, setRegisterModalOpen, setForgotPasswordModalOpen } = useContext(
-        AccountContext
-    )
+    const { getAccountData, setRegisterModalOpen, setForgotPasswordModalOpen } =
+        useContext(AccountContext)
     const { executeRecaptcha } = useGoogleReCaptcha()
     const [formData, setFormData] = useState({
         emailOrHandle: {
@@ -55,7 +54,7 @@ const LogInModal = (props: { close: () => void }): JSX.Element => {
         setShowResendVerificationEmail(false)
         if (allValid(formData, setFormData)) {
             setLoading(true)
-            const reCaptchaToken = await executeRecaptcha('login')
+            const reCaptchaToken = await executeRecaptcha!('login')
             const data = {
                 emailOrHandle: emailOrHandle.value,
                 password: password.value,

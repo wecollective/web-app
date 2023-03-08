@@ -16,9 +16,8 @@ const PostPage = (): JSX.Element => {
     const location = useLocation()
     const postId = location.pathname.split('/')[2]
     const { accountDataLoading, loggedIn } = useContext(AccountContext)
-    const { getPostData, postData, postDataLoading, postState, resetPostContext } = useContext(
-        PostContext
-    )
+    const { getPostData, postData, postDataLoading, postState, resetPostContext } =
+        useContext(PostContext)
 
     useEffect(() => {
         if (!accountDataLoading && postId !== postData.id) getPostData(postId)

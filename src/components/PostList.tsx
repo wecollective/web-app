@@ -18,15 +18,8 @@ const PostList = (props: {
     styling?: boolean
     style?: any
 }): JSX.Element => {
-    const {
-        location,
-        posts,
-        firstPostsloading,
-        nextPostsLoading,
-        className,
-        styling,
-        style,
-    } = props
+    const { location, posts, firstPostsloading, nextPostsLoading, className, styling, style } =
+        props
     const { resetSpacePosts } = useContext(SpaceContext)
     const { resetUserPosts } = useContext(UserContext)
     const mobileView = document.documentElement.clientWidth < 900

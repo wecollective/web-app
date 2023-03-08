@@ -12,9 +12,8 @@ import Cookies from 'universal-cookie'
 
 const UpdateUserEmailModal = (props: { close: () => void }): JSX.Element => {
     const { close } = props
-    const { accountData, setAccountData, setAlertModalOpen, setAlertMessage } = useContext(
-        AccountContext
-    )
+    const { accountData, setAccountData, setAlertModalOpen, setAlertMessage } =
+        useContext(AccountContext)
     const [email, setEmail] = useState({
         ...defaultErrorState,
         value: accountData.email,

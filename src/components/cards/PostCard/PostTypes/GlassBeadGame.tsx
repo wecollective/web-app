@@ -237,32 +237,34 @@ const GlassBeadGame = (props: {
             </Row>
             <Row centerX>
                 {beads.length > 0 && (
-                    <Scrollbars className={`${styles.beadDraw} row`}>
-                        {beads.map((bead, i) => (
-                            <Row key={bead.id}>
-                                <StringBeadCard
-                                    bead={{
-                                        type: 'string-audio',
-                                        Creator: bead.user,
-                                        url: bead.beadUrl,
-                                        Link: { relationship: null },
-                                    }}
-                                    postId={id}
-                                    postType={postData.type}
-                                    beadIndex={i}
-                                    location={location}
-                                    style={{
-                                        marginRight:
-                                            beads.length > 2 && i === beads.length - 1 ? 15 : 0,
-                                    }}
-                                />
-                                {i < beads.length - 1 && (
-                                    <Row centerY className={styles.beadDivider}>
-                                        <DNAIcon />
-                                    </Row>
-                                )}
-                            </Row>
-                        ))}
+                    <Scrollbars className={styles.beadDraw}>
+                        <Row>
+                            {beads.map((bead, i) => (
+                                <Row key={bead.id}>
+                                    <StringBeadCard
+                                        bead={{
+                                            type: 'string-audio',
+                                            Creator: bead.user,
+                                            url: bead.beadUrl,
+                                            Link: { relationship: null },
+                                        }}
+                                        postId={id}
+                                        postType={postData.type}
+                                        beadIndex={i}
+                                        location={location}
+                                        style={{
+                                            marginRight:
+                                                beads.length > 2 && i === beads.length - 1 ? 15 : 0,
+                                        }}
+                                    />
+                                    {i < beads.length - 1 && (
+                                        <Row centerY className={styles.beadDivider}>
+                                            <DNAIcon />
+                                        </Row>
+                                    )}
+                                </Row>
+                            ))}
+                        </Row>
                     </Scrollbars>
                 )}
             </Row>

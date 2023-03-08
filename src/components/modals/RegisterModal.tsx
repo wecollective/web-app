@@ -80,7 +80,7 @@ const RegisterModal = (props: { close: () => void }): JSX.Element => {
         setFormData(newFormData)
         if (allValid(newFormData, setFormData)) {
             setLoading(true)
-            const reCaptchaToken = await executeRecaptcha('login')
+            const reCaptchaToken = await executeRecaptcha!('login')
             const data = {
                 reCaptchaToken,
                 handle: handle.value,

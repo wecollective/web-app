@@ -16,17 +16,8 @@ const VerticalCard = (props: {
     text: string
     footer?: any
 }): JSX.Element => {
-    const {
-        type,
-        route,
-        onClick,
-        coverImagePath,
-        flagImagePath,
-        title,
-        subTitle,
-        text,
-        footer,
-    } = props
+    const { type, route, onClick, coverImagePath, flagImagePath, title, subTitle, text, footer } =
+        props
 
     const backgroundImage = coverImagePath
         ? `url(${coverImagePath})`

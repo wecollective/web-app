@@ -1,49 +1,32 @@
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
-import React, { useEffect, useRef } from 'react'
+import React, { useRef } from 'react'
 
 const Scrollbars = (props: {
     id?: string
     className?: string
-    onScrollBottom?: () => void
-    onScrollTop?: () => void
     autoScrollToBottom?: boolean
     style?: any
-    children: any
+    children?: any
 }): JSX.Element => {
-    const {
-        id,
-        className,
-        onScrollBottom,
-        onScrollTop,
-        autoScrollToBottom,
-        style,
-        children,
-    } = props
-    const ref = useRef<OverlayScrollbarsComponent>(null)
-    const OSOptions = {
-        className: 'os-theme-none',
-        callbacks: {
-            onScroll: () => {
-                const instance = ref!.current!.osInstance()
-                const scrollInfo = instance!.scroll()
-                if (onScrollBottom && scrollInfo.ratio.y > 0.99) onScrollBottom()
-                if (onScrollTop && scrollInfo.ratio.y < 0.01) onScrollTop()
-            },
-        },
-    }
+    const { id, className, autoScrollToBottom, style, children } = props
+    const ref = useRef<any>(null)
 
-    useEffect(() => {
-        if (autoScrollToBottom) {
-            const instance = ref!.current!.osInstance()
-            if (instance) instance.scroll([0, '100%'], 500)
-        }
-    }, [children.length])
+    // https://kingsora.github.io/OverlayScrollbars/
+    // "The scroll function is missing. Planned as a plugin. (WIP)"
+
+    // useEffect(() => {
+    //     if (autoScrollToBottom) {
+    //         const instance = ref!.current!.osInstance()
+    //         console.log('instance: ', instance)
+    //         if (instance) instance.scroll([0, '100%'], 500)
+    //     }
+    // }, [children.length])
 
     return (
         <OverlayScrollbarsComponent
             id={id}
-            className={`${className} os-host-flexbox scrollbar-theme`}
-            options={OSOptions}
+            className={`${className} scrollbar-theme`}
+            options={{ scrollbars: { theme: null, autoHide: 'leave', autoHideDelay: 0 } }}
             ref={ref}
             style={style}
         >
@@ -55,10 +38,9 @@ const Scrollbars = (props: {
 Scrollbars.defaultProps = {
     id: null,
     className: null,
-    onScrollBottom: null,
-    onScrollTop: null,
     autoScrollToBottom: false,
     style: null,
+    children: null,
 }
 
 export default Scrollbars

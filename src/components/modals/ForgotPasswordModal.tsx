@@ -27,7 +27,7 @@ const ForgotPasswordModal = (props: { close: () => void }): JSX.Element => {
         e.preventDefault()
         if (isValid(email, setEmail)) {
             setLoading(true)
-            const reCaptchaToken = await executeRecaptcha('resetPasswordRequest')
+            const reCaptchaToken = await executeRecaptcha!('resetPasswordRequest')
             const data = { reCaptchaToken, email: email.value }
             axios
                 .post(`${config.apiURL}/reset-password-request`, data)

@@ -1,6 +1,7 @@
 /* eslint-disable camelcase */
 import * as d3 from 'd3'
 import * as d3Hexbin from 'd3-hexbin'
+import { voronoi } from 'd3-voronoi'
 import React, { useEffect, useState } from 'react'
 // import styles from '../styles/components/PrismMap.module.scss'
 
@@ -28,16 +29,16 @@ const PrismMap = (props: { postData: any; prismData: any }): JSX.Element => {
     ]
     const [selectedColor, setSelectedColor] = useState(1)
 
-    function handleMouseOver() {
-        d3.select(`#${d3.event.target.id}:not(.clicked)`)
+    function handleMouseOver(event) {
+        d3.select(`#${event.target.id}:not(.clicked)`)
             .attr('class', 'mouseover')
             .transition()
             .duration(200)
             .attr('fill', colors[selectedColor])
     }
 
-    function handleMouseClick() {
-        d3.select(`#${d3.event.target.id}`)
+    function handleMouseClick(event) {
+        d3.select(`#${event.target.id}`)
             .transition()
             .duration(200)
             .attr('fill', colors[selectedColor])
@@ -127,7 +128,9 @@ const PrismMap = (props: { postData: any; prismData: any }): JSX.Element => {
 
             // enable zoom and drag
             d3.select('#prismMap').call(
-                d3.zoom().on('zoom', () => d3.selectAll('g').attr('transform', d3.event.transform))
+                d3
+                    .zoom()
+                    .on('zoom', (event) => d3.selectAll('g').attr('transform', event.transform))
             )
 
             // create triangle grid
@@ -139,7 +142,6 @@ const PrismMap = (props: { postData: any; prismData: any }): JSX.Element => {
                     [centerX + 1000, centerY + 1000],
                 ])
                 .centers()
-            const voronoi = d3.voronoi()
 
             svg.append('g')
                 .attr('class', 'triangles')
@@ -355,8 +357,8 @@ const PrismMap = (props: { postData: any; prismData: any }): JSX.Element => {
     useEffect(() => {
         console.log('first useffect')
         // add space bar listener
-        d3.select('body').on('keypress', () => {
-            if (d3.event.keyCode === 32 || d3.event.keyCode === 13) {
+        d3.select('body').on('keypress', (event) => {
+            if (event.keyCode === 32 || event.keyCode === 13) {
                 if (selectedColor === colors.length - 1) setSelectedColor(0)
                 else setSelectedColor(selectedColor + 1)
             }

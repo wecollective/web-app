@@ -14,11 +14,13 @@ const ImageFade = (props: {
     const topImage = d3.select(topImageRef.current)
     const bottomImage = d3.select(bottomImageRef.current)
 
+    // todo: handle image errors
     useEffect(() => {
         if (previousImage) {
             // set bottom image to previous image
             bottomImage.style('opacity', 1)
             bottomImage.attr('src', previousImage)
+            // bottomImage.on('error', (e) => handleImageError(e, previousImage))
         }
         if (imagePath) {
             // hide top image and fade in new imagePath when loaded
@@ -28,6 +30,7 @@ const ImageFade = (props: {
                 bottomImage.transition().delay(300).duration(speed).style('opacity', 0)
             })
             topImage.attr('src', imagePath)
+            // bottomImage.on('error', (e) => handleImageError(e, imagePath))
         } else {
             // hide bottom image and fade top image out to reveal placeholder
             bottomImage.style('opacity', 0)

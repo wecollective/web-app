@@ -1661,68 +1661,79 @@ const CreatePostModal = (): JSX.Element => {
                                     )}
                                     <Row centerX style={{ width: '100%' }}>
                                         {images.length > 0 && (
-                                            <Scrollbars className={`${styles.images} row`}>
-                                                {images.map((image, index) => (
-                                                    <Column
-                                                        centerX
-                                                        className={styles.image}
-                                                        key={index}
-                                                    >
-                                                        <CloseButton
-                                                            size={20}
-                                                            onClick={() => removeImage(index)}
-                                                        />
-                                                        <img
-                                                            src={
-                                                                image.url ||
-                                                                URL.createObjectURL(image.file)
-                                                            }
-                                                            alt=''
-                                                        />
-                                                        {image.caption && <p>{image.caption}</p>}
-                                                        <Row centerY style={{ width: 220 }}>
-                                                            <Input
-                                                                type='text'
-                                                                placeholder={`${
-                                                                    image.caption ? 'change' : 'add'
-                                                                } caption...`}
-                                                                value={image.newCaption}
-                                                                onChange={(v) =>
-                                                                    updateNewCaption(index, v)
+                                            <Scrollbars className={styles.images}>
+                                                <Row>
+                                                    {images.map((image, index) => (
+                                                        <Column
+                                                            centerX
+                                                            className={styles.image}
+                                                            key={index}
+                                                        >
+                                                            <CloseButton
+                                                                size={20}
+                                                                onClick={() => removeImage(index)}
+                                                            />
+                                                            <img
+                                                                src={
+                                                                    image.url ||
+                                                                    URL.createObjectURL(image.file)
                                                                 }
-                                                                style={{ marginRight: 5 }}
+                                                                alt=''
                                                             />
-                                                            <Button
-                                                                icon={<PlusIcon />}
-                                                                color='grey'
-                                                                onClick={() => updateCaption(index)}
-                                                                style={{ padding: '0 10px' }}
-                                                            />
-                                                        </Row>
-                                                        <Row centerX className={styles.itemFooter}>
-                                                            {index !== 0 && (
-                                                                <button
-                                                                    type='button'
-                                                                    onClick={() =>
-                                                                        moveImage(index, -1)
-                                                                    }
-                                                                >
-                                                                    <ChevronLeftIcon />
-                                                                </button>
+                                                            {image.caption && (
+                                                                <p>{image.caption}</p>
                                                             )}
-                                                            {index < images.length - 1 && (
-                                                                <button
-                                                                    type='button'
-                                                                    onClick={() =>
-                                                                        moveImage(index, 1)
+                                                            <Row centerY style={{ width: 220 }}>
+                                                                <Input
+                                                                    type='text'
+                                                                    placeholder={`${
+                                                                        image.caption
+                                                                            ? 'change'
+                                                                            : 'add'
+                                                                    } caption...`}
+                                                                    value={image.newCaption}
+                                                                    onChange={(v) =>
+                                                                        updateNewCaption(index, v)
                                                                     }
-                                                                >
-                                                                    <ChevronRightIcon />
-                                                                </button>
-                                                            )}
-                                                        </Row>
-                                                    </Column>
-                                                ))}
+                                                                    style={{ marginRight: 5 }}
+                                                                />
+                                                                <Button
+                                                                    icon={<PlusIcon />}
+                                                                    color='grey'
+                                                                    onClick={() =>
+                                                                        updateCaption(index)
+                                                                    }
+                                                                    style={{ padding: '0 10px' }}
+                                                                />
+                                                            </Row>
+                                                            <Row
+                                                                centerX
+                                                                className={styles.itemFooter}
+                                                            >
+                                                                {index !== 0 && (
+                                                                    <button
+                                                                        type='button'
+                                                                        onClick={() =>
+                                                                            moveImage(index, -1)
+                                                                        }
+                                                                    >
+                                                                        <ChevronLeftIcon />
+                                                                    </button>
+                                                                )}
+                                                                {index < images.length - 1 && (
+                                                                    <button
+                                                                        type='button'
+                                                                        onClick={() =>
+                                                                            moveImage(index, 1)
+                                                                        }
+                                                                    >
+                                                                        <ChevronRightIcon />
+                                                                    </button>
+                                                                )}
+                                                            </Row>
+                                                        </Column>
+                                                    ))}
+                                                </Row>
                                             </Scrollbars>
                                         )}
                                     </Row>
@@ -1844,9 +1855,9 @@ const CreatePostModal = (): JSX.Element => {
                                                 audioElementId='new-post-audio'
                                                 audioURL={URL.createObjectURL(audioFile)}
                                                 staticBars={1200}
-                                                staticColor={colors.audioVisualiserColor}
+                                                staticColor={colors.audioVisualiserStatic}
                                                 dynamicBars={160}
-                                                dynamicColor={colors.audioVisualiserColor}
+                                                dynamicColor={colors.audioVisualiserDynamic}
                                                 style={{ height: 80, margin: '20px 0 10px 0' }}
                                             />
                                             <Row centerY>
@@ -2598,64 +2609,71 @@ const CreatePostModal = (): JSX.Element => {
                                                         <Scrollbars
                                                             className={`${styles.images} row`}
                                                         >
-                                                            {images.map((image, index) => (
-                                                                <Column
-                                                                    className={styles.image}
-                                                                    key={index}
-                                                                >
-                                                                    <CloseButton
-                                                                        size={20}
-                                                                        onClick={() =>
-                                                                            removeImage(index)
-                                                                        }
-                                                                    />
-                                                                    <img
-                                                                        src={
-                                                                            image.url ||
-                                                                            URL.createObjectURL(
-                                                                                image.file
-                                                                            )
-                                                                        }
-                                                                        alt=''
-                                                                    />
-                                                                    {image.caption && (
-                                                                        <p>{image.caption}</p>
-                                                                    )}
-                                                                    <Row
-                                                                        centerY
-                                                                        style={{ width: 180 }}
+                                                            <Row>
+                                                                {images.map((image, index) => (
+                                                                    <Column
+                                                                        className={styles.image}
+                                                                        key={index}
                                                                     >
-                                                                        <Input
-                                                                            type='text'
-                                                                            placeholder={`${
-                                                                                image.caption
-                                                                                    ? 'change'
-                                                                                    : 'add'
-                                                                            } caption...`}
-                                                                            value={image.newCaption}
-                                                                            onChange={(v) =>
-                                                                                updateNewCaption(
-                                                                                    index,
-                                                                                    v
+                                                                        <CloseButton
+                                                                            size={20}
+                                                                            onClick={() =>
+                                                                                removeImage(index)
+                                                                            }
+                                                                        />
+                                                                        <img
+                                                                            src={
+                                                                                image.url ||
+                                                                                URL.createObjectURL(
+                                                                                    image.file
                                                                                 )
                                                                             }
-                                                                            style={{
-                                                                                marginRight: 5,
-                                                                            }}
+                                                                            alt=''
                                                                         />
-                                                                        <Button
-                                                                            icon={<PlusIcon />}
-                                                                            color='grey'
-                                                                            onClick={() =>
-                                                                                updateCaption(index)
-                                                                            }
-                                                                            style={{
-                                                                                padding: '0 10px',
-                                                                            }}
-                                                                        />
-                                                                    </Row>
-                                                                </Column>
-                                                            ))}
+                                                                        {image.caption && (
+                                                                            <p>{image.caption}</p>
+                                                                        )}
+                                                                        <Row
+                                                                            centerY
+                                                                            style={{ width: 180 }}
+                                                                        >
+                                                                            <Input
+                                                                                type='text'
+                                                                                placeholder={`${
+                                                                                    image.caption
+                                                                                        ? 'change'
+                                                                                        : 'add'
+                                                                                } caption...`}
+                                                                                value={
+                                                                                    image.newCaption
+                                                                                }
+                                                                                onChange={(v) =>
+                                                                                    updateNewCaption(
+                                                                                        index,
+                                                                                        v
+                                                                                    )
+                                                                                }
+                                                                                style={{
+                                                                                    marginRight: 5,
+                                                                                }}
+                                                                            />
+                                                                            <Button
+                                                                                icon={<PlusIcon />}
+                                                                                color='grey'
+                                                                                onClick={() =>
+                                                                                    updateCaption(
+                                                                                        index
+                                                                                    )
+                                                                                }
+                                                                                style={{
+                                                                                    padding:
+                                                                                        '0 10px',
+                                                                                }}
+                                                                            />
+                                                                        </Row>
+                                                                    </Column>
+                                                                ))}
+                                                            </Row>
                                                         </Scrollbars>
                                                     )}
                                                 </Row>
@@ -2741,65 +2759,81 @@ const CreatePostModal = (): JSX.Element => {
                                         />
                                     </Column>
                                     {string.length > 0 && (
-                                        <Scrollbars className={`${styles.beadDraw} row`}>
-                                            {string.map((bead, index) => (
-                                                <Row key={bead.id}>
-                                                    <Column>
-                                                        <StringBeadCard
-                                                            bead={
-                                                                bead.role === 'source'
-                                                                    ? bead
-                                                                    : formatBeadData(bead, index)
-                                                            }
-                                                            beadIndex={index}
-                                                            location='create-string-modal'
-                                                            removeBead={removeBead}
-                                                            style={{
-                                                                marginRight:
-                                                                    string.length > 2 &&
-                                                                    index === string.length - 1
-                                                                        ? 7
-                                                                        : 0,
-                                                            }}
-                                                        />
-                                                        <Row centerX className={styles.itemFooter}>
-                                                            {(string[0].role === 'source'
-                                                                ? index > 1
-                                                                : index > 0) && (
-                                                                <button
-                                                                    type='button'
-                                                                    onClick={() =>
-                                                                        moveBead(index, -1)
-                                                                    }
-                                                                >
-                                                                    <ChevronLeftIcon />
-                                                                </button>
-                                                            )}
-                                                            {(string[0].role === 'source'
-                                                                ? index > 0 &&
-                                                                  index < string.length - 1
-                                                                : index < string.length - 1) && (
-                                                                <button
-                                                                    type='button'
-                                                                    onClick={() =>
-                                                                        moveBead(index, 1)
-                                                                    }
-                                                                >
-                                                                    <ChevronRightIcon />
-                                                                </button>
-                                                            )}
-                                                        </Row>
-                                                    </Column>
-                                                    {index < string.length - 1 && (
-                                                        <Row centerY className={styles.beadDivider}>
-                                                            <DNAIcon />
-                                                        </Row>
-                                                    )}
-                                                </Row>
-                                            ))}
-                                            <span
-                                                style={{ marginLeft: -7, width: 7, flexShrink: 0 }}
-                                            />
+                                        <Scrollbars className={styles.beadDraw}>
+                                            <Row>
+                                                {string.map((bead, index) => (
+                                                    <Row key={bead.id}>
+                                                        <Column>
+                                                            <StringBeadCard
+                                                                bead={
+                                                                    bead.role === 'source'
+                                                                        ? bead
+                                                                        : formatBeadData(
+                                                                              bead,
+                                                                              index
+                                                                          )
+                                                                }
+                                                                beadIndex={index}
+                                                                location='create-string-modal'
+                                                                removeBead={removeBead}
+                                                                style={{
+                                                                    marginRight:
+                                                                        string.length > 2 &&
+                                                                        index === string.length - 1
+                                                                            ? 7
+                                                                            : 0,
+                                                                }}
+                                                            />
+                                                            <Row
+                                                                centerX
+                                                                className={styles.itemFooter}
+                                                            >
+                                                                {(string[0].role === 'source'
+                                                                    ? index > 1
+                                                                    : index > 0) && (
+                                                                    <button
+                                                                        type='button'
+                                                                        onClick={() =>
+                                                                            moveBead(index, -1)
+                                                                        }
+                                                                    >
+                                                                        <ChevronLeftIcon />
+                                                                    </button>
+                                                                )}
+                                                                {(string[0].role === 'source'
+                                                                    ? index > 0 &&
+                                                                      index < string.length - 1
+                                                                    : index <
+                                                                      string.length - 1) && (
+                                                                    <button
+                                                                        type='button'
+                                                                        onClick={() =>
+                                                                            moveBead(index, 1)
+                                                                        }
+                                                                    >
+                                                                        <ChevronRightIcon />
+                                                                    </button>
+                                                                )}
+                                                            </Row>
+                                                        </Column>
+                                                        {index < string.length - 1 && (
+                                                            <Row
+                                                                centerY
+                                                                className={styles.beadDivider}
+                                                            >
+                                                                <DNAIcon />
+                                                            </Row>
+                                                        )}
+                                                    </Row>
+                                                ))}
+                                                <span
+                                                    style={{
+                                                        marginLeft: -7,
+                                                        width: 7,
+                                                        flexShrink: 0,
+                                                    }}
+                                                />
+                                            </Row>
                                         </Scrollbars>
                                     )}
                                 </Column>

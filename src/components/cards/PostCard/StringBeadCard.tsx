@@ -254,20 +254,22 @@ const StringBeadCard = (props: {
                     {type === 'image' && (
                         <Row centerX>
                             <Scrollbars style={{ paddingBottom: 5 }} className='row'>
-                                {images.map((image, i) => (
-                                    <button
-                                        className={styles.image}
-                                        key={i}
-                                        type='button'
-                                        onClick={() => openImageModal(image.id)}
-                                    >
-                                        <img
-                                            src={image.url}
-                                            onError={(e) => handleImageError(e, image.url)}
-                                            alt=''
-                                        />
-                                    </button>
-                                ))}
+                                <Row>
+                                    {images.map((image, i) => (
+                                        <button
+                                            className={styles.image}
+                                            key={i}
+                                            type='button'
+                                            onClick={() => openImageModal(image.id)}
+                                        >
+                                            <img
+                                                src={image.url}
+                                                onError={(e) => handleImageError(e, image.url)}
+                                                alt=''
+                                            />
+                                        </button>
+                                    ))}
+                                </Row>
                             </Scrollbars>
                         </Row>
                     )}

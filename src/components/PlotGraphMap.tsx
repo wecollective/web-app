@@ -76,8 +76,8 @@ const PlotGraphMap = (props: { plotGraphData: any }): JSX.Element => {
             d3.select('#container').call(
                 d3
                     .zoom()
-                    .on('zoom', () =>
-                        d3.select('#master-group').attr('transform', d3.event.transform)
+                    .on('zoom', (event) =>
+                        d3.select('#master-group').attr('transform', event.transform)
                     )
             )
 
