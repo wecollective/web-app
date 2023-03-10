@@ -50,7 +50,7 @@ const GlobalHelpButton = (): JSX.Element => {
             {helpModalOpen && (
                 <Modal centered close={() => setHelpModalOpen(false)}>
                     <h1>Have a question or run into a bug?</h1>
-                    <p>Let us know and we'll get back to you ASAP</p>
+                    <p>Let us know and we&apos;ll get back to you ASAP</p>
                     {!loggedIn && (
                         <Input
                             type='text'

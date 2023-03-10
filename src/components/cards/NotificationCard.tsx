@@ -552,7 +552,7 @@ const NotificationCard = (props: {
 
                     {type === 'weave-move' && (
                         <Content typeIcon={<WeaveIcon />}>
-                            <p>It's your move! Add the next bead to the</p>
+                            <p>It&apos;s your move! Add the next bead to the</p>
                             <TextLink text='weave' link={`/p/${postId}`} />
                             <CreatedAt date={createdAt} />
                         </Content>

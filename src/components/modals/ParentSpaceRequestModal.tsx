@@ -154,7 +154,7 @@ const ParentSpaceRequestModal = (props: { close: () => void }): JSX.Element => {
             return (
                 <Column centerX className='successContainer'>
                     <div style={{ display: 'inline' }}>
-                        This connection is allowed and you're a moderator of{' '}
+                        This connection is allowed and you&apos;re a moderator of{' '}
                         <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
                             <FlagImage
                                 type='space'
@@ -170,7 +170,7 @@ const ParentSpaceRequestModal = (props: { close: () => void }): JSX.Element => {
         return (
             <Column centerX className='successContainer'>
                 <div style={{ display: 'inline' }}>
-                    This connection is allowed but you're not a moderator of{' '}
+                    This connection is allowed but you&apos;re not a moderator of{' '}
                     <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
                         <FlagImage type='space' imagePath={selectedSpace.flagImagePath} size={27} />
                     </div>{' '}

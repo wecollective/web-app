@@ -636,7 +636,7 @@ const GlassBeadGame = (): JSX.Element => {
     }
 
     // todo: set up general createPeer function
-    function createPeer(isInitiator) {}
+    // function createPeer(isInitiator) {}
 
     function refreshStream(socketId, user) {
         // singal refresh request
