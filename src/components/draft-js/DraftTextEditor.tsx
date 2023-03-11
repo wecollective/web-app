@@ -22,7 +22,7 @@ import {
 import Editor from '@draft-js-plugins/editor'
 // import createEmojiPlugin, { defaultTheme as emojiTheme } from '@draft-js-plugins/emoji'
 // import '@draft-js-plugins/emoji/lib/plugin.css'
-import createLinkifyPlugin from '@draft-js-plugins/linkify'
+import createLinkifyPlugin, { extractLinks } from '@draft-js-plugins/linkify'
 import createMentionPlugin from '@draft-js-plugins/mention'
 import '@draft-js-plugins/mention/lib/plugin.css'
 import createToolbarPlugin from '@draft-js-plugins/static-toolbar'
@@ -38,7 +38,7 @@ const DraftTextEditor = (props: {
     id?: string
     type: 'post' | 'comment'
     stringifiedDraft: string
-    onChange: (text: string, mentions: any[]) => void
+    onChange: (text: string, mentions: any[], urls: string[]) => void
     onSubmit?: () => void
     submitLoading?: boolean
     maxChars?: number
@@ -141,13 +141,18 @@ const DraftTextEditor = (props: {
         setEditorState(newEditorState)
         const contentState = newEditorState.getCurrentContent()
         setCharacterLength(contentState.getPlainText().length)
-        const rawDraft = convertToRaw(contentState)
+        // extract links
+        let urls = [] as any
+        const extractedLinks = extractLinks(contentState.getPlainText())
+        if (extractedLinks) urls = extractedLinks.map((link) => link.url)
+        // extract mentions
         const mentions = [] as any
+        const rawDraft = convertToRaw(contentState)
         const entities = rawDraft.entityMap
         Object.keys(entities).forEach((key) => {
             if (entities[key].type === 'mention') mentions.push(entities[key].data.mention)
         })
-        onChange(JSON.stringify(rawDraft), mentions)
+        onChange(JSON.stringify(rawDraft), mentions, urls)
     }
 
     function onSearchChange({ value }) {
