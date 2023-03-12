@@ -12,7 +12,7 @@ const ImageTitle = (props: {
     style?: any
     className?: any
     shadow?: boolean
-    link?: string
+    link?: string | null
     wrapText?: boolean
     onClick?: () => void
 }): JSX.Element => {
