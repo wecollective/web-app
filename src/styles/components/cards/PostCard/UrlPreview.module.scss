@@ -1,70 +1,82 @@
 @import '@styles/Variables';
 
+.loading {
+    width: 100%;
+    border-radius: 5px;
+    background-color: $grey1;
+    padding: 10px;
+}
+
 .wrapper {
-    display: flex;
     width: 100%;
     border-radius: 5px;
     background-color: $grey1;
     overflow: hidden;
     transition: background-color 0.3s;
+    position: relative;
 
     &:hover {
         background-color: $grey2;
     }
 
-    > img {
-        width: 200px;
-        height: 120px;
-        border-top-left-radius: 5px;
-        border-bottom-left-radius: 5px;
-        object-fit: cover;
-        flex-shrink: 0;
-    }
+    > a {
+        display: flex;
+        width: 100%;
 
-    .urlIcon {
-        margin-left: 12px;
-        color: $grey6;
-        > svg {
-            width: 20px;
-            height: 20px;
+        img {
+            width: 200px;
+            height: 120px;
+            border-top-left-radius: 5px;
+            border-bottom-left-radius: 5px;
+            object-fit: cover;
+            flex-shrink: 0;
         }
-    }
 
-    p {
-        word-break: break-all;
-        overflow: hidden;
-    }
-
-    .metaData {
-        padding: 10px 15px;
-
-        h1 {
-            font-size: 16px;
-            font-weight: 600;
-            line-height: 20px;
-            max-height: 40px;
-            overflow: hidden;
-            margin-bottom: 2px;
+        .urlIcon {
+            margin-left: 12px;
+            color: $grey6;
+            > svg {
+                width: 20px;
+                height: 20px;
+            }
         }
 
         p {
-            font-size: 14px;
-            line-height: 18px;
-            max-height: 36px;
-            margin-bottom: 5px;
+            word-break: break-all;
+            overflow: hidden;
         }
 
-        .domain {
-            > svg {
-                width: 15px;
-                height: 15px;
-                opacity: 0.3;
-                margin-right: 5px;
+        .metaData {
+            padding: 10px 15px;
+
+            h1 {
+                font-size: 16px;
+                font-weight: 600;
+                line-height: 20px;
+                max-height: 40px;
+                overflow: hidden;
+                margin-bottom: 2px;
             }
 
-            > p {
-                margin: 0;
-                opacity: 0.5;
+            p {
+                font-size: 14px;
+                line-height: 18px;
+                max-height: 36px;
+                margin-bottom: 5px;
+            }
+
+            .domain {
+                > svg {
+                    width: 15px;
+                    height: 15px;
+                    opacity: 0.3;
+                    margin-right: 5px;
+                }
+
+                > p {
+                    margin: 0;
+                    opacity: 0.5;
+                }
             }
         }
     }
