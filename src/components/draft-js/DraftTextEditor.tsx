@@ -29,7 +29,6 @@ import createToolbarPlugin from '@draft-js-plugins/static-toolbar'
 import createTextAlignmentPlugin from '@draft-js-plugins/text-alignment'
 import config from '@src/Config'
 import styles from '@styles/components/draft-js/DraftText.module.scss'
-import { DangerIcon } from '@svgs/all'
 import axios from 'axios'
 import { ContentState, convertFromRaw, convertToRaw, EditorState } from 'draft-js'
 import React, { useContext, useEffect, useRef, useState } from 'react'
@@ -118,7 +117,8 @@ const DraftTextEditor = (props: {
     const [suggestions, setSuggestions] = useState([])
     const [showSuggestions, setShowSuggestions] = useState(false)
     const [characterLength, setCharacterLength] = useState(0)
-    const editorRef = useRef<any>(null)
+    const [focused, setFocused] = useState(false)
+    const wrapperRef = useRef<HTMLDivElement>(null)
 
     // const { EmojiSuggestions, EmojiSelect } = emojiPlugin
     const { TextAlignment } = textAlignmentPlugin as any
@@ -141,7 +141,7 @@ const DraftTextEditor = (props: {
         setEditorState(newEditorState)
         const contentState = newEditorState.getCurrentContent()
         setCharacterLength(contentState.getPlainText().length)
-        // extract links
+        // extract urls
         let urls = [] as any
         const extractedLinks = extractLinks(contentState.getPlainText())
         if (extractedLinks) urls = extractedLinks.map((link) => link.url)
@@ -173,6 +173,10 @@ const DraftTextEditor = (props: {
             .catch((error) => console.log(error))
     }
 
+    function handleClickOutside(e) {
+        if (!wrapperRef.current!.contains(e.target)) setFocused(false)
+    }
+
     useEffect(() => {
         // isDraft boolean used as temporary solution until old markdown converted to draft
         const isDraft = stringifiedDraft && stringifiedDraft.slice(0, 10) === `{"blocks":`
@@ -184,16 +188,23 @@ const DraftTextEditor = (props: {
         setCharacterLength(newEditorState.getCurrentContent().getPlainText().length)
     }, [])
 
+    // set up listener for clicks outside element to update focus state
+    useEffect(() => {
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    })
+
     return (
         <div
             id={id}
             className={`${styles.wrapper} ${styles.editable} ${styles[type]} ${className} ${
                 styles[state || 'default']
             }`}
+            ref={wrapperRef}
             style={style}
             role='button'
             tabIndex={0}
-            onClick={() => editorRef.current && editorRef.current.focus()}
+            onClick={() => setFocused(true)}
         >
             <Column className={styles.reverseColumn}>
                 {/* <div className={styles.emojiButtonWrapper}>
@@ -213,12 +224,9 @@ const DraftTextEditor = (props: {
                         <Editor
                             placeholder='Enter text...'
                             editorState={editorState}
-                            onChange={onEditorStateChange}
                             plugins={plugins}
                             customStyleMap={styleMap}
-                            ref={(element) => {
-                                editorRef.current = element
-                            }}
+                            onChange={onEditorStateChange}
                         />
                         {type === 'comment' && (
                             <Button
@@ -232,23 +240,25 @@ const DraftTextEditor = (props: {
                         )}
                     </Row>
                 )}
-                <Toolbar>
-                    {(externalProps) => (
-                        <Row wrap style={{ paddingRight: 40 }}>
-                            <BoldButton {...externalProps} />
-                            <ItalicButton {...externalProps} />
-                            <UnderlineButton {...externalProps} />
-                            <CodeButton {...externalProps} />
-                            {/* <div className={styles.separator} /> */}
-                            <UnorderedListButton {...externalProps} />
-                            <OrderedListButton {...externalProps} />
-                            <BlockquoteButton {...externalProps} />
-                            <CodeBlockButton {...externalProps} />
-                            <TextAlignment {...externalProps} />
-                            <LinkButton {...externalProps} />
-                        </Row>
-                    )}
-                </Toolbar>
+                <Row className={`${styles.toolbarWrapper} ${focused && styles.visible}`}>
+                    <Toolbar>
+                        {(externalProps) => (
+                            <Row wrap style={{ paddingRight: 40 }}>
+                                <BoldButton {...externalProps} />
+                                <ItalicButton {...externalProps} />
+                                <UnderlineButton {...externalProps} />
+                                <CodeButton {...externalProps} />
+                                {/* <div className={styles.separator} /> */}
+                                <UnorderedListButton {...externalProps} />
+                                <OrderedListButton {...externalProps} />
+                                <BlockquoteButton {...externalProps} />
+                                <CodeBlockButton {...externalProps} />
+                                <TextAlignment {...externalProps} />
+                                <LinkButton {...externalProps} />
+                            </Row>
+                        )}
+                    </Toolbar>
+                </Row>
             </Column>
             <MentionSuggestions
                 onSearchChange={onSearchChange}
@@ -258,7 +268,14 @@ const DraftTextEditor = (props: {
                 onAddMention={() => null}
                 entryComponent={Suggestion}
             />
-            {(type === 'post' || state === 'invalid') && (
+            <Row className={`${styles.characters} ${focused && styles.visible}`}>
+                <p className={maxChars && characterLength > maxChars ? styles.error : ''}>
+                    {characterLength}
+                    {maxChars ? `/${maxChars}` : ''} Chars
+                </p>
+            </Row>
+
+            {/* {(type === 'post' || state === 'invalid') && (
                 <Row
                     centerY
                     spaceBetween
@@ -266,7 +283,7 @@ const DraftTextEditor = (props: {
                 >
                     <Row className={styles.errors}>
                         {state === 'invalid' && <DangerIcon />}
-                        {/* {state === 'valid' && <SuccessIcon />} */}
+                        {state === 'valid' && <SuccessIcon />}
                         {state === 'invalid' && errors!.map((error) => <p key={error}>{error}</p>)}
                     </Row>
                     <p>
@@ -274,7 +291,7 @@ const DraftTextEditor = (props: {
                         {maxChars ? `/${maxChars}` : ''} Chars
                     </p>
                 </Row>
-            )}
+            )} */}
         </div>
     )
 }
