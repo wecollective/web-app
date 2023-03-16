@@ -7,6 +7,7 @@ import Button from '@components/Button'
 import Column from '@components/Column'
 import DraftTextEditor from '@components/draft-js/DraftTextEditor'
 import ImageTitle from '@components/ImageTitle'
+import Images from '@src/components/cards/PostCard/PostTypes/Images'
 // import Input from '@components/Input'
 // import Markdown from '@components/Markdown'
 import Modal from '@components/modals/Modal'
@@ -25,6 +26,7 @@ import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/CreatePostModal2.module.scss'
 // import * as d3 from 'd3'
 // import flatpickr from 'flatpickr'
+import AddPostImagesModal from '@components/modals/AddPostImagesModal'
 import AddPostSpacesModal from '@components/modals/AddPostSpacesModal'
 import config from '@src/Config'
 import axios from 'axios'
@@ -53,8 +55,8 @@ const CreatePostModal = (): JSX.Element => {
         setAlertMessage,
     } = useContext(AccountContext)
     const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
+    const [loading, setLoading] = useState(false)
     const [postType, setPostType] = useState('')
-    const [spacesModalOpen, setSpacesModalOpen] = useState(false)
     const [spaces, setSpaces] = useState<any[]>([spaceData.id ? spaceData : defaultSelectedSpace])
     const [text, setText] = useState({
         ...defaultErrorState,
@@ -70,8 +72,10 @@ const CreatePostModal = (): JSX.Element => {
     const [mentions, setMentions] = useState<any[]>([])
     const [urls, setUrls] = useState<any[]>([])
     const [urlsMetaData, setUrlsMetaData] = useState<any[]>([])
-    const [loading, setLoading] = useState(false)
+    const [images, setImages] = useState<any[]>([])
     const [saved, setSaved] = useState(false)
+    const [spacesModalOpen, setSpacesModalOpen] = useState(false)
+    const [imagesModalOpen, setImagesModalOpen] = useState(false)
     const cookies = new Cookies()
     const urlRequestIndex = useRef(0)
 
@@ -162,6 +166,7 @@ const CreatePostModal = (): JSX.Element => {
                                     setUrls(textUrls)
                                 }}
                             />
+                            {postType === 'Image' && <Images images={images} />}
                             {urlsMetaData.map((u) => (
                                 <UrlPreview
                                     key={u.url}
@@ -174,7 +179,14 @@ const CreatePostModal = (): JSX.Element => {
                         </Column>
                     </Column>
                     <Row className={styles.contentButtons}>
-                        <button type='button' title='Add images' onClick={() => null}>
+                        <button
+                            type='button'
+                            title='Add images'
+                            onClick={() => {
+                                setPostType('Image')
+                                setImagesModalOpen(true)
+                            }}
+                        >
                             <ImageIcon />
                         </button>
                         <button type='button' title='Add audio' onClick={() => null}>
@@ -198,6 +210,13 @@ const CreatePostModal = (): JSX.Element => {
                     spaces={spaces}
                     setSpaces={setSpaces}
                     close={() => setSpacesModalOpen(false)}
+                />
+            )}
+            {imagesModalOpen && (
+                <AddPostImagesModal
+                    images={images}
+                    setImages={setImages}
+                    close={() => setImagesModalOpen(false)}
                 />
             )}
         </Modal>

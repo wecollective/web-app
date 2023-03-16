@@ -1,7 +1,6 @@
 import Audio from '@components/cards/PostCard/PostTypes/Audio'
 import Event from '@components/cards/PostCard/PostTypes/Event'
 import GlassBeadGame from '@components/cards/PostCard/PostTypes/GlassBeadGame'
-import Image from '@components/cards/PostCard/PostTypes/Image'
 import Inquiry from '@components/cards/PostCard/PostTypes/Inquiry'
 import String from '@components/cards/PostCard/PostTypes/String'
 import Text from '@components/cards/PostCard/PostTypes/Text'
@@ -19,6 +18,7 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import Comments from '@src/components/cards/Comments/Comments'
 import LikeModal from '@src/components/cards/PostCard/LikeModal'
 import LinkModal from '@src/components/cards/PostCard/LinkModal'
+import Images from '@src/components/cards/PostCard/PostTypes/Images'
 import RatingModal from '@src/components/cards/PostCard/RatingModal'
 import RepostModal from '@src/components/cards/PostCard/RepostModal'
 import EditPostModal from '@src/components/modals/EditPostModal'
@@ -328,7 +328,10 @@ const PostCard = (props: {
             <Column className={styles.content}>
                 {['text', 'string-text'].includes(type) && <Text postData={postData} />}
                 {['url', 'string-url'].includes(type) && <Url postData={postData} />}
-                {['image', 'string-image'].includes(type) && <Image postData={postData} />}
+                {/* {['image', 'string-image'].includes(type) && <Image postData={postData} />} */}
+                {['image', 'string-image'].includes(type) && (
+                    <Images images={postData.PostImages.sort((a, b) => a.index - b.index)} />
+                )}
                 {['audio', 'string-audio'].includes(type) && <Audio postData={postData} />}
                 {type === 'event' && (
                     <Event postData={postData} setPostData={setPostData} location={location} />

@@ -114,7 +114,7 @@ const AddPostSpacesModal = (props: {
 
     return (
         <Modal centered close={close} style={{ overflow: 'unset' }}>
-            <h1>Spaces</h1>
+            <h1>Add spaces</h1>
             <p>Choose where you want the post to appear</p>
             <SearchSelector
                 type='space'
@@ -166,7 +166,7 @@ const AddPostSpacesModal = (props: {
             )}
             <Button
                 text='Save spaces'
-                color='aqua'
+                color='blue'
                 onClick={saveSpaces}
                 style={{ marginTop: 30 }}
             />
