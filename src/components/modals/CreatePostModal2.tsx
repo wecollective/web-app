@@ -10,6 +10,7 @@ import ImageTitle from '@components/ImageTitle'
 import Images from '@src/components/cards/PostCard/PostTypes/Images'
 // import Input from '@components/Input'
 // import Markdown from '@components/Markdown'
+import Audio from '@components/cards/PostCard/PostTypes/Audio'
 import Modal from '@components/modals/Modal'
 import PostSpaces from '@src/components/cards/PostCard/PostSpaces'
 // import ProgressBarSteps from '@components/ProgressBarSteps'
@@ -26,6 +27,7 @@ import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/CreatePostModal2.module.scss'
 // import * as d3 from 'd3'
 // import flatpickr from 'flatpickr'
+import AddPostAudioModal from '@components/modals/AddPostAudioModal'
 import AddPostImagesModal from '@components/modals/AddPostImagesModal'
 import AddPostSpacesModal from '@components/modals/AddPostSpacesModal'
 import config from '@src/Config'
@@ -73,9 +75,11 @@ const CreatePostModal = (): JSX.Element => {
     const [urls, setUrls] = useState<any[]>([])
     const [urlsMetaData, setUrlsMetaData] = useState<any[]>([])
     const [images, setImages] = useState<any[]>([])
+    const [audio, setAudio] = useState<File>()
     const [saved, setSaved] = useState(false)
     const [spacesModalOpen, setSpacesModalOpen] = useState(false)
     const [imagesModalOpen, setImagesModalOpen] = useState(false)
+    const [audioModalOpen, setAudioModalOpen] = useState(false)
     const cookies = new Cookies()
     const urlRequestIndex = useRef(0)
 
@@ -154,6 +158,7 @@ const CreatePostModal = (): JSX.Element => {
                             </button>
                         </Row>
                         <Column className={styles.content}>
+                            {['event', 'glass-bead-game'].includes(postType) && <h2>Title!</h2>}
                             <DraftTextEditor
                                 type='post'
                                 stringifiedDraft={text.value}
@@ -166,7 +171,15 @@ const CreatePostModal = (): JSX.Element => {
                                     setUrls(textUrls)
                                 }}
                             />
-                            {postType === 'Image' && <Images images={images} />}
+                            {postType === 'image' && <Images images={images} />}
+                            {postType === 'audio' && audio && (
+                                <Audio
+                                    key={audio.lastModified}
+                                    id={0}
+                                    url={URL.createObjectURL(audio)}
+                                    location='create-post-audio'
+                                />
+                            )}
                             {urlsMetaData.map((u) => (
                                 <UrlPreview
                                     key={u.url}
@@ -182,17 +195,22 @@ const CreatePostModal = (): JSX.Element => {
                         <button
                             type='button'
                             title='Add images'
-                            onClick={() => {
-                                setPostType('Image')
-                                setImagesModalOpen(true)
-                            }}
+                            onClick={() => setImagesModalOpen(true)}
                         >
                             <ImageIcon />
                         </button>
-                        <button type='button' title='Add audio' onClick={() => null}>
+                        <button
+                            type='button'
+                            title='Add audio'
+                            onClick={() => setAudioModalOpen(true)}
+                        >
                             <AudioIcon />
                         </button>
-                        <button type='button' title='Add event' onClick={() => null}>
+                        <button
+                            type='button'
+                            title='Add event'
+                            onClick={() => setPostType('event')}
+                        >
                             <CalendarIcon />
                         </button>
                         <button type='button' title='Add poll' onClick={() => null}>
@@ -216,7 +234,16 @@ const CreatePostModal = (): JSX.Element => {
                 <AddPostImagesModal
                     images={images}
                     setImages={setImages}
+                    setPostType={setPostType}
                     close={() => setImagesModalOpen(false)}
+                />
+            )}
+            {audioModalOpen && (
+                <AddPostAudioModal
+                    audio={audio}
+                    setAudio={setAudio}
+                    setPostType={setPostType}
+                    close={() => setAudioModalOpen(false)}
                 />
             )}
         </Modal>

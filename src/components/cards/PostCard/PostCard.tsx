@@ -332,7 +332,10 @@ const PostCard = (props: {
                 {['image', 'string-image'].includes(type) && (
                     <Images images={postData.PostImages.sort((a, b) => a.index - b.index)} />
                 )}
-                {['audio', 'string-audio'].includes(type) && <Audio postData={postData} />}
+                {/* {['audio', 'string-audio'].includes(type) && <Audio postData={postData} />} */}
+                {['audio', 'string-audio'].includes(type) && (
+                    <Audio id={postData.id} url={postData.url} location={location} />
+                )}
                 {type === 'event' && (
                     <Event postData={postData} setPostData={setPostData} location={location} />
                 )}

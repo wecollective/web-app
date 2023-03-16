@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react'
 const AudioTimeSlider = (props: {
     audioElementId: string
     audioURL: string
-    location: 'space-posts' | 'user-posts' | 'post-page' | 'space-post-map' | 'gbg' | 'preview'
+    location: string // 'space-posts' | 'user-posts' | 'post-page' | 'space-post-map' | 'gbg' | 'preview'
     onPlay?: () => void
     onPause?: () => void
     onEnded?: () => void

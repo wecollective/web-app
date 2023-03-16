@@ -9,21 +9,20 @@ import { imageMBLimit, totalMBUploadLimit } from '@src/Helpers'
 import styles from '@styles/components/modals/AddPostImagesModal.module.scss'
 import { ChevronLeftIcon, ChevronRightIcon } from '@svgs/all'
 import React, { useState } from 'react'
-import Cookies from 'universal-cookie'
 import { v4 as uuidv4 } from 'uuid'
 
 const AddPostImagesModal = (props: {
     images: any[]
     setImages: (images: any[]) => void
+    setPostType: (type: string) => void
     close: () => void
 }): JSX.Element => {
-    const { images, setImages, close } = props
+    const { images, setImages, setPostType, close } = props
     const [newImages, setNewImages] = useState<any[]>(images)
     const [imageURL, setImageURL] = useState('')
     const [imageSizeError, setImageSizeError] = useState(false)
     const [toalImageSizeError, setTotalImageSizeError] = useState(false)
     const [imagePostError, setImagePostError] = useState(false)
-    const cookies = new Cookies()
 
     function addImageFiles() {
         setImageSizeError(false)
@@ -83,6 +82,7 @@ const AddPostImagesModal = (props: {
                     return { ...image, index }
                 })
             )
+            setPostType('image')
             close()
         }
     }

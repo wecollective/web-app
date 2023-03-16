@@ -1,18 +1,15 @@
 import AudioTimeSlider from '@components/AudioTimeSlider'
 import AudioVisualiser from '@components/AudioVisualiser'
 import Column from '@components/Column'
-import DraftText from '@components/draft-js/DraftText'
 import Row from '@components/Row'
-import ShowMoreLess from '@components/ShowMoreLess'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/cards/PostCard/PostTypes/Audio.module.scss'
 import { PauseIcon, PlayIcon } from '@svgs/all'
 import * as d3 from 'd3'
 import React, { useState } from 'react'
 
-const Audio = (props: { postData: any }): JSX.Element => {
-    const { postData } = props
-    const { id, text, url, location } = postData
+const Audio = (props: { id: number; url: string; location: string }): JSX.Element => {
+    const { id, url, location } = props
     const [audioPlaying, setAudioPlaying] = useState(false)
 
     function toggleAudio() {
@@ -30,11 +27,6 @@ const Audio = (props: { postData: any }): JSX.Element => {
 
     return (
         <Column>
-            {text && (
-                <ShowMoreLess height={150}>
-                    <DraftText stringifiedDraft={text} />
-                </ShowMoreLess>
-            )}
             <AudioVisualiser
                 audioElementId={`post-audio-${id}-${location}`}
                 audioURL={url}
