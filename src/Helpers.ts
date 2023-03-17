@@ -406,3 +406,39 @@ export function scrollToElement(element: HTMLElement): void {
     const top = element.getBoundingClientRect().top + window.pageYOffset - yOffset
     window.scrollTo({ top, behavior: 'smooth' })
 }
+
+export function findEventTimes(start, end?) {
+    const startDate = new Date(start)
+    const endDate = new Date(end)
+    const sameDay =
+        end &&
+        startDate.getFullYear() === endDate.getFullYear() &&
+        startDate.getMonth() === endDate.getMonth() &&
+        startDate.getDate() === endDate.getDate()
+    const sameMinute =
+        sameDay &&
+        startDate.getHours() === endDate.getHours() &&
+        startDate.getMinutes() === endDate.getMinutes()
+    // no end or ends the same minute: June 29, 2022 at 22:00
+    // ends on same day: June 29, 2022 at 22:00 → 23:00
+    // ends on different day: June 29, 2022 at 22:00 → June 30, 2022 at 22:00
+    return `${formatTimeMDYT(start)} ${
+        end && !sameMinute ? `→ ${sameDay ? formatTimeHM(end) : formatTimeMDYT(end)}` : ''
+    }`
+}
+
+export function findEventDuration(start, end?) {
+    const startDate = new Date(start)
+    const endDate = new Date(end)
+    const sameMinute =
+        startDate.getFullYear() === endDate.getFullYear() &&
+        startDate.getMonth() === endDate.getMonth() &&
+        startDate.getDate() === endDate.getDate() &&
+        startDate.getHours() === endDate.getHours() &&
+        startDate.getMinutes() === endDate.getMinutes()
+    const difference = (endDate.getTime() - startDate.getTime()) / 1000
+    if (end && !sameMinute)
+        // rounded up to nearest minute
+        return `(${formatTimeDHM(Math.ceil(difference / 60) * 60)})`
+    return null
+}

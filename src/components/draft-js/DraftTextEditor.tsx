@@ -222,7 +222,7 @@ const DraftTextEditor = (props: {
                             />
                         )}
                         <Editor
-                            placeholder='Enter text...'
+                            placeholder='Text...'
                             editorState={editorState}
                             plugins={plugins}
                             customStyleMap={styleMap}

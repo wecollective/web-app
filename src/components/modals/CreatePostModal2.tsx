@@ -8,7 +8,6 @@ import Column from '@components/Column'
 import DraftTextEditor from '@components/draft-js/DraftTextEditor'
 import ImageTitle from '@components/ImageTitle'
 import Images from '@src/components/cards/PostCard/PostTypes/Images'
-// import Input from '@components/Input'
 // import Markdown from '@components/Markdown'
 import Audio from '@components/cards/PostCard/PostTypes/Audio'
 import Modal from '@components/modals/Modal'
@@ -22,12 +21,18 @@ import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import UrlPreview from '@src/components/cards/PostCard/UrlPreview'
 // import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
-import { defaultErrorState, findDraftLength } from '@src/Helpers'
+import {
+    audioMBLimit,
+    defaultErrorState,
+    findDraftLength,
+    findEventDuration,
+    findEventTimes,
+    formatTimeMMSS,
+} from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/CreatePostModal2.module.scss'
-// import * as d3 from 'd3'
+import * as d3 from 'd3'
 // import flatpickr from 'flatpickr'
-import AddPostAudioModal from '@components/modals/AddPostAudioModal'
 import AddPostImagesModal from '@components/modals/AddPostImagesModal'
 import AddPostSpacesModal from '@components/modals/AddPostSpacesModal'
 import config from '@src/Config'
@@ -36,7 +41,7 @@ import 'flatpickr/dist/themes/material_green.css'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import Cookies from 'universal-cookie'
 // import { v4 as uuidv4 } from 'uuid'
-import { AudioIcon, CalendarIcon, CastaliaIcon, ImageIcon, InquiryIcon } from '@svgs/all'
+import { AudioIcon, CalendarIcon, CastaliaIcon, ClockIcon, ImageIcon, InquiryIcon } from '@svgs/all'
 
 const { white, red, orange, yellow, green, blue, purple } = colors
 const beadColors = [white, red, orange, yellow, green, blue, purple]
@@ -60,6 +65,7 @@ const CreatePostModal = (): JSX.Element => {
     const [loading, setLoading] = useState(false)
     const [postType, setPostType] = useState('')
     const [spaces, setSpaces] = useState<any[]>([spaceData.id ? spaceData : defaultSelectedSpace])
+    const [title, setTitle] = useState('')
     const [text, setText] = useState({
         ...defaultErrorState,
         value: '',
@@ -75,7 +81,9 @@ const CreatePostModal = (): JSX.Element => {
     const [urls, setUrls] = useState<any[]>([])
     const [urlsMetaData, setUrlsMetaData] = useState<any[]>([])
     const [images, setImages] = useState<any[]>([])
-    const [audio, setAudio] = useState<File>()
+    // events
+    const [startTime, setStartTime] = useState('')
+    const [endTime, setEndTime] = useState('')
     const [saved, setSaved] = useState(false)
     const [spacesModalOpen, setSpacesModalOpen] = useState(false)
     const [imagesModalOpen, setImagesModalOpen] = useState(false)
@@ -101,6 +109,66 @@ const CreatePostModal = (): JSX.Element => {
 
     function removeUrlMetaData(url) {
         setUrlsMetaData((us) => [...us.filter((u) => u.url !== url)])
+    }
+
+    // audio
+    const [audioFile, setAudioFile] = useState<File | undefined>()
+    const [recording, setRecording] = useState(false)
+    const [recordingTime, setRecordingTime] = useState(0)
+    const [sizeError, setSizeError] = useState(false)
+    const [noAudioError, setNoAudioError] = useState(false)
+    const audioRecorder = useRef<any>(null)
+    const audioChunks = useRef<any>([])
+    const recordingInterval = useRef<any>(null)
+
+    function resetAudioState() {
+        setAudioFile(undefined)
+        setNoAudioError(false)
+        setRecordingTime(0)
+        audioChunks.current = []
+        const input = d3.select('#audio-file-input').node()
+        if (input) input.value = ''
+    }
+
+    function selectAudioFile() {
+        const input = d3.select('#audio-file-input').node()
+        if (input && input.files && input.files[0]) {
+            if (input.files[0].size > audioMBLimit * 1024 * 1024) {
+                setSizeError(true)
+                resetAudioState()
+            } else {
+                setSizeError(false)
+                setNoAudioError(false)
+                setAudioFile(input.files[0])
+            }
+        }
+    }
+
+    function toggleAudioRecording() {
+        if (recording) {
+            audioRecorder.current.stop()
+            setRecording(false)
+        } else {
+            resetAudioState()
+            navigator.mediaDevices.getUserMedia({ audio: true }).then((audioStream) => {
+                audioRecorder.current = new MediaRecorder(audioStream)
+                audioRecorder.current.ondataavailable = (e) => {
+                    audioChunks.current.push(e.data)
+                }
+                audioRecorder.current.onstart = () => {
+                    recordingInterval.current = setInterval(() => {
+                        setRecordingTime((t) => t + 1)
+                    }, 1000)
+                }
+                audioRecorder.current.onstop = () => {
+                    clearInterval(recordingInterval.current)
+                    const blob = new Blob(audioChunks.current, { type: 'audio/mpeg-3' })
+                    setAudioFile(new File([blob], ''))
+                }
+                audioRecorder.current.start()
+                setRecording(true)
+            })
+        }
     }
 
     function createPost() {
@@ -158,7 +226,15 @@ const CreatePostModal = (): JSX.Element => {
                             </button>
                         </Row>
                         <Column className={styles.content}>
-                            {['event', 'glass-bead-game'].includes(postType) && <h2>Title!</h2>}
+                            {/* {['event', 'glass-bead-game'].includes(postType) && ( */}
+                            <input
+                                className={styles.title}
+                                placeholder='Title...'
+                                type='text'
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                            />
+                            {/* )} */}
                             <DraftTextEditor
                                 type='post'
                                 stringifiedDraft={text.value}
@@ -172,13 +248,33 @@ const CreatePostModal = (): JSX.Element => {
                                 }}
                             />
                             {postType === 'image' && <Images images={images} />}
-                            {postType === 'audio' && audio && (
+                            {postType === 'audio' && audioFile && (
                                 <Audio
-                                    key={audio.lastModified}
+                                    key={audioFile.lastModified}
                                     id={0}
-                                    url={URL.createObjectURL(audio)}
+                                    url={URL.createObjectURL(audioFile)}
                                     location='create-post-audio'
                                 />
+                            )}
+                            {postType === 'event' && (
+                                <Row centerY className={styles.dates}>
+                                    <ClockIcon />
+                                    {startTime ? (
+                                        <Row>
+                                            <p>{findEventTimes(startTime, endTime)}</p>
+                                            <p>{findEventDuration(startTime, endTime)}</p>
+                                        </Row>
+                                    ) : (
+                                        <button
+                                            className={styles.addDateButton}
+                                            type='button'
+                                            title='Click to add dates'
+                                            onClick={() => setSpacesModalOpen(true)}
+                                        >
+                                            Add dates...
+                                        </button>
+                                    )}
+                                </Row>
                             )}
                             {urlsMetaData.map((u) => (
                                 <UrlPreview
@@ -191,8 +287,47 @@ const CreatePostModal = (): JSX.Element => {
                             ))}
                         </Column>
                     </Column>
+                    <Column className={styles.contentOptions}>
+                        {postType === 'audio' && (
+                            <Column>
+                                <Row centerY style={{ marginBottom: 20 }}>
+                                    <Row className={styles.fileUploadInput}>
+                                        <label htmlFor='audio-file-input'>
+                                            Upload audio
+                                            <input
+                                                type='file'
+                                                id='audio-file-input'
+                                                accept='.mp3'
+                                                onChange={selectAudioFile}
+                                                hidden
+                                            />
+                                        </label>
+                                    </Row>
+                                    <Button
+                                        text={recording ? 'Stop recording' : 'Record audio'}
+                                        color='red'
+                                        onClick={toggleAudioRecording}
+                                    />
+                                    {recording && (
+                                        <h2 style={{ marginLeft: 10 }}>
+                                            {formatTimeMMSS(recordingTime)}
+                                        </h2>
+                                    )}
+                                </Row>
+                                {(sizeError || noAudioError) && (
+                                    <Column className={styles.errors}>
+                                        {sizeError && (
+                                            <p>Audio file too large. Max size: {audioMBLimit}MB</p>
+                                        )}
+                                        {noAudioError && <p>Recording or upload required</p>}
+                                    </Column>
+                                )}
+                            </Column>
+                        )}
+                    </Column>
                     <Row className={styles.contentButtons}>
                         <button
+                            className={postType === 'image' ? styles.selected : ''}
                             type='button'
                             title='Add images'
                             onClick={() => setImagesModalOpen(true)}
@@ -200,13 +335,15 @@ const CreatePostModal = (): JSX.Element => {
                             <ImageIcon />
                         </button>
                         <button
+                            className={postType === 'audio' ? styles.selected : ''}
                             type='button'
                             title='Add audio'
-                            onClick={() => setAudioModalOpen(true)}
+                            onClick={() => setPostType('audio')}
                         >
                             <AudioIcon />
                         </button>
                         <button
+                            className={postType === 'event' ? styles.selected : ''}
                             type='button'
                             title='Add event'
                             onClick={() => setPostType('event')}
@@ -236,14 +373,6 @@ const CreatePostModal = (): JSX.Element => {
                     setImages={setImages}
                     setPostType={setPostType}
                     close={() => setImagesModalOpen(false)}
-                />
-            )}
-            {audioModalOpen && (
-                <AddPostAudioModal
-                    audio={audio}
-                    setAudio={setAudio}
-                    setPostType={setPostType}
-                    close={() => setAudioModalOpen(false)}
                 />
             )}
         </Modal>

@@ -50,7 +50,70 @@ $transitionSpeed: 0.5s;
         }
 
         .content {
-            //
+            .title {
+                all: unset;
+                font-size: 24px;
+                margin-bottom: 10px;
+            }
+
+            ::placeholder {
+                color: $grey4;
+            }
+
+            .dates {
+                margin-top: 10px;
+
+                svg {
+                    width: 20px;
+                    height: 20px;
+                    color: $grey4;
+                    margin-right: 5px;
+                }
+            }
+        }
+    }
+
+    .contentOptions {
+        .fileUploadInput {
+            margin-right: 10px;
+
+            label {
+                height: 40px;
+                border-radius: 20px;
+                padding: 0px 20px;
+                font-size: 14px;
+                border: none;
+                outline: none;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                transition-property: background-color, filter, color;
+                transition-duration: 0.3s;
+                flex-shrink: 0;
+                background-color: $aqua;
+                color: white;
+                &:hover {
+                    &:not(.disabled) {
+                        cursor: pointer;
+                        filter: brightness(110%);
+                        &.grey {
+                            filter: brightness(96%);
+                        }
+                    }
+                }
+            }
+        }
+
+        h2 {
+            margin: 0;
+        }
+
+        .errors {
+            margin-bottom: 20px;
+            > p {
+                font-size: 14px;
+                color: $red;
+            }
         }
     }
 
@@ -81,7 +144,8 @@ $transitionSpeed: 0.5s;
                 transition: all $transitionSpeed;
             }
 
-            &:hover {
+            &:hover,
+            &.selected {
                 border: 1px solid $blue3;
                 background-color: $blue7;
 
