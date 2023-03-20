@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable no-nested-ternary */
 // import InquiryAnswer from '@components/cards/InquiryAnswer'
 // import PostCard from '@components/cards/PostCard/PostCard'
@@ -17,10 +18,14 @@ import Row from '@components/Row'
 // import Scrollbars from '@components/Scrollbars'
 import SuccessMessage from '@components/SuccessMessage'
 // import Toggle from '@components/Toggle'
+import Input from '@components/Input'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import UrlPreview from '@src/components/cards/PostCard/UrlPreview'
 // import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
+import AddPostImagesModal from '@components/modals/AddPostImagesModal'
+import AddPostSpacesModal from '@components/modals/AddPostSpacesModal'
+import config from '@src/Config'
 import {
     audioMBLimit,
     defaultErrorState,
@@ -31,17 +36,14 @@ import {
 } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/CreatePostModal2.module.scss'
-import * as d3 from 'd3'
-// import flatpickr from 'flatpickr'
-import AddPostImagesModal from '@components/modals/AddPostImagesModal'
-import AddPostSpacesModal from '@components/modals/AddPostSpacesModal'
-import config from '@src/Config'
 import axios from 'axios'
+import * as d3 from 'd3'
+import flatpickr from 'flatpickr'
 import 'flatpickr/dist/themes/material_green.css'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import Cookies from 'universal-cookie'
 // import { v4 as uuidv4 } from 'uuid'
-import { AudioIcon, CalendarIcon, CastaliaIcon, ClockIcon, ImageIcon, InquiryIcon } from '@svgs/all'
+import { AudioIcon, CalendarIcon, CastaliaIcon, ImageIcon, InquiryIcon } from '@svgs/all'
 
 const { white, red, orange, yellow, green, blue, purple } = colors
 const beadColors = [white, red, orange, yellow, green, blue, purple]
@@ -84,6 +86,7 @@ const CreatePostModal = (): JSX.Element => {
     // events
     const [startTime, setStartTime] = useState('')
     const [endTime, setEndTime] = useState('')
+
     const [saved, setSaved] = useState(false)
     const [spacesModalOpen, setSpacesModalOpen] = useState(false)
     const [imagesModalOpen, setImagesModalOpen] = useState(false)
@@ -110,6 +113,8 @@ const CreatePostModal = (): JSX.Element => {
     function removeUrlMetaData(url) {
         setUrlsMetaData((us) => [...us.filter((u) => u.url !== url)])
     }
+
+    // images
 
     // audio
     const [audioFile, setAudioFile] = useState<File | undefined>()
@@ -197,6 +202,51 @@ const CreatePostModal = (): JSX.Element => {
         }
     }, [urls])
 
+    // initialise date picker
+    const dateTimeOptions = {
+        enableTime: true,
+        clickOpens: true,
+        disableMobile: true,
+        minDate: new Date(),
+        minuteIncrement: 1,
+        altInput: true,
+    }
+    useEffect(() => {
+        if (postType === 'event') {
+            const now = new Date()
+            const startTimePast = new Date(startTime) < now
+            const endTimePast = new Date(endTime) < now
+            const defaultStartDate = startTime
+                ? startTimePast
+                    ? now
+                    : new Date(startTime)
+                : undefined
+            const defaultEndDate = endTime ? (endTimePast ? now : new Date(endTime)) : undefined
+            flatpickr('#date-time-start', {
+                ...dateTimeOptions,
+                defaultDate: defaultStartDate,
+                appendTo: document.getElementById('date-time-start-wrapper') || undefined,
+                onChange: ([value]) => setStartTime(value.toString()),
+            })
+            flatpickr('#date-time-end', {
+                ...dateTimeOptions,
+                defaultDate: defaultEndDate,
+                minDate: defaultStartDate,
+                appendTo: document.getElementById('date-time-end-wrapper') || undefined,
+                onChange: ([value]) => setEndTime(value.toString()),
+            })
+            if (startTimePast && defaultStartDate) setStartTime(defaultStartDate.toString())
+            if (endTimePast && defaultEndDate) setStartTime(defaultEndDate.toString())
+        }
+    }, [postType])
+
+    useEffect(() => {
+        if (startTime) {
+            const endTimeInstance = d3.select('#date-time-end').node()._flatpickr
+            endTimeInstance.set('minDate', new Date(startTime))
+        }
+    }, [startTime])
+
     return (
         <Modal className={styles.wrapper} close={closeModal} centered confirmClose={!saved}>
             {saved ? (
@@ -226,7 +276,6 @@ const CreatePostModal = (): JSX.Element => {
                             </button>
                         </Row>
                         <Column className={styles.content}>
-                            {/* {['event', 'glass-bead-game'].includes(postType) && ( */}
                             <input
                                 className={styles.title}
                                 placeholder='Title...'
@@ -234,7 +283,6 @@ const CreatePostModal = (): JSX.Element => {
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                             />
-                            {/* )} */}
                             <DraftTextEditor
                                 type='post'
                                 stringifiedDraft={text.value}
@@ -256,24 +304,13 @@ const CreatePostModal = (): JSX.Element => {
                                     location='create-post-audio'
                                 />
                             )}
-                            {postType === 'event' && (
+                            {postType === 'event' && startTime && (
                                 <Row centerY className={styles.dates}>
-                                    <ClockIcon />
-                                    {startTime ? (
-                                        <Row>
-                                            <p>{findEventTimes(startTime, endTime)}</p>
-                                            <p>{findEventDuration(startTime, endTime)}</p>
-                                        </Row>
-                                    ) : (
-                                        <button
-                                            className={styles.addDateButton}
-                                            type='button'
-                                            title='Click to add dates'
-                                            onClick={() => setSpacesModalOpen(true)}
-                                        >
-                                            Add dates...
-                                        </button>
-                                    )}
+                                    <CalendarIcon />
+                                    <Row>
+                                        <p>{findEventTimes(startTime, endTime)}</p>
+                                        <p>{findEventDuration(startTime, endTime)}</p>
+                                    </Row>
                                 </Row>
                             )}
                             {urlsMetaData.map((u) => (
@@ -324,6 +361,24 @@ const CreatePostModal = (): JSX.Element => {
                                 )}
                             </Column>
                         )}
+                        {postType === 'event' && (
+                            <Row className={styles.dateTimePicker}>
+                                <div id='date-time-start-wrapper'>
+                                    <Input
+                                        id='date-time-start'
+                                        type='text'
+                                        placeholder='select start time...'
+                                    />
+                                </div>
+                                <div id='date-time-end-wrapper'>
+                                    <Input
+                                        id='date-time-end'
+                                        type='text'
+                                        placeholder='select end time...'
+                                    />
+                                </div>
+                            </Row>
+                        )}
                     </Column>
                     <Row className={styles.contentButtons}>
                         <button
@@ -338,7 +393,7 @@ const CreatePostModal = (): JSX.Element => {
                             className={postType === 'audio' ? styles.selected : ''}
                             type='button'
                             title='Add audio'
-                            onClick={() => setPostType('audio')}
+                            onClick={() => setPostType(postType === 'audio' ? 'text' : 'audio')}
                         >
                             <AudioIcon />
                         </button>
@@ -346,7 +401,7 @@ const CreatePostModal = (): JSX.Element => {
                             className={postType === 'event' ? styles.selected : ''}
                             type='button'
                             title='Add event'
-                            onClick={() => setPostType('event')}
+                            onClick={() => setPostType(postType === 'event' ? 'text' : 'event')}
                         >
                             <CalendarIcon />
                         </button>

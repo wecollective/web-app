@@ -257,7 +257,7 @@ export function formatTimeMDYT(isoDate: Date): string {
     const year = date.getFullYear()
     const hours = date.getHours()
     const mins = date.getMinutes()
-    return `${month} ${day}, ${year} at ${hours}:${mins < 10 ? `0${mins}` : mins}`
+    return `${month} ${day}, ${year} @ ${hours}:${mins < 10 ? `0${mins}` : mins}`
 }
 
 export function formatTimeHM(isoDate: Date): string {
