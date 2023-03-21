@@ -75,7 +75,7 @@ const CreatePostModal = (): JSX.Element => {
     } = useContext(AccountContext)
     const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
     const [loading, setLoading] = useState(false)
-    const [postType, setPostType] = useState('')
+    const [postType, setPostType] = useState('text')
     const [spaces, setSpaces] = useState<any[]>([spaceData.id ? spaceData : defaultSelectedSpace])
     const [showTitle, setShowTitle] = useState(true)
     const [title, setTitle] = useState('')
@@ -169,7 +169,13 @@ const CreatePostModal = (): JSX.Element => {
     }
 
     function removeImage(index) {
-        setImages([...images.filter((image, i) => i !== index)])
+        setImages([
+            ...images
+                .filter((image, i) => i !== index)
+                .map((img, i) => {
+                    return { ...img, index: i }
+                }),
+        ])
     }
 
     function moveImage(index, increment) {
@@ -260,12 +266,6 @@ const CreatePostModal = (): JSX.Element => {
     }
 
     // events
-    function removeEndDate() {
-        const endTimeInstance = d3.select('#date-time-end').node()._flatpickr
-        endTimeInstance.setDate(null)
-        setEndTime('')
-    }
-
     const dateTimeOptions = {
         enableTime: true,
         clickOpens: true,
@@ -273,6 +273,12 @@ const CreatePostModal = (): JSX.Element => {
         minDate: new Date(),
         minuteIncrement: 1,
         altInput: true,
+    }
+
+    function removeEndDate() {
+        const endTimeInstance = d3.select('#date-time-end').node()._flatpickr
+        endTimeInstance.setDate(null)
+        setEndTime('')
     }
 
     function createPost() {
@@ -486,15 +492,16 @@ const CreatePostModal = (): JSX.Element => {
                                     </Row>
                                 </Row>
                             )}
-                            {urlsMetaData.map((u) => (
-                                <UrlPreview
-                                    key={u.url}
-                                    urlData={u}
-                                    loading={u.loading}
-                                    removeUrl={removeUrlMetaData}
-                                    style={{ marginTop: 10 }}
-                                />
-                            ))}
+                            {['text', 'event'].includes(postType) &&
+                                urlsMetaData.map((u) => (
+                                    <UrlPreview
+                                        key={u.url}
+                                        urlData={u}
+                                        loading={u.loading}
+                                        removeUrl={removeUrlMetaData}
+                                        style={{ marginTop: 10 }}
+                                    />
+                                ))}
                         </Column>
                     </Column>
                     <Column className={styles.contentOptions}>
