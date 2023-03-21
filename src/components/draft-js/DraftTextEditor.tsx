@@ -227,6 +227,7 @@ const DraftTextEditor = (props: {
                             plugins={plugins}
                             customStyleMap={styleMap}
                             onChange={onEditorStateChange}
+                            spellCheck
                         />
                         {type === 'comment' && (
                             <Button

@@ -57,7 +57,7 @@ $transitionSpeed: 0.5s;
 
         .content {
             .title {
-                margin-bottom: 10px;
+                margin-bottom: 5px;
 
                 > input {
                     all: unset;
@@ -169,6 +169,10 @@ $transitionSpeed: 0.5s;
                     color: $grey5;
                     margin-right: 5px;
                 }
+            }
+
+            .poll {
+                margin-top: 15px;
             }
         }
     }

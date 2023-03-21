@@ -1,7 +1,6 @@
 import Audio from '@components/cards/PostCard/PostTypes/Audio'
 import Event from '@components/cards/PostCard/PostTypes/Event'
 import GlassBeadGame from '@components/cards/PostCard/PostTypes/GlassBeadGame'
-import Inquiry from '@components/cards/PostCard/PostTypes/Inquiry'
 import String from '@components/cards/PostCard/PostTypes/String'
 import Text from '@components/cards/PostCard/PostTypes/Text'
 import Url from '@components/cards/PostCard/PostTypes/Url'
@@ -19,6 +18,7 @@ import Comments from '@src/components/cards/Comments/Comments'
 import LikeModal from '@src/components/cards/PostCard/LikeModal'
 import LinkModal from '@src/components/cards/PostCard/LinkModal'
 import Images from '@src/components/cards/PostCard/PostTypes/Images'
+import Poll from '@src/components/cards/PostCard/PostTypes/Poll'
 import RatingModal from '@src/components/cards/PostCard/RatingModal'
 import RepostModal from '@src/components/cards/PostCard/RepostModal'
 import EditPostModal from '@src/components/modals/EditPostModal'
@@ -340,7 +340,7 @@ const PostCard = (props: {
                     <Event postData={postData} setPostData={setPostData} location={location} />
                 )}
                 {type === 'inquiry' && (
-                    <Inquiry
+                    <Poll
                         postData={postData}
                         setPostData={setPostData}
                         // todo: remove when state updated locally

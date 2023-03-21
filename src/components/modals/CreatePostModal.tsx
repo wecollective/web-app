@@ -5,7 +5,6 @@
 import AudioTimeSlider from '@components/AudioTimeSlider'
 import AudioVisualiser from '@components/AudioVisualiser'
 import Button from '@components/Button'
-import InquiryAnswer from '@components/cards/InquiryAnswer'
 import PostCard from '@components/cards/PostCard/PostCard'
 import StringBeadCard from '@components/cards/PostCard/StringBeadCard'
 import CheckBox from '@components/CheckBox'
@@ -26,6 +25,7 @@ import SuccessMessage from '@components/SuccessMessage'
 import Toggle from '@components/Toggle'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
+import InquiryAnswer from '@src/components/cards/PollAnswer'
 import UrlPreview from '@src/components/cards/PostCard/UrlPreview'
 import config from '@src/Config'
 import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
@@ -1611,11 +1611,7 @@ const CreatePostModal = (): JSX.Element => {
                                     {urlData && (
                                         <Column className={styles.urlPreviewWrapper}>
                                             <UrlPreview
-                                                url={urlForm1.url.value}
-                                                image={urlData.image}
-                                                domain={urlData.domain}
-                                                title={urlData.title}
-                                                description={urlData.description}
+                                                urlData={{ url: urlForm1.url.value, ...urlData }}
                                             />
                                         </Column>
                                     )}
@@ -2484,12 +2480,10 @@ const CreatePostModal = (): JSX.Element => {
                                                 />
                                                 {newBead.urlData && (
                                                     <UrlPreview
-                                                        url={newBead.url}
-                                                        image={newBead.urlData.image}
-                                                        domain={newBead.urlData.domain}
-                                                        title={newBead.urlData.title}
-                                                        description={newBead.urlData.description}
-                                                        style={{ marginTop: 10 }}
+                                                        urlData={{
+                                                            url: newBead.url,
+                                                            ...newBead.urlData,
+                                                        }}
                                                     />
                                                 )}
                                             </Column>

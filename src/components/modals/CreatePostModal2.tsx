@@ -1,6 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-nested-ternary */
-// import InquiryAnswer from '@components/cards/InquiryAnswer'
+import PollAnswer from '@components/cards/PollAnswer'
 // import PostCard from '@components/cards/PostCard/PostCard'
 // import StringBeadCard from '@components/cards/PostCard/StringBeadCard'
 // import CheckBox from '@components/CheckBox'
@@ -16,14 +16,15 @@ import PostSpaces from '@src/components/cards/PostCard/PostSpaces'
 // import ProgressBarSteps from '@components/ProgressBarSteps'
 import Row from '@components/Row'
 // import Scrollbars from '@components/Scrollbars'
-import SuccessMessage from '@components/SuccessMessage'
-// import Toggle from '@components/Toggle'
 import Input from '@components/Input'
+import SuccessMessage from '@components/SuccessMessage'
+import Toggle from '@components/Toggle'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import UrlPreview from '@src/components/cards/PostCard/UrlPreview'
 // import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import CloseButton from '@components/CloseButton'
+import DropDown from '@components/DropDown'
 import AddPostSpacesModal from '@components/modals/AddPostSpacesModal'
 import Scrollbars from '@components/Scrollbars'
 import config from '@src/Config'
@@ -92,7 +93,7 @@ const CreatePostModal = (): JSX.Element => {
     })
     const [mentions, setMentions] = useState<any[]>([])
     const [urls, setUrls] = useState<any[]>([])
-    const [urlsMetaData, setUrlsMetaData] = useState<any[]>([])
+    const [urlsWithMetaData, setUrlsWithMetaData] = useState<any[]>([])
     const [startTime, setStartTime] = useState('')
     const [endTime, setEndTime] = useState('')
     const [saved, setSaved] = useState(false)
@@ -106,9 +107,9 @@ const CreatePostModal = (): JSX.Element => {
     }
 
     function scrapeUrlMetaData(url) {
-        setUrlsMetaData((us) => [...us, { url, loading: true }])
+        setUrlsWithMetaData((us) => [...us, { url, loading: true }])
         axios.get(`${config.apiURL}/scrape-url?url=${url}`).then((res) => {
-            setUrlsMetaData((us) => {
+            setUrlsWithMetaData((us) => {
                 const newUrlsMetaData = [...us.filter((u) => u.url !== url)]
                 newUrlsMetaData.push({ url, loading: false, ...res.data })
                 return newUrlsMetaData
@@ -117,7 +118,7 @@ const CreatePostModal = (): JSX.Element => {
     }
 
     function removeUrlMetaData(url) {
-        setUrlsMetaData((us) => [...us.filter((u) => u.url !== url)])
+        setUrlsWithMetaData((us) => [...us.filter((u) => u.url !== url)])
     }
 
     // images
@@ -281,6 +282,34 @@ const CreatePostModal = (): JSX.Element => {
         setEndTime('')
     }
 
+    // poll
+    const [pollType, setPollType] = useState('Single choice')
+    const [pollAnswersLocked, setPollAnswersLocked] = useState(true)
+    const [newPollAnswer, setNewPollAnswer] = useState('')
+    const [pollAnswers, setPollAnswers] = useState<any[]>([])
+    const [pollError, setPollError] = useState(false)
+    const pollColorScale = d3
+        .scaleSequential()
+        .domain([0, pollAnswers.length])
+        .interpolator(d3.interpolateViridis)
+
+    function addPollAnswer() {
+        setPollAnswers([
+            ...pollAnswers,
+            {
+                id: uuidv4(),
+                text: newPollAnswer,
+                Reactions: [],
+            },
+        ])
+        setNewPollAnswer('')
+        setPollError(false)
+    }
+
+    function removePollAnswer(id) {
+        setPollAnswers(pollAnswers.filter((a) => a.id !== id))
+    }
+
     function createPost() {
         console.log('create post!')
         setSaved(true)
@@ -331,14 +360,15 @@ const CreatePostModal = (): JSX.Element => {
 
     // grab metadata for new urls when added to text
     useEffect(() => {
-        if (urlsMetaData.length <= 5) {
+        if (urlsWithMetaData.length <= 5) {
             // requestIndex used to pause requests until user has finished updating the url
             urlRequestIndex.current += 1
             const requestIndex = urlRequestIndex.current
             setTimeout(() => {
                 if (urlRequestIndex.current === requestIndex) {
                     urls.forEach(
-                        (url) => !urlsMetaData.find((u) => u.url === url) && scrapeUrlMetaData(url)
+                        (url) =>
+                            !urlsWithMetaData.find((u) => u.url === url) && scrapeUrlMetaData(url)
                     )
                 }
             }, 500)
@@ -478,6 +508,7 @@ const CreatePostModal = (): JSX.Element => {
                             {postType === 'audio' && audioFile && (
                                 <Audio
                                     key={audioFile.lastModified}
+                                    // todo: make optional prop
                                     id={0}
                                     url={URL.createObjectURL(audioFile)}
                                     location='create-post-audio'
@@ -492,8 +523,43 @@ const CreatePostModal = (): JSX.Element => {
                                     </Row>
                                 </Row>
                             )}
+                            {postType === 'poll' && (
+                                <Column className={styles.poll}>
+                                    {pollAnswers.map((answer, index) => (
+                                        <PollAnswer
+                                            key={answer.id}
+                                            index={index}
+                                            type={pollType}
+                                            answer={answer}
+                                            totalVotes={0}
+                                            totalPoints={0}
+                                            color={pollColorScale(index)}
+                                            close={() => removePollAnswer(answer.id)}
+                                            preview
+                                        />
+                                    ))}
+                                    <Row style={{ width: '100%' }}>
+                                        <Input
+                                            type='text'
+                                            placeholder='New answer...'
+                                            value={newPollAnswer}
+                                            onChange={(value) => setNewPollAnswer(value)}
+                                            style={{ width: '100%', marginRight: 10 }}
+                                        />
+                                        <Button
+                                            color='blue'
+                                            text='Add'
+                                            disabled={!newPollAnswer}
+                                            onClick={addPollAnswer}
+                                        />
+                                    </Row>
+                                    {pollError && (
+                                        <p className='danger'>At least one answer required</p>
+                                    )}
+                                </Column>
+                            )}
                             {['text', 'event'].includes(postType) &&
-                                urlsMetaData.map((u) => (
+                                urlsWithMetaData.map((u) => (
                                     <UrlPreview
                                         key={u.url}
                                         urlData={u}
@@ -603,6 +669,28 @@ const CreatePostModal = (): JSX.Element => {
                                 {endTime && <CloseButton size={20} onClick={removeEndDate} />}
                             </Row>
                         )}
+                        {postType === 'poll' && (
+                            <Row centerY style={{ marginBottom: 20 }}>
+                                <DropDown
+                                    title='Voting type'
+                                    options={[
+                                        'Single choice',
+                                        'Multiple choice',
+                                        'Weighted choice',
+                                    ]}
+                                    selectedOption={pollType}
+                                    setSelectedOption={(option) => setPollType(option)}
+                                    style={{ marginRight: 20 }}
+                                />
+                                <Toggle
+                                    leftText='Lock answers'
+                                    rightText={pollAnswersLocked ? 'ON' : 'OFF'}
+                                    positionLeft={!pollAnswersLocked}
+                                    rightColor='blue'
+                                    onClick={() => setPollAnswersLocked(!pollAnswersLocked)}
+                                />
+                            </Row>
+                        )}
                     </Column>
                     <Row className={styles.contentButtons}>
                         <button
@@ -629,7 +717,12 @@ const CreatePostModal = (): JSX.Element => {
                         >
                             <CalendarIcon />
                         </button>
-                        <button type='button' title='Poll' onClick={() => null}>
+                        <button
+                            className={postType === 'poll' ? styles.selected : ''}
+                            type='button'
+                            title='Poll'
+                            onClick={() => setPostType(postType === 'poll' ? 'text' : 'poll')}
+                        >
                             <InquiryIcon />
                         </button>
                         <button type='button' title='Glass Bead Game' onClick={() => null}>
