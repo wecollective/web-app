@@ -259,6 +259,22 @@ const CreatePostModal = (): JSX.Element => {
         }
     }
 
+    // events
+    function removeEndDate() {
+        const endTimeInstance = d3.select('#date-time-end').node()._flatpickr
+        endTimeInstance.setDate(null)
+        setEndTime('')
+    }
+
+    const dateTimeOptions = {
+        enableTime: true,
+        clickOpens: true,
+        disableMobile: true,
+        minDate: new Date(),
+        minuteIncrement: 1,
+        altInput: true,
+    }
+
     function createPost() {
         console.log('create post!')
         setSaved(true)
@@ -269,31 +285,7 @@ const CreatePostModal = (): JSX.Element => {
         console.log('first useeffect')
     }, [])
 
-    // grab metadata for new urls when added to text
-    useEffect(() => {
-        if (urlsMetaData.length <= 5) {
-            // requestIndex used to pause requests until user has finished updating the url
-            urlRequestIndex.current += 1
-            const requestIndex = urlRequestIndex.current
-            setTimeout(() => {
-                if (urlRequestIndex.current === requestIndex) {
-                    urls.forEach(
-                        (url) => !urlsMetaData.find((u) => u.url === url) && scrapeUrlMetaData(url)
-                    )
-                }
-            }, 500)
-        }
-    }, [urls])
-
-    // initialise date picker
-    const dateTimeOptions = {
-        enableTime: true,
-        clickOpens: true,
-        disableMobile: true,
-        minDate: new Date(),
-        minuteIncrement: 1,
-        altInput: true,
-    }
+    // initialise date picker if post type is event
     useEffect(() => {
         if (postType === 'event') {
             const now = new Date()
@@ -323,12 +315,29 @@ const CreatePostModal = (): JSX.Element => {
         }
     }, [postType])
 
+    // update minimum end date when start date changed
     useEffect(() => {
         if (startTime) {
             const endTimeInstance = d3.select('#date-time-end').node()._flatpickr
             endTimeInstance.set('minDate', new Date(startTime))
         }
     }, [startTime])
+
+    // grab metadata for new urls when added to text
+    useEffect(() => {
+        if (urlsMetaData.length <= 5) {
+            // requestIndex used to pause requests until user has finished updating the url
+            urlRequestIndex.current += 1
+            const requestIndex = urlRequestIndex.current
+            setTimeout(() => {
+                if (urlRequestIndex.current === requestIndex) {
+                    urls.forEach(
+                        (url) => !urlsMetaData.find((u) => u.url === url) && scrapeUrlMetaData(url)
+                    )
+                }
+            }, 500)
+        }
+    }, [urls])
 
     return (
         <Modal
@@ -581,9 +590,10 @@ const CreatePostModal = (): JSX.Element => {
                                     <Input
                                         id='date-time-end'
                                         type='text'
-                                        placeholder='End time...'
+                                        placeholder='End time... (optional)'
                                     />
                                 </div>
+                                {endTime && <CloseButton size={20} onClick={removeEndDate} />}
                             </Row>
                         )}
                     </Column>
