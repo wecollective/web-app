@@ -8,7 +8,7 @@ import Button from '@components/Button'
 import Column from '@components/Column'
 import DraftTextEditor from '@components/draft-js/DraftTextEditor'
 import ImageTitle from '@components/ImageTitle'
-import Images from '@src/components/cards/PostCard/PostTypes/Images'
+import ImageModal from '@components/modals/ImageModal'
 // import Markdown from '@components/Markdown'
 import Audio from '@components/cards/PostCard/PostTypes/Audio'
 import Modal from '@components/modals/Modal'
@@ -23,8 +23,9 @@ import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import UrlPreview from '@src/components/cards/PostCard/UrlPreview'
 // import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
-import AddPostImagesModal from '@components/modals/AddPostImagesModal'
+import CloseButton from '@components/CloseButton'
 import AddPostSpacesModal from '@components/modals/AddPostSpacesModal'
+import Scrollbars from '@components/Scrollbars'
 import config from '@src/Config'
 import {
     audioMBLimit,
@@ -33,17 +34,26 @@ import {
     findEventDuration,
     findEventTimes,
     formatTimeMMSS,
+    imageMBLimit,
 } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/CreatePostModal2.module.scss'
+import {
+    AudioIcon,
+    CalendarIcon,
+    CastaliaIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    ImageIcon,
+    InquiryIcon,
+} from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
 import flatpickr from 'flatpickr'
 import 'flatpickr/dist/themes/material_green.css'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import Cookies from 'universal-cookie'
-// import { v4 as uuidv4 } from 'uuid'
-import { AudioIcon, CalendarIcon, CastaliaIcon, ImageIcon, InquiryIcon } from '@svgs/all'
+import { v4 as uuidv4 } from 'uuid'
 
 const { white, red, orange, yellow, green, blue, purple } = colors
 const beadColors = [white, red, orange, yellow, green, blue, purple]
@@ -67,6 +77,7 @@ const CreatePostModal = (): JSX.Element => {
     const [loading, setLoading] = useState(false)
     const [postType, setPostType] = useState('')
     const [spaces, setSpaces] = useState<any[]>([spaceData.id ? spaceData : defaultSelectedSpace])
+    const [showTitle, setShowTitle] = useState(true)
     const [title, setTitle] = useState('')
     const [text, setText] = useState({
         ...defaultErrorState,
@@ -82,15 +93,10 @@ const CreatePostModal = (): JSX.Element => {
     const [mentions, setMentions] = useState<any[]>([])
     const [urls, setUrls] = useState<any[]>([])
     const [urlsMetaData, setUrlsMetaData] = useState<any[]>([])
-    const [images, setImages] = useState<any[]>([])
-    // events
     const [startTime, setStartTime] = useState('')
     const [endTime, setEndTime] = useState('')
-
     const [saved, setSaved] = useState(false)
     const [spacesModalOpen, setSpacesModalOpen] = useState(false)
-    const [imagesModalOpen, setImagesModalOpen] = useState(false)
-    const [audioModalOpen, setAudioModalOpen] = useState(false)
     const cookies = new Cookies()
     const urlRequestIndex = useRef(0)
 
@@ -115,12 +121,89 @@ const CreatePostModal = (): JSX.Element => {
     }
 
     // images
+    const [images, setImages] = useState<any[]>([])
+    const [imageURL, setImageURL] = useState('')
+    const [imageModalOpen, setImageModalOpen] = useState(false)
+    const [selectedImage, setSelectedImage] = useState<any>(null)
+    const [imageSizeError, setImageSizeError] = useState(false)
+    const [toalImageSizeError, setTotalImageSizeError] = useState(false)
+    const [imagePostError, setImagePostError] = useState(false)
+
+    function findImageSize() {
+        if (images.length === 1) return 'large'
+        if (images.length === 2) return 'medium'
+        return 'small'
+    }
+
+    function openImageModal(imageId) {
+        setSelectedImage(images.find((image) => image.id === imageId))
+        setImageModalOpen(true)
+    }
+
+    function addImageFiles() {
+        setImageSizeError(false)
+        setImagePostError(false)
+        const input = document.getElementById('post-images-file-input') as HTMLInputElement
+        if (input && input.files && input.files.length) {
+            for (let i = 0; i < input.files.length; i += 1) {
+                if (input.files[i].size > imageMBLimit * 1024 * 1024) setImageSizeError(true)
+                else {
+                    setImages((imgs) => [
+                        ...imgs,
+                        {
+                            id: uuidv4(),
+                            index: imgs.length,
+                            file: input && input.files && input.files[i],
+                        },
+                    ])
+                }
+            }
+        }
+    }
+
+    function addImageURL() {
+        setImages(() => [...images, { id: uuidv4(), index: images.length, url: imageURL }])
+        setImageURL('')
+        setImageSizeError(false)
+        setImagePostError(false)
+    }
+
+    function removeImage(index) {
+        setImages([...images.filter((image, i) => i !== index)])
+    }
+
+    function moveImage(index, increment) {
+        const newImageArray = [...images]
+        const image = newImageArray[index]
+        newImageArray.splice(index, 1)
+        newImageArray.splice(index + increment, 0, image)
+        setImages(
+            newImageArray.map((img, i) => {
+                return { ...img, index: i }
+            })
+        )
+    }
+
+    function updateCaption(index, value) {
+        const newImageArray = [...images]
+        newImageArray[index].caption = value
+        setImages(newImageArray)
+    }
+
+    function findTotalImageMBs() {
+        const megaByte = 1048576
+        const totalBytes = images
+            .filter((i) => i.file)
+            .map((i) => i.file.size)
+            .reduce((a, b) => a + b, 0)
+        return +(totalBytes / megaByte).toFixed(2)
+    }
 
     // audio
     const [audioFile, setAudioFile] = useState<File | undefined>()
     const [recording, setRecording] = useState(false)
     const [recordingTime, setRecordingTime] = useState(0)
-    const [sizeError, setSizeError] = useState(false)
+    const [audioSizeError, setAudioSizeError] = useState(false)
     const [noAudioError, setNoAudioError] = useState(false)
     const audioRecorder = useRef<any>(null)
     const audioChunks = useRef<any>([])
@@ -139,10 +222,10 @@ const CreatePostModal = (): JSX.Element => {
         const input = d3.select('#audio-file-input').node()
         if (input && input.files && input.files[0]) {
             if (input.files[0].size > audioMBLimit * 1024 * 1024) {
-                setSizeError(true)
+                setAudioSizeError(true)
                 resetAudioState()
             } else {
-                setSizeError(false)
+                setAudioSizeError(false)
                 setNoAudioError(false)
                 setAudioFile(input.files[0])
             }
@@ -248,7 +331,12 @@ const CreatePostModal = (): JSX.Element => {
     }, [startTime])
 
     return (
-        <Modal className={styles.wrapper} close={closeModal} centered confirmClose={!saved}>
+        <Modal
+            className={`${styles.wrapper} ${styles[postType]}`}
+            close={closeModal}
+            centered
+            confirmClose={!saved}
+        >
             {saved ? (
                 <SuccessMessage text='Post created!' />
             ) : (
@@ -276,13 +364,17 @@ const CreatePostModal = (): JSX.Element => {
                             </button>
                         </Row>
                         <Column className={styles.content}>
-                            <input
-                                className={styles.title}
-                                placeholder='Title...'
-                                type='text'
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                            />
+                            {showTitle && (
+                                <Row centerY spaceBetween className={styles.title}>
+                                    <input
+                                        placeholder='Title...'
+                                        type='text'
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
+                                    />
+                                    <CloseButton size={20} onClick={() => setShowTitle(false)} />
+                                </Row>
+                            )}
                             <DraftTextEditor
                                 type='post'
                                 stringifiedDraft={text.value}
@@ -295,7 +387,79 @@ const CreatePostModal = (): JSX.Element => {
                                     setUrls(textUrls)
                                 }}
                             />
-                            {postType === 'image' && <Images images={images} />}
+                            {postType === 'image' && (
+                                <Row centerX style={{ width: '100%' }}>
+                                    {images.length > 0 && (
+                                        <Scrollbars className={styles.images}>
+                                            <Row>
+                                                {images.map((image, index) => (
+                                                    <Column
+                                                        centerX
+                                                        className={`${styles.imageWrapper} ${
+                                                            styles[findImageSize()]
+                                                        }`}
+                                                        key={image.id}
+                                                    >
+                                                        <CloseButton
+                                                            size={20}
+                                                            onClick={() => removeImage(index)}
+                                                            style={{
+                                                                position: 'absolute',
+                                                                right: 0,
+                                                            }}
+                                                        />
+                                                        <button
+                                                            className={styles.imageButton}
+                                                            type='button'
+                                                            onClick={() => openImageModal(image.id)}
+                                                        >
+                                                            <img
+                                                                src={
+                                                                    image.url ||
+                                                                    URL.createObjectURL(image.file)
+                                                                }
+                                                                alt=''
+                                                            />
+                                                        </button>
+                                                        <Row centerY style={{ width: '100%' }}>
+                                                            <Input
+                                                                type='text'
+                                                                placeholder='add caption...'
+                                                                value={image.caption}
+                                                                onChange={(v) =>
+                                                                    updateCaption(index, v)
+                                                                }
+                                                            />
+                                                        </Row>
+                                                        <Row centerX className={styles.itemFooter}>
+                                                            {index !== 0 && (
+                                                                <button
+                                                                    type='button'
+                                                                    onClick={() =>
+                                                                        moveImage(index, -1)
+                                                                    }
+                                                                >
+                                                                    <ChevronLeftIcon />
+                                                                </button>
+                                                            )}
+                                                            {index < images.length - 1 && (
+                                                                <button
+                                                                    type='button'
+                                                                    onClick={() =>
+                                                                        moveImage(index, 1)
+                                                                    }
+                                                                >
+                                                                    <ChevronRightIcon />
+                                                                </button>
+                                                            )}
+                                                        </Row>
+                                                    </Column>
+                                                ))}
+                                            </Row>
+                                        </Scrollbars>
+                                    )}
+                                </Row>
+                            )}
                             {postType === 'audio' && audioFile && (
                                 <Audio
                                     key={audioFile.lastModified}
@@ -325,6 +489,48 @@ const CreatePostModal = (): JSX.Element => {
                         </Column>
                     </Column>
                     <Column className={styles.contentOptions}>
+                        {postType === 'image' && (
+                            <Column>
+                                <Row centerY style={{ marginBottom: 20 }}>
+                                    <Row className={styles.fileUploadInput}>
+                                        <label htmlFor='post-images-file-input'>
+                                            Upload images
+                                            <input
+                                                type='file'
+                                                id='post-images-file-input'
+                                                accept='.png, .jpg, .jpeg, .gif'
+                                                onChange={addImageFiles}
+                                                multiple
+                                                hidden
+                                            />
+                                        </label>
+                                    </Row>
+                                    <p style={{ marginRight: 10 }}>or</p>
+                                    <Input
+                                        type='text'
+                                        placeholder='add image url...'
+                                        value={imageURL}
+                                        onChange={(v) => setImageURL(v)}
+                                        style={{ width: 200, marginRight: 10 }}
+                                    />
+                                    <Button
+                                        text='Add'
+                                        color='aqua'
+                                        disabled={imageURL === ''}
+                                        onClick={addImageURL}
+                                    />
+                                </Row>
+                                {imageSizeError && (
+                                    <Column className={styles.errors}>
+                                        {imageSizeError && (
+                                            <p className='danger' style={{ marginBottom: 10 }}>
+                                                Max file size: {imageMBLimit}MB
+                                            </p>
+                                        )}
+                                    </Column>
+                                )}
+                            </Column>
+                        )}
                         {postType === 'audio' && (
                             <Column>
                                 <Row centerY style={{ marginBottom: 20 }}>
@@ -351,9 +557,9 @@ const CreatePostModal = (): JSX.Element => {
                                         </h2>
                                     )}
                                 </Row>
-                                {(sizeError || noAudioError) && (
+                                {(audioSizeError || noAudioError) && (
                                     <Column className={styles.errors}>
-                                        {sizeError && (
+                                        {audioSizeError && (
                                             <p>Audio file too large. Max size: {audioMBLimit}MB</p>
                                         )}
                                         {noAudioError && <p>Recording or upload required</p>}
@@ -362,19 +568,20 @@ const CreatePostModal = (): JSX.Element => {
                             </Column>
                         )}
                         {postType === 'event' && (
-                            <Row className={styles.dateTimePicker}>
+                            <Row centerY className={styles.dateTimePicker}>
                                 <div id='date-time-start-wrapper'>
                                     <Input
                                         id='date-time-start'
                                         type='text'
-                                        placeholder='select start time...'
+                                        placeholder='Start time...'
                                     />
                                 </div>
+                                <p>→</p>
                                 <div id='date-time-end-wrapper'>
                                     <Input
                                         id='date-time-end'
                                         type='text'
-                                        placeholder='select end time...'
+                                        placeholder='End time...'
                                     />
                                 </div>
                             </Row>
@@ -384,15 +591,15 @@ const CreatePostModal = (): JSX.Element => {
                         <button
                             className={postType === 'image' ? styles.selected : ''}
                             type='button'
-                            title='Add images'
-                            onClick={() => setImagesModalOpen(true)}
+                            title='Images'
+                            onClick={() => setPostType(postType === 'image' ? 'text' : 'image')}
                         >
                             <ImageIcon />
                         </button>
                         <button
                             className={postType === 'audio' ? styles.selected : ''}
                             type='button'
-                            title='Add audio'
+                            title='Audio'
                             onClick={() => setPostType(postType === 'audio' ? 'text' : 'audio')}
                         >
                             <AudioIcon />
@@ -400,15 +607,15 @@ const CreatePostModal = (): JSX.Element => {
                         <button
                             className={postType === 'event' ? styles.selected : ''}
                             type='button'
-                            title='Add event'
+                            title='Event'
                             onClick={() => setPostType(postType === 'event' ? 'text' : 'event')}
                         >
                             <CalendarIcon />
                         </button>
-                        <button type='button' title='Add poll' onClick={() => null}>
+                        <button type='button' title='Poll' onClick={() => null}>
                             <InquiryIcon />
                         </button>
-                        <button type='button' title='Add glass bead game' onClick={() => null}>
+                        <button type='button' title='Glass Bead Game' onClick={() => null}>
                             <CastaliaIcon />
                         </button>
                     </Row>
@@ -422,12 +629,12 @@ const CreatePostModal = (): JSX.Element => {
                     close={() => setSpacesModalOpen(false)}
                 />
             )}
-            {imagesModalOpen && (
-                <AddPostImagesModal
+            {imageModalOpen && (
+                <ImageModal
                     images={images}
-                    setImages={setImages}
-                    setPostType={setPostType}
-                    close={() => setImagesModalOpen(false)}
+                    selectedImage={selectedImage}
+                    setSelectedImage={setSelectedImage}
+                    close={() => setImageModalOpen(false)}
                 />
             )}
         </Modal>

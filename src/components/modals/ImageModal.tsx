@@ -24,7 +24,11 @@ const ImageModal = (props: {
         <Modal close={close} className={styles.wrapper}>
             <Row centerY>
                 {selectedImage.index !== 0 && (
-                    <button type='button' onClick={() => toggleImage(-1)}>
+                    <button
+                        className={styles.navButton}
+                        type='button'
+                        onClick={() => toggleImage(-1)}
+                    >
                         <ChevronLeftIcon />
                     </button>
                 )}
@@ -50,7 +54,11 @@ const ImageModal = (props: {
                     )}
                 </Column>
                 {selectedImage.index !== images.length - 1 && (
-                    <button type='button' onClick={() => toggleImage(1)}>
+                    <button
+                        className={styles.navButton}
+                        type='button'
+                        onClick={() => toggleImage(1)}
+                    >
                         <ChevronRightIcon />
                     </button>
                 )}

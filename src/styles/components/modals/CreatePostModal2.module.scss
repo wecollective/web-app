@@ -5,12 +5,16 @@ $transitionSpeed: 0.5s;
 .wrapper {
     padding: 30px 20px;
     width: calc(100vw - 30px);
-    overflow: unset;
 
     @include for-tablet-landscape-up {
         padding: 40px;
         width: auto;
         width: 900px;
+    }
+
+    &.event {
+        // allow date-time-picker to overflow modal
+        overflow: unset;
     }
 
     .postCard {
@@ -53,13 +57,102 @@ $transitionSpeed: 0.5s;
 
         .content {
             .title {
-                all: unset;
-                font-size: 24px;
                 margin-bottom: 10px;
+
+                > input {
+                    all: unset;
+                    width: 100%;
+                    font-size: 24px;
+                }
+
+                > button {
+                    pointer-events: none;
+                    opacity: 0;
+                    transition: all 0.5s;
+                }
+
+                &:hover {
+                    > button {
+                        pointer-events: all;
+                        opacity: 1;
+                    }
+                }
             }
 
             ::placeholder {
                 color: $grey4;
+            }
+
+            .images {
+                padding: 20px 10px 5px 10px;
+
+                .imageWrapper {
+                    position: relative;
+
+                    &:not(:last-child) {
+                        margin-right: 10px;
+                    }
+
+                    .imageButton {
+                        all: unset;
+                        cursor: pointer;
+
+                        > img {
+                            object-fit: cover;
+                            margin-bottom: 10px;
+                            box-shadow: 0 0 10px 0 rgba(10, 8, 72, 0.06);
+                        }
+                    }
+
+                    &.large {
+                        .imageButton > img {
+                            max-width: 100%;
+                            max-height: 450px;
+                        }
+                        > p {
+                            width: 100%;
+                        }
+                    }
+
+                    &.medium {
+                        .imageButton > img {
+                            width: 300px;
+                            height: 300px;
+                        }
+                        > p {
+                            width: 100%;
+                        }
+                    }
+
+                    &.small {
+                        .imageButton > img {
+                            width: 225px;
+                            height: 225px;
+                        }
+                        > p {
+                            width: 100%;
+                        }
+                    }
+
+                    .itemFooter {
+                        height: 20px;
+                        margin: 7px 10px 5px 0;
+
+                        > button {
+                            all: unset;
+                            cursor: pointer;
+                            width: 20px;
+                            height: 20px;
+                            margin: 0 10px;
+
+                            > svg {
+                                opacity: 0.15;
+                                width: 20px;
+                                height: 20px;
+                            }
+                        }
+                    }
+                }
             }
 
             .dates {
@@ -131,13 +224,13 @@ $transitionSpeed: 0.5s;
                 position: relative;
                 width: 220px;
 
-                &:not(:last-child) {
-                    margin-right: 30px;
-                }
-
                 input {
                     cursor: pointer;
                 }
+            }
+
+            > p {
+                margin: 0 10px;
             }
         }
     }
