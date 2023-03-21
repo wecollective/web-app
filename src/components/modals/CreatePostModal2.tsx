@@ -30,6 +30,7 @@ import Scrollbars from '@components/Scrollbars'
 import config from '@src/Config'
 import {
     audioMBLimit,
+    capitalise,
     defaultErrorState,
     findDraftLength,
     findEventDuration,
@@ -46,7 +47,7 @@ import {
     ChevronLeftIcon,
     ChevronRightIcon,
     ImageIcon,
-    InquiryIcon,
+    PollIcon,
 } from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
@@ -63,6 +64,31 @@ const defaultSelectedSpace = {
     handle: 'all',
     name: 'All',
     flagImagePath: 'https://weco-prod-space-flag-images.s3.eu-west-1.amazonaws.com/1614556880362',
+}
+
+const ContentButton = (props: {
+    type: string
+    postType: string
+    setPostType: (type: string) => void
+}): JSX.Element => {
+    const { type, postType, setPostType } = props
+    const typeIcons = {
+        image: <ImageIcon />,
+        audio: <AudioIcon />,
+        event: <CalendarIcon />,
+        poll: <PollIcon />,
+        gbg: <CastaliaIcon />,
+    }
+    return (
+        <button
+            className={postType === type ? styles.selected : ''}
+            type='button'
+            title={capitalise(type)}
+            onClick={() => setPostType(postType === type ? 'text' : type)}
+        >
+            {typeIcons[type]}
+        </button>
+    )
 }
 
 const CreatePostModal = (): JSX.Element => {
@@ -100,6 +126,7 @@ const CreatePostModal = (): JSX.Element => {
     const [spacesModalOpen, setSpacesModalOpen] = useState(false)
     const cookies = new Cookies()
     const urlRequestIndex = useRef(0)
+    const contentButtonTypes = ['image', 'audio', 'event', 'poll', 'gbg']
 
     function closeModal() {
         setCreatePostModalOpen(false)
@@ -693,41 +720,13 @@ const CreatePostModal = (): JSX.Element => {
                         )}
                     </Column>
                     <Row className={styles.contentButtons}>
-                        <button
-                            className={postType === 'image' ? styles.selected : ''}
-                            type='button'
-                            title='Images'
-                            onClick={() => setPostType(postType === 'image' ? 'text' : 'image')}
-                        >
-                            <ImageIcon />
-                        </button>
-                        <button
-                            className={postType === 'audio' ? styles.selected : ''}
-                            type='button'
-                            title='Audio'
-                            onClick={() => setPostType(postType === 'audio' ? 'text' : 'audio')}
-                        >
-                            <AudioIcon />
-                        </button>
-                        <button
-                            className={postType === 'event' ? styles.selected : ''}
-                            type='button'
-                            title='Event'
-                            onClick={() => setPostType(postType === 'event' ? 'text' : 'event')}
-                        >
-                            <CalendarIcon />
-                        </button>
-                        <button
-                            className={postType === 'poll' ? styles.selected : ''}
-                            type='button'
-                            title='Poll'
-                            onClick={() => setPostType(postType === 'poll' ? 'text' : 'poll')}
-                        >
-                            <InquiryIcon />
-                        </button>
-                        <button type='button' title='Glass Bead Game' onClick={() => null}>
-                            <CastaliaIcon />
-                        </button>
+                        {contentButtonTypes.map((type) => (
+                            <ContentButton
+                                type={type}
+                                postType={postType}
+                                setPostType={setPostType}
+                            />
+                        ))}
                     </Row>
                     <Button text='Create post' color='blue' onClick={createPost} />
                 </Column>
