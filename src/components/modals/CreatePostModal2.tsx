@@ -1,26 +1,23 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-nested-ternary */
-import PollAnswer from '@components/cards/PollAnswer'
-// import PostCard from '@components/cards/PostCard/PostCard'
-// import StringBeadCard from '@components/cards/PostCard/StringBeadCard'
-// import CheckBox from '@components/CheckBox'
 import Button from '@components/Button'
+import PollAnswer from '@components/cards/PollAnswer'
+import Audio from '@components/cards/PostCard/PostTypes/Audio'
+import StringBeadCard from '@components/cards/PostCard/StringBeadCard'
 import Column from '@components/Column'
 import DraftTextEditor from '@components/draft-js/DraftTextEditor'
 import ImageTitle from '@components/ImageTitle'
-import ImageModal from '@components/modals/ImageModal'
-// import Markdown from '@components/Markdown'
-import Audio from '@components/cards/PostCard/PostTypes/Audio'
-import Modal from '@components/modals/Modal'
-import PostSpaces from '@src/components/cards/PostCard/PostSpaces'
-// import ProgressBarSteps from '@components/ProgressBarSteps'
-import Row from '@components/Row'
-// import Scrollbars from '@components/Scrollbars'
 import Input from '@components/Input'
+import GBGHelpModal from '@components/modals/GBGHelpModal'
+import GBGSettingsModal from '@components/modals/GBGSettingsModal'
+import ImageModal from '@components/modals/ImageModal'
+import Modal from '@components/modals/Modal'
+import Row from '@components/Row'
 import SuccessMessage from '@components/SuccessMessage'
 import Toggle from '@components/Toggle'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
+import PostSpaces from '@src/components/cards/PostCard/PostSpaces'
 import UrlPreview from '@src/components/cards/PostCard/UrlPreview'
 // import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import CloseButton from '@components/CloseButton'
@@ -32,6 +29,7 @@ import {
     audioMBLimit,
     capitalise,
     defaultErrorState,
+    defaultGBGSettings,
     findDraftLength,
     findEventDuration,
     findEventTimes,
@@ -46,8 +44,12 @@ import {
     CastaliaIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
+    HelpIcon,
     ImageIcon,
+    PlusIcon,
     PollIcon,
+    SettingsIcon,
+    UsersIcon,
 } from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
@@ -337,6 +339,20 @@ const CreatePostModal = (): JSX.Element => {
         setPollAnswers(pollAnswers.filter((a) => a.id !== id))
     }
 
+    // gbg
+    const [GBGSettingsModalOpen, setGBGSettingsModalOpen] = useState(false)
+    const [GBGHelpModalOpen, setGBGHelpModalOpen] = useState(false)
+    const [GBGSettings, setGBGSettings] = useState(defaultGBGSettings)
+    const [beads, setBeads] = useState<any[]>([])
+    const [showBeadTools, setShowBeadTools] = useState(false)
+
+    function saveGBGSettings(settings) {
+        console.log('saveGBGSettings: ', settings)
+    }
+
+    const showGBGDates = postType === 'gbg' && GBGSettings.synchronous && GBGSettings.startTime
+    const showDates = (postType === 'event' || showGBGDates) && startTime
+
     function createPost() {
         console.log('create post!')
         setSaved(true)
@@ -381,7 +397,7 @@ const CreatePostModal = (): JSX.Element => {
     useEffect(() => {
         if (startTime) {
             const endTimeInstance = d3.select('#date-time-end').node()._flatpickr
-            endTimeInstance.set('minDate', new Date(startTime))
+            if (endTimeInstance) endTimeInstance.set('minDate', new Date(startTime))
         }
     }, [startTime])
 
@@ -439,7 +455,7 @@ const CreatePostModal = (): JSX.Element => {
                             {showTitle && (
                                 <Row centerY spaceBetween className={styles.title}>
                                     <input
-                                        placeholder='Title...'
+                                        placeholder={postType === 'gbg' ? 'Topic...' : 'Title...'}
                                         type='text'
                                         value={title}
                                         onChange={(e) => setTitle(e.target.value)}
@@ -459,6 +475,15 @@ const CreatePostModal = (): JSX.Element => {
                                     setUrls(textUrls)
                                 }}
                             />
+                            {showDates && (
+                                <Row centerY className={styles.dates}>
+                                    <CalendarIcon />
+                                    <Row>
+                                        <p>{findEventTimes(startTime, endTime)}</p>
+                                        <p>{findEventDuration(startTime, endTime)}</p>
+                                    </Row>
+                                </Row>
+                            )}
                             {postType === 'image' && (
                                 <Row centerX style={{ width: '100%' }}>
                                     {images.length > 0 && (
@@ -541,15 +566,6 @@ const CreatePostModal = (): JSX.Element => {
                                     location='create-post-audio'
                                 />
                             )}
-                            {postType === 'event' && startTime && (
-                                <Row centerY className={styles.dates}>
-                                    <CalendarIcon />
-                                    <Row>
-                                        <p>{findEventTimes(startTime, endTime)}</p>
-                                        <p>{findEventDuration(startTime, endTime)}</p>
-                                    </Row>
-                                </Row>
-                            )}
                             {postType === 'poll' && (
                                 <Column className={styles.poll}>
                                     {pollAnswers.map((answer, index) => (
@@ -582,6 +598,81 @@ const CreatePostModal = (): JSX.Element => {
                                     </Row>
                                     {pollError && (
                                         <p className='danger'>At least one answer required</p>
+                                    )}
+                                </Column>
+                            )}
+                            {postType === 'gbg' && (
+                                <Column className={styles.gbg}>
+                                    {GBGSettings.synchronous ? (
+                                        <Button
+                                            text='Open game room'
+                                            color='gbg-white'
+                                            size='medium'
+                                            style={{ width: 150, marginTop: 15 }}
+                                            disabled
+                                        />
+                                    ) : (
+                                        <Column>
+                                            {GBGSettings.multiplayer &&
+                                                GBGSettings.openToAllUsers && (
+                                                    <Row centerY className={styles.openToAllUsers}>
+                                                        <UsersIcon />
+                                                        <p>Open to all users</p>
+                                                    </Row>
+                                                )}
+                                            <Row centerX>
+                                                <Scrollbars className={styles.beadDraw}>
+                                                    <Row>
+                                                        {beads.map((bead, i) => (
+                                                            <Row key={bead.id}>
+                                                                <StringBeadCard
+                                                                    bead={bead}
+                                                                    // postId={id}
+                                                                    postType={bead.type}
+                                                                    beadIndex={i}
+                                                                    location='preview'
+                                                                    style={null}
+                                                                />
+                                                                {/* {(i < stringPosts.length - 1 ||
+                                                                movesLeft) && (
+                                                                <Row
+                                                                    centerY
+                                                                    className={styles.beadDivider}
+                                                                >
+                                                                    <DNAIcon />
+                                                                </Row>
+                                                            )} */}
+                                                            </Row>
+                                                        ))}
+                                                        {GBGSettings.multiplayer &&
+                                                        !GBGSettings.openToAllUsers ? (
+                                                            <p>test</p>
+                                                        ) : (
+                                                            <button
+                                                                type='button'
+                                                                className={styles.newBeadButton}
+                                                                onClick={() =>
+                                                                    setShowBeadTools(true)
+                                                                }
+                                                                style={{
+                                                                    marginRight:
+                                                                        beads.length > 1 ? 15 : 0,
+                                                                }}
+                                                            >
+                                                                <PlusIcon />
+                                                                <p>
+                                                                    Click to create the{' '}
+                                                                    {beads.length
+                                                                        ? 'next'
+                                                                        : 'first'}{' '}
+                                                                    bead
+                                                                </p>
+                                                            </button>
+                                                        )}
+                                                    </Row>
+                                                </Scrollbars>
+                                            </Row>
+                                        </Column>
                                     )}
                                 </Column>
                             )}
@@ -677,7 +768,11 @@ const CreatePostModal = (): JSX.Element => {
                             </Column>
                         )}
                         {postType === 'event' && (
-                            <Row centerY className={styles.dateTimePicker}>
+                            <Row
+                                centerY
+                                className={styles.dateTimePicker}
+                                style={{ marginBottom: 20 }}
+                            >
                                 <div id='date-time-start-wrapper'>
                                     <Input
                                         id='date-time-start'
@@ -699,7 +794,7 @@ const CreatePostModal = (): JSX.Element => {
                         {postType === 'poll' && (
                             <Row centerY style={{ marginBottom: 20 }}>
                                 <DropDown
-                                    title='Voting type'
+                                    title='Vote type'
                                     options={[
                                         'Single choice',
                                         'Multiple choice',
@@ -718,10 +813,28 @@ const CreatePostModal = (): JSX.Element => {
                                 />
                             </Row>
                         )}
+                        {postType === 'gbg' && (
+                            <Row style={{ marginBottom: 20 }}>
+                                <Button
+                                    text='Game settings'
+                                    color='aqua'
+                                    icon={<SettingsIcon />}
+                                    onClick={() => setGBGSettingsModalOpen(true)}
+                                />
+                                <button
+                                    className={styles.helpButton}
+                                    type='button'
+                                    onClick={() => setGBGHelpModalOpen(true)}
+                                >
+                                    <HelpIcon />
+                                </button>
+                            </Row>
+                        )}
                     </Column>
                     <Row className={styles.contentButtons}>
                         {contentButtonTypes.map((type) => (
                             <ContentButton
+                                key={type}
                                 type={type}
                                 postType={postType}
                                 setPostType={setPostType}
@@ -746,6 +859,14 @@ const CreatePostModal = (): JSX.Element => {
                     close={() => setImageModalOpen(false)}
                 />
             )}
+            {GBGSettingsModalOpen && (
+                <GBGSettingsModal
+                    settings={GBGSettings}
+                    saveSettings={(settings) => saveGBGSettings(settings)}
+                    close={() => setGBGSettingsModalOpen(false)}
+                />
+            )}
+            {GBGHelpModalOpen && <GBGHelpModal close={() => setGBGHelpModalOpen(false)} />}
         </Modal>
     )
 }

@@ -1,6 +1,6 @@
 import Row from '@components/Row'
 import styles from '@styles/components/Toggle.module.scss'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 const Toggle = (props: {
     leftText?: string
@@ -18,6 +18,8 @@ const Toggle = (props: {
         setToggleLeft(!toggleLeft)
         onClick()
     }
+
+    useEffect(() => setToggleLeft(positionLeft), [positionLeft])
 
     return (
         <button type='button' className={styles.wrapper} onClick={handleClick} style={style}>

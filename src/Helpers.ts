@@ -103,6 +103,25 @@ export const defaultSpaceData = {
     totalChildren: 0,
 }
 
+export const defaultGBGSettings = {
+    synchronous: true,
+    startTime: '',
+    endTime: '',
+    multiplayer: false,
+    openToAllUsers: true,
+    players: [],
+    fixPlayerColors: false,
+    totalMoves: 0,
+    moveDuration: 0,
+    introDuration: 0,
+    intervalDuration: 0,
+    outroDuration: 0,
+    allowedBeadTypes: 'Text,Url,Audio,Image',
+    characterLimit: 0,
+    audioTimeLimit: 0,
+    timeWindow: 0,
+}
+
 // functions
 export function isPlural(number: number): boolean {
     return number < 1 || number > 1

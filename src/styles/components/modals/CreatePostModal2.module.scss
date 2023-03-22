@@ -174,6 +174,59 @@ $transitionSpeed: 0.5s;
             .poll {
                 margin-top: 15px;
             }
+
+            .gbg {
+                .openToAllUsers {
+                    margin: 10px 0;
+                    color: $grey5;
+
+                    svg {
+                        width: 25px;
+                        height: 25px;
+                        margin-right: 5px;
+                    }
+                }
+
+                .beadDraw {
+                    padding: 15px;
+                    background-color: $grey1;
+                    border-radius: 20px;
+
+                    .newBeadButton {
+                        all: unset;
+                        cursor: pointer;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        align-items: center;
+                        width: 270px;
+                        height: 270px;
+                        flex-shrink: 0;
+                        border-radius: 15px;
+                        margin-right: 15px;
+                        background-color: white;
+                        box-shadow: 0 0 7px 0 rgba(10, 8, 72, 0.1);
+                        transition: all 0.3s;
+
+                        &:hover {
+                            background-color: rgb(245, 251, 255);
+                        }
+
+                        > svg {
+                            width: 40px;
+                            height: 40px;
+                            color: $grey6;
+                            margin-bottom: 10px;
+                        }
+
+                        > p {
+                            color: $grey6;
+                            width: 150px;
+                            text-align: center;
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -222,7 +275,6 @@ $transitionSpeed: 0.5s;
 
         .dateTimePicker {
             position: relative;
-            margin-bottom: 20px;
 
             > div {
                 position: relative;
@@ -239,6 +291,25 @@ $transitionSpeed: 0.5s;
 
             > button {
                 margin-left: 5px;
+            }
+        }
+
+        .helpButton {
+            all: unset;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: $blue9;
+            border-radius: 50%;
+            margin-left: 20px;
+
+            > svg {
+                width: 20px;
+                height: 20px;
+                color: $grey7;
             }
         }
     }
