@@ -137,6 +137,16 @@ const CreatePostModal = (): JSX.Element => {
         setCreatePostModalSettings({ type: 'text' })
     }
 
+    function findModalHeader() {
+        if (postType === 'text') return 'New post'
+        if (postType === 'image') return 'New image post'
+        if (postType === 'audio') return 'New audio post'
+        if (postType === 'event') return 'New event'
+        if (postType === 'poll') return 'New poll'
+        if (postType === 'gbg') return 'New Glass Bead Game'
+        return ''
+    }
+
     function scrapeUrlMetaData(url) {
         setUrlsWithMetaData((us) => [...us, { url, loading: true }])
         axios.get(`${config.apiURL}/scrape-url?url=${url}`).then((res) => {
@@ -469,7 +479,7 @@ const CreatePostModal = (): JSX.Element => {
                 />
             ) : (
                 <Column centerX style={{ width: '100%' }}>
-                    <h1>New post</h1>
+                    <h1>{findModalHeader()}</h1>
                     <Column className={styles.postCard}>
                         <Row centerY className={styles.header}>
                             <ImageTitle
@@ -684,7 +694,10 @@ const CreatePostModal = (): JSX.Element => {
                             {postType === 'gbg' && (
                                 <Column className={styles.gbg}>
                                     {GBGSettings.synchronous ? (
-                                        <Row centerX style={{ marginTop: 15, width: '100%' }}>
+                                        <Row
+                                            centerX
+                                            style={{ marginTop: 15, width: '100%', opacity: 0.8 }}
+                                        >
                                             <Button
                                                 text='Open game room'
                                                 color='gbg-white'
