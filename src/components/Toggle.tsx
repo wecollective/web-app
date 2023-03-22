@@ -25,7 +25,7 @@ const Toggle = (props: {
 
     return (
         <button type='button' className={styles.wrapper} onClick={handleClick} style={style}>
-            <p>{leftText}</p>
+            {leftText && <p className={styles.leftText}>{leftText}</p>}
             <Row
                 className={`${styles.toggle} ${toggleLeft && styles.left} ${
                     toggleLeft ? styles[leftColor || ''] : styles[rightColor || '']
@@ -34,7 +34,7 @@ const Toggle = (props: {
                 <div className={styles.toggleButton} />
                 {onOffText && <p>{toggleLeft ? 'OFF' : 'ON'}</p>}
             </Row>
-            <p>{rightText}</p>
+            {rightText && <p className={styles.rightText}>{rightText}</p>}
         </button>
     )
 }

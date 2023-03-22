@@ -8,11 +8,18 @@
     align-items: center;
     justify-content: flex-start;
 
+    .leftText {
+        margin-right: 10px;
+    }
+
+    .rightText {
+        margin-left: 10px;
+    }
+
     .toggle {
         width: 45px;
         height: 26px;
         border-radius: 13px;
-        margin: 0 10px;
         padding: 3px;
         background-color: $grey4;
         position: relative;
