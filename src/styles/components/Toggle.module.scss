@@ -30,8 +30,24 @@
             position: absolute;
             left: calc(100% - 23px);
             transition: left 0.5s;
-            &.toggleLeft {
+        }
+
+        p {
+            position: absolute;
+            top: 9px;
+            left: calc(0% + 6px);
+            font-size: 8px;
+            line-height: 8px;
+            color: white;
+        }
+
+        &.left {
+            .toggleButton {
                 left: calc(0% + 3px);
+            }
+
+            p {
+                left: calc(100% - 20px);
             }
         }
     }
