@@ -4,6 +4,8 @@
 @import '@styles/Placeholders';
 @import '@styles/DarkMode';
 
+//todo: clean-up all unused classes, and use consistent formating ('.class-name')
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -395,6 +397,7 @@ input {
     }
 }
 
+// global styles
 .warningContainer {
     border: 2px solid $red;
     border-radius: 10px;

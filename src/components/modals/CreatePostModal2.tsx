@@ -4,27 +4,27 @@ import Button from '@components/Button'
 import PollAnswer from '@components/cards/PollAnswer'
 import Audio from '@components/cards/PostCard/PostTypes/Audio'
 import StringBeadCard from '@components/cards/PostCard/StringBeadCard'
+import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
 import DraftTextEditor from '@components/draft-js/DraftTextEditor'
+import DropDown from '@components/DropDown'
 import ImageTitle from '@components/ImageTitle'
 import Input from '@components/Input'
+import AddPostSpacesModal from '@components/modals/AddPostSpacesModal'
 import GBGHelpModal from '@components/modals/GBGHelpModal'
 import GBGSettingsModal from '@components/modals/GBGSettingsModal'
 import ImageModal from '@components/modals/ImageModal'
 import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
+import Scrollbars from '@components/Scrollbars'
 import SuccessMessage from '@components/SuccessMessage'
 import Toggle from '@components/Toggle'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import PostSpaces from '@src/components/cards/PostCard/PostSpaces'
 import UrlPreview from '@src/components/cards/PostCard/UrlPreview'
-// import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
-import CloseButton from '@components/CloseButton'
-import DropDown from '@components/DropDown'
-import AddPostSpacesModal from '@components/modals/AddPostSpacesModal'
-import Scrollbars from '@components/Scrollbars'
 import config from '@src/Config'
+import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import {
     audioMBLimit,
     capitalise,
@@ -44,11 +44,13 @@ import {
     CastaliaIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
+    DoorIcon,
     HelpIcon,
     ImageIcon,
     PlusIcon,
     PollIcon,
     SettingsIcon,
+    UploadIcon,
     UsersIcon,
 } from '@svgs/all'
 import axios from 'axios'
@@ -340,11 +342,46 @@ const CreatePostModal = (): JSX.Element => {
     }
 
     // gbg
+    const [topic, setTopic] = useState('')
+    const [topicOptions, setTopicOptions] = useState<any[]>([])
+    const [topicImageFile, setTopicImageFile] = useState<File | undefined>()
+    const [topicImageURL, setTopicImageURL] = useState('')
     const [GBGSettingsModalOpen, setGBGSettingsModalOpen] = useState(false)
     const [GBGHelpModalOpen, setGBGHelpModalOpen] = useState(false)
     const [GBGSettings, setGBGSettings] = useState(defaultGBGSettings)
     const [beads, setBeads] = useState<any[]>([])
     const [showBeadTools, setShowBeadTools] = useState(false)
+
+    function uploadTopicImage() {
+        const input = document.getElementById('topic-image-file-input') as HTMLInputElement
+        if (input && input.files && input.files[0]) {
+            setTopicImageURL('')
+            if (input.files[0].size > imageMBLimit * 1024 * 1024) {
+                setTopicImageFile(undefined)
+                input.value = ''
+            } else {
+                setTopicImageFile(input.files[0])
+                setTopicImageURL(URL.createObjectURL(input.files[0]))
+            }
+        }
+    }
+
+    function updateTopicText(topicText) {
+        const arcMatches = GlassBeadGameTopics.archetopics.filter((t) =>
+            t.name.toLowerCase().includes(topicText.toLowerCase())
+        )
+        const limMatches = GlassBeadGameTopics.liminal.filter((t) =>
+            t.name.toLowerCase().includes(topicText.toLowerCase())
+        )
+        setTopicOptions(topicText ? [...arcMatches, ...limMatches].slice(0, 9) : [])
+        setTopic(topicText)
+    }
+
+    function selectTopic(option) {
+        setTopic(option.name)
+        setTopicImageURL(option.imagePath)
+        setTopicOptions([])
+    }
 
     function saveGBGSettings(settings) {
         console.log('saveGBGSettings: ', settings)
@@ -426,7 +463,10 @@ const CreatePostModal = (): JSX.Element => {
             confirmClose={!saved}
         >
             {saved ? (
-                <SuccessMessage text='Post created!' />
+                <SuccessMessage
+                    text='
+                Post created!'
+                />
             ) : (
                 <Column centerX style={{ width: '100%' }}>
                     <h1>New post</h1>
@@ -452,15 +492,55 @@ const CreatePostModal = (): JSX.Element => {
                             </button>
                         </Row>
                         <Column className={styles.content}>
-                            {showTitle && (
+                            {showTitle && postType !== 'gbg' && (
                                 <Row centerY spaceBetween className={styles.title}>
                                     <input
-                                        placeholder={postType === 'gbg' ? 'Topic...' : 'Title...'}
+                                        placeholder='Title...'
                                         type='text'
                                         value={title}
                                         onChange={(e) => setTitle(e.target.value)}
                                     />
                                     <CloseButton size={20} onClick={() => setShowTitle(false)} />
+                                </Row>
+                            )}
+                            {postType === 'gbg' && (
+                                <Row centerY spaceBetween className={styles.topic}>
+                                    <Column centerX centerY className={styles.imageWrapper}>
+                                        {topicImageURL && <img src={topicImageURL} alt='' />}
+                                        <UploadIcon />
+                                        <label htmlFor='topic-image-file-input'>
+                                            <input
+                                                type='file'
+                                                id='topic-image-file-input'
+                                                accept='.png, .jpg, .jpeg, .gif'
+                                                onChange={uploadTopicImage}
+                                                hidden
+                                            />
+                                        </label>
+                                    </Column>
+                                    <Column className={styles.text}>
+                                        <input
+                                            placeholder='Topic...'
+                                            type='text'
+                                            maxLength={30}
+                                            value={topic}
+                                            onChange={(e) => updateTopicText(e.target.value)}
+                                        />
+                                        {topicOptions.length > 0 && (
+                                            <Column className={styles.topicOptions}>
+                                                {topicOptions.map((option) => (
+                                                    <button
+                                                        className={styles.option}
+                                                        type='button'
+                                                        onClick={() => selectTopic(option)}
+                                                    >
+                                                        <img src={option.imagePath} alt='' />
+                                                        <p>{option.name}</p>
+                                                    </button>
+                                                ))}
+                                            </Column>
+                                        )}
+                                    </Column>
                                 </Row>
                             )}
                             <DraftTextEditor
@@ -604,13 +684,14 @@ const CreatePostModal = (): JSX.Element => {
                             {postType === 'gbg' && (
                                 <Column className={styles.gbg}>
                                     {GBGSettings.synchronous ? (
-                                        <Button
-                                            text='Open game room'
-                                            color='gbg-white'
-                                            size='medium'
-                                            style={{ width: 150, marginTop: 15 }}
-                                            disabled
-                                        />
+                                        <Row centerX style={{ marginTop: 15, width: '100%' }}>
+                                            <Button
+                                                text='Open game room'
+                                                color='gbg-white'
+                                                icon={<DoorIcon />}
+                                                disabled
+                                            />
+                                        </Row>
                                     ) : (
                                         <Column>
                                             {GBGSettings.multiplayer &&

@@ -1,6 +1,7 @@
 import { ReactComponent as AppsIcon } from '@svgs/apps-grid-icon.svg'
 import { ReactComponent as ArrowRightIcon } from '@svgs/arrow-alt-circle-right-solid.svg'
 import { ReactComponent as ArrowDownIcon } from '@svgs/arrow-down-solid.svg'
+import { ReactComponent as UploadIcon } from '@svgs/arrow-up-from-bracket-solid.svg' // '@svgs/file-arrow-up-solid.svg'
 import { ReactComponent as ArrowUpIcon } from '@svgs/arrow-up-solid.svg'
 import { ReactComponent as AtIcon } from '@svgs/at-solid.svg'
 import { ReactComponent as BabyIcon } from '@svgs/baby-solid.svg'
@@ -152,4 +153,5 @@ export {
     SpaceCirclesIcon,
     SpaceTreeIcon,
     SpaceListIcon,
+    UploadIcon,
 }

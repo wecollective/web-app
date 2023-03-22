@@ -79,6 +79,86 @@ $transitionSpeed: 0.5s;
                 }
             }
 
+            .topic {
+                margin-bottom: 10px;
+
+                .imageWrapper {
+                    background-color: $grey2;
+                    width: 60px;
+                    height: 60px;
+                    border-radius: 50%;
+                    margin-right: 10px;
+                    flex-shrink: 0;
+                    position: relative;
+
+                    > img {
+                        width: inherit;
+                        height: inherit;
+                        border-radius: inherit;
+                        object-fit: cover;
+                        position: absolute;
+                        background-color: white;
+                        box-shadow: 0 0 10px 0 rgba(10, 8, 72, 0.1);
+                    }
+
+                    > svg {
+                        color: $grey5;
+                        width: 25px;
+                        height: 25px;
+                    }
+
+                    > label {
+                        position: absolute;
+                        width: 60px;
+                        height: 60px;
+                        cursor: pointer;
+                        border-radius: 50%;
+                    }
+                }
+
+                .text {
+                    position: relative;
+                    width: 100%;
+
+                    > input {
+                        all: unset;
+                        width: 100%;
+                        font-size: 24px;
+                    }
+
+                    .topicOptions {
+                        position: absolute;
+                        top: 40px;
+                        padding: 10px;
+                        background-color: white;
+                        box-shadow: 0 0 10px 0 rgba(10, 8, 72, 0.06);
+                        border-radius: 5px;
+                        z-index: 5;
+
+                        .option {
+                            all: unset;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+
+                            &:not(:last-child) {
+                                margin-bottom: 10px;
+                            }
+
+                            img {
+                                width: 30px;
+                                height: 30px;
+                                border-radius: 50%;
+                                margin-right: 5px;
+                                object-fit: cover;
+                                background-color: white;
+                                box-shadow: 0 0 5px 0 rgba(10, 8, 72, 0.1);
+                            }
+                        }
+                    }
+                }
+            }
+
             ::placeholder {
                 color: $grey4;
             }
