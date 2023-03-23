@@ -1,6 +1,29 @@
 @import '@styles/Variables';
 
 .wrapper {
+    .inputRow {
+        margin-bottom: 10px;
+
+        p {
+            margin-right: 10px;
+        }
+
+        > div {
+            width: 80px;
+        }
+    }
+
+    .allowedBeadTypes {
+        margin-top: 10px;
+
+        > label {
+            margin-bottom: 10px;
+            &:not(:last-child) {
+                margin-right: 10px;
+            }
+        }
+    }
+
     .position {
         all: unset;
         width: 35px;
@@ -38,6 +61,26 @@
             > svg {
                 width: 16px;
                 height: 16px;
+            }
+        }
+    }
+
+    .colorButtons {
+        margin: 20px 0 10px 0;
+
+        > button {
+            all: unset;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            border: 1px solid $black3;
+            &:not(:last-child) {
+                margin-right: 10px;
+            }
+
+            &.selected {
+                border: 3px solid $black3;
             }
         }
     }

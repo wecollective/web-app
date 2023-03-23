@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable no-control-regex */
 import config from '@src/Config'
 import { convertFromRaw, EditorState } from 'draft-js'
@@ -110,16 +111,16 @@ export const defaultGBGSettings = {
     multiplayer: false,
     openToAllUsers: true,
     players: [],
-    playerColors: false,
+    fixPlayerColors: false,
     totalMoves: 0,
     moveDuration: 0,
     introDuration: 0,
     intervalDuration: 0,
     outroDuration: 0,
-    allowedBeadTypes: 'Text,Url,Audio,Image',
+    allowedBeadTypes: ['Text', 'Url', 'Audio', 'Image'],
     characterLimit: 0,
     audioTimeLimit: 0,
-    timeWindow: 0,
+    moveTimeWindow: 0,
 }
 
 // functions
@@ -460,4 +461,10 @@ export function findEventDuration(start, end?) {
         // rounded up to nearest minute
         return `(${formatTimeDHM(Math.ceil(difference / 60) * 60)})`
     return null
+}
+
+export function trimNumber(number, maxValue) {
+    // if invalid number: return 0
+    // if greater than max value: return max value
+    return number ? (number > maxValue ? maxValue : number) : 0
 }
