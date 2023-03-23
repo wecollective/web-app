@@ -1,0 +1,65 @@
+@import '@styles/Variables';
+
+.wrapper {
+    .position {
+        all: unset;
+        width: 35px;
+        height: 35px;
+        background-color: $white;
+        border-radius: 50%;
+        margin-right: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        &.clickable {
+            cursor: pointer;
+        }
+    }
+
+    .positionControls {
+        height: 35px;
+        margin-right: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        > button {
+            all: unset;
+            cursor: pointer;
+            display: flex;
+            color: $grey4;
+            &:hover {
+                color: $grey5;
+            }
+            &:disabled {
+                color: $grey3;
+                cursor: unset;
+            }
+            > svg {
+                width: 16px;
+                height: 16px;
+            }
+        }
+    }
+
+    .dateTimePicker {
+        position: relative;
+
+        > div {
+            position: relative;
+            width: 220px;
+
+            input {
+                cursor: pointer;
+            }
+        }
+
+        > p {
+            margin: 0 10px;
+        }
+
+        > button {
+            margin-left: 5px;
+        }
+    }
+}

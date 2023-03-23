@@ -110,7 +110,7 @@ export const defaultGBGSettings = {
     multiplayer: false,
     openToAllUsers: true,
     players: [],
-    fixPlayerColors: false,
+    playerColors: false,
     totalMoves: 0,
     moveDuration: 0,
     introDuration: 0,

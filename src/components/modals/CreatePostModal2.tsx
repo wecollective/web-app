@@ -50,7 +50,6 @@ import {
     PlusIcon,
     PollIcon,
     SettingsIcon,
-    UploadIcon,
     UsersIcon,
 } from '@svgs/all'
 import axios from 'axios'
@@ -479,7 +478,18 @@ const CreatePostModal = (): JSX.Element => {
                 />
             ) : (
                 <Column centerX style={{ width: '100%' }}>
-                    <h1>{findModalHeader()}</h1>
+                    <Row centerY style={{ marginBottom: 20 }}>
+                        <h1 style={{ margin: 0 }}>{findModalHeader()}</h1>
+                        {postType === 'gbg' && (
+                            <button
+                                type='button'
+                                className={styles.helpButton}
+                                onClick={() => setGBGHelpModalOpen(true)}
+                            >
+                                <HelpIcon />
+                            </button>
+                        )}
+                    </Row>
                     <Column className={styles.postCard}>
                         <Row centerY className={styles.header}>
                             <ImageTitle
@@ -517,7 +527,8 @@ const CreatePostModal = (): JSX.Element => {
                                 <Row centerY spaceBetween className={styles.topic}>
                                     <Column centerX centerY className={styles.imageWrapper}>
                                         {topicImageURL && <img src={topicImageURL} alt='' />}
-                                        <UploadIcon />
+                                        {/* <UploadIcon /> */}
+                                        <ImageIcon />
                                         <label htmlFor='topic-image-file-input'>
                                             <input
                                                 type='file'
@@ -696,13 +707,16 @@ const CreatePostModal = (): JSX.Element => {
                                     {GBGSettings.synchronous ? (
                                         <Row
                                             centerX
-                                            style={{ marginTop: 15, width: '100%', opacity: 0.8 }}
+                                            style={{
+                                                marginTop: 15,
+                                                width: '100%',
+                                                pointerEvents: 'none',
+                                            }}
                                         >
                                             <Button
                                                 text='Open game room'
                                                 color='gbg-white'
                                                 icon={<DoorIcon />}
-                                                disabled
                                             />
                                         </Row>
                                     ) : (
@@ -915,13 +929,6 @@ const CreatePostModal = (): JSX.Element => {
                                     icon={<SettingsIcon />}
                                     onClick={() => setGBGSettingsModalOpen(true)}
                                 />
-                                <button
-                                    className={styles.helpButton}
-                                    type='button'
-                                    onClick={() => setGBGHelpModalOpen(true)}
-                                >
-                                    <HelpIcon />
-                                </button>
                             </Row>
                         )}
                     </Column>
