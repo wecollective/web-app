@@ -1,15 +1,31 @@
 @import '@styles/Variables';
 
 .wrapper {
-    .inputRow {
-        margin-bottom: 10px;
+    width: 740px;
 
-        p {
-            margin-right: 10px;
+    > h1 {
+        margin-bottom: 40px;
+    }
+
+    .rowWrapper {
+        margin-bottom: 30px;
+
+        > button {
+            z-index: 1;
         }
 
-        > div {
-            width: 80px;
+        .row {
+            height: 0;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.5s;
+
+            &.visible {
+                margin-top: 10px;
+                height: 40px;
+                opacity: 1;
+                pointer-events: all;
+            }
         }
     }
 

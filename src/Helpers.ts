@@ -113,7 +113,7 @@ export const defaultGBGSettings = {
     players: [],
     fixPlayerColors: false,
     totalMoves: 0,
-    moveDuration: 0,
+    moveDuration: 60,
     introDuration: 0,
     intervalDuration: 0,
     outroDuration: 0,
