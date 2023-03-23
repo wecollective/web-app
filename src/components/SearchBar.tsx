@@ -2,11 +2,11 @@ import styles from '@styles/components/SearchBar.module.scss'
 import { SearchIcon } from '@svgs/all'
 import React, { useState } from 'react'
 
-const SearchBar = (props: {
+function SearchBar(props: {
     setSearchFilter: (payload: string) => void
     placeholder: string
     style?: any
-}): JSX.Element => {
+}): JSX.Element {
     const { setSearchFilter, placeholder, style } = props
     const [newSearch, setNewSearch] = useState('')
 

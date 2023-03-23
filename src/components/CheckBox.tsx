@@ -3,13 +3,13 @@ import { CheckIcon } from '@svgs/all'
 import React from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
-const CheckBox = (props: {
+function CheckBox(props: {
     text?: string
     checked: boolean
     onChange: (checked: boolean) => void
     disabled?: boolean
     style?: any
-}): JSX.Element => {
+}): JSX.Element {
     const { text, checked, onChange, disabled, style } = props
     const id = uuidv4()
     return (

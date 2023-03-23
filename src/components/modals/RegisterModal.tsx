@@ -16,7 +16,7 @@ import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3'
 
-const RegisterModal = (props: { close: () => void }): JSX.Element => {
+function RegisterModal(props: { close: () => void }): JSX.Element {
     const { close } = props
     const { setLogInModalOpen } = useContext(AccountContext)
     const { executeRecaptcha } = useGoogleReCaptcha()

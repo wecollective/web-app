@@ -5,7 +5,7 @@ import Scrollbars from '@components/Scrollbars'
 import styles from '@styles/components/cards/PostCard/PostTypes/Images.module.scss'
 import React, { useState } from 'react'
 
-const Images = (props: { images: any }): JSX.Element => {
+function Images(props: { images: any }): JSX.Element {
     const { images } = props
     // const { text, PostImages } = postData
     // const images = PostImages.sort((a, b) => a.index - b.index)

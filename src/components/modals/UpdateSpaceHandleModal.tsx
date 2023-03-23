@@ -8,10 +8,10 @@ import config from '@src/Config'
 import styles from '@styles/components/modals/Modal.module.scss'
 import axios from 'axios'
 import React, { useContext, useState } from 'react'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
-const UpdateSpaceHandleModal = (props: { close: () => void }): JSX.Element => {
+function UpdateSpaceHandleModal(props: { close: () => void }): JSX.Element {
     const { close } = props
     const { spaceData } = useContext(SpaceContext)
     const [inputValue, setInputValue] = useState(spaceData.handle || '')
@@ -19,7 +19,7 @@ const UpdateSpaceHandleModal = (props: { close: () => void }): JSX.Element => {
     const [inputErrors, setInputErrors] = useState<string[]>([])
     const [loading, setLoading] = useState(false)
     const [showSuccessMessage, setShowSuccessMessage] = useState(false)
-    const history = useHistory()
+    const history = useNavigate()
     const cookies = new Cookies()
 
     function updateSpaceHandle(e) {
@@ -57,7 +57,7 @@ const UpdateSpaceHandleModal = (props: { close: () => void }): JSX.Element => {
                         break
                     case 'success':
                         setShowSuccessMessage(true)
-                        history.push(`/s/${inputValue}/settings`)
+                        history(`/s/${inputValue}/settings`)
                         setTimeout(() => close(), 3000)
                         break
                     default:

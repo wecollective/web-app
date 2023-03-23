@@ -14,9 +14,9 @@ import { CommentIcon, LockIcon, PostIcon, UsersIcon } from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
-const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element => {
+function SpaceCircles(props: { spaceCircleData: any; params: any }): JSX.Element {
     const { spaceCircleData, params } = props
     const { sortBy, sortOrder } = params
     const { setSpaceCircleData } = useContext(SpaceContext)
@@ -24,7 +24,7 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
     const [showSpaceModal, setShowSpaceModal] = useState(false)
     const [highlightedSpace, setHighlightedSpace] = useState<any>(null)
     const [mouseCoordinates, setMouseCoordinates] = useState({ x: 0, y: 0 })
-    const history = useHistory()
+    const history = useNavigate()
     const transitionDuration = 1000
     const maxTextLength = 20
     const circleRadius = useRef(0)
@@ -194,7 +194,7 @@ const SpaceCircles = (props: { spaceCircleData: any; params: any }): JSX.Element
             // else, navigate to new space
             else {
                 setClickedSpaceUUID(circle.data.uuid)
-                history.push(`/s/${circle.data.handle}/spaces`)
+                history(`/s/${circle.data.handle}/spaces`)
             }
         }
     }

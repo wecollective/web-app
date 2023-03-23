@@ -16,11 +16,11 @@ import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const RepostModal = (props: {
+function RepostModal(props: {
     close: () => void
     postData: any
     setPostData: (payload: any) => void
-}): JSX.Element => {
+}): JSX.Element {
     const { close, postData, setPostData } = props
     const { loggedIn, accountData, setLogInModalOpen, setAlertMessage, setAlertModalOpen } =
         useContext(AccountContext)

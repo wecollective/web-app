@@ -3,7 +3,7 @@ import styles from '@styles/components/FlagImagePlaceholder.module.scss'
 import { PostIcon, UserIcon, UsersIcon } from '@svgs/all'
 import React from 'react'
 
-const FlagImagePlaceholder = (props: { type: 'space' | 'user' | 'post' }): JSX.Element => {
+function FlagImagePlaceholder(props: { type: 'space' | 'user' | 'post' }): JSX.Element {
     const { type } = props
 
     let iconSVG

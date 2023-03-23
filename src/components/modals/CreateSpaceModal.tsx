@@ -23,7 +23,7 @@ import React, { useContext, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
-const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
+function CreateSpaceModal(props: { close: () => void }): JSX.Element {
     const { close } = props
     const { accountData, setAlertModalOpen, setAlertMessage } = useContext(AccountContext)
     const {

@@ -4,7 +4,7 @@ import Row from '@components/Row'
 import styles from '@styles/components/cards/PostCard/PostSpaces.module.scss'
 import React, { useState } from 'react'
 
-const PostSpaces = (props: { spaces: any[]; preview?: boolean }): JSX.Element => {
+function PostSpaces(props: { spaces: any[]; preview?: boolean }): JSX.Element {
     const { spaces, preview } = props
     const [modalOpen, setModalOpen] = useState(false)
     // filter out root space 'all' if included

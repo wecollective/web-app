@@ -1,7 +1,7 @@
 import Column from '@components/Column'
 import React from 'react'
 
-const PeopleListPlaceholder = (): JSX.Element => {
+function PeopleListPlaceholder(): JSX.Element {
     return (
         <Column>
             {/* <div className={styles.gradient} />

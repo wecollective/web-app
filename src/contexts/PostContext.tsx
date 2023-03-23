@@ -43,7 +43,7 @@ const defaults = {
     },
 }
 
-const PostContextProvider = ({ children }: { children: JSX.Element }): JSX.Element => {
+function PostContextProvider({ children }: { children: JSX.Element }): JSX.Element {
     const [selectedSubPage, setSelectedSubPage] = useState('')
     const [postData, setPostData] = useState(defaults.postData)
     const [postDataLoading, setPostDataLoading] = useState(true)

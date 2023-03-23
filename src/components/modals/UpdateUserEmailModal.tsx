@@ -10,7 +10,7 @@ import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const UpdateUserEmailModal = (props: { close: () => void }): JSX.Element => {
+function UpdateUserEmailModal(props: { close: () => void }): JSX.Element {
     const { close } = props
     const { accountData, setAccountData, setAlertModalOpen, setAlertMessage } =
         useContext(AccountContext)

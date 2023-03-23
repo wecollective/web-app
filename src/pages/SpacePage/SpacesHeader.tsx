@@ -15,9 +15,9 @@ import {
     SpaceTreeIcon,
 } from '@svgs/all'
 import React, { useContext, useEffect, useState } from 'react'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
-const SpacesHeader = (props: { params: any }): JSX.Element => {
+function SpacesHeader(props: { params: any }): JSX.Element {
     const { params } = props
     const { loggedIn, setAlertModalOpen, setAlertMessage } = useContext(AccountContext)
     const [createSpaceModalOpen, setCreateSpaceModalOpen] = useState(false)
@@ -25,7 +25,7 @@ const SpacesHeader = (props: { params: any }): JSX.Element => {
     const [filterParams, setFilterParams] = useState(params)
     const [lensesModalOpen, setLensesModalOpen] = useState(false)
     const location = useLocation()
-    const history = useHistory()
+    const history = useNavigate()
     const mobileView = document.documentElement.clientWidth < 900
 
     function openCreateSpaceModal() {
@@ -37,7 +37,7 @@ const SpacesHeader = (props: { params: any }): JSX.Element => {
     }
 
     function changeLens(type) {
-        history.push({
+        history({
             pathname: location.pathname,
             search: getParamString(params, 'lens', type),
         })
@@ -121,7 +121,7 @@ const SpacesHeader = (props: { params: any }): JSX.Element => {
                         text='Apply filters'
                         color='blue'
                         onClick={() => {
-                            history.push({
+                            history({
                                 pathname: location.pathname,
                                 search: getParamString(filterParams),
                             })

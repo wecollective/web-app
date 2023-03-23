@@ -10,9 +10,9 @@ import styles from '@styles/components/modals/Modal.module.scss'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
-const LogInModal = (props: { close: () => void }): JSX.Element => {
+function LogInModal(props: { close: () => void }): JSX.Element {
     const { close } = props
     const { getAccountData, setRegisterModalOpen, setForgotPasswordModalOpen } =
         useContext(AccountContext)
@@ -38,7 +38,7 @@ const LogInModal = (props: { close: () => void }): JSX.Element => {
     const [verificationEmailUserId, setVerificationEmailUserId] = useState(null)
     const [verificationEmailLoading, setVerificationEmailLoading] = useState(false)
     const location = useLocation()
-    const history = useHistory()
+    const history = useNavigate()
 
     function updateItem(item, value) {
         setErrorMessage('')
@@ -71,7 +71,7 @@ const LogInModal = (props: { close: () => void }): JSX.Element => {
                     // get account data and navigate to 'all' if on home page
                     getAccountData()
                     setTimeout(() => {
-                        if (location.pathname === '/') history.push('/s/all')
+                        if (location.pathname === '/') history('/s/all')
                         close()
                     }, 1000)
                 })

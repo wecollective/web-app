@@ -12,11 +12,11 @@ import axios from 'axios'
 import React, { useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const AddPostSpacesModal = (props: {
+function AddPostSpacesModal(props: {
     spaces: any[]
     setSpaces: (spaces: any[]) => void
     close: () => void
-}): JSX.Element => {
+}): JSX.Element {
     const { spaces, setSpaces, close } = props
     const [spaceOptions, setSpaceOptions] = useState<any[]>([])
     const [selectedSpaces, setSelectedSpaces] = useState<any[]>(spaces)

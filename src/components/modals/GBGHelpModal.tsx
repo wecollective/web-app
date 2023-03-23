@@ -4,7 +4,7 @@ import Modal from '@components/modals/Modal'
 import styles from '@styles/components/modals/AddPostAudioModal.module.scss'
 import React from 'react'
 
-const GBGHelpModal = (props: { close: () => void }): JSX.Element => {
+function GBGHelpModal(props: { close: () => void }): JSX.Element {
     const { close } = props
 
     return (

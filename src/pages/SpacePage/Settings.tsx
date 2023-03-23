@@ -17,12 +17,12 @@ import SpaceNotFound from '@pages/SpaceNotFound'
 import InviteSpaceUsersModal from '@src/components/modals/InviteSpaceUsersModal'
 import styles from '@styles/pages/SpacePage/Settings.module.scss'
 import React, { useContext, useEffect, useState } from 'react'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
-const Settings = (): JSX.Element => {
+function Settings(): JSX.Element {
     const { spaceData, spaceNotFound, isModerator } = useContext(SpaceContext)
     const location = useLocation()
-    const history = useHistory()
+    const history = useNavigate()
     const spaceHandle = location.pathname.split('/')[2]
     const [spaceHandleModalOpen, setSpaceHandleModalOpen] = useState(false)
     const [spaceNameModalOpen, setSpaceNameModalOpen] = useState(false)
@@ -36,8 +36,7 @@ const Settings = (): JSX.Element => {
     const [deleteSpaceModalOpen, setDeleteSpaceModalOpen] = useState(false)
 
     useEffect(() => {
-        if (spaceData.handle === spaceHandle && !isModerator)
-            history.push(`/s/${spaceHandle}/posts`)
+        if (spaceData.handle === spaceHandle && !isModerator) history(`/s/${spaceHandle}/posts`)
     }, [spaceData.handle])
 
     if (spaceNotFound) return <SpaceNotFound />

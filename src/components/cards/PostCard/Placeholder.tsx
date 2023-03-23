@@ -1,7 +1,7 @@
 import styles from '@styles/components/cards/PostCard/Placeholder.module.scss'
 import React from 'react'
 
-const Placeholder = (): JSX.Element => {
+function Placeholder(): JSX.Element {
     // todo: re-write
     return (
         <div className={styles.PHPost}>

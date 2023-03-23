@@ -7,14 +7,14 @@ import config from '@src/Config'
 import styles from '@styles/pages/UserPage/Notifications.module.scss'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
-const Notifications = (): JSX.Element => {
+function Notifications(): JSX.Element {
     const { accountData, accountDataLoading, setAccountData } = useContext(AccountContext)
     const { userData, getUserData, setSelectedUserSubPage, isOwnAccount } = useContext(UserContext)
     const cookies = new Cookies()
-    const history = useHistory()
+    const history = useNavigate()
     const location = useLocation()
     const userHandle = location.pathname.split('/')[2]
 
@@ -55,7 +55,7 @@ const Notifications = (): JSX.Element => {
 
     function getFirstNotifications(res) {
         if (res.handle === accountData.handle) getNotifications()
-        else history.push(`/u/${res.handle}/about`)
+        else history(`/u/${res.handle}/about`)
     }
 
     useEffect(() => {

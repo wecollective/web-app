@@ -3,7 +3,7 @@ import Placeholder from '@src/components/cards/PostCard/Placeholder'
 import styles from '@styles/components/ListPlaceholder.module.scss'
 import React from 'react'
 
-const PostListPlaceholder = (): JSX.Element => {
+function PostListPlaceholder(): JSX.Element {
     return (
         <Column className={styles.wrapper}>
             <div className={styles.gradient} />

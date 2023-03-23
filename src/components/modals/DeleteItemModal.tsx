@@ -5,7 +5,7 @@ import React from 'react'
 import CloseButton from '../CloseButton'
 import CloseOnClickOutside from '../CloseOnClickOutside'
 
-const DeleteItemModal = (props: {
+function DeleteItemModal(props: {
     text: string
     endpoint: string
     itemId: number | undefined
@@ -14,7 +14,7 @@ const DeleteItemModal = (props: {
     setDeleteItemModalOpen: (payload: boolean) => void
     getItems1: () => any
     getItems2?: () => any
-}): JSX.Element => {
+}): JSX.Element {
     const {
         text,
         endpoint,

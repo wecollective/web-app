@@ -6,16 +6,16 @@ import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
 import axios from 'axios'
 import React, { useContext, useState } from 'react'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
-const DeleteAccountModal = (props: { close: () => void }): JSX.Element => {
+function DeleteAccountModal(props: { close: () => void }): JSX.Element {
     const { close } = props
     const { logOut } = useContext(AccountContext)
     const [loading, setLoading] = useState(false)
     const [showSuccessMessage, setShowSuccessMessage] = useState(false)
     const cookies = new Cookies()
-    const history = useHistory()
+    const history = useNavigate()
 
     function deleteAccount() {
         setLoading(true)
@@ -28,7 +28,7 @@ const DeleteAccountModal = (props: { close: () => void }): JSX.Element => {
                 setShowSuccessMessage(true)
                 setTimeout(() => {
                     logOut()
-                    history.push(`/s/all`)
+                    history(`/s/all`)
                 }, 2000)
             })
             .catch((error) => console.log(error))

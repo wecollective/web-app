@@ -9,7 +9,7 @@ import ResetPasswordModal from '@components/modals/ResetPasswordModal'
 import { AccountContext } from '@contexts/AccountContext'
 import React, { useContext } from 'react'
 
-const Modals = (): JSX.Element => {
+function Modals(): JSX.Element {
     const {
         alertModalOpen,
         logInModalOpen,

@@ -17,6 +17,7 @@ import ImageModal from '@components/modals/ImageModal'
 import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
+// import ShowMoreLess from '@components/ShowMoreLess'
 import SuccessMessage from '@components/SuccessMessage'
 import Toggle from '@components/Toggle'
 import { AccountContext } from '@contexts/AccountContext'
@@ -44,7 +45,6 @@ import {
     CastaliaIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
-    DoorIcon,
     HelpIcon,
     ImageIcon,
     PlusIcon,
@@ -69,11 +69,11 @@ const defaultSelectedSpace = {
     flagImagePath: 'https://weco-prod-space-flag-images.s3.eu-west-1.amazonaws.com/1614556880362',
 }
 
-const ContentButton = (props: {
+function ContentButton(props: {
     type: string
     postType: string
     setPostType: (type: string) => void
-}): JSX.Element => {
+}): JSX.Element {
     const { type, postType, setPostType } = props
     const typeIcons = {
         image: <ImageIcon />,
@@ -94,7 +94,7 @@ const ContentButton = (props: {
     )
 }
 
-const CreatePostModal = (): JSX.Element => {
+function CreatePostModal(): JSX.Element {
     const {
         accountData,
         setCreatePostModalOpen,
@@ -564,6 +564,7 @@ const CreatePostModal = (): JSX.Element => {
                                     </Column>
                                 </Row>
                             )}
+                            {/* <ShowMoreLess height={300}> */}
                             <DraftTextEditor
                                 type='post'
                                 stringifiedDraft={text.value}
@@ -576,6 +577,7 @@ const CreatePostModal = (): JSX.Element => {
                                     setUrls(textUrls)
                                 }}
                             />
+                            {/* </ShowMoreLess> */}
                             {showDates && (
                                 <Row centerY className={styles.dates}>
                                     <CalendarIcon />
@@ -704,7 +706,7 @@ const CreatePostModal = (): JSX.Element => {
                             )}
                             {postType === 'gbg' && (
                                 <Column className={styles.gbg}>
-                                    {GBGSettings.synchronous ? (
+                                    {/* {GBGSettings.synchronous ? (
                                         <Row
                                             centerX
                                             style={{
@@ -719,7 +721,8 @@ const CreatePostModal = (): JSX.Element => {
                                                 icon={<DoorIcon />}
                                             />
                                         </Row>
-                                    ) : (
+                                    ) : ( */}
+                                    {!GBGSettings.synchronous && (
                                         <Column>
                                             {GBGSettings.multiplayer &&
                                                 GBGSettings.openToAllUsers && (
@@ -796,10 +799,15 @@ const CreatePostModal = (): JSX.Element => {
                                 ))}
                         </Column>
                     </Column>
-                    <Column className={styles.contentOptions}>
+                    <Column
+                        centerY
+                        className={`${styles.contentOptions} ${
+                            postType === 'text' && styles.hidden
+                        }`}
+                    >
                         {postType === 'image' && (
                             <Column>
-                                <Row centerY style={{ marginBottom: 20 }}>
+                                <Row centerY>
                                     <Row className={styles.fileUploadInput}>
                                         <label htmlFor='post-images-file-input'>
                                             Upload images
@@ -841,7 +849,7 @@ const CreatePostModal = (): JSX.Element => {
                         )}
                         {postType === 'audio' && (
                             <Column>
-                                <Row centerY style={{ marginBottom: 20 }}>
+                                <Row centerY>
                                     <Row className={styles.fileUploadInput}>
                                         <label htmlFor='audio-file-input'>
                                             Upload audio
@@ -876,11 +884,7 @@ const CreatePostModal = (): JSX.Element => {
                             </Column>
                         )}
                         {postType === 'event' && (
-                            <Row
-                                centerY
-                                className={styles.dateTimePicker}
-                                style={{ marginBottom: 20 }}
-                            >
+                            <Row centerY className={styles.dateTimePicker}>
                                 <div id='date-time-start-wrapper'>
                                     <Input
                                         id='date-time-start'
@@ -900,7 +904,7 @@ const CreatePostModal = (): JSX.Element => {
                             </Row>
                         )}
                         {postType === 'poll' && (
-                            <Row centerY style={{ marginBottom: 20 }}>
+                            <Row centerY>
                                 <DropDown
                                     title='Vote type'
                                     options={[
@@ -922,7 +926,7 @@ const CreatePostModal = (): JSX.Element => {
                             </Row>
                         )}
                         {postType === 'gbg' && (
-                            <Row style={{ marginBottom: 20 }}>
+                            <Row>
                                 <Button
                                     text='Game settings'
                                     color='aqua'
@@ -942,7 +946,7 @@ const CreatePostModal = (): JSX.Element => {
                             />
                         ))}
                     </Row>
-                    <Button text='Create post' color='blue' onClick={createPost} />
+                    <Button text='Post' color='blue' onClick={createPost} />
                 </Column>
             )}
             {spacesModalOpen && (

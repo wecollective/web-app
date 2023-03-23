@@ -22,11 +22,11 @@ import flatpickr from 'flatpickr'
 import 'flatpickr/dist/themes/material_green.css'
 import React, { useContext, useEffect, useState } from 'react'
 
-const GBGSettingsModal = (props: {
+function GBGSettingsModal(props: {
     settings: any
     saveSettings: (settings: any) => void
     close: () => void
-}): JSX.Element => {
+}): JSX.Element {
     const { settings, saveSettings, close } = props
     const { accountData } = useContext(AccountContext)
     const [synchronous, setSynchronous] = useState(settings.synchronous)

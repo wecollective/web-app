@@ -2,7 +2,7 @@ import Row from '@components/Row'
 import styles from '@styles/components/Toggle.module.scss'
 import React, { useEffect, useState } from 'react'
 
-const Toggle = (props: {
+function Toggle(props: {
     leftText?: string
     rightText?: string
     leftColor?: 'blue' | 'red'
@@ -11,7 +11,7 @@ const Toggle = (props: {
     onOffText?: boolean
     onClick: () => void
     style?: any
-}): JSX.Element => {
+}): JSX.Element {
     const { leftText, rightText, leftColor, rightColor, positionLeft, onOffText, style, onClick } =
         props
     const [toggleLeft, setToggleLeft] = useState(positionLeft)

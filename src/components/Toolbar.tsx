@@ -8,7 +8,7 @@ import styles from '@styles/components/Toolbar.module.scss'
 import { AppsIcon, EyeIcon, PlusIcon, PostIcon, SlidersIcon, SpacesIcon, UserIcon } from '@svgs/all'
 import React, { useContext } from 'react'
 
-const Toolbar = (): JSX.Element => {
+function Toolbar(): JSX.Element {
     const { accountData } = useContext(AccountContext)
 
     // todo: grab followed spaces when needed

@@ -11,7 +11,7 @@ import styles from '@styles/pages/SpacePage/Spaces.module.scss'
 import React, { useContext, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
-const Spaces = (): JSX.Element => {
+function Spaces(): JSX.Element {
     const { loggedIn, pageBottomReached } = useContext(AccountContext)
     const {
         spaceData,

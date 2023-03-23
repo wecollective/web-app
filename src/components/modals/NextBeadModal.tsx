@@ -40,11 +40,11 @@ import { v4 as uuidv4 } from 'uuid'
 const { white, red, orange, yellow, green, blue, purple } = colors
 const beadColors = [white, red, orange, yellow, green, blue, purple]
 
-const NextBeadModal = (props: {
+function NextBeadModal(props: {
     postData: any
     setPostData: (data: any) => void
     close: () => void
-}): JSX.Element => {
+}): JSX.Element {
     const { accountData, setAlertMessage, setAlertModalOpen } = useContext(AccountContext)
     const { postData, setPostData, close } = props
     const { id, Weave, StringPlayers, StringPosts } = postData

@@ -14,12 +14,12 @@ import styles from '@styles/components/draft-js/DraftText.module.scss'
 import { ContentState, convertFromRaw, EditorState } from 'draft-js'
 import React, { useEffect, useRef, useState } from 'react'
 
-const DraftText = (props: {
+function DraftText(props: {
     stringifiedDraft: string
     className?: string
     markdownStyles?: string
     style?: any
-}): JSX.Element => {
+}): JSX.Element {
     const { stringifiedDraft, className, markdownStyles, style } = props
     const [type, setType] = useState('')
     const [editorState, setEditorState] = useState<any>(null)

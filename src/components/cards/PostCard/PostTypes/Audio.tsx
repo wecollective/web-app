@@ -8,7 +8,7 @@ import { PauseIcon, PlayIcon } from '@svgs/all'
 import * as d3 from 'd3'
 import React, { useState } from 'react'
 
-const Audio = (props: { id: number; url: string; location: string }): JSX.Element => {
+function Audio(props: { id: number; url: string; location: string }): JSX.Element {
     const { id, url, location } = props
     const [audioPlaying, setAudioPlaying] = useState(false)
 

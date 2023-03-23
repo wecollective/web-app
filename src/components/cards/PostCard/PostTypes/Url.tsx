@@ -4,7 +4,7 @@ import DraftText from '@components/draft-js/DraftText'
 import ShowMoreLess from '@components/ShowMoreLess'
 import React from 'react'
 
-const Url = (props: { postData: any }): JSX.Element => {
+function Url(props: { postData: any }): JSX.Element {
     const { postData } = props
     const { text, url, urlDescription, urlDomain, urlImage, urlTitle } = postData
     const urlData = {

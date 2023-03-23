@@ -154,7 +154,7 @@ const postTypes = [
 const { white, red, orange, yellow, green, blue, purple } = colors
 const beadColors = [white, red, orange, yellow, green, blue, purple]
 
-const CreatePostModal = (): JSX.Element => {
+function CreatePostModal(): JSX.Element {
     const {
         accountData,
         setCreatePostModalOpen,

@@ -6,14 +6,14 @@ import * as d3 from 'd3'
 import getBlobDuration from 'get-blob-duration'
 import React, { useEffect, useState } from 'react'
 
-const AudioTimeSlider = (props: {
+function AudioTimeSlider(props: {
     audioElementId: string
     audioURL: string
     location: string // 'space-posts' | 'user-posts' | 'post-page' | 'space-post-map' | 'gbg' | 'preview'
     onPlay?: () => void
     onPause?: () => void
     onEnded?: () => void
-}): JSX.Element => {
+}): JSX.Element {
     const { audioURL, audioElementId, location, onPlay, onPause, onEnded } = props
     const [duration, setDuration] = useState(0)
     const [currentTime, setCurrentTime] = useState(0)

@@ -7,16 +7,16 @@ import config from '@src/Config'
 import styles from '@styles/components/modals/Modal.module.scss'
 import axios from 'axios'
 import React, { useContext, useState } from 'react'
-import { Link, useHistory } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
-const DeleteSpaceModal = (props: { close: () => void }): JSX.Element => {
+function DeleteSpaceModal(props: { close: () => void }): JSX.Element {
     const { close } = props
     const { spaceData } = useContext(SpaceContext)
     const [loading, setLoading] = useState(false)
     const [showSuccessMessage, setShowSuccessMessage] = useState(false)
     const cookies = new Cookies()
-    const history = useHistory()
+    const history = useNavigate()
 
     function deleteSpace(e) {
         e.preventDefault()
@@ -29,7 +29,7 @@ const DeleteSpaceModal = (props: { close: () => void }): JSX.Element => {
             .then(() => {
                 setLoading(false)
                 setShowSuccessMessage(true)
-                setTimeout(() => history.push(`/s/all`), 3000)
+                setTimeout(() => history(`/s/all`), 3000)
             })
             .catch((error) => console.log(error))
     }

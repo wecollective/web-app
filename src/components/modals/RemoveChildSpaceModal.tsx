@@ -12,7 +12,7 @@ import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const RemoveChildSpaceModal = (props: { close: () => void }): JSX.Element => {
+function RemoveChildSpaceModal(props: { close: () => void }): JSX.Element {
     const { close } = props
     const { spaceData } = useContext(SpaceContext)
     const [options, setOptions] = useState<any[]>([])

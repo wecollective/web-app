@@ -3,14 +3,14 @@ import CloseOnClickOutside from '@components/CloseOnClickOutside'
 import styles from '@styles/components/modals/Modal.module.scss'
 import React from 'react'
 
-const Modal = (props: {
+function Modal(props: {
     close: () => void
     centered?: boolean
     confirmClose?: boolean
     className?: any
     style?: any
     children: any
-}): JSX.Element => {
+}): JSX.Element {
     const { close, centered, confirmClose, className, style, children } = props
 
     const classes = [styles.modal]

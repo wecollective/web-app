@@ -18,7 +18,7 @@ import { Link } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
 // current unused, will be replaced with toolbar
-const SidebarSmall = (): JSX.Element | null => {
+function SidebarSmall(): JSX.Element | null {
     const { accountData, updateAccountData, loggedIn } = useContext(AccountContext)
     const { selectedSpaceSubPage } = useContext(SpaceContext)
     const { FollowedSpaces: joinedSpaces } = accountData

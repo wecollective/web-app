@@ -3,7 +3,7 @@ import { handleImageError } from '@src/Helpers'
 import styles from '@styles/components/FlagImage.module.scss'
 import React from 'react'
 
-const FlagImage = (props: {
+function FlagImage(props: {
     type: 'space' | 'user' | 'post'
     size: number
     imagePath: string | null
@@ -11,7 +11,7 @@ const FlagImage = (props: {
     outline?: boolean
     shadow?: boolean
     style?: any
-}): JSX.Element => {
+}): JSX.Element {
     const { size, type, imagePath, className, outline, shadow, style } = props
 
     const classes = [styles.wrapper]

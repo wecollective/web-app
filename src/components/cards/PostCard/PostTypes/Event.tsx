@@ -17,11 +17,11 @@ import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const Event = (props: {
+function Event(props: {
     postData: any
     setPostData: (data: any) => void
     location: string
-}): JSX.Element => {
+}): JSX.Element {
     const { postData, setPostData, location } = props
     const { id, text, Event: event } = postData
     const { accountData, setAlertMessage, setAlertModalOpen } = useContext(AccountContext)

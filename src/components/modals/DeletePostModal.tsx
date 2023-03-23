@@ -10,11 +10,11 @@ import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const DeletePostModal = (props: {
+function DeletePostModal(props: {
     postId: number
     location: 'post-page' | 'space-posts' | 'space-post-map' | 'user-posts' | 'preview'
     close: () => void
-}): JSX.Element => {
+}): JSX.Element {
     const { postId, location, close } = props
     const { spacePosts, setSpacePosts } = useContext(SpaceContext)
     const { userPosts, setUserPosts } = useContext(UserContext)

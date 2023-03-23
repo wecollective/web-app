@@ -14,7 +14,7 @@ import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const RemoveSpaceModeratorModal = (props: { close: () => void }): JSX.Element => {
+function RemoveSpaceModeratorModal(props: { close: () => void }): JSX.Element {
     const { close } = props
     const { accountData } = useContext(AccountContext)
     const { spaceData, setSpaceData } = useContext(SpaceContext)

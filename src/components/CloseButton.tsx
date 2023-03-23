@@ -2,7 +2,7 @@ import styles from '@styles/components/CloseButton.module.scss'
 import { TimesIcon } from '@svgs/all'
 import React from 'react'
 
-const CloseButton = (props: { size: number; onClick: () => void; style?: any }): JSX.Element => {
+function CloseButton(props: { size: number; onClick: () => void; style?: any }): JSX.Element {
     const { size, onClick, style } = props
 
     return (

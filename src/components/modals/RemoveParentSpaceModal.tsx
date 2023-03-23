@@ -14,7 +14,7 @@ import React, { useContext, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
-const RemoveParentSpaceModal = (props: { close: () => void }): JSX.Element => {
+function RemoveParentSpaceModal(props: { close: () => void }): JSX.Element {
     const { close } = props
     const { spaceData, setSpaceData } = useContext(SpaceContext)
     const [options, setOptions] = useState<any[]>([])

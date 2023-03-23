@@ -28,7 +28,7 @@ import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const Content = (props: { typeIcon: JSX.Element; children: any }): JSX.Element => {
+function Content(props: { typeIcon: JSX.Element; children: any }): JSX.Element {
     const { typeIcon, children } = props
     return (
         <>
@@ -38,12 +38,12 @@ const Content = (props: { typeIcon: JSX.Element; children: any }): JSX.Element =
     )
 }
 
-const CreatedAt = (props: { date: string }): JSX.Element => {
+function CreatedAt(props: { date: string }): JSX.Element {
     const { date } = props
     return <p title={dateCreated(date)}>• {timeSinceCreated(date)}</p>
 }
 
-const Success = (): JSX.Element => {
+function Success(): JSX.Element {
     return (
         <div className={`${styles.inlineIcon} ${styles.green}`}>
             <SuccessIcon />
@@ -51,7 +51,7 @@ const Success = (): JSX.Element => {
     )
 }
 
-const Fail = (): JSX.Element => {
+function Fail(): JSX.Element {
     return (
         <div className={`${styles.inlineIcon} ${styles.red}`}>
             <FailIcon />
@@ -59,10 +59,10 @@ const Fail = (): JSX.Element => {
     )
 }
 
-const State = (props: {
+function State(props: {
     state: 'pending' | 'accepted' | 'rejected'
     respond: (response: 'accepted' | 'rejected') => void
-}): JSX.Element => {
+}): JSX.Element {
     const { state, respond } = props
     const [acceptLoading, setAcceptLoading] = useState(false)
     const [rejectLoading, setRejectLoading] = useState(false)
@@ -113,11 +113,11 @@ const State = (props: {
     )
 }
 
-const NotificationCard = (props: {
+function NotificationCard(props: {
     notification: any
     location: 'account' | 'space'
     updateNotification: (id, key, payload) => void
-}): JSX.Element => {
+}): JSX.Element {
     const { notification, location, updateNotification } = props
     const {
         id,

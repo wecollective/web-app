@@ -4,7 +4,7 @@ import styles from '@styles/components/Input.module.scss'
 import { DangerIcon, SuccessIcon } from '@svgs/all'
 import React from 'react'
 
-const Input = (props: {
+function Input(props: {
     type: 'text' | 'number' | 'text-area' | 'password' | 'email'
     id?: string
     title?: string
@@ -19,7 +19,7 @@ const Input = (props: {
     loading?: boolean
     autoFill?: boolean
     onChange?: (payload: string) => void
-}): JSX.Element => {
+}): JSX.Element {
     const {
         type,
         id,

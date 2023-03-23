@@ -33,7 +33,7 @@ import axios from 'axios'
 import { ContentState, convertFromRaw, convertToRaw, EditorState } from 'draft-js'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 
-const DraftTextEditor = (props: {
+function DraftTextEditor(props: {
     id?: string
     type: 'post' | 'comment'
     stringifiedDraft: string
@@ -45,7 +45,7 @@ const DraftTextEditor = (props: {
     errors?: string[]
     className?: string
     style?: any
-}): JSX.Element => {
+}): JSX.Element {
     const {
         id,
         type,

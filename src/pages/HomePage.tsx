@@ -9,12 +9,12 @@ import styles from '@styles/pages/HomePage.module.scss'
 import { CastaliaIcon, DoorIcon, HandshakeIcon, OSIcon, PollIcon } from '@svgs/all'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 // todo: import logo and background images as SVG components
 // import { ReactComponent as BackgroundImageSVG } from '@svgs/earth.svg'
 
-const Homepage = (): JSX.Element => {
+function Homepage(): JSX.Element {
     const {
         loggedIn,
         setAlertMessage,
@@ -25,7 +25,7 @@ const Homepage = (): JSX.Element => {
     } = useContext(AccountContext)
     const urlParams = new URLSearchParams(window.location.search)
     const alert = urlParams.get('alert')
-    const history = useHistory()
+    const history = useNavigate()
     const cookies = new Cookies()
 
     const [highlights, setHighlights] = useState<any>(null)
@@ -131,7 +131,7 @@ const Homepage = (): JSX.Element => {
     }
 
     function enter() {
-        if (loggedIn) history.push('/s/all')
+        if (loggedIn) history('/s/all')
         else setLogInModalOpen(true)
     }
 
@@ -188,7 +188,7 @@ const Homepage = (): JSX.Element => {
                             text={`${highlights.totals.totalPosts} Post${pluralise(
                                 highlights.posts.length
                             )}`}
-                            onClick={() => history.push('/s/all/posts')}
+                            onClick={() => history('/s/all/posts')}
                             outline
                         />
                         <FlagImageHighlights
@@ -198,7 +198,7 @@ const Homepage = (): JSX.Element => {
                             text={`${highlights.totals.totalSpaces} Space${pluralise(
                                 highlights.totals.totalSpaces
                             )}`}
-                            onClick={() => history.push('/s/all/spaces')}
+                            onClick={() => history('/s/all/spaces')}
                             outline
                         />
                         <FlagImageHighlights
@@ -208,7 +208,7 @@ const Homepage = (): JSX.Element => {
                             text={`${highlights.totals.totalUsers} ${
                                 isPlural(highlights.totals.totalUsers) ? 'People' : 'Person'
                             }`}
-                            onClick={() => history.push('/s/all/people')}
+                            onClick={() => history('/s/all/people')}
                             outline
                         />
                     </div>

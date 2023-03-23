@@ -6,7 +6,7 @@ import Row from '@components/Row'
 import styles from '@styles/components/cards/PollAnswer.module.scss'
 import React from 'react'
 
-const PollAnswer = (props: {
+function PollAnswer(props: {
     index: number
     type: string // 'single-choice' | 'multiple-choice' | 'weighted-choice'
     answer: any
@@ -17,7 +17,7 @@ const PollAnswer = (props: {
     selected?: boolean
     onChange?: (value: boolean | number) => void
     close?: () => void
-}): JSX.Element => {
+}): JSX.Element {
     const {
         index,
         type,

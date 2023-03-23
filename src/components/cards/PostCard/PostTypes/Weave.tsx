@@ -15,11 +15,11 @@ import { DNAIcon, PlusIcon, UsersIcon } from '@svgs/all'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 
 // todo: clean up logic when GBG refactored
-const Weave = (props: {
+function Weave(props: {
     postData: any
     setPostData: (data: any) => void
     location: string
-}): JSX.Element => {
+}): JSX.Element {
     const { postData, setPostData, location } = props
     const {
         id,

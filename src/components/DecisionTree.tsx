@@ -11,7 +11,7 @@ import Peer from 'simple-peer'
 import { io } from 'socket.io-client'
 import { v4 as uuidv4 } from 'uuid'
 
-const Video = (props) => {
+function Video(props) {
     const { peer, videoRef, mainUser, size } = props
     const { accountData } = useContext(AccountContext)
     const ref = useRef<any>(null)
@@ -39,7 +39,7 @@ const Video = (props) => {
     )
 }
 
-const DecisionTree = (): JSX.Element => {
+function DecisionTree(): JSX.Element {
     const { accountData } = useContext(AccountContext)
     const { postDataLoading, getPostData, postData } = useContext(PostContext)
 

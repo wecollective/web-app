@@ -1,6 +1,6 @@
 import { AccountContext } from '@contexts/AccountContext'
 import React, { useContext, useEffect, useState } from 'react'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 // import { SpaceContext } from '@contexts/SpaceContext'
 import Button from '@components/Button'
 import DropDown from '@components/DropDown'
@@ -11,7 +11,7 @@ import { getParamString } from '@src/Helpers'
 import styles from '@styles/pages/SpacePage/Header.module.scss'
 import { EyeIcon, PlusIcon, SlidersIcon } from '@svgs/all'
 
-const PostsHeader = (props: { params: any }): JSX.Element => {
+function PostsHeader(props: { params: any }): JSX.Element {
     const { params } = props
     const {
         loggedIn,
@@ -24,7 +24,7 @@ const PostsHeader = (props: { params: any }): JSX.Element => {
     const [filterParams, setFilterParams] = useState(params)
     const [lensesModalOpen, setLensesModalOpen] = useState(false)
     const location = useLocation()
-    const history = useHistory()
+    const history = useNavigate()
     const mobileView = document.documentElement.clientWidth < 900
     const smallMobileView = document.documentElement.clientWidth < 400
 
@@ -147,7 +147,7 @@ const PostsHeader = (props: { params: any }): JSX.Element => {
                         text='Apply filters'
                         color='blue'
                         onClick={() => {
-                            history.push({
+                            history({
                                 pathname: location.pathname,
                                 search: getParamString(filterParams),
                             })
@@ -165,7 +165,7 @@ const PostsHeader = (props: { params: any }): JSX.Element => {
                         rightText='Map'
                         positionLeft={params.lens === 'List'}
                         onClick={() => {
-                            history.push({
+                            history({
                                 pathname: location.pathname,
                                 search: getParamString(
                                     params,

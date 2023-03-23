@@ -3,12 +3,12 @@
 import * as d3 from 'd3'
 import React, { useEffect, useState } from 'react'
 
-const TimeGraph = (props: {
+function TimeGraph(props: {
     type: string
     postId: number
     answers: any[]
     startTime: Date
-}): JSX.Element => {
+}): JSX.Element {
     const { type, postId, answers, startTime } = props
     const [bezierCurves, setBezierCurves] = useState(false)
     const weighted = type === 'weighted-choice'

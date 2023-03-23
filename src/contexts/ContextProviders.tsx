@@ -3,15 +3,15 @@ import PostContextProvider from '@contexts/PostContext'
 import SpaceContextProvider from '@contexts/SpaceContext'
 import UserContextProvider from '@contexts/UserContext'
 import config from '@src/Config'
-import { createBrowserHistory } from 'history'
+// import { createBrowserHistory } from 'history'
 import React from 'react'
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3'
 import { BrowserRouter } from 'react-router-dom'
 
-const ContextProviders = (props: { children: any }): JSX.Element => {
+function ContextProviders(props: { children: any }): JSX.Element {
     const { children } = props
     return (
-        <BrowserRouter history={createBrowserHistory}>
+        <BrowserRouter>
             <AccountContextProvider>
                 <SpaceContextProvider>
                     <UserContextProvider>

@@ -2,7 +2,7 @@ import LoadingWheel from '@components/LoadingWheel'
 import styles from '@styles/components/CircleButton.module.scss'
 import React, { useState } from 'react'
 
-const Button = (props: {
+function Button(props: {
     icon?: JSX.Element
     size?: number
     style?: any
@@ -10,7 +10,7 @@ const Button = (props: {
     loading?: boolean
     onClick?: () => void
     children?: any
-}): JSX.Element => {
+}): JSX.Element {
     const { icon, size, style, disabled, loading, onClick, children } = props
     const [mouseOver, setMouseOver] = useState(false)
 

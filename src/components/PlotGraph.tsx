@@ -6,7 +6,7 @@ import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import PlotGraphMap from './PlotGraphMap'
 
-const PlotGraph = (): JSX.Element => {
+function PlotGraph(): JSX.Element {
     const { postData } = useContext(PostContext)
     const [plotGraphData, setPlotGraphData] = useState({})
 

@@ -12,10 +12,10 @@ $transitionSpeed: 0.5s;
         width: 900px;
     }
 
-    &.event {
-        // allow date-time-picker to overflow modal
-        overflow: unset;
-    }
+    // &.event {
+    //     // allow date-time-picker to overflow modal
+    //     overflow: unset;
+    // }
 
     .helpButton {
         all: unset;
@@ -330,6 +330,17 @@ $transitionSpeed: 0.5s;
     }
 
     .contentOptions {
+        height: 42px;
+        margin-bottom: 20px;
+        opacity: 1;
+        transition: all $transitionSpeed;
+
+        &.hidden {
+            height: 0;
+            margin-bottom: 0;
+            opacity: 0;
+        }
+
         .fileUploadInput {
             margin-right: 10px;
 

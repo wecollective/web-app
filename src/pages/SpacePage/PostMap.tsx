@@ -15,7 +15,7 @@ import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const PostMap = (props: { postMapData: any; params: any }): JSX.Element => {
+function PostMap(props: { postMapData: any; params: any }): JSX.Element {
     const { postMapData, params } = props
     const { accountData } = useContext(AccountContext)
     const { spaceData, setPostMapData, getPostMapData } = useContext(SpaceContext)

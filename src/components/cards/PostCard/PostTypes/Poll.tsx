@@ -19,12 +19,12 @@ import * as d3 from 'd3'
 import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const Poll = (props: {
+function Poll(props: {
     postData: any
     setPostData: (data: any) => void
     location: string
     params: any
-}): JSX.Element => {
+}): JSX.Element {
     const { postData, setPostData, location, params } = props
     const { id, text, Inquiry: inquiry } = postData
     const { accountData, setAlertMessage, setAlertModalOpen, loggedIn } = useContext(AccountContext)

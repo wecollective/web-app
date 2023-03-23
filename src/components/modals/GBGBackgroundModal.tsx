@@ -9,11 +9,11 @@ import React, { useState } from 'react'
 import Cookies from 'universal-cookie'
 import { imageMBLimit } from '@src/Helpers'
 
-const GBGBackgroundModal = (props: {
+function GBGBackgroundModal(props: {
     gameData: any
     signalNewBackground: (type: 'image' | 'video', url: string, startTime?: number) => void
     close: () => void
-}): JSX.Element => {
+}): JSX.Element {
     const { gameData, signalNewBackground, close } = props
     const [imageFile, setImageFile] = useState<File>()
     const [imageURL, setImageURL] = useState('')

@@ -12,7 +12,7 @@ import styles from '@styles/pages/PostPage/PostPage.module.scss'
 import React, { useContext, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
-const PostPage = (): JSX.Element => {
+function PostPage(): JSX.Element {
     const location = useLocation()
     const postId = location.pathname.split('/')[2]
     const { accountDataLoading, loggedIn } = useContext(AccountContext)
@@ -20,7 +20,7 @@ const PostPage = (): JSX.Element => {
         useContext(PostContext)
 
     useEffect(() => {
-        if (!accountDataLoading && postId !== postData.id) getPostData(postId)
+        if (!accountDataLoading && postId !== postData.id) getPostData(+postId)
     }, [accountDataLoading, postId, loggedIn])
 
     useEffect(() => () => resetPostContext(), [])

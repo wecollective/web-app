@@ -7,11 +7,11 @@ import Row from '@components/Row'
 import styles from '@styles/components/PeopleList.module.scss'
 import React from 'react'
 
-const PeopleList = (props: {
+function PeopleList(props: {
     people: any[]
     firstPeopleloading: boolean
     nextPeopleLoading: boolean
-}): JSX.Element => {
+}): JSX.Element {
     const { people, firstPeopleloading, nextPeopleLoading } = props
 
     return (

@@ -16,14 +16,14 @@ import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const LinkModal = (props: {
+function LinkModal(props: {
     type: 'post' | 'bead'
     location: string
     postId?: number // required for beads
     postData: any
     setPostData: (payload: any) => void
     close: () => void
-}): JSX.Element => {
+}): JSX.Element {
     const { type, location, postId, postData, setPostData, close } = props
     const { loggedIn, accountData, setLogInModalOpen, setAlertMessage, setAlertModalOpen } =
         useContext(AccountContext)

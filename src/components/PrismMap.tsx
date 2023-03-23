@@ -5,7 +5,7 @@ import { voronoi } from 'd3-voronoi'
 import React, { useEffect, useState } from 'react'
 // import styles from '../styles/components/PrismMap.module.scss'
 
-const PrismMap = (props: { postData: any; prismData: any }): JSX.Element => {
+function PrismMap(props: { postData: any; prismData: any }): JSX.Element {
     const { postData, prismData } = props
     // console.log('props: ', props)
 

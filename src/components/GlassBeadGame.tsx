@@ -45,7 +45,7 @@ import {
 import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import Peer from 'simple-peer'
 import { io } from 'socket.io-client'
 import { v4 as uuidv4 } from 'uuid'
@@ -153,7 +153,7 @@ const colors = {
     white: 'white',
 }
 
-const Video = (props) => {
+function Video(props) {
     const {
         id,
         user,
@@ -200,7 +200,7 @@ const Video = (props) => {
     )
 }
 
-const Comment = (props) => {
+function Comment(props) {
     const { comment } = props
     const { user, text, createdAt } = comment
     if (user)
@@ -223,7 +223,7 @@ const Comment = (props) => {
     )
 }
 
-const GameSettingsModal = (props) => {
+function GameSettingsModal(props) {
     const { close, gameData, socketId, players, setPlayers, signalStartGame } = props
     const [formData, setFormData] = useState({
         introDuration: {
@@ -413,7 +413,7 @@ const GameSettingsModal = (props) => {
     )
 }
 
-const GlassBeadGame = (): JSX.Element => {
+function GlassBeadGame(): JSX.Element {
     const { loggedIn, accountData, accountDataLoading, setAlertModalOpen, setAlertMessage } =
         useContext(AccountContext)
     const { postData, postDataLoading } = useContext(PostContext)
@@ -463,7 +463,7 @@ const GlassBeadGame = (): JSX.Element => {
     const liveBeadIndexRef = useRef(+urlParams.bead || 1)
     const gameInProgressRef = useRef(false)
 
-    const history = useHistory()
+    const history = useNavigate()
     const largeScreen = document.body.clientWidth >= 900
     const roomIntro = new Audio(`${config.publicAssets}/audio/room-intro.mp3`)
     const highMetalTone = new Audio(`${config.publicAssets}/audio/hi-metal-tone.mp3`)
@@ -1067,7 +1067,7 @@ const GlassBeadGame = (): JSX.Element => {
     //             // if (path !== newLocation) {
     //             //     console.log('attempted back button')
     //             //     // Clone location object and push it to history
-    //             //     history.push({
+    //             //     history({
     //             //         pathname: newLocation.pathname,
     //             //         search: newLocation.search,
     //             //     })
@@ -1083,7 +1083,7 @@ const GlassBeadGame = (): JSX.Element => {
     //             // if (path !== newLocation) {
     //             //     console.log('attempted back button')
     //             //     // Clone location object and push it to history
-    //             //     history.push({
+    //             //     history({
     //             //         pathname: newLocation.pathname,
     //             //         search: newLocation.search,
     //             //     })
@@ -1846,7 +1846,7 @@ const GlassBeadGame = (): JSX.Element => {
                                             text='Yes, leave room'
                                             color='gbg-black'
                                             style={{ marginRight: 10, marginBottom: 10 }}
-                                            onClick={() => history.push('/s/all')}
+                                            onClick={() => history('/s/all')}
                                         />
                                         <Button
                                             text='No, cancel'

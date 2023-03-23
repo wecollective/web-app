@@ -11,11 +11,11 @@ import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const EditPostModal = (props: {
+function EditPostModal(props: {
     postData: any
     setPostData: (data: any) => void
     close: () => void
-}): JSX.Element => {
+}): JSX.Element {
     const { postData, setPostData, close } = props
     const { accountData } = useContext(AccountContext)
     const [newText, setNewText] = useState({

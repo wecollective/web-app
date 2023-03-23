@@ -3,7 +3,7 @@ import styles from '@styles/components/modals/DonateModal.module.scss'
 import { DonateIcon } from '@svgs/all'
 import React from 'react'
 
-const DonateModal = (props: { close: () => void }): JSX.Element => {
+function DonateModal(props: { close: () => void }): JSX.Element {
     const { close } = props
 
     return (

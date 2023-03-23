@@ -7,7 +7,7 @@ import styles from '@styles/pages/SpacePage/Governance.module.scss'
 import React, { useContext } from 'react'
 import { useLocation } from 'react-router-dom'
 
-const Governance = (): JSX.Element => {
+function Governance(): JSX.Element {
     const { spaceData, spaceNotFound } = useContext(SpaceContext)
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]

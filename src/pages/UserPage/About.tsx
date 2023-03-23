@@ -8,7 +8,7 @@ import styles from '@styles/pages/UserPage/About.module.scss'
 import React, { useContext } from 'react'
 import { useLocation } from 'react-router-dom'
 
-const About = (): JSX.Element => {
+function About(): JSX.Element {
     const { userData, userNotFound } = useContext(UserContext)
     const { handle, createdAt, bio } = userData
     const location = useLocation()

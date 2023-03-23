@@ -5,7 +5,7 @@ import styles from '@styles/components/VerticalCard.module.scss'
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-const VerticalCard = (props: {
+function VerticalCard(props: {
     type: 'user' | 'space'
     route: string
     onClick?: () => void
@@ -15,7 +15,7 @@ const VerticalCard = (props: {
     subTitle: string
     text: string
     footer?: any
-}): JSX.Element => {
+}): JSX.Element {
     const { type, route, onClick, coverImagePath, flagImagePath, title, subTitle, text, footer } =
         props
 

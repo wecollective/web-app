@@ -3,7 +3,7 @@ import styles from '@styles/components/ImageNameLink.module.scss'
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-const ImageNameLink = (props: {
+function ImageNameLink(props: {
     type: 'space' | 'user'
     data: {
         name: string
@@ -11,7 +11,7 @@ const ImageNameLink = (props: {
         flagImagePath: string
     }
     onClick?: () => void
-}): JSX.Element => {
+}): JSX.Element {
     const { type, data, onClick } = props
     const route = `/${type[0]}/${data.handle}`
     return (

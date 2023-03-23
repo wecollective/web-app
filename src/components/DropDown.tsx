@@ -5,14 +5,14 @@ import styles from '@styles/components/DropDown.module.scss'
 import { CaretDownIcon } from '@svgs/all'
 import React, { useState } from 'react'
 
-const DropDown = (props: {
+function DropDown(props: {
     title: string
     options: any[]
     selectedOption: string | number
     setSelectedOption: any
     // orientation: string
     style?: any
-}): JSX.Element => {
+}): JSX.Element {
     const { title, options, selectedOption, setSelectedOption, style } = props
     const [menuOpen, setMenuOpen] = useState(false)
 

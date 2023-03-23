@@ -9,11 +9,11 @@ import styles from '@styles/components/cards/PostCard/PostTypes/GlassBeadGame.mo
 import { DNAIcon } from '@svgs/all'
 import React, { useState } from 'react'
 
-const String = (props: {
+function String(props: {
     postData: any
     setPostData: (data: any) => void
     location: string
-}): JSX.Element => {
+}): JSX.Element {
     const { postData, setPostData, location } = props
     const { id, text, StringPosts } = postData
     const [selectedBead, setSelectedBead] = useState<any>(null)

@@ -8,12 +8,12 @@ import styles from '@styles/components/modals/ImageModal.module.scss'
 import { ChevronLeftIcon, ChevronRightIcon } from '@svgs/all'
 import React from 'react'
 
-const ImageModal = (props: {
+function ImageModal(props: {
     images: any[]
     selectedImage: any
     setSelectedImage: (image: any) => void
     close: () => void
-}): JSX.Element => {
+}): JSX.Element {
     const { images, selectedImage, setSelectedImage, close } = props
 
     function toggleImage(increment) {

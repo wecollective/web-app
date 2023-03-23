@@ -48,16 +48,16 @@ import {
 import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
 import axios from 'axios'
 import React, { useContext, useState } from 'react'
-import { Link, useHistory, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
-const PostCard = (props: {
+function PostCard(props: {
     post: any
     index?: number
     location: 'post-page' | 'space-posts' | 'space-post-map' | 'user-posts' | 'preview'
     styling?: boolean
     style?: any
-}): JSX.Element => {
+}): JSX.Element {
     const { post, index, location, styling, style } = props
     const {
         accountData,
@@ -100,7 +100,7 @@ const PostCard = (props: {
 
     const [likeResponseLoading, setLikeResponseLoading] = useState(false)
     const mobileView = document.documentElement.clientWidth < 900
-    const history = useHistory()
+    const history = useNavigate()
     const cookies = new Cookies()
     const isOwnPost = accountData && Creator && accountData.id === Creator.id
     const directSpaces = DirectSpaces.filter((s) => s.id !== 1)
@@ -424,7 +424,7 @@ const PostCard = (props: {
                                 iconSize={20}
                                 text='Open game room'
                                 disabled={location === 'preview'}
-                                onClick={() => history.push(`/p/${id}`)}
+                                onClick={() => history(`/p/${id}`)}
                             />
                         )}
                         {likeModalOpen && (
@@ -485,7 +485,7 @@ const PostCard = (props: {
                                 to={`/p/${id}`}
                                 className={styles.link}
                                 title='Open post page'
-                                style={location === 'preview' ? { pointerEvents: 'none' } : null}
+                                style={location === 'preview' ? { pointerEvents: 'none' } : {}}
                             >
                                 <ExpandIcon />
                             </Link>

@@ -4,14 +4,14 @@ import { pluralise } from '@src/Helpers'
 import * as d3 from 'd3'
 import React, { useEffect } from 'react'
 
-const PieChart = (props: {
+function PieChart(props: {
     type: string
     postId: number
     totalVotes: number
     totalPoints: number
     totalUsers: number
     answers: any[]
-}): JSX.Element => {
+}): JSX.Element {
     const { type, postId, totalVotes, totalPoints, totalUsers, answers } = props
     const weighted = type === 'weighted-choice'
     const size = 280

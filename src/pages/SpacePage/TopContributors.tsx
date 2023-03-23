@@ -9,7 +9,7 @@ import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
-const TopContributors = (): JSX.Element => {
+function TopContributors(): JSX.Element {
     const { spaceData } = useContext(SpaceContext)
     const [topContributors, setTopContributors] = useState<any[]>([])
     const [loading, setLoading] = useState(true)

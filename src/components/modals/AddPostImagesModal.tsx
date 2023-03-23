@@ -11,12 +11,12 @@ import { ChevronLeftIcon, ChevronRightIcon } from '@svgs/all'
 import React, { useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
-const AddPostImagesModal = (props: {
+function AddPostImagesModal(props: {
     images: any[]
     setImages: (images: any[]) => void
     setPostType: (type: string) => void
     close: () => void
-}): JSX.Element => {
+}): JSX.Element {
     const { images, setImages, setPostType, close } = props
     const [newImages, setNewImages] = useState<any[]>(images)
     const [imageURL, setImageURL] = useState('')

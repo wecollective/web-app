@@ -3,7 +3,7 @@ import React, { useEffect } from 'react'
 // import * as d3Hexbin from "d3-hexbin";
 // import styles from '../styles/components/PrismMap.module.scss'
 
-const PlotGraphMap = (props: { plotGraphData: any }): JSX.Element => {
+function PlotGraphMap(props: { plotGraphData: any }): JSX.Element {
     const { plotGraphData } = props
 
     // console.log('plotGraphData: ', plotGraphData)

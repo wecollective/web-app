@@ -2,7 +2,7 @@ import config from '@src/Config'
 import styles from '@styles/components/UrlPreview.module.scss'
 import React from 'react'
 
-const UrlPreview = (props: {
+function UrlPreview(props: {
     url: string
     urlLoading: boolean
     urlImage: string
@@ -10,7 +10,7 @@ const UrlPreview = (props: {
     urlTitle: string
     urlDescription: string
     urlFlashMessage: string
-}): JSX.Element => {
+}): JSX.Element {
     const { url, urlLoading, urlImage, urlDomain, urlTitle, urlDescription, urlFlashMessage } =
         props
 

@@ -3,7 +3,7 @@ import Column from '@components/Column'
 import styles from '@styles/components/ListPlaceholder.module.scss'
 import React from 'react'
 
-const SpaceListPlaceholder = (): JSX.Element => {
+function SpaceListPlaceholder(): JSX.Element {
     return (
         <Column>
             <div className={styles.gradient} />

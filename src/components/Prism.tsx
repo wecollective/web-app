@@ -7,7 +7,7 @@ import styles from '@styles/components/Prism.module.scss'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 
-const Prism = (): JSX.Element => {
+function Prism(): JSX.Element {
     const { postData } = useContext(PostContext)
     const [prismData, setPrismData] = useState<Partial<IPrism>>({})
 

@@ -11,12 +11,12 @@ import { PauseIcon, PlayIcon } from '@svgs/all'
 import * as d3 from 'd3'
 import React, { useRef, useState } from 'react'
 
-const AddPostAudioModal = (props: {
+function AddPostAudioModal(props: {
     audio: File | undefined
     setAudio: (audio: File) => void
     setPostType: (type: string) => void
     close: () => void
-}): JSX.Element => {
+}): JSX.Element {
     const { audio, setAudio, setPostType, close } = props
     const [audioFile, setAudioFile] = useState<File | undefined>(audio)
     const [audioPlaying, setAudioPlaying] = useState(false)

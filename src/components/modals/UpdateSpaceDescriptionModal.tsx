@@ -11,7 +11,7 @@ import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const UpdateSpaceDescriptionModal = (props: { close: () => void }): JSX.Element => {
+function UpdateSpaceDescriptionModal(props: { close: () => void }): JSX.Element {
     const { close } = props
     const { spaceData, setSpaceData } = useContext(SpaceContext)
     const [inputValue, setInputValue] = useState(spaceData.description || '')

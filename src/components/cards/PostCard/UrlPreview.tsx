@@ -6,12 +6,12 @@ import styles from '@styles/components/cards/PostCard/UrlPreview.module.scss'
 import { LinkIcon } from '@svgs/all'
 import React, { useEffect, useState } from 'react'
 
-const UrlPreview = (props: {
+function UrlPreview(props: {
     urlData: any
     loading?: boolean
     style?: any
     removeUrl?: (url: string) => void
-}): JSX.Element => {
+}): JSX.Element {
     const { urlData, loading, style, removeUrl } = props
     const { url, image, domain, title, description } = urlData
     const [workingImage, setWorkingImage] = useState('')

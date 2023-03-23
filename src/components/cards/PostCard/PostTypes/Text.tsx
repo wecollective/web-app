@@ -2,7 +2,7 @@ import DraftText from '@components/draft-js/DraftText'
 import ShowMoreLess from '@components/ShowMoreLess'
 import React from 'react'
 
-const Text = (props: { postData: any }): JSX.Element => {
+function Text(props: { postData: any }): JSX.Element {
     const { postData } = props
     const { text } = postData
     return (

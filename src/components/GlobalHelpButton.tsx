@@ -10,7 +10,7 @@ import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const GlobalHelpButton = (): JSX.Element => {
+function GlobalHelpButton(): JSX.Element {
     const { loggedIn } = useContext(AccountContext)
     const [helpModalOpen, setHelpModalOpen] = useState(false)
     const [email, setEmail] = useState('')

@@ -3,11 +3,11 @@ import { AccountContext } from '@contexts/AccountContext'
 import styles from '@styles/components/CoverImage.module.scss'
 import React, { useContext } from 'react'
 
-const CoverImage = (props: {
+function CoverImage(props: {
     type: 'user' | 'space'
     image: string
     canEdit: boolean
-}): JSX.Element => {
+}): JSX.Element {
     const { type, image, canEdit } = props
     const { setImageUploadType, setImageUploadModalOpen } = useContext(AccountContext)
 

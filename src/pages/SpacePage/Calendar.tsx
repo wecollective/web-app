@@ -17,7 +17,7 @@ import { useLocation } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 import { v4 as uuidv4 } from 'uuid'
 
-const Calendar = (): JSX.Element => {
+function Calendar(): JSX.Element {
     const { loggedIn } = useContext(AccountContext)
     const { spaceData, spaceNotFound } = useContext(SpaceContext)
     const [dateOffset, setDateOffset] = useState(0)
