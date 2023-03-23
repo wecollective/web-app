@@ -75,8 +75,6 @@ function Posts(): JSX.Element {
         )
     }, [])
 
-    console.log('Posts')
-
     if (spaceNotFound) return <SpaceNotFound />
     return (
         <Column centerX className={styles.wrapper}>

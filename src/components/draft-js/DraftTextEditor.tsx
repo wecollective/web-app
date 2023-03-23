@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unstable-nested-components */
 /* eslint-disable jsx-a11y/anchor-has-content */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/jsx-props-no-spreading */
@@ -227,6 +228,7 @@ function DraftTextEditor(props: {
                             plugins={plugins}
                             customStyleMap={styleMap}
                             onChange={onEditorStateChange}
+                            stripPastedStyles
                             spellCheck
                         />
                         {type === 'comment' && (

@@ -246,8 +246,6 @@ function SpacePage(): JSX.Element {
         }
     }, [spaceData.id])
 
-    console.log('SpacePage')
-
     return (
         <Column centerX className={styles.wrapper}>
             <div id='space-background' className={styles.background} />
