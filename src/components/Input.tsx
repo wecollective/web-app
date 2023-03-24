@@ -38,7 +38,10 @@ function Input(props: {
     } = props
 
     return (
-        <div className={`${styles.wrapper} ${disabled && styles.disabled}`} style={style}>
+        <div
+            className={`${styles.wrapper} ${styles[type]} ${disabled && styles.disabled}`}
+            style={style}
+        >
             {title && <h1>{title}</h1>}
             {state === 'invalid' && errors && errors.map((error) => <h2 key={error}>{error}</h2>)}
             <div className={`${styles.inputWrapper} ${styles[state || 'default']}`}>

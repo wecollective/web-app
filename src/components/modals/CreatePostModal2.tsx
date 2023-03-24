@@ -45,6 +45,7 @@ import {
     CastaliaIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
+    DoorIcon,
     HelpIcon,
     ImageIcon,
     PlusIcon,
@@ -392,10 +393,6 @@ function CreatePostModal(): JSX.Element {
         setTopicOptions([])
     }
 
-    function saveGBGSettings(settings) {
-        console.log('saveGBGSettings: ', settings)
-    }
-
     const showGBGDates = postType === 'gbg' && GBGSettings.synchronous && GBGSettings.startTime
     const showDates = (postType === 'event' || showGBGDates) && startTime
 
@@ -706,7 +703,7 @@ function CreatePostModal(): JSX.Element {
                             )}
                             {postType === 'gbg' && (
                                 <Column className={styles.gbg}>
-                                    {/* {GBGSettings.synchronous ? (
+                                    {GBGSettings.synchronous && (
                                         <Row
                                             centerX
                                             style={{
@@ -721,7 +718,7 @@ function CreatePostModal(): JSX.Element {
                                                 icon={<DoorIcon />}
                                             />
                                         </Row>
-                                    ) : ( */}
+                                    )}
                                     {!GBGSettings.synchronous && (
                                         <Column>
                                             {GBGSettings.multiplayer &&
@@ -967,7 +964,7 @@ function CreatePostModal(): JSX.Element {
             {GBGSettingsModalOpen && (
                 <GBGSettingsModal
                     settings={GBGSettings}
-                    saveSettings={(settings) => saveGBGSettings(settings)}
+                    setSettings={setGBGSettings}
                     close={() => setGBGSettingsModalOpen(false)}
                 />
             )}

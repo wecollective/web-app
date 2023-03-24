@@ -7,6 +7,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
+    flex-shrink: 0;
 
     .leftText {
         margin-right: 10px;
