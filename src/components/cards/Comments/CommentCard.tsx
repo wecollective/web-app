@@ -75,7 +75,7 @@ const CommentCard = (props: {
             </Row>
             {loggedIn && state === 'visible' && (
                 <Row className={styles.buttons}>
-                    <button type='button' onClick={toggleReplyInput}>
+                    <button type='button' onClick={() => toggleReplyInput()}>
                         Reply
                     </button>
                     {isOwnComment && (
