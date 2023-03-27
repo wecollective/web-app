@@ -10,15 +10,17 @@ function Input(props: {
     title?: string
     prefix?: string
     placeholder?: string
-    state?: 'default' | 'valid' | 'invalid'
-    errors?: string[]
     value?: string | number
     rows?: number
-    style?: any
+    min?: number
+    max?: number
     disabled?: boolean
     loading?: boolean
     autoFill?: boolean
-    onChange?: (payload: string) => void
+    state?: 'default' | 'valid' | 'invalid'
+    errors?: string[]
+    style?: any
+    onChange?: (payload: any) => void
 }): JSX.Element {
     const {
         type,
@@ -30,12 +32,21 @@ function Input(props: {
         errors,
         value,
         rows,
+        min,
+        max,
         style,
         disabled,
         loading,
         autoFill,
         onChange,
     } = props
+
+    function handleChange(newValue) {
+        let validatedValue = +newValue
+        if (min && +newValue < min) validatedValue = min
+        if (max && +newValue > max) validatedValue = max
+        if (onChange) onChange(validatedValue)
+    }
 
     return (
         <div
@@ -65,7 +76,9 @@ function Input(props: {
                         placeholder={placeholder}
                         type={type}
                         value={value}
-                        onChange={(e) => onChange && onChange(e.target.value)}
+                        min={min}
+                        max={max}
+                        onChange={(e) => handleChange(e.target.value)}
                         disabled={disabled}
                         data-lpignore={!autoFill}
                     />
@@ -90,6 +103,8 @@ Input.defaultProps = {
     value: '',
     onChange: null,
     rows: null,
+    min: null,
+    max: null,
     style: null,
     disabled: false,
     loading: false,
