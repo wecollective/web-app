@@ -115,13 +115,11 @@ export const defaultGBGSettings = {
     totalMoves: 5,
     movesPerPlayer: 5,
     moveDuration: 60,
-    introDuration: 60,
-    intervalDuration: 15,
-    outroDuration: 60,
+    introDuration: 0,
+    intervalDuration: 0,
+    outroDuration: 0,
     allowedBeadTypes: ['Text', 'Url', 'Audio', 'Image'],
-    characterLimit: 140,
-    // 'audioTimeLimit' same as 'moveDuration'
-    audioTimeLimit: 60,
+    characterLimit: 0,
     moveTimeWindow: 0,
 }
 

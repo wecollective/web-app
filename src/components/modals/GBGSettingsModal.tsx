@@ -20,7 +20,7 @@ import axios from 'axios'
 import * as d3 from 'd3'
 import flatpickr from 'flatpickr'
 import 'flatpickr/dist/themes/material_green.css'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 
 function GBGSettingsModal(props: {
     settings: any
@@ -35,14 +35,20 @@ function GBGSettingsModal(props: {
     const [playerOptions, setPlayerOptions] = useState<any[]>([])
     const [playersLoading, setPlayersLoading] = useState(false)
     const [selectedPlayerId, setSelectedPlayerId] = useState(0)
-    const [introOn, setIntroOn] = useState(false)
-    const [intervalsOn, setIntervalsOn] = useState(false)
-    const [outroOn, setOutroOn] = useState(false)
-    const [characterLimitOn, setCharacterLimitOn] = useState(false)
-    const [audioTimeLimitOn, setAudioTimeLimitOn] = useState(false)
+    const [introOn, setIntroOn] = useState(!!settings.introDuration)
+    const [intervalsOn, setIntervalsOn] = useState(!!settings.intervalDuration)
+    const [outroOn, setOutroOn] = useState(!!settings.outroDuration)
+    const [characterLimitOn, setCharacterLimitOn] = useState(!!settings.characterLimit)
+    const [audioTimeLimitOn, setAudioTimeLimitOn] = useState(
+        !settings.synchronous && !!settings.moveDuration
+    )
     const [moveTimeWindowOn, setMoveTimeWindowOn] = useState(false)
     const [moveTimeWindowValues, setMoveTimeWindowValues] = useState<any>({})
-    const [includeDates, setIncludeDates] = useState(false)
+    const [includeDates, setIncludeDates] = useState(!!settings.startTime)
+    const startTime = useRef(settings.startTime)
+    const endTime = useRef(settings.endTime)
+    const [startTimeError, setStartTimeError] = useState(false)
+    const [beadTypeError, setBeadTypeError] = useState(false)
     const [newSettings, setNewSettings] = useState(settings)
     const {
         synchronous,
@@ -50,6 +56,7 @@ function GBGSettingsModal(props: {
         openToAllUsers,
         fixPlayerColors,
         totalMoves,
+        movesPerPlayer,
         moveDuration,
         introDuration,
         intervalDuration,
@@ -57,8 +64,6 @@ function GBGSettingsModal(props: {
         allowedBeadTypes,
         characterLimit,
         moveTimeWindow,
-        startTime,
-        endTime,
     } = newSettings
 
     const { white, red, orange, yellow, green, blue, purple } = colors
@@ -77,8 +82,18 @@ function GBGSettingsModal(props: {
     }
 
     function updateAllowedBeadTypes(type, checked) {
-        if (checked) updateSetting('allowedBeadTypes', [...allowedBeadTypes, type])
-        else updateSetting('allowedBeadTypes', [...allowedBeadTypes.filter((t) => t !== type)])
+        setBeadTypeError(false)
+        const newTypes = checked
+            ? [...allowedBeadTypes, type]
+            : [...allowedBeadTypes.filter((t) => t !== type)]
+        setNewSettings({
+            ...newSettings,
+            allowedBeadTypes: newTypes,
+            characterLimit: newTypes.includes('Text') ? characterLimit : 0,
+            moveDuration: newTypes.includes('Audio') ? moveDuration : 0,
+        })
+        if (!newTypes.includes('Text')) setCharacterLimitOn(false)
+        if (!newTypes.includes('Audio')) setAudioTimeLimitOn(false)
     }
 
     function findPlayers(query) {
@@ -123,55 +138,83 @@ function GBGSettingsModal(props: {
     }
 
     function removeEndDate() {
-        const endTimeInstance = d3.select('#date-time-end').node()._flatpickr
-        if (endTimeInstance) endTimeInstance.setDate(null)
-        updateSetting('endTime', '')
+        const endTimeInstance = d3.select('#date-time-end').node()
+        if (endTimeInstance) endTimeInstance._flatpickr.setDate(null)
+        endTime.current = ''
     }
 
     function save() {
-        console.log('newSettings: ', newSettings)
-        setSettings(newSettings)
-        close()
+        // validate settings
+        let valid = true
+        const validatedSettings = { ...newSettings }
+        // event dates
+        const addDates = synchronous && includeDates
+        validatedSettings.startTime = addDates ? startTime.current : ''
+        validatedSettings.endTime = addDates ? endTime.current : ''
+        if (addDates && !startTime.current) {
+            setStartTimeError(true)
+            valid = false
+        }
+        // allowed bead types
+        if (!allowedBeadTypes.length) {
+            setBeadTypeError(true)
+            valid = false
+        }
+        // reset unused values
+        if (!introOn || !synchronous) validatedSettings.introDuration = 0
+        if (!intervalsOn || !synchronous) validatedSettings.intervalDuration = 0
+        if (!outroOn || !synchronous) validatedSettings.outroDuration = 0
+        if (!characterLimitOn || synchronous) validatedSettings.characterLimit = 0
+        if (!audioTimeLimitOn && !synchronous) validatedSettings.moveDuration = 0
+        setSettings(validatedSettings)
+        console.log('validatedSettings: ', validatedSettings)
+        if (valid) close()
     }
 
     // initialise date picker
     useEffect(() => {
         if (includeDates) {
             const now = new Date()
-            const startTimePast = new Date(startTime) < now
-            const endTimePast = new Date(endTime) < now
-            const defaultStartDate = startTime
+            const startTimePast = new Date(startTime.current) < now
+            const endTimePast = new Date(endTime.current) < now
+            const defaultStartDate = startTime.current
                 ? startTimePast
                     ? now
-                    : new Date(startTime)
+                    : new Date(startTime.current)
                 : undefined
-            const defaultEndDate = endTime ? (endTimePast ? now : new Date(endTime)) : undefined
+            const defaultEndDate = endTime.current
+                ? endTimePast
+                    ? now
+                    : new Date(endTime.current)
+                : undefined
             flatpickr('#date-time-start', {
                 ...dateTimeOptions,
                 defaultDate: defaultStartDate,
                 appendTo: document.getElementById('date-time-start-wrapper') || undefined,
-                onChange: ([value]) => updateSetting('startTime', value.toString()),
+                onChange: ([value]) => {
+                    startTime.current = value.toString()
+                    setStartTimeError(false)
+                    const endTimeInstance = d3.select('#date-time-end').node()
+                    if (endTimeInstance) endTimeInstance._flatpickr.set('minDate', value)
+                    if (new Date(endTime.current) < new Date(startTime.current)) {
+                        endTime.current = ''
+                    }
+                },
             })
             flatpickr('#date-time-end', {
                 ...dateTimeOptions,
                 defaultDate: defaultEndDate,
-                minDate: defaultStartDate,
+                minDate: defaultStartDate || now,
                 appendTo: document.getElementById('date-time-end-wrapper') || undefined,
-                onChange: ([value]) => updateSetting('endTime', value.toString()),
+                onChange: ([value]) => {
+                    endTime.current = value.toString()
+                },
             })
-            if (startTimePast && defaultStartDate)
-                updateSetting('startTime', defaultStartDate.toString())
-            if (endTimePast && defaultEndDate) updateSetting('startTime', defaultEndDate.toString())
+            // if (startTimePast && defaultStartDate)
+            //     updateSetting('startTime', defaultStartDate.toString())
+            // if (endTimePast && defaultEndDate) updateSetting('startTime', defaultEndDate.toString())
         }
     }, [includeDates])
-
-    // update minimum end date when start date changed
-    useEffect(() => {
-        if (startTime) {
-            const endTimeInstance = d3.select('#date-time-end').node()._flatpickr
-            if (endTimeInstance) endTimeInstance.set('minDate', new Date(startTime))
-        }
-    }, [startTime])
 
     return (
         <Modal centered close={close} className={styles.wrapper} confirmClose>
@@ -181,7 +224,14 @@ function GBGSettingsModal(props: {
                     leftText='Synchronous'
                     positionLeft={!synchronous}
                     rightColor='blue'
-                    onClick={() => updateSetting('synchronous', !synchronous)}
+                    onClick={() => {
+                        setNewSettings({
+                            ...newSettings,
+                            synchronous: !synchronous,
+                            moveDuration: !synchronous ? 60 : 0,
+                        })
+                        if (synchronous) setAudioTimeLimitOn(false)
+                    }}
                     style={{ marginBottom: 30 }}
                     onOffText
                 />
@@ -192,7 +242,10 @@ function GBGSettingsModal(props: {
                                 leftText='Schedule as event'
                                 positionLeft={!includeDates}
                                 rightColor='blue'
-                                onClick={() => setIncludeDates(!includeDates)}
+                                onClick={() => {
+                                    setIncludeDates(!includeDates)
+                                    setStartTimeError(false)
+                                }}
                                 onOffText
                             />
                             <Row
@@ -206,6 +259,7 @@ function GBGSettingsModal(props: {
                                         id='date-time-start'
                                         type='text'
                                         placeholder='Start time...'
+                                        state={startTimeError ? 'invalid' : 'default'}
                                     />
                                 </div>
                                 <p>→</p>
@@ -218,13 +272,16 @@ function GBGSettingsModal(props: {
                                 </div>
                                 {endTime && <CloseButton size={20} onClick={removeEndDate} />}
                             </Row>
+                            {startTimeError && <p className={styles.error}>Start time required</p>}
                         </Column>
                         <Row centerY style={{ marginBottom: 30 }}>
                             <p style={{ marginRight: 10 }}>Moves per player</p>
                             <Input
                                 type='number'
-                                value={totalMoves / players.length}
-                                onChange={(v) => updateSetting('totalMoves', +v * players.length)}
+                                value={movesPerPlayer}
+                                min={1}
+                                max={20}
+                                onChange={(v) => updateSetting('movesPerPlayer', v)}
                                 style={{ width: 70 }}
                             />
                         </Row>
@@ -253,7 +310,9 @@ function GBGSettingsModal(props: {
                                     <Input
                                         type='number'
                                         value={moveDuration}
-                                        onChange={(v) => updateSetting('moveDuration', +v)}
+                                        min={10}
+                                        max={600}
+                                        onChange={(v) => updateSetting('moveDuration', v)}
                                         style={{ width: 70, marginRight: 10 }}
                                     />
                                     <p>seconds</p>
@@ -265,7 +324,10 @@ function GBGSettingsModal(props: {
                                 leftText='Intro'
                                 positionLeft={!introOn}
                                 rightColor='blue'
-                                onClick={() => setIntroOn(!introOn)}
+                                onClick={() => {
+                                    setIntroOn(!introOn)
+                                    if (!introDuration) updateSetting('introDuration', 60)
+                                }}
                                 onOffText
                             />
                             <Row centerY className={`${styles.row} ${introOn && styles.visible}`}>
@@ -291,6 +353,8 @@ function GBGSettingsModal(props: {
                                     <Input
                                         type='number'
                                         value={introDuration}
+                                        min={10}
+                                        max={300}
                                         onChange={(v) => updateSetting('introDuration', +v)}
                                         style={{ width: 70, marginRight: 10 }}
                                     />
@@ -303,7 +367,10 @@ function GBGSettingsModal(props: {
                                 leftText='Outro'
                                 positionLeft={!outroOn}
                                 rightColor='blue'
-                                onClick={() => setOutroOn(!outroOn)}
+                                onClick={() => {
+                                    setOutroOn(!outroOn)
+                                    if (!outroDuration) updateSetting('outroDuration', 60)
+                                }}
                                 onOffText
                             />
                             <Row centerY className={`${styles.row} ${outroOn && styles.visible}`}>
@@ -329,6 +396,8 @@ function GBGSettingsModal(props: {
                                     <Input
                                         type='number'
                                         value={outroDuration}
+                                        min={10}
+                                        max={300}
                                         onChange={(v) => updateSetting('outroDuration', +v)}
                                         style={{ width: 70, marginRight: 10 }}
                                     />
@@ -341,7 +410,10 @@ function GBGSettingsModal(props: {
                                 leftText='Intervals'
                                 positionLeft={!intervalsOn}
                                 rightColor='blue'
-                                onClick={() => setIntervalsOn(!intervalsOn)}
+                                onClick={() => {
+                                    setIntervalsOn(!intervalsOn)
+                                    if (!intervalDuration) updateSetting('intervalDuration', 15)
+                                }}
                                 onOffText
                             />
                             <Row
@@ -349,27 +421,29 @@ function GBGSettingsModal(props: {
                                 className={`${styles.row} ${intervalsOn && styles.visible}`}
                             >
                                 <Button
+                                    text='15 sec'
+                                    color={intervalDuration === 15 ? 'blue' : 'grey'}
+                                    onClick={() => updateSetting('intervalDuration', 15)}
+                                    style={{ marginRight: 10 }}
+                                />
+                                <Button
+                                    text='30 sec'
+                                    color={intervalDuration === 30 ? 'blue' : 'grey'}
+                                    onClick={() => updateSetting('intervalDuration', 30)}
+                                    style={{ marginRight: 10 }}
+                                />
+                                <Button
                                     text='1 min'
                                     color={intervalDuration === 60 ? 'blue' : 'grey'}
                                     onClick={() => updateSetting('intervalDuration', 60)}
-                                    style={{ marginRight: 10 }}
-                                />
-                                <Button
-                                    text='2 min'
-                                    color={intervalDuration === 120 ? 'blue' : 'grey'}
-                                    onClick={() => updateSetting('intervalDuration', 120)}
-                                    style={{ marginRight: 10 }}
-                                />
-                                <Button
-                                    text='3 min'
-                                    color={intervalDuration === 180 ? 'blue' : 'grey'}
-                                    onClick={() => updateSetting('intervalDuration', 180)}
                                     style={{ marginRight: 10 }}
                                 />
                                 <Row centerY>
                                     <Input
                                         type='number'
                                         value={intervalDuration}
+                                        min={10}
+                                        max={60}
                                         onChange={(v) => updateSetting('intervalDuration', +v)}
                                         style={{ width: 70, marginRight: 10 }}
                                     />
@@ -407,10 +481,10 @@ function GBGSettingsModal(props: {
                                             <p style={{ marginRight: 10 }}>Moves per player</p>
                                             <Input
                                                 type='number'
-                                                value={totalMoves / players.length}
-                                                onChange={(v) =>
-                                                    updateSetting('totalMoves', +v * players.length)
-                                                }
+                                                value={movesPerPlayer}
+                                                min={1}
+                                                max={20}
+                                                onChange={(v) => updateSetting('movesPerPlayer', v)}
                                                 style={{ width: 70 }}
                                             />
                                         </Row>
@@ -496,6 +570,8 @@ function GBGSettingsModal(props: {
                                         <Input
                                             type='number'
                                             value={totalMoves}
+                                            min={1}
+                                            max={50}
                                             onChange={(v) => updateSetting('totalMoves', +v)}
                                             style={{ width: 70 }}
                                         />
@@ -531,6 +607,11 @@ function GBGSettingsModal(props: {
                                             }
                                         />
                                     </Row>
+                                    {beadTypeError && (
+                                        <p className={styles.error}>
+                                            At least one bead type required
+                                        </p>
+                                    )}
                                 </Column>
                                 {allowedBeadTypes.includes('Text') && (
                                     <Column centerX className={styles.rowWrapper}>
@@ -538,7 +619,11 @@ function GBGSettingsModal(props: {
                                             leftText='Text character limit'
                                             positionLeft={!characterLimitOn}
                                             rightColor='blue'
-                                            onClick={() => setCharacterLimitOn(!characterLimitOn)}
+                                            onClick={() => {
+                                                setCharacterLimitOn(!characterLimitOn)
+                                                if (!characterLimit)
+                                                    updateSetting('characterLimit', 140)
+                                            }}
                                             onOffText
                                         />
                                         <Row
@@ -560,11 +645,11 @@ function GBGSettingsModal(props: {
                                                 style={{ marginRight: 10 }}
                                             />
                                             <Input
-                                                type='text'
+                                                type='number'
                                                 value={characterLimit}
-                                                onChange={(v) =>
-                                                    updateSetting('characterLimit', +v)
-                                                }
+                                                min={10}
+                                                max={1000}
+                                                onChange={(v) => updateSetting('characterLimit', v)}
                                                 style={{ width: 70, marginRight: 10 }}
                                             />
                                         </Row>
@@ -576,7 +661,10 @@ function GBGSettingsModal(props: {
                                             leftText='Audio time limit'
                                             positionLeft={!audioTimeLimitOn}
                                             rightColor='blue'
-                                            onClick={() => setAudioTimeLimitOn(!audioTimeLimitOn)}
+                                            onClick={() => {
+                                                setAudioTimeLimitOn(!audioTimeLimitOn)
+                                                if (!moveDuration) updateSetting('moveDuration', 60)
+                                            }}
                                             onOffText
                                         />
                                         <Row
@@ -605,10 +693,12 @@ function GBGSettingsModal(props: {
                                             />
                                             <Row centerY>
                                                 <Input
-                                                    type='text'
+                                                    type='number'
                                                     value={moveDuration}
+                                                    min={10}
+                                                    max={600}
                                                     onChange={(v) =>
-                                                        updateSetting('moveDuration', +v)
+                                                        updateSetting('moveDuration', v)
                                                     }
                                                     style={{ width: 70, marginRight: 10 }}
                                                 />
