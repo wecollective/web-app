@@ -1,6 +1,8 @@
 @import '@styles/Variables';
 
 .wrapper {
+    justify-content: space-between;
+
     > h1 {
         margin-bottom: 40px;
     }

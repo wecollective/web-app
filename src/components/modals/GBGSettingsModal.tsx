@@ -400,7 +400,7 @@ function GBGSettingsModal(props: {
                                 rightColor='blue'
                                 onClick={() => {
                                     setIntroOn(!introOn)
-                                    if (!introDuration) updateSetting('introDuration', 60)
+                                    updateSetting('introDuration', introOn ? 0 : 60)
                                 }}
                                 onOffText
                             />
@@ -443,7 +443,7 @@ function GBGSettingsModal(props: {
                                 rightColor='blue'
                                 onClick={() => {
                                     setOutroOn(!outroOn)
-                                    if (!outroDuration) updateSetting('outroDuration', 60)
+                                    updateSetting('outroDuration', outroOn ? 0 : 60)
                                 }}
                                 onOffText
                             />
@@ -486,7 +486,7 @@ function GBGSettingsModal(props: {
                                 rightColor='blue'
                                 onClick={() => {
                                     setIntervalsOn(!intervalsOn)
-                                    if (!intervalDuration) updateSetting('intervalDuration', 15)
+                                    updateSetting('intervalDuration', intervalsOn ? 0 : 15)
                                 }}
                                 onOffText
                             />
@@ -783,8 +783,10 @@ function GBGSettingsModal(props: {
                                                     rightColor='blue'
                                                     onClick={() => {
                                                         setCharacterLimitOn(!characterLimitOn)
-                                                        if (!characterLimit)
-                                                            updateSetting('characterLimit', 140)
+                                                        updateSetting(
+                                                            'characterLimit',
+                                                            characterLimitOn ? 0 : 140
+                                                        )
                                                     }}
                                                     onOffText
                                                 />
@@ -835,8 +837,10 @@ function GBGSettingsModal(props: {
                                                     rightColor='blue'
                                                     onClick={() => {
                                                         setAudioTimeLimitOn(!audioTimeLimitOn)
-                                                        if (!moveDuration)
-                                                            updateSetting('moveDuration', 60)
+                                                        updateSetting(
+                                                            'moveDuration',
+                                                            audioTimeLimitOn ? 0 : 60
+                                                        )
                                                     }}
                                                     onOffText
                                                 />
