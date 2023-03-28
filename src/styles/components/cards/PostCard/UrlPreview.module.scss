@@ -80,4 +80,20 @@
             }
         }
     }
+
+    &.bead {
+        > a {
+            flex-direction: column;
+
+            img {
+                width: 100%;
+                border-top-right-radius: 5px;
+                border-bottom-left-radius: 0;
+            }
+
+            .urlIcon {
+                display: none;
+            }
+        }
+    }
 }

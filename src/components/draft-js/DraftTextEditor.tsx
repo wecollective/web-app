@@ -36,7 +36,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react'
 
 function DraftTextEditor(props: {
     id?: string
-    type: 'post' | 'comment'
+    type: 'post' | 'comment' | 'bead'
     stringifiedDraft: string
     onChange: (text: string, mentions: any[], urls: string[]) => void
     onSubmit?: () => void
@@ -213,7 +213,7 @@ function DraftTextEditor(props: {
                     <EmojiSuggestions />
                 </div> */}
                 {editorState && (
-                    <Row>
+                    <Row className={styles.editorWrapper}>
                         {type === 'comment' && (
                             <FlagImage
                                 type='user'
@@ -246,7 +246,7 @@ function DraftTextEditor(props: {
                 <Row className={`${styles.toolbarWrapper} ${focused && styles.visible}`}>
                     <Toolbar>
                         {(externalProps) => (
-                            <Row wrap style={{ paddingRight: 40 }}>
+                            <Row wrap>
                                 <BoldButton {...externalProps} />
                                 <ItalicButton {...externalProps} />
                                 <UnderlineButton {...externalProps} />

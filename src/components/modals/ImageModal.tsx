@@ -1,5 +1,4 @@
 import Column from '@components/Column'
-import Markdown from '@components/Markdown'
 import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
 import ShowMoreLess from '@components/ShowMoreLess'
@@ -11,19 +10,19 @@ import React from 'react'
 function ImageModal(props: {
     images: any[]
     selectedImage: any
-    setSelectedImage: (image: any) => void
+    setSelectedImage?: (image: any) => void
     close: () => void
 }): JSX.Element {
     const { images, selectedImage, setSelectedImage, close } = props
 
     function toggleImage(increment) {
-        setSelectedImage(images[selectedImage.index + increment])
+        if (setSelectedImage) setSelectedImage(images[selectedImage.index + increment])
     }
 
     return (
         <Modal close={close} className={styles.wrapper}>
             <Row centerY>
-                {selectedImage.index !== 0 && (
+                {images.length > 1 && selectedImage.index !== 0 && (
                     <button
                         className={styles.navButton}
                         type='button'
@@ -45,15 +44,14 @@ function ImageModal(props: {
                         alt=''
                     />
                     {selectedImage.caption && (
-                        <ShowMoreLess height={150}>
-                            <Markdown
-                                text={selectedImage.caption}
-                                style={{ textAlign: 'center', marginTop: 20 }}
-                            />
+                        <ShowMoreLess height={150} style={{ marginTop: 20 }}>
+                            <p style={{ width: '100%', textAlign: 'center' }}>
+                                {selectedImage.caption}
+                            </p>
                         </ShowMoreLess>
                     )}
                 </Column>
-                {selectedImage.index !== images.length - 1 && (
+                {images.length > 1 && selectedImage.index !== images.length - 1 && (
                     <button
                         className={styles.navButton}
                         type='button'
@@ -65,6 +63,10 @@ function ImageModal(props: {
             </Row>
         </Modal>
     )
+}
+
+ImageModal.defaultProps = {
+    setSelectedImage: null,
 }
 
 export default ImageModal

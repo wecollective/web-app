@@ -52,6 +52,7 @@ $transitionSpeed: 0.5s;
         padding: 0;
 
         :global(.DraftEditor-root) {
+            position: relative;
             width: 100%;
             cursor: text;
 
@@ -62,13 +63,124 @@ $transitionSpeed: 0.5s;
             :global(.public-DraftEditorPlaceholder-root) {
                 padding: 5px 0;
                 color: $grey4;
+                // text-shadow: 0 0 2px rgba(black, 0.2);
                 position: absolute;
                 pointer-events: none;
             }
         }
     }
 
-    // comment editor styling
+    .toolbarWrapper {
+        height: 37px;
+        opacity: 1;
+
+        .toolbar {
+            display: flex;
+            z-index: 2;
+
+            > div {
+                display: flex;
+            }
+
+            .button {
+                border: 1px solid $grey2;
+                border-radius: 5px;
+                background-color: white;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 32px;
+                width: 32px;
+                margin: 0 5px 5px 0;
+                cursor: pointer;
+                pointer-events: auto;
+
+                &:hover {
+                    background-color: $grey1;
+                }
+
+                > svg {
+                    width: 18px;
+                }
+
+                &.active {
+                    background-color: $grey2;
+                }
+            }
+
+            .separator {
+                width: 2px;
+                height: 32px;
+                background-color: $grey2;
+                margin: 0 10px 0 5px;
+            }
+
+            .linkInput {
+                width: calc(100% - 37px);
+                padding: 6px 8px;
+                outline: none;
+                border: 1px solid $grey2;
+                border-radius: 5px;
+                margin-bottom: 5px;
+            }
+        }
+    }
+
+    .characters {
+        justify-content: end;
+        width: 100%;
+        height: 20px;
+        opacity: 1;
+
+        p {
+            text-align: end;
+            font-size: 14px;
+            color: $grey4;
+
+            &.error {
+                color: $red;
+            }
+        }
+    }
+
+    &.post {
+        .toolbarWrapper {
+            height: 0;
+            opacity: 0;
+            transition: all $transitionSpeed;
+
+            .toolbar {
+                display: none;
+                .button {
+                    pointer-events: none;
+                }
+            }
+
+            &.visible {
+                height: 37px;
+                opacity: 1;
+
+                .toolbar {
+                    display: flex;
+                    .button {
+                        pointer-events: auto;
+                    }
+                }
+            }
+        }
+
+        .characters {
+            height: 0;
+            opacity: 0;
+            transition: all $transitionSpeed;
+
+            &.visible {
+                height: 20px;
+                opacity: 1;
+            }
+        }
+    }
+
     &.comment {
         :global(.DraftEditor-root) {
             padding: 5px 10px 10px 10px;
@@ -106,78 +218,35 @@ $transitionSpeed: 0.5s;
         }
     }
 
-    .toolbarWrapper {
-        height: 0;
-        opacity: 0;
-        transition: all $transitionSpeed;
+    &.bead {
+        height: 400px;
+        background-color: transparent;
 
-        &.visible {
-            height: 37px;
-            opacity: 1;
+        .reverseColumn {
+            align-items: center;
+            margin-bottom: 34px;
 
-            .toolbar {
-                display: flex;
-                .button {
-                    pointer-events: auto;
-                }
-            }
-        }
-
-        .toolbar {
-            display: none;
-            z-index: 2;
-
-            > div {
-                display: flex;
+            .toolbarWrapper {
+                justify-content: center;
+                height: 50px;
+                margin-bottom: 36px;
             }
 
-            .button {
-                border: 1px solid $grey2;
-                border-radius: 5px;
-                background-color: white;
-                display: flex;
+            .editorWrapper {
+                width: 274px;
+                height: 244px;
                 justify-content: center;
                 align-items: center;
-                height: 32px;
-                width: 32px;
-                margin: 0 5px 5px 0;
-                cursor: pointer;
-                pointer-events: none;
 
-                &:hover {
-                    background-color: $grey1;
+                :global(.DraftEditor-editorContainer) {
+                    max-height: 244px;
                 }
-
-                > svg {
-                    width: 18px;
-                }
-
-                &.active {
-                    background-color: $grey2;
-                }
-            }
-
-            .separator {
-                width: 2px;
-                height: 32px;
-                background-color: $grey2;
-                margin: 0 10px 0 5px;
-            }
-
-            .linkInput {
-                width: calc(100% - 37px);
-                padding: 6px 8px;
-                outline: none;
-                border: 1px solid $grey2;
-                border-radius: 5px;
-                margin-bottom: 5px;
             }
         }
-    }
 
-    .editorWrapper {
-        all: unset;
-        width: 100%;
+        .characters {
+            justify-content: center;
+        }
     }
 
     .alignLeft {
@@ -190,29 +259,6 @@ $transitionSpeed: 0.5s;
 
     .alignCenter {
         text-align: center;
-    }
-
-    .characters {
-        justify-content: end;
-        width: 100%;
-        height: 0;
-        opacity: 0;
-        transition: all $transitionSpeed;
-
-        &.visible {
-            height: 20px;
-            opacity: 1;
-        }
-
-        p {
-            text-align: end;
-            font-size: 14px;
-            color: $grey4;
-
-            &.error {
-                color: $red;
-            }
-        }
     }
 
     // .stats {

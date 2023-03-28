@@ -1,5 +1,6 @@
 import AudioTimeSlider from '@components/AudioTimeSlider'
 import AudioVisualiser from '@components/AudioVisualiser'
+import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
 import Row from '@components/Row'
 import colors from '@styles/Colors.module.scss'
@@ -8,8 +9,14 @@ import { PauseIcon, PlayIcon } from '@svgs/all'
 import * as d3 from 'd3'
 import React, { useState } from 'react'
 
-function Audio(props: { id: number; url: string; location: string }): JSX.Element {
-    const { id, url, location } = props
+function Audio(props: {
+    id?: number
+    url: string
+    location: string
+    style?: any
+    remove?: () => void
+}): JSX.Element {
+    const { id, url, location, style, remove } = props
     const [audioPlaying, setAudioPlaying] = useState(false)
 
     function toggleAudio() {
@@ -26,7 +33,14 @@ function Audio(props: { id: number; url: string; location: string }): JSX.Elemen
     }
 
     return (
-        <Column>
+        <Column style={{ ...style, position: 'relative' }}>
+            {remove && (
+                <CloseButton
+                    size={20}
+                    onClick={remove}
+                    style={{ position: 'absolute', top: 0, right: 0, zIndex: 5 }}
+                />
+            )}
             <AudioVisualiser
                 audioElementId={`post-audio-${id}-${location}`}
                 audioURL={url}
@@ -34,7 +48,7 @@ function Audio(props: { id: number; url: string; location: string }): JSX.Elemen
                 staticColor={colors.audioVisualiserStatic}
                 dynamicBars={160}
                 dynamicColor={colors.audioVisualiserDynamic}
-                style={{ height: 80, margin: '20px 0 10px 0' }}
+                style={{ height: '100%', marginBottom: 10 }}
             />
             <Row centerY>
                 <button
@@ -56,6 +70,12 @@ function Audio(props: { id: number; url: string; location: string }): JSX.Elemen
             </Row>
         </Column>
     )
+}
+
+Audio.defaultProps = {
+    id: 0,
+    style: null,
+    remove: null,
 }
 
 export default Audio

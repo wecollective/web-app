@@ -23,7 +23,7 @@ function Url(props: { postData: any }): JSX.Element {
                     </ShowMoreLess>
                 </Column>
             )}
-            <UrlPreview urlData={urlData} />
+            <UrlPreview type='post' urlData={urlData} />
         </Column>
     )
 }

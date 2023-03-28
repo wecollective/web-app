@@ -1611,6 +1611,7 @@ function CreatePostModal(): JSX.Element {
                                     {urlData && (
                                         <Column className={styles.urlPreviewWrapper}>
                                             <UrlPreview
+                                                type='post'
                                                 urlData={{ url: urlForm1.url.value, ...urlData }}
                                             />
                                         </Column>
@@ -2480,6 +2481,7 @@ function CreatePostModal(): JSX.Element {
                                                 />
                                                 {newBead.urlData && (
                                                     <UrlPreview
+                                                        type='post'
                                                         urlData={{
                                                             url: newBead.url,
                                                             ...newBead.urlData,

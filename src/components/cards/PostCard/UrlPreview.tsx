@@ -7,12 +7,13 @@ import { LinkIcon } from '@svgs/all'
 import React, { useEffect, useState } from 'react'
 
 function UrlPreview(props: {
+    type: 'post' | 'bead'
     urlData: any
     loading?: boolean
     style?: any
-    removeUrl?: (url: string) => void
+    remove?: (url?: string) => void
 }): JSX.Element {
-    const { urlData, loading, style, removeUrl } = props
+    const { type, urlData, loading, style, remove } = props
     const { url, image, domain, title, description } = urlData
     const [workingImage, setWorkingImage] = useState('')
     const availableMetaData = image || domain || title || description
@@ -34,11 +35,11 @@ function UrlPreview(props: {
             </Row>
         )
     return (
-        <Row className={styles.wrapper} style={style}>
-            {removeUrl && (
+        <Row className={`${styles.wrapper} ${styles[type]}`} style={style}>
+            {remove && (
                 <CloseButton
                     size={20}
-                    onClick={() => removeUrl(url)}
+                    onClick={() => remove(url)}
                     style={{ position: 'absolute', top: 5, right: 5 }}
                 />
             )}
@@ -46,7 +47,7 @@ function UrlPreview(props: {
                 href={url}
                 target='_blank'
                 rel='noreferrer'
-                style={{ pointerEvents: removeUrl ? 'none' : 'auto' }}
+                style={{ pointerEvents: remove ? 'none' : 'auto' }}
             >
                 {workingImage.length > 0 ? (
                     <img
@@ -84,7 +85,7 @@ function UrlPreview(props: {
 UrlPreview.defaultProps = {
     loading: false,
     style: null,
-    removeUrl: null,
+    remove: null,
 }
 
 export default UrlPreview
