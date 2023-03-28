@@ -3,19 +3,24 @@
 $transitionSpeed: 0.5s;
 
 .wrapper {
-    padding: 30px 20px;
-    width: calc(100vw - 30px);
+    padding: 40px 0;
+    width: 100vw;
+    // width: calc(100vw - 30px);
 
     @include for-tablet-landscape-up {
         padding: 40px;
         width: auto;
-        width: 900px;
     }
 
-    // &.event {
-    //     // allow date-time-picker to overflow modal
-    //     overflow: unset;
-    // }
+    &.event {
+        // allow date-time-picker to overflow modal
+        overflow: unset;
+    }
+
+    :global(.DraftEditor-editorContainer) {
+        max-height: 300px;
+        overflow: auto;
+    }
 
     .helpButton {
         all: unset;
@@ -37,15 +42,20 @@ $transitionSpeed: 0.5s;
     }
 
     .postCard {
-        width: 780px;
+        width: 100%;
         background-color: white;
         box-shadow: 0 7px 10px 0 rgba(10, 8, 72, 0.04);
         border: 1px solid $grey2;
         position: relative;
         opacity: 1;
         padding: 20px;
-        border-radius: 10px;
+        border-radius: 0;
         margin-bottom: 20px;
+
+        @include for-tablet-landscape-up {
+            width: 780px;
+            border-radius: 10px;
+        }
 
         .header {
             font-size: 15px;
@@ -265,7 +275,6 @@ $transitionSpeed: 0.5s;
                 }
 
                 p {
-                    color: $grey5;
                     margin-right: 5px;
                 }
             }
@@ -275,11 +284,11 @@ $transitionSpeed: 0.5s;
             }
 
             .gbg {
-                .openToAllUsers {
-                    margin: 10px 0;
+                .gbgInfo {
+                    margin-top: 10px;
                     color: $grey5;
 
-                    svg {
+                    > div > svg {
                         width: 25px;
                         height: 25px;
                         margin-right: 5px;

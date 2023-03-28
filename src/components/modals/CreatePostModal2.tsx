@@ -8,6 +8,7 @@ import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
 import DraftTextEditor from '@components/draft-js/DraftTextEditor'
 import DropDown from '@components/DropDown'
+import FlagImageHighlights from '@components/FlagImageHighlights'
 import ImageTitle from '@components/ImageTitle'
 import Input from '@components/Input'
 import AddPostSpacesModal from '@components/modals/AddPostSpacesModal'
@@ -45,7 +46,6 @@ import {
     CastaliaIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
-    DoorIcon,
     HelpIcon,
     ImageIcon,
     PlusIcon,
@@ -358,7 +358,8 @@ function CreatePostModal(): JSX.Element {
     const [topicImageURL, setTopicImageURL] = useState('')
     const [GBGSettingsModalOpen, setGBGSettingsModalOpen] = useState(false)
     const [GBGHelpModalOpen, setGBGHelpModalOpen] = useState(false)
-    const [GBGSettings, setGBGSettings] = useState(defaultGBGSettings)
+    const [GBGSettings, setGBGSettings] = useState<any>(defaultGBGSettings)
+    const { synchronous, multiplayer, players, totalMoves, movesPerPlayer } = GBGSettings
     const [beads, setBeads] = useState<any[]>([])
     const [showBeadTools, setShowBeadTools] = useState(false)
 
@@ -393,8 +394,22 @@ function CreatePostModal(): JSX.Element {
         setTopicOptions([])
     }
 
-    const showGBGDates = postType === 'gbg' && GBGSettings.synchronous && GBGSettings.startTime
-    const showDates = (postType === 'event' || showGBGDates) && startTime
+    function eventTimes() {
+        const showEventDates = postType === 'event' && startTime
+        const showGBGDates = postType === 'gbg' && GBGSettings.synchronous && GBGSettings.startTime
+        const start = postType === 'event' ? startTime : GBGSettings.startTime
+        const end = postType === 'event' ? endTime : GBGSettings.endTime
+        if (!showEventDates && !showGBGDates) return null
+        return (
+            <Row centerY className={styles.dates}>
+                <CalendarIcon />
+                <Row>
+                    <p>{findEventTimes(start, end)}</p>
+                    <p>{findEventDuration(start, end)}</p>
+                </Row>
+            </Row>
+        )
+    }
 
     function createPost() {
         console.log('create post!')
@@ -436,11 +451,12 @@ function CreatePostModal(): JSX.Element {
         }
     }, [postType])
 
+    // todo: pass function into input so hook not necissary (requires use of refs..., maybe update gbg settings instead?)
     // update minimum end date when start date changed
     useEffect(() => {
         if (startTime) {
-            const endTimeInstance = d3.select('#date-time-end').node()._flatpickr
-            if (endTimeInstance) endTimeInstance.set('minDate', new Date(startTime))
+            const endTimeInstance = d3.select('#date-time-end').node()
+            if (endTimeInstance) endTimeInstance._flatpickr.set('minDate', new Date(startTime))
         }
     }, [startTime])
 
@@ -469,10 +485,7 @@ function CreatePostModal(): JSX.Element {
             confirmClose={!saved}
         >
             {saved ? (
-                <SuccessMessage
-                    text='
-                Post created!'
-                />
+                <SuccessMessage text='Post created!' />
             ) : (
                 <Column centerX style={{ width: '100%' }}>
                     <Row centerY style={{ marginBottom: 20 }}>
@@ -561,7 +574,6 @@ function CreatePostModal(): JSX.Element {
                                     </Column>
                                 </Row>
                             )}
-                            {/* <ShowMoreLess height={300}> */}
                             <DraftTextEditor
                                 type='post'
                                 stringifiedDraft={text.value}
@@ -574,16 +586,7 @@ function CreatePostModal(): JSX.Element {
                                     setUrls(textUrls)
                                 }}
                             />
-                            {/* </ShowMoreLess> */}
-                            {showDates && (
-                                <Row centerY className={styles.dates}>
-                                    <CalendarIcon />
-                                    <Row>
-                                        <p>{findEventTimes(startTime, endTime)}</p>
-                                        <p>{findEventDuration(startTime, endTime)}</p>
-                                    </Row>
-                                </Row>
-                            )}
+                            {eventTimes()}
                             {postType === 'image' && (
                                 <Row centerX style={{ width: '100%' }}>
                                     {images.length > 0 && (
@@ -703,45 +706,67 @@ function CreatePostModal(): JSX.Element {
                             )}
                             {postType === 'gbg' && (
                                 <Column className={styles.gbg}>
-                                    {GBGSettings.synchronous && (
-                                        <Row
-                                            centerX
-                                            style={{
-                                                marginTop: 15,
-                                                width: '100%',
-                                                pointerEvents: 'none',
-                                            }}
-                                        >
-                                            <Button
-                                                text='Open game room'
-                                                color='gbg-white'
-                                                icon={<DoorIcon />}
-                                            />
-                                        </Row>
-                                    )}
-                                    {!GBGSettings.synchronous && (
+                                    {!synchronous && (
                                         <Column>
-                                            {GBGSettings.multiplayer &&
-                                                GBGSettings.openToAllUsers && (
-                                                    <Row centerY className={styles.openToAllUsers}>
+                                            {multiplayer && !players.length && (
+                                                <Row
+                                                    spaceBetween
+                                                    centerY
+                                                    className={styles.gbgInfo}
+                                                >
+                                                    <Row centerY>
                                                         <UsersIcon />
                                                         <p>Open to all users</p>
                                                     </Row>
-                                                )}
-                                            <Row centerX>
-                                                <Scrollbars className={styles.beadDraw}>
-                                                    <Row>
-                                                        {beads.map((bead, i) => (
-                                                            <Row key={bead.id}>
-                                                                <StringBeadCard
-                                                                    bead={bead}
-                                                                    // postId={id}
-                                                                    postType={bead.type}
-                                                                    beadIndex={i}
-                                                                    location='preview'
-                                                                    style={null}
-                                                                />
-                                                                {/* {(i < stringPosts.length - 1 ||
+                                                    <p>
+                                                        Waiting for move: 1{' '}
+                                                        {totalMoves ? `/ ${totalMoves}` : ''}
+                                                    </p>
+                                                </Row>
+                                            )}
+                                            {multiplayer && !!players.length && (
+                                                <Row
+                                                    spaceBetween
+                                                    centerY
+                                                    className={styles.gbgInfo}
+                                                >
+                                                    <FlagImageHighlights
+                                                        type='user'
+                                                        imagePaths={players.map(
+                                                            (p) => p.flagImagePath
+                                                        )}
+                                                        imageSize={30}
+                                                        text={`${players.length} players`}
+                                                    />
+                                                    <Row centerY>
+                                                        <p>Waiting for {players.length - 1}</p>
+                                                        <FlagImageHighlights
+                                                            type='user'
+                                                            imagePaths={players
+                                                                .filter(
+                                                                    (p) => p.id !== accountData.id
+                                                                )
+                                                                .map((p) => p.flagImagePath)}
+                                                            imageSize={30}
+                                                            style={{ marginLeft: 10 }}
+                                                        />
+                                                    </Row>
+                                                </Row>
+                                            )}
+                                            {!multiplayer && (
+                                                <Row centerX>
+                                                    <Scrollbars className={styles.beadDraw}>
+                                                        <Row>
+                                                            {beads.map((bead, i) => (
+                                                                <Row key={bead.id}>
+                                                                    <StringBeadCard
+                                                                        bead={bead}
+                                                                        postType={bead.type}
+                                                                        beadIndex={i}
+                                                                        location='preview'
+                                                                        style={null}
+                                                                    />
+                                                                    {/* {(i < stringPosts.length - 1 ||
                                                                 movesLeft) && (
                                                                 <Row
                                                                     centerY
@@ -750,36 +775,36 @@ function CreatePostModal(): JSX.Element {
                                                                     <DNAIcon />
                                                                 </Row>
                                                             )} */}
-                                                            </Row>
-                                                        ))}
-                                                        {GBGSettings.multiplayer &&
-                                                        !GBGSettings.openToAllUsers ? (
-                                                            <p>test</p>
-                                                        ) : (
-                                                            <button
-                                                                type='button'
-                                                                className={styles.newBeadButton}
-                                                                onClick={() =>
-                                                                    setShowBeadTools(true)
-                                                                }
-                                                                style={{
-                                                                    marginRight:
-                                                                        beads.length > 1 ? 15 : 0,
-                                                                }}
-                                                            >
-                                                                <PlusIcon />
-                                                                <p>
-                                                                    Click to create the{' '}
-                                                                    {beads.length
-                                                                        ? 'next'
-                                                                        : 'first'}{' '}
-                                                                    bead
-                                                                </p>
-                                                            </button>
-                                                        )}
-                                                    </Row>
-                                                </Scrollbars>
-                                            </Row>
+                                                                </Row>
+                                                            ))}
+                                                            {!multiplayer && (
+                                                                <button
+                                                                    type='button'
+                                                                    className={styles.newBeadButton}
+                                                                    onClick={() =>
+                                                                        setShowBeadTools(true)
+                                                                    }
+                                                                    style={{
+                                                                        marginRight:
+                                                                            beads.length > 1
+                                                                                ? 15
+                                                                                : 0,
+                                                                    }}
+                                                                >
+                                                                    <PlusIcon />
+                                                                    <p>
+                                                                        Click to create the{' '}
+                                                                        {beads.length
+                                                                            ? 'next'
+                                                                            : 'first'}{' '}
+                                                                        bead
+                                                                    </p>
+                                                                </button>
+                                                            )}
+                                                        </Row>
+                                                    </Scrollbars>
+                                                </Row>
+                                            )}
                                         </Column>
                                     )}
                                 </Column>
@@ -915,10 +940,10 @@ function CreatePostModal(): JSX.Element {
                                 />
                                 <Toggle
                                     leftText='Lock answers'
-                                    rightText={pollAnswersLocked ? 'ON' : 'OFF'}
                                     positionLeft={!pollAnswersLocked}
                                     rightColor='blue'
                                     onClick={() => setPollAnswersLocked(!pollAnswersLocked)}
+                                    onOffText
                                 />
                             </Row>
                         )}

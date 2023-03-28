@@ -3,6 +3,10 @@
 .wrapper {
     justify-content: space-between;
 
+    @include for-tablet-landscape-up {
+        min-width: 750px;
+    }
+
     > h1 {
         margin-bottom: 40px;
     }
