@@ -1,8 +1,6 @@
 @import '@styles/Variables';
 
 .wrapper {
-    min-width: 740px;
-
     > h1 {
         margin-bottom: 40px;
     }
@@ -128,6 +126,69 @@
 
         > button {
             margin-left: 5px;
+        }
+    }
+
+    .sections {
+        display: flex;
+        flex-direction: column;
+
+        @media (min-width: 1200px) {
+            flex-direction: row;
+        }
+
+        .section {
+            width: 450px;
+        }
+
+        .divider {
+            width: 1px;
+            display: none;
+            align-self: stretch;
+            margin: 40px 10px;
+            background-color: $grey3;
+
+            @media (min-width: 1200px) {
+                display: flex;
+            }
+        }
+    }
+
+    .sectionHeader {
+        border-bottom: 1px solid $grey3;
+        margin-bottom: 20px;
+
+        p {
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        button {
+            all: unset;
+            cursor: pointer;
+            margin-left: 8px;
+
+            @media (min-width: 1200px) {
+                display: none;
+            }
+
+            svg {
+                width: 16px;
+                height: 16px;
+                color: $grey4;
+            }
+        }
+    }
+
+    .searchWrapper {
+        margin-bottom: 30px;
+        width: 250px;
+
+        > svg {
+            width: 20px;
+            height: 20px;
+            color: $grey3;
+            margin-left: 10px;
         }
     }
 

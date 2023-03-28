@@ -109,16 +109,14 @@ export const defaultGBGSettings = {
     startTime: '',
     endTime: '',
     multiplayer: false,
-    openToAllUsers: true,
     players: [],
-    fixPlayerColors: false,
+    allowedBeadTypes: ['Text', 'Url', 'Audio', 'Image'],
     totalMoves: 5,
     movesPerPlayer: 5,
     moveDuration: 60,
     introDuration: 0,
     intervalDuration: 0,
     outroDuration: 0,
-    allowedBeadTypes: ['Text', 'Url', 'Audio', 'Image'],
     characterLimit: 0,
     moveTimeWindow: 0,
 }
@@ -467,4 +465,17 @@ export function trimNumber(number, maxValue) {
     // if invalid number: return 0
     // if greater than max value: return max value
     return number ? (number > maxValue ? maxValue : number) : 0
+}
+
+export function findDHMFromMinutes(minutes) {
+    // return { days, hours, minutes } object from minutes
+    const days = Math.floor(minutes / 60 / 24)
+    const hours = Math.floor(minutes / 60) - days * 24
+    const mins = minutes - days * 24 * 60 - hours * 60
+    return { days, hours, minutes: mins }
+}
+
+export function findMinutesFromDHM(values) {
+    // find minutes from { days, hours, minutes } object
+    return values.days * 24 * 60 + values.hours * 60 + values.minutes
 }

@@ -42,7 +42,7 @@ function Input(props: {
     } = props
 
     function handleChange(newValue) {
-        let validatedValue = +newValue
+        let validatedValue = type === 'number' ? +newValue : newValue
         if (min && +newValue < min) validatedValue = min
         if (max && +newValue > max) validatedValue = max
         if (onChange) onChange(validatedValue)
