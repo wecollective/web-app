@@ -17,11 +17,6 @@ $transitionSpeed: 0.5s;
         overflow: unset;
     }
 
-    :global(.DraftEditor-editorContainer) {
-        max-height: 300px;
-        overflow: auto;
-    }
-
     .helpButton {
         all: unset;
         cursor: pointer;
@@ -70,9 +65,9 @@ $transitionSpeed: 0.5s;
                 margin-left: 10px;
                 height: 30px;
                 padding: 0 10px;
-                border: 1px solid $grey3;
+                border: 1px solid $grey4;
                 border-radius: 15px;
-                color: $grey5;
+                color: $grey6;
                 cursor: pointer;
                 transition: all $transitionSpeed;
 
@@ -188,8 +183,16 @@ $transitionSpeed: 0.5s;
                 }
             }
 
+            .text {
+                :global(.DraftEditor-editorContainer) {
+                    max-height: 400px;
+                    overflow: auto;
+                }
+            }
+
             ::placeholder {
                 color: $grey4;
+                opacity: 1;
             }
 
             .images {
@@ -430,7 +433,7 @@ $transitionSpeed: 0.5s;
     }
 
     .contentButtons {
-        margin-bottom: 30px;
+        margin-bottom: 20px;
 
         button {
             all: unset;
@@ -465,6 +468,13 @@ $transitionSpeed: 0.5s;
                     color: $blue3;
                 }
             }
+        }
+    }
+
+    .errors {
+        color: $red;
+        > p {
+            margin-bottom: 20px;
         }
     }
 }

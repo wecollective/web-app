@@ -31,13 +31,14 @@ import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import {
     audioMBLimit,
     capitalise,
-    defaultErrorState,
     defaultGBGSettings,
     findDraftLength,
     findEventDuration,
     findEventTimes,
     formatTimeMMSS,
     imageMBLimit,
+    megaByte,
+    totalMBUploadLimit,
 } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/CreatePostModal2.module.scss'
@@ -112,24 +113,19 @@ function CreatePostModal(): JSX.Element {
     const [spaces, setSpaces] = useState<any[]>([spaceData.id ? spaceData : defaultSelectedSpace])
     const [showTitle, setShowTitle] = useState(true)
     const [title, setTitle] = useState('')
-    const [text, setText] = useState({
-        ...defaultErrorState,
-        value: '',
-        validate: (v) => {
-            const errors: string[] = []
-            const totalCharacters = findDraftLength(v)
-            if (totalCharacters < 1) errors.push('Required')
-            if (totalCharacters > 5000) errors.push('Must be less than 5K characters')
-            return errors
-        },
-    })
+    const [text, setText] = useState('')
+    const [noTextError, setNoTextError] = useState(false)
+    const [maxCharsErrors, setMaxCharsErrors] = useState(false)
     const [mentions, setMentions] = useState<any[]>([])
     const [urls, setUrls] = useState<any[]>([])
     const [urlsWithMetaData, setUrlsWithMetaData] = useState<any[]>([])
     const [startTime, setStartTime] = useState('')
     const [endTime, setEndTime] = useState('')
+    const [noEventTimesError, setNoEventTimesError] = useState(false)
+    const [eventTextError, setEventTextError] = useState(false)
     const [saved, setSaved] = useState(false)
     const [spacesModalOpen, setSpacesModalOpen] = useState(false)
+    const maxChars = 5000
     const cookies = new Cookies()
     const urlRequestIndex = useRef(0)
     const contentButtonTypes = ['image', 'audio', 'event', 'poll', 'gbg']
@@ -170,8 +166,8 @@ function CreatePostModal(): JSX.Element {
     const [imageModalOpen, setImageModalOpen] = useState(false)
     const [selectedImage, setSelectedImage] = useState<any>(null)
     const [imageSizeError, setImageSizeError] = useState(false)
-    const [toalImageSizeError, setTotalImageSizeError] = useState(false)
-    const [imagePostError, setImagePostError] = useState(false)
+    const [totalImageSizeError, setTotalImageSizeError] = useState(false)
+    const [noImagesError, setNoImagesError] = useState(false)
 
     function findImageSize() {
         if (images.length === 1) return 'large'
@@ -186,7 +182,7 @@ function CreatePostModal(): JSX.Element {
 
     function addImageFiles() {
         setImageSizeError(false)
-        setImagePostError(false)
+        setNoImagesError(false)
         const input = document.getElementById('post-images-file-input') as HTMLInputElement
         if (input && input.files && input.files.length) {
             for (let i = 0; i < input.files.length; i += 1) {
@@ -209,10 +205,11 @@ function CreatePostModal(): JSX.Element {
         setImages(() => [...images, { id: uuidv4(), index: images.length, url: imageURL }])
         setImageURL('')
         setImageSizeError(false)
-        setImagePostError(false)
+        setNoImagesError(false)
     }
 
     function removeImage(index) {
+        setTotalImageSizeError(false)
         setImages([
             ...images
                 .filter((image, i) => i !== index)
@@ -241,7 +238,6 @@ function CreatePostModal(): JSX.Element {
     }
 
     function findTotalImageMBs() {
-        const megaByte = 1048576
         const totalBytes = images
             .filter((i) => i.file)
             .map((i) => i.file.size)
@@ -330,7 +326,8 @@ function CreatePostModal(): JSX.Element {
     const [pollAnswersLocked, setPollAnswersLocked] = useState(true)
     const [newPollAnswer, setNewPollAnswer] = useState('')
     const [pollAnswers, setPollAnswers] = useState<any[]>([])
-    const [pollError, setPollError] = useState(false)
+    const [pollTextError, setPollTextError] = useState(false)
+    const [pollAnswersError, setPollAnswersError] = useState(false)
     const pollColorScale = d3
         .scaleSequential()
         .domain([0, pollAnswers.length])
@@ -346,7 +343,7 @@ function CreatePostModal(): JSX.Element {
             },
         ])
         setNewPollAnswer('')
-        setPollError(false)
+        setPollAnswersError(false)
     }
 
     function removePollAnswer(id) {
@@ -364,8 +361,10 @@ function CreatePostModal(): JSX.Element {
     const { synchronous, multiplayer, players, totalMoves, movesPerPlayer } = GBGSettings
     const [beads, setBeads] = useState<any[]>([])
     const [nextBeadModalOpen, setNextBeadModalOpen] = useState(false)
+    const [topicError, setTopicError] = useState(false)
+    const [noBeadsError, setNoBeadsError] = useState(false)
     const showNextBeadButton = !multiplayer && (!totalMoves || beads.length < totalMoves)
-    console.log('showNextBeadButton: ', showNextBeadButton)
+    // console.log('showNextBeadButton: ', showNextBeadButton)
 
     function uploadTopicImage() {
         const input = document.getElementById('topic-image-file-input') as HTMLInputElement
@@ -382,6 +381,7 @@ function CreatePostModal(): JSX.Element {
     }
 
     function updateTopicText(topicText) {
+        // todo: merge groups into single array
         const arcMatches = GlassBeadGameTopics.archetopics.filter((t) =>
             t.name.toLowerCase().includes(topicText.toLowerCase())
         )
@@ -390,12 +390,14 @@ function CreatePostModal(): JSX.Element {
         )
         setTopicOptions(topicText ? [...arcMatches, ...limMatches].slice(0, 9) : [])
         setTopic(topicText)
+        setTopicError(false)
     }
 
     function selectTopic(option) {
         setTopic(option.name)
         setTopicImageURL(option.imagePath)
         setTopicOptions([])
+        setTopicError(false)
     }
 
     function renderImages() {
@@ -550,24 +552,95 @@ function CreatePostModal(): JSX.Element {
         )
     }
 
-    function addBead(bead) {
-        console.log('bead: ', bead)
-        setBeads([...beads, bead])
+    function postValid() {
+        let valid = true
+        const totalChars = findDraftLength(text)
+        if (postType === 'text') {
+            if (totalChars < 1 && !title) {
+                setNoTextError(true)
+                valid = false
+            }
+            if (totalChars > maxChars) {
+                setMaxCharsErrors(true)
+                valid = false
+            }
+        }
+        if (postType === 'image') {
+            if (!images.length) {
+                setNoImagesError(true)
+                valid = false
+            }
+            const totalImageSize = findTotalImageMBs()
+            if (totalImageSize > totalMBUploadLimit) {
+                setTotalImageSizeError(true)
+                valid = false
+            }
+        }
+        if (postType === 'audio') {
+            if (!audioFile) {
+                setAudioSizeError(false)
+                setNoAudioError(true)
+                valid = false
+            }
+        }
+        if (postType === 'event') {
+            if (totalChars < 1 && !title) {
+                setEventTextError(true)
+                valid = false
+            }
+            if (!startTime) {
+                setNoEventTimesError(true)
+                valid = false
+            }
+        }
+        if (postType === 'poll') {
+            if (totalChars < 1 && !title) {
+                setPollTextError(true)
+                valid = false
+            }
+            if (pollAnswers.length < 2) {
+                setPollAnswersError(true)
+                valid = false
+            }
+        }
+        if (postType === 'gbg') {
+            if (!topic) {
+                setTopicError(true)
+                valid = false
+            }
+            if (!synchronous && !multiplayer && !beads.length) {
+                setNoBeadsError(true)
+                valid = false
+            }
+        }
+        return valid
     }
 
     function createPost() {
-        console.log('create post!')
-        setSaved(true)
-        setTimeout(() => closeModal(), 1000)
+        if (postValid()) {
+            console.log('post valid!')
+        }
+
+        // setSaved(true)
+        // setTimeout(() => closeModal(), 1000)
     }
 
+    // remove errors and initialise date picker if post type is event
     useEffect(() => {
-        console.log('first useeffect')
-    }, [])
-
-    // initialise date picker if post type is event
-    useEffect(() => {
+        // remove errors
+        setNoTextError(false)
+        setMaxCharsErrors(false)
+        setNoImagesError(false)
+        setTotalImageSizeError(false)
+        setNoAudioError(false)
+        setEventTextError(false)
+        setNoEventTimesError(false)
+        setPollTextError(false)
+        setPollAnswersError(false)
+        setTopicError(false)
+        setNoBeadsError(false)
         if (postType === 'event') {
+            // initialise date picker
             const now = new Date()
             const startTimePast = new Date(startTime) < now
             const endTimePast = new Date(endTime) < now
@@ -581,7 +654,10 @@ function CreatePostModal(): JSX.Element {
                 ...dateTimeOptions,
                 defaultDate: defaultStartDate,
                 appendTo: document.getElementById('date-time-start-wrapper') || undefined,
-                onChange: ([value]) => setStartTime(value.toString()),
+                onChange: ([value]) => {
+                    setNoEventTimesError(false)
+                    setStartTime(value.toString())
+                },
             })
             flatpickr('#date-time-end', {
                 ...dateTimeOptions,
@@ -672,9 +748,20 @@ function CreatePostModal(): JSX.Element {
                                         placeholder='Title...'
                                         type='text'
                                         value={title}
-                                        onChange={(e) => setTitle(e.target.value)}
+                                        onChange={(e) => {
+                                            setTitle(e.target.value)
+                                            setNoTextError(false)
+                                            setEventTextError(false)
+                                            setPollTextError(false)
+                                        }}
                                     />
-                                    <CloseButton size={20} onClick={() => setShowTitle(false)} />
+                                    <CloseButton
+                                        size={20}
+                                        onClick={() => {
+                                            setTitle('')
+                                            setShowTitle(false)
+                                        }}
+                                    />
                                 </Row>
                             )}
                             {postType === 'gbg' && (
@@ -700,6 +787,7 @@ function CreatePostModal(): JSX.Element {
                                             maxLength={30}
                                             value={topic}
                                             onChange={(e) => updateTopicText(e.target.value)}
+                                            onBlur={() => setTopicOptions([])}
                                         />
                                         {topicOptions.length > 0 && (
                                             <Column className={styles.topicOptions}>
@@ -720,15 +808,18 @@ function CreatePostModal(): JSX.Element {
                                 </Row>
                             )}
                             <DraftTextEditor
+                                className={styles.text}
                                 type='post'
-                                stringifiedDraft={text.value}
-                                maxChars={5000}
-                                state={text.state}
-                                errors={text.errors}
+                                stringifiedDraft={text}
+                                maxChars={maxChars}
                                 onChange={(value, textMentions, textUrls) => {
-                                    setText({ ...text, value, state: 'default' })
+                                    setText(value)
                                     setMentions(textMentions)
                                     setUrls(textUrls)
+                                    setNoTextError(false)
+                                    setMaxCharsErrors(false)
+                                    setEventTextError(false)
+                                    setPollTextError(false)
                                 }}
                             />
                             {renderEventTimes()}
@@ -777,9 +868,6 @@ function CreatePostModal(): JSX.Element {
                                             onClick={addPollAnswer}
                                         />
                                     </Row>
-                                    {pollError && (
-                                        <p className='danger'>At least one answer required</p>
-                                    )}
                                 </Column>
                             )}
                             {postType === 'gbg' && (
@@ -837,19 +925,10 @@ function CreatePostModal(): JSX.Element {
                                     <Button
                                         text='Add'
                                         color='aqua'
-                                        disabled={imageURL === ''}
+                                        disabled={!imageURL}
                                         onClick={addImageURL}
                                     />
                                 </Row>
-                                {imageSizeError && (
-                                    <Column className={styles.errors}>
-                                        {imageSizeError && (
-                                            <p className='danger' style={{ marginBottom: 10 }}>
-                                                Max file size: {imageMBLimit}MB
-                                            </p>
-                                        )}
-                                    </Column>
-                                )}
                             </Column>
                         )}
                         {postType === 'audio' && (
@@ -878,14 +957,6 @@ function CreatePostModal(): JSX.Element {
                                         </h2>
                                     )}
                                 </Row>
-                                {(audioSizeError || noAudioError) && (
-                                    <Column className={styles.errors}>
-                                        {audioSizeError && (
-                                            <p>Audio file too large. Max size: {audioMBLimit}MB</p>
-                                        )}
-                                        {noAudioError && <p>Recording or upload required</p>}
-                                    </Column>
-                                )}
                             </Column>
                         )}
                         {postType === 'event' && (
@@ -951,6 +1022,26 @@ function CreatePostModal(): JSX.Element {
                             />
                         ))}
                     </Row>
+                    <Column centerX className={styles.errors}>
+                        {noTextError && <p>No content added</p>}
+                        {maxCharsErrors && <p>Text must be less than {maxChars} characters</p>}
+                        {noImagesError && <p>No images added</p>}
+                        {imageSizeError && <p>Max file size: {imageMBLimit} MBs</p>}
+                        {totalImageSizeError && (
+                            <p>
+                                Total upload size ({findTotalImageMBs()} MBs) is greater than limit
+                                of {totalMBUploadLimit} MBs
+                            </p>
+                        )}
+                        {audioSizeError && <p>Max file size: {audioMBLimit} MBs</p>}
+                        {noAudioError && <p>No audio added</p>}
+                        {eventTextError && <p>Title or text required for events</p>}
+                        {noEventTimesError && <p>Start time required for events</p>}
+                        {pollTextError && <p>Title or text required for polls</p>}
+                        {pollAnswersError && <p>At least 2 answers required for polls</p>}
+                        {topicError && <p>Topic required</p>}
+                        {noBeadsError && <p>At least 1 bead required for single player games</p>}
+                    </Column>
                     <Button text='Post' color='blue' onClick={createPost} />
                 </Column>
             )}
@@ -972,7 +1063,10 @@ function CreatePostModal(): JSX.Element {
             {GBGSettingsModalOpen && (
                 <GBGSettingsModal
                     settings={GBGSettings}
-                    setSettings={setGBGSettings}
+                    setSettings={(newSettings) => {
+                        setGBGSettings(newSettings)
+                        setNoBeadsError(false)
+                    }}
                     close={() => setGBGSettingsModalOpen(false)}
                 />
             )}
@@ -980,7 +1074,10 @@ function CreatePostModal(): JSX.Element {
                 <NextBeadModal
                     settings={GBGSettings}
                     beads={beads}
-                    saveBead={(bead) => setBeads([...beads, bead])}
+                    saveBead={(bead) => {
+                        setBeads([...beads, bead])
+                        setNoBeadsError(false)
+                    }}
                     close={() => setNextBeadModalOpen(false)}
                 />
             )}

@@ -7,6 +7,7 @@ import React from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
 // constants
+export const megaByte = 1048576
 export const imageMBLimit = 10
 export const audioMBLimit = 25
 export const totalMBUploadLimit = 50
