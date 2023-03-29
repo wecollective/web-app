@@ -295,10 +295,26 @@ $transitionSpeed: 0.5s;
                     }
                 }
 
-                .beadDraw {
+                .beads {
                     padding: 15px;
                     background-color: $grey1;
                     border-radius: 20px;
+                    margin-top: 10px;
+
+                    .beadDivider {
+                        width: 35px;
+                        height: 300px;
+                        opacity: 1;
+                        animation-name: fadeInOpacity;
+                        animation-timing-function: ease-in;
+                        animation-duration: 2s;
+
+                        > svg {
+                            transform: rotate(90deg);
+                            height: 35px;
+                            color: $bluegrey2;
+                        }
+                    }
 
                     .newBeadButton {
                         all: unset;
@@ -307,11 +323,10 @@ $transitionSpeed: 0.5s;
                         flex-direction: column;
                         justify-content: center;
                         align-items: center;
-                        width: 270px;
-                        height: 270px;
+                        width: 300px;
+                        height: 300px;
                         flex-shrink: 0;
                         border-radius: 15px;
-                        margin-right: 15px;
                         background-color: white;
                         box-shadow: 0 0 7px 0 rgba(10, 8, 72, 0.1);
                         transition: all 0.3s;

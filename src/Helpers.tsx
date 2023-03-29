@@ -1,7 +1,9 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable no-control-regex */
 import config from '@src/Config'
+import { AudioIcon, ImageIcon, LinkIcon, TextIcon } from '@svgs/all'
 import { convertFromRaw, EditorState } from 'draft-js'
+import React from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
 // constants
@@ -74,18 +76,20 @@ export const defaultPostData = {
     StringPlayers: [] as any[],
 }
 
-export const defaultBeadData = {
-    id: uuidv4(),
-    type: 'text',
-    color: '#fff',
-    text: '',
-    url: '',
-    urlData: null,
-    audioFile: null,
-    audioBlob: null,
-    audioType: '',
-    images: [],
-}
+// export const defaultBeadData = {
+//     id: uuidv4(),
+//     type: 'text',
+//     color: '#fff',
+//     // text: '',
+//     // // url: '',
+//     // // urlData: null,
+//     // // audioFile: null,
+//     // // audioBlob: null,
+//     // // audioType: '',
+//     // urlData: null,
+//     // image: null,
+//     // audio: null,
+// }
 
 export const defaultSpaceData = {
     id: uuidv4(),
@@ -110,7 +114,7 @@ export const defaultGBGSettings = {
     endTime: '',
     multiplayer: false,
     players: [],
-    allowedBeadTypes: ['Text', 'Url', 'Audio', 'Image'],
+    allowedBeadTypes: ['text', 'url', 'audio', 'image'],
     totalMoves: 5,
     movesPerPlayer: 5,
     moveDuration: 60,
@@ -119,6 +123,13 @@ export const defaultGBGSettings = {
     outroDuration: 0,
     characterLimit: 0,
     moveTimeWindow: 0,
+}
+
+export const beadTypeIcons = {
+    text: <TextIcon />,
+    url: <LinkIcon />,
+    image: <ImageIcon />,
+    audio: <AudioIcon />,
 }
 
 // functions

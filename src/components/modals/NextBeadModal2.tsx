@@ -1,6 +1,7 @@
 /* eslint-disable react/no-array-index-key */
 import Button from '@components/Button'
 import Audio from '@components/cards/PostCard/PostTypes/Audio'
+import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
 import DraftTextEditor from '@components/draft-js/DraftTextEditor'
 import Input from '@components/Input'
@@ -12,6 +13,7 @@ import UrlPreview from '@src/components/cards/PostCard/UrlPreview'
 import config from '@src/Config'
 import {
     audioMBLimit,
+    beadTypeIcons,
     capitalise,
     findDraftLength,
     formatTimeMMSS,
@@ -19,22 +21,14 @@ import {
 } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/NextBeadModal2.module.scss'
-import { AudioIcon, ImageIcon, LinkIcon, TextIcon } from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
 import getBlobDuration from 'get-blob-duration'
 import React, { useRef, useState } from 'react'
-import CloseButton from '../CloseButton'
+import { v4 as uuidv4 } from 'uuid'
 
 const { white, red, orange, yellow, green, blue, purple } = colors
 const beadColors = [white, red, orange, yellow, green, blue, purple]
-
-const typeIcons = {
-    text: <TextIcon />,
-    url: <LinkIcon />,
-    image: <ImageIcon />,
-    audio: <AudioIcon />,
-}
 
 function NextBeadModal(props: {
     settings: any
@@ -216,15 +210,16 @@ function NextBeadModal(props: {
     }
 
     function addBead() {
-        const bead = { type, color } as any
+        const bead = { id: uuidv4(), type, color } as any
         if (type === 'text') {
             bead.text = text
             bead.mentions = mentions
         }
-        if (type === 'url') bead.urlData = urlData
-        if (type === 'audio') bead.audio = audioFile
-        if (type === 'image') bead.image = image
+        if (type === 'url') bead.Urls = [urlData]
+        if (type === 'audio') bead.Audio = { file: audioFile, url: '' }
+        if (type === 'image') bead.Images = [image]
         saveBead(bead)
+        close()
     }
 
     return (
@@ -261,8 +256,9 @@ function NextBeadModal(props: {
                             }}
                         />
                         <Column className={styles.bead} style={{ backgroundColor: color }}>
+                            <div className={styles.watermark} />
                             <Row centerY spaceBetween className={styles.header}>
-                                {typeIcons[type]}
+                                {beadTypeIcons[type]}
                                 {/* <ImageTitle
                                 type='user'
                                 imagePath={accountData.flagImagePath}
@@ -273,7 +269,7 @@ function NextBeadModal(props: {
                             </Row>
                             <Column centerX centerY className={styles.content}>
                                 {type === 'url' && (
-                                    <Column centerX style={{ width: '100%' }}>
+                                    <Column centerX centerY className={styles.urlWrapper}>
                                         {urlData ? (
                                             <UrlPreview
                                                 key={urlData.url}
@@ -319,7 +315,7 @@ function NextBeadModal(props: {
                                 {type === 'image' && (
                                     <Column style={{ width: '100%', height: '100%' }}>
                                         {image ? (
-                                            <Column spaceBetween className={styles.image}>
+                                            <Column className={styles.imageWrapper}>
                                                 <CloseButton
                                                     size={20}
                                                     onClick={() => setImage(null)}
@@ -338,7 +334,7 @@ function NextBeadModal(props: {
                                                         alt=''
                                                     />
                                                 </button>
-                                                <Row centerY style={{ width: '100%' }}>
+                                                <Row centerY className={styles.caption}>
                                                     <Input
                                                         type='text'
                                                         placeholder='Caption...'
@@ -407,7 +403,7 @@ function NextBeadModal(props: {
                                 title={capitalise(t)}
                                 onClick={() => setType(t)}
                             >
-                                {typeIcons[t]}
+                                {beadTypeIcons[t]}
                             </button>
                         ))}
                     </Row>

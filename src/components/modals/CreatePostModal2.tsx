@@ -3,7 +3,7 @@
 import Button from '@components/Button'
 import PollAnswer from '@components/cards/PollAnswer'
 import Audio from '@components/cards/PostCard/PostTypes/Audio'
-import StringBeadCard from '@components/cards/PostCard/StringBeadCard'
+import StringBeadCard from '@components/cards/PostCard/StringBeadCard2'
 import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
 import DraftTextEditor from '@components/draft-js/DraftTextEditor'
@@ -19,6 +19,7 @@ import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
 // import ShowMoreLess from '@components/ShowMoreLess'
+import NextBeadModal from '@components/modals/NextBeadModal2'
 import SuccessMessage from '@components/SuccessMessage'
 import Toggle from '@components/Toggle'
 import { AccountContext } from '@contexts/AccountContext'
@@ -46,6 +47,7 @@ import {
     CastaliaIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
+    DNAIcon,
     HelpIcon,
     ImageIcon,
     PlusIcon,
@@ -361,7 +363,9 @@ function CreatePostModal(): JSX.Element {
     const [GBGSettings, setGBGSettings] = useState<any>(defaultGBGSettings)
     const { synchronous, multiplayer, players, totalMoves, movesPerPlayer } = GBGSettings
     const [beads, setBeads] = useState<any[]>([])
-    const [showBeadTools, setShowBeadTools] = useState(false)
+    const [nextBeadModalOpen, setNextBeadModalOpen] = useState(false)
+    const showNextBeadButton = !multiplayer && (!totalMoves || beads.length < totalMoves)
+    console.log('showNextBeadButton: ', showNextBeadButton)
 
     function uploadTopicImage() {
         const input = document.getElementById('topic-image-file-input') as HTMLInputElement
@@ -394,7 +398,56 @@ function CreatePostModal(): JSX.Element {
         setTopicOptions([])
     }
 
-    function eventTimes() {
+    function renderImages() {
+        return (
+            <Scrollbars className={styles.images}>
+                <Row>
+                    {images.map((image, index) => (
+                        <Column
+                            key={image.id}
+                            centerX
+                            className={`${styles.imageWrapper} ${styles[findImageSize()]}`}
+                        >
+                            <CloseButton
+                                size={20}
+                                onClick={() => removeImage(index)}
+                                style={{ position: 'absolute', right: 0 }}
+                            />
+                            <button
+                                className={styles.imageButton}
+                                type='button'
+                                onClick={() => openImageModal(image.id)}
+                            >
+                                <img src={image.url || URL.createObjectURL(image.file)} alt='' />
+                            </button>
+                            <Row centerY style={{ width: '100%' }}>
+                                <Input
+                                    type='text'
+                                    placeholder='add caption...'
+                                    value={image.caption}
+                                    onChange={(v) => updateCaption(index, v)}
+                                />
+                            </Row>
+                            <Row centerX className={styles.itemFooter}>
+                                {index !== 0 && (
+                                    <button type='button' onClick={() => moveImage(index, -1)}>
+                                        <ChevronLeftIcon />
+                                    </button>
+                                )}
+                                {index < images.length - 1 && (
+                                    <button type='button' onClick={() => moveImage(index, 1)}>
+                                        <ChevronRightIcon />
+                                    </button>
+                                )}
+                            </Row>
+                        </Column>
+                    ))}
+                </Row>
+            </Scrollbars>
+        )
+    }
+
+    function renderEventTimes() {
         const showEventDates = postType === 'event' && startTime
         const showGBGDates = postType === 'gbg' && GBGSettings.synchronous && GBGSettings.startTime
         const start = postType === 'event' ? startTime : GBGSettings.startTime
@@ -409,6 +462,97 @@ function CreatePostModal(): JSX.Element {
                 </Row>
             </Row>
         )
+    }
+
+    function renderGBGInfoRow() {
+        return (
+            <Row spaceBetween centerY className={styles.gbgInfo}>
+                {players.length ? (
+                    <>
+                        <FlagImageHighlights
+                            type='user'
+                            imagePaths={players.map((p) => p.flagImagePath)}
+                            imageSize={30}
+                            text={`${players.length} players`}
+                        />
+                        <Row centerY>
+                            <p>Waiting for {players.length - 1}</p>
+                            <FlagImageHighlights
+                                type='user'
+                                imagePaths={players
+                                    .filter((p) => p.id !== accountData.id)
+                                    .map((p) => p.flagImagePath)}
+                                imageSize={30}
+                                style={{ marginLeft: 10 }}
+                            />
+                        </Row>
+                    </>
+                ) : (
+                    <>
+                        <Row centerY>
+                            <UsersIcon />
+                            <p>Open to all users</p>
+                        </Row>
+                        <p>Waiting for move: 1 {totalMoves ? `/ ${totalMoves}` : ''}</p>
+                    </>
+                )}
+            </Row>
+        )
+    }
+
+    function removeBead(beadIndex) {
+        setBeads([...beads.filter((bead, i) => i + 1 !== beadIndex)])
+    }
+
+    function renderBeads() {
+        return (
+            <Row centerX>
+                <Scrollbars className={styles.beads}>
+                    <Row>
+                        {beads.map((bead, i) => (
+                            <Row key={bead.id}>
+                                <StringBeadCard
+                                    bead={bead}
+                                    postType={bead.type}
+                                    beadIndex={i + 1}
+                                    location='preview'
+                                    removeBead={removeBead}
+                                />
+                                {(showNextBeadButton || i < beads.length - 1) && (
+                                    <Row centerY className={styles.beadDivider}>
+                                        <DNAIcon />
+                                    </Row>
+                                )}
+                                {!showNextBeadButton &&
+                                    i === beads.length - 1 &&
+                                    beads.length > 2 && (
+                                        <span style={{ width: 15, flexShrink: 0 }} />
+                                    )}
+                            </Row>
+                        ))}
+                        {showNextBeadButton && (
+                            <button
+                                type='button'
+                                className={styles.newBeadButton}
+                                onClick={() => setNextBeadModalOpen(true)}
+                                style={{
+                                    marginRight: beads.length > 1 ? 15 : 0,
+                                }}
+                            >
+                                <PlusIcon />
+                                <p>Click to create the {beads.length ? 'next' : 'first'} bead</p>
+                            </button>
+                        )}
+                        <span style={{ marginLeft: -7, width: 7, flexShrink: 0 }} />
+                    </Row>
+                </Scrollbars>
+            </Row>
+        )
+    }
+
+    function addBead(bead) {
+        console.log('bead: ', bead)
+        setBeads([...beads, bead])
     }
 
     function createPost() {
@@ -561,6 +705,7 @@ function CreatePostModal(): JSX.Element {
                                             <Column className={styles.topicOptions}>
                                                 {topicOptions.map((option) => (
                                                     <button
+                                                        key={option.name}
                                                         className={styles.option}
                                                         type='button'
                                                         onClick={() => selectTopic(option)}
@@ -586,78 +731,10 @@ function CreatePostModal(): JSX.Element {
                                     setUrls(textUrls)
                                 }}
                             />
-                            {eventTimes()}
+                            {renderEventTimes()}
                             {postType === 'image' && (
                                 <Row centerX style={{ width: '100%' }}>
-                                    {images.length > 0 && (
-                                        <Scrollbars className={styles.images}>
-                                            <Row>
-                                                {images.map((image, index) => (
-                                                    <Column
-                                                        centerX
-                                                        className={`${styles.imageWrapper} ${
-                                                            styles[findImageSize()]
-                                                        }`}
-                                                        key={image.id}
-                                                    >
-                                                        <CloseButton
-                                                            size={20}
-                                                            onClick={() => removeImage(index)}
-                                                            style={{
-                                                                position: 'absolute',
-                                                                right: 0,
-                                                            }}
-                                                        />
-                                                        <button
-                                                            className={styles.imageButton}
-                                                            type='button'
-                                                            onClick={() => openImageModal(image.id)}
-                                                        >
-                                                            <img
-                                                                src={
-                                                                    image.url ||
-                                                                    URL.createObjectURL(image.file)
-                                                                }
-                                                                alt=''
-                                                            />
-                                                        </button>
-                                                        <Row centerY style={{ width: '100%' }}>
-                                                            <Input
-                                                                type='text'
-                                                                placeholder='add caption...'
-                                                                value={image.caption}
-                                                                onChange={(v) =>
-                                                                    updateCaption(index, v)
-                                                                }
-                                                            />
-                                                        </Row>
-                                                        <Row centerX className={styles.itemFooter}>
-                                                            {index !== 0 && (
-                                                                <button
-                                                                    type='button'
-                                                                    onClick={() =>
-                                                                        moveImage(index, -1)
-                                                                    }
-                                                                >
-                                                                    <ChevronLeftIcon />
-                                                                </button>
-                                                            )}
-                                                            {index < images.length - 1 && (
-                                                                <button
-                                                                    type='button'
-                                                                    onClick={() =>
-                                                                        moveImage(index, 1)
-                                                                    }
-                                                                >
-                                                                    <ChevronRightIcon />
-                                                                </button>
-                                                            )}
-                                                        </Row>
-                                                    </Column>
-                                                ))}
-                                            </Row>
-                                        </Scrollbars>
-                                    )}
+                                    {images.length > 0 && renderImages()}
                                 </Row>
                             )}
                             {postType === 'audio' && audioFile && (
@@ -667,6 +744,7 @@ function CreatePostModal(): JSX.Element {
                                     id={0}
                                     url={URL.createObjectURL(audioFile)}
                                     location='create-post-audio'
+                                    style={{ height: 200 }}
                                 />
                             )}
                             {postType === 'poll' && (
@@ -708,103 +786,7 @@ function CreatePostModal(): JSX.Element {
                                 <Column className={styles.gbg}>
                                     {!synchronous && (
                                         <Column>
-                                            {multiplayer && !players.length && (
-                                                <Row
-                                                    spaceBetween
-                                                    centerY
-                                                    className={styles.gbgInfo}
-                                                >
-                                                    <Row centerY>
-                                                        <UsersIcon />
-                                                        <p>Open to all users</p>
-                                                    </Row>
-                                                    <p>
-                                                        Waiting for move: 1{' '}
-                                                        {totalMoves ? `/ ${totalMoves}` : ''}
-                                                    </p>
-                                                </Row>
-                                            )}
-                                            {multiplayer && !!players.length && (
-                                                <Row
-                                                    spaceBetween
-                                                    centerY
-                                                    className={styles.gbgInfo}
-                                                >
-                                                    <FlagImageHighlights
-                                                        type='user'
-                                                        imagePaths={players.map(
-                                                            (p) => p.flagImagePath
-                                                        )}
-                                                        imageSize={30}
-                                                        text={`${players.length} players`}
-                                                    />
-                                                    <Row centerY>
-                                                        <p>Waiting for {players.length - 1}</p>
-                                                        <FlagImageHighlights
-                                                            type='user'
-                                                            imagePaths={players
-                                                                .filter(
-                                                                    (p) => p.id !== accountData.id
-                                                                )
-                                                                .map((p) => p.flagImagePath)}
-                                                            imageSize={30}
-                                                            style={{ marginLeft: 10 }}
-                                                        />
-                                                    </Row>
-                                                </Row>
-                                            )}
-                                            {!multiplayer && (
-                                                <Row centerX>
-                                                    <Scrollbars className={styles.beadDraw}>
-                                                        <Row>
-                                                            {beads.map((bead, i) => (
-                                                                <Row key={bead.id}>
-                                                                    <StringBeadCard
-                                                                        bead={bead}
-                                                                        postType={bead.type}
-                                                                        beadIndex={i}
-                                                                        location='preview'
-                                                                        style={null}
-                                                                    />
-                                                                    {/* {(i < stringPosts.length - 1 ||
-                                                                movesLeft) && (
-                                                                <Row
-                                                                    centerY
-                                                                    className={styles.beadDivider}
-                                                                >
-                                                                    <DNAIcon />
-                                                                </Row>
-                                                            )} */}
-                                                                </Row>
-                                                            ))}
-                                                            {!multiplayer && (
-                                                                <button
-                                                                    type='button'
-                                                                    className={styles.newBeadButton}
-                                                                    onClick={() =>
-                                                                        setShowBeadTools(true)
-                                                                    }
-                                                                    style={{
-                                                                        marginRight:
-                                                                            beads.length > 1
-                                                                                ? 15
-                                                                                : 0,
-                                                                    }}
-                                                                >
-                                                                    <PlusIcon />
-                                                                    <p>
-                                                                        Click to create the{' '}
-                                                                        {beads.length
-                                                                            ? 'next'
-                                                                            : 'first'}{' '}
-                                                                        bead
-                                                                    </p>
-                                                                </button>
-                                                            )}
-                                                        </Row>
-                                                    </Scrollbars>
-                                                </Row>
-                                            )}
+                                            {multiplayer ? renderGBGInfoRow() : renderBeads()}
                                         </Column>
                                     )}
                                 </Column>
@@ -813,9 +795,10 @@ function CreatePostModal(): JSX.Element {
                                 urlsWithMetaData.map((u) => (
                                     <UrlPreview
                                         key={u.url}
+                                        type='post'
                                         urlData={u}
                                         loading={u.loading}
-                                        removeUrl={removeUrlMetaData}
+                                        remove={removeUrlMetaData}
                                         style={{ marginTop: 10 }}
                                     />
                                 ))}
@@ -991,6 +974,14 @@ function CreatePostModal(): JSX.Element {
                     settings={GBGSettings}
                     setSettings={setGBGSettings}
                     close={() => setGBGSettingsModalOpen(false)}
+                />
+            )}
+            {nextBeadModalOpen && (
+                <NextBeadModal
+                    settings={GBGSettings}
+                    beads={beads}
+                    saveBead={(bead) => setBeads([...beads, bead])}
+                    close={() => setNextBeadModalOpen(false)}
                 />
             )}
             {GBGHelpModalOpen && <GBGHelpModal close={() => setGBGHelpModalOpen(false)} />}

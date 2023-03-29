@@ -12,7 +12,13 @@ import SearchSelector from '@components/SearchSelector'
 import Toggle from '@components/Toggle'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
-import { findDHMFromMinutes, findMinutesFromDHM, pluralise } from '@src/Helpers'
+import {
+    capitalise,
+    defaultGBGSettings,
+    findDHMFromMinutes,
+    findMinutesFromDHM,
+    pluralise,
+} from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/GBGSettingsModal.module.scss'
 import { ChevronDownIcon, ChevronUpIcon, SearchIcon } from '@svgs/all'
@@ -104,7 +110,7 @@ function GBGSettingsModal(props: {
                 introDuration: 0,
                 outroDuration: 0,
                 intervalDuration: 0,
-                allowedBeadTypes: ['Text', 'Url', 'Audio', 'Image'],
+                allowedBeadTypes: defaultGBGSettings.allowedBeadTypes,
             })
             setIncludeDates(false)
             startTime.current = ''
@@ -124,7 +130,7 @@ function GBGSettingsModal(props: {
                 moveDuration: 60,
                 moveTimeWindow: 0,
                 characterLimit: 0,
-                allowedBeadTypes: ['Audio'],
+                allowedBeadTypes: ['audio'],
             })
             setOpenToAllUsers(true)
             setLimitMovesOn(false)
@@ -134,19 +140,25 @@ function GBGSettingsModal(props: {
         }
     }
 
-    function updateAllowedBeadTypes(type, checked) {
+    function updateBeadTypes(type, checked) {
         setBeadTypeError(false)
-        const newTypes = checked
-            ? [...allowedBeadTypes, type]
-            : [...allowedBeadTypes.filter((t) => t !== type)]
+        let newTypes = [] as any
+        if (checked) {
+            // maintain order when adding types
+            defaultGBGSettings.allowedBeadTypes.forEach((t) => {
+                if (allowedBeadTypes.includes(t) || t === type) newTypes.push(t)
+            })
+        } else {
+            newTypes = [...allowedBeadTypes.filter((t) => t !== type)]
+        }
         setNewSettings({
             ...newSettings,
             allowedBeadTypes: newTypes,
-            characterLimit: newTypes.includes('Text') ? characterLimit : 0,
-            moveDuration: newTypes.includes('Audio') ? moveDuration : 0,
+            characterLimit: newTypes.includes('text') ? characterLimit : 0,
+            moveDuration: newTypes.includes('audio') ? moveDuration : 0,
         })
-        if (!newTypes.includes('Text')) setCharacterLimitOn(false)
-        if (!newTypes.includes('Audio')) setAudioTimeLimitOn(false)
+        if (!newTypes.includes('text')) setCharacterLimitOn(false)
+        if (!newTypes.includes('audio')) setAudioTimeLimitOn(false)
     }
 
     function updateWindow(item, value) {
@@ -740,34 +752,14 @@ function GBGSettingsModal(props: {
                                         <Column centerX style={{ marginBottom: 30 }}>
                                             <p>Allowed bead types:</p>
                                             <Row wrap centerX className={styles.allowedBeadTypes}>
-                                                <CheckBox
-                                                    text='Text'
-                                                    checked={allowedBeadTypes.includes('Text')}
-                                                    onChange={(c) =>
-                                                        updateAllowedBeadTypes('Text', c)
-                                                    }
-                                                />
-                                                <CheckBox
-                                                    text='Url'
-                                                    checked={allowedBeadTypes.includes('Url')}
-                                                    onChange={(checked) =>
-                                                        updateAllowedBeadTypes('Url', checked)
-                                                    }
-                                                />
-                                                <CheckBox
-                                                    text='Audio'
-                                                    checked={allowedBeadTypes.includes('Audio')}
-                                                    onChange={(checked) =>
-                                                        updateAllowedBeadTypes('Audio', checked)
-                                                    }
-                                                />
-                                                <CheckBox
-                                                    text='Image'
-                                                    checked={allowedBeadTypes.includes('Image')}
-                                                    onChange={(checked) =>
-                                                        updateAllowedBeadTypes('Image', checked)
-                                                    }
-                                                />
+                                                {defaultGBGSettings.allowedBeadTypes.map((type) => (
+                                                    <CheckBox
+                                                        key={type}
+                                                        text={capitalise(type)}
+                                                        checked={allowedBeadTypes.includes(type)}
+                                                        onChange={(c) => updateBeadTypes(type, c)}
+                                                    />
+                                                ))}
                                             </Row>
                                             {beadTypeError && (
                                                 <p className={styles.error}>
@@ -775,7 +767,7 @@ function GBGSettingsModal(props: {
                                                 </p>
                                             )}
                                         </Column>
-                                        {allowedBeadTypes.includes('Text') && (
+                                        {allowedBeadTypes.includes('text') && (
                                             <Column centerX className={styles.rowWrapper}>
                                                 <Toggle
                                                     leftText='Text character limit'
@@ -829,7 +821,7 @@ function GBGSettingsModal(props: {
                                                 </Row>
                                             </Column>
                                         )}
-                                        {allowedBeadTypes.includes('Audio') && (
+                                        {allowedBeadTypes.includes('audio') && (
                                             <Column centerX className={styles.rowWrapper}>
                                                 <Toggle
                                                     leftText='Audio time limit'
