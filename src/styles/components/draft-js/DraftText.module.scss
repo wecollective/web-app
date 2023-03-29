@@ -75,6 +75,7 @@ $transitionSpeed: 0.5s;
         opacity: 1;
 
         .toolbar {
+            width: 100%;
             display: flex;
             z-index: 2;
 
@@ -116,10 +117,11 @@ $transitionSpeed: 0.5s;
             }
 
             .linkInput {
-                width: calc(100% - 37px);
+                width: 100%;
                 padding: 6px 8px;
                 outline: none;
                 border: 1px solid $grey2;
+                background-color: white;
                 border-radius: 5px;
                 margin-bottom: 5px;
             }
@@ -230,6 +232,11 @@ $transitionSpeed: 0.5s;
                 justify-content: center;
                 height: 50px;
                 margin-bottom: 36px;
+
+                .linkInput {
+                    height: 37px;
+                    width: 300px;
+                }
             }
 
             .editorWrapper {
