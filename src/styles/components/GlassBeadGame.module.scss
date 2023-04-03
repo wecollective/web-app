@@ -93,7 +93,7 @@ $transitionSpeed: 1s;
             height: 100%;
         }
         &.showBeads {
-            height: calc(100% - 200px);
+            height: calc(100% - 240px);
         }
 
         .commentBar {
@@ -643,8 +643,8 @@ $transitionSpeed: 1s;
         transition: height $transitionSpeed;
 
         @include for-tablet-landscape-up {
-            height: 200px;
-            padding: 0 40px;
+            height: 240px;
+            padding: 0 20px;
         }
 
         &.hidden {
