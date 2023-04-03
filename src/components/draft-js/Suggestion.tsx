@@ -4,7 +4,7 @@ import Row from '@components/Row'
 import styles from '@styles/components/draft-js/Suggestion.module.scss'
 import React from 'react'
 
-const Suggestion = (props: { mention }): JSX.Element => {
+function Suggestion(props: { mention }): JSX.Element {
     const { mention, ...parentProps } = props
     return (
         <div {...parentProps}>

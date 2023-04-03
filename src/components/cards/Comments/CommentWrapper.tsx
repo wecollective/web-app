@@ -4,14 +4,14 @@ import Column from '@components/Column'
 import { scrollToElement } from '@src/Helpers'
 import React, { useState } from 'react'
 
-const CommentWrapper = (props: {
+function CommentWrapper(props: {
     comment: any
     postId: number
     highlightedCommentId: any
     addComment: (newComment: string) => void
     removeComment: (comment: any) => void
     editComment: (comment: any, newText: string) => void
-}): JSX.Element => {
+}): JSX.Element {
     const { comment, postId, highlightedCommentId, addComment, removeComment, editComment } = props
     const [replyId, setReplyId] = useState(0)
     const [replyInputOpen, setReplyInputOpen] = useState(false)
@@ -29,7 +29,7 @@ const CommentWrapper = (props: {
             <CommentCard
                 comment={comment}
                 highlighted={highlightedCommentId === comment.id}
-                toggleReplyInput={toggleReplyInput}
+                toggleReplyInput={() => toggleReplyInput()}
                 removeComment={removeComment}
                 editComment={editComment}
             />

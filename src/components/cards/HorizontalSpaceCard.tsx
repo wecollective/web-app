@@ -10,7 +10,7 @@ import { CommentIcon, PostIcon, ReactionIcon, UsersIcon } from '@svgs/all'
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-const HorizontalSpaceCard = (props: { space: any; style?: any }): JSX.Element => {
+function HorizontalSpaceCard(props: { space: any; style?: any }): JSX.Element {
     const { space, style } = props
     const {
         handle,

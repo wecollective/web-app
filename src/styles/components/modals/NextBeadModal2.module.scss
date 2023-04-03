@@ -1,0 +1,231 @@
+@import '@styles/Variables';
+
+$transitionSpeed: 0.5s;
+
+.wrapper {
+    width: 100vw;
+
+    @include for-tablet-landscape-up {
+        padding: 50px;
+        width: auto;
+        min-width: 600px;
+    }
+
+    .beadWrapper {
+        position: relative;
+        height: 300px;
+        width: 100%;
+        margin-bottom: 20px;
+        transition: all $transitionSpeed;
+
+        :global(.DraftEditor-editorContainer) {
+            overflow: auto;
+        }
+
+        .textEditor {
+            position: absolute;
+            z-index: 5;
+            opacity: 0;
+            pointer-events: none;
+            transition: all $transitionSpeed;
+
+            button {
+                pointer-events: none !important;
+            }
+        }
+
+        &.expanded {
+            margin: 50px 0;
+
+            .textEditor {
+                opacity: 1;
+                pointer-events: auto;
+
+                button {
+                    pointer-events: auto !important;
+                }
+            }
+        }
+
+        .bead {
+            padding: 10px;
+            width: 300px;
+            height: 300px;
+            flex-shrink: 0;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 0 7px 0 rgba(10, 8, 72, 0.1);
+            position: relative;
+            border: 1px solid $grey2;
+
+            .watermark {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: inherit;
+                height: inherit;
+                background-color: white;
+                border: 2px solid white;
+                border-radius: inherit;
+                opacity: 0.1;
+                z-index: 1;
+            }
+
+            .header {
+                z-index: 2;
+                > svg {
+                    width: 20px;
+                    height: 20px;
+                    opacity: 0.3;
+                    // color: $grey4;
+                }
+            }
+
+            .content {
+                height: 100%;
+                margin-top: 10px;
+                z-index: 2;
+
+                .urlWrapper {
+                    width: 100%;
+                    height: 100%;
+                    max-height: 248px;
+                }
+
+                .imageWrapper {
+                    position: relative;
+                    width: 100%;
+                    height: 100%;
+
+                    .imageButton {
+                        all: unset;
+                        cursor: pointer;
+                        width: 100%;
+                        height: 100%;
+                        max-height: 200px;
+                        border-radius: 5px;
+
+                        img {
+                            width: 100%;
+                            height: 100%;
+                            max-height: 200px;
+                            border-radius: 5px;
+                            object-fit: cover;
+                        }
+                    }
+                }
+
+                .caption {
+                    width: 100%;
+                    margin-top: 8px;
+                }
+            }
+        }
+    }
+
+    .colorButtons {
+        margin-bottom: 20px;
+
+        > button {
+            all: unset;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            // border: 1px solid $grey5;
+            box-shadow: 0 0 3px 0 rgba(10, 8, 72, 0.1);
+
+            &:not(:last-child) {
+                margin-right: 10px;
+            }
+        }
+    }
+
+    .beadTypeButtons {
+        margin-bottom: 30px;
+
+        button {
+            all: unset;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 50px;
+            height: 50px;
+            border: 1px solid $grey3;
+            border-radius: 50%;
+            background-color: white;
+            cursor: pointer;
+            transition: all $transitionSpeed;
+
+            &:not(:last-child) {
+                margin-right: 10px;
+            }
+
+            svg {
+                color: $grey7;
+                width: 25px;
+                height: 25px;
+                transition: all $transitionSpeed;
+            }
+
+            &:hover,
+            &.selected {
+                border: 1px solid $blue3;
+                background-color: $blue7;
+
+                svg {
+                    color: $blue3;
+                }
+            }
+        }
+    }
+
+    .fileUploadInput {
+        margin-bottom: 10px;
+
+        label {
+            height: 40px;
+            border-radius: 20px;
+            padding: 0px 20px;
+            font-size: 14px;
+            border: none;
+            outline: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            background-color: $aqua;
+            color: white;
+            transition: all $transitionSpeed;
+
+            &:hover {
+                &:not(.disabled) {
+                    cursor: pointer;
+                    filter: brightness(110%);
+                    &.grey {
+                        filter: brightness(96%);
+                    }
+                }
+            }
+        }
+    }
+
+    // .itemFooter {
+    //     height: 20px;
+    //     margin: 7px 10px 5px 0;
+
+    //     > button {
+    //         all: unset;
+    //         cursor: pointer;
+    //         width: 20px;
+    //         height: 20px;
+    //         margin: 0 10px;
+
+    //         > svg {
+    //             opacity: 0.15;
+    //             width: 20px;
+    //             height: 20px;
+    //         }
+    //     }
+    // }
+}

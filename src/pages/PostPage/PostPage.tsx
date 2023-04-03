@@ -1,10 +1,8 @@
 /* eslint-disable no-nested-ternary */
 import PostCard from '@components/cards/PostCard/PostCard'
 import Column from '@components/Column'
-import DecisionTree from '@components/DecisionTree'
 import GlassBeadGame from '@components/GlassBeadGame'
 import LoadingWheel from '@components/LoadingWheel'
-import PlotGraph from '@components/PlotGraph'
 import Prism from '@components/Prism'
 import { AccountContext } from '@contexts/AccountContext'
 import { PostContext } from '@contexts/PostContext'
@@ -12,15 +10,16 @@ import styles from '@styles/pages/PostPage/PostPage.module.scss'
 import React, { useContext, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
-const PostPage = (): JSX.Element => {
+function PostPage(): JSX.Element {
     const location = useLocation()
     const postId = location.pathname.split('/')[2]
     const { accountDataLoading, loggedIn } = useContext(AccountContext)
     const { getPostData, postData, postDataLoading, postState, resetPostContext } =
         useContext(PostContext)
+    const { GlassBeadGame2 } = postData
 
     useEffect(() => {
-        if (!accountDataLoading && postId !== postData.id) getPostData(postId)
+        if (!accountDataLoading && postId !== postData.id) getPostData(+postId)
     }, [accountDataLoading, postId, loggedIn])
 
     useEffect(() => () => resetPostContext(), [])
@@ -28,15 +27,15 @@ const PostPage = (): JSX.Element => {
     if (postData.type === 'prism') {
         return <Prism />
     }
-    if (postData.type === 'plot-graph') {
-        return <PlotGraph />
-    }
-    if (postData.type === 'glass-bead-game') {
+    // if (postData.type === 'plot-graph') {
+    //     return <PlotGraph />
+    // }
+    if (postData.type === 'glass-bead-game' && GlassBeadGame2 && GlassBeadGame2.synchronous) {
         return <GlassBeadGame />
     }
-    if (postData.type === 'decision-tree') {
-        return <DecisionTree />
-    }
+    // if (postData.type === 'decision-tree') {
+    //     return <DecisionTree />
+    // }
 
     return (
         <Column centerX className={styles.wrapper}>

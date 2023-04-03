@@ -4,22 +4,24 @@ import styles from '@styles/components/Input.module.scss'
 import { DangerIcon, SuccessIcon } from '@svgs/all'
 import React from 'react'
 
-const Input = (props: {
+function Input(props: {
     type: 'text' | 'number' | 'text-area' | 'password' | 'email'
     id?: string
     title?: string
     prefix?: string
     placeholder?: string
-    state?: 'default' | 'valid' | 'invalid'
-    errors?: string[]
     value?: string | number
     rows?: number
-    style?: any
+    min?: number
+    max?: number
     disabled?: boolean
     loading?: boolean
     autoFill?: boolean
-    onChange?: (payload: string) => void
-}): JSX.Element => {
+    state?: 'default' | 'valid' | 'invalid'
+    errors?: string[]
+    style?: any
+    onChange?: (payload: any) => void
+}): JSX.Element {
     const {
         type,
         id,
@@ -30,6 +32,8 @@ const Input = (props: {
         errors,
         value,
         rows,
+        min,
+        max,
         style,
         disabled,
         loading,
@@ -37,8 +41,18 @@ const Input = (props: {
         onChange,
     } = props
 
+    function handleChange(newValue) {
+        let validatedValue = type === 'number' ? +newValue : newValue
+        if (min && +newValue < min) validatedValue = min
+        if (max && +newValue > max) validatedValue = max
+        if (onChange) onChange(validatedValue)
+    }
+
     return (
-        <div className={`${styles.wrapper} ${disabled && styles.disabled}`} style={style}>
+        <div
+            className={`${styles.wrapper} ${styles[type]} ${disabled && styles.disabled}`}
+            style={style}
+        >
             {title && <h1>{title}</h1>}
             {state === 'invalid' && errors && errors.map((error) => <h2 key={error}>{error}</h2>)}
             <div className={`${styles.inputWrapper} ${styles[state || 'default']}`}>
@@ -62,7 +76,9 @@ const Input = (props: {
                         placeholder={placeholder}
                         type={type}
                         value={value}
-                        onChange={(e) => onChange && onChange(e.target.value)}
+                        min={min}
+                        max={max}
+                        onChange={(e) => handleChange(e.target.value)}
                         disabled={disabled}
                         data-lpignore={!autoFill}
                     />
@@ -87,6 +103,8 @@ Input.defaultProps = {
     value: '',
     onChange: null,
     rows: null,
+    min: null,
+    max: null,
     style: null,
     disabled: false,
     loading: false,

@@ -4,7 +4,7 @@ import styles from '@styles/components/draft-js/Mention.module.scss'
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 
-const MentionComponent = (props: { mention; children }): JSX.Element => {
+function MentionComponent(props: { mention; children }): JSX.Element {
     const { mention, children } = props
     const [modalOpen, setModalOpen] = useState(false)
     return (

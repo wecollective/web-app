@@ -3,12 +3,12 @@ import CloseButton from '@components/CloseButton'
 import FlagImageHighlights from '@components/FlagImageHighlights'
 import Input from '@components/Input'
 import Row from '@components/Row'
-import styles from '@styles/components/cards/InquiryAnswer.module.scss'
+import styles from '@styles/components/cards/PollAnswer.module.scss'
 import React from 'react'
 
-const InquiryAnswer = (props: {
+function PollAnswer(props: {
     index: number
-    type: 'single-choice' | 'multiple-choice' | 'weighted-choice'
+    type: string // 'single-choice' | 'multiple-choice' | 'weighted-choice'
     answer: any
     totalVotes: number
     totalPoints: number
@@ -17,7 +17,7 @@ const InquiryAnswer = (props: {
     selected?: boolean
     onChange?: (value: boolean | number) => void
     close?: () => void
-}): JSX.Element => {
+}): JSX.Element {
     const {
         index,
         type,
@@ -85,11 +85,11 @@ const InquiryAnswer = (props: {
     )
 }
 
-InquiryAnswer.defaultProps = {
+PollAnswer.defaultProps = {
     preview: false,
     selected: false,
     onChange: null,
     close: null,
 }
 
-export default InquiryAnswer
+export default PollAnswer

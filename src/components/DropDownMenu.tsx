@@ -3,14 +3,14 @@ import config from '@src/Config'
 import styles from '@styles/components/DropDownMenu.module.scss'
 import React, { useState } from 'react'
 
-const DropDownMenu = (props: {
+function DropDownMenu(props: {
     title: string
     options: any[]
     selectedOption: string | number
     setSelectedOption: any
     orientation: string
     style?: any
-}): JSX.Element => {
+}): JSX.Element {
     const { title, options, selectedOption, setSelectedOption, orientation, style } = props
     const [menuOpen, setMenuOpen] = useState(false)
 

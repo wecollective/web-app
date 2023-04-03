@@ -10,7 +10,7 @@ import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const UpdateSpaceHandleModal = (props: { close: () => void }): JSX.Element => {
+function UpdateSpaceHandleModal(props: { close: () => void }): JSX.Element {
     const { close } = props
     const { spaceData, setSpaceData } = useContext(SpaceContext)
     const [inputValue, setInputValue] = useState(spaceData.name || '')

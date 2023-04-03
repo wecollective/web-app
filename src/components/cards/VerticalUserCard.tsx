@@ -10,7 +10,7 @@ import { CommentIcon, PostIcon } from '@svgs/all'
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-const VerticalUserCard = (props: { user: any; style?: any }): JSX.Element => {
+function VerticalUserCard(props: { user: any; style?: any }): JSX.Element {
     const { user, style } = props
     const { handle, name, bio, flagImagePath, coverImagePath, totalPosts, totalComments } = user
 

@@ -10,14 +10,14 @@ import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
-const Comments = (props: {
+function Comments(props: {
     postId: number
     type?: string
     location?: string
     totalComments: number
     incrementTotalComments: (value: number) => void
     style?: any
-}): JSX.Element => {
+}): JSX.Element {
     const { postId, type, location, totalComments, incrementTotalComments, style } = props
     const { accountData, loggedIn } = useContext(AccountContext)
     const [comments, setComments] = useState<any[]>([])
@@ -33,6 +33,7 @@ const Comments = (props: {
         axios
             .get(`${config.apiURL}/post-comments?postId=${postId}`)
             .then((res) => {
+                // console.log('post-comments: ', res.data, totalComments)
                 setComments(res.data)
                 setLoading(false)
                 // if commentId in urlParams, scroll to comment

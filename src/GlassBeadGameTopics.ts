@@ -3,6 +3,8 @@ import config from '@src/Config'
 const arc = `${config.publicAssets}/images/archetopics/`
 const lim = `${config.publicAssets}/images/liminal/`
 
+// todo: merge into single array and store topic group as object value
+
 export default {
     archetopics: [
         { name: 'Addiction', imagePath: `${arc}addiction.png`, spaceId: 90 },

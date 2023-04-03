@@ -3,7 +3,7 @@ import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
 import React, { useContext } from 'react'
 
-const AlertModal = (): JSX.Element => {
+function AlertModal(): JSX.Element {
     const { setAlertModalOpen, alertMessage, setLogInModalOpen } = useContext(AccountContext)
 
     function logIn() {

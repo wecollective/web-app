@@ -18,16 +18,16 @@ import styles from '@styles/components/cards/PostCard/PostTypes/GlassBeadGame.mo
 import { ClockIcon, DNAIcon, SuccessIcon } from '@svgs/all'
 import axios from 'axios'
 import React, { useContext, useState } from 'react'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
-const GlassBeadGame = (props: {
+function GlassBeadGame(props: {
     postData: any
     setPostData: (data: any) => void
     location: string
-}): JSX.Element => {
+}): JSX.Element {
     const { postData, setPostData, location } = props
-    const { id, text, GlassBeadGame: glassBeadGame, Event: event } = postData
+    const { id, text, GlassBeadGame2: glassBeadGame, Beads, Event: event } = postData
     const { accountData, setAlertMessage, setAlertModalOpen, loggedIn } = useContext(AccountContext)
     const [goingModalOpen, setGoingModalOpen] = useState(false)
     const [interestedModalOpen, setInterestedModalOpen] = useState(false)
@@ -35,9 +35,9 @@ const GlassBeadGame = (props: {
     const [interestedLoading, setInterestedLoading] = useState(false)
     const going = event && event.Going.map((u) => u.id).includes(accountData.id)
     const interested = event && event.Interested.map((u) => u.id).includes(accountData.id)
-    const beads = glassBeadGame.GlassBeads.sort((a, b) => a.index - b.index)
+    const beads = Beads.sort((a, b) => a.Link.index - b.Link.index)
     const cookies = new Cookies()
-    const history = useHistory()
+    const history = useNavigate()
 
     // todo: move into helpers as also used in Event post type
     function findEventTimes() {
@@ -232,7 +232,7 @@ const GlassBeadGame = (props: {
                     color='gbg-white'
                     size='medium'
                     disabled={location === 'preview'}
-                    onClick={() => history.push(`/p/${id}`)}
+                    onClick={() => history(`/p/${id}`)}
                 />
             </Row>
             <Row centerX>
@@ -243,9 +243,10 @@ const GlassBeadGame = (props: {
                                 <Row key={bead.id}>
                                     <StringBeadCard
                                         bead={{
-                                            type: 'string-audio',
-                                            Creator: bead.user,
-                                            url: bead.beadUrl,
+                                            id: bead.id,
+                                            type: 'gbg-audio',
+                                            Creator: bead.Creator,
+                                            url: bead.Audios[0].url,
                                             Link: { relationship: null },
                                         }}
                                         postId={id}

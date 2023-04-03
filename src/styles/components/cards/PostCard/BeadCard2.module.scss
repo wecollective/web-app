@@ -1,0 +1,181 @@
+@import '@styles/Variables';
+
+.wrapper {
+    padding: 10px;
+    width: 300px;
+    height: 300px;
+    flex-shrink: 0;
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 0 7px 0 rgba(10, 8, 72, 0.1);
+    position: relative;
+    // border: 1px solid $grey2;
+
+    &.gbgRoom {
+        width: 200px;
+        height: 200px;
+    }
+
+    .watermark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: inherit;
+        height: inherit;
+        background-color: white;
+        border: 2px solid white;
+        border-radius: inherit;
+        opacity: 0.1;
+        // z-index: 1;
+        pointer-events: none;
+    }
+
+    &.source {
+        border: 2px solid $blue5;
+    }
+
+    &.selected {
+        border: 2px solid black;
+    }
+
+    .header {
+        position: relative;
+        // z-index: 2;
+
+        svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .beadType {
+            opacity: 0.3;
+        }
+
+        .beadRelationship {
+            all: unset;
+            cursor: pointer;
+            > svg {
+                color: $blue5;
+            }
+        }
+
+        .menuButton {
+            all: unset;
+            cursor: pointer;
+            padding-left: 10px;
+            display: flex;
+            align-items: center;
+
+            &:hover {
+                > svg {
+                    color: $grey6;
+                }
+            }
+
+            > svg {
+                color: $grey4;
+                width: 10px;
+                height: 22px;
+                transition: color 0.3s;
+            }
+        }
+
+        .menu {
+            position: absolute;
+            top: 30px;
+            right: 0;
+            background-color: white;
+            box-shadow: 0 0 7px 0 rgba(black, 0.15);
+            border-radius: 10px;
+            padding: 12px;
+            z-index: 5;
+
+            button {
+                all: unset;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+
+                &:not(:last-child) {
+                    margin-bottom: 10px;
+                }
+
+                &:hover > svg {
+                    color: $grey6;
+                }
+
+                > svg {
+                    width: 20px;
+                    height: 20px;
+                    margin-right: 8px;
+                    color: $grey5;
+                    transition: color 0.3s;
+                }
+            }
+        }
+
+        .id {
+            // all: unset;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            line-height: 14px;
+        }
+    }
+
+    .content {
+        height: 100%;
+        margin-top: 10px;
+        overflow: hidden;
+        // z-index: 2;
+
+        .markdown {
+            img {
+                max-width: 100%;
+            }
+        }
+
+        .playButton {
+            all: unset;
+            cursor: pointer;
+            display: flex;
+            width: 18px;
+            height: 18px;
+            color: $blue5;
+            margin-right: 5px;
+            flex-shrink: 0;
+        }
+
+        .image {
+            all: unset;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+            border-radius: 5px;
+
+            img {
+                width: inherit;
+                height: inherit;
+                border-radius: 5px;
+                object-fit: cover;
+            }
+        }
+    }
+
+    .footer {
+        flex-shrink: 0;
+        margin-top: 7px;
+
+        > div > button {
+            font-size: 15px;
+            cursor: pointer;
+            color: $grey5;
+            // opacity: 0.25;
+            // &:hover {
+            //     opacity: 0.4;
+            // }
+            // transition: opacity 0.3s;
+        }
+    }
+}

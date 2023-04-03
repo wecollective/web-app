@@ -1,7 +1,7 @@
 import styles from '@styles/components/cards/SpaceCardPlaceholder.module.scss'
 import React from 'react'
 
-const SpaceCardPlaceholder = (): JSX.Element => {
+function SpaceCardPlaceholder(): JSX.Element {
     return (
         <div className={styles.PHHolon}>
             <div className='PHHolonShine' />

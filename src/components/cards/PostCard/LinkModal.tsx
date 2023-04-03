@@ -16,14 +16,14 @@ import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const LinkModal = (props: {
+function LinkModal(props: {
     type: 'post' | 'bead'
     location: string
     postId?: number // required for beads
     postData: any
     setPostData: (payload: any) => void
     close: () => void
-}): JSX.Element => {
+}): JSX.Element {
     const { type, location, postId, postData, setPostData, close } = props
     const { loggedIn, accountData, setLogInModalOpen, setAlertMessage, setAlertModalOpen } =
         useContext(AccountContext)
@@ -51,9 +51,11 @@ const LinkModal = (props: {
     const headerText = totalLinks ? `${totalLinks} link${pluralise(totalLinks)}` : 'No links yet...'
 
     function getLinks() {
+        // console.log('postData.id: ', postData.id)
         axios
             .get(`${config.apiURL}/post-links?postId=${postData.id}`)
             .then((res) => {
+                console.log('res: ', res)
                 setIncomingLinks(res.data.IncomingLinks)
                 setOutgoingLinks(res.data.OutgoingLinks)
                 setLoading(false)
@@ -103,11 +105,7 @@ const LinkModal = (props: {
                         ...links,
                         {
                             id: res.data.link.id,
-                            Creator: {
-                                id: accountData.id,
-                                handle: accountData.handle,
-                                name: accountData.name,
-                            },
+                            Creator: accountData,
                             PostB: res.data.itemB,
                         },
                     ])
@@ -119,7 +117,7 @@ const LinkModal = (props: {
                         post.accountLink = true
                     } else if (type === 'bead') {
                         // update bead state
-                        const bead = post.StringPosts.find((p) => p.id === postData.id)
+                        const bead = post.Beads.find((p) => p.id === postData.id)
                         bead.totalLinks += 1
                         bead.accountLink = true
                     }
@@ -131,7 +129,7 @@ const LinkModal = (props: {
                     }
                     // update linked bead if in state
                     newPosts.forEach((p) => {
-                        const linkedBead = p.StringPosts.find((b) => b.id === +linkTarget.value)
+                        const linkedBead = p.Beads.find((b) => b.id === +linkTarget.value)
                         if (linkedBead) {
                             linkedBead.totalLinks += 1
                             linkedBead.accountLink = true
@@ -195,7 +193,7 @@ const LinkModal = (props: {
                         )
                     } else if (type === 'bead') {
                         // update bead state
-                        const bead = post.StringPosts.find((p) => p.id === postData.id)
+                        const bead = post.Beads.find((p) => p.id === postData.id)
                         bead.totalLinks -= 1
                         bead.accountLink = false
                     }
@@ -207,7 +205,7 @@ const LinkModal = (props: {
                     }
                     // update linked beads if in state
                     newPosts.forEach((p) => {
-                        const linkedBead = p.StringPosts.find((b) => b.id === linkedPostId)
+                        const linkedBead = p.Beads.find((b) => b.id === linkedPostId)
                         if (linkedBead) {
                             linkedBead.totalLinks -= 1
                             linkedBead.accountLink = false

@@ -6,13 +6,13 @@ import styles from '@styles/components/CollapsibleCards.module.scss'
 import { ChevronDownIcon } from '@svgs/all'
 import React, { useState } from 'react'
 
-const Card = (props: {
+function Card(props: {
     data: any
     index: number
     row: number
     selectedCard: number | null
     toggleCard: (row: number, index: number | null) => void
-}): JSX.Element => {
+}): JSX.Element {
     const { data, index, row, selectedCard, toggleCard } = props
     const { text, link, imagePath, svg, smallIcon, children } = data
 
@@ -54,7 +54,7 @@ const Card = (props: {
     )
 }
 
-const CollapsibleCards = (props: { data: any; style?: any }): JSX.Element => {
+function CollapsibleCards(props: { data: any; style?: any }): JSX.Element {
     const { data, style } = props
 
     const [row1selectedCard, setRow1SelectedCard] = useState<null | number>(null)

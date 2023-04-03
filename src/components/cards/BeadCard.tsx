@@ -11,7 +11,7 @@ import { PauseIcon, PlayIcon, ShareIcon } from '@svgs/all'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useState } from 'react'
 
-const BeadCard = (props: {
+function BeadCard(props: {
     postId: number
     location: 'space-posts' | 'user-posts' | 'post-page' | 'space-post-map' | 'gbg' | 'preview'
     index: number
@@ -19,7 +19,7 @@ const BeadCard = (props: {
     highlight?: boolean
     style?: any
     className?: string
-}): JSX.Element => {
+}): JSX.Element {
     const { postId, location, index, bead, highlight, style, className } = props
     const { accountData } = useContext(AccountContext)
     const [firstRun, setFirstRun] = useState(true)

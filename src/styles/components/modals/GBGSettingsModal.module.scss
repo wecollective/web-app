@@ -1,0 +1,205 @@
+@import '@styles/Variables';
+
+.wrapper {
+    justify-content: space-between;
+
+    @include for-tablet-landscape-up {
+        min-width: 750px;
+    }
+
+    > h1 {
+        margin-bottom: 40px;
+    }
+
+    .rowWrapper {
+        margin-bottom: 30px;
+
+        > button {
+            z-index: 1;
+        }
+
+        .row {
+            height: 0;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.5s;
+
+            &.visible {
+                margin-top: 10px;
+                height: 40px;
+                opacity: 1;
+                pointer-events: all;
+            }
+        }
+    }
+
+    .multiplayer {
+        margin-bottom: 30px;
+        width: 140px;
+        transition: all 0.5s;
+
+        &.expanded {
+            width: 350px;
+        }
+    }
+
+    .allowedBeadTypes {
+        margin-top: 10px;
+
+        > label {
+            &:not(:last-child) {
+                margin-right: 10px;
+            }
+        }
+    }
+
+    .position {
+        all: unset;
+        width: 35px;
+        height: 35px;
+        background-color: $white;
+        border-radius: 50%;
+        margin-right: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        &.clickable {
+            cursor: pointer;
+        }
+    }
+
+    .positionControls {
+        height: 35px;
+        margin-right: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        > button {
+            all: unset;
+            cursor: pointer;
+            display: flex;
+            color: $grey4;
+            &:hover {
+                color: $grey5;
+            }
+            &:disabled {
+                color: $grey3;
+                cursor: unset;
+            }
+            > svg {
+                width: 16px;
+                height: 16px;
+            }
+        }
+    }
+
+    .colorButtons {
+        margin: 20px 0 10px 0;
+
+        > button {
+            all: unset;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            border: 1px solid $black3;
+            &:not(:last-child) {
+                margin-right: 10px;
+            }
+
+            &.selected {
+                border: 3px solid $black3;
+            }
+        }
+    }
+
+    .dateTimePicker {
+        position: relative;
+
+        > div {
+            position: relative;
+            width: 220px;
+
+            input {
+                cursor: pointer;
+            }
+        }
+
+        > p {
+            margin: 0 10px;
+        }
+
+        > button {
+            margin-left: 5px;
+        }
+    }
+
+    .sections {
+        display: flex;
+        flex-direction: column;
+
+        @media (min-width: 1200px) {
+            flex-direction: row;
+        }
+
+        .section {
+            width: 450px;
+        }
+
+        .divider {
+            width: 1px;
+            display: none;
+            align-self: stretch;
+            margin: 40px 10px;
+            background-color: $grey3;
+
+            @media (min-width: 1200px) {
+                display: flex;
+            }
+        }
+    }
+
+    .sectionHeader {
+        border-bottom: 1px solid $grey3;
+        margin-bottom: 20px;
+
+        p {
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        button {
+            all: unset;
+            cursor: pointer;
+            margin-left: 8px;
+
+            @media (min-width: 1200px) {
+                display: none;
+            }
+
+            svg {
+                width: 16px;
+                height: 16px;
+                color: $grey4;
+            }
+        }
+    }
+
+    .searchWrapper {
+        margin-bottom: 30px;
+        width: 250px;
+
+        > svg {
+            width: 20px;
+            height: 20px;
+            color: $grey3;
+            margin-left: 10px;
+        }
+    }
+
+    .error {
+        color: $red;
+        margin-top: 10px;
+    }
+}

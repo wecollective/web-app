@@ -11,13 +11,13 @@ import styles from '@styles/components/cards/Comments/CommentCard.module.scss'
 import React, { useContext, useState } from 'react'
 import { Link } from 'react-router-dom'
 
-const CommentCard = (props: {
+function CommentCard(props: {
     comment: any
     highlighted: boolean
     toggleReplyInput: () => void
     removeComment: (comment: any) => void
     editComment: (comment: any, newText: string) => void
-}): JSX.Element => {
+}): JSX.Element {
     const { comment, highlighted, toggleReplyInput, removeComment, editComment } = props
     const { text, state, createdAt, updatedAt, Creator } = comment
     const { loggedIn, accountData } = useContext(AccountContext)

@@ -14,11 +14,11 @@ import Settings from '@src/pages/UserPage/Settings'
 import styles from '@styles/pages/UserPage/UserPage.module.scss'
 import { AboutIcon, BellIcon, PostIcon, SettingsIcon } from '@svgs/all'
 import React, { useContext, useEffect, useState } from 'react'
-import { Redirect, Route, Switch, useLocation } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 
 // todo: load UserNotFound component here instead of in each subpage?
 
-const UserPage = (): JSX.Element => {
+function UserPage(): JSX.Element {
     const { accountDataLoading, setPageBottomReached, loggedIn } = useContext(AccountContext)
     const { userData, getUserData, resetUserData, isOwnAccount, setSelectedUserSubPage } =
         useContext(UserContext)
@@ -108,13 +108,13 @@ const UserPage = (): JSX.Element => {
                 </Row>
             </Column>
             <Column centerX className={styles.content}>
-                <Switch>
-                    <Redirect from='/u/:userHandle/' to='/u/:userHandle/about' exact />
-                    <Route path='/u/:userHandle/about' component={About} exact />
-                    <Route path='/u/:userHandle/posts' component={Posts} exact />
-                    <Route path='/u/:userHandle/notifications' component={Notifications} exact />
-                    <Route path='/u/:userHandle/settings' component={Settings} exact />
-                </Switch>
+                <Routes>
+                    <Route path='/' element={<Navigate to='/about' replace />} />
+                    <Route path='about' element={<About />} />
+                    <Route path='posts' element={<Posts />} />
+                    <Route path='notifications' element={<Notifications />} />
+                    <Route path='settings' element={<Settings />} />
+                </Routes>
             </Column>
         </Column>
     )

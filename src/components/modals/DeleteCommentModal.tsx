@@ -8,11 +8,11 @@ import axios from 'axios'
 import React, { useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const DeleteCommentModal = (props: {
+function DeleteCommentModal(props: {
     comment: any
     removeComment: (comment: any) => void
     close: () => void
-}): JSX.Element => {
+}): JSX.Element {
     const { comment, removeComment, close } = props
     const [loading, setLoading] = useState(false)
     const [success, setSuccess] = useState(false)

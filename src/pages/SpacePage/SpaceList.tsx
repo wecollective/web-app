@@ -8,12 +8,12 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import styles from '@styles/components/PostList.module.scss'
 import React, { useContext, useEffect } from 'react'
 
-const SpaceList = (props: {
+function SpaceList(props: {
     location: 'space-spaces'
     spaces: any[]
     firstSpacesloading: boolean
     nextSpacesLoading: boolean
-}): JSX.Element => {
+}): JSX.Element {
     const { location, spaces, firstSpacesloading, nextSpacesLoading } = props
     const { resetSpaceListData } = useContext(SpaceContext)
 

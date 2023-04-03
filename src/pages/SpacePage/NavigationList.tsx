@@ -12,13 +12,13 @@ import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
-const Space = (props: {
+function Space(props: {
     space: any
     type: 'parent' | 'child'
     selectedSubPage: string
     expand: (space: any, type: 'parent' | 'child') => void
     onLocationChange: (() => void) | undefined
-}): JSX.Element => {
+}): JSX.Element {
     // recursive component used to render space trees in the NavigationList component below
     const { space, type, selectedSubPage, expand, onLocationChange } = props
     const {
@@ -79,7 +79,7 @@ const Space = (props: {
     )
 }
 
-const NavigationList = (props: { onLocationChange?: () => void; style?: any }): JSX.Element => {
+function NavigationList(props: { onLocationChange?: () => void; style?: any }): JSX.Element {
     const { onLocationChange, style } = props
     const { spaceData, selectedSpaceSubPage } = useContext(SpaceContext)
     const [parentSpaces, setParentSpaces] = useState<any[]>([])

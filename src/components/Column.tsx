@@ -1,7 +1,7 @@
 import styles from '@styles/components/Column.module.scss'
 import React from 'react'
 
-const Column = (props: {
+function Column(props: {
     children?: any
     style?: any
     className?: any
@@ -11,7 +11,7 @@ const Column = (props: {
     centerY?: boolean
     spaceBetween?: boolean
     scroll?: boolean
-}): JSX.Element => {
+}): JSX.Element {
     const { children, style, className, id, title, centerX, centerY, spaceBetween, scroll } = props
 
     const classes = [styles.wrapper]

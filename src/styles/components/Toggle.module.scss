@@ -7,12 +7,20 @@
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
+    flex-shrink: 0;
+
+    .leftText {
+        margin-right: 10px;
+    }
+
+    .rightText {
+        margin-left: 10px;
+    }
 
     .toggle {
         width: 45px;
         height: 26px;
         border-radius: 13px;
-        margin: 0 10px;
         padding: 3px;
         background-color: $grey4;
         position: relative;
@@ -30,8 +38,24 @@
             position: absolute;
             left: calc(100% - 23px);
             transition: left 0.5s;
-            &.toggleLeft {
+        }
+
+        p {
+            position: absolute;
+            top: 9px;
+            left: calc(0% + 6px);
+            font-size: 8px;
+            line-height: 8px;
+            color: white;
+        }
+
+        &.left {
+            .toggleButton {
                 left: calc(0% + 3px);
+            }
+
+            p {
+                left: calc(100% - 20px);
             }
         }
     }

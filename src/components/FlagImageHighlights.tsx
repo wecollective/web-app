@@ -2,7 +2,7 @@ import FlagImage from '@components/FlagImage'
 import styles from '@styles/components/FlagImageHighlights.module.scss'
 import React from 'react'
 
-const FlagImageHighlights = (props: {
+function FlagImageHighlights(props: {
     type: 'user' | 'space' | 'post'
     imagePaths: string[]
     imageSize?: number
@@ -11,7 +11,7 @@ const FlagImageHighlights = (props: {
     outline?: boolean
     shadow?: boolean
     onClick?: () => void
-}): JSX.Element => {
+}): JSX.Element {
     const { type, imagePaths, imageSize, text, style, outline, shadow, onClick } = props
     return (
         <button

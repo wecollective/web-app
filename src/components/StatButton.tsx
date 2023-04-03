@@ -2,7 +2,7 @@ import LoadingWheel from '@components/LoadingWheel'
 import styles from '@styles/components/StatButton.module.scss'
 import React from 'react'
 
-const StatButton = (props: {
+function StatButton(props: {
     icon: any
     text?: string
     title?: string
@@ -14,7 +14,7 @@ const StatButton = (props: {
     onClick?: () => void
     onClickIcon?: () => void
     onClickStat?: () => void
-}): JSX.Element => {
+}): JSX.Element {
     const {
         icon,
         text,

@@ -4,11 +4,11 @@ import styles from '@styles/components/ProgressBarSteps.module.scss'
 import { CheckIcon } from '@svgs/all'
 import React from 'react'
 
-const ProgressBarSteps = (props: {
+function ProgressBarSteps(props: {
     steps: string[]
     currentStep: number
     style?: any
-}): JSX.Element => {
+}): JSX.Element {
     const { steps, currentStep, style } = props
 
     return (

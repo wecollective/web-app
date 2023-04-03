@@ -5,14 +5,14 @@ import styles from '@styles/components/cards/BeadCardUrlPreview.module.scss'
 import { LinkIcon } from '@svgs/all'
 import React from 'react'
 
-const BeadCardUrlPreview = (props: {
+function BeadCardUrlPreview(props: {
     url: string
     image: string | null
     domain: string | null
     title: string | null
     description: string | null
     style?: any
-}): JSX.Element => {
+}): JSX.Element {
     const { url, image, domain, title, description, style } = props
 
     const availableMetaData = image || domain || title || description

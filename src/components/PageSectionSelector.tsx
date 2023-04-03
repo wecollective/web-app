@@ -3,7 +3,7 @@ import styles from '@styles/components/PageSectionSelector.module.scss'
 import React, { useContext, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
-const PageSectionSelector = (props: { url: string; pathname: string }): JSX.Element => {
+function PageSectionSelector(props: { url: string; pathname: string }): JSX.Element {
     const { url, pathname } = props
     const { selectedSubPage, setSelectedSubPage } = useContext(PostContext)
 

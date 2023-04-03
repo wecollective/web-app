@@ -9,7 +9,7 @@ import { UserContext } from '@contexts/UserContext'
 import styles from '@styles/components/PostList.module.scss'
 import React, { useContext, useEffect } from 'react'
 
-const PostList = (props: {
+function PostList(props: {
     location: 'space-posts' | 'user-posts'
     posts: any[]
     firstPostsloading: boolean
@@ -17,7 +17,7 @@ const PostList = (props: {
     className?: string
     styling?: boolean
     style?: any
-}): JSX.Element => {
+}): JSX.Element {
     const { location, posts, firstPostsloading, nextPostsLoading, className, styling, style } =
         props
     const { resetSpacePosts } = useContext(SpaceContext)

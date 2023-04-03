@@ -5,7 +5,7 @@ import rehypeRaw from 'rehype-raw'
 import gfm from 'remark-gfm'
 import { v4 as uuidv4 } from 'uuid'
 
-const Markdown = (props: { text: string; style?: any; className?: any }): JSX.Element => {
+function Markdown(props: { text: string; style?: any; className?: any }): JSX.Element {
     const { text, style, className } = props
     const id = uuidv4()
     useEffect(() => {

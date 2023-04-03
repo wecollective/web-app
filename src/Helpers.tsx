@@ -1,9 +1,21 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable no-control-regex */
 import config from '@src/Config'
+import {
+    AudioIcon,
+    CalendarIcon,
+    CastaliaIcon,
+    ImageIcon,
+    LinkIcon,
+    PollIcon,
+    TextIcon,
+} from '@svgs/all'
 import { convertFromRaw, EditorState } from 'draft-js'
+import React from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
 // constants
+export const megaByte = 1048576
 export const imageMBLimit = 10
 export const audioMBLimit = 25
 export const totalMBUploadLimit = 50
@@ -43,11 +55,11 @@ export const defaultPostData = {
     id: uuidv4(),
     type: 'text',
     text: '',
-    url: '',
-    urlImage: null,
-    urlDomain: null,
-    urlTitle: null,
-    urlDescription: null,
+    // url: '',
+    // urlImage: null,
+    // urlDomain: null,
+    // urlTitle: null,
+    // urlDescription: null,
     totalLikes: 0,
     totalComments: 0,
     totalReposts: 0,
@@ -64,27 +76,31 @@ export const defaultPostData = {
     Reactions: [] as any[],
     IncomingLinks: [] as any[],
     OutgoingLinks: [] as any[],
-    PostImages: [] as any[],
+    // Link: [] as any[],
+    Images: [] as any[],
+    Audios: [] as any[],
     Event: null as any,
     Inquiry: null as any,
-    GlassBeadGame: null as any,
-    StringPosts: [] as any[],
-    Weave: null as any,
-    StringPlayers: [] as any[],
+    GlassBeadGame2: null as any,
+    Beads: [] as any[],
+    // Weave: null as any,
+    Players: [] as any[],
 }
 
-export const defaultBeadData = {
-    id: uuidv4(),
-    type: 'text',
-    color: '#fff',
-    text: '',
-    url: '',
-    urlData: null,
-    audioFile: null,
-    audioBlob: null,
-    audioType: '',
-    images: [],
-}
+// export const defaultBeadData = {
+//     id: uuidv4(),
+//     type: 'text',
+//     color: '#fff',
+//     // text: '',
+//     // // url: '',
+//     // // urlData: null,
+//     // // audioFile: null,
+//     // // audioBlob: null,
+//     // // audioType: '',
+//     // urlData: null,
+//     // image: null,
+//     // audio: null,
+// }
 
 export const defaultSpaceData = {
     id: uuidv4(),
@@ -101,6 +117,33 @@ export const defaultSpaceData = {
     totalRatings: 0,
     totalPosts: 0,
     totalChildren: 0,
+}
+
+export const defaultGBGSettings = {
+    synchronous: true,
+    startTime: '',
+    endTime: '',
+    multiplayer: false,
+    players: [],
+    allowedBeadTypes: ['audio'],
+    totalMoves: 0,
+    movesPerPlayer: 5,
+    moveDuration: 60,
+    introDuration: 0,
+    intervalDuration: 0,
+    outroDuration: 0,
+    characterLimit: 0,
+    moveTimeWindow: 0,
+}
+
+export const postTypeIcons = {
+    text: <TextIcon />,
+    url: <LinkIcon />,
+    image: <ImageIcon />,
+    audio: <AudioIcon />,
+    event: <CalendarIcon />,
+    poll: <PollIcon />,
+    'glass-bead-game': <CastaliaIcon />,
 }
 
 // functions
@@ -257,7 +300,7 @@ export function formatTimeMDYT(isoDate: Date): string {
     const year = date.getFullYear()
     const hours = date.getHours()
     const mins = date.getMinutes()
-    return `${month} ${day}, ${year} at ${hours}:${mins < 10 ? `0${mins}` : mins}`
+    return `${month} ${day}, ${year} @ ${hours}:${mins < 10 ? `0${mins}` : mins}`
 }
 
 export function formatTimeHM(isoDate: Date): string {
@@ -405,4 +448,59 @@ export function scrollToElement(element: HTMLElement): void {
     const yOffset = window.screen.height / 2.3
     const top = element.getBoundingClientRect().top + window.pageYOffset - yOffset
     window.scrollTo({ top, behavior: 'smooth' })
+}
+
+export function findEventTimes(start, end?) {
+    const startDate = new Date(start)
+    const endDate = new Date(end)
+    const sameDay =
+        end &&
+        startDate.getFullYear() === endDate.getFullYear() &&
+        startDate.getMonth() === endDate.getMonth() &&
+        startDate.getDate() === endDate.getDate()
+    const sameMinute =
+        sameDay &&
+        startDate.getHours() === endDate.getHours() &&
+        startDate.getMinutes() === endDate.getMinutes()
+    // no end or ends the same minute: June 29, 2022 at 22:00
+    // ends on same day: June 29, 2022 at 22:00 → 23:00
+    // ends on different day: June 29, 2022 at 22:00 → June 30, 2022 at 22:00
+    return `${formatTimeMDYT(start)} ${
+        end && !sameMinute ? `→ ${sameDay ? formatTimeHM(end) : formatTimeMDYT(end)}` : ''
+    }`
+}
+
+export function findEventDuration(start, end?) {
+    const startDate = new Date(start)
+    const endDate = new Date(end)
+    const sameMinute =
+        startDate.getFullYear() === endDate.getFullYear() &&
+        startDate.getMonth() === endDate.getMonth() &&
+        startDate.getDate() === endDate.getDate() &&
+        startDate.getHours() === endDate.getHours() &&
+        startDate.getMinutes() === endDate.getMinutes()
+    const difference = (endDate.getTime() - startDate.getTime()) / 1000
+    if (end && !sameMinute)
+        // rounded up to nearest minute
+        return `(${formatTimeDHM(Math.ceil(difference / 60) * 60)})`
+    return null
+}
+
+export function trimNumber(number, maxValue) {
+    // if invalid number: return 0
+    // if greater than max value: return max value
+    return number ? (number > maxValue ? maxValue : number) : 0
+}
+
+export function findDHMFromMinutes(minutes) {
+    // return { days, hours, minutes } object from minutes
+    const days = Math.floor(minutes / 60 / 24)
+    const hours = Math.floor(minutes / 60) - days * 24
+    const mins = minutes - days * 24 * 60 - hours * 60
+    return { days, hours, minutes: mins }
+}
+
+export function findMinutesFromDHM(values) {
+    // find minutes from { days, hours, minutes } object
+    return values.days * 24 * 60 + values.hours * 60 + values.minutes
 }

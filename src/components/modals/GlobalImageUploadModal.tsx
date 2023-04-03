@@ -12,7 +12,7 @@ import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const ImageUploadModal = (): JSX.Element => {
+function ImageUploadModal(): JSX.Element {
     const { setImageUploadModalOpen, imageUploadType, accountData, setAccountData } =
         useContext(AccountContext)
     const { spaceData, setSpaceData } = useContext(SpaceContext)

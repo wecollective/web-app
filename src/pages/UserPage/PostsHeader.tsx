@@ -2,19 +2,19 @@ import DropDown from '@components/DropDown'
 import { getParamString } from '@src/Helpers'
 import styles from '@styles/pages/SpacePage/Header.module.scss'
 import React, { useEffect, useState } from 'react'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 // import Toggle from '@components/Toggle'
 import Button from '@components/Button'
 import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
 import { SlidersIcon } from '@svgs/all'
 
-const PostsHeader = (props: { params: any }): JSX.Element => {
+function PostsHeader(props: { params: any }): JSX.Element {
     const { params } = props
     const [filtersModalOpen, setFiltersModalOpen] = useState(false)
     const [filterParams, setFilterParams] = useState(params)
     const location = useLocation()
-    const history = useHistory()
+    const history = useNavigate()
     const mobileView = document.documentElement.clientWidth < 900
 
     useEffect(() => setFilterParams(params), [params])
@@ -40,11 +40,11 @@ const PostsHeader = (props: { params: any }): JSX.Element => {
                             'Url',
                             'Audio',
                             'Event',
-                            'Inquiry',
+                            'Poll',
                             'Glass Bead Game',
-                            'String',
-                            'Weave',
-                            'Prism',
+                            // 'String',
+                            // 'Weave',
+                            // 'Prism',
                         ]}
                         selectedOption={filterParams.type}
                         setSelectedOption={(value) =>
@@ -90,7 +90,7 @@ const PostsHeader = (props: { params: any }): JSX.Element => {
                         text='Apply filters'
                         color='blue'
                         onClick={() => {
-                            history.push({
+                            history({
                                 pathname: location.pathname,
                                 search: getParamString(filterParams),
                             })

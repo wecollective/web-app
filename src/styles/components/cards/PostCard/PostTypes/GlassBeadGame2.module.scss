@@ -1,0 +1,128 @@
+@import '@styles/Variables';
+
+.wrapper {
+    margin-bottom: 10px;
+    .infoRow {
+        margin-bottom: 10px;
+        color: $grey5;
+
+        > div > svg {
+            width: 25px;
+            height: 25px;
+            margin-right: 5px;
+        }
+    }
+
+    .nextBeadCard {
+        all: unset;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 300px;
+        height: 300px;
+        flex-shrink: 0;
+        border-radius: 15px;
+        margin-right: 15px;
+        background-color: white;
+        box-shadow: 0 0 7px 0 rgba(10, 8, 72, 0.1);
+        transition: all 0.3s;
+
+        &:hover {
+            background-color: rgb(245, 251, 255);
+        }
+
+        > svg {
+            width: 40px;
+            height: 40px;
+            color: $grey6;
+            margin-bottom: 10px;
+        }
+
+        > p {
+            color: $grey6;
+            width: 150px;
+            text-align: center;
+        }
+    }
+
+    .waitingForPlayerCard {
+        width: 300px;
+        height: 300px;
+        flex-shrink: 0;
+        border-radius: 15px;
+        margin-right: 15px;
+        background-color: white;
+        box-shadow: 0 0 7px 0 rgba(10, 8, 72, 0.1);
+    }
+
+    .pendingBead {
+        width: 270px;
+        height: 270px;
+        flex-shrink: 0;
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 0 7px 0 rgba(10, 8, 72, 0.1);
+
+        > p {
+            color: $grey6;
+            margin-bottom: 10px;
+        }
+    }
+
+    .beads {
+        margin-top: 5px;
+        // margin-bottom:
+        padding: 15px;
+        background-color: $grey1;
+        border-radius: 20px;
+
+        .nextBeadButton {
+            all: unset;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 300px;
+            height: 300px;
+            flex-shrink: 0;
+            border-radius: 15px;
+            background-color: white;
+            box-shadow: 0 0 7px 0 rgba(10, 8, 72, 0.1);
+            transition: all 0.3s;
+
+            &:hover {
+                background-color: rgb(245, 251, 255);
+            }
+
+            > svg {
+                width: 40px;
+                height: 40px;
+                color: $grey6;
+                margin-bottom: 10px;
+            }
+
+            > p {
+                color: $grey6;
+                width: 150px;
+                text-align: center;
+            }
+        }
+    }
+
+    .beadDivider {
+        width: 35px;
+        opacity: 1;
+        animation-name: fadeInOpacity;
+        animation-timing-function: ease-in;
+        animation-duration: 2s;
+
+        > svg {
+            transform: rotate(90deg);
+            height: 35px;
+            color: $bluegrey2;
+        }
+    }
+}

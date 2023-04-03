@@ -1,7 +1,7 @@
 import styles from '@styles/components/Row.module.scss'
 import React from 'react'
 
-const Row = (props: {
+function Row(props: {
     children?: any
     style?: any
     className?: any
@@ -12,7 +12,7 @@ const Row = (props: {
     spaceBetween?: boolean
     wrap?: boolean
     scroll?: boolean
-}): JSX.Element => {
+}): JSX.Element {
     const { children, style, className, id, title, centerX, centerY, spaceBetween, wrap, scroll } =
         props
 

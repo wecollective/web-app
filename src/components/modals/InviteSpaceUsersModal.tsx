@@ -14,7 +14,7 @@ import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const InviteSpaceUsersModal = (props: { close: () => void }): JSX.Element => {
+function InviteSpaceUsersModal(props: { close: () => void }): JSX.Element {
     const { close } = props
     const { accountData, setAlertMessage, setAlertModalOpen } = useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)

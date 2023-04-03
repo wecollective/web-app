@@ -1,13 +1,13 @@
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
 import React, { useRef } from 'react'
 
-const Scrollbars = (props: {
+function Scrollbars(props: {
     id?: string
     className?: string
     autoScrollToBottom?: boolean
     style?: any
     children?: any
-}): JSX.Element => {
+}): JSX.Element {
     const { id, className, autoScrollToBottom, style, children } = props
     const ref = useRef<any>(null)
 

@@ -10,11 +10,11 @@ import axios from 'axios'
 import React, { useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const EditCommentModal = (props: {
+function EditCommentModal(props: {
     comment: any
     editComment: (comment: any, newText: string) => void
     close: () => void
-}): JSX.Element => {
+}): JSX.Element {
     const { comment, editComment, close } = props
     const [newText, setNewText] = useState({
         ...defaultErrorState,
@@ -69,7 +69,7 @@ const EditCommentModal = (props: {
                 <Column centerX style={{ width: '100%', maxWidth: 700 }}>
                     <h1>Edit comment</h1>
                     <DraftTextEditor
-                        type='post'
+                        type='other'
                         stringifiedDraft={newText.value}
                         maxChars={5000}
                         onChange={onChange}

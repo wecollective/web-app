@@ -33,9 +33,9 @@ import {
 } from '@svgs/all'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useState } from 'react'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
-const StringBeadCard = (props: {
+function StringBeadCard(props: {
     bead: any
     postId?: number
     postType?: string
@@ -45,7 +45,7 @@ const StringBeadCard = (props: {
     toggleBeadComments?: () => void
     removeBead?: (beadIndex: number) => void
     style?: any
-}): JSX.Element => {
+}): JSX.Element {
     const {
         bead: sourceBeadData,
         postId,
@@ -67,9 +67,9 @@ const StringBeadCard = (props: {
     const [likeModalOpen, setLikeModalOpen] = useState(false)
     const [linkModalOpen, setLinkModalOpen] = useState(false)
     const [selectedImage, setSelectedImage] = useState<any>(null)
-    const history = useHistory()
-    const images = bead.PostImages ? bead.PostImages.sort((a, b) => a.index - b.index) : []
-    const type = bead.type.replace('string-', '')
+    const history = useNavigate()
+    const images = bead.Images ? bead.Images.sort((a, b) => a.index - b.index) : []
+    const type = bead.type.replace('gbg-', '')
     const isSource = bead.Link && bead.Link.relationship === 'source'
     const isOwnPost = accountData && bead.Creator && accountData.id === bead.Creator.id
     const showDropDown =
@@ -80,7 +80,7 @@ const StringBeadCard = (props: {
 
     const showFooter =
         bead.state !== 'account-deleted' &&
-        postType !== 'glass-bead-game' &&
+        // postType !== 'glass-bead-game' &&
         !['create-string-modal', 'next-bead-modal'].includes(location)
 
     function findUserTitle() {
@@ -160,7 +160,7 @@ const StringBeadCard = (props: {
                         onClick={() =>
                             !['create-string-modal', 'next-bead-modal', 'preview'].includes(
                                 location
-                            ) && history.push(`/p/${bead.id}`)
+                            ) && history(`/p/${bead.id}`)
                         }
                     >
                         <SourceIcon />

@@ -9,7 +9,7 @@ import styles from '@styles/pages/SpacePage/People.module.scss'
 import React, { useContext, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
-const People = (): JSX.Element => {
+function People(): JSX.Element {
     const { pageBottomReached } = useContext(AccountContext)
     const {
         spaceData,

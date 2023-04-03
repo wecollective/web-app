@@ -15,19 +15,13 @@ import { DNAIcon, PlusIcon, UsersIcon } from '@svgs/all'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 
 // todo: clean up logic when GBG refactored
-const Weave = (props: {
+function Weave(props: {
     postData: any
     setPostData: (data: any) => void
     location: string
-}): JSX.Element => {
+}): JSX.Element {
     const { postData, setPostData, location } = props
-    const {
-        id,
-        text,
-        Weave: weave,
-        StringPosts: stringPosts,
-        StringPlayers: stringPlayers,
-    } = postData
+    const { id, text, Weave: weave, Beads: stringPosts, Players: stringPlayers } = postData
     const { accountData, setAlertMessage, setAlertModalOpen, loggedIn } = useContext(AccountContext)
     const [nextBeadModalOpen, setNextBeadModalOpen] = useState(false)
     const [timeLeftInMove, setTimeLeftInMove] = useState(0)
@@ -259,7 +253,7 @@ const Weave = (props: {
                     totalComments={selectedBead.totalComments}
                     incrementTotalComments={(value) => {
                         const newPostData = { ...postData }
-                        const bead = newPostData.StringPosts.find((b) => b.id === selectedBead.id)
+                        const bead = newPostData.Beads.find((b) => b.id === selectedBead.id)
                         bead.totalComments += value
                         bead.accountComment = value > 0
                         setPostData(newPostData)

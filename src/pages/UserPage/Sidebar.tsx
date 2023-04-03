@@ -7,7 +7,7 @@ import { UserContext } from '@contexts/UserContext'
 import styles from '@styles/pages/UserPage/Sidebar.module.scss'
 import React, { useContext, useState } from 'react'
 
-const Sidebar = (): JSX.Element => {
+function Sidebar(): JSX.Element {
     const { userData, setUserData, isOwnAccount } = useContext(UserContext)
     const { id, handle, name, bio, flagImagePath } = userData
     const [imageUploadModalOpen, setImageUploadModalOpen] = useState(false)

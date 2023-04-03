@@ -2,7 +2,7 @@ import LoadingWheel from '@components/LoadingWheel'
 import styles from '@styles/components/Button.module.scss'
 import React from 'react'
 
-const Button = (props: {
+function Button(props: {
     text?: string
     icon?: JSX.Element
     color: 'blue' | 'aqua' | 'red' | 'purple' | 'grey' | 'light-green' | 'gbg-black' | 'gbg-white'
@@ -12,7 +12,7 @@ const Button = (props: {
     loading?: boolean
     submit?: boolean
     onClick?: () => void
-}): JSX.Element => {
+}): JSX.Element {
     const { text, icon, color, size, style, disabled, loading, submit, onClick } = props
 
     return (

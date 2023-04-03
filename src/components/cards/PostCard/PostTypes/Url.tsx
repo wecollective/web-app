@@ -4,9 +4,16 @@ import DraftText from '@components/draft-js/DraftText'
 import ShowMoreLess from '@components/ShowMoreLess'
 import React from 'react'
 
-const Url = (props: { postData: any }): JSX.Element => {
+function Url(props: { postData: any }): JSX.Element {
     const { postData } = props
     const { text, url, urlDescription, urlDomain, urlImage, urlTitle } = postData
+    const urlData = {
+        url,
+        image: urlImage,
+        title: urlTitle,
+        description: urlDescription,
+        domain: urlDomain,
+    }
     return (
         <Column>
             {text && (
@@ -16,13 +23,7 @@ const Url = (props: { postData: any }): JSX.Element => {
                     </ShowMoreLess>
                 </Column>
             )}
-            <UrlPreview
-                url={url}
-                image={urlImage}
-                domain={urlDomain}
-                title={urlTitle}
-                description={urlDescription}
-            />
+            <UrlPreview type='post' urlData={urlData} />
         </Column>
     )
 }

@@ -3,7 +3,7 @@ import styles from '@styles/components/PageTabs.module.scss'
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
-const Tab = (props: { baseRoute: string; tab: any }): JSX.Element => {
+function Tab(props: { baseRoute: string; tab: any }): JSX.Element {
     const { baseRoute, tab } = props
     const location = useLocation()
     const subpage = location.pathname.split('/')[3]
@@ -21,7 +21,7 @@ const Tab = (props: { baseRoute: string; tab: any }): JSX.Element => {
     )
 }
 
-const PageTabs = (props: { tabs: any }): JSX.Element => {
+function PageTabs(props: { tabs: any }): JSX.Element {
     const { tabs } = props
     return (
         <Row className={styles.wrapper}>

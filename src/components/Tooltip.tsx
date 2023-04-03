@@ -2,13 +2,13 @@ import Column from '@components/Column'
 import styles from '@styles/components/Tooltip.module.scss'
 import React from 'react'
 
-const Tooltip = (props: {
+function Tooltip(props: {
     children: any
     top: number
     left?: number
     width?: number
     centered?: boolean
-}): JSX.Element => {
+}): JSX.Element {
     const { children, top, left, width, centered } = props
     const centeredLeft = width ? `${-width / 2 + 22.5}px` : 0
     return (

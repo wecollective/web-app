@@ -3,7 +3,7 @@ import styles from '@styles/components/ImageTitle.module.scss'
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-const ImageTitle = (props: {
+function ImageTitle(props: {
     type: 'space' | 'user'
     imagePath: string
     imageSize?: number
@@ -12,10 +12,10 @@ const ImageTitle = (props: {
     style?: any
     className?: any
     shadow?: boolean
-    link?: string
+    link?: string | null
     wrapText?: boolean
     onClick?: () => void
-}): JSX.Element => {
+}): JSX.Element {
     const {
         type,
         imagePath,

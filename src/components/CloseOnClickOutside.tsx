@@ -3,11 +3,11 @@ import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
 import React, { useEffect, useRef, useState } from 'react'
 
-const CloseOnClickOutside = (props: {
+function CloseOnClickOutside(props: {
     onClick: () => void
     confirmClose?: boolean
     children: JSX.Element
-}): JSX.Element => {
+}): JSX.Element {
     const { onClick, confirmClose, children } = props
     const ref = useRef<HTMLDivElement>(null)
     const [confirmationModalOpen, setConfirmationModalOpen] = useState(false)

@@ -14,16 +14,16 @@ import styles from '@styles/components/GlobalSearchBar.module.scss'
 import { SearchIcon } from '@svgs/all'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
 // todo: simply and clarify logic where possible, put some of it into functions
 // todo: include search query if in params
-const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }): JSX.Element => {
+function GlobalSearchBar(props: { onLocationChange?: () => void; style?: any }): JSX.Element {
     const { onLocationChange, style } = props
     const { spaceData } = useContext(SpaceContext)
     const { userData } = useContext(UserContext)
-    const history = useHistory()
+    const history = useNavigate()
     const location = useLocation()
     const pageType = location.pathname.split('/')[1]
     const handle = location.pathname.split('/')[2]
@@ -83,7 +83,7 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
         setSuggestions([])
         if (searchType === 'Spaces')
             params.depth = searchQuery ? 'All Contained Spaces' : 'Only Direct Descendents'
-        history.push({
+        history({
             pathname: `/${searchConstraint ? pageType : 's'}/${
                 searchConstraint ? handle : 'all'
             }/${searchType.toLowerCase()}`,
@@ -162,7 +162,7 @@ const GlobalSearchBar = (props: { onLocationChange?: () => void; style?: any }):
                             type='button'
                             key={option.id}
                             onClick={() => {
-                                history.push(
+                                history(
                                     `/${searchType === 'Spaces' ? 's' : 'u'}/${option.handle}/${
                                         searchType === 'People' ? 'posts' : subpage || ''
                                     }`

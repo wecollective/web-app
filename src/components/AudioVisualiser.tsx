@@ -2,7 +2,7 @@ import Column from '@components/Column'
 import * as d3 from 'd3'
 import React, { useEffect, useRef } from 'react'
 
-const AudioVisualiser = (props: {
+function AudioVisualiser(props: {
     audioElementId: string
     audioURL: string
     staticBars: number
@@ -10,7 +10,7 @@ const AudioVisualiser = (props: {
     dynamicBars: number
     dynamicColor: string
     style?: any
-}): JSX.Element => {
+}): JSX.Element {
     const { audioElementId, audioURL, staticBars, staticColor, dynamicBars, dynamicColor, style } =
         props
 

@@ -12,7 +12,7 @@ import styles from '@styles/pages/SpacePage/Posts.module.scss'
 import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
-const Posts = (): JSX.Element => {
+function Posts(): JSX.Element {
     const { pageBottomReached, loggedIn } = useContext(AccountContext)
     const {
         spaceData,

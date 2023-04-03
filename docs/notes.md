@@ -17,3 +17,11 @@ run `psql -U postgres dbname < dump.sql`
 
 where 'postgres' = the username used in PGAdmin
 and 'dbname' = the database name used in PGAdmin
+
+# Check for updates in package.json dependencies
+
+npx npm-check-updates -u
+
+### Run eslint on all files in src folder
+
+npx eslint --fix src

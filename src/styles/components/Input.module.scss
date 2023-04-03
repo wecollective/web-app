@@ -75,6 +75,7 @@
 
         ::placeholder {
             color: $grey6;
+            opacity: 1;
         }
 
         // validation
@@ -117,6 +118,13 @@
                 height: 20px;
                 width: 20px;
             }
+        }
+    }
+
+    &.number {
+        input {
+            padding: 0 5px 0 15px;
+            text-align: center;
         }
     }
 }

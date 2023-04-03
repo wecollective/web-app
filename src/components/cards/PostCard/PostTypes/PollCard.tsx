@@ -1,13 +1,10 @@
 /* eslint-disable no-param-reassign */
 import Button from '@components/Button'
-import InquiryAnswer from '@components/cards/InquiryAnswer'
 import Column from '@components/Column'
-import DraftText from '@components/draft-js/DraftText'
-import Markdown from '@components/Markdown'
 import PieChart from '@components/PieChart'
 import Row from '@components/Row'
-import ShowMoreLess from '@components/ShowMoreLess'
 import TimeGraph from '@components/TimeGraph'
+import PollAnswer from '@src/components/cards/PollAnswer'
 import config from '@src/Config'
 import { AccountContext } from '@src/contexts/AccountContext'
 import { PostContext } from '@src/contexts/PostContext'
@@ -19,12 +16,12 @@ import * as d3 from 'd3'
 import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const Inquiry = (props: {
+function PollCard(props: {
     postData: any
     setPostData: (data: any) => void
     location: string
     params: any
-}): JSX.Element => {
+}): JSX.Element {
     const { postData, setPostData, location, params } = props
     const { id, text, Inquiry: inquiry } = postData
     const { accountData, setAlertMessage, setAlertModalOpen, loggedIn } = useContext(AccountContext)
@@ -169,12 +166,6 @@ const Inquiry = (props: {
 
     return (
         <Column>
-            <Markdown text={`# ${inquiry.title}`} className={styles.title} />
-            {text && (
-                <ShowMoreLess height={150} style={{ marginBottom: 10 }}>
-                    <DraftText stringifiedDraft={text} />
-                </ShowMoreLess>
-            )}
             <Row centerX className={styles.inquiryResults}>
                 <PieChart
                     type={inquiry.type}
@@ -217,7 +208,7 @@ const Inquiry = (props: {
             {newInquiryAnswers.length > 0 && (
                 <Column className={styles.inquiryAnswers}>
                     {newInquiryAnswers.map((answer, i) => (
-                        <InquiryAnswer
+                        <PollAnswer
                             key={answer.id}
                             index={i}
                             type={inquiry.type}
@@ -236,4 +227,4 @@ const Inquiry = (props: {
     )
 }
 
-export default Inquiry
+export default PollCard

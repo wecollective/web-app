@@ -11,7 +11,7 @@ import React, { useState } from 'react'
 
 // todo: add selectedOptions array and allowMultiple boolean?
 
-const SearchSelector = (props: {
+function SearchSelector(props: {
     type: 'space' | 'user' | 'topic'
     title?: string
     placeholder?: string
@@ -25,7 +25,7 @@ const SearchSelector = (props: {
     onOptionSelected: (payload: any) => void
     // selectedOptions: any[]
     // allowMultiple: boolean
-}): JSX.Element => {
+}): JSX.Element {
     const {
         type,
         title,

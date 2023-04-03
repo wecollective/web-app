@@ -6,14 +6,14 @@ import { getParamString } from '@src/Helpers'
 import styles from '@styles/pages/SpacePage/Header.module.scss'
 import { SlidersIcon } from '@svgs/all'
 import React, { useEffect, useState } from 'react'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
-const PeopleHeader = (props: { params: any }): JSX.Element => {
+function PeopleHeader(props: { params: any }): JSX.Element {
     const { params } = props
     const [filtersModalOpen, setFiltersModalOpen] = useState(false)
     const [filterParams, setFilterParams] = useState(params)
     const location = useLocation()
-    const history = useHistory()
+    const history = useNavigate()
     const mobileView = document.documentElement.clientWidth < 900
     // const smallMobileView = document.documentElement.clientWidth < 400
 
@@ -69,7 +69,7 @@ const PeopleHeader = (props: { params: any }): JSX.Element => {
                         text='Apply filters'
                         color='blue'
                         onClick={() => {
-                            history.push({
+                            history({
                                 pathname: location.pathname,
                                 search: getParamString(filterParams),
                             })

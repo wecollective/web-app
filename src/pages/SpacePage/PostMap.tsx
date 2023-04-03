@@ -15,7 +15,7 @@ import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const PostMap = (props: { postMapData: any; params: any }): JSX.Element => {
+function PostMap(props: { postMapData: any; params: any }): JSX.Element {
     const { postMapData, params } = props
     const { accountData } = useContext(AccountContext)
     const { spaceData, setPostMapData, getPostMapData } = useContext(SpaceContext)
@@ -114,14 +114,14 @@ const PostMap = (props: { postMapData: any; params: any }): JSX.Element => {
                     .append('image')
                     .attr('id', `image-${d.id}`)
                     .attr('height', findRadius(d) * 2)
-                    .attr('xlink:href', d.urlImage || d.PostImages[0].url)
+                    .attr('xlink:href', d.urlImage || d.Images[0].url)
                     .on('error', () => {
                         const newImage = d3.select(`#image-${d.id}`)
                         // try image proxy
                         if (!newImage.attr('xlink:href').includes('//images.weserv.nl/')) {
                             newImage.attr(
                                 'xlink:href',
-                                `//images.weserv.nl/?url=${d.urlImage || d.PostImages[0].url}`
+                                `//images.weserv.nl/?url=${d.urlImage || d.Images[0].url}`
                             )
                         } else {
                             // fall back on placeholder

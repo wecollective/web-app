@@ -9,7 +9,7 @@ import axios from 'axios'
 import React, { useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const ImageUploadModal = (props: {
+function ImageUploadModal(props: {
     type: 'user-flag' | 'user-cover' | 'space-flag' | 'space-cover' | 'gbg-topic' | 'gbg-background'
     shape: 'circle' | 'square' | 'rectangle'
     id: number
@@ -17,7 +17,7 @@ const ImageUploadModal = (props: {
     subTitle?: string
     onSaved?: (imageURL: string) => void
     close: () => void
-}): JSX.Element => {
+}): JSX.Element {
     const { type, shape, id, title, subTitle, onSaved, close } = props
     const [imageFile, setImageFile] = useState<File>()
     const [imageURL, setImageURL] = useState('')

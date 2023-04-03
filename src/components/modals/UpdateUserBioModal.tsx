@@ -12,7 +12,7 @@ import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const UpdateUserBioModal = (props: { close: () => void }): JSX.Element => {
+function UpdateUserBioModal(props: { close: () => void }): JSX.Element {
     const { close } = props
     const { accountData, setAccountData } = useContext(AccountContext)
     const { userData, setUserData } = useContext(UserContext)
@@ -72,7 +72,7 @@ const UpdateUserBioModal = (props: { close: () => void }): JSX.Element => {
             <h1>Change your account bio</h1>
             <form onSubmit={updateUserBio} style={{ width: '100%', maxWidth: 500 }}>
                 <DraftTextEditor
-                    type='post'
+                    type='other'
                     stringifiedDraft={inputValue}
                     maxChars={10000}
                     onChange={(value, userMentions) => {

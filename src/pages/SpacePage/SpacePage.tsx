@@ -36,11 +36,11 @@ import {
 import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useState } from 'react'
-import { Redirect, Route, Switch, useLocation } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import textures from 'textures'
 import Cookies from 'universal-cookie'
 
-const SpacePage = (): JSX.Element => {
+function SpacePage(): JSX.Element {
     const {
         accountData,
         accountDataLoading,
@@ -315,18 +315,18 @@ const SpacePage = (): JSX.Element => {
             </Column>
             <Column centerX className={styles.content}>
                 {spaceData.access === 'granted' ? (
-                    <Switch>
-                        <Redirect from='/s/:spaceHandle/' to='/s/:spaceHandle/posts' exact />
-                        <Route path='/s/:spaceHandle/about' component={About} exact />
-                        <Route path='/s/:spaceHandle/posts' component={Posts} exact />
-                        <Route path='/s/:spaceHandle/spaces' component={Spaces} exact />
-                        <Route path='/s/:spaceHandle/people' component={People} exact />
-                        <Route path='/s/:spaceHandle/calendar' component={Calendar} exact />
-                        <Route path='/s/:spaceHandle/rooms' component={Rooms} exact />
-                        <Route path='/s/:spaceHandle/governance' component={Governance} exact />
-                        <Route path='/s/:spaceHandle/settings' component={Settings} exact />
-                        <Route component={PageNotFound} />
-                    </Switch>
+                    <Routes>
+                        <Route path='/' element={<Navigate to='/posts' replace />} />
+                        <Route path='about' element={<About />} />
+                        <Route path='posts' element={<Posts />} />
+                        <Route path='spaces' element={<Spaces />} />
+                        <Route path='people' element={<People />} />
+                        <Route path='calendar' element={<Calendar />} />
+                        <Route path='rooms' element={<Rooms />} />
+                        <Route path='governance' element={<Governance />} />
+                        <Route path='settings' element={<Settings />} />
+                        <Route element={<PageNotFound />} />
+                    </Routes>
                 ) : (
                     <Column centerX style={{ zIndex: 40 }}>
                         <h2>Access blocked!</h2>

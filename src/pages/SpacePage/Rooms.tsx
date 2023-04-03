@@ -5,7 +5,7 @@ import styles from '@styles/pages/SpacePage/About.module.scss'
 import React, { useContext } from 'react'
 import { useLocation } from 'react-router-dom'
 
-const Rooms = (): JSX.Element => {
+function Rooms(): JSX.Element {
     const { spaceData, spaceNotFound } = useContext(SpaceContext)
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]

@@ -6,7 +6,7 @@ import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-const CommentInput = (props: {
+function CommentInput(props: {
     id?: string
     postId?: number
     commentId?: number
@@ -14,7 +14,7 @@ const CommentInput = (props: {
     style?: any
     addComment: (newComment: string) => void
     close?: () => void
-}): JSX.Element => {
+}): JSX.Element {
     const { id, postId, commentId, replyId, style, addComment, close } = props
     const { spaceData } = useContext(SpaceContext)
     const [newComment, setNewComment] = useState({

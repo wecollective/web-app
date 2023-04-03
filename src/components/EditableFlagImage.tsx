@@ -4,14 +4,14 @@ import { AccountContext } from '@contexts/AccountContext'
 import styles from '@styles/components/EditableFlagImage.module.scss'
 import React, { useContext } from 'react'
 
-const EditableFlagImage = (props: {
+function EditableFlagImage(props: {
     type: 'space' | 'user' | 'post'
     size: number
     imagePath: string | null
     canEdit: boolean
     className?: string
     style?: any
-}): JSX.Element => {
+}): JSX.Element {
     const { size, type, imagePath, canEdit, className, style } = props
     const { setImageUploadType, setImageUploadModalOpen } = useContext(AccountContext)
 

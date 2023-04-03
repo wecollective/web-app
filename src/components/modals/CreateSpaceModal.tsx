@@ -23,7 +23,7 @@ import React, { useContext, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
-const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
+function CreateSpaceModal(props: { close: () => void }): JSX.Element {
     const { close } = props
     const { accountData, setAlertModalOpen, setAlertMessage } = useContext(AccountContext)
     const {
@@ -213,7 +213,7 @@ const CreateSpaceModal = (props: { close: () => void }): JSX.Element => {
                         <Column style={{ width: '100%', marginBottom: 40 }}>
                             <p style={{ fontSize: 14, marginBottom: 5 }}>Description</p>
                             <DraftTextEditor
-                                type='post'
+                                type='other'
                                 stringifiedDraft={description.value}
                                 maxChars={5000}
                                 onChange={(v) => updateItem('description', v)}

@@ -1,9 +1,11 @@
 @import '@styles/Variables';
 
+$transitionSpeed: 0.5s;
+
 .wrapper {
     position: relative;
     width: 100%;
-    padding: 5px 0;
+    // padding: 5px 0;
 
     span {
         font-family: inherit;
@@ -50,23 +52,137 @@
         padding: 0;
 
         :global(.DraftEditor-root) {
-            min-height: 30px;
+            position: relative;
             width: 100%;
+            cursor: text;
 
             :global(.DraftEditor-editorContainer) {
-                padding: 15px;
+                padding: 5px 0;
             }
 
             :global(.public-DraftEditorPlaceholder-root) {
-                padding: 15px;
-                color: #9197a3;
+                padding: 5px 0;
+                color: $grey4;
+                // text-shadow: 0 0 2px rgba(black, 0.2);
                 position: absolute;
-                z-index: 0;
+                pointer-events: none;
             }
         }
     }
 
-    // comment editor styling
+    .toolbarWrapper {
+        height: 37px;
+        opacity: 1;
+
+        .toolbar {
+            width: 100%;
+            display: flex;
+            z-index: 2;
+
+            > div {
+                display: flex;
+            }
+
+            .button {
+                border: 1px solid $grey2;
+                border-radius: 5px;
+                background-color: white;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 32px;
+                width: 32px;
+                margin: 0 5px 5px 0;
+                cursor: pointer;
+                pointer-events: auto;
+
+                &:hover {
+                    background-color: $grey1;
+                }
+
+                > svg {
+                    width: 18px;
+                }
+
+                &.active {
+                    background-color: $grey2;
+                }
+            }
+
+            .separator {
+                width: 2px;
+                height: 32px;
+                background-color: $grey2;
+                margin: 0 10px 0 5px;
+            }
+
+            .linkInput {
+                width: 100%;
+                padding: 6px 8px;
+                outline: none;
+                border: 1px solid $grey2;
+                background-color: white;
+                border-radius: 5px;
+                margin-bottom: 5px;
+            }
+        }
+    }
+
+    .characters {
+        justify-content: end;
+        width: 100%;
+        height: 20px;
+        opacity: 1;
+
+        p {
+            text-align: end;
+            font-size: 14px;
+            color: $grey4;
+
+            &.error {
+                color: $red;
+            }
+        }
+    }
+
+    &.post {
+        .toolbarWrapper {
+            height: 0;
+            opacity: 0;
+            transition: all $transitionSpeed;
+
+            .toolbar {
+                display: none;
+                .button {
+                    pointer-events: none;
+                }
+            }
+
+            &.visible {
+                height: 37px;
+                opacity: 1;
+
+                .toolbar {
+                    display: flex;
+                    .button {
+                        pointer-events: auto;
+                    }
+                }
+            }
+        }
+
+        .characters {
+            height: 0;
+            opacity: 0;
+            transition: all $transitionSpeed;
+
+            &.visible {
+                height: 20px;
+                opacity: 1;
+            }
+        }
+    }
+
     &.comment {
         :global(.DraftEditor-root) {
             padding: 5px 10px 10px 10px;
@@ -80,10 +196,15 @@
 
         :global(.public-DraftEditorPlaceholder-root) {
             padding: 12px !important;
+            // height: ;
         }
 
         .toolbar {
             border-bottom: none;
+        }
+
+        .characters {
+            display: none;
         }
 
         &.invalid {
@@ -104,57 +225,99 @@
         }
     }
 
-    .toolbar {
-        padding: 5px 5px 0 5px;
-        border-bottom: 2px solid $grey2;
-        z-index: 2;
+    &.bead {
+        height: 400px;
+        background-color: transparent;
 
-        > div {
-            display: flex;
-        }
-
-        .button {
-            border: 1px solid $grey2;
-            border-radius: 5px;
-            background-color: white;
-            display: flex;
-            justify-content: center;
+        .reverseColumn {
             align-items: center;
-            height: 32px;
-            width: 32px;
-            margin: 0 5px 5px 0;
-            cursor: pointer;
+            margin-bottom: 34px;
 
-            &:hover {
-                background-color: $grey1;
+            .toolbarWrapper {
+                justify-content: center;
+                height: 50px;
+                margin-bottom: 36px;
+
+                .linkInput {
+                    height: 37px;
+                    width: 300px;
+                }
             }
 
-            > svg {
-                height: 32px;
-                width: 32px;
-            }
+            .editorWrapper {
+                width: 274px;
+                height: 244px;
+                justify-content: center;
+                align-items: center;
 
-            &.active {
-                background-color: $grey2;
+                :global(.DraftEditor-editorContainer) {
+                    max-height: 244px;
+                }
             }
         }
 
-        .separator {
-            width: 2px;
-            height: 32px;
-            background-color: $grey2;
-            margin: 0 10px 0 5px;
-        }
-
-        .linkInput {
-            width: calc(100% - 37px);
-            padding: 6px 8px;
-            outline: none;
-            border: 1px solid $grey2;
-            border-radius: 5px;
-            margin-bottom: 5px;
+        .characters {
+            justify-content: center;
         }
     }
+
+    &.other {
+        padding: 10px;
+
+        :global(.DraftEditor-root) {
+            margin: 5px 0;
+        }
+    }
+
+    .alignLeft {
+        text-align: left;
+    }
+
+    .alignRight {
+        text-align: right;
+    }
+
+    .alignCenter {
+        text-align: center;
+    }
+
+    // .stats {
+    //     background-color: white;
+    //     padding: 5px 0;
+    //     // border: 1px solid $grey2;
+    //     font-size: 14px;
+    //     color: $grey4;
+    //     // height: 30px;
+
+    //     &.error {
+    //         color: $red;
+    //     }
+
+    //     .errors {
+    //         > svg {
+    //             flex-shrink: 0;
+    //             height: 20px;
+    //             width: 20px;
+    //             margin-right: 5px;
+    //         }
+    //     }
+    // }
+
+    &.invalid {
+        :global(.DraftEditor-root) {
+            border: 2px solid $red;
+        }
+    }
+
+    // &.valid {
+    //     :global(.DraftEditor-root) {
+    //         border: 2px solid $green;
+    //     }
+
+    //     svg {
+    //         color: $green;
+    //     }
+    // }
 
     // .emojiButtonWrapper {
     //     position: absolute;
@@ -196,61 +359,6 @@
     //         ul {
     //             padding: 0;
     //         }
-    //     }
-    // }
-
-    .editorWrapper {
-        all: unset;
-        width: 100%;
-    }
-
-    .alignLeft {
-        text-align: left;
-    }
-
-    .alignRight {
-        text-align: right;
-    }
-
-    .alignCenter {
-        text-align: center;
-    }
-
-    .stats {
-        background-color: white;
-        padding: 0 10px;
-        border: 1px solid $grey2;
-        font-size: 14px;
-        color: $grey4;
-        height: 30px;
-
-        &.error {
-            color: $red;
-        }
-
-        .errors {
-            > svg {
-                flex-shrink: 0;
-                height: 20px;
-                width: 20px;
-                margin-right: 5px;
-            }
-        }
-    }
-
-    &.invalid {
-        :global(.DraftEditor-root) {
-            border: 2px solid $red;
-        }
-    }
-
-    // &.valid {
-    //     :global(.DraftEditor-root) {
-    //         border: 2px solid $green;
-    //     }
-
-    //     svg {
-    //         color: $green;
     //     }
     // }
 }

@@ -27,9 +27,9 @@ import {
     WecoLogo,
 } from '@svgs/all'
 import React, { useContext, useState } from 'react'
-import { Link, useHistory, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
-const Navbar = (): JSX.Element => {
+function Navbar(): JSX.Element {
     const {
         loggedIn,
         accountData,
@@ -45,7 +45,7 @@ const Navbar = (): JSX.Element => {
     const [searchDropDownOpen, setSearchDropDownOpen] = useState(false)
     const [exploreDropDownOpen, setExploreDropDownOpen] = useState(false)
     const [profileDropDownOpen, setProfileDropDownOpen] = useState(false)
-    const history = useHistory()
+    const history = useNavigate()
     const location = useLocation()
     const otherUsersPage =
         location.pathname.split('/')[1] === 'u' &&
@@ -143,7 +143,7 @@ const Navbar = (): JSX.Element => {
                                         className={styles.homeButton}
                                         onClick={() => {
                                             toggleHamburgerMenu()
-                                            history.push('/')
+                                            history('/')
                                         }}
                                     >
                                         <WecoLogo />
@@ -278,7 +278,7 @@ const Navbar = (): JSX.Element => {
                     className={styles.homeButton}
                     onClick={() => {
                         rotateButton()
-                        history.push('/')
+                        history('/')
                     }}
                 >
                     <WecoLogo />

@@ -11,9 +11,9 @@ import { CommentIcon, LockIcon, PostIcon, UsersIcon } from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
-const SpaceTree = (props: { spaceTreeData: any; params: any }): JSX.Element => {
+function SpaceTree(props: { spaceTreeData: any; params: any }): JSX.Element {
     const { spaceTreeData, params } = props
     const { spaceData, setSpaceTreeData, getSpaceMapChildren } = useContext(SpaceContext)
     const [clickedSpaceUUID, setClickedSpaceUUID] = useState('')
@@ -25,7 +25,7 @@ const SpaceTree = (props: { spaceTreeData: any; params: any }): JSX.Element => {
     const parentLinks = useRef<any>(null)
     const childNodes = useRef<any>(null)
     const childLinks = useRef<any>(null)
-    const history = useHistory()
+    const history = useNavigate()
     const circleRadius = 25
     const maxTextLength = 14
     const duration = 1000
@@ -220,7 +220,7 @@ const SpaceTree = (props: { spaceTreeData: any; params: any }): JSX.Element => {
             setShowSpaceModal(false)
             setHighlightedSpace(null)
             // if current space, open post page
-            if (!d.parent) history.push(`/s/${d.data.handle}/posts`)
+            if (!d.parent) history(`/s/${d.data.handle}/posts`)
             else if (d.data.expander) {
                 // if expander, fetch next set of children
                 const spaceId = d.parent.data.id
@@ -237,7 +237,7 @@ const SpaceTree = (props: { spaceTreeData: any; params: any }): JSX.Element => {
             } else {
                 // otherwise navigate to new space
                 setClickedSpaceUUID(d.data.uuid)
-                history.push(`/s/${d.data.handle}/spaces?lens=Tree`)
+                history(`/s/${d.data.handle}/spaces?lens=Tree`)
             }
         }
     }

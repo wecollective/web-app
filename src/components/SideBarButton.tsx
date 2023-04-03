@@ -3,7 +3,7 @@ import styles from '@styles/components/SideBarButton.module.scss'
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-const SideBarButton = (props: {
+function SideBarButton(props: {
     icon: string
     text: string
     url?: string | null
@@ -11,7 +11,7 @@ const SideBarButton = (props: {
     onClickFunction?: (() => void) | null
     marginBottom: number
     total?: number | null
-}): JSX.Element => {
+}): JSX.Element {
     const { icon, text, url, selected, onClickFunction, marginBottom, total } = props
 
     const handleClick = () => {

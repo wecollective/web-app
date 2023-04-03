@@ -11,9 +11,9 @@ import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
 import styles from '@styles/pages/UserPage/Settings.module.scss'
 import React, { useContext, useEffect, useState } from 'react'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
-const Settings = (): JSX.Element => {
+function Settings(): JSX.Element {
     const { accountData, accountDataLoading } = useContext(AccountContext)
     const { setSelectedUserSubPage, userData, getUserData, isOwnAccount } = useContext(UserContext)
     const { handle, name, bio, email } = accountData
@@ -23,12 +23,12 @@ const Settings = (): JSX.Element => {
     const [userEmailModalOpen, setUserEmailModalOpen] = useState(false)
     const [deleteAccountModalOpen, setDeleteAccountModalOpen] = useState(false)
 
-    const history = useHistory()
+    const history = useNavigate()
     const location = useLocation()
     const userHandle = location.pathname.split('/')[2]
 
     function redirect(res) {
-        if (res.handle !== handle) history.push(`/u/${res.handle}/about`)
+        if (res.handle !== handle) history(`/u/${res.handle}/about`)
     }
 
     useEffect(() => {

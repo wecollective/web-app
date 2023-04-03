@@ -2,12 +2,12 @@ import styles from '@styles/components/ShowMoreLess.module.scss'
 import { ChevronDownIcon } from '@svgs/all'
 import React, { useEffect, useRef, useState } from 'react'
 
-const ShowMoreLess = (props: {
+function ShowMoreLess(props: {
     height: number
     gradientColor?: 'white' | 'grey'
     style?: any
     children: any
-}): JSX.Element => {
+}): JSX.Element {
     const { height, gradientColor, style, children } = props
     const [overflow, setOverflow] = useState(false)
     const [expanded, setExpanded] = useState(false)
