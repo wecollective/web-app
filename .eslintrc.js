@@ -1,11 +1,15 @@
 module.exports = {
     extends: ['airbnb-typescript-prettier'],
     rules: {
+        // todo: review
         'prettier/prettier': 'error',
         'react/jsx-filename-extension': [1, { extensions: ['.jsx', '.tsx'] }],
         'react-hooks/exhaustive-deps': 'off',
         'react/jsx-no-bind': 'off',
         'import/no-unresolved': 'off',
+        'react/jsx-no-constructed-context-values': 'off',
+        'react/jsx-no-useless-fragment': 'off',
+        'react/no-unstable-nested-components': 'off',
         'no-console': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-non-null-assertion': 'off',

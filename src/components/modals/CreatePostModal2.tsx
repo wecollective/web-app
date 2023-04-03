@@ -710,7 +710,7 @@ function CreatePostModal(): JSX.Element {
                     options
                 )
                 .then((res) => {
-                    console.log('success: ', res.data)
+                    // console.log('success: ', res.data)
                     const allPostSpaceIds = [
                         ...spaces.map((space) => space.id),
                         ...res.data.indirectSpaces.map((s) => s.spaceId),
@@ -1067,17 +1067,17 @@ function CreatePostModal(): JSX.Element {
                                         renderBeads()}
                                 </Column>
                             )}
-                            {['text', 'event'].includes(postType) &&
-                                urlsWithMetaData.map((u) => (
-                                    <UrlPreview
-                                        key={u.url}
-                                        type='post'
-                                        urlData={u}
-                                        loading={u.loading}
-                                        remove={removeUrlMetaData}
-                                        style={{ marginTop: 10 }}
-                                    />
-                                ))}
+                            {/* {['text', 'event'].includes(postType) && */}
+                            {urlsWithMetaData.map((u) => (
+                                <UrlPreview
+                                    key={u.url}
+                                    type='post'
+                                    urlData={u}
+                                    loading={u.loading}
+                                    remove={removeUrlMetaData}
+                                    style={{ marginTop: 10 }}
+                                />
+                            ))}
                         </Column>
                     </Column>
                     <Column

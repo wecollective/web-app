@@ -116,7 +116,7 @@ function BeadCard(props: {
     // if (type === 'url') console.log('sourceBead: ', sourceBead)
 
     useEffect(() => {
-        console.log('bead: ', beadProp)
+        // console.log('bead: ', beadProp)
         setBead(beadProp)
         setIsSource(beadProp.Link.relationship === 'source')
     }, [beadProp])

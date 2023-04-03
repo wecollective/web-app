@@ -1146,7 +1146,7 @@ function GlassBeadGame(): JSX.Element {
                         const audio = d3
                             .select(`#post-audio-${liveBeadIndexRef.current}-gbg-room`)
                             .node()
-                        console.log(audio)
+                        // console.log(audio)
                         if (audio) audio.play()
                     })
                     .transition()
@@ -1235,7 +1235,7 @@ function GlassBeadGame(): JSX.Element {
         axios
             .get(`${config.apiURL}/glass-bead-game-comments?gameId=${gameData.id}`)
             .then((res) => {
-                console.log('glass-bead-game-comments: ', res.data)
+                // console.log('glass-bead-game-comments: ', res.data)
                 setComments(res.data)
             })
             .catch((error) => {
@@ -1246,7 +1246,7 @@ function GlassBeadGame(): JSX.Element {
     // todo: flatten out userData into user object with socketId
     useEffect(() => {
         if (!accountDataLoading && !postDataLoading && postData.id) {
-            console.log('connect!')
+            // console.log('connect!')
             getGameComments()
             if (beads.length) d3.select('#timer-bead-wave-form').style('opacity', 0)
             beads.forEach((bead, index) => addEventListenersToBead(index + 1))
