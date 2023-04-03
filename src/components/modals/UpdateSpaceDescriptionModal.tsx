@@ -71,7 +71,7 @@ function UpdateSpaceDescriptionModal(props: { close: () => void }): JSX.Element 
             <h1>Change the description for {spaceData.name}</h1>
             <form onSubmit={updateSpaceDescription} style={{ width: '100%', maxWidth: 500 }}>
                 <DraftTextEditor
-                    type='post'
+                    type='other'
                     stringifiedDraft={inputValue}
                     maxChars={10000}
                     onChange={(value, userMentions) => {

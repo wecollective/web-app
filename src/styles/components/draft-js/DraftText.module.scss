@@ -261,6 +261,14 @@ $transitionSpeed: 0.5s;
         }
     }
 
+    &.other {
+        padding: 10px;
+
+        :global(.DraftEditor-root) {
+            margin: 5px 0;
+        }
+    }
+
     .alignLeft {
         text-align: left;
     }

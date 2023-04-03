@@ -72,7 +72,7 @@ function UpdateUserBioModal(props: { close: () => void }): JSX.Element {
             <h1>Change your account bio</h1>
             <form onSubmit={updateUserBio} style={{ width: '100%', maxWidth: 500 }}>
                 <DraftTextEditor
-                    type='post'
+                    type='other'
                     stringifiedDraft={inputValue}
                     maxChars={10000}
                     onChange={(value, userMentions) => {

@@ -36,7 +36,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react'
 
 function DraftTextEditor(props: {
     id?: string
-    type: 'post' | 'comment' | 'bead'
+    type: 'post' | 'comment' | 'bead' | 'other'
     stringifiedDraft: string
     onChange: (text: string, mentions: any[], urls: string[]) => void
     onSubmit?: () => void

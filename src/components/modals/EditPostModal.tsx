@@ -75,7 +75,7 @@ function EditPostModal(props: {
                 <Column centerX style={{ width: '100%', maxWidth: 700 }}>
                     <h1>Edit post text</h1>
                     <DraftTextEditor
-                        type='post'
+                        type='other'
                         stringifiedDraft={newText.value}
                         maxChars={5000}
                         onChange={onChange}

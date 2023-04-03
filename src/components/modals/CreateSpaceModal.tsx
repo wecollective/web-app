@@ -213,7 +213,7 @@ function CreateSpaceModal(props: { close: () => void }): JSX.Element {
                         <Column style={{ width: '100%', marginBottom: 40 }}>
                             <p style={{ fontSize: 14, marginBottom: 5 }}>Description</p>
                             <DraftTextEditor
-                                type='post'
+                                type='other'
                                 stringifiedDraft={description.value}
                                 maxChars={5000}
                                 onChange={(v) => updateItem('description', v)}
