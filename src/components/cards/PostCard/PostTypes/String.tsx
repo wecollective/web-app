@@ -15,10 +15,10 @@ function String(props: {
     location: string
 }): JSX.Element {
     const { postData, setPostData, location } = props
-    const { id, text, StringPosts } = postData
+    const { id, text, Beads } = postData
     const [selectedBead, setSelectedBead] = useState<any>(null)
     const [beadCommentsOpen, setBeadCommentsOpen] = useState(false)
-    const stringPosts = StringPosts && StringPosts.sort((a, b) => a.Link.index - b.Link.index)
+    const stringPosts = Beads && Beads.sort((a, b) => a.Link.index - b.Link.index)
 
     return (
         <Column>
@@ -75,7 +75,7 @@ function String(props: {
                     totalComments={selectedBead.totalComments}
                     incrementTotalComments={(value) => {
                         const newPostData = { ...postData }
-                        const bead = newPostData.StringPosts.find((b) => b.id === selectedBead.id)
+                        const bead = newPostData.Beads.find((b) => b.id === selectedBead.id)
                         bead.totalComments += value
                         bead.accountComment = value > 0
                         setPostData(newPostData)

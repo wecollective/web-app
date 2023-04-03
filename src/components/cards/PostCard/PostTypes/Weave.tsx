@@ -21,13 +21,7 @@ function Weave(props: {
     location: string
 }): JSX.Element {
     const { postData, setPostData, location } = props
-    const {
-        id,
-        text,
-        Weave: weave,
-        StringPosts: stringPosts,
-        StringPlayers: stringPlayers,
-    } = postData
+    const { id, text, Weave: weave, Beads: stringPosts, Players: stringPlayers } = postData
     const { accountData, setAlertMessage, setAlertModalOpen, loggedIn } = useContext(AccountContext)
     const [nextBeadModalOpen, setNextBeadModalOpen] = useState(false)
     const [timeLeftInMove, setTimeLeftInMove] = useState(0)
@@ -259,7 +253,7 @@ function Weave(props: {
                     totalComments={selectedBead.totalComments}
                     incrementTotalComments={(value) => {
                         const newPostData = { ...postData }
-                        const bead = newPostData.StringPosts.find((b) => b.id === selectedBead.id)
+                        const bead = newPostData.Beads.find((b) => b.id === selectedBead.id)
                         bead.totalComments += value
                         bead.accountComment = value > 0
                         setPostData(newPostData)

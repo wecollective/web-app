@@ -27,7 +27,7 @@ function GlassBeadGame(props: {
     location: string
 }): JSX.Element {
     const { postData, setPostData, location } = props
-    const { id, text, GlassBeadGame: glassBeadGame, Event: event } = postData
+    const { id, text, GlassBeadGame2: glassBeadGame, Beads, Event: event } = postData
     const { accountData, setAlertMessage, setAlertModalOpen, loggedIn } = useContext(AccountContext)
     const [goingModalOpen, setGoingModalOpen] = useState(false)
     const [interestedModalOpen, setInterestedModalOpen] = useState(false)
@@ -35,7 +35,7 @@ function GlassBeadGame(props: {
     const [interestedLoading, setInterestedLoading] = useState(false)
     const going = event && event.Going.map((u) => u.id).includes(accountData.id)
     const interested = event && event.Interested.map((u) => u.id).includes(accountData.id)
-    const beads = glassBeadGame.GlassBeads.sort((a, b) => a.index - b.index)
+    const beads = Beads.sort((a, b) => a.Link.index - b.Link.index)
     const cookies = new Cookies()
     const history = useNavigate()
 
@@ -243,9 +243,10 @@ function GlassBeadGame(props: {
                                 <Row key={bead.id}>
                                     <StringBeadCard
                                         bead={{
-                                            type: 'string-audio',
-                                            Creator: bead.user,
-                                            url: bead.beadUrl,
+                                            id: bead.id,
+                                            type: 'gbg-audio',
+                                            Creator: bead.Creator,
+                                            url: bead.Audios[0].url,
                                             Link: { relationship: null },
                                         }}
                                         postId={id}

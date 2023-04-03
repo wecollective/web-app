@@ -33,6 +33,7 @@ function Comments(props: {
         axios
             .get(`${config.apiURL}/post-comments?postId=${postId}`)
             .then((res) => {
+                // console.log('post-comments: ', res.data, totalComments)
                 setComments(res.data)
                 setLoading(false)
                 // if commentId in urlParams, scroll to comment

@@ -5,7 +5,7 @@ $transitionSpeed: 0.5s;
 .wrapper {
     position: relative;
     width: 100%;
-    padding: 5px 0;
+    // padding: 5px 0;
 
     span {
         font-family: inherit;
@@ -196,10 +196,15 @@ $transitionSpeed: 0.5s;
 
         :global(.public-DraftEditorPlaceholder-root) {
             padding: 12px !important;
+            // height: ;
         }
 
         .toolbar {
             border-bottom: none;
+        }
+
+        .characters {
+            display: none;
         }
 
         &.invalid {

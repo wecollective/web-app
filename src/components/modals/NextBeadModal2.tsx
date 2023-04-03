@@ -11,33 +11,38 @@ import Row from '@components/Row'
 import SuccessMessage from '@components/SuccessMessage'
 import UrlPreview from '@src/components/cards/PostCard/UrlPreview'
 import config from '@src/Config'
+import { AccountContext } from '@src/contexts/AccountContext'
 import {
     audioMBLimit,
-    beadTypeIcons,
     capitalise,
+    defaultPostData,
     findDraftLength,
     formatTimeMMSS,
     imageMBLimit,
+    postTypeIcons,
 } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/NextBeadModal2.module.scss'
 import axios from 'axios'
 import * as d3 from 'd3'
 import getBlobDuration from 'get-blob-duration'
-import React, { useRef, useState } from 'react'
+import React, { useContext, useRef, useState } from 'react'
+import Cookies from 'universal-cookie'
 import { v4 as uuidv4 } from 'uuid'
 
 const { white, red, orange, yellow, green, blue, purple } = colors
 const beadColors = [white, red, orange, yellow, green, blue, purple]
 
 function NextBeadModal(props: {
+    location: 'new-gbg' | 'existing-gbg'
+    postId?: number
     settings: any
     beads: any[]
-    saveBead: (bead: any) => void
+    addBead: (bead: any) => void
     close: () => void
 }): JSX.Element {
-    // const { accountData, setAlertMessage, setAlertModalOpen } = useContext(AccountContext)
-    const { settings, beads, saveBead, close } = props
+    const { accountData, setAlertMessage, setAlertModalOpen } = useContext(AccountContext)
+    const { location, postId, settings, beads, addBead, close } = props
     const { allowedBeadTypes, characterLimit, moveDuration, moveTimeWindow } = settings
     // const [newBead, setNewBead] = useState<any>({ ...defaultBeadData, type: allowedBeadTypes[0] })
     const [type, setType] = useState(allowedBeadTypes[0])
@@ -48,6 +53,7 @@ function NextBeadModal(props: {
     const [loading, setLoading] = useState(false)
     const [saved, setSaved] = useState(false)
     const maxChars = characterLimit || 5000
+    const cookies = new Cookies()
 
     // url
     const [url, setUrl] = useState('')
@@ -68,6 +74,8 @@ function NextBeadModal(props: {
 
     // audio
     const [audioFile, setAudioFile] = useState<File | undefined>()
+    const [audioBlob, setAudioBlob] = useState<any>()
+    const [audioType, setAudioType] = useState('')
     const [recording, setRecording] = useState(false)
     const [recordingTime, setRecordingTime] = useState(0)
     const [audioSizeError, setAudioSizeError] = useState(false)
@@ -100,6 +108,7 @@ function NextBeadModal(props: {
                 setAudioSizeError(false)
                 setAudioTimeError(false)
                 setAudioFile(input.files[0])
+                setAudioType('file')
             }
         }
     }
@@ -133,6 +142,8 @@ function NextBeadModal(props: {
                     clearInterval(recordingInterval.current)
                     const blob = new Blob(audioChunks.current, { type: 'audio/mpeg-3' })
                     setAudioFile(new File([blob], ''))
+                    setAudioBlob(blob)
+                    setAudioType('recording')
                 }
                 audioRecorder.current.start()
                 setRecording(true)
@@ -209,17 +220,76 @@ function NextBeadModal(props: {
         return false
     }
 
-    function addBead() {
-        const bead = { id: uuidv4(), type, color } as any
+    function uploadBead(bead) {
+        setLoading(true)
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        const beadData = {
+            ...bead,
+            creatorName: accountData.name,
+            creatorHandle: accountData.handle,
+            postId,
+            mentions: bead.type === 'text' ? bead.mentions.map((m) => m.link) : [],
+        }
+        let fileData
+        let uploadType
+        if (bead.type === 'audio') {
+            const { file, blob } = bead.Audios[0]
+            uploadType = `audio-${bead.Audios[0].type === 'recording' ? 'blob' : 'file'}`
+            fileData = new FormData()
+            fileData.append('file', bead.Audios[0].type === 'recording' ? blob : file)
+            fileData.append('beadData', JSON.stringify(beadData))
+        }
+        if (bead.type === 'image' && bead.Images[0].file) {
+            uploadType = 'image-file'
+            fileData = new FormData()
+            fileData.append('file', bead.Images[0].file)
+            fileData.append('beadData', JSON.stringify(beadData))
+        }
+        axios
+            .post(
+                `${config.apiURL}/create-next-bead?uploadType=${uploadType}`,
+                fileData || beadData,
+                options
+            )
+            .then((res) => {
+                console.log('create-next-bead res: ', res)
+                setSaved(true)
+                setLoading(false)
+                addBead({ ...defaultPostData, ...bead, id: res.data.bead.id })
+                setTimeout(() => close(), 1000)
+            })
+            .catch((error) => {
+                console.log('error: ', error)
+                if (error.response.status === 401) {
+                    setAlertMessage('Your session has run out. Please log in again.')
+                    setAlertModalOpen(true)
+                }
+            })
+    }
+
+    function saveBead() {
+        const bead = {
+            id: uuidv4(),
+            type,
+            color,
+            Link: { source: null },
+            Creator: accountData,
+        } as any
         if (type === 'text') {
             bead.text = text
             bead.mentions = mentions
         }
         if (type === 'url') bead.Urls = [urlData]
-        if (type === 'audio') bead.Audio = { file: audioFile, url: '' }
+        if (type === 'audio') {
+            bead.Audios = [{ type: audioType, file: audioFile, blob: audioBlob }]
+        }
         if (type === 'image') bead.Images = [image]
-        saveBead(bead)
-        close()
+        // save
+        if (location === 'existing-gbg') uploadBead(bead)
+        else {
+            addBead(bead)
+            close()
+        }
     }
 
     return (
@@ -258,7 +328,7 @@ function NextBeadModal(props: {
                         <Column className={styles.bead} style={{ backgroundColor: color }}>
                             <div className={styles.watermark} />
                             <Row centerY spaceBetween className={styles.header}>
-                                {beadTypeIcons[type]}
+                                {postTypeIcons[type]}
                                 {/* <ImageTitle
                                 type='user'
                                 imagePath={accountData.flagImagePath}
@@ -403,7 +473,7 @@ function NextBeadModal(props: {
                                 title={capitalise(t)}
                                 onClick={() => setType(t)}
                             >
-                                {beadTypeIcons[t]}
+                                {postTypeIcons[t]}
                             </button>
                         ))}
                     </Row>
@@ -412,13 +482,17 @@ function NextBeadModal(props: {
                         color='aqua'
                         disabled={disable()}
                         loading={loading}
-                        onClick={addBead}
+                        onClick={saveBead}
                         style={{ margin: '20px 0' }}
                     />
                 </Column>
             )}
         </Modal>
     )
+}
+
+NextBeadModal.defaultProps = {
+    postId: null,
 }
 
 export default NextBeadModal

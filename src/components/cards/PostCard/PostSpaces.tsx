@@ -55,7 +55,7 @@ function PostSpaces(props: { spaces: any[]; preview?: boolean }): JSX.Element {
                             imageSize={32}
                             title={space.name}
                             fontSize={15}
-                            link={`/s/${space.handle}/posts`}
+                            link={preview ? null : `/s/${space.handle}/posts`}
                             style={{ marginTop: 10 }}
                             shadow
                         />

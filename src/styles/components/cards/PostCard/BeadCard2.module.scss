@@ -9,7 +9,12 @@
     border-radius: 15px;
     box-shadow: 0 0 7px 0 rgba(10, 8, 72, 0.1);
     position: relative;
-    border: 1px solid $grey2;
+    // border: 1px solid $grey2;
+
+    &.gbgRoom {
+        width: 200px;
+        height: 200px;
+    }
 
     .watermark {
         position: absolute;
@@ -21,7 +26,8 @@
         border: 2px solid white;
         border-radius: inherit;
         opacity: 0.1;
-        z-index: 1;
+        // z-index: 1;
+        pointer-events: none;
     }
 
     &.source {
@@ -34,7 +40,7 @@
 
     .header {
         position: relative;
-        z-index: 2;
+        // z-index: 2;
 
         svg {
             width: 20px;
@@ -107,13 +113,22 @@
                 }
             }
         }
+
+        .id {
+            // all: unset;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            line-height: 14px;
+        }
     }
 
     .content {
         height: 100%;
         margin-top: 10px;
         overflow: hidden;
-        z-index: 2;
+        // z-index: 2;
 
         .markdown {
             img {
@@ -155,12 +170,12 @@
         > div > button {
             font-size: 15px;
             cursor: pointer;
-            color: black;
-            opacity: 0.25;
-            &:hover {
-                opacity: 0.4;
-            }
-            transition: opacity 0.3s;
+            color: $grey5;
+            // opacity: 0.25;
+            // &:hover {
+            //     opacity: 0.4;
+            // }
+            // transition: opacity 0.3s;
         }
     }
 }

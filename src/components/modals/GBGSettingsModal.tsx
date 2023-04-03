@@ -12,13 +12,7 @@ import SearchSelector from '@components/SearchSelector'
 import Toggle from '@components/Toggle'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
-import {
-    capitalise,
-    defaultGBGSettings,
-    findDHMFromMinutes,
-    findMinutesFromDHM,
-    pluralise,
-} from '@src/Helpers'
+import { capitalise, findDHMFromMinutes, findMinutesFromDHM, pluralise } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/GBGSettingsModal.module.scss'
 import { ChevronDownIcon, ChevronUpIcon, SearchIcon } from '@svgs/all'
@@ -83,6 +77,7 @@ function GBGSettingsModal(props: {
         characterLimit,
     } = newSettings
 
+    const allBeadTypes = ['text', 'url', 'audio', 'image']
     const { white, red, orange, yellow, green, blue, purple } = colors
     const beadColors = [white, red, orange, yellow, green, blue, purple]
     const dateTimeOptions = {
@@ -110,7 +105,7 @@ function GBGSettingsModal(props: {
                 introDuration: 0,
                 outroDuration: 0,
                 intervalDuration: 0,
-                allowedBeadTypes: defaultGBGSettings.allowedBeadTypes,
+                allowedBeadTypes: allBeadTypes,
             })
             setIncludeDates(false)
             startTime.current = ''
@@ -145,7 +140,7 @@ function GBGSettingsModal(props: {
         let newTypes = [] as any
         if (checked) {
             // maintain order when adding types
-            defaultGBGSettings.allowedBeadTypes.forEach((t) => {
+            allBeadTypes.forEach((t) => {
                 if (allowedBeadTypes.includes(t) || t === type) newTypes.push(t)
             })
         } else {
@@ -752,7 +747,7 @@ function GBGSettingsModal(props: {
                                         <Column centerX style={{ marginBottom: 30 }}>
                                             <p>Allowed bead types:</p>
                                             <Row wrap centerX className={styles.allowedBeadTypes}>
-                                                {defaultGBGSettings.allowedBeadTypes.map((type) => (
+                                                {allBeadTypes.map((type) => (
                                                     <CheckBox
                                                         key={type}
                                                         text={capitalise(type)}

@@ -29,6 +29,7 @@
             border-top-left-radius: 5px;
             border-bottom-left-radius: 5px;
             object-fit: cover;
+            flex-shrink: 0;
         }
 
         .urlIcon {
@@ -92,6 +93,7 @@
                 height: 100%;
                 border-top-right-radius: 5px;
                 border-bottom-left-radius: 0;
+                flex-shrink: unset;
             }
 
             .urlIcon {

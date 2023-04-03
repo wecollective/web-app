@@ -20,10 +20,11 @@ function GlassBeadGame(props: {
     location: string
 }): JSX.Element {
     const { postData, setPostData, location } = props
-    const { id, text, GlassBeadGame2, Beads, Players } = postData
+    const { id, Creator, GlassBeadGame2, Beads, Players } = postData
     const { synchronous, multiplayer, totalMoves, movesPerPlayer, playerOrder, nextMoveDeadline } =
         GlassBeadGame2
     const { accountData, setAlertMessage, setAlertModalOpen, loggedIn } = useContext(AccountContext)
+    const [beads, setBeads] = useState<any[]>(Beads.sort((a, b) => a.Link.index - b.Link.index))
     const [orderedPlayers, setOrderedPlayers] = useState<any[]>([])
     const [nextPlayer, setNextPlayer] = useState<any>(null)
     const [timeLeftInMove, setTimeLeftInMove] = useState(0)
@@ -31,13 +32,12 @@ function GlassBeadGame(props: {
     const [nextBeadModalOpen, setNextBeadModalOpen] = useState(false)
     const [beadCommentsOpen, setBeadCommentsOpen] = useState(false)
     const [selectedBead, setSelectedBead] = useState<any>(null)
+    const [renderKey, setRenderKey] = useState(0)
     const history = useNavigate()
     const pendingPlayers = Players.filter((p) => p.UserPost.state === 'pending')
     const rejectedPlayers = Players.filter((p) => p.UserPost.state === 'rejected')
     const allAccepted = !pendingPlayers.length && !rejectedPlayers.length
-    const hideBeadDraw = synchronous ? !Beads.length : !allAccepted
-
-    Beads.sort((a, b) => a.Link.index - b.Link.index)
+    const hideBeadDraw = synchronous ? !beads.length : !allAccepted
 
     function toggleBeadComments(bead) {
         if (beadCommentsOpen) {
@@ -50,8 +50,9 @@ function GlassBeadGame(props: {
     }
 
     function renderOpenToAllUsersRow() {
-        const move = `${Beads.length + 1} ${totalMoves && `/ ${totalMoves}`}`
-        const movesLeft = !totalMoves || totalMoves > Beads.length
+        const move = `${beads.length + 1} ${totalMoves ? `/ ${totalMoves}` : ''}`
+        const movesLeft = !totalMoves || totalMoves > beads.length
+        console.log('moves left: ', movesLeft)
         return (
             <Row spaceBetween centerY className={styles.infoRow}>
                 <Row centerY>
@@ -64,8 +65,8 @@ function GlassBeadGame(props: {
     }
 
     function renderRestrictedPlayersRow() {
-        const move = `${Beads.length + 1} / ${movesPerPlayer * Players.length}`
-        const movesLeft = movesPerPlayer * Players.length > Beads.length
+        const move = `${beads.length + 1} / ${movesPerPlayer * Players.length}`
+        const movesLeft = movesPerPlayer * Players.length > beads.length
         return (
             <Row spaceBetween centerY className={styles.infoRow}>
                 <FlagImageHighlights
@@ -138,14 +139,20 @@ function GlassBeadGame(props: {
                 <button
                     type='button'
                     className={styles.nextBeadCard}
-                    onClick={() => setNextBeadModalOpen(true)}
+                    onClick={() => {
+                        if (loggedIn) setNextBeadModalOpen(true)
+                        else {
+                            setAlertMessage('Log in to add beads')
+                            setAlertModalOpen(true)
+                        }
+                    }}
                     // todo: refactor margin with screen width taken into account
                     style={{
-                        marginRight: Beads.length > 1 ? 15 : 0,
+                        marginRight: beads.length > 1 ? 15 : 0,
                     }}
                 >
                     <PlusIcon />
-                    <p>Click to create the {Beads.length ? 'next' : 'first'} bead</p>
+                    <p>Click to create the {beads.length ? 'next' : 'first'} bead</p>
                 </button>
             </Row>
         )
@@ -163,10 +170,10 @@ function GlassBeadGame(props: {
                     className={styles.waitingForPlayerCard}
                     // todo: refactor margin with screen width taken into account
                     style={{
-                        marginRight: Beads.length > 1 ? 15 : 0,
+                        marginRight: beads.length > 1 ? 15 : 0,
                     }}
                 >
-                    <p>Waiting for</p>
+                    <p style={{ marginBottom: 10 }}>Waiting for</p>
                     <ImageTitle
                         type='user'
                         imagePath={nextPlayer.flagImagePath}
@@ -179,14 +186,26 @@ function GlassBeadGame(props: {
     }
 
     function renderNextCard() {
-        const movesLeft =
-            !synchronous && (totalMoves || movesPerPlayer * Players.length) > Beads.length
-        const waitingForOtherPlayer = !synchronous && nextPlayer && nextPlayer.id !== accountData.id
-        if (waitingForOtherPlayer) return renderWaitingForPlayerCard()
-        if (movesLeft) return renderNextBeadButton()
-        return <span style={{ marginRight: 15 }} />
+        // game rooms
+        if (synchronous) return <span style={{ marginRight: 15 }} />
+        // restricted weaves
+        if (nextPlayer) {
+            if (nextPlayer.id === accountData.id) return renderNextBeadButton()
+            return renderWaitingForPlayerCard()
+        }
+        // open weaves
+        const movesLeft = !totalMoves || totalMoves > beads.length
+        if (multiplayer && movesLeft) {
+            return renderNextBeadButton()
+        }
+        // strings
+        if (!multiplayer && movesLeft && Creator.id === accountData.id) {
+            return renderNextBeadButton()
+        }
+        return null
     }
 
+    // handle players and move deadline
     useEffect(() => {
         if (Players.length && playerOrder) {
             // order players and find next player
@@ -195,7 +214,8 @@ function GlassBeadGame(props: {
                 players.push(Players.find((p) => p.id === +playerId))
             })
             setOrderedPlayers(players)
-            setNextPlayer(players[Beads.length % Players.length])
+            const movesLeft = beads.length < Players.length * movesPerPlayer
+            setNextPlayer(movesLeft ? players[beads.length % Players.length] : null)
             // set up timer if nextMoveDeadline active
             const deadlineActive = nextMoveDeadline && new Date(nextMoveDeadline) < new Date()
             if (deadlineActive) {
@@ -208,6 +228,11 @@ function GlassBeadGame(props: {
         }
         return () => clearInterval(timeLeftInMoveInterval.current)
     }, [])
+
+    useEffect(() => {
+        // console.log('new post data: ', postData)
+        setBeads(Beads.sort((a, b) => a.Link.index - b.Link.index))
+    }, [postData])
 
     return (
         <Column className={styles.wrapper}>
@@ -225,8 +250,8 @@ function GlassBeadGame(props: {
             {!hideBeadDraw && (
                 <Row centerX>
                     <Scrollbars className={styles.beads}>
-                        <Row>
-                            {Beads.map((bead, i) => (
+                        <Row key={renderKey}>
+                            {beads.map((bead, i) => (
                                 <Row key={bead.id}>
                                     <BeadCard
                                         bead={bead}
@@ -238,10 +263,10 @@ function GlassBeadGame(props: {
                                         toggleBeadComments={() => toggleBeadComments(bead)}
                                         // style={{
                                         //     marginRight:
-                                        //         Beads.length > 2 && i === Beads.length - 1 ? 15 : 0,
+                                        //         beads.length > 2 && i === beads.length - 1 ? 15 : 0,
                                         // }}
                                     />
-                                    {i < Beads.length - 1 && (
+                                    {i < beads.length - 1 && (
                                         <Row centerY className={styles.beadDivider}>
                                             <DNAIcon />
                                         </Row>
@@ -256,16 +281,15 @@ function GlassBeadGame(props: {
             )}
             {nextBeadModalOpen && (
                 <NextBeadModal
+                    location='existing-gbg'
                     settings={{
                         ...GlassBeadGame2,
                         allowedBeadTypes: [...GlassBeadGame2.allowedBeadTypes.split(',')],
                     }}
-                    beads={Beads}
-                    saveBead={(bead) => {
-                        console.log('save next bead!', bead)
-                        // setBeads([...beads, bead])
-                        // setNoBeadsError(false)
-                    }}
+                    postId={id}
+                    beads={beads}
+                    // addBead={(bead) => setBeads([...beads, bead])}
+                    addBead={(bead) => setPostData({ ...postData, Beads: [...beads, bead] })}
                     close={() => setNextBeadModalOpen(false)}
                 />
             )}
@@ -276,11 +300,17 @@ function GlassBeadGame(props: {
                     location={location}
                     totalComments={selectedBead.totalComments}
                     incrementTotalComments={(value) => {
-                        const newPostData = { ...postData }
-                        const bead = newPostData.Beads.find((b) => b.id === selectedBead.id)
+                        // console.log('selectedBead: ', selectedBead)
+                        // console.log('beads: ', postData.Beads)
+                        // const newPostData = { ...postData }
+                        const newBeads = [...beads]
+                        const bead = newBeads.find((b) => b.id === selectedBead.id)
                         bead.totalComments += value
                         bead.accountComment = value > 0
-                        setPostData(newPostData)
+                        // console.log('bead.totalComments: ', bead.totalComments)
+                        setBeads(newBeads)
+                        // // setRenderKey(renderKey + 1)
+                        // setPostData(newPostData)
                     }}
                     style={{ margin: '10px 0' }}
                 />

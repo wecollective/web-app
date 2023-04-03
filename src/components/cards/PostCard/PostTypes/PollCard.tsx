@@ -1,11 +1,8 @@
 /* eslint-disable no-param-reassign */
 import Button from '@components/Button'
 import Column from '@components/Column'
-import DraftText from '@components/draft-js/DraftText'
-import Markdown from '@components/Markdown'
 import PieChart from '@components/PieChart'
 import Row from '@components/Row'
-import ShowMoreLess from '@components/ShowMoreLess'
 import TimeGraph from '@components/TimeGraph'
 import PollAnswer from '@src/components/cards/PollAnswer'
 import config from '@src/Config'
@@ -19,7 +16,7 @@ import * as d3 from 'd3'
 import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-function Poll(props: {
+function PollCard(props: {
     postData: any
     setPostData: (data: any) => void
     location: string
@@ -169,12 +166,6 @@ function Poll(props: {
 
     return (
         <Column>
-            <Markdown text={`# ${inquiry.title}`} className={styles.title} />
-            {text && (
-                <ShowMoreLess height={150} style={{ marginBottom: 10 }}>
-                    <DraftText stringifiedDraft={text} />
-                </ShowMoreLess>
-            )}
             <Row centerX className={styles.inquiryResults}>
                 <PieChart
                     type={inquiry.type}
@@ -236,4 +227,4 @@ function Poll(props: {
     )
 }
 
-export default Poll
+export default PollCard

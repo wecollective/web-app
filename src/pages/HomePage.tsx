@@ -135,16 +135,16 @@ function Homepage(): JSX.Element {
         else setLogInModalOpen(true)
     }
 
-    // function test() {
-    //     axios
-    //         .get(`${config.apiURL}/test`)
-    //         .then((res) => {
-    //             console.log('test res: ', res.data)
-    //         })
-    //         .catch((error) => {
-    //             console.log('ERROR: ', error)
-    //         })
-    // }
+    function test() {
+        axios
+            .get(`${config.apiURL}/test`)
+            .then((res) => {
+                console.log('test res: ', res.data)
+            })
+            .catch((error) => {
+                console.log('ERROR: ', error)
+            })
+    }
 
     useEffect(() => {
         window.scrollTo(0, 0)
@@ -176,7 +176,7 @@ function Homepage(): JSX.Element {
                     <span className='roboto'>{`}`}</span>
                 </h1>
                 <h2>play together</h2>
-                {/* <Button text='Test' color='blue' onClick={test} style={{ marginBottom: 20 }} /> */}
+                <Button text='Test' color='blue' onClick={test} style={{ marginBottom: 20 }} />
                 <Button text='Enter' icon={<DoorIcon />} color='blue' onClick={enter} />
                 <CollapsibleCards data={cardData} style={{ marginTop: 40, marginBottom: 40 }} />
                 {highlights && (

@@ -3,7 +3,6 @@
 import Button from '@components/Button'
 import PollAnswer from '@components/cards/PollAnswer'
 import Audio from '@components/cards/PostCard/PostTypes/Audio'
-import StringBeadCard from '@components/cards/PostCard/StringBeadCard2'
 import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
 import DraftTextEditor from '@components/draft-js/DraftTextEditor'
@@ -18,6 +17,7 @@ import ImageModal from '@components/modals/ImageModal'
 import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
+import BeadCard from '@src/components/cards/PostCard/BeadCard2'
 // import ShowMoreLess from '@components/ShowMoreLess'
 import NextBeadModal from '@components/modals/NextBeadModal2'
 import SuccessMessage from '@components/SuccessMessage'
@@ -32,27 +32,26 @@ import {
     audioMBLimit,
     capitalise,
     defaultGBGSettings,
+    defaultPostData,
     findDraftLength,
     findEventDuration,
     findEventTimes,
     formatTimeMMSS,
     imageMBLimit,
     megaByte,
+    postTypeIcons,
     totalMBUploadLimit,
 } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/CreatePostModal2.module.scss'
 import {
-    AudioIcon,
     CalendarIcon,
-    CastaliaIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
     DNAIcon,
     HelpIcon,
     ImageIcon,
     PlusIcon,
-    PollIcon,
     SettingsIcon,
     UsersIcon,
 } from '@svgs/all'
@@ -79,13 +78,6 @@ function ContentButton(props: {
     setPostType: (type: string) => void
 }): JSX.Element {
     const { type, postType, setPostType } = props
-    const typeIcons = {
-        image: <ImageIcon />,
-        audio: <AudioIcon />,
-        event: <CalendarIcon />,
-        poll: <PollIcon />,
-        gbg: <CastaliaIcon />,
-    }
     return (
         <button
             className={postType === type ? styles.selected : ''}
@@ -93,7 +85,7 @@ function ContentButton(props: {
             title={capitalise(type)}
             onClick={() => setPostType(postType === type ? 'text' : type)}
         >
-            {typeIcons[type]}
+            {postTypeIcons[type]}
         </button>
     )
 }
@@ -128,7 +120,7 @@ function CreatePostModal(): JSX.Element {
     const maxChars = 5000
     const cookies = new Cookies()
     const urlRequestIndex = useRef(0)
-    const contentButtonTypes = ['image', 'audio', 'event', 'poll', 'gbg']
+    const contentButtonTypes = ['image', 'audio', 'event', 'poll', 'glass-bead-game']
 
     function closeModal() {
         setCreatePostModalOpen(false)
@@ -141,7 +133,7 @@ function CreatePostModal(): JSX.Element {
         if (postType === 'audio') return 'New audio post'
         if (postType === 'event') return 'New event'
         if (postType === 'poll') return 'New poll'
-        if (postType === 'gbg') return 'New Glass Bead Game'
+        if (postType === 'glass-bead-game') return 'New Glass Bead Game'
         return ''
     }
 
@@ -451,7 +443,8 @@ function CreatePostModal(): JSX.Element {
 
     function renderEventTimes() {
         const showEventDates = postType === 'event' && startTime
-        const showGBGDates = postType === 'gbg' && GBGSettings.synchronous && GBGSettings.startTime
+        const showGBGDates =
+            postType === 'glass-bead-game' && GBGSettings.synchronous && GBGSettings.startTime
         const start = postType === 'event' ? startTime : GBGSettings.startTime
         const end = postType === 'event' ? endTime : GBGSettings.endTime
         if (!showEventDates && !showGBGDates) return null
@@ -513,7 +506,7 @@ function CreatePostModal(): JSX.Element {
                     <Row>
                         {beads.map((bead, i) => (
                             <Row key={bead.id}>
-                                <StringBeadCard
+                                <BeadCard
                                     bead={bead}
                                     postType={bead.type}
                                     beadIndex={i + 1}
@@ -556,7 +549,7 @@ function CreatePostModal(): JSX.Element {
         let valid = true
         const totalChars = findDraftLength(text)
         if (postType === 'text') {
-            if (totalChars < 1 && !title) {
+            if (totalChars < 1 && !title && !urlsWithMetaData.length) {
                 setNoTextError(true)
                 valid = false
             }
@@ -603,7 +596,7 @@ function CreatePostModal(): JSX.Element {
                 valid = false
             }
         }
-        if (postType === 'gbg') {
+        if (postType === 'glass-bead-game') {
             if (!topic) {
                 setTopicError(true)
                 valid = false
@@ -616,13 +609,159 @@ function CreatePostModal(): JSX.Element {
         return valid
     }
 
+    function findTopicGroup() {
+        if (postType === 'glass-bead-game') {
+            // todo: update when objects merged into array && check for image match
+            const arcMatch = GlassBeadGameTopics.archetopics.find((t) => t.name === topic)
+            if (arcMatch) return 'archetopics'
+            const limMatch = GlassBeadGameTopics.liminal.find((t) => t.name === topic)
+            if (limMatch) return 'liminal'
+        }
+        return null
+    }
+
     function createPost() {
         if (postValid()) {
-            console.log('post valid!')
+            setLoading(true)
+            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+            const postData = {
+                creatorName: accountData.name,
+                creatorHandle: accountData.handle,
+                type: postType === 'text' && urlsWithMetaData.length > 0 ? 'url' : postType,
+                spaceIds:
+                    // remove root space if other spaces present
+                    spaces.length > 1
+                        ? spaces.filter((s) => s.id !== 1).map((s) => s.id)
+                        : spaces.map((s) => s.id),
+                title,
+                text: findDraftLength(text) ? text : null,
+                mentions: mentions.map((m) => m.link),
+                urls: urlsWithMetaData,
+                images: postType === 'image' ? images : [],
+                startTime,
+                endTime,
+                pollType: pollType.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                pollAnswersLocked,
+                pollAnswers,
+                topic,
+                topicGroup: findTopicGroup(),
+                topicImageUrl: topicImageFile ? null : topicImageURL,
+                gbgSettings: GBGSettings,
+                beads,
+            }
+            // set up file uploads if required
+            let fileData
+            let uploadType
+            if (postType === 'image') {
+                uploadType = 'image-file'
+                fileData = new FormData()
+                images.forEach((image, index) => {
+                    if (image.file) fileData.append('file', image.file, index)
+                })
+                fileData.append('postData', JSON.stringify(postData))
+            }
+            if (postType === 'audio') {
+                const isBlob = audioFile && !audioFile.name
+                uploadType = isBlob ? 'audio-blob' : 'audio-file'
+                fileData = new FormData()
+                fileData.append(
+                    'file',
+                    isBlob ? new Blob(audioChunks.current, { type: 'audio/mpeg-3' }) : audioFile
+                )
+                fileData.append('postData', JSON.stringify(postData))
+            }
+            if (postType === 'glass-bead-game') {
+                uploadType = 'glass-bead-game'
+                fileData = new FormData()
+                // upload topic image if required
+                if (topicImageFile) fileData.append('topicImage', topicImageFile)
+                // add beads to fileData
+                if (!synchronous && !multiplayer) {
+                    beads.forEach((bead, index) => {
+                        if (bead.type === 'audio') {
+                            const { type, file, blob } = bead.Audios[0]
+                            if (type === 'file') fileData.append('audioFile', file, index)
+                            else fileData.append('audioBlob', blob, index)
+                        } else if (bead.type === 'image') {
+                            const { file } = bead.Images[0]
+                            if (file) fileData.append('imageFile', file, index)
+                        }
+                    })
+                }
+                fileData.append('postData', JSON.stringify(postData))
+            }
+            axios
+                .post(
+                    `${config.apiURL}/create-post?uploadType=${uploadType}`,
+                    fileData || postData,
+                    options
+                )
+                .then((res) => {
+                    console.log('success: ', res.data)
+                    const allPostSpaceIds = [
+                        ...spaces.map((space) => space.id),
+                        ...res.data.indirectSpaces.map((s) => s.spaceId),
+                    ]
+                    // console.log('allPostSpaceIds: ', allPostSpaceIds)
+                    if (allPostSpaceIds.includes(spaceData.id)) {
+                        const newPost = {
+                            ...defaultPostData,
+                            ...res.data.post,
+                            Creator: accountData,
+                            DirectSpaces: spaces,
+                            Urls: urlsWithMetaData,
+                            Event: res.data.event
+                                ? {
+                                      ...res.data.event,
+                                      Going: [],
+                                      Interested: [],
+                                  }
+                                : null,
+                        }
+                        if (postType === 'audio') newPost.Audios = [{ url: res.data.audio.url }]
+                        if (postType === 'image') newPost.Images = images
+                        if (postType === 'poll')
+                            newPost.Inquiry = {
+                                type: pollType.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                                locked: pollAnswersLocked,
+                                InquiryAnswers: res.data.pollAnswers.map((a) => {
+                                    return { ...a, Reactions: [] }
+                                }),
+                            }
+                        if (postType === 'glass-bead-game') {
+                            // console.log('res.data.gbg.beads: ', res.data.gbg.beads)
+                            newPost.Beads = beads.map((bead, i) => {
+                                return {
+                                    ...bead,
+                                    id: res.data.gbg.beads[i].newBead.id,
+                                    Reactions: [],
+                                }
+                            })
+                            newPost.GlassBeadGame2 = { ...res.data.gbg.game }
+                            newPost.Players = GBGSettings.players || []
+                        }
+                        console.log('new Post: ', newPost)
+                        setSpacePosts([newPost, ...spacePosts])
+                    }
+                    setLoading(false)
+                    setSaved(true)
+                    setTimeout(() => setCreatePostModalOpen(false), 1000)
+                })
+                .catch((error) => {
+                    if (!error.response) console.log(error)
+                    else {
+                        const { message } = error.response.data
+                        switch (message) {
+                            case 'File size too large':
+                                setAudioSizeError(true)
+                                break
+                            default:
+                                break
+                        }
+                    }
+                    setLoading(false)
+                })
         }
-
-        // setSaved(true)
-        // setTimeout(() => closeModal(), 1000)
     }
 
     // remove errors and initialise date picker if post type is event
@@ -710,7 +849,7 @@ function CreatePostModal(): JSX.Element {
                 <Column centerX style={{ width: '100%' }}>
                     <Row centerY style={{ marginBottom: 20 }}>
                         <h1 style={{ margin: 0 }}>{findModalHeader()}</h1>
-                        {postType === 'gbg' && (
+                        {postType === 'glass-bead-game' && (
                             <button
                                 type='button'
                                 className={styles.helpButton}
@@ -742,12 +881,13 @@ function CreatePostModal(): JSX.Element {
                             </button>
                         </Row>
                         <Column className={styles.content}>
-                            {showTitle && postType !== 'gbg' && (
+                            {showTitle && postType !== 'glass-bead-game' && (
                                 <Row centerY spaceBetween className={styles.title}>
                                     <input
                                         placeholder='Title...'
                                         type='text'
                                         value={title}
+                                        maxLength={100}
                                         onChange={(e) => {
                                             setTitle(e.target.value)
                                             setNoTextError(false)
@@ -764,7 +904,7 @@ function CreatePostModal(): JSX.Element {
                                     />
                                 </Row>
                             )}
-                            {postType === 'gbg' && (
+                            {postType === 'glass-bead-game' && (
                                 <Row centerY spaceBetween className={styles.topic}>
                                     <Column centerX centerY className={styles.imageWrapper}>
                                         {topicImageURL && <img src={topicImageURL} alt='' />}
@@ -784,10 +924,12 @@ function CreatePostModal(): JSX.Element {
                                         <input
                                             placeholder='Topic...'
                                             type='text'
-                                            maxLength={30}
+                                            maxLength={50}
                                             value={topic}
                                             onChange={(e) => updateTopicText(e.target.value)}
-                                            onBlur={() => setTopicOptions([])}
+                                            onBlur={() =>
+                                                setTimeout(() => setTopicOptions([]), 200)
+                                            }
                                         />
                                         {topicOptions.length > 0 && (
                                             <Column className={styles.topicOptions}>
@@ -831,8 +973,6 @@ function CreatePostModal(): JSX.Element {
                             {postType === 'audio' && audioFile && (
                                 <Audio
                                     key={audioFile.lastModified}
-                                    // todo: make optional prop
-                                    id={0}
                                     url={URL.createObjectURL(audioFile)}
                                     location='create-post-audio'
                                     style={{ height: 200 }}
@@ -870,7 +1010,7 @@ function CreatePostModal(): JSX.Element {
                                     </Row>
                                 </Column>
                             )}
-                            {postType === 'gbg' && (
+                            {postType === 'glass-bead-game' && (
                                 <Column className={styles.gbg}>
                                     {!synchronous && (
                                         <Column>
@@ -1001,7 +1141,7 @@ function CreatePostModal(): JSX.Element {
                                 />
                             </Row>
                         )}
-                        {postType === 'gbg' && (
+                        {postType === 'glass-bead-game' && (
                             <Row>
                                 <Button
                                     text='Game settings'
@@ -1042,7 +1182,7 @@ function CreatePostModal(): JSX.Element {
                         {topicError && <p>Topic required</p>}
                         {noBeadsError && <p>At least 1 bead required for single player games</p>}
                     </Column>
-                    <Button text='Post' color='blue' onClick={createPost} />
+                    <Button text='Post' color='blue' loading={loading} onClick={createPost} />
                 </Column>
             )}
             {spacesModalOpen && (
@@ -1072,9 +1212,10 @@ function CreatePostModal(): JSX.Element {
             )}
             {nextBeadModalOpen && (
                 <NextBeadModal
+                    location='new-gbg'
                     settings={GBGSettings}
                     beads={beads}
-                    saveBead={(bead) => {
+                    addBead={(bead) => {
                         setBeads([...beads, bead])
                         setNoBeadsError(false)
                     }}

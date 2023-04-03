@@ -29,7 +29,7 @@ function CommentWrapper(props: {
             <CommentCard
                 comment={comment}
                 highlighted={highlightedCommentId === comment.id}
-                toggleReplyInput={toggleReplyInput}
+                toggleReplyInput={() => toggleReplyInput()}
                 removeComment={removeComment}
                 editComment={editComment}
             />

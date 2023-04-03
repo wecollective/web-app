@@ -47,7 +47,7 @@ function NextBeadModal(props: {
 }): JSX.Element {
     const { accountData, setAlertMessage, setAlertModalOpen } = useContext(AccountContext)
     const { postData, setPostData, close } = props
-    const { id, Weave, StringPlayers, StringPosts } = postData
+    const { id, Weave, Players, Beads } = postData
     const {
         numberOfTurns,
         allowedBeadTypes,
@@ -58,8 +58,8 @@ function NextBeadModal(props: {
         privacy,
     } = Weave
     const maxChars = characterLimit || 5000
-    const beadIndex = StringPosts.length + 1
-    const playerData = StringPlayers.find((p) => p.id === accountData.id)
+    const beadIndex = Beads.length + 1
+    const playerData = Players.find((p) => p.id === accountData.id)
     const playerColor = playerData ? playerData.UserPost.color : null
     const defaultBead = {
         id: uuidv4(),
@@ -81,8 +81,8 @@ function NextBeadModal(props: {
     const [saved, setSaved] = useState(false)
 
     function findNextPlayerId() {
-        if (StringPosts.length + 1 < StringPlayers.length * numberOfTurns) {
-            return StringPlayers[(StringPosts.length + 1) % StringPlayers.length].id
+        if (Beads.length + 1 < Players.length * numberOfTurns) {
+            return Players[(Beads.length + 1) % Players.length].id
         }
         return null
     }
@@ -354,12 +354,12 @@ function NextBeadModal(props: {
                             ...Weave,
                             nextMoveDeadline: res.data.newDeadline,
                         },
-                        StringPosts: [
-                            ...StringPosts,
+                        Beads: [
+                            ...Beads,
                             {
                                 ...res.data.bead,
                                 Link: { index: beadIndex },
-                                PostImages: res.data.imageData || [],
+                                Images: res.data.imageData || [],
                                 Creator: {
                                     id: accountData.id,
                                     name: accountData.name,
@@ -664,7 +664,7 @@ function NextBeadModal(props: {
                                     bead={{
                                         ...newBead,
                                         type: `string-${newBead.type.toLowerCase()}`,
-                                        PostImages: images.map((image, index) => {
+                                        Images: images.map((image, index) => {
                                             return {
                                                 id: uuidv4(),
                                                 index,

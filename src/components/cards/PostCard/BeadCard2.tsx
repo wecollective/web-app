@@ -14,8 +14,8 @@ import { AccountContext } from '@contexts/AccountContext'
 import LikeModal from '@src/components/cards/PostCard/LikeModal'
 import LinkModal from '@src/components/cards/PostCard/LinkModal'
 import EditPostModal from '@src/components/modals/EditPostModal'
-import { beadTypeIcons, handleImageError, statTitle } from '@src/Helpers'
-import styles from '@styles/components/cards/PostCard/StringBeadCard2.module.scss'
+import { statTitle } from '@src/Helpers'
+import styles from '@styles/components/cards/PostCard/BeadCard2.module.scss'
 import {
     CommentIcon,
     EditIcon,
@@ -26,9 +26,9 @@ import {
 } from '@svgs/all'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
-function StringBeadCard(props: {
+function BeadCard(props: {
     bead: any
     // todo: remove post type?
     postType?: string
@@ -55,7 +55,7 @@ function StringBeadCard(props: {
     const [bead, setBead] = useState(sourceBead)
     const {
         id,
-        type,
+        // type,
         totalLikes,
         totalComments,
         totalLinks,
@@ -65,7 +65,7 @@ function StringBeadCard(props: {
         Creator,
         Links,
         Urls,
-        Audio,
+        Audios,
         Images,
     } = bead
     const [menuOpen, setMenuOpen] = useState(false)
@@ -77,9 +77,8 @@ function StringBeadCard(props: {
     const [selectedImage, setSelectedImage] = useState<any>(null)
     const history = useNavigate()
 
-    // New Link approach:
     const images = bead.Images ? bead.Images.sort((a, b) => a.index - b.index) : []
-    // const type = bead.type.replace('string-', '')
+    const type = bead.type.replace('gbg-', '')
     // const isSource = bead.Link && bead.Link.relationship === 'source'
     // const sourceBead = bead.index === 0
 
@@ -90,11 +89,9 @@ function StringBeadCard(props: {
         beadIndex !== 0 &&
         !['create-string-modal', 'next-bead-modal', 'preview'].includes(location)
 
-    const showFooter =
-        location !== 'preview' &&
-        bead.state !== 'account-deleted' &&
-        postType !== 'glass-bead-game' &&
-        !['create-string-modal', 'next-bead-modal'].includes(location)
+    const showFooter = location !== 'preview' && bead.state !== 'account-deleted'
+    // postType !== 'glass-bead-game' &&
+    // !['create-string-modal', 'next-bead-modal'].includes(location)
 
     function findUserTitle() {
         if (bead.state === 'account-deleted') return '[Account deleted]'
@@ -122,76 +119,90 @@ function StringBeadCard(props: {
         setImageModalOpen(true)
     }
 
+    // if (type === 'url') console.log('sourceBead: ', sourceBead)
+
     useEffect(() => setBead(sourceBead), [sourceBead])
 
     return (
         <Column
             spaceBetween
             className={`${styles.wrapper} ${selected && styles.selected} ${
-                beadIndex === 0 && styles.source
-            }`}
+                bead.Link.relationship === 'source' && styles.source
+            } ${location === 'gbg-room' && styles.gbgRoom}`}
             style={{ ...style, backgroundColor: bead.color }}
         >
             <div className={styles.watermark} />
             <Row spaceBetween centerY className={styles.header}>
-                {postType && ['glass-bead-game', 'weave'].includes(postType) && (
-                    <ImageTitle
-                        type='user'
-                        imagePath={bead.Creator.flagImagePath}
-                        title={findUserTitle()}
-                        fontSize={12}
-                        imageSize={20}
-                        style={{ marginRight: 10 }}
-                    />
-                )}
-                <Row centerX centerY className={styles.beadType}>
-                    {beadTypeIcons[type]}
-                </Row>
-                {removeBead && beadIndex !== 0 && (
-                    <CloseButton size={20} onClick={() => removeBead(beadIndex)} />
-                )}
-                {beadIndex === 0 && (
-                    <button
-                        type='button'
-                        title='Open source bead'
-                        className={styles.beadRelationship}
-                        onClick={() =>
-                            !['create-string-modal', 'next-bead-modal', 'preview'].includes(
-                                location
-                            ) && history(`/p/${bead.id}`)
-                        }
-                    >
-                        <SourceIcon />
-                    </button>
-                )}
-                {showDropDown && (
-                    <Row>
+                {/* {postType && ['glass-bead-game', 'weave'].includes(postType) && ( */}
+                <ImageTitle
+                    type='user'
+                    imagePath={bead.Creator.flagImagePath}
+                    title={findUserTitle()}
+                    fontSize={12}
+                    imageSize={20}
+                    style={{ marginRight: 10 }}
+                />
+                {/* )} */}
+                {/* <Row centerX centerY className={styles.beadType}>
+                    {postTypeIcons[type]}
+                </Row> */}
+                <Row centerY>
+                    {removeBead && beadIndex !== 0 && (
+                        <CloseButton size={20} onClick={() => removeBead(beadIndex)} />
+                    )}
+                    {!!id && (
+                        <Link to={`/p/${id}`} className={styles.id} title='Open post page'>
+                            <p className='grey'>ID:</p>
+                            <p style={{ marginLeft: 5 }}>{id}</p>
+                        </Link>
+                    )}
+                    {/* <a hr className={styles.id}>
+                        <p className='grey'>ID:</p>
+                        <p style={{ marginLeft: 5 }}>{id}</p>
+                    </button> */}
+                    {bead.Link.relationship === 'source' && (
                         <button
                             type='button'
-                            className={styles.menuButton}
-                            onClick={() => setMenuOpen(!menuOpen)}
+                            title='Open source bead'
+                            className={styles.beadRelationship}
+                            onClick={() =>
+                                !['create-string-modal', 'next-bead-modal', 'preview'].includes(
+                                    location
+                                ) && history(`/p/${bead.id}`)
+                            }
                         >
-                            <VerticalEllipsisIcon />
+                            <SourceIcon />
                         </button>
-                        {menuOpen && (
-                            <CloseOnClickOutside onClick={() => setMenuOpen(false)}>
-                                <Column className={styles.menu}>
-                                    {isOwnPost && (
-                                        <Column>
-                                            <button
-                                                type='button'
-                                                onClick={() => setEditPostModalOpen(true)}
-                                            >
-                                                <EditIcon />
-                                                Edit text
-                                            </button>
-                                        </Column>
-                                    )}
-                                </Column>
-                            </CloseOnClickOutside>
-                        )}
-                    </Row>
-                )}
+                    )}
+                    {showDropDown && (
+                        <Row>
+                            <button
+                                type='button'
+                                className={styles.menuButton}
+                                onClick={() => setMenuOpen(!menuOpen)}
+                            >
+                                <VerticalEllipsisIcon />
+                            </button>
+                            {menuOpen && (
+                                <CloseOnClickOutside onClick={() => setMenuOpen(false)}>
+                                    <Column className={styles.menu}>
+                                        {isOwnPost && (
+                                            <Column>
+                                                <button
+                                                    type='button'
+                                                    onClick={() => setEditPostModalOpen(true)}
+                                                >
+                                                    <EditIcon />
+                                                    Edit text
+                                                </button>
+                                            </Column>
+                                        )}
+                                    </Column>
+                                </CloseOnClickOutside>
+                            )}
+                        </Row>
+                    )}
+                </Row>
             </Row>
             {bead.state === 'account-deleted' ? (
                 <Column centerY centerX style={{ height: '100%' }}>
@@ -205,15 +216,15 @@ function StringBeadCard(props: {
                         </Scrollbars>
                     )}
                     {type === 'url' && <UrlPreview type='bead' urlData={Urls[0]} />}
-                    {type === 'audio' && (
+                    {type === 'audio' && Audios && (
                         <AudioCard
-                            id={id}
-                            url={URL.createObjectURL(Audio.file)}
-                            location='post-bead-audio'
+                            id={beadIndex}
+                            url={Audios[0].url || URL.createObjectURL(Audios[0].file)}
+                            location={location}
                             style={{ width: '100%', height: '100%' }}
                         />
                     )}
-                    {type === 'image' && (
+                    {type === 'image' && Images && (
                         <button
                             className={styles.image}
                             type='button'
@@ -221,7 +232,7 @@ function StringBeadCard(props: {
                         >
                             <img
                                 src={Images[0].url || URL.createObjectURL(Images[0].file)}
-                                onError={(e) => handleImageError(e, Images[0].url)}
+                                // onError={(e) => handleImageError(e, Images[0].url)}
                                 alt=''
                             />
                         </button>
@@ -236,25 +247,27 @@ function StringBeadCard(props: {
                         text={totalLikes || ''}
                         title={statTitle('Like', totalLikes || 0)}
                         color={accountLike && 'blue'}
-                        disabled={location === 'preview'}
+                        // disabled={location === 'preview'}
                         onClick={() => setLikeModalOpen(true)}
                     />
-                    <StatButton
-                        icon={<CommentIcon />}
-                        iconSize={20}
-                        text={totalComments || ''}
-                        title={statTitle('Comment', totalComments || 0)}
-                        // color={accountComment && 'blue'}
-                        disabled={location === 'preview'}
-                        onClick={() => toggleBeadComments && toggleBeadComments()}
-                    />
+                    {location !== 'gbg-room' && (
+                        <StatButton
+                            icon={<CommentIcon />}
+                            iconSize={20}
+                            text={totalComments || ''}
+                            title={statTitle('Comment', totalComments || 0)}
+                            // color={accountComment && 'blue'}
+                            // disabled={location === 'preview'}
+                            onClick={() => toggleBeadComments && toggleBeadComments()}
+                        />
+                    )}
                     <StatButton
                         icon={<LinkIcon />}
                         iconSize={20}
                         text={totalLinks || ''}
                         title={statTitle('Link', totalLinks || 0)}
                         color={accountLink && 'blue'}
-                        disabled={location === 'preview'}
+                        // disabled={location === 'preview'}
                         onClick={() => setLinkModalOpen(true)}
                     />
                 </Row>
@@ -295,7 +308,7 @@ function StringBeadCard(props: {
     )
 }
 
-StringBeadCard.defaultProps = {
+BeadCard.defaultProps = {
     postId: null,
     postType: null,
     selected: false,
@@ -304,4 +317,4 @@ StringBeadCard.defaultProps = {
     style: null,
 }
 
-export default StringBeadCard
+export default BeadCard

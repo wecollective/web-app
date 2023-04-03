@@ -68,8 +68,8 @@ function StringBeadCard(props: {
     const [linkModalOpen, setLinkModalOpen] = useState(false)
     const [selectedImage, setSelectedImage] = useState<any>(null)
     const history = useNavigate()
-    const images = bead.PostImages ? bead.PostImages.sort((a, b) => a.index - b.index) : []
-    const type = bead.type.replace('string-', '')
+    const images = bead.Images ? bead.Images.sort((a, b) => a.index - b.index) : []
+    const type = bead.type.replace('gbg-', '')
     const isSource = bead.Link && bead.Link.relationship === 'source'
     const isOwnPost = accountData && bead.Creator && accountData.id === bead.Creator.id
     const showDropDown =
@@ -80,7 +80,7 @@ function StringBeadCard(props: {
 
     const showFooter =
         bead.state !== 'account-deleted' &&
-        postType !== 'glass-bead-game' &&
+        // postType !== 'glass-bead-game' &&
         !['create-string-modal', 'next-bead-modal'].includes(location)
 
     function findUserTitle() {

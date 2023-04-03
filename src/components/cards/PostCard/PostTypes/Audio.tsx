@@ -32,6 +32,8 @@ function Audio(props: {
         }
     }
 
+    console.log('location: ', location)
+
     return (
         <Column style={{ ...style, position: 'relative' }}>
             {remove && (
@@ -48,7 +50,7 @@ function Audio(props: {
                 staticColor={colors.audioVisualiserStatic}
                 dynamicBars={160}
                 dynamicColor={colors.audioVisualiserDynamic}
-                style={{ height: '100%', marginBottom: 10 }}
+                style={{ height: location === 'gbg-room' ? 80 : '100%', marginBottom: 10 }}
             />
             <Row centerY>
                 <button

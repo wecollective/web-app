@@ -84,7 +84,11 @@ function Calendar(): JSX.Element {
                                 if (eventDate === dayNumber)
                                     dayEvents.push({
                                         ...post.Event,
-                                        title: post.Event.title || post.GlassBeadGame.topic,
+                                        title:
+                                            post.title ||
+                                            (post.GlassBeadGame2
+                                                ? post.GlassBeadGame2.topic
+                                                : post.text),
                                         type: post.type,
                                         postId: post.id,
                                     })

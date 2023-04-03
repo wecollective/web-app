@@ -1,7 +1,15 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable no-control-regex */
 import config from '@src/Config'
-import { AudioIcon, ImageIcon, LinkIcon, TextIcon } from '@svgs/all'
+import {
+    AudioIcon,
+    CalendarIcon,
+    CastaliaIcon,
+    ImageIcon,
+    LinkIcon,
+    PollIcon,
+    TextIcon,
+} from '@svgs/all'
 import { convertFromRaw, EditorState } from 'draft-js'
 import React from 'react'
 import { v4 as uuidv4 } from 'uuid'
@@ -47,11 +55,11 @@ export const defaultPostData = {
     id: uuidv4(),
     type: 'text',
     text: '',
-    url: '',
-    urlImage: null,
-    urlDomain: null,
-    urlTitle: null,
-    urlDescription: null,
+    // url: '',
+    // urlImage: null,
+    // urlDomain: null,
+    // urlTitle: null,
+    // urlDescription: null,
     totalLikes: 0,
     totalComments: 0,
     totalReposts: 0,
@@ -68,13 +76,14 @@ export const defaultPostData = {
     Reactions: [] as any[],
     IncomingLinks: [] as any[],
     OutgoingLinks: [] as any[],
-    PostImages: [] as any[],
+    Images: [] as any[],
+    Audios: [] as any[],
     Event: null as any,
     Inquiry: null as any,
-    GlassBeadGame: null as any,
-    StringPosts: [] as any[],
-    Weave: null as any,
-    StringPlayers: [] as any[],
+    GlassBeadGame2: null as any,
+    Beads: [] as any[],
+    // Weave: null as any,
+    Players: [] as any[],
 }
 
 // export const defaultBeadData = {
@@ -115,8 +124,8 @@ export const defaultGBGSettings = {
     endTime: '',
     multiplayer: false,
     players: [],
-    allowedBeadTypes: ['text', 'url', 'audio', 'image'],
-    totalMoves: 5,
+    allowedBeadTypes: ['audio'],
+    totalMoves: 0,
     movesPerPlayer: 5,
     moveDuration: 60,
     introDuration: 0,
@@ -126,11 +135,14 @@ export const defaultGBGSettings = {
     moveTimeWindow: 0,
 }
 
-export const beadTypeIcons = {
+export const postTypeIcons = {
     text: <TextIcon />,
     url: <LinkIcon />,
     image: <ImageIcon />,
     audio: <AudioIcon />,
+    event: <CalendarIcon />,
+    poll: <PollIcon />,
+    'glass-bead-game': <CastaliaIcon />,
 }
 
 // functions

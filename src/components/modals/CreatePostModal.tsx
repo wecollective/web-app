@@ -32,7 +32,7 @@ import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import {
     allValid,
     audioMBLimit,
-    defaultBeadData,
+    // defaultBeadData,
     defaultErrorState,
     defaultPostData,
     findDraftLength,
@@ -359,7 +359,7 @@ function CreatePostModal(): JSX.Element {
     })
 
     // string
-    const [newBead, setNewBead] = useState<any>(defaultBeadData)
+    const [newBead, setNewBead] = useState<any>({})
     const [string, setString] = useState<any[]>([])
     type errorState = 'default' | 'valid' | 'invalid'
     const [stringTextState, setStringTextState] = useState<errorState>('default')
@@ -751,7 +751,7 @@ function CreatePostModal(): JSX.Element {
             }
             setString([...string, newBead])
             setNewBead({
-                ...defaultBeadData,
+                // ...defaultBeadData,
                 id: uuidv4(),
                 type: newBead.type,
             })
@@ -969,7 +969,7 @@ function CreatePostModal(): JSX.Element {
             sourceCreatorId: createPostModalSettings.source
                 ? createPostModalSettings.source.Creator.id
                 : null,
-        }
+        } as any
         if (postType === 'Text') data.text = textForm.text.value
         if (postType === 'Url') {
             data.text = urlForm2.text.value
@@ -981,7 +981,7 @@ function CreatePostModal(): JSX.Element {
         }
         if (postType === 'Image') {
             data.text = imageForm.text.value
-            data.PostImages = images.map((image, index) => {
+            data.Images = images.map((image, index) => {
                 return {
                     id: image.id,
                     index,
@@ -1040,7 +1040,7 @@ function CreatePostModal(): JSX.Element {
         }
         if (postType === 'String') {
             data.text = stringForm.description.value
-            data.StringPosts = string.map((bead, index) => {
+            data.Beads = string.map((bead, index) => {
                 if (bead.role === 'source') return bead
                 let beadUrl = ''
                 if (bead.type === 'url') beadUrl = bead.url
@@ -1057,7 +1057,7 @@ function CreatePostModal(): JSX.Element {
                     urlImage: bead.urlData ? bead.urlData.image : null,
                     urlTitle: bead.urlData ? bead.urlData.title : null,
                     Link: { index },
-                    PostImages: bead.images.map((image, i) => {
+                    Images: bead.images.map((image, i) => {
                         return {
                             id: image.id,
                             index: i,
@@ -1070,7 +1070,7 @@ function CreatePostModal(): JSX.Element {
         }
         if (postType === 'Weave') {
             data.text = multiplayerStringForm1.description.value
-            data.StringPlayers = selectedUsers.map((user, index) => {
+            data.Players = selectedUsers.map((user, index) => {
                 return {
                     ...user,
                     UserPost: {
@@ -1111,7 +1111,7 @@ function CreatePostModal(): JSX.Element {
             urlTitle: bead.urlData ? bead.urlData.title : null,
             urlImage: bead.urlData ? bead.urlData.image : null,
             Link: { index },
-            PostImages: bead.images.map((image, i) => {
+            Images: bead.images.map((image, i) => {
                 return {
                     id: image.id,
                     index: i,
@@ -1274,7 +1274,7 @@ function CreatePostModal(): JSX.Element {
                                     return {
                                         ...bead.stringPost,
                                         Link: { index: i },
-                                        PostImages: bead.imageData || [],
+                                        Images: bead.imageData || [],
                                     }
                                 }),
                             ]
@@ -1287,7 +1287,7 @@ function CreatePostModal(): JSX.Element {
                         const newPost = {
                             ...data,
                             ...res.data.post,
-                            PostImages: res.data.images || [],
+                            Images: res.data.images || [],
                             Event: res.data.event
                                 ? {
                                       ...res.data.event,
@@ -1304,7 +1304,7 @@ function CreatePostModal(): JSX.Element {
                                           }),
                                       }
                                     : null,
-                            StringPosts: stringPosts,
+                            Beads: stringPosts,
                         }
                         setSpacePosts([newPost, ...spacePosts])
                     }
