@@ -273,7 +273,7 @@ function NotificationCard(props: {
             const data = { postId, notificationId: id, response }
             const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
             axios
-                .post(`${config.apiURL}/respond-to-weave-invite`, data, authHeader)
+                .post(`${config.apiURL}/respond-to-gbg-invite`, data, authHeader)
                 .then(() => updateNotification(id, 'state', response))
                 .catch((error) => console.log(error))
         }
@@ -516,97 +516,97 @@ function NotificationCard(props: {
                         </Content>
                     )}
 
-                    {type === 'weave-invitation' && (
+                    {type === 'gbg-invitation' && (
                         <Content typeIcon={<WeaveIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>invited you to join a</p>
-                            <TextLink text='weave' link={`/p/${postId}`} />
+                            <TextLink text='glass bead game' link={`/p/${postId}`} />
                             <State
                                 state={state}
                                 respond={(response) => respondToWeaveInvite(response)}
                             />
-                            {relatedPost.Weave.state === 'cancelled' && <p>Game cancelled</p>}
+                            {/* {relatedPost.Weave.state === 'cancelled' && <p>Game cancelled</p>} */}
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}
 
-                    {type === 'weave-accepted' && (
+                    {type === 'gbg-accepted' && (
                         <Content typeIcon={<WeaveIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>accepted your</p>
-                            <TextLink text='weave' link={`/p/${postId}`} />
+                            <TextLink text='glass bead game' link={`/p/${postId}`} />
                             <p>invite</p>
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}
 
-                    {type === 'weave-rejected' && (
+                    {type === 'gbg-rejected' && (
                         <Content typeIcon={<WeaveIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>has rejected their</p>
-                            <TextLink text='weave' link={`/p/${postId}`} />
+                            <TextLink text='glass bead game' link={`/p/${postId}`} />
                             <p>invite so the game has been cancelled</p>
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}
 
-                    {type === 'weave-move' && (
+                    {type === 'gbg-move' && (
                         <Content typeIcon={<WeaveIcon />}>
                             <p>It&apos;s your move! Add the next bead to the</p>
-                            <TextLink text='weave' link={`/p/${postId}`} />
+                            <TextLink text='glass bead game' link={`/p/${postId}`} />
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}
 
-                    {type === 'weave-move-from-other-player' && (
+                    {type === 'gbg-move-from-other-player' && (
                         <Content typeIcon={<WeaveIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>just added a new bead to a</p>
-                            <TextLink text='weave' link={`/p/${postId}`} />
+                            <TextLink text='glass bead game' link={`/p/${postId}`} />
                             <p>you have particpated in</p>
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}
 
-                    {type === 'weave-creator-move-from-other-player' && (
+                    {type === 'gbg-creator-move-from-other-player' && (
                         <Content typeIcon={<WeaveIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>just added a new bead to a</p>
-                            <TextLink text='weave' link={`/p/${postId}`} />
+                            <TextLink text='glass bead game' link={`/p/${postId}`} />
                             <p>you created</p>
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}
 
-                    {type === 'weave-move-reminder' && (
+                    {type === 'gbg-move-reminder' && (
                         <Content typeIcon={<WeaveIcon />}>
                             <p>You have 15 minutes left to complete your move on</p>
-                            <TextLink text='this weave!' link={`/p/${postId}`} />
+                            <TextLink text='this glass bead game!' link={`/p/${postId}`} />
                             <p>If you fail to do this, the game ends!</p>
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}
 
-                    {type === 'weave-cancelled' && (
+                    {type === 'gbg-cancelled' && (
                         <Content typeIcon={<WeaveIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>failed to make their move in time on</p>
-                            <TextLink text='this weave.' link={`/p/${postId}`} />
+                            <TextLink text='this glass bead game.' link={`/p/${postId}`} />
                             <p>The game has now ended!</p>
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}
 
-                    {type === 'weave-ended' && (
+                    {type === 'gbg-ended' && (
                         <Content typeIcon={<WeaveIcon />}>
                             <p>A</p>
-                            <TextLink text='weave' link={`/p/${postId}`} />
+                            <TextLink text='glass bead game' link={`/p/${postId}`} />
                             <p>you participated in has ended</p>
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}
 
-                    {type === 'new-string-from-your-post' && (
+                    {type === 'new-gbg-from-your-post' && (
                         <Content typeIcon={<StringIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>just created a</p>
@@ -616,18 +616,18 @@ function NotificationCard(props: {
                         </Content>
                     )}
 
-                    {type === 'inquiry-vote' && (
+                    {type === 'poll-vote' && (
                         <Content typeIcon={<InquiryIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>just voted on your</p>
-                            <TextLink text='Inquiry' link={`/p/${postId}`} />
+                            <TextLink text='Poll' link={`/p/${postId}`} />
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}
                 </>
             )}
 
-            {location === 'space' && (
+            {/* {location === 'space' && (
                 <>
                     {type === 'parent-space-request' && (
                         <Content typeIcon={<SpacesIcon />}>
@@ -644,7 +644,7 @@ function NotificationCard(props: {
                         </Content>
                     )}
                 </>
-            )}
+            )} */}
         </Row>
     )
 }

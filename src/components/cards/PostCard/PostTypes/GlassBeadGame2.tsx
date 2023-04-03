@@ -21,8 +21,15 @@ function GlassBeadGame(props: {
 }): JSX.Element {
     const { postData, setPostData, location } = props
     const { id, Creator, GlassBeadGame2, Beads, Players } = postData
-    const { synchronous, multiplayer, totalMoves, movesPerPlayer, playerOrder, nextMoveDeadline } =
-        GlassBeadGame2
+    const {
+        synchronous,
+        multiplayer,
+        totalMoves,
+        movesPerPlayer,
+        playerOrder,
+        nextMoveDeadline,
+        state,
+    } = GlassBeadGame2
     const { accountData, setAlertMessage, setAlertModalOpen, loggedIn } = useContext(AccountContext)
     const [beads, setBeads] = useState<any[]>(Beads.sort((a, b) => a.Link.index - b.Link.index))
     const [orderedPlayers, setOrderedPlayers] = useState<any[]>([])
@@ -37,7 +44,9 @@ function GlassBeadGame(props: {
     const pendingPlayers = Players.filter((p) => p.UserPost.state === 'pending')
     const rejectedPlayers = Players.filter((p) => p.UserPost.state === 'rejected')
     const allAccepted = !pendingPlayers.length && !rejectedPlayers.length
-    const hideBeadDraw = synchronous ? !beads.length : !allAccepted
+    const hideBeadDraw = synchronous
+        ? !beads.length
+        : !allAccepted || (state === 'cancelled' && !beads.length)
 
     function toggleBeadComments(bead) {
         if (beadCommentsOpen) {
@@ -51,8 +60,7 @@ function GlassBeadGame(props: {
 
     function renderOpenToAllUsersRow() {
         const move = `${beads.length + 1} ${totalMoves ? `/ ${totalMoves}` : ''}`
-        const movesLeft = !totalMoves || totalMoves > beads.length
-        console.log('moves left: ', movesLeft)
+        const movesLeft = state === 'active' && (!totalMoves || totalMoves > beads.length)
         return (
             <Row spaceBetween centerY className={styles.infoRow}>
                 <Row centerY>
@@ -66,7 +74,7 @@ function GlassBeadGame(props: {
 
     function renderRestrictedPlayersRow() {
         const move = `${beads.length + 1} / ${movesPerPlayer * Players.length}`
-        const movesLeft = movesPerPlayer * Players.length > beads.length
+        const movesLeft = state === 'active' && movesPerPlayer * Players.length > beads.length
         return (
             <Row spaceBetween centerY className={styles.infoRow}>
                 <FlagImageHighlights
@@ -80,7 +88,7 @@ function GlassBeadGame(props: {
                         {formatTimeHHDDMMSS(timeLeftInMove)}
                     </p>
                 )}
-                {allAccepted && nextPlayer && (
+                {allAccepted && (nextPlayer || !movesLeft) && (
                     <Row centerY>
                         {movesLeft ? (
                             <Row centerY>
@@ -94,7 +102,7 @@ function GlassBeadGame(props: {
                                 <p>&apos;s move: {move}</p>
                             </Row>
                         ) : (
-                            <p>Game finished</p>
+                            <p>Game {state === 'cancelled' ? 'cancelled' : 'finished'}</p>
                         )}
                     </Row>
                 )}
@@ -105,6 +113,7 @@ function GlassBeadGame(props: {
                             type='user'
                             imagePaths={pendingPlayers.map((p) => p.flagImagePath)}
                             imageSize={30}
+                            style={{ marginLeft: 5 }}
                         />
                     </Row>
                 )}
@@ -133,9 +142,11 @@ function GlassBeadGame(props: {
     function renderNextBeadButton() {
         return (
             <Row centerY>
-                <Row centerY className={styles.beadDivider}>
-                    <DNAIcon />
-                </Row>
+                {beads.length > 0 && (
+                    <Row centerY className={styles.beadDivider}>
+                        <DNAIcon />
+                    </Row>
+                )}
                 <button
                     type='button'
                     className={styles.nextBeadCard}
@@ -161,9 +172,11 @@ function GlassBeadGame(props: {
     function renderWaitingForPlayerCard() {
         return (
             <Row centerY>
-                <Row centerY className={styles.beadDivider}>
-                    <DNAIcon />
-                </Row>
+                {beads.length > 0 && (
+                    <Row centerY className={styles.beadDivider}>
+                        <DNAIcon />
+                    </Row>
+                )}
                 <Column
                     centerX
                     centerY
@@ -189,9 +202,12 @@ function GlassBeadGame(props: {
         // game rooms
         if (synchronous) return <span style={{ marginRight: 15 }} />
         // restricted weaves
-        if (nextPlayer) {
-            if (nextPlayer.id === accountData.id) return renderNextBeadButton()
-            return renderWaitingForPlayerCard()
+        if (Players.length) {
+            if (nextPlayer) {
+                if (nextPlayer.id === accountData.id) return renderNextBeadButton()
+                return renderWaitingForPlayerCard()
+            }
+            return <span style={{ marginRight: 15 }} />
         }
         // open weaves
         const movesLeft = !totalMoves || totalMoves > beads.length
@@ -207,6 +223,7 @@ function GlassBeadGame(props: {
 
     // handle players and move deadline
     useEffect(() => {
+        setBeads(Beads.sort((a, b) => a.Link.index - b.Link.index))
         if (Players.length && playerOrder) {
             // order players and find next player
             const players = [] as any
@@ -214,10 +231,9 @@ function GlassBeadGame(props: {
                 players.push(Players.find((p) => p.id === +playerId))
             })
             setOrderedPlayers(players)
-            const movesLeft = beads.length < Players.length * movesPerPlayer
-            setNextPlayer(movesLeft ? players[beads.length % Players.length] : null)
-            // set up timer if nextMoveDeadline active
-            const deadlineActive = nextMoveDeadline && new Date(nextMoveDeadline) < new Date()
+            const movesLeft = Beads.length < Players.length * movesPerPlayer
+            setNextPlayer(movesLeft ? players[Beads.length % Players.length] : null)
+            const deadlineActive = nextMoveDeadline && new Date(nextMoveDeadline) > new Date()
             if (deadlineActive) {
                 timeLeftInMoveInterval.current = setInterval(() => {
                     const now = new Date().getTime()
@@ -227,11 +243,6 @@ function GlassBeadGame(props: {
             }
         }
         return () => clearInterval(timeLeftInMoveInterval.current)
-    }, [])
-
-    useEffect(() => {
-        // console.log('new post data: ', postData)
-        setBeads(Beads.sort((a, b) => a.Link.index - b.Link.index))
     }, [postData])
 
     return (
@@ -287,9 +298,12 @@ function GlassBeadGame(props: {
                         allowedBeadTypes: [...GlassBeadGame2.allowedBeadTypes.split(',')],
                     }}
                     postId={id}
-                    beads={beads}
-                    // addBead={(bead) => setBeads([...beads, bead])}
-                    addBead={(bead) => setPostData({ ...postData, Beads: [...beads, bead] })}
+                    players={Players}
+                    addBead={(bead) => {
+                        const newPostData = { ...postData, Beads: [...beads, bead] }
+                        newPostData.GlassBeadGame2.nextMoveDeadline = bead.nextMoveDeadline
+                        setPostData(newPostData)
+                    }}
                     close={() => setNextBeadModalOpen(false)}
                 />
             )}

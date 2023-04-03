@@ -738,7 +738,15 @@ function CreatePostModal(): JSX.Element {
                                 }
                             })
                             newPost.GlassBeadGame2 = { ...res.data.gbg.game }
-                            newPost.Players = GBGSettings.players || []
+                            newPost.Players =
+                                GBGSettings.players.map((p) => {
+                                    return {
+                                        ...p,
+                                        UserPost: {
+                                            state: p.id === accountData.id ? 'accepted' : 'pending',
+                                        },
+                                    }
+                                }) || []
                         }
                         console.log('new Post: ', newPost)
                         setSpacePosts([newPost, ...spacePosts])
@@ -1214,7 +1222,7 @@ function CreatePostModal(): JSX.Element {
                 <NextBeadModal
                     location='new-gbg'
                     settings={GBGSettings}
-                    beads={beads}
+                    players={GBGSettings.players}
                     addBead={(bead) => {
                         setBeads([...beads, bead])
                         setNoBeadsError(false)

@@ -181,10 +181,7 @@ function PostCard(props: {
         )
     }
 
-    useEffect(() => {
-        console.log('new post data')
-        setPostData(post)
-    }, [post])
+    useEffect(() => setPostData(post), [post])
 
     return (
         <Column

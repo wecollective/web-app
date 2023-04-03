@@ -26,7 +26,7 @@ import styles from '@styles/components/modals/NextBeadModal2.module.scss'
 import axios from 'axios'
 import * as d3 from 'd3'
 import getBlobDuration from 'get-blob-duration'
-import React, { useContext, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import Cookies from 'universal-cookie'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -37,16 +37,17 @@ function NextBeadModal(props: {
     location: 'new-gbg' | 'existing-gbg'
     postId?: number
     settings: any
-    beads: any[]
+    players: any[]
     addBead: (bead: any) => void
     close: () => void
 }): JSX.Element {
     const { accountData, setAlertMessage, setAlertModalOpen } = useContext(AccountContext)
-    const { location, postId, settings, beads, addBead, close } = props
+    const { location, postId, settings, players, addBead, close } = props
     const { allowedBeadTypes, characterLimit, moveDuration, moveTimeWindow } = settings
     // const [newBead, setNewBead] = useState<any>({ ...defaultBeadData, type: allowedBeadTypes[0] })
     const [type, setType] = useState(allowedBeadTypes[0])
     const [color, setColor] = useState('#fff')
+    const [showColors, setShowColors] = useState(true)
     const [text, setText] = useState('')
     const [mentions, setMentions] = useState<any[]>([])
     // const cookies = new Cookies()
@@ -252,10 +253,15 @@ function NextBeadModal(props: {
                 options
             )
             .then((res) => {
-                console.log('create-next-bead res: ', res)
+                console.log('create-next-bead res: ', res.data)
                 setSaved(true)
                 setLoading(false)
-                addBead({ ...defaultPostData, ...bead, id: res.data.bead.id })
+                addBead({
+                    ...defaultPostData,
+                    ...bead,
+                    id: res.data.bead.id,
+                    nextMoveDeadline: res.data.newDeadline || null,
+                })
                 setTimeout(() => close(), 1000)
             })
             .catch((error) => {
@@ -292,6 +298,16 @@ function NextBeadModal(props: {
         }
     }
 
+    useEffect(() => {
+        if (players.length) {
+            const accountPlayer = players.find((p) => p.id === accountData.id)
+            if (accountPlayer.UserPost.color) {
+                setColor(accountPlayer.UserPost.color)
+                setShowColors(false)
+            }
+        }
+    }, [])
+
     return (
         <Modal className={styles.wrapper} close={close} centered confirmClose>
             {saved ? (
@@ -299,17 +315,19 @@ function NextBeadModal(props: {
             ) : (
                 <Column centerX style={{ width: '100%' }}>
                     <h1>Add a new bead</h1>
-                    <Row centerY className={styles.colorButtons}>
-                        {beadColors.map((c) => (
-                            <button
-                                key={c}
-                                type='button'
-                                aria-label='color'
-                                onClick={() => setColor(c)}
-                                style={{ backgroundColor: c }}
-                            />
-                        ))}
-                    </Row>
+                    {showColors && (
+                        <Row centerY className={styles.colorButtons}>
+                            {beadColors.map((c) => (
+                                <button
+                                    key={c}
+                                    type='button'
+                                    aria-label='color'
+                                    onClick={() => setColor(c)}
+                                    style={{ backgroundColor: c }}
+                                />
+                            ))}
+                        </Row>
+                    )}
                     <Column
                         centerY
                         centerX

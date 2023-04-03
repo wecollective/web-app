@@ -32,8 +32,6 @@ function Audio(props: {
         }
     }
 
-    console.log('location: ', location)
-
     return (
         <Column style={{ ...style, position: 'relative' }}>
             {remove && (
