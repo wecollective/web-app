@@ -203,7 +203,7 @@ function GlassBeadGame(props: {
         if (synchronous) return <span style={{ marginRight: 15 }} />
         // restricted weaves
         if (Players.length) {
-            if (nextPlayer) {
+            if (state === 'active' && nextPlayer) {
                 if (nextPlayer.id === accountData.id) return renderNextBeadButton()
                 return renderWaitingForPlayerCard()
             }

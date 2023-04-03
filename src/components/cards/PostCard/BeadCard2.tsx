@@ -16,14 +16,7 @@ import LinkModal from '@src/components/cards/PostCard/LinkModal'
 import EditPostModal from '@src/components/modals/EditPostModal'
 import { statTitle } from '@src/Helpers'
 import styles from '@styles/components/cards/PostCard/BeadCard2.module.scss'
-import {
-    CommentIcon,
-    EditIcon,
-    LikeIcon,
-    LinkIcon,
-    SourceIcon,
-    VerticalEllipsisIcon,
-} from '@svgs/all'
+import { CommentIcon, EditIcon, LikeIcon, LinkIcon, VerticalEllipsisIcon } from '@svgs/all'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -41,7 +34,7 @@ function BeadCard(props: {
     style?: any
 }): JSX.Element {
     const {
-        bead: sourceBead,
+        bead: beadProp,
         postId,
         postType,
         beadIndex,
@@ -52,7 +45,8 @@ function BeadCard(props: {
         style,
     } = props
     const { accountData } = useContext(AccountContext)
-    const [bead, setBead] = useState(sourceBead)
+    const [bead, setBead] = useState(beadProp)
+    const [isSource, setIsSource] = useState(false)
     const {
         id,
         // type,
@@ -121,13 +115,17 @@ function BeadCard(props: {
 
     // if (type === 'url') console.log('sourceBead: ', sourceBead)
 
-    useEffect(() => setBead(sourceBead), [sourceBead])
+    useEffect(() => {
+        console.log('bead: ', beadProp)
+        setBead(beadProp)
+        setIsSource(beadProp.Link.relationship === 'source')
+    }, [beadProp])
 
     return (
         <Column
             spaceBetween
             className={`${styles.wrapper} ${selected && styles.selected} ${
-                bead.Link.relationship === 'source' && styles.source
+                isSource && styles.source
             } ${location === 'gbg-room' && styles.gbgRoom}`}
             style={{ ...style, backgroundColor: bead.color }}
         >
@@ -147,7 +145,7 @@ function BeadCard(props: {
                     {postTypeIcons[type]}
                 </Row> */}
                 <Row centerY>
-                    {removeBead && beadIndex !== 0 && (
+                    {removeBead && !isSource && (
                         <CloseButton size={20} onClick={() => removeBead(beadIndex)} />
                     )}
                     {!!id && (
@@ -160,7 +158,7 @@ function BeadCard(props: {
                         <p className='grey'>ID:</p>
                         <p style={{ marginLeft: 5 }}>{id}</p>
                     </button> */}
-                    {bead.Link.relationship === 'source' && (
+                    {/* {isSource && (
                         <button
                             type='button'
                             title='Open source bead'
@@ -173,7 +171,7 @@ function BeadCard(props: {
                         >
                             <SourceIcon />
                         </button>
-                    )}
+                    )} */}
                     {showDropDown && (
                         <Row>
                             <button

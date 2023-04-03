@@ -101,7 +101,7 @@ function CreatePostModal(): JSX.Element {
     } = useContext(AccountContext)
     const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
     const [loading, setLoading] = useState(false)
-    const [postType, setPostType] = useState('text')
+    const [postType, setPostType] = useState(createPostModalSettings.type || 'text')
     const [spaces, setSpaces] = useState<any[]>([spaceData.id ? spaceData : defaultSelectedSpace])
     const [showTitle, setShowTitle] = useState(true)
     const [title, setTitle] = useState('')
@@ -121,6 +121,7 @@ function CreatePostModal(): JSX.Element {
     const cookies = new Cookies()
     const urlRequestIndex = useRef(0)
     const contentButtonTypes = ['image', 'audio', 'event', 'poll', 'glass-bead-game']
+    // if (createPostModalSettings.type === 'gbg-from-post') contentButtonTypes = ['glass-bead-game']
 
     function closeModal() {
         setCreatePostModalOpen(false)
@@ -134,6 +135,7 @@ function CreatePostModal(): JSX.Element {
         if (postType === 'event') return 'New event'
         if (postType === 'poll') return 'New poll'
         if (postType === 'glass-bead-game') return 'New Glass Bead Game'
+        if (postType === 'gbg-from-post') return 'New Glass Bead Game from post'
         return ''
     }
 
@@ -355,8 +357,6 @@ function CreatePostModal(): JSX.Element {
     const [nextBeadModalOpen, setNextBeadModalOpen] = useState(false)
     const [topicError, setTopicError] = useState(false)
     const [noBeadsError, setNoBeadsError] = useState(false)
-    const showNextBeadButton = !multiplayer && (!totalMoves || beads.length < totalMoves)
-    // console.log('showNextBeadButton: ', showNextBeadButton)
 
     function uploadTopicImage() {
         const input = document.getElementById('topic-image-file-input') as HTMLInputElement
@@ -500,6 +500,8 @@ function CreatePostModal(): JSX.Element {
     }
 
     function renderBeads() {
+        let showNextBeadButton = !multiplayer && (!totalMoves || beads.length < totalMoves)
+        if (postType === 'gbg-from-post' && synchronous) showNextBeadButton = false
         return (
             <Row centerX>
                 <Scrollbars className={styles.beads}>
@@ -620,10 +622,16 @@ function CreatePostModal(): JSX.Element {
         return null
     }
 
+    function postButtonDisabled() {
+        if (urlsWithMetaData.find((u) => u.loading)) return true
+        return false
+    }
+
     function createPost() {
         if (postValid()) {
             setLoading(true)
             const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+            // console.log('beads: ', beads)
             const postData = {
                 creatorName: accountData.name,
                 creatorHandle: accountData.handle,
@@ -648,6 +656,11 @@ function CreatePostModal(): JSX.Element {
                 topicImageUrl: topicImageFile ? null : topicImageURL,
                 gbgSettings: GBGSettings,
                 beads,
+            } as any
+            if (postType === 'gbg-from-post') {
+                postData.type = 'glass-bead-game'
+                postData.sourcePostId = createPostModalSettings.source.id
+                postData.sourceCreatorId = createPostModalSettings.source.Creator.id
             }
             // set up file uploads if required
             let fileData
@@ -670,7 +683,7 @@ function CreatePostModal(): JSX.Element {
                 )
                 fileData.append('postData', JSON.stringify(postData))
             }
-            if (postType === 'glass-bead-game') {
+            if (postData.type === 'glass-bead-game') {
                 uploadType = 'glass-bead-game'
                 fileData = new FormData()
                 // upload topic image if required
@@ -728,8 +741,17 @@ function CreatePostModal(): JSX.Element {
                                     return { ...a, Reactions: [] }
                                 }),
                             }
-                        if (postType === 'glass-bead-game') {
-                            // console.log('res.data.gbg.beads: ', res.data.gbg.beads)
+                        if (postData.type === 'glass-bead-game') {
+                            // newPost.Beads = [
+                            //     createPostModalSettings.source,
+                            //     ...beads.map((bead, i) => {
+                            //         return {
+                            //             ...bead,
+                            //             id: res.data.gbg.beads[i].newBead.id,
+                            //             Reactions: [],
+                            //         }
+                            //     }),
+                            // ]
                             newPost.Beads = beads.map((bead, i) => {
                                 return {
                                     ...bead,
@@ -748,7 +770,6 @@ function CreatePostModal(): JSX.Element {
                                     }
                                 }) || []
                         }
-                        console.log('new Post: ', newPost)
                         setSpacePosts([newPost, ...spacePosts])
                     }
                     setLoading(false)
@@ -771,6 +792,19 @@ function CreatePostModal(): JSX.Element {
                 })
         }
     }
+
+    // handle new gbg from post
+    // useEffect(() => {
+    //     if (postType === 'gbg-from-post') {
+    //         const sourceBead = {
+    //             // ...defaultPostData,
+    //             ...createPostModalSettings.source,
+    //             Link: { relationship: 'source' },
+    //             // sourceBead: true,
+    //         }
+    //         setBeads([sourceBead])
+    //     }
+    // }, [])
 
     // remove errors and initialise date picker if post type is event
     useEffect(() => {
@@ -889,30 +923,31 @@ function CreatePostModal(): JSX.Element {
                             </button>
                         </Row>
                         <Column className={styles.content}>
-                            {showTitle && postType !== 'glass-bead-game' && (
-                                <Row centerY spaceBetween className={styles.title}>
-                                    <input
-                                        placeholder='Title...'
-                                        type='text'
-                                        value={title}
-                                        maxLength={100}
-                                        onChange={(e) => {
-                                            setTitle(e.target.value)
-                                            setNoTextError(false)
-                                            setEventTextError(false)
-                                            setPollTextError(false)
-                                        }}
-                                    />
-                                    <CloseButton
-                                        size={20}
-                                        onClick={() => {
-                                            setTitle('')
-                                            setShowTitle(false)
-                                        }}
-                                    />
-                                </Row>
-                            )}
-                            {postType === 'glass-bead-game' && (
+                            {showTitle &&
+                                !['glass-bead-game', 'gbg-from-post'].includes(postType) && (
+                                    <Row centerY spaceBetween className={styles.title}>
+                                        <input
+                                            placeholder='Title...'
+                                            type='text'
+                                            value={title}
+                                            maxLength={100}
+                                            onChange={(e) => {
+                                                setTitle(e.target.value)
+                                                setNoTextError(false)
+                                                setEventTextError(false)
+                                                setPollTextError(false)
+                                            }}
+                                        />
+                                        <CloseButton
+                                            size={20}
+                                            onClick={() => {
+                                                setTitle('')
+                                                setShowTitle(false)
+                                            }}
+                                        />
+                                    </Row>
+                                )}
+                            {['glass-bead-game', 'gbg-from-post'].includes(postType) && (
                                 <Row centerY spaceBetween className={styles.topic}>
                                     <Column centerX centerY className={styles.imageWrapper}>
                                         {topicImageURL && <img src={topicImageURL} alt='' />}
@@ -1018,13 +1053,18 @@ function CreatePostModal(): JSX.Element {
                                     </Row>
                                 </Column>
                             )}
-                            {postType === 'glass-bead-game' && (
+                            {['glass-bead-game', 'gbg-from-post'].includes(postType) && (
                                 <Column className={styles.gbg}>
                                     {!synchronous && (
                                         <Column>
-                                            {multiplayer ? renderGBGInfoRow() : renderBeads()}
+                                            {multiplayer && renderGBGInfoRow()}
+                                            {/* {(!multiplayer || postType === 'gbg-from-post') &&
+                                                renderBeads()} */}
                                         </Column>
                                     )}
+                                    {(postType === 'gbg-from-post' ||
+                                        (!synchronous && !multiplayer)) &&
+                                        renderBeads()}
                                 </Column>
                             )}
                             {['text', 'event'].includes(postType) &&
@@ -1149,7 +1189,7 @@ function CreatePostModal(): JSX.Element {
                                 />
                             </Row>
                         )}
-                        {postType === 'glass-bead-game' && (
+                        {['glass-bead-game', 'gbg-from-post'].includes(postType) && (
                             <Row>
                                 <Button
                                     text='Game settings'
@@ -1160,16 +1200,18 @@ function CreatePostModal(): JSX.Element {
                             </Row>
                         )}
                     </Column>
-                    <Row className={styles.contentButtons}>
-                        {contentButtonTypes.map((type) => (
-                            <ContentButton
-                                key={type}
-                                type={type}
-                                postType={postType}
-                                setPostType={setPostType}
-                            />
-                        ))}
-                    </Row>
+                    {createPostModalSettings.type !== 'gbg-from-post' && (
+                        <Row className={styles.contentButtons}>
+                            {contentButtonTypes.map((type) => (
+                                <ContentButton
+                                    key={type}
+                                    type={type}
+                                    postType={postType}
+                                    setPostType={setPostType}
+                                />
+                            ))}
+                        </Row>
+                    )}
                     <Column centerX className={styles.errors}>
                         {noTextError && <p>No content added</p>}
                         {maxCharsErrors && <p>Text must be less than {maxChars} characters</p>}
@@ -1190,7 +1232,13 @@ function CreatePostModal(): JSX.Element {
                         {topicError && <p>Topic required</p>}
                         {noBeadsError && <p>At least 1 bead required for single player games</p>}
                     </Column>
-                    <Button text='Post' color='blue' loading={loading} onClick={createPost} />
+                    <Button
+                        text='Post'
+                        color='blue'
+                        disabled={postButtonDisabled()}
+                        loading={loading}
+                        onClick={createPost}
+                    />
                 </Column>
             )}
             {spacesModalOpen && (

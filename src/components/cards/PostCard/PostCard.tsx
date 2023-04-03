@@ -23,10 +23,6 @@ import EditPostModal from '@src/components/modals/EditPostModal'
 import config from '@src/Config'
 import { dateCreated, statTitle, timeSinceCreated, timeSinceCreatedShort } from '@src/Helpers'
 import {
-    ArrowRightIcon,
-    // AudioIcon,
-    // CalendarIcon,
-    // CastaliaIcon,
     CommentIcon,
     DeleteIcon,
     EditIcon,
@@ -37,7 +33,6 @@ import {
     // PrismIcon,
     RepostIcon,
     StarIcon,
-    StringIcon,
     // TextIcon,
     // WeaveIcon,
     VerticalEllipsisIcon,
@@ -181,6 +176,19 @@ function PostCard(props: {
         )
     }
 
+    // function startNewGbgFromPost() {
+    //     if (loggedIn) {
+    //         setCreatePostModalSettings({
+    //             type: 'gbg-from-post',
+    //             source: postData,
+    //         })
+    //         setCreatePostModalOpen(true)
+    //     } else {
+    //         setAlertMessage('Log in to create glass bead games from posts')
+    //         setAlertModalOpen(true)
+    //     }
+    // }
+
     useEffect(() => setPostData(post), [post])
 
     return (
@@ -321,135 +329,112 @@ function PostCard(props: {
                 )}
             </Column>
             <Column className={styles.footer}>
-                <Row spaceBetween>
-                    <Row className={styles.statButtons}>
+                {/* <Row spaceBetween> */}
+                <Row centerY className={styles.statButtons}>
+                    <StatButton
+                        icon={<LikeIcon />}
+                        iconSize={20}
+                        text={totalLikes}
+                        title={statTitle('Like', totalLikes || 0)}
+                        color={accountLike && 'blue'}
+                        disabled={location === 'preview'}
+                        loading={likeResponseLoading}
+                        onClickIcon={toggleLike}
+                        onClickStat={() => setLikeModalOpen(true)}
+                    />
+                    <StatButton
+                        icon={<CommentIcon />}
+                        iconSize={20}
+                        text={totalComments}
+                        title={statTitle('Comment', totalComments || 0)}
+                        // color={accountComment && 'blue'}
+                        disabled={location === 'preview'}
+                        onClick={() => {
+                            if (loggedIn || totalComments) setCommentsOpen(!commentsOpen)
+                            else {
+                                setAlertMessage('Log in to comment on posts')
+                                setAlertModalOpen(true)
+                            }
+                        }}
+                    />
+                    <StatButton
+                        icon={<RepostIcon />}
+                        iconSize={20}
+                        text={totalReposts}
+                        title={statTitle('Repost', totalReposts || 0)}
+                        color={accountRepost && 'blue'}
+                        disabled={location === 'preview'}
+                        onClick={() => setRepostModalOpen(true)}
+                    />
+                    <StatButton
+                        icon={<StarIcon />}
+                        iconSize={20}
+                        text={totalRatings}
+                        title={statTitle('Rating', totalRatings || 0)}
+                        color={accountRating && 'blue'}
+                        disabled={location === 'preview'}
+                        onClick={() => setRatingModalOpen(true)}
+                    />
+                    <StatButton
+                        icon={<LinkIcon />}
+                        iconSize={20}
+                        text={totalLinks}
+                        title={statTitle('Link', totalLinks || 0)}
+                        color={accountLink && 'blue'}
+                        disabled={location === 'preview'}
+                        onClick={() => setLinkModalOpen(true)}
+                    />
+                    {/* <button
+                        className={styles.gbgFromPostButton}
+                        type='button'
+                        title='Create GBG from post'
+                        // disabled={location === 'preview'}
+                        onClick={startNewGbgFromPost}
+                    >
+                        <CastaliaIcon />
+                    </button> */}
+                    {/* {['prism', 'decision-tree'].includes(type) && (
                         <StatButton
-                            icon={<LikeIcon />}
+                            icon={<ArrowRightIcon />}
                             iconSize={20}
-                            text={totalLikes}
-                            title={statTitle('Like', totalLikes || 0)}
-                            color={accountLike && 'blue'}
+                            text='Open game room'
                             disabled={location === 'preview'}
-                            loading={likeResponseLoading}
-                            onClickIcon={toggleLike}
-                            onClickStat={() => setLikeModalOpen(true)}
+                            onClick={() => history(`/p/${id}`)}
                         />
-                        <StatButton
-                            icon={<CommentIcon />}
-                            iconSize={20}
-                            text={totalComments}
-                            title={statTitle('Comment', totalComments || 0)}
-                            // color={accountComment && 'blue'}
-                            disabled={location === 'preview'}
-                            onClick={() => {
-                                if (loggedIn || totalComments) setCommentsOpen(!commentsOpen)
-                                else {
-                                    setAlertMessage('Log in to comment on posts')
-                                    setAlertModalOpen(true)
-                                }
-                            }}
+                    )} */}
+                    {likeModalOpen && (
+                        <LikeModal
+                            postData={postData}
+                            setPostData={setPostData}
+                            close={() => setLikeModalOpen(false)}
                         />
-                        <StatButton
-                            icon={<RepostIcon />}
-                            iconSize={20}
-                            text={totalReposts}
-                            title={statTitle('Repost', totalReposts || 0)}
-                            color={accountRepost && 'blue'}
-                            disabled={location === 'preview'}
-                            onClick={() => setRepostModalOpen(true)}
+                    )}
+                    {repostModalOpen && (
+                        <RepostModal
+                            postData={postData}
+                            setPostData={setPostData}
+                            close={() => setRepostModalOpen(false)}
                         />
-                        <StatButton
-                            icon={<StarIcon />}
-                            iconSize={20}
-                            text={totalRatings}
-                            title={statTitle('Rating', totalRatings || 0)}
-                            color={accountRating && 'blue'}
-                            disabled={location === 'preview'}
-                            onClick={() => setRatingModalOpen(true)}
+                    )}
+                    {ratingModalOpen && (
+                        <RatingModal
+                            postData={postData}
+                            setPostData={setPostData}
+                            close={() => setRatingModalOpen(false)}
                         />
-                        <StatButton
-                            icon={<LinkIcon />}
-                            iconSize={20}
-                            text={totalLinks}
-                            title={statTitle('Link', totalLinks || 0)}
-                            color={accountLink && 'blue'}
-                            disabled={location === 'preview'}
-                            onClick={() => setLinkModalOpen(true)}
+                    )}
+                    {linkModalOpen && (
+                        <LinkModal
+                            type='post'
+                            location={location}
+                            postData={postData}
+                            setPostData={setPostData}
+                            close={() => setLinkModalOpen(false)}
                         />
-                        {['prism', 'decision-tree'].includes(type) && ( // 'glass-bead-game'
-                            <StatButton
-                                icon={<ArrowRightIcon />}
-                                iconSize={20}
-                                text='Open game room'
-                                disabled={location === 'preview'}
-                                onClick={() => history(`/p/${id}`)}
-                            />
-                        )}
-                        {likeModalOpen && (
-                            <LikeModal
-                                postData={postData}
-                                setPostData={setPostData}
-                                close={() => setLikeModalOpen(false)}
-                            />
-                        )}
-                        {repostModalOpen && (
-                            <RepostModal
-                                postData={postData}
-                                setPostData={setPostData}
-                                close={() => setRepostModalOpen(false)}
-                            />
-                        )}
-                        {ratingModalOpen && (
-                            <RatingModal
-                                postData={postData}
-                                setPostData={setPostData}
-                                close={() => setRatingModalOpen(false)}
-                            />
-                        )}
-                        {linkModalOpen && (
-                            <LinkModal
-                                type='post'
-                                location={location}
-                                postData={postData}
-                                setPostData={setPostData}
-                                close={() => setLinkModalOpen(false)}
-                            />
-                        )}
-                    </Row>
-                    <Row className={styles.otherButtons}>
-                        {['text', 'url', 'audio', 'image'].includes(type) && (
-                            <button
-                                type='button'
-                                title='Create string from post'
-                                disabled={location === 'preview'}
-                                onClick={() => {
-                                    if (loggedIn) {
-                                        setCreatePostModalSettings({
-                                            type: 'string-from-post',
-                                            source: postData,
-                                        })
-                                        setCreatePostModalOpen(true)
-                                    } else {
-                                        setAlertMessage('Log in to create strings from posts')
-                                        setAlertModalOpen(true)
-                                    }
-                                }}
-                            >
-                                <StringIcon />
-                            </button>
-                        )}
-                        {/* {location !== 'post-page' && (
-                            <Link
-                                to={`/p/${id}`}
-                                className={styles.link}
-                                title='Open post page'
-                                style={location === 'preview' ? { pointerEvents: 'none' } : {}}
-                            >
-                                <ExpandIcon />
-                            </Link>
-                        )} */}
-                    </Row>
+                    )}
                 </Row>
+
+                {/* </Row> */}
                 {commentsOpen && (
                     <Comments
                         postId={postData.id}
@@ -488,3 +473,38 @@ PostCard.defaultProps = {
 }
 
 export default PostCard
+
+/* {location !== 'post-page' && (
+    <Link
+        to={`/p/${id}`}
+        className={styles.link}
+        title='Open post page'
+        style={location === 'preview' ? { pointerEvents: 'none' } : {}}
+    >
+        <ExpandIcon />
+    </Link>
+)} */
+
+/* <Row className={styles.otherButtons}>
+    {['text', 'url', 'audio', 'image'].includes(type) && (
+        <button
+            type='button'
+            title='Create string from post'
+            disabled={location === 'preview'}
+            onClick={() => {
+                if (loggedIn) {
+                    setCreatePostModalSettings({
+                        type: 'string-from-post',
+                        source: postData,
+                    })
+                    setCreatePostModalOpen(true)
+                } else {
+                    setAlertMessage('Log in to create strings from posts')
+                    setAlertModalOpen(true)
+                }
+            }}
+        >
+            <StringIcon />
+        </button>
+    )}
+</Row> */

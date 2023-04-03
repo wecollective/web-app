@@ -76,6 +76,7 @@ export const defaultPostData = {
     Reactions: [] as any[],
     IncomingLinks: [] as any[],
     OutgoingLinks: [] as any[],
+    // Link: [] as any[],
     Images: [] as any[],
     Audios: [] as any[],
     Event: null as any,

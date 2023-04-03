@@ -130,9 +130,24 @@
         margin-top: 2px;
 
         .statButtons {
+            height: 24px;
             flex-shrink: 0;
+
             > div > button {
                 font-size: 15px;
+            }
+
+            .gbgFromPostButton {
+                all: unset;
+                cursor: pointer;
+                width: 22px;
+                height: 22px;
+
+                > svg {
+                    width: 22px;
+                    height: 22px;
+                    color: $grey6;
+                }
             }
         }
 

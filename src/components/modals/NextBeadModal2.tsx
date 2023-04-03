@@ -28,7 +28,6 @@ import * as d3 from 'd3'
 import getBlobDuration from 'get-blob-duration'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import Cookies from 'universal-cookie'
-import { v4 as uuidv4 } from 'uuid'
 
 const { white, red, orange, yellow, green, blue, purple } = colors
 const beadColors = [white, red, orange, yellow, green, blue, purple]
@@ -275,7 +274,7 @@ function NextBeadModal(props: {
 
     function saveBead() {
         const bead = {
-            id: uuidv4(),
+            // id: uuidv4(),
             type,
             color,
             Link: { source: null },
