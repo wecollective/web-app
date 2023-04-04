@@ -316,7 +316,7 @@ function SpacePage(): JSX.Element {
             <Column centerX className={styles.content}>
                 {spaceData.access === 'granted' ? (
                     <Routes>
-                        <Route path='/' element={<Navigate to='/posts' replace />} />
+                        <Route path='/' element={<Navigate to='posts' replace />} />
                         <Route path='about' element={<About />} />
                         <Route path='posts' element={<Posts />} />
                         <Route path='spaces' element={<Spaces />} />

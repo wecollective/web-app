@@ -109,7 +109,7 @@ function UserPage(): JSX.Element {
             </Column>
             <Column centerX className={styles.content}>
                 <Routes>
-                    <Route path='/' element={<Navigate to='/about' replace />} />
+                    <Route path='/' element={<Navigate to='posts' replace />} />
                     <Route path='about' element={<About />} />
                     <Route path='posts' element={<Posts />} />
                     <Route path='notifications' element={<Notifications />} />
