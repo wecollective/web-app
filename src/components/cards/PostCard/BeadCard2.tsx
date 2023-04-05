@@ -1,5 +1,4 @@
 /* eslint-disable react/no-array-index-key */
-import AudioCard from '@components/cards/PostCard/PostTypes/Audio'
 import UrlPreview from '@components/cards/PostCard/UrlPreview'
 import CloseButton from '@components/CloseButton'
 import CloseOnClickOutside from '@components/CloseOnClickOutside'
@@ -13,6 +12,7 @@ import StatButton from '@components/StatButton'
 import { AccountContext } from '@contexts/AccountContext'
 import LikeModal from '@src/components/cards/PostCard/LikeModal'
 import LinkModal from '@src/components/cards/PostCard/LinkModal'
+import AudioCard from '@src/components/cards/PostCard/PostTypes/AudioCard'
 import EditPostModal from '@src/components/modals/EditPostModal'
 import { statTitle } from '@src/Helpers'
 import styles from '@styles/components/cards/PostCard/BeadCard2.module.scss'

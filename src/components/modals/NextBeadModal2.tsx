@@ -1,6 +1,5 @@
 /* eslint-disable react/no-array-index-key */
 import Button from '@components/Button'
-import Audio from '@components/cards/PostCard/PostTypes/Audio'
 import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
 import DraftTextEditor from '@components/draft-js/DraftTextEditor'
@@ -9,6 +8,7 @@ import ImageModal from '@components/modals/ImageModal'
 import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
 import SuccessMessage from '@components/SuccessMessage'
+import AudioCard from '@src/components/cards/PostCard/PostTypes/AudioCard'
 import UrlPreview from '@src/components/cards/PostCard/UrlPreview'
 import config from '@src/Config'
 import { AccountContext } from '@src/contexts/AccountContext'
@@ -387,7 +387,7 @@ function NextBeadModal(props: {
                                 {type === 'audio' && (
                                     <Column centerX style={{ width: '100%', height: '100%' }}>
                                         {audioFile ? (
-                                            <Audio
+                                            <AudioCard
                                                 key={audioFile.lastModified}
                                                 url={URL.createObjectURL(audioFile)}
                                                 location='create-bead-audio'

@@ -2,7 +2,6 @@
 /* eslint-disable no-nested-ternary */
 import Button from '@components/Button'
 import PollAnswer from '@components/cards/PollAnswer'
-import Audio from '@components/cards/PostCard/PostTypes/Audio'
 import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
 import DraftTextEditor from '@components/draft-js/DraftTextEditor'
@@ -18,6 +17,7 @@ import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
 import BeadCard from '@src/components/cards/PostCard/BeadCard2'
+import AudioCard from '@src/components/cards/PostCard/PostTypes/AudioCard'
 // import ShowMoreLess from '@components/ShowMoreLess'
 import NextBeadModal from '@components/modals/NextBeadModal2'
 import SuccessMessage from '@components/SuccessMessage'
@@ -1014,7 +1014,7 @@ function CreatePostModal(): JSX.Element {
                                 </Row>
                             )}
                             {postType === 'audio' && audioFile && (
-                                <Audio
+                                <AudioCard
                                     key={audioFile.lastModified}
                                     url={URL.createObjectURL(audioFile)}
                                     location='create-post-audio'

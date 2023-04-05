@@ -1,4 +1,3 @@
-import Audio from '@components/cards/PostCard/PostTypes/Audio'
 import GlassBeadGame from '@components/cards/PostCard/PostTypes/GlassBeadGame2'
 import UrlPreview from '@components/cards/PostCard/UrlPreview'
 import CloseOnClickOutside from '@components/CloseOnClickOutside'
@@ -14,6 +13,7 @@ import Comments from '@src/components/cards/Comments/Comments'
 import LikeModal from '@src/components/cards/PostCard/LikeModal'
 import LinkModal from '@src/components/cards/PostCard/LinkModal'
 import PostSpaces from '@src/components/cards/PostCard/PostSpaces'
+import AudioCard from '@src/components/cards/PostCard/PostTypes/AudioCard'
 import EventCard from '@src/components/cards/PostCard/PostTypes/EventCard'
 import Images from '@src/components/cards/PostCard/PostTypes/Images'
 import PollCard from '@src/components/cards/PostCard/PostTypes/PollCard'
@@ -102,33 +102,6 @@ function PostCard(props: {
     const cookies = new Cookies()
     const isOwnPost = accountData && Creator && accountData.id === Creator.id
     // const directSpaces = DirectSpaces.filter((s) => s.id !== 1)
-
-    // function findPostTypeIcon(postType) {
-    //     switch (postType) {
-    //         case 'text':
-    //             return <TextIcon />
-    //         case 'url':
-    //             return <LinkIcon />
-    //         case 'image':
-    //             return <ImageIcon />
-    //         case 'audio':
-    //             return <AudioIcon />
-    //         case 'event':
-    //             return <CalendarIcon />
-    //         case 'poll':
-    //             return <InquiryIcon />
-    //         case 'glass-bead-game':
-    //             return <CastaliaIcon />
-    //         case 'string':
-    //             return <StringIcon />
-    //         case 'weave':
-    //             return <WeaveIcon />
-    //         case 'prism':
-    //             return <PrismIcon />
-    //         default:
-    //             return null
-    //     }
-    // }
 
     const urlParams = Object.fromEntries(new URLSearchParams(useLocation().search))
     const params = { ...spacePostsFilters }
@@ -291,7 +264,7 @@ function PostCard(props: {
                     <Images images={postData.Images.sort((a, b) => a.index - b.index)} />
                 )}
                 {type.includes('audio') && (
-                    <Audio
+                    <AudioCard
                         id={postData.id}
                         url={Audios[0].url}
                         location={location}

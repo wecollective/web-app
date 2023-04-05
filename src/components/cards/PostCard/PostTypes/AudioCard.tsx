@@ -4,12 +4,12 @@ import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
 import Row from '@components/Row'
 import colors from '@styles/Colors.module.scss'
-import styles from '@styles/components/cards/PostCard/PostTypes/Audio.module.scss'
+import styles from '@styles/components/cards/PostCard/PostTypes/AudioCard.module.scss'
 import { PauseIcon, PlayIcon } from '@svgs/all'
 import * as d3 from 'd3'
 import React, { useState } from 'react'
 
-function Audio(props: {
+function AudioCard(props: {
     id?: number
     url: string
     location: string
@@ -72,10 +72,10 @@ function Audio(props: {
     )
 }
 
-Audio.defaultProps = {
+AudioCard.defaultProps = {
     id: 0,
     style: null,
     remove: null,
 }
 
-export default Audio
+export default AudioCard

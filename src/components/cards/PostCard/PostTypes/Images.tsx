@@ -7,8 +7,6 @@ import React, { useState } from 'react'
 
 function Images(props: { images: any }): JSX.Element {
     const { images } = props
-    // const { text, Images } = postData
-    // const images = Images.sort((a, b) => a.index - b.index)
     const [imageModalOpen, setImageModalOpen] = useState(false)
     const [selectedImage, setSelectedImage] = useState<any>(null)
 
