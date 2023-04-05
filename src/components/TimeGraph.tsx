@@ -54,7 +54,7 @@ function TimeGraph(props: {
             )
             const voteData = [] as any
             answers.forEach((answer) => {
-                const answerVotes = activeVotes.filter((v) => v.inquiryAnswerId === answer.id)
+                const answerVotes = activeVotes.filter((v) => v.pollAnswerId === answer.id)
                 const answerPoints = weighted
                     ? +answerVotes.map((v) => +v.value).reduce((a, b) => a + b, 0)
                     : 0

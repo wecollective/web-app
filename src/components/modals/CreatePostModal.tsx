@@ -25,7 +25,7 @@ import SuccessMessage from '@components/SuccessMessage'
 import Toggle from '@components/Toggle'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
-import InquiryAnswer from '@src/components/cards/PollAnswer'
+import PollAnswer from '@src/components/cards/PollAnswer'
 import UrlPreview from '@src/components/cards/PostCard/UrlPreview'
 import config from '@src/Config'
 import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
@@ -104,10 +104,10 @@ const postTypes = [
         icon: <CalendarIcon />,
     },
     {
-        name: 'Inquiry',
-        description: `**Inquiry**: Ask a question, supply your own answers or leave them open for other users to add to, and keep track of the results. Single choice, multiple choice, or weighted choice voting allowed.`,
+        name: 'Poll',
+        description: `**Poll**: Ask a question, supply your own answers or leave them open for other users to add to, and keep track of the results. Single choice, multiple choice, or weighted choice voting allowed.`,
         steps: [
-            'Post Type: Inquiry',
+            'Post Type: Poll',
             'Title',
             'Description (optional)',
             'Settings',
@@ -283,7 +283,7 @@ function CreatePostModal(): JSX.Element {
         },
     })
 
-    // inquiry
+    // poll
     const [inquiryForm1, setInquiryForm1] = useState({
         title: {
             ...defaultErrorState,
@@ -866,7 +866,7 @@ function CreatePostModal(): JSX.Element {
             if (currentStep === 4 && allValid(eventForm3, setEventForm3)) setCurrentStep(5)
         }
 
-        if (postType === 'Inquiry') {
+        if (postType === 'Poll') {
             if (currentStep === 2 && allValid(inquiryForm1, setInquiryForm1)) setCurrentStep(3)
             if (currentStep === 3 && allValid(inquiryForm2, setInquiryForm2)) setCurrentStep(4)
             if (currentStep === 4) setCurrentStep(5)
@@ -1004,14 +1004,14 @@ function CreatePostModal(): JSX.Element {
                 Interested: [],
             }
         }
-        if (postType === 'Inquiry') {
+        if (postType === 'Poll') {
             data.text = inquiryForm2.description.value
-            data.Inquiry = {
+            data.Poll = {
                 title: inquiryForm1.title.value,
                 type: inquiryType,
                 endTime: inquiryForm3.endTime.value,
                 answersLocked,
-                InquiryAnswers: answers.map((a) => {
+                PollAnswers: answers.map((a) => {
                     return { ...a, Reactions: [] }
                 }),
             }
@@ -1181,7 +1181,7 @@ function CreatePostModal(): JSX.Element {
             title: data.Event ? data.Event.title : '',
             startTime: data.Event ? data.Event.startTime : null,
             endTime: data.Event ? data.Event.endTime : null,
-            // inquiry posts
+            // poll posts
             inquiryTitle: inquiryForm1.title.value,
             inquiryEndTime: inquiryForm3.endTime.value,
             answersLocked,
@@ -1295,11 +1295,11 @@ function CreatePostModal(): JSX.Element {
                                       Interested: [],
                                   }
                                 : null,
-                            Inquiry:
-                                postType === 'Inquiry'
+                            Poll:
+                                postType === 'Poll'
                                     ? {
-                                          ...data.Inquiry,
-                                          InquiryAnswers: res.data.inquiryAnswers.map((a) => {
+                                          ...data.Poll,
+                                          PollAnswers: res.data.inquiryAnswers.map((a) => {
                                               return { ...a, Reactions: [] }
                                           }),
                                       }
@@ -1417,7 +1417,7 @@ function CreatePostModal(): JSX.Element {
             if (startTimePast && defaultStartDate) setStartTime(defaultStartDate.toString())
             if (endTimePast && defaultEndDate) setStartTime(defaultEndDate.toString())
         }
-        if (postType === 'Inquiry' && currentStep === 4) {
+        if (postType === 'Poll' && currentStep === 4) {
             const now = new Date()
             const endTimePast = new Date(inquiryForm3.endTime.value) < now
             const defaultEndDate = inquiryForm3.endTime.value
@@ -1498,7 +1498,7 @@ function CreatePostModal(): JSX.Element {
                 })
             }
         }
-        if (postType === 'Inquiry') {
+        if (postType === 'Poll') {
             setInquiryForm3({
                 ...inquiryForm3,
                 endTime: {
@@ -2001,7 +2001,7 @@ function CreatePostModal(): JSX.Element {
                         </Column>
                     )}
 
-                    {postType === 'Inquiry' && (
+                    {postType === 'Poll' && (
                         <Column centerX style={{ width: '100%' }}>
                             {currentStep === 2 && (
                                 <Column centerX style={{ width: '100%', marginBottom: 30 }}>
@@ -2124,7 +2124,7 @@ function CreatePostModal(): JSX.Element {
                                         style={{ maxWidth: 400, margin: 0 }}
                                     >
                                         <p style={{ marginBottom: 10 }}>
-                                            Choose an end time for the inquiry after which voting is
+                                            Choose an end time for the poll after which voting is
                                             locked (optional):
                                         </p>
                                         <div id='date-time-end-wrapper'>
@@ -2183,7 +2183,7 @@ function CreatePostModal(): JSX.Element {
                                     </Row>
                                     <Column style={{ maxWidth: 600 }}>
                                         {answers.map((answer, index) => (
-                                            <InquiryAnswer
+                                            <PollAnswer
                                                 key={answer.id}
                                                 index={index}
                                                 type={inquiryType}

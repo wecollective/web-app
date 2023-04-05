@@ -1,6 +1,6 @@
 @import '@styles/Variables';
 
-.inquiryResults {
+.results {
     flex-wrap: wrap;
     @include for-tablet-portrait-up {
         flex-wrap: nowrap;
@@ -8,7 +8,7 @@
     margin-bottom: 10px;
 }
 
-.inquiryAnswers {
+.answers {
     > div {
         background-color: $grey1;
     }

@@ -80,7 +80,7 @@ export const defaultPostData = {
     Images: [] as any[],
     Audios: [] as any[],
     Event: null as any,
-    Inquiry: null as any,
+    Poll: null as any,
     GlassBeadGame2: null as any,
     Beads: [] as any[],
     // Weave: null as any,

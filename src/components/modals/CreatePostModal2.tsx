@@ -734,10 +734,10 @@ function CreatePostModal(): JSX.Element {
                         if (postType === 'audio') newPost.Audios = [{ url: res.data.audio.url }]
                         if (postType === 'image') newPost.Images = images
                         if (postType === 'poll')
-                            newPost.Inquiry = {
+                            newPost.Poll = {
                                 type: pollType.toLowerCase().replace(/[^a-z0-9]/g, '-'),
                                 locked: pollAnswersLocked,
-                                InquiryAnswers: res.data.pollAnswers.map((a) => {
+                                PollAnswers: res.data.pollAnswers.map((a) => {
                                     return { ...a, Reactions: [] }
                                 }),
                             }

@@ -115,7 +115,7 @@ function PostCard(props: {
     //             return <AudioIcon />
     //         case 'event':
     //             return <CalendarIcon />
-    //         case 'inquiry':
+    //         case 'poll':
     //             return <InquiryIcon />
     //         case 'glass-bead-game':
     //             return <CastaliaIcon />

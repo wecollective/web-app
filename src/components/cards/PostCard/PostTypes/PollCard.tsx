@@ -10,7 +10,7 @@ import { AccountContext } from '@src/contexts/AccountContext'
 import { PostContext } from '@src/contexts/PostContext'
 import { SpaceContext } from '@src/contexts/SpaceContext'
 import { UserContext } from '@src/contexts/UserContext'
-import styles from '@styles/components/cards/PostCard/PostTypes/Inquiry.module.scss'
+import styles from '@styles/components/cards/PostCard/PostTypes/PollCard.module.scss'
 import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useState } from 'react'
@@ -23,7 +23,7 @@ function PollCard(props: {
     params: any
 }): JSX.Element {
     const { postData, setPostData, location, params } = props
-    const { id, text, Inquiry: inquiry } = postData
+    const { id, text, Poll: poll } = postData
     const { accountData, setAlertMessage, setAlertModalOpen, loggedIn } = useContext(AccountContext)
     const { spaceData, getSpacePosts, spacePostsPaginationLimit } = useContext(SpaceContext)
     const { userData, getUserPosts, userPostsPaginationLimit } = useContext(UserContext)
@@ -40,7 +40,7 @@ function PollCard(props: {
     const [totalUsedPoints, setTotalUsedPoints] = useState(0)
     const colorScale = d3
         .scaleSequential()
-        .domain([0, inquiry ? inquiry.InquiryAnswers.length : 0])
+        .domain([0, poll ? poll.PollAnswers.length : 0])
         .interpolator(d3.interpolateViridis)
     const cookies = new Cookies()
 
@@ -66,7 +66,7 @@ function PollCard(props: {
                         }
                     }),
             }
-            axios.post(`${config.apiURL}/vote-on-inquiry`, data, options).then(() => {
+            axios.post(`${config.apiURL}/vote-on-poll`, data, options).then(() => {
                 const newAnswers = [
                     ...newInquiryAnswers.sort((a, b) => b.totalVotes - a.totalVotes),
                 ]
@@ -90,7 +90,7 @@ function PollCard(props: {
 
     function updateAnswers(answerId, value) {
         const newAnswers = [...newInquiryAnswers]
-        if (inquiry.type === 'single-choice') {
+        if (poll.type === 'single-choice') {
             newAnswers.forEach((a) => {
                 if (a.accountVote) {
                     a.accountVote = false
@@ -99,7 +99,7 @@ function PollCard(props: {
             })
         }
         const selectedAnswer = newAnswers.find((a) => a.id === answerId)
-        if (inquiry.type === 'weighted-choice') {
+        if (poll.type === 'weighted-choice') {
             selectedAnswer.accountVote = !!value
             selectedAnswer.accountPoints = value > 100 ? 100 : value
             setTotalUsedPoints(newAnswers.map((a) => +a.accountPoints).reduce((a, b) => a + b, 0))
@@ -112,7 +112,7 @@ function PollCard(props: {
     }
 
     function voteDisabled() {
-        const weighted = inquiry.type === 'weighted-choice'
+        const weighted = poll.type === 'weighted-choice'
         if (location === 'preview') return true
         if (loggedIn) {
             if (weighted) {
@@ -124,14 +124,14 @@ function PollCard(props: {
         return false
     }
 
-    // build inquiry data
+    // build poll data
     useEffect(() => {
-        const weighted = inquiry.type === 'weighted-choice'
+        const weighted = poll.type === 'weighted-choice'
         const answers = [] as any[]
         let totalInquiryVotes = 0
         let totalInquiryPoints = 0
         const inquiryUsers = [] as number[]
-        inquiry.InquiryAnswers.forEach((answer) => {
+        poll.PollAnswers.forEach((answer) => {
             const activeReactions = answer.Reactions.filter((r) => r.state === 'active')
             // find all users
             activeReactions.forEach((r) => {
@@ -166,9 +166,9 @@ function PollCard(props: {
 
     return (
         <Column>
-            <Row centerX className={styles.inquiryResults}>
+            <Row centerX className={styles.results}>
                 <PieChart
-                    type={inquiry.type}
+                    type={poll.type}
                     postId={id}
                     totalVotes={totalVotes}
                     totalPoints={totalPoints}
@@ -177,7 +177,7 @@ function PollCard(props: {
                 />
                 {totalVotes > 0 && (
                     <TimeGraph
-                        type={inquiry.type}
+                        type={poll.type}
                         postId={id}
                         answers={inquiryAnswers}
                         startTime={postData.createdAt}
@@ -186,8 +186,8 @@ function PollCard(props: {
             </Row>
             <Row centerY spaceBetween style={{ marginBottom: 15 }}>
                 <Row>
-                    <p className='grey'>Inquiry type: {inquiry.type}</p>
-                    {inquiry.type === 'weighted-choice' && (
+                    <p className='grey'>Poll type: {poll.type}</p>
+                    {poll.type === 'weighted-choice' && (
                         <p
                             className={voteChanged && totalUsedPoints !== 100 ? 'danger' : 'grey'}
                             style={{ marginLeft: 10 }}
@@ -206,12 +206,12 @@ function PollCard(props: {
                 />
             </Row>
             {newInquiryAnswers.length > 0 && (
-                <Column className={styles.inquiryAnswers}>
+                <Column className={styles.answers}>
                     {newInquiryAnswers.map((answer, i) => (
                         <PollAnswer
                             key={answer.id}
                             index={i}
-                            type={inquiry.type}
+                            type={poll.type}
                             answer={answer}
                             totalVotes={totalVotes}
                             totalPoints={totalPoints}

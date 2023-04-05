@@ -145,7 +145,7 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
         if (d.type === 'event') {
             return colors.red
         }
-        if (d.type === 'inquiry') {
+        if (d.type === 'poll') {
             return colors.purple
         }
         if (d.type === 'string') {
