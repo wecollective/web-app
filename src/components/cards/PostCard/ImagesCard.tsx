@@ -2,10 +2,10 @@ import Column from '@components/Column'
 import ImageModal from '@components/modals/ImageModal'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
-import styles from '@styles/components/cards/PostCard/PostTypes/Images.module.scss'
+import styles from '@styles/components/cards/PostCard/ImagesCard.module.scss'
 import React, { useState } from 'react'
 
-function Images(props: { images: any }): JSX.Element {
+function ImagesCard(props: { images: any }): JSX.Element {
     const { images } = props
     const [imageModalOpen, setImageModalOpen] = useState(false)
     const [selectedImage, setSelectedImage] = useState<any>(null)
@@ -58,4 +58,4 @@ function Images(props: { images: any }): JSX.Element {
     )
 }
 
-export default Images
+export default ImagesCard

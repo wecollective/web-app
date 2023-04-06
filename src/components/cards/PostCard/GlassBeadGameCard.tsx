@@ -1,5 +1,4 @@
 import Button from '@components/Button'
-import BeadCard from '@components/cards/PostCard/BeadCard2'
 import Column from '@components/Column'
 import FlagImageHighlights from '@components/FlagImageHighlights'
 import ImageTitle from '@components/ImageTitle'
@@ -7,20 +6,21 @@ import NextBeadModal from '@components/modals/NextBeadModal2'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
 import Comments from '@src/components/cards/Comments/Comments'
+import BeadCard from '@src/components/cards/PostCard/BeadCard'
 import { AccountContext } from '@src/contexts/AccountContext'
 import { formatTimeHHDDMMSS, pluralise } from '@src/Helpers'
-import styles from '@styles/components/cards/PostCard/PostTypes/GlassBeadGame2.module.scss'
+import styles from '@styles/components/cards/PostCard/GlassBeadGameCard.module.scss'
 import { DNAIcon, DoorIcon, PlusIcon, UsersIcon } from '@svgs/all'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-function GlassBeadGame(props: {
+function GlassBeadGameCard(props: {
     postData: any
     setPostData: (data: any) => void
     location: string
 }): JSX.Element {
     const { postData, setPostData, location } = props
-    const { id, Creator, GlassBeadGame2, Beads, Players } = postData
+    const { id, Creator, GlassBeadGame, Beads, Players } = postData
     const {
         synchronous,
         multiplayer,
@@ -29,7 +29,7 @@ function GlassBeadGame(props: {
         playerOrder,
         nextMoveDeadline,
         state,
-    } = GlassBeadGame2
+    } = GlassBeadGame
     const { accountData, setAlertMessage, setAlertModalOpen, loggedIn } = useContext(AccountContext)
     const [beads, setBeads] = useState<any[]>(Beads.sort((a, b) => a.Link.index - b.Link.index))
     const [orderedPlayers, setOrderedPlayers] = useState<any[]>([])
@@ -294,14 +294,14 @@ function GlassBeadGame(props: {
                 <NextBeadModal
                     location='existing-gbg'
                     settings={{
-                        ...GlassBeadGame2,
-                        allowedBeadTypes: [...GlassBeadGame2.allowedBeadTypes.split(',')],
+                        ...GlassBeadGame,
+                        allowedBeadTypes: [...GlassBeadGame.allowedBeadTypes.split(',')],
                     }}
                     postId={id}
                     players={Players}
                     addBead={(bead) => {
                         const newPostData = { ...postData, Beads: [...beads, bead] }
-                        newPostData.GlassBeadGame2.nextMoveDeadline = bead.nextMoveDeadline
+                        newPostData.GlassBeadGame.nextMoveDeadline = bead.nextMoveDeadline
                         setPostData(newPostData)
                     }}
                     close={() => setNextBeadModalOpen(false)}
@@ -333,4 +333,4 @@ function GlassBeadGame(props: {
     )
 }
 
-export default GlassBeadGame
+export default GlassBeadGameCard

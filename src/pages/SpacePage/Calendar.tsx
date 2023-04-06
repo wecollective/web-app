@@ -86,8 +86,8 @@ function Calendar(): JSX.Element {
                                         ...post.Event,
                                         title:
                                             post.title ||
-                                            (post.GlassBeadGame2
-                                                ? post.GlassBeadGame2.topic
+                                            (post.GlassBeadGame
+                                                ? post.GlassBeadGame.topic
                                                 : post.text),
                                         type: post.type,
                                         postId: post.id,

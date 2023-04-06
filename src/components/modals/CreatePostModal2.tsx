@@ -16,8 +16,8 @@ import ImageModal from '@components/modals/ImageModal'
 import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
-import BeadCard from '@src/components/cards/PostCard/BeadCard2'
-import AudioCard from '@src/components/cards/PostCard/PostTypes/AudioCard'
+import AudioCard from '@src/components/cards/PostCard/AudioCard'
+import BeadCard from '@src/components/cards/PostCard/BeadCard'
 // import ShowMoreLess from '@components/ShowMoreLess'
 import NextBeadModal from '@components/modals/NextBeadModal2'
 import SuccessMessage from '@components/SuccessMessage'
@@ -25,7 +25,7 @@ import Toggle from '@components/Toggle'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import PostSpaces from '@src/components/cards/PostCard/PostSpaces'
-import UrlPreview from '@src/components/cards/PostCard/UrlPreview'
+import UrlPreview from '@src/components/cards/PostCard/UrlCard'
 import config from '@src/Config'
 import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import {
@@ -759,7 +759,7 @@ function CreatePostModal(): JSX.Element {
                                     Reactions: [],
                                 }
                             })
-                            newPost.GlassBeadGame2 = { ...res.data.gbg.game }
+                            newPost.GlassBeadGame = { ...res.data.gbg.game }
                             newPost.Players =
                                 GBGSettings.players.map((p) => {
                                     return {

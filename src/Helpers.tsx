@@ -81,7 +81,7 @@ export const defaultPostData = {
     Audios: [] as any[],
     Event: null as any,
     Poll: null as any,
-    GlassBeadGame2: null as any,
+    GlassBeadGame: null as any,
     Beads: [] as any[],
     // Weave: null as any,
     Players: [] as any[],

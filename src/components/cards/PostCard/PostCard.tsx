@@ -1,5 +1,3 @@
-import GlassBeadGame from '@components/cards/PostCard/PostTypes/GlassBeadGame2'
-import UrlPreview from '@components/cards/PostCard/UrlPreview'
 import CloseOnClickOutside from '@components/CloseOnClickOutside'
 import Column from '@components/Column'
 import DraftText from '@components/draft-js/DraftText'
@@ -10,15 +8,17 @@ import StatButton from '@components/StatButton'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import Comments from '@src/components/cards/Comments/Comments'
-import LikeModal from '@src/components/cards/PostCard/LikeModal'
-import LinkModal from '@src/components/cards/PostCard/LinkModal'
+import AudioCard from '@src/components/cards/PostCard/AudioCard'
+import EventCard from '@src/components/cards/PostCard/EventCard'
+import GlassBeadGameCard from '@src/components/cards/PostCard/GlassBeadGameCard'
+import ImagesCard from '@src/components/cards/PostCard/ImagesCard'
+import LikeModal from '@src/components/cards/PostCard/Modals/LikeModal'
+import LinkModal from '@src/components/cards/PostCard/Modals/LinkModal'
+import RatingModal from '@src/components/cards/PostCard/Modals/RatingModal'
+import RepostModal from '@src/components/cards/PostCard/Modals/RepostModal'
+import PollCard from '@src/components/cards/PostCard/PollCard'
 import PostSpaces from '@src/components/cards/PostCard/PostSpaces'
-import AudioCard from '@src/components/cards/PostCard/PostTypes/AudioCard'
-import EventCard from '@src/components/cards/PostCard/PostTypes/EventCard'
-import Images from '@src/components/cards/PostCard/PostTypes/Images'
-import PollCard from '@src/components/cards/PostCard/PostTypes/PollCard'
-import RatingModal from '@src/components/cards/PostCard/RatingModal'
-import RepostModal from '@src/components/cards/PostCard/RepostModal'
+import UrlCard from '@src/components/cards/PostCard/UrlCard'
 import EditPostModal from '@src/components/modals/EditPostModal'
 import config from '@src/Config'
 import { dateCreated, statTitle, timeSinceCreated, timeSinceCreatedShort } from '@src/Helpers'
@@ -26,15 +26,10 @@ import {
     CommentIcon,
     DeleteIcon,
     EditIcon,
-    // ImageIcon,
-    // InquiryIcon,
     LikeIcon,
     LinkIcon,
-    // PrismIcon,
     RepostIcon,
     StarIcon,
-    // TextIcon,
-    // WeaveIcon,
     VerticalEllipsisIcon,
 } from '@src/svgs/all'
 import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
@@ -81,9 +76,9 @@ function PostCard(props: {
         DirectSpaces,
         Urls,
         Audios,
-        GlassBeadGame2,
+        GlassBeadGame,
     } = postData
-    // const { topic, topicImage } = GlassBeadGame2
+    // const { topic, topicImage } = GlassBeadGame
 
     // modals
     const [menuOpen, setMenuOpen] = useState(false)
@@ -140,7 +135,7 @@ function PostCard(props: {
     }
 
     function renderTopic() {
-        const { topic, topicImage } = GlassBeadGame2
+        const { topic, topicImage } = GlassBeadGame
         return (
             <Row centerY className={styles.topic}>
                 {topicImage && <img src={topicImage} alt='' />}
@@ -254,14 +249,14 @@ function PostCard(props: {
             </Row>
             <Column className={styles.content}>
                 {title && <h1 className={styles.title}>{title}</h1>}
-                {GlassBeadGame2 && GlassBeadGame2.topic && renderTopic()}
+                {GlassBeadGame && GlassBeadGame.topic && renderTopic()}
                 {text && <DraftText stringifiedDraft={text} style={{ marginBottom: 10 }} />}
                 {/* {todo: startTime && } */}
                 {postData.Event && (
                     <EventCard postData={postData} setPostData={setPostData} location={location} />
                 )}
                 {type.includes('image') && (
-                    <Images images={postData.Images.sort((a, b) => a.index - b.index)} />
+                    <ImagesCard images={postData.Images.sort((a, b) => a.index - b.index)} />
                 )}
                 {type.includes('audio') && (
                     <AudioCard
@@ -282,7 +277,7 @@ function PostCard(props: {
                 )}
                 {/* {type === 'glass-bead-game' && ( */}
                 {type === 'glass-bead-game' && (
-                    <GlassBeadGame
+                    <GlassBeadGameCard
                         postData={postData}
                         setPostData={setPostData}
                         location={location}
@@ -291,7 +286,7 @@ function PostCard(props: {
                 {Urls.length > 0 && (
                     <Column style={{ marginBottom: 10 }}>
                         {Urls.map((urlData) => (
-                            <UrlPreview
+                            <UrlCard
                                 key={urlData.url}
                                 type='post'
                                 urlData={urlData}

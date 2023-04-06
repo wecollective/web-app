@@ -2,11 +2,11 @@ import Column from '@components/Column'
 import LoadingWheel from '@components/LoadingWheel'
 import Row from '@components/Row'
 import CloseButton from '@src/components/CloseButton'
-import styles from '@styles/components/cards/PostCard/UrlPreview.module.scss'
+import styles from '@styles/components/cards/PostCard/UrlCard.module.scss'
 import { LinkIcon } from '@svgs/all'
 import React, { useEffect, useState } from 'react'
 
-function UrlPreview(props: {
+function UrlCard(props: {
     type: 'post' | 'bead'
     urlData: any
     loading?: boolean
@@ -82,10 +82,10 @@ function UrlPreview(props: {
     )
 }
 
-UrlPreview.defaultProps = {
+UrlCard.defaultProps = {
     loading: false,
     style: null,
     remove: null,
 }
 
-export default UrlPreview
+export default UrlCard

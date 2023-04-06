@@ -2,7 +2,6 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import Button from '@components/Button'
-import BeadCard from '@components/cards/PostCard/BeadCard2'
 import Column from '@components/Column'
 import FlagImage from '@components/FlagImage'
 import ImageTitle from '@components/ImageTitle'
@@ -17,6 +16,7 @@ import Scrollbars from '@components/Scrollbars'
 import SuccessMessage from '@components/SuccessMessage'
 import { AccountContext } from '@contexts/AccountContext'
 import { PostContext } from '@contexts/PostContext'
+import BeadCard from '@src/components/cards/PostCard/BeadCard'
 import config from '@src/Config'
 import {
     allValid,
@@ -420,7 +420,7 @@ function GlassBeadGame(): JSX.Element {
     const { loggedIn, accountData, accountDataLoading, setAlertModalOpen, setAlertMessage } =
         useContext(AccountContext)
     const { postData, postDataLoading } = useContext(PostContext)
-    const [gameData, setGameData] = useState<any>(postData.GlassBeadGame2)
+    const [gameData, setGameData] = useState<any>(postData.GlassBeadGame)
     const [gameInProgress, setGameInProgress] = useState(false)
     const [userIsStreaming, setUserIsStreaming] = useState(false)
     const [players, setPlayers] = useState<any[]>([])

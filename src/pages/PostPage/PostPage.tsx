@@ -1,7 +1,6 @@
 /* eslint-disable no-nested-ternary */
 import PostCard from '@components/cards/PostCard/PostCard'
 import Column from '@components/Column'
-import GlassBeadGame from '@components/GlassBeadGame'
 import LoadingWheel from '@components/LoadingWheel'
 import Prism from '@components/Prism'
 import { AccountContext } from '@contexts/AccountContext'
@@ -16,7 +15,7 @@ function PostPage(): JSX.Element {
     const { accountDataLoading, loggedIn } = useContext(AccountContext)
     const { getPostData, postData, postDataLoading, postState, resetPostContext } =
         useContext(PostContext)
-    const { GlassBeadGame2 } = postData
+    const { GlassBeadGame } = postData
 
     useEffect(() => {
         if (!accountDataLoading && postId !== postData.id) getPostData(+postId)
@@ -30,7 +29,7 @@ function PostPage(): JSX.Element {
     // if (postData.type === 'plot-graph') {
     //     return <PlotGraph />
     // }
-    if (postData.type === 'glass-bead-game' && GlassBeadGame2 && GlassBeadGame2.synchronous) {
+    if (postData.type === 'glass-bead-game' && GlassBeadGame && GlassBeadGame.synchronous) {
         return <GlassBeadGame />
     }
     // if (postData.type === 'decision-tree') {
