@@ -19,13 +19,13 @@ import Scrollbars from '@components/Scrollbars'
 import AudioCard from '@src/components/cards/PostCard/AudioCard'
 import BeadCard from '@src/components/cards/PostCard/BeadCard'
 // import ShowMoreLess from '@components/ShowMoreLess'
-import NextBeadModal from '@components/modals/NextBeadModal2'
 import SuccessMessage from '@components/SuccessMessage'
 import Toggle from '@components/Toggle'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import PostSpaces from '@src/components/cards/PostCard/PostSpaces'
 import UrlPreview from '@src/components/cards/PostCard/UrlCard'
+import NextBeadModal from '@src/components/modals/NextBeadModal'
 import config from '@src/Config'
 import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import {
@@ -641,7 +641,7 @@ function CreatePostModal(): JSX.Element {
                     spaces.length > 1
                         ? spaces.filter((s) => s.id !== 1).map((s) => s.id)
                         : spaces.map((s) => s.id),
-                title,
+                title: postType === 'glass-bead-game' ? null : title,
                 text: findDraftLength(text) ? text : null,
                 mentions: mentions.map((m) => m.link),
                 urls: urlsWithMetaData,
@@ -820,8 +820,8 @@ function CreatePostModal(): JSX.Element {
         setPollAnswersError(false)
         setTopicError(false)
         setNoBeadsError(false)
+        // initialise date picker
         if (postType === 'event') {
-            // initialise date picker
             const now = new Date()
             const startTimePast = new Date(startTime) < now
             const endTimePast = new Date(endTime) < now
@@ -1067,7 +1067,6 @@ function CreatePostModal(): JSX.Element {
                                         renderBeads()}
                                 </Column>
                             )}
-                            {/* {['text', 'event'].includes(postType) && */}
                             {urlsWithMetaData.map((u) => (
                                 <UrlPreview
                                     key={u.url}
