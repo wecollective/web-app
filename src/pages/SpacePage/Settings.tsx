@@ -11,7 +11,6 @@ import UpdateSpaceDescriptionModal from '@components/modals/UpdateSpaceDescripti
 import UpdateSpaceHandleModal from '@components/modals/UpdateSpaceHandleModal'
 import UpdateSpaceNameModal from '@components/modals/UpdateSpaceNameModal'
 import Row from '@components/Row'
-import ShowMoreLess from '@components/ShowMoreLess'
 import { SpaceContext } from '@contexts/SpaceContext'
 import SpaceNotFound from '@pages/SpaceNotFound'
 import InviteSpaceUsersModal from '@src/components/modals/InviteSpaceUsersModal'
@@ -68,9 +67,9 @@ function Settings(): JSX.Element {
                     </Row>
                     <Column centerX>
                         <h1>Description:</h1>
-                        <ShowMoreLess height={75}>
-                            <DraftText stringifiedDraft={spaceData.description || ''} />
-                        </ShowMoreLess>
+                        {/* <ShowMoreLess height={75}> */}
+                        <DraftText stringifiedDraft={spaceData.description || ''} />
+                        {/* </ShowMoreLess> */}
                         <Button
                             text='Edit'
                             color='blue'
