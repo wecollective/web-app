@@ -215,8 +215,12 @@ function GlassBeadGameCard(props: {
             return renderNextBeadButton()
         }
         // strings
-        if (!multiplayer && movesLeft && Creator.id === accountData.id) {
-            return renderNextBeadButton()
+        if (!multiplayer && movesLeft) {
+            return Creator.id === accountData.id ? (
+                renderNextBeadButton()
+            ) : (
+                <span style={{ marginRight: 15 }} />
+            )
         }
         return null
     }
