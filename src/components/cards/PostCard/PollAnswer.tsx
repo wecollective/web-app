@@ -3,7 +3,7 @@ import CloseButton from '@components/CloseButton'
 import FlagImageHighlights from '@components/FlagImageHighlights'
 import Input from '@components/Input'
 import Row from '@components/Row'
-import styles from '@styles/components/cards/PollAnswer.module.scss'
+import styles from '@styles/components/cards/PostCard/PollAnswer.module.scss'
 import React from 'react'
 
 function PollAnswer(props: {
@@ -58,7 +58,7 @@ function PollAnswer(props: {
                         />
                     )}
                     <p className={styles.percentage}>{findPercentage()}%</p>
-                    <p className={styles.points}>{+points.toFixed(2)} ↑</p>
+                    {/* <p className={styles.points}>{+points.toFixed(2)} ↑</p> */}
                 </Row>
             )}
             <p>{answer.text}</p>

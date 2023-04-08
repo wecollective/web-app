@@ -305,7 +305,7 @@ function PostCard(props: {
                         text={totalLikes}
                         title={statTitle('Like', totalLikes || 0)}
                         color={accountLike && 'blue'}
-                        disabled={location === 'preview'}
+                        disabled={location === 'preview' || likeResponseLoading}
                         loading={likeResponseLoading}
                         onClickIcon={toggleLike}
                         onClickStat={() => setLikeModalOpen(true)}

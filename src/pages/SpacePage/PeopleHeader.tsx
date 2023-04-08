@@ -33,7 +33,7 @@ function PeopleHeader(props: { params: any }): JSX.Element {
                     <h1>People Filters</h1>
                     <DropDown
                         title='Sort By'
-                        options={['Posts', 'Comments', 'Date']}
+                        options={['Posts', 'Comments', 'Date Created']}
                         selectedOption={filterParams.sortBy}
                         setSelectedOption={(value) =>
                             setFilterParams({ ...filterParams, sortBy: value })

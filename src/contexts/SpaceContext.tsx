@@ -37,7 +37,7 @@ const defaults = {
     },
     postFilters: {
         type: 'All Types',
-        sortBy: 'Date',
+        sortBy: 'Recent Activity',
         sortOrder: 'Descending',
         timeRange: 'All Time',
         depth: 'All Contained Posts',
@@ -52,7 +52,7 @@ const defaults = {
         lens: 'Circles',
     },
     peopleFilters: {
-        sortBy: 'Date',
+        sortBy: 'Date Created',
         sortOrder: 'Descending',
         timeRange: 'All Time',
     },

@@ -1,7 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-nested-ternary */
 import Button from '@components/Button'
-import PollAnswer from '@components/cards/PollAnswer'
 import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
 import DraftTextEditor from '@components/draft-js/DraftTextEditor'
@@ -18,6 +17,7 @@ import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
 import AudioCard from '@src/components/cards/PostCard/AudioCard'
 import BeadCard from '@src/components/cards/PostCard/BeadCard'
+import PollAnswer from '@src/components/cards/PostCard/PollAnswer'
 // import ShowMoreLess from '@components/ShowMoreLess'
 import SuccessMessage from '@components/SuccessMessage'
 import Toggle from '@components/Toggle'
