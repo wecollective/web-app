@@ -20,8 +20,9 @@ import {
 } from '@src/Helpers'
 import axios from 'axios'
 import React, { useContext, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
+import { v4 as uuidv4 } from 'uuid'
 
 function CreateSpaceModal(props: { close: () => void }): JSX.Element {
     const { close } = props
@@ -33,6 +34,9 @@ function CreateSpaceModal(props: { close: () => void }): JSX.Element {
         setSpaceListData,
         spaceTreeData,
         setSpaceTreeData,
+        spaceCircleData,
+        setSpaceCircleData,
+        spaceSpacesFilters,
     } = useContext(SpaceContext)
     const [formData, setFormData] = useState({
         handle: {
@@ -72,7 +76,7 @@ function CreateSpaceModal(props: { close: () => void }): JSX.Element {
     const [loading, setLoading] = useState(false)
     const [success, setSuccess] = useState(false)
     const [successMessage, setSuccessMessage] = useState('')
-
+    const history = useNavigate()
     const cookies = new Cookies()
     const authorized = isModerator || spaceData.id === 1
 
@@ -109,31 +113,51 @@ function CreateSpaceModal(props: { close: () => void }): JSX.Element {
                     } else {
                         const newSpaceData = {
                             ...defaultSpaceData,
+                            uuid: uuidv4(),
                             id: res.data.spaceId,
                             handle: handle.value,
                             name: name.value,
                             description: description.value,
                         }
-                        setSpaceTreeData({
-                            ...spaceTreeData,
-                            children: [newSpaceData, ...spaceTreeData.children],
-                        })
-                        setSpaceListData([newSpaceData, ...spaceListData])
+                        const { lens } = spaceSpacesFilters
+                        if (lens === 'Circles') {
+                            setSpaceCircleData({
+                                ...spaceCircleData,
+                                children: [newSpaceData, ...spaceCircleData.children],
+                            })
+                        } else if (lens === 'Tree') {
+                            setSpaceTreeData({
+                                ...spaceTreeData,
+                                children: [newSpaceData, ...spaceTreeData.children],
+                            })
+                        } else if (lens === 'List') {
+                            setSpaceListData([newSpaceData, ...spaceListData])
+                        }
                         setSuccessMessage(`Space created and attached to '${spaceData.name}'`)
                         setSuccess(true)
                     }
-                    setTimeout(() => close(), 3000)
+                    setTimeout(() => {
+                        if (spaceSpacesFilters.lens === 'Circles') {
+                            history(`/s/${data.handle}/spaces`)
+                        }
+                        close()
+                    }, 1000)
                 })
                 .catch((error) => {
-                    switch (error.response.data.message) {
-                        case 'handle-taken':
-                            invalidateFormItem(formData, setFormData, 'handle', 'Handle taken')
-                            break
-                        case 'not-logged-in':
-                            break
-                        default:
-                            console.log(error)
-                            break
+                    if (error.response) {
+                        const { message } = error.response.data
+                        switch (message) {
+                            case 'handle-taken':
+                                invalidateFormItem(formData, setFormData, 'handle', 'Handle taken')
+                                break
+                            case 'not-logged-in':
+                                break
+                            default:
+                                console.log('Error message: ', message)
+                                break
+                        }
+                    } else {
+                        console.log(error)
                     }
                     setLoading(false)
                 })

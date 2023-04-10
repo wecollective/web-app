@@ -3,13 +3,13 @@
 .wrapper {
     margin-bottom: 10px;
     width: 100%;
-    @include for-post-width-up {
+    @include for-desktop-small-up {
         width: auto;
     }
 
     .content {
         width: 100%;
-        @include for-post-width-up {
+        @include for-desktop-small-up {
             width: auto;
         }
 

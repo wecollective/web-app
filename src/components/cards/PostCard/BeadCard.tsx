@@ -209,7 +209,7 @@ function BeadCard(props: {
             ) : (
                 <Column centerY className={styles.content}>
                     {type === 'text' && (
-                        <Scrollbars style={{ marginBottom: showFooter ? 0 : 10 }}>
+                        <Scrollbars style={{ paddingRight: 10, marginBottom: showFooter ? 0 : 10 }}>
                             <DraftText stringifiedDraft={bead.text} />
                         </Scrollbars>
                     )}

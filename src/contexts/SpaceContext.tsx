@@ -136,6 +136,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
 
     function getSpacePosts(spaceId, offset, limit, params) {
         console.log(`SpaceContext: getSpacePosts (${offset + 1} to ${offset + limit})`)
+        setSpacePostsFilters(params)
         const firstLoad = offset === 0
         if (firstLoad) setSpacePostsLoading(true)
         else setNextSpacePostsLoading(true)
@@ -168,6 +169,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
 
     function getPostMapData(spaceId, params, limit) {
         console.log(`SpaceContext: getPostMapData`, spaceId, params, limit)
+        setSpacePostsFilters(params)
         const accessToken = cookies.get('accessToken')
         const options = { headers: { Authorization: `Bearer ${accessToken}` } }
         axios
@@ -189,6 +191,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
 
     function getSpaceListData(spaceId, offset, limit, params) {
         console.log(`SpaceContext: getSpaceListData (${offset + 1} to ${offset + limit})`)
+        setSpaceSpacesFilters(params)
         const firstLoad = offset === 0
         if (firstLoad) setSpaceSpacesLoading(true)
         else setNextSpaceSpacesLoading(true)
@@ -220,6 +223,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     // todo: use post request and pass in params as object
     function getSpaceMapData(spaceId, params) {
         console.log(`SpaceContext: getSpaceMapData`)
+        setSpaceSpacesFilters(params)
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
             .get(
@@ -243,6 +247,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     }
 
     function getSpaceMapChildren(spaceId, offset, params, isParent) {
+        setSpaceSpacesFilters(params)
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         return axios.get(
             /* prettier-ignore */
