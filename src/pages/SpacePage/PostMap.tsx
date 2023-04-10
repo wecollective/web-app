@@ -7,7 +7,6 @@ import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import { getDraftPlainText } from '@src/Helpers'
-import { IPost } from '@src/Interfaces'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/pages/SpacePage/PostMap.module.scss'
 import axios from 'axios'
@@ -49,30 +48,14 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
     function findDomain() {
         let dMin = 0
         let dMax
-        if (sortBy === 'Reactions')
-            dMax = d3.max(postMapData.posts.map((post: any) => post.totalReactions))
-        if (sortBy === 'Likes') dMax = d3.max(postMapData.posts.map((post: any) => post.totalLikes))
-        if (sortBy === 'Reposts')
-            dMax = d3.max(postMapData.posts.map((post: any) => post.totalReposts))
-        if (sortBy === 'Ratings')
-            dMax = d3.max(postMapData.posts.map((post: any) => post.totalRatings))
-        if (sortBy === 'Comments')
-            dMax = d3.max(postMapData.posts.map((post: any) => post.totalComments))
-        if (sortBy === 'Date') {
-            dMin = d3.min(postMapData.posts.map((post: IPost) => Date.parse(post.createdAt)))
-            dMax = d3.max(postMapData.posts.map((post: IPost) => Date.parse(post.createdAt)))
-        }
-        let domainMin
-        let domainMax
-        if (sortOrder === 'Descending') {
-            domainMin = dMin
-            domainMax = dMax
-        }
-        if (sortOrder === 'Ascending') {
-            domainMin = dMax
-            domainMax = dMin
-        }
-        return [domainMin, domainMax]
+        if (sortBy === 'Date Created') {
+            dMin = d3.min(postMapData.posts.map((post) => Date.parse(post.createdAt)))
+            dMax = d3.max(postMapData.posts.map((post) => Date.parse(post.createdAt)))
+        } else if (sortBy === 'Recent Activity') {
+            dMin = d3.min(postMapData.posts.map((post) => Date.parse(post.lastActivity)))
+            dMax = d3.max(postMapData.posts.map((post) => Date.parse(post.lastActivity)))
+        } else dMax = d3.max(postMapData.posts.map((child) => child[`total${sortBy}`]))
+        return sortOrder === 'Descending' ? [dMin, dMax] : [dMax, dMin]
     }
 
     function findRadius(d) {
@@ -80,15 +63,10 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
             .scaleLinear()
             .domain(findDomain()) // data values spread
             .range([20, 60]) // radius size spread
-
         let radius
-        if (sortBy === 'Reactions') radius = d.totalReactions
-        if (sortBy === 'Likes') radius = d.totalLikes
-        if (sortBy === 'Reposts') radius = d.totalReposts
-        if (sortBy === 'Ratings') radius = d.totalRatings
-        if (sortBy === 'Comments') radius = d.totalComments
-        if (sortBy === 'Date') radius = Date.parse(d.createdAt)
-
+        if (sortBy === 'Date Created') radius = Date.parse(d.createdAt)
+        else if (sortBy === 'Recent Activity') radius = Date.parse(d.lastActivity)
+        else radius = d[`total${sortBy}`]
         return radiusScale(radius)
     }
 
@@ -136,40 +114,13 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
             return `url(#pattern-${d.id})`
         }
         // return color based on post type
-        if (d.type === 'url') {
-            return colors.yellow
-        }
-        if (d.type === 'audio') {
-            return colors.orange
-        }
-        if (d.type === 'event') {
-            return colors.red
-        }
-        if (d.type === 'poll') {
-            return colors.purple
-        }
-        if (d.type === 'string') {
-            return colors.lightBlue
-        }
-        // if (d.type === 'poll') {
-        //     return colors.red
-        // }
-        if (d.type === 'text') {
-            return colors.green
-        }
-        // if (d.type === 'prism') {
-        //     return colors.purple
-        // }
-        if (d.type === 'glass-bead-game') {
-            return colors.blue
-        }
-        if (d.type === 'weave') {
-            return colors.aqua
-        }
-        // if (d.type === 'plot-graph') {
-        //     return colors.orange
-        // }
-        return null
+        let color = colors.green
+        if (d.type === 'url') color = colors.aqua
+        if (d.type === 'audio') color = colors.orange
+        if (d.type === 'event') color = colors.red
+        if (d.type === 'poll') color = colors.purple
+        if (d.type === 'glass-bead-game') color = colors.blue
+        return color
     }
 
     function findStroke(d) {
