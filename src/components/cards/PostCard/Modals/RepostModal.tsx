@@ -245,6 +245,7 @@ function RepostModal(props: {
                                 style={{ marginBottom: 20 }}
                                 onSearchQuery={(query) => findSpaces(query)}
                                 onOptionSelected={(space) => addSpace(space)}
+                                onBlur={() => setTimeout(() => setSpaceOptions([]), 200)}
                                 options={spaceOptions}
                             />
                             {selectedSpaces.length > 0 && (

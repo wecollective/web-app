@@ -2,17 +2,14 @@ import ImageTitle from '@components/ImageTitle'
 import Input from '@components/Input'
 import styles from '@styles/components/SearchSelector.module.scss'
 import React, { useState } from 'react'
-// import Row from '@components/Row'
 
 // general purpose search selector:
 // • text input fires onSearchQuery function
 // • results fed back into option list via options prop
 // • clicking an option passes the option to onOptionSelected function
 
-// todo: add selectedOptions array and allowMultiple boolean?
-
 function SearchSelector(props: {
-    type: 'space' | 'user' | 'topic'
+    type: 'space' | 'user'
     title?: string
     placeholder?: string
     style?: any
@@ -23,8 +20,7 @@ function SearchSelector(props: {
     loading?: boolean
     onSearchQuery: (payload: string) => void
     onOptionSelected: (payload: any) => void
-    // selectedOptions: any[]
-    // allowMultiple: boolean
+    onBlur?: () => void
 }): JSX.Element {
     const {
         type,
@@ -38,6 +34,7 @@ function SearchSelector(props: {
         loading,
         onSearchQuery,
         onOptionSelected,
+        onBlur,
     } = props
     const [inputValue, setInputValue] = useState('')
 
@@ -63,28 +60,19 @@ function SearchSelector(props: {
                 loading={loading}
                 value={inputValue}
                 onChange={(newValue) => handleSearchQuery(newValue)}
+                onBlur={onBlur}
             />
             {options.length > 0 && (
                 <div className={styles.dropDown}>
-                    {type === 'topic'
-                        ? options.map((option) => (
-                              <ImageTitle
-                                  key={option.handle}
-                                  type='space'
-                                  imagePath={option.imagePath}
-                                  title={option.name}
-                                  onClick={() => selectOption(option)}
-                              />
-                          ))
-                        : options.map((option) => (
-                              <ImageTitle
-                                  key={option.handle}
-                                  type={type}
-                                  imagePath={option.flagImagePath}
-                                  title={`${option.name} (${option.handle})`}
-                                  onClick={() => selectOption(option)}
-                              />
-                          ))}
+                    {options.map((option) => (
+                        <ImageTitle
+                            key={option.handle}
+                            type={type}
+                            imagePath={option.flagImagePath}
+                            title={`${option.name} (${option.handle})`}
+                            onClick={() => selectOption(option)}
+                        />
+                    ))}
                 </div>
             )}
         </div>
@@ -99,6 +87,7 @@ SearchSelector.defaultProps = {
     state: 'default',
     errors: null,
     loading: false,
+    onBlur: null,
 }
 
 export default SearchSelector

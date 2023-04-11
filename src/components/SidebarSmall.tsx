@@ -110,6 +110,7 @@ function SidebarSmall(): JSX.Element | null {
                                 placeholder='Space name or handle...'
                                 onSearchQuery={(query) => findSpaces(query)}
                                 onOptionSelected={(space) => addSpace(space)}
+                                onBlur={() => setTimeout(() => setSpaceOptions([]), 200)}
                                 options={spaceOptions}
                                 style={{ margin: '25px 0' }}
                             />

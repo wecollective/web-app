@@ -253,6 +253,7 @@ function ParentSpaceRequestModal(props: { close: () => void }): JSX.Element {
                     placeholder='name or handle...'
                     onSearchQuery={(query) => findSpaces(query)}
                     onOptionSelected={(space) => selectSpace(space)}
+                    onBlur={() => setTimeout(() => setOptions([]), 200)}
                     options={options}
                 />
                 {selectedSpace && (

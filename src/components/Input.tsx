@@ -21,6 +21,7 @@ function Input(props: {
     errors?: string[]
     style?: any
     onChange?: (payload: any) => void
+    onBlur?: () => void
 }): JSX.Element {
     const {
         type,
@@ -39,6 +40,7 @@ function Input(props: {
         loading,
         autoFill,
         onChange,
+        onBlur,
     } = props
 
     function handleChange(newValue) {
@@ -67,6 +69,7 @@ function Input(props: {
                             if (onChange) onChange(e.target.value)
                             resizeTextArea(e.target)
                         }}
+                        onBlur={onBlur}
                         disabled={disabled}
                         data-lpignore={!autoFill}
                     />
@@ -79,6 +82,7 @@ function Input(props: {
                         min={min}
                         max={max}
                         onChange={(e) => handleChange(e.target.value)}
+                        onBlur={onBlur}
                         disabled={disabled}
                         data-lpignore={!autoFill}
                     />
@@ -102,6 +106,7 @@ Input.defaultProps = {
     errors: null,
     value: '',
     onChange: null,
+    onBlur: null,
     rows: null,
     min: null,
     max: null,

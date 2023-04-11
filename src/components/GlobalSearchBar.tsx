@@ -13,7 +13,7 @@ import { capitalise, getParamString } from '@src/Helpers'
 import styles from '@styles/components/GlobalSearchBar.module.scss'
 import { SearchIcon } from '@svgs/all'
 import axios from 'axios'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
@@ -30,6 +30,7 @@ function GlobalSearchBar(props: { onLocationChange?: () => void; style?: any }):
     const subpage = location.pathname.split('/')[3]
     const [firstRun, setFirstRun] = useState(true)
     const [searchQuery, setSearchQuery] = useState('')
+    const searchQueryRef = useRef('')
     const [searchType, setSearchType] = useState(
         pageType === 's'
             ? ['posts', 'spaces', 'people'].includes(subpage)
@@ -50,11 +51,14 @@ function GlobalSearchBar(props: { onLocationChange?: () => void; style?: any }):
         params[param] = urlParams[param]
     })
     const cookies = new Cookies()
-    // const [searchQuery, setSearchQuery] = useState(params.searchQuery)
 
     function getSuggestions(query) {
         setSearchQuery(query)
-        if (query && ['Spaces', 'People'].includes(searchType)) {
+        searchQueryRef.current = query
+        if (!query || !['Spaces', 'People'].includes(searchType)) {
+            setSuggestions([])
+            setSuggestionsLoading(false)
+        } else {
             setSuggestionsLoading(true)
             const route = `find-${searchType.toLowerCase()}`
             const data = {
@@ -67,15 +71,14 @@ function GlobalSearchBar(props: { onLocationChange?: () => void; style?: any }):
             axios
                 .post(`${config.apiURL}/${route}`, data, options)
                 .then((res) => {
-                    setSuggestionsLoading(false)
-                    // if search query changed since request sent don't set options
-                    setSearchQuery((s) => {
-                        if (s === query) setSuggestions(res.data)
-                        return s
-                    })
+                    // if the search query has changed since the request was sent don't set options
+                    if (searchQueryRef.current === query) {
+                        setSuggestions(res.data)
+                        setSuggestionsLoading(false)
+                    }
                 })
                 .catch((error) => console.log(error))
-        } else setSuggestions([])
+        }
     }
 
     function search(e) {
@@ -93,11 +96,8 @@ function GlobalSearchBar(props: { onLocationChange?: () => void; style?: any }):
     }
 
     useEffect(() => {
-        if (firstRun) {
-            setFirstRun(false)
-            // setSearchQuery(params.searchQuery)
-            // console.log(params.searchQuery)
-        } else {
+        if (firstRun) setFirstRun(false)
+        else {
             // update search constraint
             const showSpaceConstraint =
                 pageType === 's' &&
@@ -110,15 +110,12 @@ function GlobalSearchBar(props: { onLocationChange?: () => void; style?: any }):
                 pageType === 's' && ['posts', 'spaces', 'people'].includes(subpage)
             const updateUserSearchType = pageType === 'u' && subpage === 'posts'
             if (updateSpaceSearchType || updateUserSearchType) setSearchType(capitalise(subpage))
-            // include search query if present
-            // console.log(params.searchQuery)
-            // if (params.searchQuery) setSearchQuery(params.searchQuery)
         }
     }, [location])
 
     useEffect(() => {
+        searchQueryRef.current = ''
         setSearchQuery('')
-        // setSearchQuery(params.searchQuery)
         setSuggestions([])
     }, [subpage, handle])
 
@@ -154,6 +151,7 @@ function GlobalSearchBar(props: { onLocationChange?: () => void; style?: any }):
                 value={searchQuery}
                 data-lpignore='true'
                 onChange={(e) => getSuggestions(e.target.value)}
+                onBlur={() => setTimeout(() => setSuggestions([]), 200)}
             />
             {suggestions.length > 0 && (
                 <Column className={styles.searchOptions}>

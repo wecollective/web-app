@@ -9,7 +9,7 @@ import Row from '@components/Row'
 import SearchSelector from '@components/SearchSelector'
 import config from '@src/Config'
 import axios from 'axios'
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 function AddPostSpacesModal(props: {
@@ -18,22 +18,34 @@ function AddPostSpacesModal(props: {
     close: () => void
 }): JSX.Element {
     const { spaces, setSpaces, close } = props
+    const searchQuery = useRef('')
     const [spaceOptions, setSpaceOptions] = useState<any[]>([])
     const [selectedSpaces, setSelectedSpaces] = useState<any[]>(spaces)
     const [spacesError, setSpacesError] = useState(false)
+    const [loading, setLoading] = useState<any | null>(null)
     const [checkingPrivacyAccess, setCheckingPrivacyAccess] = useState(false)
     const [spaceRestrictions, setSpaceRestrictions] = useState<any | null>(null)
     const cookies = new Cookies()
 
     function findSpaces(query) {
-        if (!query) setSpaceOptions([])
-        else {
+        searchQuery.current = query
+        if (!query) {
+            setSpaceOptions([])
+            setLoading(false)
+        } else {
+            setLoading(true)
             const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
             const blacklist = [...selectedSpaces.map((s) => s.id)]
             const data = { query, blacklist, spaceAccessRequired: true }
             axios
                 .post(`${config.apiURL}/find-spaces`, data, options)
-                .then((res) => setSpaceOptions(res.data))
+                .then((res) => {
+                    // if the search query has changed since the request was sent don't set options
+                    if (searchQuery.current === query) {
+                        setSpaceOptions(res.data)
+                        setLoading(false)
+                    }
+                })
                 .catch((error) => console.log(error))
         }
     }
@@ -121,7 +133,10 @@ function AddPostSpacesModal(props: {
                 placeholder='space name or handle...'
                 onSearchQuery={(query) => findSpaces(query)}
                 onOptionSelected={(space) => addSpace(space)}
+                onBlur={() => setTimeout(() => setSpaceOptions([]), 200)}
                 options={spaceOptions}
+                loading={loading}
+                style={{ width: '100%' }}
             />
             {selectedSpaces.length > 0 && (
                 <Column centerX style={{ marginTop: 10 }}>

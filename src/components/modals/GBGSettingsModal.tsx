@@ -917,6 +917,12 @@ function GBGSettingsModal(props: {
                                                         onOptionSelected={(space) =>
                                                             addPlayer(space)
                                                         }
+                                                        onBlur={() =>
+                                                            setTimeout(
+                                                                () => setPlayerOptions([]),
+                                                                200
+                                                            )
+                                                        }
                                                         options={playerOptions}
                                                         loading={playersLoading}
                                                         style={{ width: '100%' }}

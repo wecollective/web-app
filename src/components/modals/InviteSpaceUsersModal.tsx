@@ -110,6 +110,7 @@ function InviteSpaceUsersModal(props: { close: () => void }): JSX.Element {
                                 placeholder='name or handle...'
                                 onSearchQuery={(query) => findUsers(query)}
                                 onOptionSelected={(user) => addUser(user)}
+                                onBlur={() => setTimeout(() => setSuggestedUsers([]), 200)}
                                 options={suggestedUsers}
                             />
                         ) : (

@@ -110,6 +110,7 @@ function RemoveSpaceModeratorModal(props: { close: () => void }): JSX.Element {
                         errors={inputErrors}
                         onSearchQuery={(query) => findModerators(query)}
                         onOptionSelected={(user) => selectModerator(user)}
+                        onBlur={() => setTimeout(() => setOptions([]), 200)}
                         options={options}
                     />
                 ) : (
