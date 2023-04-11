@@ -7,13 +7,8 @@ import React, { useState } from 'react'
 function PostSpaces(props: { spaces: any[]; preview?: boolean }): JSX.Element {
     const { spaces, preview } = props
     const [modalOpen, setModalOpen] = useState(false)
-    // filter out root space 'all' if included
-    const filteredSpaces = spaces.filter((s) => s.id > 1)
-
-    function findLink(space) {
-        const link = `/s/${space.handle}/posts`
-        return preview || space.state !== 'active' ? null : link
-    }
+    // filter out root space 'all' and deleted spaces if included
+    const filteredSpaces = spaces.filter((s) => s.id > 1 && (preview || s.state === 'active'))
 
     function otherSpacesTitle() {
         if (!filteredSpaces.length) return ''
@@ -34,8 +29,7 @@ function PostSpaces(props: { spaces: any[]; preview?: boolean }): JSX.Element {
                     imageSize={32}
                     title={filteredSpaces[0].name}
                     fontSize={15}
-                    link={findLink(filteredSpaces[0])}
-                    state={filteredSpaces[0].state}
+                    link={preview ? null : `/s/${filteredSpaces[0].handle}/posts`}
                     style={{ margin: '0 5px' }}
                     shadow
                 />
@@ -61,8 +55,7 @@ function PostSpaces(props: { spaces: any[]; preview?: boolean }): JSX.Element {
                             imageSize={32}
                             title={space.name}
                             fontSize={15}
-                            link={findLink(space)}
-                            state={space.state}
+                            link={preview ? null : `/s/${space.handle}/posts`}
                             style={{ marginTop: 10 }}
                             shadow
                         />

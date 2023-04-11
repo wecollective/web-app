@@ -178,14 +178,18 @@ function PostCard(props: {
                         shadow
                     />
                     <PostSpaces spaces={DirectSpaces} />
-                    <Row>
+                    <Row style={{ marginLeft: 2 }}>
                         <p className='grey' title={`Posted at ${dateCreated(createdAt)}`}>
                             {mobileView
                                 ? timeSinceCreatedShort(createdAt)
                                 : timeSinceCreated(createdAt)}
                         </p>
                         {createdAt !== updatedAt && (
-                            <p className='grey' title={`Edited at ${dateCreated(updatedAt)}`}>
+                            <p
+                                className='grey'
+                                title={`Edited at ${dateCreated(updatedAt)}`}
+                                style={{ paddingLeft: 5 }}
+                            >
                                 *
                             </p>
                         )}
