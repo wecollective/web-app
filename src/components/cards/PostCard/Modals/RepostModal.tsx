@@ -13,7 +13,7 @@ import config from '@src/Config'
 import { pluralise } from '@src/Helpers'
 import styles from '@styles/components/cards/PostCard/Modals/RepostModal.module.scss'
 import axios from 'axios'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 function RepostModal(props: {
@@ -25,6 +25,8 @@ function RepostModal(props: {
     const { loggedIn, accountData, setLogInModalOpen, setAlertMessage, setAlertModalOpen } =
         useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
+    const searchQuery = useRef('')
+    const [spacesLoading, setSpacesLoading] = useState(false)
     const [reposts, setReposts] = useState<any[]>([])
     const [indirectSpaces, setIndirectSpaces] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
@@ -64,15 +66,25 @@ function RepostModal(props: {
     }
 
     function findSpaces(query) {
-        if (!query) setSpaceOptions([])
-        else {
+        searchQuery.current = query
+        if (!query) {
+            setSpaceOptions([])
+            setSpacesLoading(false)
+        } else {
+            setSpacesLoading(true)
             const accessToken = cookies.get('accessToken')
             const options = { headers: { Authorization: `Bearer ${accessToken}` } }
             const blacklist = findAllSpaceIds()
             const data = { query, blacklist, spaceAccessRequired: true }
             axios
                 .post(`${config.apiURL}/find-spaces`, data, options)
-                .then((res) => setSpaceOptions(res.data))
+                .then((res) => {
+                    // if the search query has changed since the request was sent don't set options
+                    if (searchQuery.current === query) {
+                        setSpaceOptions(res.data)
+                        setSpacesLoading(false)
+                    }
+                })
                 .catch((error) => console.log(error))
         }
     }
@@ -204,7 +216,7 @@ function RepostModal(props: {
     }, [])
 
     return (
-        <Modal close={close} style={{ width: 600 }} centered>
+        <Modal close={close} style={{ width: 600, overflow: 'unset' }} centered>
             {loading ? (
                 <LoadingWheel />
             ) : (
@@ -247,6 +259,7 @@ function RepostModal(props: {
                                 onOptionSelected={(space) => addSpace(space)}
                                 onBlur={() => setTimeout(() => setSpaceOptions([]), 200)}
                                 options={spaceOptions}
+                                loading={spacesLoading}
                             />
                             {selectedSpaces.length > 0 && (
                                 <Row style={{ marginBottom: 20 }} wrap centerX>
