@@ -300,8 +300,6 @@ function SpaceTree(props: { spaceTreeData: any; params: any }): JSX.Element {
         arrow
             .append('animateMotion')
             .attr('calcMode', 'linear')
-            .attr('dur', 'infinite')
-            .attr('repeatCount', 'infinite')
             .attr('rotate', 'auto')
             .attr('keyPoints', keyPoints)
             .attr('keyTimes', '0.0;1.0')

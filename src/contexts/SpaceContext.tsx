@@ -252,6 +252,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         return axios.get(
             /* prettier-ignore */
             `${config.apiURL}/space-map-data?spaceId=${spaceId
+                }&lens=${params.lens
                 }&offset=${offset
                 }&sortBy=${params.sortBy
                 }&sortOrder=${params.sortOrder

@@ -51,11 +51,9 @@ function LinkModal(props: {
     const headerText = totalLinks ? `${totalLinks} link${pluralise(totalLinks)}` : 'No links yet...'
 
     function getLinks() {
-        // console.log('postData.id: ', postData.id)
         axios
             .get(`${config.apiURL}/post-links?postId=${postData.id}`)
             .then((res) => {
-                console.log('res: ', res)
                 setIncomingLinks(res.data.IncomingLinks)
                 setOutgoingLinks(res.data.OutgoingLinks)
                 setLoading(false)
