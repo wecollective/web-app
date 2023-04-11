@@ -60,7 +60,6 @@ import { ReactComponent as SpaceCirclesIcon } from '@svgs/space-circles-icon.svg
 import { ReactComponent as SpaceListIcon } from '@svgs/space-list-icon.svg'
 import { ReactComponent as SpaceTreeIcon } from '@svgs/space-tree-icon.svg'
 import { ReactComponent as LoadingWheelIcon } from '@svgs/spinner.svg'
-import { ReactComponent as InquiryIcon } from '@svgs/square-poll-vertical-solid.svg'
 import { ReactComponent as StarIcon } from '@svgs/star-solid.svg'
 import { ReactComponent as StringIcon } from '@svgs/string-icon.svg'
 import { ReactComponent as ThumbsUpIcon } from '@svgs/thumbs-up-solid.svg'
@@ -95,7 +94,7 @@ export {
     PlusIcon,
     PrismIcon,
     RepostIcon,
-    InquiryIcon,
+    PollIcon,
     StarIcon,
     StringIcon,
     DeleteIcon,
@@ -143,7 +142,6 @@ export {
     DoorIcon,
     HandshakeIcon,
     OSIcon,
-    PollIcon,
     ArrowDownIcon,
     ArrowUpIcon,
     MinusIcon,

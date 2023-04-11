@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 import Button from '@components/Button'
 import Column from '@components/Column'
+import Input from '@components/Input'
 import PieChart from '@components/PieChart'
 import Row from '@components/Row'
 import TimeGraph from '@components/TimeGraph'
@@ -26,9 +27,12 @@ function PollCard(props: {
     const { id, text, Poll } = postData
     const { type, answersLocked, PollAnswers } = Poll
     const { accountData, setAlertMessage, setAlertModalOpen, loggedIn } = useContext(AccountContext)
+    // todo: update component directly instead of refreshing posts
     const { spaceData, getSpacePosts, spacePostsPaginationLimit } = useContext(SpaceContext)
     const { userData, getUserPosts, userPostsPaginationLimit } = useContext(UserContext)
     const { getPostData } = useContext(PostContext)
+    const [newAnswer, setNewAnswer] = useState('')
+    const [newAnswerLoading, setNewAnswerLoading] = useState(false)
     const [totalVotes, setTotalVotes] = useState(0)
     const [totalPoints, setTotalPoints] = useState(0)
     const [totalUsers, setTotalUsers] = useState(0)
@@ -46,44 +50,43 @@ function PollCard(props: {
     const cookies = new Cookies()
 
     function vote() {
-        const accessToken = cookies.get('accessToken')
-        if (!accessToken) {
+        if (!loggedIn) {
             setAlertMessage('Log in to vote on inquiries')
             setAlertModalOpen(true)
         } else {
             setVoteLoading(true)
-            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+            const voteData = newPollAnswers
+                .filter((a) => a.accountVote)
+                .map((a) => {
+                    return {
+                        id: a.id,
+                        value: a.accountPoints,
+                    }
+                })
             const data = {
                 userName: accountData.name,
                 userHandle: accountData.handle,
                 spaceId: spaceData.id,
                 postId: id,
-                voteData: newPollAnswers
-                    .filter((a) => a.accountVote)
-                    .map((a) => {
-                        return {
-                            id: a.id,
-                            value: a.accountPoints,
-                        }
-                    }),
+                voteData,
             }
-            axios.post(`${config.apiURL}/vote-on-poll`, data, options).then(() => {
-                const newAnswers = [...newPollAnswers.sort((a, b) => b.totalVotes - a.totalVotes)]
-                setTotalVotes(newAnswers.map((a) => a.totalVotes).reduce((a, b) => a + b, 0))
-                setPollAnswers(newAnswers)
-                setNewPollAnswers(newAnswers)
-                setVoteLoading(false)
-                setShowVoteSavedMessage(true)
-                setTimeout(() => {
-                    setShowVoteSavedMessage(false)
-                    // todo: update state locally
-                    if (location === 'space-posts')
-                        getSpacePosts(spaceData.id, 0, spacePostsPaginationLimit, params)
-                    if (location === 'user-posts')
-                        getUserPosts(userData.id, 0, userPostsPaginationLimit, params)
-                    if (location === 'post-page') getPostData(id)
-                }, 3000)
-            })
+            axios
+                .post(`${config.apiURL}/vote-on-poll`, data, options)
+                .then(() => {
+                    setVoteLoading(false)
+                    setShowVoteSavedMessage(true)
+                    setTimeout(() => {
+                        setShowVoteSavedMessage(false)
+                        // todo: update state locally
+                        if (location === 'space-posts')
+                            getSpacePosts(spaceData.id, 0, spacePostsPaginationLimit, params)
+                        if (location === 'user-posts')
+                            getUserPosts(userData.id, 0, userPostsPaginationLimit, params)
+                        if (location === 'post-page') getPostData(id)
+                    }, 1000)
+                })
+                .catch((error) => console.log(error))
         }
     }
 
@@ -121,6 +124,29 @@ function PollCard(props: {
             }
         }
         return false
+    }
+
+    function addNewAnswer() {
+        if (!loggedIn) {
+            setAlertMessage('Log in to vote on inquiries')
+            setAlertModalOpen(true)
+        } else {
+            setNewAnswerLoading(true)
+            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+            const data = { pollId: Poll.id, newAnswer }
+            axios
+                .post(`${config.apiURL}/new-poll-answer`, data, options)
+                .then((res) => {
+                    const answer = { ...res.data.pollAnswer, Creator: accountData, Reactions: [] }
+                    setPostData({
+                        ...postData,
+                        Poll: { ...Poll, PollAnswers: [...PollAnswers, answer] },
+                    })
+                    setNewAnswer('')
+                    setNewAnswerLoading(false)
+                })
+                .catch((error) => console.log(error))
+        }
     }
 
     // build poll data
@@ -161,7 +187,7 @@ function PollCard(props: {
         setTotalUsers(pollUsers.length)
         setPollAnswers(answers)
         setNewPollAnswers(answers)
-    }, [])
+    }, [postData])
 
     return (
         <Column>
@@ -216,11 +242,28 @@ function PollCard(props: {
                             totalPoints={totalPoints}
                             color={colorScale(i)}
                             selected={answer.accountVote}
-                            preview={location === 'preview'}
                             onChange={(v) => updateAnswers(answer.id, v)}
                         />
                     ))}
                 </Column>
+            )}
+            {!answersLocked && (
+                <Row style={{ marginBottom: 10 }}>
+                    <Input
+                        type='text'
+                        placeholder='New answer...'
+                        value={newAnswer}
+                        onChange={(value) => setNewAnswer(value)}
+                        style={{ width: '100%', marginRight: 10 }}
+                    />
+                    <Button
+                        color='blue'
+                        text='Add'
+                        disabled={!newAnswer}
+                        loading={newAnswerLoading}
+                        onClick={addNewAnswer}
+                    />
+                </Row>
             )}
         </Column>
     )

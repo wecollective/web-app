@@ -14,8 +14,8 @@ import {
     CommentIcon,
     EnvelopeIcon,
     FailIcon,
-    InquiryIcon,
     LinkIcon,
+    PollIcon,
     RetweetIcon,
     SpacesIcon,
     StarIcon,
@@ -617,7 +617,7 @@ function NotificationCard(props: {
                     )}
 
                     {type === 'poll-vote' && (
-                        <Content typeIcon={<InquiryIcon />}>
+                        <Content typeIcon={<PollIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>just voted on your</p>
                             <TextLink text='Poll' link={`/p/${postId}`} />

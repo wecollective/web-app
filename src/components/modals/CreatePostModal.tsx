@@ -735,9 +735,8 @@ function CreatePostModal(): JSX.Element {
                         if (postType === 'image') newPost.Images = images
                         if (postType === 'poll')
                             newPost.Poll = {
-                                type: pollType.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-                                locked: pollAnswersLocked,
-                                PollAnswers: res.data.pollAnswers.map((a) => {
+                                ...res.data.pollData.poll,
+                                PollAnswers: res.data.pollData.answers.map((a) => {
                                     return { ...a, Reactions: [] }
                                 }),
                             }
