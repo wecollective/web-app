@@ -9,6 +9,7 @@ function ImageTitle(props: {
     imageSize?: number
     title: string
     fontSize?: number
+    state?: string
     style?: any
     className?: any
     shadow?: boolean
@@ -22,6 +23,7 @@ function ImageTitle(props: {
         imageSize,
         title,
         fontSize,
+        state,
         style,
         className,
         shadow,
@@ -29,17 +31,20 @@ function ImageTitle(props: {
         wrapText,
         onClick,
     } = props
+    const text = state === 'active' ? title : `[${type} deleted]`
+    const color = state === 'active' ? '' : '#acacae'
+
     if (link) {
         return (
             <Link
                 to={link}
                 onClick={onClick}
-                className={`${styles.container} ${styles.clickable} ${className}`}
+                className={`${styles.container} ${styles.container} ${styles.clickable} ${className}`}
                 style={style}
             >
                 <FlagImage type={type} size={imageSize!} imagePath={imagePath} shadow={shadow} />
-                <p style={{ fontSize }} className={wrapText ? styles.wrapText : ''}>
-                    {title}
+                <p style={{ fontSize, color }} className={wrapText ? styles.wrapText : ''}>
+                    {text}
                 </p>
             </Link>
         )
@@ -53,8 +58,8 @@ function ImageTitle(props: {
                 style={style}
             >
                 <FlagImage type={type} size={imageSize!} imagePath={imagePath} shadow={shadow} />
-                <p style={{ fontSize }} className={wrapText ? styles.wrapText : ''}>
-                    {title}
+                <p style={{ fontSize, color }} className={wrapText ? styles.wrapText : ''}>
+                    {text}
                 </p>
             </button>
         )
@@ -62,8 +67,8 @@ function ImageTitle(props: {
     return (
         <div className={`${styles.container} ${className}`} style={style}>
             <FlagImage type={type} size={imageSize!} imagePath={imagePath} shadow={shadow} />
-            <p style={{ fontSize }} className={wrapText ? styles.wrapText : ''}>
-                {title}
+            <p style={{ fontSize, color }} className={wrapText ? styles.wrapText : ''}>
+                {text}
             </p>
         </div>
     )
@@ -72,6 +77,7 @@ function ImageTitle(props: {
 ImageTitle.defaultProps = {
     imageSize: 30,
     fontSize: 14,
+    state: 'active',
     style: null,
     className: null,
     shadow: false,

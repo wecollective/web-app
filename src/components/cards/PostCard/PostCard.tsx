@@ -275,7 +275,6 @@ function PostCard(props: {
                         params={params}
                     />
                 )}
-                {/* {type === 'glass-bead-game' && ( */}
                 {type === 'glass-bead-game' && (
                     <GlassBeadGameCard
                         postData={postData}
