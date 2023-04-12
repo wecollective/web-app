@@ -98,7 +98,8 @@ function SpaceCircles(props: { spaceCircleData: any; params: any }): JSX.Element
         const circle = d3.select(`#sc-circle-image-${d.data.uuid}`)
         if (existingImage.node()) {
             // check image size matches circle start size
-            const matchingSizes = existingImage.attr('height') / 2 === +circle.attr('r')
+            const matchingSizes =
+                circle.node() && existingImage.attr('height') / 2 === +circle.attr('r')
             // only include duration if circle present and matching sizes
             existingImage
                 .transition()
