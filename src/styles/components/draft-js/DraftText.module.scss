@@ -90,11 +90,17 @@ $transitionSpeed: 0.5s;
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                height: 32px;
-                width: 32px;
-                margin: 0 5px 5px 0;
                 cursor: pointer;
                 pointer-events: auto;
+                height: 26px;
+                width: 26px;
+                margin: 0 2px 2px 0;
+
+                @include for-tablet-landscape-up {
+                    height: 32px;
+                    width: 32px;
+                    margin: 0 5px 5px 0;
+                }
 
                 &:hover {
                     background-color: $grey1;

@@ -347,12 +347,12 @@ function NextBeadModal(props: {
                             <Row centerY spaceBetween className={styles.header}>
                                 {postTypeIcons[type]}
                                 {/* <ImageTitle
-                                type='user'
-                                imagePath={accountData.flagImagePath}
-                                title={accountData.name}
-                                // fontSize={12}
-                                // imageSize={20}
-                            /> */}
+                                    type='user'
+                                    imagePath={accountData.flagImagePath}
+                                    title={accountData.name}
+                                    // fontSize={12}
+                                    // imageSize={20}
+                                /> */}
                             </Row>
                             <Column centerX centerY className={styles.content}>
                                 {type === 'url' && (
