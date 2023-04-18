@@ -236,71 +236,75 @@ function ParentSpaceRequestModal(props: { close: () => void }): JSX.Element {
     useEffect(() => getParentSpaceBlacklist(), [])
 
     return (
-        <Modal centered close={close} style={{ maxWidth: 600 }}>
-            <h1>Add a new parent space</h1>
-            <div style={{ display: 'inline', marginBottom: 20 }}>
-                Once connected, new posts to{' '}
-                <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-                    <FlagImage type='space' imagePath={spaceData.flagImagePath} size={27} />
-                </div>{' '}
-                <b>{spaceData.name}</b> will appear in the selected parent space and all of its
-                ancestors (unless blocked by privacy settings).
-            </div>
-            <Column centerX>
-                <SearchSelector
-                    type='space'
-                    title="Search for the parent space's name or handle below:"
-                    placeholder='name or handle...'
-                    onSearchQuery={(query) => findSpaces(query)}
-                    onOptionSelected={(space) => selectSpace(space)}
-                    onBlur={() => setTimeout(() => setOptions([]), 200)}
-                    options={options}
-                />
-                {selectedSpace && (
-                    <Column centerX style={{ marginTop: 20 }}>
-                        <p>Selected parent space:</p>
-                        <Row centerY style={{ margin: '10px 0 20px 0' }}>
-                            <ImageTitle
-                                type='space'
-                                imagePath={selectedSpace.flagImagePath}
-                                title={`${selectedSpace.name} (s/${selectedSpace.handle})`}
-                                fontSize={16}
-                                style={{ marginRight: 10 }}
-                            />
-                            <CloseButton size={17} onClick={() => setSelectedSpace(null)} />
-                        </Row>
-                        {checkingPrivacyAccess ? (
-                            <Row>
-                                <p style={{ marginRight: 10 }}>Checking privacy access</p>
-                                <LoadingWheel size={25} />
+        <Modal centerX close={close}>
+            <Column centerX style={{ maxWidth: 600 }}>
+                <h1>Add a new parent space</h1>
+                <div style={{ display: 'inline', marginBottom: 20 }}>
+                    Once connected, new posts to{' '}
+                    <div style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+                        <FlagImage type='space' imagePath={spaceData.flagImagePath} size={27} />
+                    </div>{' '}
+                    <b>{spaceData.name}</b> will appear in the selected parent space and all of its
+                    ancestors (unless blocked by privacy settings).
+                </div>
+                <Column centerX>
+                    <SearchSelector
+                        type='space'
+                        title="Search for the parent space's name or handle below:"
+                        placeholder='name or handle...'
+                        onSearchQuery={(query) => findSpaces(query)}
+                        onOptionSelected={(space) => selectSpace(space)}
+                        onBlur={() => setTimeout(() => setOptions([]), 200)}
+                        options={options}
+                    />
+                    {selectedSpace && (
+                        <Column centerX style={{ marginTop: 20 }}>
+                            <p>Selected parent space:</p>
+                            <Row centerY style={{ margin: '10px 0 20px 0' }}>
+                                <ImageTitle
+                                    type='space'
+                                    imagePath={selectedSpace.flagImagePath}
+                                    title={`${selectedSpace.name} (s/${selectedSpace.handle})`}
+                                    fontSize={16}
+                                    style={{ marginRight: 10 }}
+                                />
+                                <CloseButton size={17} onClick={() => setSelectedSpace(null)} />
                             </Row>
-                        ) : (
-                            <Column>
-                                {blockedBy ? findBlockedByMessage() : findAccessMessage()}
-                            </Column>
+                            {checkingPrivacyAccess ? (
+                                <Row>
+                                    <p style={{ marginRight: 10 }}>Checking privacy access</p>
+                                    <LoadingWheel size={25} />
+                                </Row>
+                            ) : (
+                                <Column>
+                                    {blockedBy ? findBlockedByMessage() : findAccessMessage()}
+                                </Column>
+                            )}
+                        </Column>
+                    )}
+                    <Column centerX style={{ marginTop: 30 }}>
+                        <Button
+                            text={modOfSelectedSpace ? 'Connect parent space' : 'Send request'}
+                            color='blue'
+                            style={{ marginBottom: 20 }}
+                            disabled={
+                                loading ||
+                                showSuccessMessage ||
+                                !selectedSpace ||
+                                checkingPrivacyAccess ||
+                                blockedBy
+                            }
+                            loading={loading}
+                            onClick={addParentSpace}
+                        />
+                        {showSuccessMessage && (
+                            <SuccessMessage
+                                text={
+                                    modOfSelectedSpace ? 'Parent space connected!' : 'Request sent!'
+                                }
+                            />
                         )}
                     </Column>
-                )}
-                <Column centerX style={{ marginTop: 30 }}>
-                    <Button
-                        text={modOfSelectedSpace ? 'Connect parent space' : 'Send request'}
-                        color='blue'
-                        style={{ marginBottom: 20 }}
-                        disabled={
-                            loading ||
-                            showSuccessMessage ||
-                            !selectedSpace ||
-                            checkingPrivacyAccess ||
-                            blockedBy
-                        }
-                        loading={loading}
-                        onClick={addParentSpace}
-                    />
-                    {showSuccessMessage && (
-                        <SuccessMessage
-                            text={modOfSelectedSpace ? 'Parent space connected!' : 'Request sent!'}
-                        />
-                    )}
                 </Column>
             </Column>
         </Modal>

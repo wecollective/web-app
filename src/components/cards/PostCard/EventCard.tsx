@@ -105,7 +105,7 @@ function EventCard(props: {
                 </Row>
             )}
             {goingModalOpen && (
-                <Modal centered close={() => setGoingModalOpen(false)}>
+                <Modal centerX close={() => setGoingModalOpen(false)}>
                     <h1>Going to event</h1>
                     <Column centerX>
                         {Going.map((user) => (
@@ -122,7 +122,7 @@ function EventCard(props: {
                 </Modal>
             )}
             {interestedModalOpen && (
-                <Modal centered close={() => setInterestedModalOpen(false)}>
+                <Modal centerX close={() => setInterestedModalOpen(false)}>
                     <h1>Interested in event</h1>
                     <Column centerX>
                         {Interested.map((user) => (

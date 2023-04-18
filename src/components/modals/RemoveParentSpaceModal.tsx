@@ -71,11 +71,11 @@ function RemoveParentSpaceModal(props: { close: () => void }): JSX.Element {
     }
 
     return (
-        <Modal centered close={close} style={{ maxWidth: 600 }}>
+        <Modal centerX close={close}>
             {showSuccessMessage ? (
                 <SuccessMessage text='Parent space removed' />
             ) : (
-                <Column centerX>
+                <Column centerX style={{ maxWidth: 600 }}>
                     <h1>Remove a parent space</h1>
                     {onlyParentIsRoot ? (
                         <Column centerX>

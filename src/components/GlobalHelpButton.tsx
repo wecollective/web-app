@@ -48,7 +48,7 @@ function GlobalHelpButton(): JSX.Element {
                 <HelpIcon />
             </button>
             {helpModalOpen && (
-                <Modal centered close={() => setHelpModalOpen(false)}>
+                <Modal centerX close={() => setHelpModalOpen(false)}>
                     <h1>Have a question or run into a bug?</h1>
                     <p>Let us know and we&apos;ll get back to you ASAP</p>
                     {!loggedIn && (

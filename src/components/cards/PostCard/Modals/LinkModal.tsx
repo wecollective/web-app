@@ -220,7 +220,7 @@ function LinkModal(props: {
     useEffect(() => getLinks(), [])
 
     return (
-        <Modal close={close} centered style={{ minWidth: 400 }}>
+        <Modal close={close} centerX style={{ minWidth: 400 }}>
             {loading ? (
                 <LoadingWheel />
             ) : (

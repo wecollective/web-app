@@ -25,6 +25,7 @@ function LikeModal(props: {
     const [loading, setLoading] = useState(true)
     const [responseLoading, setResponseLoading] = useState(false)
     const cookies = new Cookies()
+    const mobileView = document.documentElement.clientWidth < 900
     const headerText = likes.length
         ? `${likes.length} like${pluralise(likes.length)}`
         : 'No likes yet...'
@@ -72,7 +73,7 @@ function LikeModal(props: {
     useEffect(() => getLikes(), [])
 
     return (
-        <Modal close={close} style={{ width: 400 }} centered>
+        <Modal close={close} style={{ minWidth: mobileView ? null : 400 }} centerX>
             {loading ? (
                 <LoadingWheel />
             ) : (

@@ -36,7 +36,7 @@ function DeleteCommentModal(props: {
     }
 
     return (
-        <Modal close={close} centered>
+        <Modal close={close} centerX>
             {success ? (
                 <SuccessMessage text='Comment deleted!' />
             ) : (

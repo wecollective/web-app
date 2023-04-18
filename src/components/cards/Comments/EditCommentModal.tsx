@@ -62,7 +62,7 @@ function EditCommentModal(props: {
     }
 
     return (
-        <Modal className={styles.wrapper} close={close} centered>
+        <Modal className={styles.wrapper} close={close} centerX>
             {success ? (
                 <SuccessMessage text='Changes saved' />
             ) : (

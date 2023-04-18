@@ -7,7 +7,7 @@ function DonateModal(props: { close: () => void }): JSX.Element {
     const { close } = props
 
     return (
-        <Modal close={close} style={{ minWidth: 350 }} centered>
+        <Modal close={close} style={{ minWidth: 350 }} centerX>
             <DonateIcon className={styles.donateIcon} />
             <p>Help support the development of weco.io</p>
             <p>

@@ -165,11 +165,11 @@ function CreateSpaceModal(props: { close: () => void }): JSX.Element {
     }
 
     return (
-        <Modal close={close} centered confirmClose={!success} style={{ maxWidth: 600 }}>
+        <Modal close={close} centerX confirmClose={!success}>
             {success ? (
                 <SuccessMessage text={successMessage} />
             ) : (
-                <Column>
+                <Column centerX style={{ maxWidth: 500 }}>
                     <Column centerX style={{ marginBottom: 30, fontSize: 24 }}>
                         <p>Create a new space in</p>
                         <ImageTitle
@@ -201,7 +201,7 @@ function CreateSpaceModal(props: { close: () => void }): JSX.Element {
                     </p>
                     <br />
                     <form onSubmit={createSpace}>
-                        <Row centerY style={{ marginBottom: 20 }}>
+                        <Row centerY style={{ margin: '20px 0' }}>
                             <p style={{ fontSize: 14, marginRight: 10 }}>Privacy:</p>
                             <Toggle
                                 leftText='Public'

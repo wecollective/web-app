@@ -96,7 +96,7 @@ function ImageUploadModal(): JSX.Element {
     }
 
     return (
-        <Modal close={() => setImageUploadModalOpen(false)} centered>
+        <Modal close={() => setImageUploadModalOpen(false)} centerX>
             <h1>{title}</h1>
             {imagePreviewURL && (
                 <img

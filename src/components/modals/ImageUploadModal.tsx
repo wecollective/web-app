@@ -74,7 +74,7 @@ function ImageUploadModal(props: {
     }
 
     return (
-        <Modal close={close} centered>
+        <Modal close={close} centerX>
             <h1>{title}</h1>
             {subTitle && <p>{subTitle}</p>}
             {imagePreviewURL && (

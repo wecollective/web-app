@@ -29,7 +29,7 @@ function PostsHeader(props: { params: any }): JSX.Element {
                 onClick={() => setFiltersModalOpen(true)}
             />
             {filtersModalOpen && (
-                <Modal centered close={() => setFiltersModalOpen(false)}>
+                <Modal centerX close={() => setFiltersModalOpen(false)}>
                     <h1>Post Filters</h1>
                     <DropDown
                         title='Post Type'
@@ -114,7 +114,7 @@ function PostsHeader(props: { params: any }): JSX.Element {
                 onClick={() => setViewModalOpen(true)}
             />
             {viewModalOpen && (
-                <Modal centered close={() => setViewModalOpen(false)}>
+                <Modal centerX close={() => setViewModalOpen(false)}>
                     <h1>Views</h1>
                     <p>Choose how to display the posts</p>
                     <Toggle

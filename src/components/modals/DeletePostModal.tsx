@@ -44,7 +44,7 @@ function DeletePostModal(props: {
     }
 
     return (
-        <Modal close={close} centered>
+        <Modal close={close} centerX>
             {!success ? (
                 <Column centerX>
                     <h1>Are you sure you want to delete your post?</h1>

@@ -29,7 +29,7 @@ function PeopleHeader(props: { params: any }): JSX.Element {
                 onClick={() => setFiltersModalOpen(true)}
             />
             {filtersModalOpen && (
-                <Modal centered close={() => setFiltersModalOpen(false)}>
+                <Modal centerX close={() => setFiltersModalOpen(false)}>
                     <h1>People Filters</h1>
                     <DropDown
                         title='Sort By'

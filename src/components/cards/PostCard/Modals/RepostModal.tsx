@@ -216,7 +216,7 @@ function RepostModal(props: {
     }, [])
 
     return (
-        <Modal close={close} style={{ width: 600, overflow: 'unset' }} centered>
+        <Modal close={close} style={{ overflow: 'unset' }} centerX>
             {loading ? (
                 <LoadingWheel />
             ) : (

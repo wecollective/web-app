@@ -60,7 +60,7 @@ function ForgotPasswordModal(props: { close: () => void }): JSX.Element {
     })
 
     return (
-        <Modal close={close} centered>
+        <Modal close={close} centerX>
             {success ? (
                 <SuccessMessage text="Success! We've sent you an email with a link to reset your password." />
             ) : (

@@ -1,9 +1,9 @@
 @import '@styles/Variables';
 
 .wrapper {
-    width: calc(100vw - 40px);
+    // width: calc(100vw - 40px);
     @include for-tablet-landscape-up {
         padding: 50px;
-        width: auto;
+        // width: auto;
     }
 }

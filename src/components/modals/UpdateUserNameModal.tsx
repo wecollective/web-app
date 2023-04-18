@@ -1,4 +1,5 @@
 import Button from '@components/Button'
+import Column from '@components/Column'
 import Input from '@components/Input'
 import LoadingWheel from '@components/LoadingWheel'
 import Modal from '@components/modals/Modal'
@@ -22,8 +23,7 @@ function UpdateUserNameModal(props: { close: () => void }): JSX.Element {
     const [showSuccessMessage, setShowSuccessMessage] = useState(false)
     const cookies = new Cookies()
 
-    function updateUserName(e) {
-        e.preventDefault()
+    function updateUserName() {
         const unChanged = inputValue === accountData.name
         const invalid = inputValue.length < 1 || inputValue.length > 30
         if (unChanged) {
@@ -65,12 +65,13 @@ function UpdateUserNameModal(props: { close: () => void }): JSX.Element {
     }
 
     return (
-        <Modal centered close={close} style={{ maxWidth: 500 }}>
-            <h1>Change your account name</h1>
-            <p>
-                This will be the main visible name for your account seen by other users on the site
-            </p>
-            <form onSubmit={updateUserName}>
+        <Modal centerX close={close}>
+            <Column centerX style={{ maxWidth: 500 }}>
+                <h1>Change your account name</h1>
+                <p>
+                    This will be the main visible name for your account seen by other users on the
+                    site
+                </p>
                 <Input
                     type='text'
                     title='New name:'
@@ -90,13 +91,13 @@ function UpdateUserNameModal(props: { close: () => void }): JSX.Element {
                             color='blue'
                             style={{ marginRight: 10 }}
                             disabled={loading || inputState === 'invalid'}
-                            submit
+                            onClick={updateUserName}
                         />
                     )}
                     {loading && <LoadingWheel />}
                     {showSuccessMessage && <SuccessMessage text='New name saved!' />}
                 </div>
-            </form>
+            </Column>
         </Modal>
     )
 }

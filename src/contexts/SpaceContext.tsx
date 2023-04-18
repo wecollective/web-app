@@ -157,6 +157,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 options
             )
             .then((res) => {
+                console.log('res.data: ', res.data)
                 if (currentSpaceHandleRef.current === spaceData.handle) {
                     setSpacePosts(firstLoad ? res.data : [...spacePosts, ...res.data])
                     setSpacePostsPaginationHasMore(res.data.length === spacePostsPaginationLimit)
@@ -186,7 +187,10 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 }&searchQuery=${params.searchQuery || ''}`,
                 options
             )
-            .then((res) => setPostMapData(res.data))
+            .then((res) => {
+                console.log('post-map-data: ', res.data)
+                setPostMapData(res.data)
+            })
     }
 
     function getSpaceListData(spaceId, offset, limit, params) {

@@ -3,11 +3,11 @@ import Input from '@components/Input'
 import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
 import config from '@src/Config'
+import { imageMBLimit } from '@src/Helpers'
 import styles from '@styles/components/modals/GBGBackgroundModal.module.scss'
 import axios from 'axios'
 import React, { useState } from 'react'
 import Cookies from 'universal-cookie'
-import { imageMBLimit } from '@src/Helpers'
 
 function GBGBackgroundModal(props: {
     gameData: any
@@ -97,7 +97,7 @@ function GBGBackgroundModal(props: {
     }
 
     return (
-        <Modal centered close={close} style={{ textAlign: 'center' }}>
+        <Modal centerX close={close} style={{ textAlign: 'center' }}>
             <h1>Add a new background</h1>
             {showImagePreview && (
                 <img

@@ -35,7 +35,7 @@ function DeleteAccountModal(props: { close: () => void }): JSX.Element {
     }
 
     return (
-        <Modal centered close={close} style={{ maxWidth: 600, textAlign: 'center' }}>
+        <Modal centerX close={close} style={{ maxWidth: 600, textAlign: 'center' }}>
             <h1>Delete Account</h1>
             <p>Are you sure you want to permanently delete your account?</p>
             <p>

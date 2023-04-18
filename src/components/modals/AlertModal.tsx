@@ -12,8 +12,8 @@ function AlertModal(): JSX.Element {
     }
 
     return (
-        <Modal close={() => setAlertModalOpen(false)} centered style={{ maxWidth: 600 }}>
-            <h1 style={{ textAlign: 'center' }}>{alertMessage}</h1>
+        <Modal close={() => setAlertModalOpen(false)} centerX centerY>
+            <h1 style={{ textAlign: 'center', maxWidth: 600 }}>{alertMessage}</h1>
             {alertMessage.includes('Log in') ? (
                 <Button text='Log in' color='blue' onClick={logIn} />
             ) : (

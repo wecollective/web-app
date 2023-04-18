@@ -72,7 +72,7 @@ function SpacesHeader(props: { params: any }): JSX.Element {
                 <CreateSpaceModal close={() => setCreateSpaceModalOpen(false)} />
             )}
             {filtersModalOpen && (
-                <Modal centered close={() => setFiltersModalOpen(false)}>
+                <Modal centerX centerY close={() => setFiltersModalOpen(false)}>
                     <h1>Space Filters</h1>
                     <DropDown
                         title='Sort By'
@@ -138,7 +138,7 @@ function SpacesHeader(props: { params: any }): JSX.Element {
                 </Modal>
             )}
             {lensesModalOpen && (
-                <Modal centered close={() => setLensesModalOpen(false)}>
+                <Modal centerX centerY close={() => setLensesModalOpen(false)}>
                     <Row centerY className={styles.header}>
                         <h1>Space Lenses</h1>
                         <EyeIcon />

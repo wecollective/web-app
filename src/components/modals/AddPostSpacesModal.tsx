@@ -125,7 +125,7 @@ function AddPostSpacesModal(props: {
     }
 
     return (
-        <Modal centered close={close} style={{ overflow: 'unset' }}>
+        <Modal centerX close={close} style={{ overflow: 'unset' }}>
             <h1>Add spaces</h1>
             <p>Choose where you want the post to appear</p>
             <SearchSelector

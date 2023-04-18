@@ -32,6 +32,7 @@ function RatingModal(props: {
         ? `${ratings.length} rating${pluralise(ratings.length)}`
         : 'No ratings yet...'
     const averageScore = `${(postData.totalRatingPoints / ratings.length).toFixed(2)}%`
+    const mobileView = document.documentElement.clientWidth < 900
 
     function getRatings() {
         axios
@@ -108,7 +109,7 @@ function RatingModal(props: {
     useEffect(() => getRatings(), [])
 
     return (
-        <Modal close={close} centered style={{ width: 400 }}>
+        <Modal close={close} centerX style={{ minWidth: mobileView ? null : 400 }}>
             {loading ? (
                 <LoadingWheel />
             ) : (

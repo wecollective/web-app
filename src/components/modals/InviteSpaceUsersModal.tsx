@@ -87,7 +87,7 @@ function InviteSpaceUsersModal(props: { close: () => void }): JSX.Element {
     }, [])
 
     return (
-        <Modal centered close={close}>
+        <Modal centerX close={close}>
             {complete ? (
                 <SuccessMessage text='Invites sent!' />
             ) : (

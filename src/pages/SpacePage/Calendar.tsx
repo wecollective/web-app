@@ -30,6 +30,7 @@ function Calendar(): JSX.Element {
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]
     const cookies = new Cookies()
+    const mobileView = document.documentElement.clientWidth < 900
 
     function openEventModal(postId) {
         setSelectedPost(null)
@@ -176,7 +177,11 @@ function Calendar(): JSX.Element {
                 </div>
             )}
             {eventModalOpen && (
-                <Modal centered close={() => setEventModalOpen(false)} style={{ width: 900 }}>
+                <Modal
+                    centerX
+                    close={() => setEventModalOpen(false)}
+                    style={{ maxWidth: mobileView ? null : 900 }}
+                >
                     {selectedPost ? (
                         <PostCard location='post-page' post={selectedPost} />
                     ) : (

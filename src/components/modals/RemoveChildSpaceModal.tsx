@@ -41,8 +41,7 @@ function RemoveChildSpaceModal(props: { close: () => void }): JSX.Element {
         setSelectedSpace(space)
     }
 
-    function removeChildSpace(e) {
-        e.preventDefault()
+    function removeChildSpace() {
         setLoading(true)
         const accessToken = cookies.get('accessToken')
         const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
@@ -62,17 +61,17 @@ function RemoveChildSpaceModal(props: { close: () => void }): JSX.Element {
     }
 
     return (
-        <Modal centered close={close} style={{ maxWidth: 600 }}>
-            <h1>Remove a child space from &apos;{spaceData.name}&apos;</h1>
-            <Column style={{ marginBottom: 20 }}>
-                <p style={{ marginBottom: 10 }}>
-                    Once removed, new posts to the selected child space will no longer appear in
-                    &apos;
-                    {spaceData.name}&apos;.
-                </p>
-                <p>Old posts will remain where they were when posted.</p>
-            </Column>
-            <form onSubmit={removeChildSpace}>
+        <Modal centerX close={close}>
+            <Column centerX style={{ maxWidth: 600 }}>
+                <h1>Remove a child space from &apos;{spaceData.name}&apos;</h1>
+                <Column style={{ marginBottom: 20 }}>
+                    <p style={{ marginBottom: 10 }}>
+                        Once removed, new posts to the selected child space will no longer appear in
+                        &apos;
+                        {spaceData.name}&apos;.
+                    </p>
+                    <p>Old posts will remain where they were when posted.</p>
+                </Column>
                 <SearchSelector
                     type='space'
                     title="Search for the child space's name or handle below:"
@@ -97,16 +96,16 @@ function RemoveChildSpaceModal(props: { close: () => void }): JSX.Element {
                 )}
                 <div className={styles.footer}>
                     <Button
-                        submit
                         text='Remove child space'
                         color='blue'
+                        onClick={removeChildSpace}
                         loading={loading}
                         disabled={loading || showSuccessMessage || !selectedSpace}
                         style={{ marginRight: 10 }}
                     />
                     {showSuccessMessage && <SuccessMessage text='Child space removed' />}
                 </div>
-            </form>
+            </Column>
         </Modal>
     )
 }

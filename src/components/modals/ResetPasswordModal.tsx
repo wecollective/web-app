@@ -66,7 +66,7 @@ function ResetPasswordModal(): JSX.Element {
     }
 
     return (
-        <Modal centered close={() => setResetPasswordModalOpen(false)}>
+        <Modal centerX close={() => setResetPasswordModalOpen(false)}>
             {success ? (
                 <Column centerX>
                     <SuccessMessage text='Success! Password updated' />

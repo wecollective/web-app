@@ -125,11 +125,11 @@ function RegisterModal(props: { close: () => void }): JSX.Element {
     })
 
     return (
-        <Modal close={close} centered confirmClose={!success}>
+        <Modal close={close} centerX confirmClose={!success}>
             {success ? (
                 <SuccessMessage text="Success! We've sent you an email. Follow the instructions there to complete the registration process." />
             ) : (
-                <form onSubmit={register}>
+                <form onSubmit={register} style={{ maxWidth: 400 }}>
                     <h1>Create a new account</h1>
                     <Input
                         type='text'

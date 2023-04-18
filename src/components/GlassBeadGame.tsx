@@ -307,7 +307,7 @@ function GameSettingsModal(props) {
     }
 
     return (
-        <Modal close={close} centered>
+        <Modal close={close} centerX>
             <h1>Game settings</h1>
             <form onSubmit={saveSettings}>
                 <div className={styles.settingSections}>
@@ -1721,7 +1721,7 @@ function GlassBeadGame(): JSX.Element {
                 />
             )}
             {topicTextModalOpen && (
-                <Modal centered close={() => setTopicTextModalOpen(false)}>
+                <Modal centerX close={() => setTopicTextModalOpen(false)}>
                     <h1>Change the topic</h1>
                     <p>Current topic: {gameData.topic}</p>
                     <form onSubmit={saveNewTopic}>
@@ -1852,7 +1852,7 @@ function GlassBeadGame(): JSX.Element {
                                 onClick={() => setLeaveRoomModalOpen(true)}
                             />
                             {leaveRoomModalOpen && (
-                                <Modal centered close={() => setLeaveRoomModalOpen(false)}>
+                                <Modal centerX close={() => setLeaveRoomModalOpen(false)}>
                                     <h1>Are you sure you want to leave?</h1>
                                     <Row wrap>
                                         <Button

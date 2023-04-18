@@ -94,7 +94,7 @@ function SidebarSmall(): JSX.Element | null {
             </Column>
             {joinSpacesModalOpen && (
                 <Modal
-                    centered
+                    centerX
                     close={() => {
                         setJoinSpacesModalOpen(false)
                         setSuccess(false)

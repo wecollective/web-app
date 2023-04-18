@@ -300,7 +300,7 @@ function GBGSettingsModal(props: {
     }, [includeDates])
 
     return (
-        <Modal centered close={close} className={styles.wrapper} confirmClose>
+        <Modal centerX close={close} className={styles.wrapper} confirmClose>
             <h1>Game Settings</h1>
             <Column centerX style={{ width: '100%', marginBottom: 20 }}>
                 <Toggle
@@ -1023,7 +1023,7 @@ function GBGSettingsModal(props: {
                                                     )}
                                                     {selectedPlayerId !== 0 && (
                                                         <Modal
-                                                            centered
+                                                            centerX
                                                             close={() => setSelectedPlayerId(0)}
                                                         >
                                                             <h1>Choose the players color:</h1>

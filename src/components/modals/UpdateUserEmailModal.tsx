@@ -52,11 +52,11 @@ function UpdateUserEmailModal(props: { close: () => void }): JSX.Element {
     }
 
     return (
-        <Modal centered close={close} style={{ maxWidth: 500 }}>
+        <Modal centerX close={close}>
             {saved ? (
                 <SuccessMessage text='New email saved!' />
             ) : (
-                <Column centerX>
+                <Column centerX style={{ maxWidth: 500 }}>
                     <h1>Change your account email</h1>
                     <Input
                         type='text'

@@ -131,7 +131,7 @@ function LogInModal(props: { close: () => void }): JSX.Element {
     })
 
     return (
-        <Modal centered close={close}>
+        <Modal centerX centerY close={close}>
             {success ? (
                 <SuccessMessage text={successMessage} />
             ) : (

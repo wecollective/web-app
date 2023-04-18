@@ -77,7 +77,7 @@ function PostsHeader(props: { params: any }): JSX.Element {
                 />
             )} */}
             {filtersModalOpen && (
-                <Modal centered close={() => setFiltersModalOpen(false)}>
+                <Modal centerX centerY close={() => setFiltersModalOpen(false)}>
                     <h1>Post Filters</h1>
                     <DropDown
                         title='Post Type'
@@ -165,7 +165,7 @@ function PostsHeader(props: { params: any }): JSX.Element {
                 </Modal>
             )}
             {lensesModalOpen && (
-                <Modal centered close={() => setLensesModalOpen(false)}>
+                <Modal centerX centerY close={() => setLensesModalOpen(false)}>
                     <h1>Post Lenses</h1>
                     <p>Choose how to display the posts</p>
                     <Toggle

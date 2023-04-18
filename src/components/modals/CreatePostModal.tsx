@@ -43,7 +43,7 @@ import {
     totalMBUploadLimit,
 } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
-import styles from '@styles/components/modals/CreatePostModal2.module.scss'
+import styles from '@styles/components/modals/CreatePostModal.module.scss'
 import {
     CalendarIcon,
     ChevronLeftIcon,
@@ -881,7 +881,7 @@ function CreatePostModal(): JSX.Element {
         <Modal
             className={`${styles.wrapper} ${styles[postType]}`}
             close={closeModal}
-            centered
+            centerX
             confirmClose={!saved}
         >
             {saved ? (

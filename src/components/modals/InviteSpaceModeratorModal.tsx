@@ -79,7 +79,7 @@ function InviteSpaceModeratorModal(props: { close: () => void }): JSX.Element {
     }, [])
 
     return (
-        <Modal centered close={close}>
+        <Modal centerX close={close}>
             <h1>Invite someone to moderate &apos;{spaceData.name}&apos;</h1>
             <Column centerX>
                 {moderatorsLoaded ? (

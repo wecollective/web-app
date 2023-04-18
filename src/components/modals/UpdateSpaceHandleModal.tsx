@@ -68,7 +68,7 @@ function UpdateSpaceHandleModal(props: { close: () => void }): JSX.Element {
     }
 
     return (
-        <Modal centered close={close}>
+        <Modal centerX close={close}>
             <h1>Change the handle for {spaceData.name}</h1>
             <p>This is the unique identifier that&apos;s used in the space&apos;s url</p>
             <form onSubmit={updateSpaceHandle}>

@@ -29,7 +29,7 @@ function CloseOnClickOutside(props: {
         <div ref={ref}>
             {children}
             {confirmationModalOpen && (
-                <Modal close={() => setConfirmationModalOpen(false)} centered>
+                <Modal close={() => setConfirmationModalOpen(false)} centerX>
                     <h1>Are you sure you want to exit the modal?</h1>
                     <p>All entered data will be lost.</p>
                     <Row centerX style={{ marginTop: 10 }}>

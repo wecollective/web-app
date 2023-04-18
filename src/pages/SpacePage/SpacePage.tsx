@@ -246,7 +246,7 @@ function SpacePage(): JSX.Element {
 
     return (
         <Column centerX className={styles.wrapper}>
-            <div id='space-background' className={styles.background} />
+            {/* <div id='space-background' className={styles.background} /> */}
             <Column centerX className={`${styles.header} ${headerCollapsed && styles.collapsed}`}>
                 <CoverImage type='space' image={spaceData.coverImagePath} canEdit={isModerator} />
                 {awaitingSpaceData ? (
@@ -397,7 +397,7 @@ function SpacePage(): JSX.Element {
                 )}
             </Column>
             {followingModalOpen && (
-                <Modal centered close={() => setFollowingModalOpen(false)}>
+                <Modal centerX close={() => setFollowingModalOpen(false)}>
                     <h1>Are you sure you want to unfollow this space?</h1>
                     <Row centerX style={{ marginTop: 10 }}>
                         <Button

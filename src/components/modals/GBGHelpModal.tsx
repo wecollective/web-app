@@ -8,7 +8,7 @@ function GBGHelpModal(props: { close: () => void }): JSX.Element {
     const { close } = props
 
     return (
-        <Modal centered close={close} className={styles.wrapper}>
+        <Modal centerX close={close} className={styles.wrapper}>
             <h1>About The Glass Bead Game</h1>
             <Column centerX>
                 <p>

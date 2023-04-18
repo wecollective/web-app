@@ -16,6 +16,7 @@ import Cookies from 'universal-cookie'
 
 function PostMap(props: { postMapData: any; params: any }): JSX.Element {
     const { postMapData, params } = props
+    console.log('postMapData: ', postMapData)
     const { accountData } = useContext(AccountContext)
     const { spaceData, setPostMapData, getPostMapData } = useContext(SpaceContext)
     const { sortBy, sortOrder } = params
@@ -695,7 +696,7 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
             </div>
             <div id='canvas' />
             {postModalOpen && (
-                <Modal centered close={() => setPostModalOpen(false)} style={{ width: 900 }}>
+                <Modal centerX close={() => setPostModalOpen(false)} style={{ width: 900 }}>
                     {selectedPost ? (
                         <PostCard location='post-page' post={selectedPost} />
                     ) : (

@@ -45,7 +45,7 @@ function PostSpaces(props: { spaces: any[]; preview?: boolean }): JSX.Element {
                 </button>
             )}
             {modalOpen && (
-                <Modal centered close={() => setModalOpen(false)}>
+                <Modal centerX close={() => setModalOpen(false)}>
                     <h2>Posted to</h2>
                     {filteredSpaces.map((space) => (
                         <ImageTitle

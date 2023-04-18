@@ -98,7 +98,7 @@ function RemoveSpaceModeratorModal(props: { close: () => void }): JSX.Element {
     }, [])
 
     return (
-        <Modal centered close={close}>
+        <Modal centerX close={close}>
             <h1>Remove a moderator from &apos;{spaceData.name}&apos;</h1>
             <Column centerX>
                 {moderatorsLoaded ? (
