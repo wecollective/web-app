@@ -57,6 +57,14 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
             axios
                 .get(`${config.apiURL}/account-data`, options)
                 .then((res) => {
+                    const { id, handle, name, bio } = res.data
+                    const script = document.getElementById('greencheck')
+                    script!.innerHTML = JSON.stringify({
+                        uuid: id,
+                        username: handle,
+                        fullname: name,
+                        description: bio,
+                    })
                     setAccountData(res.data)
                     setLoggedIn(true)
                     setAccountDataLoading(false)
@@ -76,6 +84,8 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
     function logOut() {
         console.log('AccountContext: logOut')
         cookies.remove('accessToken', { path: '/' })
+        const script = document.getElementById('greencheck')
+        script!.innerHTML = ''
         setAccountData(defaults.accountData)
         setLoggedIn(false)
     }
