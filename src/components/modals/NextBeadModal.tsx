@@ -2,16 +2,13 @@
 import Button from '@components/Button'
 import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
-import DraftTextEditor from '@components/draft-js/DraftTextEditor'
 import Input from '@components/Input'
-import ImageModal from '@components/modals/ImageModal'
-import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
 import SuccessMessage from '@components/SuccessMessage'
-import AudioCard from '@src/components/cards/PostCard/AudioCard'
-import UrlPreview from '@src/components/cards/PostCard/UrlCard'
+import DraftTextEditor from '@components/draft-js/DraftTextEditor'
+import ImageModal from '@components/modals/ImageModal'
+import Modal from '@components/modals/Modal'
 import config from '@src/Config'
-import { AccountContext } from '@src/contexts/AccountContext'
 import {
     audioMBLimit,
     capitalise,
@@ -21,13 +18,18 @@ import {
     imageMBLimit,
     postTypeIcons,
 } from '@src/Helpers'
+import AudioCard from '@src/components/cards/PostCard/AudioCard'
+import UrlPreview from '@src/components/cards/PostCard/UrlCard'
+import { AccountContext } from '@src/contexts/AccountContext'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/NextBeadModal2.module.scss'
 import axios from 'axios'
 import * as d3 from 'd3'
 import getBlobDuration from 'get-blob-duration'
 import React, { useContext, useEffect, useRef, useState } from 'react'
+import RecordRTC from 'recordrtc'
 import Cookies from 'universal-cookie'
+import { v4 as uuidv4 } from 'uuid'
 
 const { white, red, orange, yellow, green, blue, purple } = colors
 const beadColors = [white, red, orange, yellow, green, blue, purple]
@@ -43,13 +45,11 @@ function NextBeadModal(props: {
     const { accountData, setAlertMessage, setAlertModalOpen } = useContext(AccountContext)
     const { location, postId, settings, players, addBead, close } = props
     const { allowedBeadTypes, characterLimit, moveDuration, moveTimeWindow } = settings
-    // const [newBead, setNewBead] = useState<any>({ ...defaultBeadData, type: allowedBeadTypes[0] })
     const [type, setType] = useState(allowedBeadTypes[0])
     const [color, setColor] = useState('#fff')
     const [showColors, setShowColors] = useState(true)
     const [text, setText] = useState('')
     const [mentions, setMentions] = useState<any[]>([])
-    // const cookies = new Cookies()
     const [loading, setLoading] = useState(false)
     const [saved, setSaved] = useState(false)
     const maxChars = characterLimit || 5000
@@ -81,13 +81,11 @@ function NextBeadModal(props: {
     const [audioSizeError, setAudioSizeError] = useState(false)
     const [audioTimeError, setAudioTimeError] = useState(false)
     const audioRecorder = useRef<any>(null)
-    const audioChunks = useRef<any>([])
     const recordingInterval = useRef<any>(null)
 
     function resetAudioState() {
         setAudioFile(undefined)
         setRecordingTime(0)
-        audioChunks.current = []
         const input = d3.select('#bead-audio-file-input').node()
         if (input) input.value = ''
     }
@@ -113,39 +111,38 @@ function NextBeadModal(props: {
         }
     }
 
+    function stopAudioRecording() {
+        audioRecorder.current.stopRecording(() => {
+            clearInterval(recordingInterval.current)
+            const blob = audioRecorder.current.getBlob()
+            setAudioBlob(blob)
+            setAudioFile(new File([blob], ''))
+            setAudioType('recording')
+        })
+        setRecording(false)
+    }
+
     function toggleAudioRecording() {
-        if (recording) {
-            audioRecorder.current.stop()
-            setRecording(false)
-        } else {
+        if (recording) stopAudioRecording()
+        else {
             resetAudioState()
             setAudioSizeError(false)
             setAudioTimeError(false)
-            navigator.mediaDevices.getUserMedia({ audio: true }).then((audio) => {
-                audioRecorder.current = new MediaRecorder(audio)
-                audioRecorder.current.ondataavailable = (e) => {
-                    audioChunks.current.push(e.data)
-                }
-                audioRecorder.current.onstart = () => {
-                    let time = 0
-                    recordingInterval.current = setInterval(() => {
-                        time += 1
-                        setRecordingTime(time)
-                        if (moveDuration && moveDuration === time) {
-                            clearInterval(recordingInterval.current)
-                            audioRecorder.current.stop()
-                            setRecording(false)
-                        }
-                    }, 1000)
-                }
-                audioRecorder.current.onstop = async () => {
-                    clearInterval(recordingInterval.current)
-                    const blob = new Blob(audioChunks.current, { type: 'audio/mpeg-3' })
-                    setAudioFile(new File([blob], ''))
-                    setAudioBlob(blob)
-                    setAudioType('recording')
-                }
-                audioRecorder.current.start()
+            navigator.mediaDevices.getUserMedia({ audio: true }).then((audioStream) => {
+                audioRecorder.current = RecordRTC(audioStream, {
+                    type: 'audio',
+                    mimeType: 'audio/mpeg',
+                })
+                audioRecorder.current.startRecording()
+                let time = 0
+                recordingInterval.current = setInterval(() => {
+                    time += 1
+                    setRecordingTime(time)
+                    if (moveDuration && moveDuration === time) {
+                        clearInterval(recordingInterval.current)
+                        stopAudioRecording()
+                    }
+                }, 1000)
                 setRecording(true)
             })
         }
@@ -233,10 +230,9 @@ function NextBeadModal(props: {
         let fileData
         let uploadType
         if (bead.type === 'audio') {
-            const { file, blob } = bead.Audios[0]
-            uploadType = `audio-${bead.Audios[0].type === 'recording' ? 'blob' : 'file'}`
+            uploadType = `audio-${audioType === 'recording' ? 'blob' : 'file'}`
             fileData = new FormData()
-            fileData.append('file', bead.Audios[0].type === 'recording' ? blob : file)
+            fileData.append('file', audioType === 'recording' ? audioBlob : audioFile)
             fileData.append('beadData', JSON.stringify(beadData))
         }
         if (bead.type === 'image' && bead.Images[0].file) {
@@ -274,7 +270,7 @@ function NextBeadModal(props: {
 
     function saveBead() {
         const bead = {
-            // id: uuidv4(),
+            id: uuidv4(),
             type,
             color,
             Link: { source: null },

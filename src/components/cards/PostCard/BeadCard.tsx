@@ -148,7 +148,7 @@ function BeadCard(props: {
                     {removeBead && !isSource && (
                         <CloseButton size={20} onClick={() => removeBead(beadIndex)} />
                     )}
-                    {!!id && (
+                    {!!id && location !== 'preview' && (
                         <Link to={`/p/${id}`} className={styles.id} title='Open post page'>
                             <p className='grey'>ID:</p>
                             <p style={{ marginLeft: 5 }}>{id}</p>
