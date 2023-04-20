@@ -60,6 +60,7 @@ import * as d3 from 'd3'
 import flatpickr from 'flatpickr'
 import 'flatpickr/dist/themes/material_green.css'
 import React, { useContext, useEffect, useRef, useState } from 'react'
+import RecordRTC from 'recordrtc'
 import Cookies from 'universal-cookie'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -241,19 +242,18 @@ function CreatePostModal(): JSX.Element {
 
     // audio
     const [audioFile, setAudioFile] = useState<File | undefined>()
+    const [audioBlob, setAudioBlob] = useState<any>()
     const [recording, setRecording] = useState(false)
     const [recordingTime, setRecordingTime] = useState(0)
     const [audioSizeError, setAudioSizeError] = useState(false)
     const [noAudioError, setNoAudioError] = useState(false)
     const audioRecorder = useRef<any>(null)
-    const audioChunks = useRef<any>([])
     const recordingInterval = useRef<any>(null)
 
     function resetAudioState() {
         setAudioFile(undefined)
         setNoAudioError(false)
         setRecordingTime(0)
-        audioChunks.current = []
         const input = d3.select('#audio-file-input').node()
         if (input) input.value = ''
     }
@@ -274,26 +274,24 @@ function CreatePostModal(): JSX.Element {
 
     function toggleAudioRecording() {
         if (recording) {
-            audioRecorder.current.stop()
+            audioRecorder.current.stopRecording(() => {
+                clearInterval(recordingInterval.current)
+                const blob = audioRecorder.current.getBlob()
+                setAudioBlob(blob)
+                setAudioFile(new File([blob], ''))
+            })
             setRecording(false)
         } else {
             resetAudioState()
             navigator.mediaDevices.getUserMedia({ audio: true }).then((audioStream) => {
-                audioRecorder.current = new MediaRecorder(audioStream)
-                audioRecorder.current.ondataavailable = (e) => {
-                    audioChunks.current.push(e.data)
-                }
-                audioRecorder.current.onstart = () => {
-                    recordingInterval.current = setInterval(() => {
-                        setRecordingTime((t) => t + 1)
-                    }, 1000)
-                }
-                audioRecorder.current.onstop = () => {
-                    clearInterval(recordingInterval.current)
-                    const blob = new Blob(audioChunks.current, { type: 'audio/mpeg-3' })
-                    setAudioFile(new File([blob], ''))
-                }
-                audioRecorder.current.start()
+                audioRecorder.current = RecordRTC(audioStream, {
+                    type: 'audio',
+                    mimeType: 'audio/mpeg',
+                })
+                audioRecorder.current.startRecording()
+                recordingInterval.current = setInterval(() => {
+                    setRecordingTime((t) => t + 1)
+                }, 1000)
                 setRecording(true)
             })
         }
@@ -631,7 +629,6 @@ function CreatePostModal(): JSX.Element {
         if (postValid()) {
             setLoading(true)
             const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-            // console.log('beads: ', beads)
             const postData = {
                 creatorName: accountData.name,
                 creatorHandle: accountData.handle,
@@ -677,10 +674,7 @@ function CreatePostModal(): JSX.Element {
                 const isBlob = audioFile && !audioFile.name
                 uploadType = isBlob ? 'audio-blob' : 'audio-file'
                 fileData = new FormData()
-                fileData.append(
-                    'file',
-                    isBlob ? new Blob(audioChunks.current, { type: 'audio/mpeg-3' }) : audioFile
-                )
+                fileData.append('file', isBlob ? audioBlob : audioFile)
                 fileData.append('postData', JSON.stringify(postData))
             }
             if (postData.type === 'glass-bead-game') {
@@ -710,12 +704,10 @@ function CreatePostModal(): JSX.Element {
                     options
                 )
                 .then((res) => {
-                    // console.log('success: ', res.data)
                     const allPostSpaceIds = [
                         ...spaces.map((space) => space.id),
                         ...res.data.indirectSpaces.map((s) => s.spaceId),
                     ]
-                    // console.log('allPostSpaceIds: ', allPostSpaceIds)
                     if (allPostSpaceIds.includes(spaceData.id)) {
                         const newPost = {
                             ...defaultPostData,
