@@ -721,7 +721,9 @@ function CreatePostModal(): JSX.Element {
                             ...defaultPostData,
                             ...res.data.post,
                             Creator: accountData,
-                            DirectSpaces: spaces,
+                            DirectSpaces: spaces.map((s) => {
+                                return { ...s, state: 'active' }
+                            }),
                             Urls: urlsWithMetaData,
                             Event: res.data.event
                                 ? {
@@ -769,6 +771,7 @@ function CreatePostModal(): JSX.Element {
                                     }
                                 }) || []
                         }
+                        console.log('new post: ', newPost)
                         setSpacePosts([newPost, ...spacePosts])
                     }
                     setLoading(false)
