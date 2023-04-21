@@ -8,15 +8,14 @@ import ImageTitle from '@components/ImageTitle'
 import Input from '@components/Input'
 import LoadingWheel from '@components/LoadingWheel'
 import Markdown from '@components/Markdown'
-import GBGBackgroundModal from '@components/modals/GBGBackgroundModal'
-import ImageUploadModal from '@components/modals/ImageUploadModal'
-import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
 import SuccessMessage from '@components/SuccessMessage'
+import GBGBackgroundModal from '@components/modals/GBGBackgroundModal'
+import ImageUploadModal from '@components/modals/ImageUploadModal'
+import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
 import { PostContext } from '@contexts/PostContext'
-import BeadCard from '@src/components/cards/PostCard/BeadCard'
 import config from '@src/Config'
 import {
     allValid,
@@ -26,6 +25,7 @@ import {
     notNull,
     timeSinceCreated,
 } from '@src/Helpers'
+import BeadCard from '@src/components/cards/PostCard/BeadCard'
 import styles from '@styles/components/GlassBeadGame.module.scss'
 import {
     AudioIcon,
@@ -46,6 +46,7 @@ import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import RecordRTC from 'recordrtc'
 import Peer from 'simple-peer'
 import { io } from 'socket.io-client'
 import Cookies from 'universal-cookie'
@@ -459,8 +460,7 @@ function GlassBeadGame(): JSX.Element {
     const peersRef = useRef<any[]>([])
     const videosRef = useRef<any[]>([])
     const secondsTimerRef = useRef<any>(null)
-    const mediaRecorderRef = useRef<any>(null)
-    const chunksRef = useRef<any[]>([])
+    const audioRecorderRef = useRef<any>(null)
     const streamRef = useRef<any>(null)
     const audioRef = useRef<any>(null)
     const videoRef = useRef<any>(null)
@@ -777,52 +777,62 @@ function GlassBeadGame(): JSX.Element {
             })
     }
 
-    function startAudioRecording(moveNumber: number) {
-        mediaRecorderRef.current = new MediaRecorder(audioRef.current)
-        mediaRecorderRef.current.ondataavailable = (e) => {
-            chunksRef.current.push(e.data)
-        }
-        mediaRecorderRef.current.onstop = () => {
-            const blob = new Blob(chunksRef.current, { type: 'audio/mpeg-3' }) // audio/webm;codecs=opus' })
-            const formData = new FormData()
-            formData.append('file', blob)
-            chunksRef.current = []
-            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-            axios
-                .post(
-                    `${config.apiURL}/gbg-audio-upload?postId=${postId}&moveNumber=${moveNumber}`,
-                    formData,
-                    options
-                )
-                .then((res) => {
-                    const signalData = {
-                        roomId: roomIdRef.current,
-                        type: 'audio',
-                        id: res.data.id,
-                        Creator: userRef.current,
-                        Audios: [{ url: res.data.url }],
-                        Link: { index: moveNumber },
-                    }
-                    socketRef.current.emit('outgoing-audio-bead', signalData)
+    function startAudioRecording() {
+        audioRecorderRef.current = RecordRTC(audioRef.current, {
+            type: 'audio',
+            mimeType: 'audio/ogg',
+        })
+        audioRecorderRef.current.startRecording()
+    }
+
+    function stopAudioRecording(isRecording: boolean) {
+        return new Promise((resolve) => {
+            if (!isRecording) resolve(null)
+            else {
+                audioRecorderRef.current.stopRecording(() => {
+                    const blob = audioRecorderRef.current.getBlob()
+                    resolve(blob)
                 })
-                .catch((error) => {
+            }
+        })
+    }
+
+    function uploadAudio(moveNumber, blob) {
+        const formData = new FormData()
+        formData.append('file', blob)
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .post(
+                `${config.apiURL}/gbg-audio-upload?postId=${postId}&moveNumber=${moveNumber}`,
+                formData,
+                options
+            )
+            .then((res) => {
+                const signalData = {
+                    roomId: roomIdRef.current,
+                    type: 'audio',
+                    id: res.data.id,
+                    Creator: userRef.current,
+                    Audios: [{ url: res.data.url }],
+                    Link: { index: moveNumber },
+                }
+                socketRef.current.emit('outgoing-audio-bead', signalData)
+            })
+            .catch((error) => {
+                if (error.response) {
                     const { message } = error.response.data
                     switch (message) {
                         case 'File size too large':
-                            // todo: give user option to save bead locally before deleting (edge-case)
-                            chunksRef.current = []
                             setAlertMessage(`Error uploading audio. ${message}`)
                             setAlertModalOpen(true)
                             break
                         default:
-                            chunksRef.current = []
                             setAlertMessage(`Unknown error uploading audio`)
                             setAlertModalOpen(true)
                             break
                     }
-                })
-        }
-        mediaRecorderRef.current.start()
+                } else console.log(error)
+            })
     }
 
     function signalStartGame(data) {
@@ -860,7 +870,7 @@ function GlassBeadGame(): JSX.Element {
     function startMove(moveNumber, turnNumber, player, data) {
         const { movesPerPlayer, moveDuration, intervalDuration } = data
         // if your move, start audio recording
-        if (isYou(player.socketId)) startAudioRecording(moveNumber)
+        if (isYou(player.socketId)) startAudioRecording()
         // calculate turn and game duration
         const turnDuration = data.players.length * (moveDuration + intervalDuration)
         const gameDuration = turnDuration * movesPerPlayer - intervalDuration
@@ -894,21 +904,24 @@ function GlassBeadGame(): JSX.Element {
                 // end seconds timer
                 clearInterval(secondsTimerRef.current)
                 // if your move, stop audio recording
-                if (isYou(player.socketId) && mediaRecorderRef.current)
-                    mediaRecorderRef.current.stop()
-                // if more moves left
-                if (moveNumber < movesPerPlayer * data.players.length) {
-                    // calculate next player from previous players index
-                    const PPIndex = data.players.findIndex((p) => p.socketId === player.socketId)
-                    const endOfTurn = PPIndex + 1 === data.players.length
-                    const nextPlayer = data.players[endOfTurn ? 0 : PPIndex + 1]
-                    // if interval, start interval
-                    if (intervalDuration > 0)
-                        startInterval(moveNumber + 1, newTurnNumber, nextPlayer, data)
-                    // else start next move
-                    else startMove(moveNumber + 1, newTurnNumber, nextPlayer, data)
-                } else if (data.outroDuration) startOutro(data)
-                else endGame()
+                stopAudioRecording(isYou(player.socketId)).then((blob) => {
+                    if (blob) uploadAudio(moveNumber, blob)
+                    // if moves left
+                    if (moveNumber < movesPerPlayer * data.players.length) {
+                        // calculate next player from previous players index
+                        const PPIndex = data.players.findIndex(
+                            (p) => p.socketId === player.socketId
+                        )
+                        const endOfTurn = PPIndex + 1 === data.players.length
+                        const nextPlayer = data.players[endOfTurn ? 0 : PPIndex + 1]
+                        // if interval, start interval
+                        if (intervalDuration > 0)
+                            startInterval(moveNumber + 1, newTurnNumber, nextPlayer, data)
+                        // else start next move
+                        else startMove(moveNumber + 1, newTurnNumber, nextPlayer, data)
+                    } else if (data.outroDuration) startOutro(data)
+                    else endGame()
+                })
             }
         }, 1000)
     }
@@ -1455,8 +1468,8 @@ function GlassBeadGame(): JSX.Element {
                 addPlayButtonToCenterBead()
                 d3.select('#timer-bead-wave-form').transition(1000).style('opacity', 0)
                 setTurn(0)
-                if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording')
-                    mediaRecorderRef.current.stop()
+                if (audioRecorderRef.current && audioRecorderRef.current.state === 'recording')
+                    stopAudioRecording(true).then((blob) => uploadAudio(999, blob))
             })
             // save game signal recieved
             socketRef.current.on('incoming-save-game', (data) => {
@@ -1466,7 +1479,7 @@ function GlassBeadGame(): JSX.Element {
             // audio bead recieved
             socketRef.current.on('incoming-audio-bead', (data) => {
                 setBeads((previousBeads) => [...previousBeads, data])
-                addEventListenersToBead(data.index)
+                addEventListenersToBead(data.Link.index)
                 // if (!gameInProgressRef.current) {
                 //     d3.select('#timer-bead-wave-form').transition(1000).style('opacity', 0)
                 //     // addPlayButtonToCenterBead()
