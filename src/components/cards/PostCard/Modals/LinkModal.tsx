@@ -171,7 +171,7 @@ function LinkModal(props: {
             setAlertMessage('Log in to link posts')
             setAlertModalOpen(true)
         } else {
-            const data = { linkId }
+            const data = { linkId, itemAId: postData.id, itemBId: linkedPostId }
             const options = { headers: { Authorization: `Bearer ${accessToken}` } }
             axios
                 .post(`${config.apiURL}/remove-link`, data, options)

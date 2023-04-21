@@ -20,7 +20,7 @@ function DeleteCommentModal(props: {
 
     function deleteComment() {
         setLoading(true)
-        const data = { commentId: comment.id }
+        const data = { commentId: comment.id, postId: comment.itemId }
         const authHeader = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
             .post(`${config.apiURL}/delete-comment`, data, authHeader)

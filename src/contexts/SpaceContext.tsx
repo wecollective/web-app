@@ -157,7 +157,6 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 options
             )
             .then((res) => {
-                console.log('res.data: ', res.data)
                 if (currentSpaceHandleRef.current === spaceData.handle) {
                     setSpacePosts(firstLoad ? res.data : [...spacePosts, ...res.data])
                     setSpacePostsPaginationHasMore(res.data.length === spacePostsPaginationLimit)
