@@ -780,7 +780,7 @@ function GlassBeadGame(): JSX.Element {
     function startAudioRecording() {
         audioRecorderRef.current = RecordRTC(audioRef.current, {
             type: 'audio',
-            mimeType: 'audio/ogg',
+            mimeType: 'audio/mpeg',
         })
         audioRecorderRef.current.startRecording()
     }
@@ -1157,7 +1157,9 @@ function GlassBeadGame(): JSX.Element {
                         playButton.attr('display', 'none')
                         pauseButton.attr('display', 'flex')
                         const audio = d3
-                            .select(`#post-audio-${liveBeadIndexRef.current}-gbg-room`)
+                            .select(
+                                `#post-audio-gbg-room-${postData.id}-${liveBeadIndexRef.current}`
+                            )
                             .node()
                         // console.log(audio)
                         if (audio) audio.play()
@@ -1182,7 +1184,9 @@ function GlassBeadGame(): JSX.Element {
                         pauseButton.attr('display', 'none')
                         playButton.attr('display', 'flex')
                         const audio = d3
-                            .select(`#post-audio-${liveBeadIndexRef.current}-gbg-room`)
+                            .select(
+                                `#post-audio-gbg-room-${postData.id}-${liveBeadIndexRef.current}`
+                            )
                             .node()
                         if (audio) audio.pause()
                     })
@@ -1190,10 +1194,11 @@ function GlassBeadGame(): JSX.Element {
         )
     }
 
-    function addEventListenersToBead(beadIndex) {
-        d3.select(`#post-audio-${beadIndex}-gbg-room`)
+    function addEventListenersToBead(index) {
+        console.log('index: ', index)
+        d3.select(`#post-audio-gbg-room-${postData.id}-${index}`)
             .on('play', () => {
-                liveBeadIndexRef.current = beadIndex
+                liveBeadIndexRef.current = index
                 d3.select('#play-button').attr('display', 'none')
                 d3.select('#pause-button').attr('display', 'flex')
             })
@@ -1202,7 +1207,9 @@ function GlassBeadGame(): JSX.Element {
                 d3.select('#pause-button').attr('display', 'none')
             })
             .on('ended', () => {
-                const nextBead = d3.select(`#post-audio-${beadIndex + 1}-gbg-room`).node()
+                const nextBead = d3
+                    .select(`#post-audio-gbg-room-${postData.id}-${index + 1}`)
+                    .node()
                 if (nextBead) nextBead.play()
                 else {
                     liveBeadIndexRef.current = 1

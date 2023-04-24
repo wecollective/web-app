@@ -652,7 +652,7 @@ function CreatePostModal(): JSX.Element {
                 topicGroup: findTopicGroup(),
                 topicImageUrl: topicImageFile ? null : topicImageURL,
                 gbgSettings: GBGSettings,
-                beads,
+                beads: !synchronous && !multiplayer ? beads : [],
             } as any
             if (postType === 'gbg-from-post') {
                 postData.type = 'glass-bead-game'
@@ -683,18 +683,16 @@ function CreatePostModal(): JSX.Element {
                 // upload topic image if required
                 if (topicImageFile) fileData.append('topicImage', topicImageFile)
                 // add beads to fileData
-                if (!synchronous && !multiplayer) {
-                    beads.forEach((bead, index) => {
-                        if (bead.type === 'audio') {
-                            const { type, file, blob } = bead.Audios[0]
-                            if (type === 'file') fileData.append('audioFile', file, index)
-                            else fileData.append('audioBlob', blob, index)
-                        } else if (bead.type === 'image') {
-                            const { file } = bead.Images[0]
-                            if (file) fileData.append('imageFile', file, index)
-                        }
-                    })
-                }
+                postData.beads.forEach((bead, index) => {
+                    if (bead.type === 'audio') {
+                        const { type, file, blob } = bead.Audios[0]
+                        if (type === 'file') fileData.append('audioFile', file, index)
+                        else fileData.append('audioBlob', blob, index)
+                    } else if (bead.type === 'image') {
+                        const { file } = bead.Images[0]
+                        if (file) fileData.append('imageFile', file, index)
+                    }
+                })
                 fileData.append('postData', JSON.stringify(postData))
             }
             axios
@@ -745,11 +743,12 @@ function CreatePostModal(): JSX.Element {
                             //         }
                             //     }),
                             // ]
-                            newPost.Beads = beads.map((bead, i) => {
+                            newPost.Beads = postData.beads.map((bead, i) => {
                                 return {
                                     ...bead,
                                     id: res.data.gbg.beads[i].newBead.id,
                                     Reactions: [],
+                                    Link: { index: i + 1 },
                                 }
                             })
                             newPost.GlassBeadGame = { ...res.data.gbg.game }

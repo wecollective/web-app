@@ -216,7 +216,8 @@ function BeadCard(props: {
                     {type === 'url' && <UrlPreview type='bead' urlData={Urls[0]} />}
                     {type === 'audio' && Audios && (
                         <AudioCard
-                            id={location === 'gbg-room' ? beadIndex : id}
+                            id={postId}
+                            index={beadIndex}
                             url={Audios[0].url || URL.createObjectURL(Audios[0].file)}
                             location={location}
                             style={{ width: '100%', height: '100%' }}

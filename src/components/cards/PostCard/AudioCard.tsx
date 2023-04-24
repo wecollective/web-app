@@ -11,16 +11,17 @@ import React, { useState } from 'react'
 
 function AudioCard(props: {
     id?: number
+    index?: number
     url: string
     location: string
     style?: any
     remove?: () => void
 }): JSX.Element {
-    const { id, url, location, style, remove } = props
+    const { id, index, url, location, style, remove } = props
     const [audioPlaying, setAudioPlaying] = useState(false)
 
     function toggleAudio() {
-        const audio = d3.select(`#post-audio-${id}-${location}`).node()
+        const audio = d3.select(`#post-audio-${location}-${id}-${index}`).node()
         if (audio) {
             if (audio.paused) {
                 // pause all playing audio
@@ -30,6 +31,12 @@ function AudioCard(props: {
                 audio.play()
             } else audio.pause()
         }
+    }
+
+    function onEnded() {
+        setAudioPlaying(false)
+        const nextBead = d3.select(`#post-audio-${location}-${id}-${index! + 1}`).node()
+        if (nextBead) nextBead.play()
     }
 
     return (
@@ -42,7 +49,7 @@ function AudioCard(props: {
                 />
             )}
             <AudioVisualiser
-                audioElementId={`post-audio-${id}-${location}`}
+                audioElementId={`post-audio-${location}-${id}-${index}`}
                 audioURL={url}
                 staticBars={1200}
                 staticColor={colors.audioVisualiserStatic}
@@ -60,12 +67,12 @@ function AudioCard(props: {
                     {audioPlaying ? <PauseIcon /> : <PlayIcon />}
                 </button>
                 <AudioTimeSlider
-                    audioElementId={`post-audio-${id}-${location}`}
+                    audioElementId={`post-audio-${location}-${id}-${index}`}
                     audioURL={url}
                     location={location}
                     onPlay={() => setAudioPlaying(true)}
                     onPause={() => setAudioPlaying(false)}
-                    onEnded={() => setAudioPlaying(false)}
+                    onEnded={onEnded}
                 />
             </Row>
         </Column>
@@ -74,6 +81,7 @@ function AudioCard(props: {
 
 AudioCard.defaultProps = {
     id: 0,
+    index: 0,
     style: null,
     remove: null,
 }

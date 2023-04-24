@@ -272,14 +272,10 @@ function GlassBeadGameCard(props: {
                                         bead={bead}
                                         postId={id}
                                         postType={postData.type}
-                                        beadIndex={bead.Link.index}
+                                        beadIndex={i + 1}
                                         location={location}
                                         selected={selectedBead && selectedBead.id === bead.id}
                                         toggleBeadComments={() => toggleBeadComments(bead)}
-                                        // style={{
-                                        //     marginRight:
-                                        //         beads.length > 2 && i === beads.length - 1 ? 15 : 0,
-                                        // }}
                                     />
                                     {i < beads.length - 1 && (
                                         <Row centerY className={styles.beadDivider}>
