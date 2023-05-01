@@ -116,7 +116,7 @@ function NextBeadModal(props: {
             clearInterval(recordingInterval.current)
             const blob = audioRecorder.current.getBlob()
             setAudioBlob(blob)
-            setAudioFile(new File([blob], ''))
+            setAudioFile(new File([blob], '', { type: 'audio/wav' }))
             setAudioType('recording')
         })
         setRecording(false)
@@ -128,23 +128,29 @@ function NextBeadModal(props: {
             resetAudioState()
             setAudioSizeError(false)
             setAudioTimeError(false)
-            navigator.mediaDevices.getUserMedia({ audio: true }).then((audioStream) => {
-                audioRecorder.current = RecordRTC(audioStream, {
-                    type: 'audio',
-                    mimeType: 'audio/mpeg',
+            navigator.mediaDevices
+                .getUserMedia({ audio: { sampleRate: 24000 } })
+                .then((audioStream) => {
+                    audioRecorder.current = RecordRTC(audioStream, {
+                        type: 'audio',
+                        mimeType: 'audio/wav',
+                        recorderType: RecordRTC.StereoAudioRecorder,
+                        bufferSize: 16384,
+                        numberOfAudioChannels: 1,
+                        desiredSampRate: 24000,
+                    })
+                    audioRecorder.current.startRecording()
+                    let time = 0
+                    recordingInterval.current = setInterval(() => {
+                        time += 1
+                        setRecordingTime(time)
+                        if (moveDuration && moveDuration === time) {
+                            clearInterval(recordingInterval.current)
+                            stopAudioRecording()
+                        }
+                    }, 1000)
+                    setRecording(true)
                 })
-                audioRecorder.current.startRecording()
-                let time = 0
-                recordingInterval.current = setInterval(() => {
-                    time += 1
-                    setRecordingTime(time)
-                    if (moveDuration && moveDuration === time) {
-                        clearInterval(recordingInterval.current)
-                        stopAudioRecording()
-                    }
-                }, 1000)
-                setRecording(true)
-            })
         }
     }
 
@@ -157,7 +163,7 @@ function NextBeadModal(props: {
                         <input
                             type='file'
                             id='bead-audio-file-input'
-                            accept='.mp3'
+                            accept='audio/mpeg'
                             onChange={selectAudioFile}
                             hidden
                         />

@@ -606,7 +606,7 @@ function GlassBeadGame(): JSX.Element {
                 .catch(() => {
                     console.log('Unable to connect video, trying audio only...')
                     navigator.mediaDevices
-                        .getUserMedia({ audio: true })
+                        .getUserMedia({ audio: { sampleRate: 24000 } })
                         .then((stream) => {
                             setUserIsStreaming(true)
                             setAudioOnly(true)
@@ -635,7 +635,7 @@ function GlassBeadGame(): JSX.Element {
                 })
             // set up seperate audio stream for moves
             navigator.mediaDevices
-                .getUserMedia({ audio: true })
+                .getUserMedia({ audio: { sampleRate: 24000 } })
                 .then((audio) => (audioRef.current = audio))
         }
     }
@@ -780,7 +780,11 @@ function GlassBeadGame(): JSX.Element {
     function startAudioRecording() {
         audioRecorderRef.current = RecordRTC(audioRef.current, {
             type: 'audio',
-            mimeType: 'audio/mpeg',
+            mimeType: 'audio/wav',
+            recorderType: RecordRTC.StereoAudioRecorder,
+            bufferSize: 16384,
+            numberOfAudioChannels: 1,
+            desiredSampRate: 24000,
         })
         audioRecorderRef.current.startRecording()
     }
@@ -1195,7 +1199,6 @@ function GlassBeadGame(): JSX.Element {
     }
 
     function addEventListenersToBead(index) {
-        console.log('index: ', index)
         d3.select(`#post-audio-gbg-room-${postData.id}-${index}`)
             .on('play', () => {
                 liveBeadIndexRef.current = index

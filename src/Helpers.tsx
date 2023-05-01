@@ -10,14 +10,14 @@ import {
     PollIcon,
     TextIcon,
 } from '@svgs/all'
-import { convertFromRaw, EditorState } from 'draft-js'
+import { EditorState, convertFromRaw } from 'draft-js'
 import React from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
 // constants
 export const megaByte = 1048576
 export const imageMBLimit = 10
-export const audioMBLimit = 25
+export const audioMBLimit = 30
 export const totalMBUploadLimit = 50
 
 export const weekDays = [

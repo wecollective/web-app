@@ -278,22 +278,28 @@ function CreatePostModal(): JSX.Element {
                 clearInterval(recordingInterval.current)
                 const blob = audioRecorder.current.getBlob()
                 setAudioBlob(blob)
-                setAudioFile(new File([blob], ''))
+                setAudioFile(new File([blob], '', { type: 'audio/wav' }))
             })
             setRecording(false)
         } else {
             resetAudioState()
-            navigator.mediaDevices.getUserMedia({ audio: true }).then((audioStream) => {
-                audioRecorder.current = RecordRTC(audioStream, {
-                    type: 'audio',
-                    mimeType: 'audio/mpeg',
+            navigator.mediaDevices
+                .getUserMedia({ audio: { sampleRate: 24000 } })
+                .then((audioStream) => {
+                    audioRecorder.current = RecordRTC(audioStream, {
+                        type: 'audio',
+                        mimeType: 'audio/wav',
+                        recorderType: RecordRTC.StereoAudioRecorder,
+                        bufferSize: 16384,
+                        numberOfAudioChannels: 1,
+                        desiredSampRate: 24000,
+                    })
+                    audioRecorder.current.startRecording()
+                    recordingInterval.current = setInterval(() => {
+                        setRecordingTime((t) => t + 1)
+                    }, 1000)
+                    setRecording(true)
                 })
-                audioRecorder.current.startRecording()
-                recordingInterval.current = setInterval(() => {
-                    setRecordingTime((t) => t + 1)
-                }, 1000)
-                setRecording(true)
-            })
         }
     }
 
@@ -1120,7 +1126,7 @@ function CreatePostModal(): JSX.Element {
                                             <input
                                                 type='file'
                                                 id='audio-file-input'
-                                                accept='.mp3'
+                                                accept='audio/mpeg'
                                                 onChange={selectAudioFile}
                                                 hidden
                                             />
