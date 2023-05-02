@@ -200,8 +200,9 @@ function SpaceCircles(props: { spaceCircleData: any; params: any }): JSX.Element
         event.stopPropagation()
         if (!transitioning.current) {
             circleMouseOut(event, circle)
-            // if main circle, reset position
-            if (circle.data.id === childNodes.current[0].data.id) resetPosition(transitionDuration)
+            // if main circle, navigate to post list
+            if (circle.data.id === childNodes.current[0].data.id)
+                history(`/s/${circle.data.handle}/posts`)
             // else, navigate to new space
             else {
                 setClickedSpaceUUID(circle.data.uuid)
