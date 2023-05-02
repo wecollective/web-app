@@ -9,7 +9,7 @@ import Row from '@components/Row'
 import { SpaceContext } from '@contexts/SpaceContext'
 import { UserContext } from '@contexts/UserContext'
 import config from '@src/Config'
-import { capitalise, getParamString } from '@src/Helpers'
+import { getParamString } from '@src/Helpers'
 import styles from '@styles/components/GlobalSearchBar.module.scss'
 import { SearchIcon } from '@svgs/all'
 import axios from 'axios'
@@ -31,13 +31,7 @@ function GlobalSearchBar(props: { onLocationChange?: () => void; style?: any }):
     const [firstRun, setFirstRun] = useState(true)
     const [searchQuery, setSearchQuery] = useState('')
     const searchQueryRef = useRef('')
-    const [searchType, setSearchType] = useState(
-        pageType === 's'
-            ? ['posts', 'spaces', 'people'].includes(subpage)
-                ? capitalise(subpage)
-                : 'Spaces'
-            : 'Posts'
-    )
+    const [searchType, setSearchType] = useState('Spaces')
     const [searchConstraint, setSearchConstraint] = useState(
         pageType === 'u' || (pageType === 's' && handle !== 'all')
     )
@@ -105,11 +99,6 @@ function GlobalSearchBar(props: { onLocationChange?: () => void; style?: any }):
                 (['posts', 'spaces', 'people'].includes(subpage) || searchConstraint)
             const showUserConstraint = pageType === 'u' && (subpage === 'posts' || searchConstraint)
             setSearchConstraint(showSpaceConstraint || showUserConstraint)
-            // update search type
-            const updateSpaceSearchType =
-                pageType === 's' && ['posts', 'spaces', 'people'].includes(subpage)
-            const updateUserSearchType = pageType === 'u' && subpage === 'posts'
-            if (updateSpaceSearchType || updateUserSearchType) setSearchType(capitalise(subpage))
         }
     }, [location])
 
@@ -206,3 +195,18 @@ GlobalSearchBar.defaultProps = {
 }
 
 export default GlobalSearchBar
+
+// old code used to match search type with page type:
+// const [searchType, setSearchType] = useState(
+//     pageType === 's'
+//         ? ['posts', 'spaces', 'people'].includes(subpage)
+//             ? capitalise(subpage)
+//             : 'Spaces'
+//         : 'Posts'
+// )
+
+// update search type in location useEffect
+// const updateSpaceSearchType =
+//     pageType === 's' && ['posts', 'spaces', 'people'].includes(subpage)
+// const updateUserSearchType = pageType === 'u' && subpage === 'posts'
+// if (updateSpaceSearchType || updateUserSearchType) setSearchType(capitalise(subpage))
