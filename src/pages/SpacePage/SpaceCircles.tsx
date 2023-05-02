@@ -27,6 +27,7 @@ function SpaceCircles(props: { spaceCircleData: any; params: any }): JSX.Element
     const history = useNavigate()
     const transitionDuration = 1000
     const maxTextLength = 20
+    const currentCircle = useRef('')
     const circleRadius = useRef(0)
     const transitioning = useRef(true)
     const parentNodes = useRef<any>(null)
@@ -146,24 +147,33 @@ function SpaceCircles(props: { spaceCircleData: any; params: any }): JSX.Element
     function circleMouseOver(event, circle) {
         event.stopPropagation()
         if (!transitioning.current) {
-            const zoomScale = d3.zoomTransform(d3.select('#sc-master-group').node()).k
-            d3.selectAll(
-                `.sc-parent-circle-${circle.data.id},.sc-circle-${circle.data.id},.sc-circle-background-${circle.data.id},.sc-circle-image-${circle.data.id}`
-            )
-                .transition('circles-mouse-over')
-                .duration(transitionDuration / 3)
-                .attr('stroke', (d) => colors[isHoveredCircle(circle, d) ? 'cpBlue' : 'cpPurple'])
-                .attr('stroke-width', 5 / zoomScale)
-                .attr('opacity', 1)
-            // display space info
-            getHighlightedSpaceData(circle.data)
-            setShowSpaceModal(true)
+            currentCircle.current = circle.data.uuid
+            setTimeout(() => {
+                if (currentCircle.current === circle.data.uuid) {
+                    const zoomScale = d3.zoomTransform(d3.select('#sc-master-group').node()).k
+                    d3.selectAll(
+                        `.sc-parent-circle-${circle.data.id},.sc-circle-${circle.data.id},.sc-circle-background-${circle.data.id},.sc-circle-image-${circle.data.id}`
+                    )
+                        .transition('circles-mouse-over')
+                        .duration(transitionDuration / 3)
+                        .attr(
+                            'stroke',
+                            (d) => colors[isHoveredCircle(circle, d) ? 'cpBlue' : 'cpPurple']
+                        )
+                        .attr('stroke-width', 5 / zoomScale)
+                        .attr('opacity', 1)
+                    // display space info
+                    getHighlightedSpaceData(circle.data)
+                    setShowSpaceModal(true)
+                }
+            }, 500)
         }
     }
 
     function circleMouseOut(event, circle) {
         event.stopPropagation()
         if (!transitioning.current) {
+            currentCircle.current = ''
             const zoomScale = d3.zoomTransform(d3.select('#sc-master-group').node()).k
             // remove stroke highlight
             d3.selectAll(
