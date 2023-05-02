@@ -21,6 +21,7 @@ function SpaceCircles(props: { spaceCircleData: any; params: any }): JSX.Element
     const { sortBy, sortOrder } = params
     const { setSpaceCircleData } = useContext(SpaceContext)
     const [clickedSpaceUUID, setClickedSpaceUUID] = useState('')
+    const [mouseDown, setMouseDown] = useState(false)
     const [showSpaceModal, setShowSpaceModal] = useState(false)
     const [highlightedSpace, setHighlightedSpace] = useState<any>(null)
     const [mouseCoordinates, setMouseCoordinates] = useState({ x: 0, y: 0 })
@@ -39,19 +40,28 @@ function SpaceCircles(props: { spaceCircleData: any; params: any }): JSX.Element
         .range(['hsl(152,80%,80%)', 'hsl(228,30%,40%)'])
         .interpolate(d3.interpolateHcl)
 
-    const zoom = d3.zoom().on('zoom', (event) => {
-        d3.select('#sc-master-group').attr('transform', event.transform)
-        // scale circle and text attributes
-        const scale = event.transform.k
-        d3.selectAll('.sc-circle,.sc-circle-image').attr('stroke-width', 1 / scale)
-        d3.selectAll('.sc-circle-text')
-            .attr('font-size', (d) => (isRoot(d) ? 20 : 16) / scale)
-            .attr('y', (d) => d.y - d.r - (isRoot(d) ? 25 : 15) / scale)
-            .attr('opacity', (d) => {
-                if (scale > 7) return 1
-                return d.r > 30 / scale ? 1 : 0
-            })
-    })
+    const zoom = d3
+        .zoom()
+        .on('zoom', (event) => {
+            d3.select('#sc-master-group').attr('transform', event.transform)
+            // scale circle and text attributes
+            const scale = event.transform.k
+            d3.selectAll('.sc-circle,.sc-circle-image').attr('stroke-width', 1 / scale)
+            d3.selectAll('.sc-circle-text')
+                .attr('font-size', (d) => (isRoot(d) ? 20 : 16) / scale)
+                .attr('y', (d) => d.y - d.r - (isRoot(d) ? 25 : 15) / scale)
+                .attr('opacity', (d) => {
+                    if (scale > 7) return 1
+                    return d.r > 30 / scale ? 1 : 0
+                })
+        })
+        .on('end', (event) => {
+            // update mouse coordinates after drag events
+            const { pageX, pageY } = event
+            const { y } = d3.select('#sc-svg').node().getBoundingClientRect()
+            setMouseCoordinates({ x: pageX + 20, y: pageY + y - 456 })
+            setMouseDown(false)
+        })
 
     function isRoot(circle) {
         return circle.data.uuid === childNodes.current[0].data.uuid
@@ -273,6 +283,7 @@ function SpaceCircles(props: { spaceCircleData: any; params: any }): JSX.Element
                         .attr('fill', (d) => colorScale(d.depth + 1))
                         .on('mouseover', circleMouseOver)
                         .on('mouseout', circleMouseOut)
+                        .on('mousedown', () => setMouseDown(true))
                         .on('click', circleClick)
                         .call((circle) =>
                             circle
@@ -539,7 +550,7 @@ function SpaceCircles(props: { spaceCircleData: any; params: any }): JSX.Element
 
     return (
         <div id='sc-canvas' className={styles.canvas}>
-            {showSpaceModal && highlightedSpace && (
+            {showSpaceModal && highlightedSpace && !mouseDown && (
                 <Column
                     className={styles.spaceInfoModal}
                     style={{ top: mouseCoordinates.y, left: mouseCoordinates.x }}
