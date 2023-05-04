@@ -4,6 +4,7 @@ import config from '@src/Config'
 import {
     AudioIcon,
     CalendarIcon,
+    CardIcon,
     CastaliaIcon,
     ImageIcon,
     LinkIcon,
@@ -143,6 +144,7 @@ export const postTypeIcons = {
     audio: <AudioIcon />,
     event: <CalendarIcon />,
     poll: <PollIcon />,
+    card: <CardIcon />,
     'glass-bead-game': <CastaliaIcon />,
 }
 

@@ -121,7 +121,7 @@ function CreatePostModal(): JSX.Element {
     const maxChars = 5000
     const cookies = new Cookies()
     const urlRequestIndex = useRef(0)
-    const contentButtonTypes = ['image', 'audio', 'event', 'poll', 'glass-bead-game']
+    const contentButtonTypes = ['image', 'audio', 'event', 'poll', 'glass-bead-game', 'card']
     // if (createPostModalSettings.type === 'gbg-from-post') contentButtonTypes = ['glass-bead-game']
 
     function closeModal() {
@@ -135,6 +135,7 @@ function CreatePostModal(): JSX.Element {
         if (postType === 'audio') return 'New audio post'
         if (postType === 'event') return 'New event'
         if (postType === 'poll') return 'New poll'
+        if (postType === 'card') return 'New card'
         if (postType === 'glass-bead-game') return 'New Glass Bead Game'
         if (postType === 'gbg-from-post') return 'New Glass Bead Game from post'
         return ''
@@ -1081,7 +1082,7 @@ function CreatePostModal(): JSX.Element {
                     <Column
                         centerY
                         className={`${styles.contentOptions} ${
-                            postType === 'text' && styles.hidden
+                            ['text', 'card'].includes(postType) && styles.hidden
                         }`}
                     >
                         {postType === 'image' && (
