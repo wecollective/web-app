@@ -9,6 +9,7 @@ import { ReactComponent as BellIcon } from '@svgs/bell-solid.svg'
 import { ReactComponent as AboutIcon } from '@svgs/book-open-solid.svg'
 import { ReactComponent as GovernanceIcon } from '@svgs/building-columns-solid.svg'
 import { ReactComponent as CalendarIcon } from '@svgs/calendar-days-solid.svg'
+import { ReactComponent as CardIcon } from '@svgs/card-icon.svg'
 import { ReactComponent as CaretDownIcon } from '@svgs/caret-down-solid.svg'
 import { ReactComponent as CastaliaIcon } from '@svgs/castalia-logo.svg'
 import { ReactComponent as SuccessIcon } from '@svgs/check-circle-solid.svg'
@@ -152,4 +153,5 @@ export {
     SpaceTreeIcon,
     SpaceListIcon,
     UploadIcon,
+    CardIcon,
 }
