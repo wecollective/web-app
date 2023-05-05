@@ -52,6 +52,7 @@ import {
     HelpIcon,
     ImageIcon,
     PlusIcon,
+    RepostIcon,
     SettingsIcon,
     UsersIcon,
 } from '@svgs/all'
@@ -347,6 +348,18 @@ function CreatePostModal(): JSX.Element {
 
     function removePollAnswer(id) {
         setPollAnswers(pollAnswers.filter((a) => a.id !== id))
+    }
+
+    // card
+    const [cardRotating, setCardRotating] = useState(false)
+    const [cardFlipped, setCardFlipped] = useState(false)
+
+    function rotateCard() {
+        setCardRotating(true)
+        setTimeout(() => {
+            setCardFlipped(!cardFlipped)
+            setCardRotating(false)
+        }, 500)
     }
 
     // gbg
@@ -1051,6 +1064,34 @@ function CreatePostModal(): JSX.Element {
                                             onClick={addPollAnswer}
                                         />
                                     </Row>
+                                </Column>
+                            )}
+                            {postType === 'card' && (
+                                <Column centerX className={styles.cardContainer}>
+                                    <Column
+                                        centerX
+                                        centerY
+                                        className={`${styles.card} ${
+                                            cardRotating && styles.rotating
+                                        }`}
+                                    >
+                                        <button
+                                            type='button'
+                                            title='Click to rotate'
+                                            onClick={rotateCard}
+                                        >
+                                            <RepostIcon />
+                                        </button>
+                                        {!cardFlipped ? (
+                                            <Column>
+                                                <p>Front</p>
+                                            </Column>
+                                        ) : (
+                                            <Column>
+                                                <p>Back</p>
+                                            </Column>
+                                        )}
+                                    </Column>
                                 </Column>
                             )}
                             {['glass-bead-game', 'gbg-from-post'].includes(postType) && (

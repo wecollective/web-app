@@ -286,6 +286,41 @@ $transitionSpeed: 0.5s;
                 margin-top: 15px;
             }
 
+            .cardContainer {
+                margin-top: 5px;
+                padding: 20px;
+                border-radius: 10px;
+                background-color: $grey1;
+
+                .card {
+                    position: relative;
+                    width: 250px;
+                    height: 350px;
+                    box-shadow: 0 0 10px 0 rgba(10, 8, 72, 0.1);
+                    border-radius: 15px;
+                    background-color: white;
+                    transition: transform ease-in-out 0.5s;
+
+                    &.rotating {
+                        transform: rotateY(90deg);
+                    }
+
+                    > button {
+                        all: unset;
+                        cursor: pointer;
+                        position: absolute;
+                        top: 10px;
+                        right: 10px;
+
+                        > svg {
+                            width: 20px;
+                            height: 20px;
+                            color: $grey4;
+                        }
+                    }
+                }
+            }
+
             .gbg {
                 .gbgInfo {
                     margin-top: 10px;
