@@ -268,6 +268,44 @@ $transitionSpeed: 0.5s;
         }
     }
 
+    &.card {
+        height: 435px;
+        width: 450px;
+        background-color: transparent;
+
+        .reverseColumn {
+            align-items: center;
+            margin-bottom: 20px;
+
+            .toolbarWrapper {
+                justify-content: center;
+                height: 40px;
+                margin-bottom: 20px;
+
+                .linkInput {
+                    height: 37px;
+                    width: 300px;
+                }
+            }
+
+            .editorWrapper {
+                width: 220px;
+                height: 320px;
+                justify-content: center;
+                align-items: center;
+
+                :global(.DraftEditor-editorContainer) {
+                    max-height: 320px;
+                    overflow: hidden;
+                }
+            }
+        }
+
+        .characters {
+            justify-content: center;
+        }
+    }
+
     &.other {
         padding: 10px;
 

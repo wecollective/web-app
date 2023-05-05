@@ -292,17 +292,14 @@ $transitionSpeed: 0.5s;
                 border-radius: 10px;
                 background-color: $grey1;
 
-                .card {
+                .cardWrapper {
                     position: relative;
-                    width: 250px;
-                    height: 350px;
-                    box-shadow: 0 0 10px 0 rgba(10, 8, 72, 0.1);
-                    border-radius: 15px;
-                    background-color: white;
-                    transition: transform ease-in-out 0.5s;
+                    width: 500px;
+                    transition: all 0.3s;
 
-                    &.rotating {
-                        transform: rotateY(90deg);
+                    &.expanded {
+                        height: 360px;
+                        margin: 40px;
                     }
 
                     > button {
@@ -316,6 +313,35 @@ $transitionSpeed: 0.5s;
                             width: 20px;
                             height: 20px;
                             color: $grey4;
+                        }
+                    }
+
+                    .card {
+                        position: relative;
+                        width: 250px;
+                        height: 350px;
+                        box-shadow: 0 0 10px 0 rgba(10, 8, 72, 0.1);
+                        border-radius: 15px;
+                        background-color: white;
+                        transition: transform ease-in-out 0.5s;
+
+                        &.rotating {
+                            transform: rotateY(90deg);
+                        }
+
+                        > img {
+                            position: absolute;
+                            border-radius: inherit;
+                            width: 100%;
+                            height: 100%;
+                            object-fit: cover;
+                        }
+
+                        > div {
+                            display: none;
+                            &.visible {
+                                display: flex;
+                            }
                         }
                     }
                 }
@@ -403,36 +429,6 @@ $transitionSpeed: 0.5s;
             opacity: 0;
         }
 
-        .fileUploadInput {
-            margin-right: 10px;
-
-            label {
-                height: 40px;
-                border-radius: 20px;
-                padding: 0px 20px;
-                font-size: 14px;
-                border: none;
-                outline: none;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                transition-property: background-color, filter, color;
-                transition-duration: 0.3s;
-                flex-shrink: 0;
-                background-color: $aqua;
-                color: white;
-                &:hover {
-                    &:not(.disabled) {
-                        cursor: pointer;
-                        filter: brightness(110%);
-                        &.grey {
-                            filter: brightness(96%);
-                        }
-                    }
-                }
-            }
-        }
-
         h2 {
             margin: 0;
         }
@@ -467,41 +463,37 @@ $transitionSpeed: 0.5s;
         }
     }
 
-    .contentButtons {
-        margin-bottom: 20px;
+    .contentButton {
+        all: unset;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 50px;
+        height: 50px;
+        border: 1px solid $grey3;
+        border-radius: 50%;
+        background-color: white;
+        cursor: pointer;
+        transition: all $transitionSpeed;
 
-        button {
-            all: unset;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 50px;
-            height: 50px;
-            border: 1px solid $grey3;
-            border-radius: 50%;
-            background-color: white;
-            cursor: pointer;
+        &:not(:last-child) {
+            margin-right: 10px;
+        }
+
+        svg {
+            color: $grey7;
+            width: 25px;
+            height: 25px;
             transition: all $transitionSpeed;
+        }
 
-            &:not(:last-child) {
-                margin-right: 10px;
-            }
+        &:hover,
+        &.selected {
+            border: 1px solid $blue3;
+            background-color: $blue7;
 
             svg {
-                color: $grey7;
-                width: 25px;
-                height: 25px;
-                transition: all $transitionSpeed;
-            }
-
-            &:hover,
-            &.selected {
-                border: 1px solid $blue3;
-                background-color: $blue7;
-
-                svg {
-                    color: $blue3;
-                }
+                color: $blue3;
             }
         }
     }
@@ -510,6 +502,36 @@ $transitionSpeed: 0.5s;
         color: $red;
         > p {
             margin-bottom: 20px;
+        }
+    }
+
+    .fileUploadInput {
+        margin-right: 10px;
+
+        label {
+            height: 40px;
+            border-radius: 20px;
+            padding: 0px 20px;
+            font-size: 14px;
+            border: none;
+            outline: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition-property: background-color, filter, color;
+            transition-duration: 0.3s;
+            flex-shrink: 0;
+            background-color: $aqua;
+            color: white;
+            &:hover {
+                &:not(.disabled) {
+                    cursor: pointer;
+                    filter: brightness(110%);
+                    &.grey {
+                        filter: brightness(96%);
+                    }
+                }
+            }
         }
     }
 }

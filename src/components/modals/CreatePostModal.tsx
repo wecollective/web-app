@@ -82,7 +82,7 @@ function ContentButton(props: {
     const { type, postType, setPostType } = props
     return (
         <button
-            className={postType === type ? styles.selected : ''}
+            className={`${styles.contentButton} ${postType === type ? styles.selected : ''}`}
             type='button'
             title={capitalise(type)}
             onClick={() => setPostType(postType === type ? 'text' : type)}
@@ -353,6 +353,14 @@ function CreatePostModal(): JSX.Element {
     // card
     const [cardRotating, setCardRotating] = useState(false)
     const [cardFlipped, setCardFlipped] = useState(false)
+    const [cardFrontType, setCardFrontType] = useState('text')
+    const [cardFrontText, setCardFrontText] = useState('')
+    const [cardFrontMentions, setCardFrontMentions] = useState<any[]>([])
+    const [cardBackType, setCardBackType] = useState('text')
+    const [cardBackText, setCardBackText] = useState('')
+    const [cardBackMentions, setCardBackMentions] = useState<any[]>([])
+    const [cardImage, setCardImage] = useState<File>()
+    const [cardImageSizeError, setCardImageSizeError] = useState(false)
 
     function rotateCard() {
         setCardRotating(true)
@@ -360,6 +368,21 @@ function CreatePostModal(): JSX.Element {
             setCardFlipped(!cardFlipped)
             setCardRotating(false)
         }, 500)
+    }
+
+    function cardContainerExpanded() {
+        if (cardFlipped) {
+            return cardBackType === 'text' ? styles.expanded : null
+        }
+        return cardFrontType === 'text' ? styles.expanded : null
+    }
+
+    function addCardImage() {
+        const input = document.getElementById('card-image-file-input') as HTMLInputElement
+        if (input && input.files && input.files.length) {
+            if (input.files[0].size > imageMBLimit * 1024 * 1024) setCardImageSizeError(true)
+            else setCardImage(input.files[0])
+        }
     }
 
     // gbg
@@ -1071,9 +1094,9 @@ function CreatePostModal(): JSX.Element {
                                     <Column
                                         centerX
                                         centerY
-                                        className={`${styles.card} ${
-                                            cardRotating && styles.rotating
-                                        }`}
+                                        className={`${
+                                            styles.cardWrapper
+                                        } ${cardContainerExpanded()}`}
                                     >
                                         <button
                                             type='button'
@@ -1082,16 +1105,83 @@ function CreatePostModal(): JSX.Element {
                                         >
                                             <RepostIcon />
                                         </button>
-                                        {!cardFlipped ? (
-                                            <Column>
-                                                <p>Front</p>
+                                        <Column
+                                            centerX
+                                            centerY
+                                            className={`${styles.card} ${
+                                                cardRotating && styles.rotating
+                                            }`}
+                                        >
+                                            {cardImage && (
+                                                <img
+                                                    src={URL.createObjectURL(cardImage)}
+                                                    alt='background'
+                                                    style={{ opacity: 0.5 }}
+                                                />
+                                            )}
+                                            <Column className={`${!cardFlipped && styles.visible}`}>
+                                                {cardFrontType === 'text' && (
+                                                    <DraftTextEditor
+                                                        className={styles.textEditor}
+                                                        type='card'
+                                                        stringifiedDraft={cardFrontText}
+                                                        maxChars={maxChars}
+                                                        onChange={(value, textMentions) => {
+                                                            setCardFrontText(value)
+                                                            setCardFrontMentions(textMentions)
+                                                        }}
+                                                    />
+                                                )}
                                             </Column>
-                                        ) : (
-                                            <Column>
-                                                <p>Back</p>
+                                            <Column className={`${cardFlipped && styles.visible}`}>
+                                                {cardBackType === 'text' && (
+                                                    <DraftTextEditor
+                                                        className={styles.textEditor}
+                                                        type='card'
+                                                        stringifiedDraft={text}
+                                                        maxChars={maxChars}
+                                                        onChange={(value, textMentions) => {
+                                                            setCardBackText(value)
+                                                            setCardBackMentions(textMentions)
+                                                        }}
+                                                    />
+                                                )}
                                             </Column>
-                                        )}
+                                        </Column>
                                     </Column>
+                                    <Row className={styles.fileUploadInput}>
+                                        <label htmlFor='card-image-file-input'>
+                                            Add image
+                                            <input
+                                                type='file'
+                                                id='card-image-file-input'
+                                                accept='.png, .jpg, .jpeg, .gif'
+                                                onChange={addCardImage}
+                                                hidden
+                                            />
+                                        </label>
+                                    </Row>
+                                    {/* {!cardFlipped ? (
+                                        <Row style={{ marginTop: 20 }}>
+                                            {['text'].map((type) => (
+                                                <ContentButton
+                                                    type={type}
+                                                    postType={cardFrontType}
+                                                    setPostType={setCardFrontType}
+                                                />
+                                            ))}
+                                        </Row>
+                                    ) : (
+                                        <Row style={{ marginTop: 20 }}>
+                                            {['text'].map((type) => (
+                                                <ContentButton
+                                                    type={type}
+                                                    postType={cardBackType}
+                                                    setPostType={setCardBackType}
+                                                />
+                                            ))}
+                                        </Row>
+                                    )} */}
                                 </Column>
                             )}
                             {['glass-bead-game', 'gbg-from-post'].includes(postType) && (
@@ -1241,7 +1331,7 @@ function CreatePostModal(): JSX.Element {
                         )}
                     </Column>
                     {createPostModalSettings.type !== 'gbg-from-post' && (
-                        <Row className={styles.contentButtons}>
+                        <Row style={{ marginBottom: 20 }}>
                             {contentButtonTypes.map((type) => (
                                 <ContentButton
                                     key={type}
