@@ -358,11 +358,13 @@ function CreatePostModal(): JSX.Element {
     const [cardFrontMentions, setCardFrontMentions] = useState<any[]>([])
     const [cardFrontImage, setCardFrontImage] = useState<File>()
     const [cardFrontWatermark, setCardFrontWatermark] = useState(false)
+    const [cardFrontError, setCardFrontError] = useState(false)
     const [cardBackType, setCardBackType] = useState('text')
     const [cardBackText, setCardBackText] = useState('')
     const [cardBackMentions, setCardBackMentions] = useState<any[]>([])
     const [cardBackImage, setCardBackImage] = useState<File>()
     const [cardBackWatermark, setCardBackWatermark] = useState(false)
+    const [cardBackError, setCardBackError] = useState(false)
     const [cardImageSizeError, setCardImageSizeError] = useState(false)
 
     function rotateCard() {
@@ -384,8 +386,15 @@ function CreatePostModal(): JSX.Element {
         const input = document.getElementById('card-image-file-input') as HTMLInputElement
         if (input && input.files && input.files.length) {
             if (input.files[0].size > imageMBLimit * 1024 * 1024) setCardImageSizeError(true)
-            else if (cardFlipped) setCardBackImage(input.files[0])
-            else setCardFrontImage(input.files[0])
+            else if (cardFlipped) {
+                setCardBackImage(input.files[0])
+                setCardBackError(false)
+                setCardImageSizeError(false)
+            } else {
+                setCardFrontImage(input.files[0])
+                setCardFrontError(false)
+                setCardImageSizeError(false)
+            }
         }
     }
 
@@ -655,6 +664,17 @@ function CreatePostModal(): JSX.Element {
             }
             if (!synchronous && !multiplayer && !beads.length) {
                 setNoBeadsError(true)
+                valid = false
+            }
+        }
+        if (postType === 'card') {
+            const frontTotalChars = findDraftLength(cardFrontText)
+            const backTotalChars = findDraftLength(cardBackText)
+            if (!cardFrontImage && frontTotalChars === 0) {
+                setCardFrontError(true)
+                valid = false
+            } else if (!cardBackImage && backTotalChars === 0) {
+                setCardBackError(true)
                 valid = false
             }
         }
@@ -1100,7 +1120,7 @@ function CreatePostModal(): JSX.Element {
                             )}
                             {postType === 'card' && (
                                 <Column centerX className={styles.cardContainer}>
-                                    <p>{cardFlipped ? 'Back' : 'Front'} of card</p>
+                                    <span>{cardFlipped ? 'Back' : 'Front'}</span>
                                     <button
                                         type='button'
                                         title='Click to rotate'
@@ -1142,6 +1162,7 @@ function CreatePostModal(): JSX.Element {
                                                         stringifiedDraft={cardFrontText}
                                                         maxChars={maxChars}
                                                         onChange={(value, textMentions) => {
+                                                            setCardFrontError(false)
                                                             setCardFrontText(value)
                                                             setCardFrontMentions(textMentions)
                                                         }}
@@ -1167,6 +1188,7 @@ function CreatePostModal(): JSX.Element {
                                                         stringifiedDraft={cardBackText}
                                                         maxChars={maxChars}
                                                         onChange={(value, textMentions) => {
+                                                            setCardBackError(false)
                                                             setCardBackText(value)
                                                             setCardBackMentions(textMentions)
                                                         }}
@@ -1175,6 +1197,11 @@ function CreatePostModal(): JSX.Element {
                                             )}
                                         </Column>
                                     </Column>
+                                    {cardImageSizeError && (
+                                        <Row className={styles.errors}>
+                                            <p>Max image size: {imageMBLimit}MB</p>
+                                        </Row>
+                                    )}
                                     <Row>
                                         {((cardFlipped && !cardBackImage) ||
                                             (!cardFlipped && !cardFrontImage)) && (
@@ -1412,6 +1439,8 @@ function CreatePostModal(): JSX.Element {
                         {pollAnswersError && <p>At least 2 answers required for polls</p>}
                         {topicError && <p>Topic required</p>}
                         {noBeadsError && <p>At least 1 bead required for single player games</p>}
+                        {cardFrontError && <p>No content added to front of card</p>}
+                        {cardBackError && <p>No content added to back of card</p>}
                     </Column>
                     <Button
                         text='Post'
