@@ -269,9 +269,9 @@ $transitionSpeed: 0.5s;
     }
 
     &.card {
-        height: 435px;
         width: 450px;
         background-color: transparent;
+        margin-top: -42px;
 
         .reverseColumn {
             align-items: center;
@@ -281,10 +281,29 @@ $transitionSpeed: 0.5s;
                 justify-content: center;
                 height: 40px;
                 margin-bottom: 20px;
+                opacity: 0;
+                transition: all $transitionSpeed;
 
                 .linkInput {
                     height: 37px;
                     width: 300px;
+                }
+
+                .toolbar {
+                    .button {
+                        pointer-events: none;
+                    }
+                }
+
+                &.visible {
+                    opacity: 1;
+
+                    .toolbar {
+                        display: flex;
+                        .button {
+                            pointer-events: auto;
+                        }
+                    }
                 }
             }
 
@@ -303,6 +322,13 @@ $transitionSpeed: 0.5s;
 
         .characters {
             justify-content: center;
+            height: 20px;
+            opacity: 0;
+            transition: all $transitionSpeed;
+
+            &.visible {
+                opacity: 1;
+            }
         }
     }
 

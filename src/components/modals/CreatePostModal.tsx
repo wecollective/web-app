@@ -356,10 +356,13 @@ function CreatePostModal(): JSX.Element {
     const [cardFrontType, setCardFrontType] = useState('text')
     const [cardFrontText, setCardFrontText] = useState('')
     const [cardFrontMentions, setCardFrontMentions] = useState<any[]>([])
+    const [cardFrontImage, setCardFrontImage] = useState<File>()
+    const [cardFrontWatermark, setCardFrontWatermark] = useState(false)
     const [cardBackType, setCardBackType] = useState('text')
     const [cardBackText, setCardBackText] = useState('')
     const [cardBackMentions, setCardBackMentions] = useState<any[]>([])
-    const [cardImage, setCardImage] = useState<File>()
+    const [cardBackImage, setCardBackImage] = useState<File>()
+    const [cardBackWatermark, setCardBackWatermark] = useState(false)
     const [cardImageSizeError, setCardImageSizeError] = useState(false)
 
     function rotateCard() {
@@ -381,8 +384,14 @@ function CreatePostModal(): JSX.Element {
         const input = document.getElementById('card-image-file-input') as HTMLInputElement
         if (input && input.files && input.files.length) {
             if (input.files[0].size > imageMBLimit * 1024 * 1024) setCardImageSizeError(true)
-            else setCardImage(input.files[0])
+            else if (cardFlipped) setCardBackImage(input.files[0])
+            else setCardFrontImage(input.files[0])
         }
+    }
+
+    function removeCardImage() {
+        if (cardFlipped) setCardBackImage(undefined)
+        else setCardFrontImage(undefined)
     }
 
     // gbg
@@ -1091,37 +1100,43 @@ function CreatePostModal(): JSX.Element {
                             )}
                             {postType === 'card' && (
                                 <Column centerX className={styles.cardContainer}>
+                                    <p>{cardFlipped ? 'Back' : 'Front'} of card</p>
+                                    <button
+                                        type='button'
+                                        title='Click to rotate'
+                                        onClick={rotateCard}
+                                    >
+                                        <RepostIcon />
+                                    </button>
                                     <Column
                                         centerX
-                                        centerY
                                         className={`${
                                             styles.cardWrapper
                                         } ${cardContainerExpanded()}`}
                                     >
-                                        <button
-                                            type='button'
-                                            title='Click to rotate'
-                                            onClick={rotateCard}
-                                        >
-                                            <RepostIcon />
-                                        </button>
                                         <Column
                                             centerX
-                                            centerY
                                             className={`${styles.card} ${
                                                 cardRotating && styles.rotating
                                             }`}
                                         >
-                                            {cardImage && (
-                                                <img
-                                                    src={URL.createObjectURL(cardImage)}
-                                                    alt='background'
-                                                    style={{ opacity: 0.5 }}
-                                                />
-                                            )}
-                                            <Column className={`${!cardFlipped && styles.visible}`}>
-                                                {cardFrontType === 'text' && (
+                                            {!cardFlipped ? (
+                                                <Column centerX className={styles.cardContent}>
+                                                    {cardFrontImage && (
+                                                        <img
+                                                            src={URL.createObjectURL(
+                                                                cardFrontImage
+                                                            )}
+                                                            alt='background'
+                                                            style={{
+                                                                opacity: cardFrontWatermark
+                                                                    ? 0.3
+                                                                    : 1,
+                                                            }}
+                                                        />
+                                                    )}
                                                     <DraftTextEditor
+                                                        key='card-front'
                                                         className={styles.textEditor}
                                                         type='card'
                                                         stringifiedDraft={cardFrontText}
@@ -1131,57 +1146,90 @@ function CreatePostModal(): JSX.Element {
                                                             setCardFrontMentions(textMentions)
                                                         }}
                                                     />
-                                                )}
-                                            </Column>
-                                            <Column className={`${cardFlipped && styles.visible}`}>
-                                                {cardBackType === 'text' && (
+                                                </Column>
+                                            ) : (
+                                                <Column centerX className={styles.cardContent}>
+                                                    {cardBackImage && (
+                                                        <img
+                                                            src={URL.createObjectURL(cardBackImage)}
+                                                            alt='background'
+                                                            style={{
+                                                                opacity: cardBackWatermark
+                                                                    ? 0.3
+                                                                    : 1,
+                                                            }}
+                                                        />
+                                                    )}
                                                     <DraftTextEditor
+                                                        key='card-back'
                                                         className={styles.textEditor}
                                                         type='card'
-                                                        stringifiedDraft={text}
+                                                        stringifiedDraft={cardBackText}
                                                         maxChars={maxChars}
                                                         onChange={(value, textMentions) => {
                                                             setCardBackText(value)
                                                             setCardBackMentions(textMentions)
                                                         }}
                                                     />
-                                                )}
-                                            </Column>
+                                                </Column>
+                                            )}
                                         </Column>
                                     </Column>
-                                    <Row className={styles.fileUploadInput}>
-                                        <label htmlFor='card-image-file-input'>
-                                            Add image
-                                            <input
-                                                type='file'
-                                                id='card-image-file-input'
-                                                accept='.png, .jpg, .jpeg, .gif'
-                                                onChange={addCardImage}
-                                                hidden
-                                            />
-                                        </label>
+                                    <Row>
+                                        {((cardFlipped && !cardBackImage) ||
+                                            (!cardFlipped && !cardFrontImage)) && (
+                                            <Row className={styles.fileUploadInput}>
+                                                <label htmlFor='card-image-file-input'>
+                                                    Add image
+                                                    <input
+                                                        type='file'
+                                                        id='card-image-file-input'
+                                                        accept='.png, .jpg, .jpeg, .gif'
+                                                        onChange={addCardImage}
+                                                        hidden
+                                                    />
+                                                </label>
+                                            </Row>
+                                        )}
+                                        {((cardFlipped && cardBackImage) ||
+                                            (!cardFlipped && cardFrontImage)) && (
+                                            <Row>
+                                                <Button
+                                                    text='Remove image'
+                                                    color='red'
+                                                    onClick={removeCardImage}
+                                                />
+                                                <Toggle
+                                                    leftText='Watermark'
+                                                    positionLeft={
+                                                        cardFlipped
+                                                            ? !cardBackWatermark
+                                                            : !cardFrontWatermark
+                                                    }
+                                                    rightColor='blue'
+                                                    onClick={() => {
+                                                        if (cardFlipped)
+                                                            setCardBackWatermark(!cardBackWatermark)
+                                                        else
+                                                            setCardFrontWatermark(
+                                                                !cardFrontWatermark
+                                                            )
+                                                    }}
+                                                    style={{ marginLeft: 10 }}
+                                                    onOffText
+                                                />
+                                            </Row>
+                                        )}
                                     </Row>
-                                    {/* {!cardFlipped ? (
-                                        <Row style={{ marginTop: 20 }}>
-                                            {['text'].map((type) => (
-                                                <ContentButton
-                                                    type={type}
-                                                    postType={cardFrontType}
-                                                    setPostType={setCardFrontType}
-                                                />
-                                            ))}
-                                        </Row>
-                                    ) : (
-                                        <Row style={{ marginTop: 20 }}>
-                                            {['text'].map((type) => (
-                                                <ContentButton
-                                                    type={type}
-                                                    postType={cardBackType}
-                                                    setPostType={setCardBackType}
-                                                />
-                                            ))}
-                                        </Row>
-                                    )} */}
+                                    {/* <Row style={{ marginTop: 20 }}>
+                                        {['text'].map((type) => (
+                                            <ContentButton
+                                                type={type}
+                                                postType={cardFrontType}
+                                                setPostType={setCardFrontType}
+                                            />
+                                        ))}
+                                    </Row> */}
                                 </Column>
                             )}
                             {['glass-bead-game', 'gbg-from-post'].includes(postType) && (
@@ -1232,7 +1280,7 @@ function CreatePostModal(): JSX.Element {
                                             />
                                         </label>
                                     </Row>
-                                    <p style={{ marginRight: 10 }}>or</p>
+                                    <p style={{ margin: '0 10px' }}>or</p>
                                     <Input
                                         type='text'
                                         placeholder='add image url...'
@@ -1252,7 +1300,10 @@ function CreatePostModal(): JSX.Element {
                         {postType === 'audio' && (
                             <Column>
                                 <Row centerY>
-                                    <Row className={styles.fileUploadInput}>
+                                    <Row
+                                        className={styles.fileUploadInput}
+                                        style={{ marginRight: 10 }}
+                                    >
                                         <label htmlFor='audio-file-input'>
                                             Upload audio
                                             <input
