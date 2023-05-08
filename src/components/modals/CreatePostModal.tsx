@@ -725,6 +725,10 @@ function CreatePostModal(): JSX.Element {
                 topicImageUrl: topicImageFile ? null : topicImageURL,
                 gbgSettings: GBGSettings,
                 beads: !synchronous && !multiplayer ? beads : [],
+                cardFrontText: findDraftLength(cardFrontText) ? cardFrontText : null,
+                cardBackText: findDraftLength(cardBackText) ? cardBackText : null,
+                cardFrontWatermark,
+                cardBackWatermark,
             } as any
             if (postType === 'gbg-from-post') {
                 postData.type = 'glass-bead-game'
@@ -747,6 +751,13 @@ function CreatePostModal(): JSX.Element {
                 uploadType = isBlob ? 'audio-blob' : 'audio-file'
                 fileData = new FormData()
                 fileData.append('file', isBlob ? audioBlob : audioFile)
+                fileData.append('postData', JSON.stringify(postData))
+            }
+            if (postType === 'card') {
+                uploadType = 'image-file'
+                fileData = new FormData()
+                if (cardFrontImage) fileData.append('file', cardFrontImage, 'front')
+                if (cardBackImage) fileData.append('file', cardBackImage, 'back')
                 fileData.append('postData', JSON.stringify(postData))
             }
             if (postData.type === 'glass-bead-game') {
