@@ -73,6 +73,7 @@ function PostCard(props: {
         accountRating,
         accountRepost,
         accountLink,
+        sourcePostId,
         Creator,
         DirectSpaces,
         Urls,
@@ -239,6 +240,14 @@ function PostCard(props: {
                 </Row>
             </Row>
             <Column className={styles.content}>
+                {sourcePostId && (
+                    <Row centerX className={styles.sourcePostId}>
+                        <Link to={`/p/${sourcePostId}`} title='Click to open source post'>
+                            <span>Source post:</span>
+                            <p>{sourcePostId}</p>
+                        </Link>
+                    </Row>
+                )}
                 {title && <h1 className={styles.title}>{title}</h1>}
                 {GlassBeadGame && GlassBeadGame.topic && renderTopic()}
                 {text && <DraftText stringifiedDraft={text} style={{ marginBottom: 10 }} />}
@@ -246,7 +255,7 @@ function PostCard(props: {
                 {postData.Event && (
                     <EventCard postData={postData} setPostData={setPostData} location={location} />
                 )}
-                {type.includes('image') && (
+                {['image', 'gbg-image', 'card-front', 'card-back'].includes(type) && (
                     <ImagesCard images={postData.Images.sort((a, b) => a.index - b.index)} />
                 )}
                 {type.includes('audio') && (

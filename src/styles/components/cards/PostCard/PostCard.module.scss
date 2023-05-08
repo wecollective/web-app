@@ -102,6 +102,23 @@
     .content {
         width: 100%;
 
+        .sourcePostId {
+            margin-bottom: 20px;
+
+            > a {
+                display: flex;
+                background-color: $grey1;
+                padding: 12px;
+                border-radius: 10px;
+                line-height: 16px;
+
+                span {
+                    color: $grey6;
+                    margin-right: 5px;
+                }
+            }
+        }
+
         .title {
             font-size: 24px;
             line-height: 30px;
