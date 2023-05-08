@@ -17,7 +17,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 function LinkModal(props: {
-    type: 'post' | 'bead'
+    type: 'post' | 'bead' | 'card'
     location: string
     postId?: number // required for beads
     postData: any
@@ -113,11 +113,16 @@ function LinkModal(props: {
                     if (type === 'post') {
                         post.totalLinks += 1
                         post.accountLink = true
-                    } else if (type === 'bead') {
-                        // update bead state
+                    }
+                    if (type === 'bead') {
                         const bead = post.Beads.find((p) => p.id === postData.id)
                         bead.totalLinks += 1
                         bead.accountLink = true
+                    }
+                    if (type === 'card') {
+                        const card = post.CardSides.find((p) => p.id === postData.id)
+                        card.totalLinks += 1
+                        card.accountLink = true
                     }
                     // update linked post if in state
                     const linkedPost = newPosts.find((p) => p.id === +linkTarget.value)
@@ -131,6 +136,14 @@ function LinkModal(props: {
                         if (linkedBead) {
                             linkedBead.totalLinks += 1
                             linkedBead.accountLink = true
+                        }
+                    })
+                    // update linked card if in state
+                    newPosts.forEach((p) => {
+                        const linkedCard = p.CardSides.find((c) => c.id === +linkTarget.value)
+                        if (linkedCard) {
+                            linkedCard.totalLinks += 1
+                            linkedCard.accountLink = true
                         }
                     })
                     if (location === 'space-posts') setSpacePosts(newPosts)
@@ -189,11 +202,16 @@ function LinkModal(props: {
                         post.accountLink = !!links.find(
                             (l) => l.Creator.id === accountData.id && l.id !== linkId
                         )
-                    } else if (type === 'bead') {
-                        // update bead state
+                    }
+                    if (type === 'bead') {
                         const bead = post.Beads.find((p) => p.id === postData.id)
                         bead.totalLinks -= 1
                         bead.accountLink = false
+                    }
+                    if (type === 'card') {
+                        const card = post.CardSides.find((p) => p.id === postData.id)
+                        card.totalLinks -= 1
+                        card.accountLink = false
                     }
                     // update linked post if in state
                     const linkedPost = newPosts.find((p) => p.id === linkedPostId)
@@ -207,6 +225,14 @@ function LinkModal(props: {
                         if (linkedBead) {
                             linkedBead.totalLinks -= 1
                             linkedBead.accountLink = false
+                        }
+                    })
+                    // update linked card if in state
+                    newPosts.forEach((p) => {
+                        const linkedCard = p.CardSides.find((c) => c.id === linkedPostId)
+                        if (linkedCard) {
+                            linkedCard.totalLinks -= 1
+                            linkedCard.accountLink = false
                         }
                     })
                     if (location === 'space-posts') setSpacePosts(newPosts)
