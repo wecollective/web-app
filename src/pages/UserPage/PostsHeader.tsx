@@ -42,8 +42,7 @@ function PostsHeader(props: { params: any }): JSX.Element {
                             'Event',
                             'Poll',
                             'Glass Bead Game',
-                            // 'String',
-                            // 'Weave',
+                            'Card',
                             // 'Prism',
                         ]}
                         selectedOption={filterParams.type}

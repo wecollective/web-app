@@ -9,6 +9,7 @@ import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import Comments from '@src/components/cards/Comments/Comments'
 import AudioCard from '@src/components/cards/PostCard/AudioCard'
+import CardCard from '@src/components/cards/PostCard/CardCard'
 import EventCard from '@src/components/cards/PostCard/EventCard'
 import GlassBeadGameCard from '@src/components/cards/PostCard/GlassBeadGameCard'
 import ImagesCard from '@src/components/cards/PostCard/ImagesCard'
@@ -200,20 +201,6 @@ function PostCard(props: {
                         <p className='grey'>ID:</p>
                         <p style={{ marginLeft: 5 }}>{id}</p>
                     </Link>
-                    {/* {location !== 'preview' && (
-                        <Row>
-                            <p className='grey'>ID:</p>
-                            <p style={{ margin: 0 }}>{id}</p>
-                        </Row>
-                    )} */}
-                    {/* <Column
-                        centerX
-                        centerY
-                        className={`${styles.postType} ${styles[type]}`}
-                        title={type}
-                    >
-                        {findPostTypeIcon(type)}
-                    </Column> */}
                     {location !== 'preview' && isOwnPost && (
                         <>
                             <button
@@ -286,6 +273,7 @@ function PostCard(props: {
                         location={location}
                     />
                 )}
+                {type === 'card' && <CardCard postData={postData} setPostData={setPostData} />}
                 {Urls.length > 0 && (
                     <Column style={{ marginBottom: 10 }}>
                         {Urls.map((urlData) => (
