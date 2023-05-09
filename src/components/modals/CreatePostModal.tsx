@@ -845,7 +845,8 @@ function CreatePostModal(): JSX.Element {
                                     }
                                 }) || []
                         }
-                        console.log('new post: ', newPost)
+                        if (postData.type === 'card')
+                            newPost.CardSides = [res.data.card.front, res.data.card.back]
                         setSpacePosts([newPost, ...spacePosts])
                     }
                     setLoading(false)

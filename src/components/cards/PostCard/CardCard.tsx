@@ -33,7 +33,6 @@ function CardCard(props: { postData: any; setPostData: (data: any) => void }): J
             (s) => s.type !== `card-${cardFlipped ? 'back' : 'front'}`
         )
         newPostData.CardSides.push(newCardData)
-        console.log('newPostData: ', newPostData)
         setPostData(newPostData)
     }
 
@@ -67,7 +66,7 @@ function CardCard(props: { postData: any; setPostData: (data: any) => void }): J
             >
                 {renderCardFace()}
             </Column>
-            <Column centerX spaceBetween className={styles.icons}>
+            <Column spaceBetween className={styles.icons}>
                 <Column>
                     <Link to={`/p/${card.id}`} title='Open post page' style={{ marginBottom: 10 }}>
                         <Row centerX>
