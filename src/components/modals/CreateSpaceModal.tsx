@@ -201,19 +201,18 @@ function CreateSpaceModal(props: { close: () => void }): JSX.Element {
                     </p>
                     <br />
                     <form onSubmit={createSpace}>
-                        <Row centerY style={{ margin: '20px 0' }}>
-                            <p style={{ fontSize: 14, marginRight: 10 }}>Privacy:</p>
+                        <Row centerX style={{ marginBottom: 20 }}>
                             <Toggle
-                                leftText='Public'
-                                rightText='Private'
+                                leftText='Private'
                                 rightColor='blue'
                                 positionLeft={!privateSpace}
                                 onClick={() => setPrivateSpace(!privateSpace)}
+                                onOffText
                             />
                         </Row>
                         <Input
                             type='text'
-                            title='Handle (the unique name used in your spaces URL)'
+                            title='Space handle (the unique identifier used in your spaces URL)'
                             prefix='weco.io/s/'
                             placeholder='handle...'
                             value={handle.value}
@@ -226,7 +225,7 @@ function CreateSpaceModal(props: { close: () => void }): JSX.Element {
                         />
                         <Input
                             type='text'
-                            title='Visible name (max 30 characters)'
+                            title='Space name (max 30 characters)'
                             placeholder='name...'
                             value={name.value}
                             state={name.state}
@@ -235,7 +234,7 @@ function CreateSpaceModal(props: { close: () => void }): JSX.Element {
                             style={{ marginBottom: 20 }}
                         />
                         <Column style={{ width: '100%', marginBottom: 40 }}>
-                            <p style={{ fontSize: 14, marginBottom: 5 }}>Description</p>
+                            <p style={{ fontSize: 14, marginBottom: 5 }}>Space description</p>
                             <DraftTextEditor
                                 type='other'
                                 stringifiedDraft={description.value}
