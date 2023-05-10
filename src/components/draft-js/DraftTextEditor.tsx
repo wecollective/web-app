@@ -21,8 +21,11 @@ import {
     UnorderedListButton,
 } from '@draft-js-plugins/buttons'
 import Editor from '@draft-js-plugins/editor'
+import { ImageIcon } from '@src/svgs/all'
 // import createEmojiPlugin, { defaultTheme as emojiTheme } from '@draft-js-plugins/emoji'
 // import '@draft-js-plugins/emoji/lib/plugin.css'
+import createImagePlugin from '@draft-js-plugins/image'
+import '@draft-js-plugins/image/lib/plugin.css'
 import createLinkifyPlugin, { extractLinks } from '@draft-js-plugins/linkify'
 import createMentionPlugin from '@draft-js-plugins/mention'
 import '@draft-js-plugins/mention/lib/plugin.css'
@@ -71,17 +74,6 @@ function DraftTextEditor(props: {
             mentionComponent: Mention,
         })
     )
-    // const [emojiPlugin] = useState(
-    //     createEmojiPlugin({
-    //         theme: {
-    //             ...emojiTheme,
-    //             emojiSelectButton: styles.emojiSelectButton,
-    //             emojiSelectButtonPressed: `${styles.emojiSelectButton} ${styles.selected}`,
-    //             emojiSelectPopover: styles.emojiSelectPopover,
-    //         },
-    //         // useNativeArt: true,
-    //     })
-    // )
     const [textAlignmentPlugin] = useState(
         createTextAlignmentPlugin({
             theme: {
@@ -107,13 +99,29 @@ function DraftTextEditor(props: {
             component: (linkifyProps) => <a {...linkifyProps} />,
         })
     )
+    const [imagePlugin] = useState(createImagePlugin())
+    const [imageInputOpen, setImageInputOpen] = useState(false)
+    const [imageURL, setImageURL] = useState('')
+
+    // const [emojiPlugin] = useState(
+    //     createEmojiPlugin({
+    //         theme: {
+    //             ...emojiTheme,
+    //             emojiSelectButton: styles.emojiSelectButton,
+    //             emojiSelectButtonPressed: `${styles.emojiSelectButton} ${styles.selected}`,
+    //             emojiSelectPopover: styles.emojiSelectPopover,
+    //         },
+    //         // useNativeArt: true,
+    //     })
+    // )
     const plugins = [
         toolbarPlugin,
         textAlignmentPlugin,
         mentionPlugin,
-        // emojiPlugin,
         linkPlugin,
         linkifyPlugin,
+        imagePlugin,
+        // emojiPlugin,
     ]
     const [suggestions, setSuggestions] = useState([])
     const [showSuggestions, setShowSuggestions] = useState(false)
@@ -176,6 +184,12 @@ function DraftTextEditor(props: {
 
     function handleClickOutside(e) {
         if (!wrapperRef.current!.contains(e.target)) setFocused(false)
+    }
+
+    function addImage() {
+        const newState = imagePlugin.addImage(editorState, imageURL, {})
+        setImageURL('')
+        setTimeout(() => onEditorStateChange(newState), 200)
     }
 
     useEffect(() => {
@@ -258,6 +272,39 @@ function DraftTextEditor(props: {
                                 <CodeBlockButton {...externalProps} />
                                 <TextAlignment {...externalProps} />
                                 <LinkButton {...externalProps} />
+                                <button
+                                    type='button'
+                                    className={styles.button}
+                                    onClick={() => {
+                                        setImageInputOpen(true)
+                                        setTimeout(() => {
+                                            document.getElementById('draft-image-input')?.focus()
+                                        }, 100)
+                                    }}
+                                >
+                                    <ImageIcon />
+                                </button>
+                                {imageInputOpen && (
+                                    <Row className={styles.imageInput}>
+                                        <input
+                                            id='draft-image-input'
+                                            placeholder='Image URL...'
+                                            type='text'
+                                            value={imageURL}
+                                            onChange={(e) => setImageURL(e.target.value)}
+                                            onBlur={() =>
+                                                setTimeout(() => setImageInputOpen(false), 100)
+                                            }
+                                        />
+                                        <button
+                                            type='button'
+                                            className={styles.addImageButton}
+                                            onClick={addImage}
+                                        >
+                                            Add image
+                                        </button>
+                                    </Row>
+                                )}
                             </Row>
                         )}
                     </Toolbar>

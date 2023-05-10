@@ -6,6 +6,7 @@ import createLinkPlugin from '@draft-js-plugins/anchor'
 import Editor from '@draft-js-plugins/editor'
 // import createEmojiPlugin, { defaultTheme } from '@draft-js-plugins/emoji'
 // import '@draft-js-plugins/emoji/lib/plugin.css'
+import createImagePlugin from '@draft-js-plugins/image'
 import createLinkifyPlugin from '@draft-js-plugins/linkify'
 import createMentionPlugin from '@draft-js-plugins/mention'
 import '@draft-js-plugins/mention/lib/plugin.css'
@@ -57,7 +58,8 @@ function DraftText(props: {
             component: (linkifyProps) => <a {...linkifyProps} />,
         })
     )
-    const plugins = [textAlignmentPlugin, mentionPlugin, linkPlugin, linkifyPlugin] // emojiPlugin
+    const [imagePlugin] = useState(createImagePlugin())
+    const plugins = [textAlignmentPlugin, mentionPlugin, linkPlugin, linkifyPlugin, imagePlugin] // emojiPlugin
     const editorRef = useRef<any>(null)
 
     const styleMap = {

@@ -41,6 +41,10 @@ $transitionSpeed: 0.5s;
         padding-inline-start: 40px;
     }
 
+    img {
+        max-width: 100%;
+    }
+
     .reverseColumn {
         // used to display toolbar above editor but load it after (to prevent button '.active' class bug)
         flex-direction: column-reverse;
@@ -131,6 +135,39 @@ $transitionSpeed: 0.5s;
                 background-color: white;
                 border-radius: 5px;
                 margin-bottom: 5px;
+            }
+
+            .imageInput {
+                position: absolute;
+                width: 100%;
+                height: 32px;
+                margin-bottom: 5px;
+
+                input {
+                    width: 100%;
+                    height: 32px;
+                    padding: 6px 8px;
+                    outline: none;
+                    border: 1px solid $grey2;
+                    background-color: white;
+                    border-radius: 5px;
+                    margin-right: 10px;
+                }
+
+                .addImageButton {
+                    all: unset;
+                    cursor: pointer;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    background-color: $aqua;
+                    width: 100px;
+                    border-radius: 16px;
+                    color: white;
+                    font-size: 14px;
+                    line-height: 14px;
+                    padding: 0 5px;
+                }
             }
         }
     }
