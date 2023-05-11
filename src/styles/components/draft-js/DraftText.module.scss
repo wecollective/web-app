@@ -142,6 +142,7 @@ $transitionSpeed: 0.5s;
                 width: 100%;
                 height: 32px;
                 margin-bottom: 5px;
+                background-color: white;
 
                 input {
                     width: 100%;
@@ -306,7 +307,7 @@ $transitionSpeed: 0.5s;
     }
 
     &.card {
-        width: 450px;
+        width: 482px;
         background-color: transparent;
         margin-top: -42px;
 
@@ -329,6 +330,10 @@ $transitionSpeed: 0.5s;
                 .toolbar {
                     .button {
                         pointer-events: none;
+                    }
+
+                    .imageInput {
+                        background-color: $grey1;
                     }
                 }
 
