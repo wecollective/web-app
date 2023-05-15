@@ -214,24 +214,22 @@ function PostCard(props: {
                             {menuOpen && (
                                 <CloseOnClickOutside onClick={() => setMenuOpen(false)}>
                                     <Column className={styles.menu}>
-                                        {isOwnPost && (
-                                            <Column>
-                                                <button
-                                                    type='button'
-                                                    onClick={() => setEditPostModalOpen(true)}
-                                                >
-                                                    <EditIcon />
-                                                    Edit text
-                                                </button>
-                                                <button
-                                                    type='button'
-                                                    onClick={() => setDeletePostModalOpen(true)}
-                                                >
-                                                    <DeleteIcon />
-                                                    Delete post
-                                                </button>
-                                            </Column>
-                                        )}
+                                        <Column>
+                                            <button
+                                                type='button'
+                                                onClick={() => setEditPostModalOpen(true)}
+                                            >
+                                                <EditIcon />
+                                                Edit text
+                                            </button>
+                                            <button
+                                                type='button'
+                                                onClick={() => setDeletePostModalOpen(true)}
+                                            >
+                                                <DeleteIcon />
+                                                Delete post
+                                            </button>
+                                        </Column>
                                     </Column>
                                 </CloseOnClickOutside>
                             )}

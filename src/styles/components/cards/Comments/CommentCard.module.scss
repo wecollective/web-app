@@ -4,12 +4,66 @@
     margin-bottom: 10px;
 
     .content {
+        position: relative;
         margin-left: 6px;
         border-radius: 15px;
         padding: 6px 12px;
         font-size: 14px;
         background-color: $grey1;
         width: calc(100% - 36px);
+
+        .menuButton {
+            all: unset;
+            cursor: pointer;
+            position: absolute;
+            right: 10px;
+
+            svg {
+                color: $grey4;
+                height: 18px;
+                transition: color 0.3s;
+            }
+
+            &:hover {
+                svg {
+                    color: $grey6;
+                }
+            }
+        }
+
+        .menu {
+            position: absolute;
+            top: 0;
+            right: 20px;
+            background-color: white;
+            box-shadow: 0 0 7px 0 rgba(black, 0.15);
+            border-radius: 5px;
+            padding: 10px;
+            z-index: 5;
+
+            button {
+                all: unset;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+
+                &:not(:last-child) {
+                    margin-bottom: 10px;
+                }
+
+                &:hover > svg {
+                    color: $grey6;
+                }
+
+                > svg {
+                    width: 20px;
+                    height: 20px;
+                    margin-right: 8px;
+                    color: $grey5;
+                    transition: color 0.3s;
+                }
+            }
+        }
     }
 
     &.highlighted .content {
@@ -19,12 +73,27 @@
     .buttons {
         margin: 5px 0 0 36px;
 
-        > button {
+        button {
             all: unset;
             cursor: pointer;
-            font-size: 12px;
-            color: $grey5;
+            font-size: 14px;
+            color: $grey4;
             margin-right: 10px;
+            display: flex;
+            align-items: center;
+
+            &.reply {
+                margin-right: 5px;
+                svg {
+                    transform: rotate(180deg);
+                }
+            }
+
+            svg {
+                width: 16px;
+                height: 16px;
+                margin-right: 3px;
+            }
         }
     }
 

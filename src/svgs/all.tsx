@@ -51,6 +51,7 @@ import { ReactComponent as PostIcon } from '@svgs/post-icon.svg'
 import { ReactComponent as PrismIcon } from '@svgs/prism-icon.svg'
 import { ReactComponent as HelpIcon } from '@svgs/question-solid.svg'
 import { ReactComponent as RankingIcon } from '@svgs/ranking-star-solid.svg'
+import { ReactComponent as ReplyIcon } from '@svgs/reply-solid.svg'
 import { ReactComponent as RepostIcon } from '@svgs/repost.svg'
 import { ReactComponent as RetweetIcon } from '@svgs/retweet-solid.svg'
 import { ReactComponent as SourceIcon } from '@svgs/right-to-bracket-solid.svg'
@@ -154,4 +155,5 @@ export {
     SpaceListIcon,
     UploadIcon,
     CardIcon,
+    ReplyIcon,
 }
