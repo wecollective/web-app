@@ -9,6 +9,7 @@ import { scrollToElement } from '@src/Helpers'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
+import Cookies from 'universal-cookie'
 
 function Comments(props: {
     postId: number
@@ -22,6 +23,7 @@ function Comments(props: {
     const { accountData, loggedIn } = useContext(AccountContext)
     const [comments, setComments] = useState<any[]>([])
     const [loading, setLoading] = useState(false)
+    const cookies = new Cookies()
     const urlParams = Object.fromEntries(new URLSearchParams(useLocation().search))
     const filteredComments = comments.filter((c) => {
         // remove deleted comments with no replies
@@ -30,10 +32,10 @@ function Comments(props: {
 
     function getComments() {
         setLoading(true)
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
-            .get(`${config.apiURL}/post-comments?postId=${postId}`)
+            .get(`${config.apiURL}/post-comments?postId=${postId}`, options)
             .then((res) => {
-                // console.log('post-comments: ', res.data, totalComments)
                 setComments(res.data)
                 setLoading(false)
                 // if commentId in urlParams, scroll to comment
@@ -93,6 +95,23 @@ function Comments(props: {
         setComments(newComments)
     }
 
+    function updateCommentReactions(comment, reactionType, increment) {
+        console.log(comment, reactionType, increment)
+        const { id, parentCommentId } = comment
+        const newComments = [...comments]
+        let selectedComment
+        if (parentCommentId) {
+            const parentComment = newComments.find((c) => c.id === parentCommentId)
+            selectedComment = parentComment.Replies.find((c) => c.id === id)
+        } else {
+            selectedComment = comments.find((c) => c.id === id)
+        }
+        if (increment) selectedComment[`total${reactionType}s`] += 1
+        else selectedComment[`total${reactionType}s`] -= 1
+        selectedComment[`account${reactionType}`] = increment
+        setComments(newComments)
+    }
+
     useEffect(() => {
         setComments([])
         if (totalComments) getComments()
@@ -121,6 +140,7 @@ function Comments(props: {
                         addComment={addComment}
                         removeComment={removeComment}
                         editComment={editComment}
+                        updateCommentReactions={updateCommentReactions}
                     />
                 ))
             )}

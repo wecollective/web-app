@@ -92,6 +92,17 @@
             margin-right: 10px;
             display: flex;
             align-items: center;
+            transition: all 0.5s;
+
+            svg {
+                width: 16px;
+                height: 16px;
+                margin-right: 3px;
+            }
+
+            &:hover {
+                color: $grey6;
+            }
 
             &.reply {
                 margin-right: 5px;
@@ -100,10 +111,10 @@
                 }
             }
 
-            svg {
-                width: 16px;
-                height: 16px;
-                margin-right: 3px;
+            &.blue {
+                svg {
+                    color: $blue1;
+                }
             }
         }
     }

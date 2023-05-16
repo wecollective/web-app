@@ -11,8 +11,17 @@ function CommentWrapper(props: {
     addComment: (newComment: string) => void
     removeComment: (comment: any) => void
     editComment: (comment: any, newText: string) => void
+    updateCommentReactions: (commentId: number, reactionType: string, increment: boolean) => void
 }): JSX.Element {
-    const { comment, postId, highlightedCommentId, addComment, removeComment, editComment } = props
+    const {
+        comment,
+        postId,
+        highlightedCommentId,
+        addComment,
+        removeComment,
+        editComment,
+        updateCommentReactions,
+    } = props
     const [replyId, setReplyId] = useState(0)
     const [replyInputOpen, setReplyInputOpen] = useState(false)
 
@@ -32,6 +41,7 @@ function CommentWrapper(props: {
                 toggleReplyInput={() => toggleReplyInput()}
                 removeComment={removeComment}
                 editComment={editComment}
+                updateCommentReactions={updateCommentReactions}
             />
             <Column style={{ marginLeft: 36 }}>
                 {comment.Replies.map((reply) => (
@@ -42,6 +52,7 @@ function CommentWrapper(props: {
                         toggleReplyInput={() => toggleReplyInput(reply.id)}
                         removeComment={removeComment}
                         editComment={editComment}
+                        updateCommentReactions={updateCommentReactions}
                     />
                 ))}
                 {replyInputOpen && (

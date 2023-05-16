@@ -8,6 +8,7 @@ import DraftText from '@components/draft-js/DraftText'
 import DeleteCommentModal from '@components/modals/DeleteCommentModal'
 import { AccountContext } from '@contexts/AccountContext'
 import { dateCreated, timeSinceCreated } from '@src/Helpers'
+import LikeModal from '@src/components/modals/LikeModal'
 import styles from '@styles/components/cards/Comments/CommentCard.module.scss'
 import {
     DeleteIcon,
@@ -27,13 +28,26 @@ function CommentCard(props: {
     toggleReplyInput: () => void
     removeComment: (comment: any) => void
     editComment: (comment: any, newText: string) => void
+    updateCommentReactions: (commentId: number, reactionType: string, increment: boolean) => void
 }): JSX.Element {
-    const { comment, highlighted, toggleReplyInput, removeComment, editComment } = props
+    const {
+        comment,
+        highlighted,
+        toggleReplyInput,
+        removeComment,
+        editComment,
+        updateCommentReactions,
+    } = props
     const {
         id,
         itemId,
         text,
         state,
+        totalLikes,
+        totalReposts,
+        totalRatings,
+        totalLinks,
+        totalGlassBeadGames,
         accountLike,
         accountRating,
         accountLink,
@@ -157,7 +171,7 @@ function CommentCard(props: {
                         onClick={() => setLikeModalOpen(true)}
                     >
                         <LikeIcon />
-                        <p>0</p>
+                        <p>{totalLikes}</p>
                     </button>
                     <button
                         type='button'
@@ -177,21 +191,22 @@ function CommentCard(props: {
                     </button>
                 </Row>
             )}
-            {/* {likeModalOpen && (
+            {likeModalOpen && (
                 <LikeModal
-                    postData={postData}
-                    setPostData={setPostData}
+                    itemType='comment'
+                    itemData={comment}
+                    updateItem={(increment) => updateCommentReactions(comment, 'Like', increment)}
                     close={() => setLikeModalOpen(false)}
                 />
             )}
-            {ratingModalOpen && (
+            {/* {ratingModalOpen && (
                 <RatingModal
                     postData={postData}
                     setPostData={setPostData}
                     close={() => setRatingModalOpen(false)}
                 />
-            )}
-            {linkModalOpen && (
+            )} */}
+            {/* {linkModalOpen && (
                 <LinkModal
                     type='post'
                     location={location}
