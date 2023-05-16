@@ -13,11 +13,13 @@ import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 function LikeModal(props: {
+    itemType: 'post' | 'comment'
+    itemData: any
+    updateItem: (addingLike: boolean) => void
     close: () => void
-    postData: any
-    setPostData: (payload: any) => void
 }): JSX.Element {
-    const { close, postData, setPostData } = props
+    const { itemType, itemData, updateItem, close } = props
+    const { id, accountLike } = itemData
     const { loggedIn, accountData, setLogInModalOpen, setAlertMessage, setAlertModalOpen } =
         useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
@@ -32,7 +34,7 @@ function LikeModal(props: {
 
     function getLikes() {
         axios
-            .get(`${config.apiURL}/post-likes?postId=${postData.id}`)
+            .get(`${config.apiURL}/likes?itemType=${itemType}&itemId=${id}`)
             .then((res) => {
                 setLikes(res.data)
                 setLoading(false)
@@ -42,32 +44,21 @@ function LikeModal(props: {
 
     function toggleLike() {
         setResponseLoading(true)
-        const addingLike = !postData.accountLike
-        const accessToken = cookies.get('accessToken')
-        if (accessToken) {
-            const data = { postId: postData.id } as any
-            if (addingLike) {
-                data.accountHandle = accountData.handle
-                data.accountName = accountData.name
-                data.spaceId = window.location.pathname.includes('/s/') ? spaceData.id : null
-            }
-            const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
-            axios
-                .post(`${config.apiURL}/${addingLike ? 'add' : 'remove'}-like`, data, authHeader)
-                .then(() => {
-                    setPostData({
-                        ...postData,
-                        totalLikes: postData.totalLikes + (addingLike ? 1 : -1),
-                        accountLike: addingLike,
-                    })
-                    close()
-                })
-                .catch((error) => console.log(error))
-        } else {
-            close()
-            setAlertMessage(`Log in to ${!addingLike && 'un'}like posts`)
-            setAlertModalOpen(true)
+        const data = { itemType, itemId: id } as any
+        if (itemType === 'comment') data.parentItemId = itemData.itemId
+        if (!accountLike) {
+            data.accountHandle = accountData.handle
+            data.accountName = accountData.name
+            data.spaceId = window.location.pathname.includes('/s/') ? spaceData.id : null
         }
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .post(`${config.apiURL}/${!accountLike ? 'add' : 'remove'}-like`, data, options)
+            .then(() => {
+                updateItem(!accountLike)
+                close()
+            })
+            .catch((error) => console.log(error))
     }
 
     useEffect(() => getLikes(), [])
@@ -95,11 +86,11 @@ function LikeModal(props: {
                     )}
                     {loggedIn ? (
                         <Button
-                            text={`${postData.accountLike ? 'Remove' : 'Add'} like`}
-                            color={postData.accountLike ? 'red' : 'blue'}
+                            text={`${accountLike ? 'Remove' : 'Add'} like`}
+                            color={accountLike ? 'red' : 'blue'}
                             style={{ marginTop: likes.length ? 20 : 0 }}
                             loading={responseLoading}
-                            onClick={() => toggleLike()}
+                            onClick={toggleLike}
                         />
                     ) : (
                         <Row centerY style={{ marginTop: likes.length ? 20 : 0 }}>
@@ -112,7 +103,7 @@ function LikeModal(props: {
                                     close()
                                 }}
                             />
-                            <p>to like posts</p>
+                            <p>to like {itemType}s</p>
                         </Row>
                     )}
                 </Column>

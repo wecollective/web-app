@@ -1,8 +1,8 @@
 import Column from '@components/Column'
 import Row from '@components/Row'
 import DraftText from '@components/draft-js/DraftText'
-import LikeModal from '@src/components/cards/PostCard/Modals/LikeModal'
 import LinkModal from '@src/components/cards/PostCard/Modals/LinkModal'
+import LikeModal from '@src/components/modals/LikeModal'
 import styles from '@styles/components/cards/PostCard/CardCard.module.scss'
 import { LikeIcon, LinkIcon, RepostIcon } from '@svgs/all'
 import React, { useState } from 'react'
@@ -104,8 +104,15 @@ function CardCard(props: { postData: any; setPostData: (data: any) => void }): J
             </Column>
             {likeModalOpen && (
                 <LikeModal
-                    postData={card}
-                    setPostData={setCardData}
+                    itemType='post'
+                    itemData={card}
+                    updateItem={(addingLike) => {
+                        setCardData({
+                            ...card,
+                            totalLikes: card.totalLikes + (addingLike ? 1 : -1),
+                            accountLike: addingLike,
+                        })
+                    }}
                     close={() => setLikeModalOpen(false)}
                 />
             )}

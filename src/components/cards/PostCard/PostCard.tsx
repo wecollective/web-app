@@ -1,19 +1,20 @@
 import CloseOnClickOutside from '@components/CloseOnClickOutside'
 import Column from '@components/Column'
-import DraftText from '@components/draft-js/DraftText'
 import ImageTitle from '@components/ImageTitle'
-import DeletePostModal from '@components/modals/DeletePostModal'
 import Row from '@components/Row'
 import StatButton from '@components/StatButton'
+import DraftText from '@components/draft-js/DraftText'
+import DeletePostModal from '@components/modals/DeletePostModal'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
+import config from '@src/Config'
+import { dateCreated, statTitle, timeSinceCreated, timeSinceCreatedShort } from '@src/Helpers'
 import Comments from '@src/components/cards/Comments/Comments'
 import AudioCard from '@src/components/cards/PostCard/AudioCard'
 import CardCard from '@src/components/cards/PostCard/CardCard'
 import EventCard from '@src/components/cards/PostCard/EventCard'
 import GlassBeadGameCard from '@src/components/cards/PostCard/GlassBeadGameCard'
 import ImagesCard from '@src/components/cards/PostCard/ImagesCard'
-import LikeModal from '@src/components/cards/PostCard/Modals/LikeModal'
 import LinkModal from '@src/components/cards/PostCard/Modals/LinkModal'
 import RatingModal from '@src/components/cards/PostCard/Modals/RatingModal'
 import RepostModal from '@src/components/cards/PostCard/Modals/RepostModal'
@@ -21,8 +22,7 @@ import PollCard from '@src/components/cards/PostCard/PollCard'
 import PostSpaces from '@src/components/cards/PostCard/PostSpaces'
 import UrlCard from '@src/components/cards/PostCard/UrlCard'
 import EditPostModal from '@src/components/modals/EditPostModal'
-import config from '@src/Config'
-import { dateCreated, statTitle, timeSinceCreated, timeSinceCreatedShort } from '@src/Helpers'
+import LikeModal from '@src/components/modals/LikeModal'
 import {
     CommentIcon,
     DeleteIcon,
@@ -370,8 +370,15 @@ function PostCard(props: {
                     )} */}
                     {likeModalOpen && (
                         <LikeModal
-                            postData={postData}
-                            setPostData={setPostData}
+                            itemType='post'
+                            itemData={postData}
+                            updateItem={(addingLike) => {
+                                setPostData({
+                                    ...postData,
+                                    totalLikes: postData.totalLikes + (addingLike ? 1 : -1),
+                                    accountLike: addingLike,
+                                })
+                            }}
                             close={() => setLikeModalOpen(false)}
                         />
                     )}

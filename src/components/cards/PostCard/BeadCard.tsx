@@ -2,19 +2,19 @@
 import CloseButton from '@components/CloseButton'
 import CloseOnClickOutside from '@components/CloseOnClickOutside'
 import Column from '@components/Column'
-import DraftText from '@components/draft-js/DraftText'
 import ImageTitle from '@components/ImageTitle'
-import ImageModal from '@components/modals/ImageModal'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
 import StatButton from '@components/StatButton'
+import DraftText from '@components/draft-js/DraftText'
+import ImageModal from '@components/modals/ImageModal'
 import { AccountContext } from '@contexts/AccountContext'
+import { statTitle } from '@src/Helpers'
 import AudioCard from '@src/components/cards/PostCard/AudioCard'
-import LikeModal from '@src/components/cards/PostCard/Modals/LikeModal'
 import LinkModal from '@src/components/cards/PostCard/Modals/LinkModal'
 import UrlPreview from '@src/components/cards/PostCard/UrlCard'
 import EditPostModal from '@src/components/modals/EditPostModal'
-import { statTitle } from '@src/Helpers'
+import LikeModal from '@src/components/modals/LikeModal'
 import styles from '@styles/components/cards/PostCard/BeadCard.module.scss'
 import { CommentIcon, EditIcon, LikeIcon, LinkIcon, VerticalEllipsisIcon } from '@svgs/all'
 import * as d3 from 'd3'
@@ -281,9 +281,16 @@ function BeadCard(props: {
             )}
             {likeModalOpen && (
                 <LikeModal
+                    itemType='post'
+                    itemData={bead}
+                    updateItem={(addingLike) => {
+                        setBead({
+                            ...bead,
+                            totalLikes: bead.totalLikes + (addingLike ? 1 : -1),
+                            accountLike: addingLike,
+                        })
+                    }}
                     close={() => setLikeModalOpen(false)}
-                    postData={bead}
-                    setPostData={setBead}
                 />
             )}
             {linkModalOpen && (
