@@ -29,8 +29,19 @@ function CommentCard(props: {
     editComment: (comment: any, newText: string) => void
 }): JSX.Element {
     const { comment, highlighted, toggleReplyInput, removeComment, editComment } = props
-    const { text, state, accountLike, accountRating, accountLink, createdAt, updatedAt, Creator } =
-        comment
+    const {
+        id,
+        itemId,
+        text,
+        state,
+        accountLike,
+        accountRating,
+        accountLink,
+        createdAt,
+        updatedAt,
+        Creator,
+    } = comment
+
     const { loggedIn, accountData } = useContext(AccountContext)
     const [menuOpen, setMenuOpen] = useState(false)
     const [editCommentModalOpen, setEditCommentModalOpen] = useState(false)
@@ -53,15 +64,48 @@ function CommentCard(props: {
                     <FlagImage type='user' size={30} imagePath={Creator.flagImagePath} />
                 </Link>
                 <Column className={styles.content}>
-                    {isOwnComment && (
-                        <>
-                            <button
-                                type='button'
-                                className={styles.menuButton}
-                                onClick={() => setMenuOpen(!menuOpen)}
+                    <Row spaceBetween className={styles.header}>
+                        <Row>
+                            {state === 'account-deleted' ? (
+                                <p className='grey' style={{ marginRight: 5 }}>
+                                    [Account deleted]
+                                </p>
+                            ) : (
+                                <Link to={`/u/${Creator.handle}`} style={{ marginRight: 5 }}>
+                                    <p style={{ fontWeight: 600 }}>{Creator.name}</p>
+                                </Link>
+                            )}
+                            <p className='grey' title={dateCreated(createdAt)}>
+                                {`• ${timeSinceCreated(createdAt)}`}
+                            </p>
+                            {createdAt !== updatedAt && (
+                                <p
+                                    className='grey'
+                                    title={`Edited at ${dateCreated(updatedAt)}`}
+                                    style={{ paddingLeft: 5 }}
+                                >
+                                    *
+                                </p>
+                            )}
+                        </Row>
+                        <Row>
+                            <Link
+                                to={`/p/${itemId}?commentId=${id}`}
+                                className={styles.id}
+                                title='Open post page'
                             >
-                                <VerticalEllipsisIcon />
-                            </button>
+                                <p className='grey'>ID:</p>
+                                <p style={{ marginLeft: 5 }}>{id}</p>
+                            </Link>
+                            {isOwnComment && (
+                                <button
+                                    type='button'
+                                    className={styles.menuButton}
+                                    onClick={() => setMenuOpen(!menuOpen)}
+                                >
+                                    <VerticalEllipsisIcon />
+                                </button>
+                            )}
                             {menuOpen && (
                                 <CloseOnClickOutside onClick={() => setMenuOpen(false)}>
                                     <Column className={styles.menu}>
@@ -71,43 +115,20 @@ function CommentCard(props: {
                                                 onClick={() => setEditCommentModalOpen(true)}
                                             >
                                                 <EditIcon />
-                                                Edit text
+                                                Edit comment
                                             </button>
                                             <button
                                                 type='button'
                                                 onClick={() => setDeleteCommentModalOpen(true)}
                                             >
                                                 <DeleteIcon />
-                                                Delete post
+                                                Delete comment
                                             </button>
                                         </Column>
                                     </Column>
                                 </CloseOnClickOutside>
                             )}
-                        </>
-                    )}
-                    <Row style={{ marginBottom: 2 }}>
-                        {state === 'account-deleted' ? (
-                            <p className='grey' style={{ marginRight: 5 }}>
-                                [Account deleted]
-                            </p>
-                        ) : (
-                            <Link to={`/u/${Creator.handle}`} style={{ marginRight: 5 }}>
-                                <p style={{ fontWeight: 600 }}>{Creator.name}</p>
-                            </Link>
-                        )}
-                        <p className='grey' title={dateCreated(createdAt)}>
-                            {`• ${timeSinceCreated(createdAt)}`}
-                        </p>
-                        {createdAt !== updatedAt && (
-                            <p
-                                className='grey'
-                                title={`Edited at ${dateCreated(updatedAt)}`}
-                                style={{ paddingLeft: 5 }}
-                            >
-                                *
-                            </p>
-                        )}
+                        </Row>
                     </Row>
                     {state !== 'account-deleted' && (
                         <ShowMoreLess height={250} gradientColor='grey'>

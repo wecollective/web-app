@@ -12,55 +12,66 @@
         background-color: $grey1;
         width: calc(100% - 36px);
 
-        .menuButton {
-            all: unset;
-            cursor: pointer;
-            position: absolute;
-            right: 10px;
+        .header {
+            margin-bottom: 2px;
 
-            svg {
-                color: $grey4;
-                height: 18px;
-                transition: color 0.3s;
+            .id {
+                display: flex;
+                align-items: center;
             }
 
-            &:hover {
-                svg {
-                    color: $grey6;
-                }
-            }
-        }
-
-        .menu {
-            position: absolute;
-            top: 0;
-            right: 20px;
-            background-color: white;
-            box-shadow: 0 0 7px 0 rgba(black, 0.15);
-            border-radius: 5px;
-            padding: 10px;
-            z-index: 5;
-
-            button {
+            .menuButton {
                 all: unset;
                 cursor: pointer;
                 display: flex;
                 align-items: center;
+                padding-left: 8px;
+                flex-shrink: 0;
 
-                &:not(:last-child) {
-                    margin-bottom: 10px;
-                }
-
-                &:hover > svg {
-                    color: $grey6;
-                }
-
-                > svg {
-                    width: 20px;
-                    height: 20px;
-                    margin-right: 8px;
-                    color: $grey5;
+                svg {
+                    color: $grey4;
+                    height: 18px;
                     transition: color 0.3s;
+                }
+
+                &:hover {
+                    svg {
+                        color: $grey6;
+                    }
+                }
+            }
+
+            .menu {
+                position: absolute;
+                top: 30px;
+                right: 10px;
+                background-color: white;
+                box-shadow: 0 0 7px 0 rgba(black, 0.15);
+                border-radius: 5px;
+                padding: 10px;
+                z-index: 5;
+
+                button {
+                    all: unset;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+
+                    &:not(:last-child) {
+                        margin-bottom: 10px;
+                    }
+
+                    &:hover > svg {
+                        color: $grey6;
+                    }
+
+                    > svg {
+                        width: 18px;
+                        height: 18px;
+                        margin-right: 8px;
+                        color: $grey5;
+                        transition: color 0.3s;
+                    }
                 }
             }
         }
