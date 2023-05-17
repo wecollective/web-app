@@ -29,6 +29,8 @@ function TimeGraph(props: {
     // todo: put build step in function or seperate useeffect to seperate from canvas build step
     useEffect(() => {
         // get all time points
+        // todo: use ids to ensure duplication not present (currently happening if removed votes have slightly different time stamp to updated votes)
+        // const times = [{ id: 0, time: new Date(startTime).getTime() }]
         const times = [new Date(startTime).getTime()]
         const votes = [] as any[]
         answers.forEach((answer) => {

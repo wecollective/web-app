@@ -15,14 +15,14 @@ import CardCard from '@src/components/cards/PostCard/CardCard'
 import EventCard from '@src/components/cards/PostCard/EventCard'
 import GlassBeadGameCard from '@src/components/cards/PostCard/GlassBeadGameCard'
 import ImagesCard from '@src/components/cards/PostCard/ImagesCard'
-import LinkModal from '@src/components/cards/PostCard/Modals/LinkModal'
-import RatingModal from '@src/components/cards/PostCard/Modals/RatingModal'
-import RepostModal from '@src/components/cards/PostCard/Modals/RepostModal'
 import PollCard from '@src/components/cards/PostCard/PollCard'
 import PostSpaces from '@src/components/cards/PostCard/PostSpaces'
 import UrlCard from '@src/components/cards/PostCard/UrlCard'
 import EditPostModal from '@src/components/modals/EditPostModal'
 import LikeModal from '@src/components/modals/LikeModal'
+import LinkModal from '@src/components/modals/LinkModal'
+import RatingModal from '@src/components/modals/RatingModal'
+import RepostModal from '@src/components/modals/RepostModal'
 import {
     CommentIcon,
     DeleteIcon,

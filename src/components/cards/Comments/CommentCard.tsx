@@ -8,8 +8,8 @@ import DraftText from '@components/draft-js/DraftText'
 import DeleteCommentModal from '@components/modals/DeleteCommentModal'
 import { AccountContext } from '@contexts/AccountContext'
 import { dateCreated, timeSinceCreated } from '@src/Helpers'
-import RatingModal from '@src/components/cards/PostCard/Modals/RatingModal'
 import LikeModal from '@src/components/modals/LikeModal'
+import RatingModal from '@src/components/modals/RatingModal'
 import styles from '@styles/components/cards/Comments/CommentCard.module.scss'
 import {
     DeleteIcon,
