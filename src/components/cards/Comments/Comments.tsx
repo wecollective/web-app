@@ -95,7 +95,7 @@ function Comments(props: {
         setComments(newComments)
     }
 
-    function updateCommentReactions(comment, reactionType, increment) {
+    function updateCommentReactions(comment, reactionType, increment, rating?) {
         console.log(comment, reactionType, increment)
         const { id, parentCommentId } = comment
         const newComments = [...comments]
@@ -109,6 +109,10 @@ function Comments(props: {
         if (increment) selectedComment[`total${reactionType}s`] += 1
         else selectedComment[`total${reactionType}s`] -= 1
         selectedComment[`account${reactionType}`] = increment
+        if (reactionType === 'Rating') {
+            selectedComment.totalRatingPoints =
+                +selectedComment.totalRatingPoints + (increment ? rating : -rating)
+        }
         setComments(newComments)
     }
 

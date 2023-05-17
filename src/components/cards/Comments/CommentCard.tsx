@@ -8,6 +8,7 @@ import DraftText from '@components/draft-js/DraftText'
 import DeleteCommentModal from '@components/modals/DeleteCommentModal'
 import { AccountContext } from '@contexts/AccountContext'
 import { dateCreated, timeSinceCreated } from '@src/Helpers'
+import RatingModal from '@src/components/cards/PostCard/Modals/RatingModal'
 import LikeModal from '@src/components/modals/LikeModal'
 import styles from '@styles/components/cards/Comments/CommentCard.module.scss'
 import {
@@ -28,7 +29,12 @@ function CommentCard(props: {
     toggleReplyInput: () => void
     removeComment: (comment: any) => void
     editComment: (comment: any, newText: string) => void
-    updateCommentReactions: (commentId: number, reactionType: string, increment: boolean) => void
+    updateCommentReactions: (
+        commentId: number,
+        reactionType: string,
+        increment: boolean,
+        rating?: number
+    ) => void
 }): JSX.Element {
     const {
         comment,
@@ -156,7 +162,7 @@ function CommentCard(props: {
                     )}
                 </Column>
             </Row>
-            {loggedIn && state === 'visible' && (
+            {state === 'visible' && (
                 <Row className={styles.buttons}>
                     <button
                         type='button'
@@ -167,7 +173,7 @@ function CommentCard(props: {
                     </button>
                     <button
                         type='button'
-                        className={accountLike && styles.blue}
+                        className={accountLike ? styles.blue : ''}
                         onClick={() => setLikeModalOpen(true)}
                     >
                         <LikeIcon />
@@ -175,15 +181,15 @@ function CommentCard(props: {
                     </button>
                     <button
                         type='button'
-                        className={accountRating && styles.blue}
+                        className={accountRating ? styles.blue : ''}
                         onClick={() => setRatingModalOpen(true)}
                     >
                         <StarIcon />
-                        <p>0</p>
+                        <p>{totalRatings}</p>
                     </button>
                     <button
                         type='button'
-                        className={accountLink && styles.blue}
+                        className={accountLink ? styles.blue : ''}
                         onClick={() => setLinkModalOpen(true)}
                     >
                         <LinkIcon />
@@ -195,17 +201,20 @@ function CommentCard(props: {
                 <LikeModal
                     itemType='comment'
                     itemData={comment}
-                    updateItem={(increment) => updateCommentReactions(comment, 'Like', increment)}
+                    updateItem={() => updateCommentReactions(comment, 'Like', !accountLike)}
                     close={() => setLikeModalOpen(false)}
                 />
             )}
-            {/* {ratingModalOpen && (
+            {ratingModalOpen && (
                 <RatingModal
-                    postData={postData}
-                    setPostData={setPostData}
+                    itemType='comment'
+                    itemData={comment}
+                    updateItem={(rating) =>
+                        updateCommentReactions(comment, 'Rating', !accountRating, rating)
+                    }
                     close={() => setRatingModalOpen(false)}
                 />
-            )} */}
+            )}
             {/* {linkModalOpen && (
                 <LinkModal
                     type='post'

@@ -283,11 +283,11 @@ function BeadCard(props: {
                 <LikeModal
                     itemType='post'
                     itemData={bead}
-                    updateItem={(addingLike) => {
+                    updateItem={() => {
                         setBead({
                             ...bead,
-                            totalLikes: bead.totalLikes + (addingLike ? 1 : -1),
-                            accountLike: addingLike,
+                            totalLikes: bead.totalLikes + (bead.accountLike ? -1 : 1),
+                            accountLike: !bead.accountLike,
                         })
                     }}
                     close={() => setLikeModalOpen(false)}

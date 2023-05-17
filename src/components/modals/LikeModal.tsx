@@ -15,7 +15,7 @@ import Cookies from 'universal-cookie'
 function LikeModal(props: {
     itemType: 'post' | 'comment'
     itemData: any
-    updateItem: (addingLike: boolean) => void
+    updateItem: () => void
     close: () => void
 }): JSX.Element {
     const { itemType, itemData, updateItem, close } = props
@@ -55,7 +55,7 @@ function LikeModal(props: {
         axios
             .post(`${config.apiURL}/${!accountLike ? 'add' : 'remove'}-like`, data, options)
             .then(() => {
-                updateItem(!accountLike)
+                updateItem()
                 close()
             })
             .catch((error) => console.log(error))

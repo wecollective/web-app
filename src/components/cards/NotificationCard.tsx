@@ -312,6 +312,17 @@ function NotificationCard(props: {
                         </Content>
                     )}
 
+                    {type === 'comment-like' && (
+                        <Content typeIcon={<ThumbsUpIcon />}>
+                            <ImageNameLink type='user' data={triggerUser} />
+                            <p>liked your</p>
+                            <TextLink text='comment' link={`/p/${postId}?commentId=${commentId}`} />
+                            {triggerSpace && <p>in</p>}
+                            {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
+                            <CreatedAt date={createdAt} />
+                        </Content>
+                    )}
+
                     {type === 'post-comment' && (
                         <Content typeIcon={<CommentIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
@@ -339,6 +350,17 @@ function NotificationCard(props: {
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>rated your</p>
                             <TextLink text='post' link={`/p/${postId}`} />
+                            {triggerSpace && <p>in</p>}
+                            {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
+                            <CreatedAt date={createdAt} />
+                        </Content>
+                    )}
+
+                    {type === 'comment-rating' && (
+                        <Content typeIcon={<ThumbsUpIcon />}>
+                            <ImageNameLink type='user' data={triggerUser} />
+                            <p>rated your</p>
+                            <TextLink text='comment' link={`/p/${postId}?commentId=${commentId}`} />
                             {triggerSpace && <p>in</p>}
                             {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
                             <CreatedAt date={createdAt} />

@@ -106,11 +106,11 @@ function CardCard(props: { postData: any; setPostData: (data: any) => void }): J
                 <LikeModal
                     itemType='post'
                     itemData={card}
-                    updateItem={(addingLike) => {
+                    updateItem={() => {
                         setCardData({
                             ...card,
-                            totalLikes: card.totalLikes + (addingLike ? 1 : -1),
-                            accountLike: addingLike,
+                            totalLikes: card.totalLikes + (card.accountLike ? -1 : 1),
+                            accountLike: !card.accountLike,
                         })
                     }}
                     close={() => setLikeModalOpen(false)}

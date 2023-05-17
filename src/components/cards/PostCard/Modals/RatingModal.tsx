@@ -15,11 +15,13 @@ import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 function RatingModal(props: {
+    itemType: 'post' | 'comment'
+    itemData: any
+    updateItem: (rating: number) => void
     close: () => void
-    postData: any
-    setPostData: (payload: any) => void
 }): JSX.Element {
-    const { close, postData, setPostData } = props
+    const { itemType, itemData, updateItem, close } = props
+    const { id, accountRating, totalRatingPoints } = itemData
     const { loggedIn, accountData, setLogInModalOpen, setAlertMessage, setAlertModalOpen } =
         useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
@@ -31,12 +33,12 @@ function RatingModal(props: {
     const headerText = ratings.length
         ? `${ratings.length} rating${pluralise(ratings.length)}`
         : 'No ratings yet...'
-    const averageScore = `${(postData.totalRatingPoints / ratings.length).toFixed(2)}%`
+    const averageScore = `${(totalRatingPoints / ratings.length).toFixed(2)}%`
     const mobileView = document.documentElement.clientWidth < 900
 
     function getRatings() {
         axios
-            .get(`${config.apiURL}/post-ratings?postId=${postData.id}`)
+            .get(`${config.apiURL}/ratings?itemType=${itemType}&itemId=${id}`)
             .then((res) => {
                 setRatings(res.data)
                 setLoading(false)
@@ -44,66 +46,27 @@ function RatingModal(props: {
             .catch((error) => console.log(error))
     }
 
-    function addRating() {
+    function toggleRating() {
         setResponseLoading(true)
-        const accessToken = cookies.get('accessToken')
-        if (accessToken) {
-            const data = {
-                accountHandle: accountData.handle,
-                accountName: accountData.name,
-                postId: postData.id,
-                spaceId: window.location.pathname.includes('/s/') ? spaceData.id : null,
-                newRating,
-            }
-            const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
-            axios
-                .post(`${config.apiURL}/add-rating`, data, authHeader)
-                .then(() => {
-                    setPostData({
-                        ...postData,
-                        totalReactions: postData.totalReactions + 1,
-                        totalRatings: postData.totalRatings + 1,
-                        totalRatingPoints: postData.totalRatingPoints + newRating,
-                        accountRating: true,
-                    })
-                    close()
-                })
-                .catch((error) => console.log(error))
-        } else {
-            close()
-            setAlertMessage('Log in to rate posts')
-            setAlertModalOpen(true)
+        const data = { itemType, itemId: id } as any
+        if (itemType === 'comment') data.parentItemId = itemData.itemId
+        if (!accountRating) {
+            data.accountHandle = accountData.handle
+            data.accountName = accountData.name
+            data.spaceId = window.location.pathname.includes('/s/') ? spaceData.id : null
+            data.newRating = newRating
         }
-    }
-
-    function removeRating() {
-        setResponseLoading(true)
-        const accessToken = cookies.get('accessToken')
-        if (accessToken) {
-            const data = {
-                postId: postData.id,
-                spaceId: window.location.pathname.includes('/s/') ? spaceData.id : null,
-            }
-            const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
-            axios
-                .post(`${config.apiURL}/remove-rating`, data, authHeader)
-                .then(() => {
-                    const removedRating = ratings.find((r) => r.Creator.id === accountData.id)
-                    setPostData({
-                        ...postData,
-                        totalReactions: postData.totalReactions - 1,
-                        totalRatings: postData.totalRatings - 1,
-                        totalRatingPoints: postData.totalRatingPoints - +removedRating.value,
-                        accountRating: false,
-                    })
-                    close()
-                })
-                .catch((error) => console.log(error))
-        } else {
-            close()
-            setAlertMessage('Log in to rate posts')
-            setAlertModalOpen(true)
-        }
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .post(`${config.apiURL}/${!accountRating ? 'add' : 'remove'}-rating`, data, options)
+            .then(() => {
+                const rating = accountRating
+                    ? +ratings.find((r) => r.Creator.id === accountData.id).value
+                    : +newRating
+                updateItem(rating)
+                close()
+            })
+            .catch((error) => console.log(error))
     }
 
     useEffect(() => getRatings(), [])
@@ -147,7 +110,7 @@ function RatingModal(props: {
                     )}
                     {loggedIn ? (
                         <Column>
-                            {!postData.accountRating && (
+                            {!itemData.accountRating && (
                                 <Row centerY style={{ marginBottom: 20 }}>
                                     <Input
                                         type='text'
@@ -159,11 +122,11 @@ function RatingModal(props: {
                                 </Row>
                             )}
                             <Button
-                                text={`${postData.accountRating ? 'Remove' : 'Add'} rating`}
-                                color={postData.accountRating ? 'red' : 'blue'}
+                                text={`${accountRating ? 'Remove' : 'Add'} rating`}
+                                color={accountRating ? 'red' : 'blue'}
                                 disabled={newRating > 100}
                                 loading={responseLoading}
-                                onClick={postData.accountRating ? removeRating : addRating}
+                                onClick={toggleRating}
                             />
                         </Column>
                     ) : (
@@ -177,7 +140,7 @@ function RatingModal(props: {
                                     close()
                                 }}
                             />
-                            <p>to rate posts</p>
+                            <p>to rate {itemType}s</p>
                         </Row>
                     )}
                 </Column>

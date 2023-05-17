@@ -67,6 +67,7 @@ function PostCard(props: {
         totalComments,
         totalLikes,
         totalRatings,
+        totalRatingPoints,
         totalReposts,
         totalLinks,
         accountLike,
@@ -159,7 +160,10 @@ function PostCard(props: {
     //     }
     // }
 
-    useEffect(() => setPostData(post), [post])
+    useEffect(() => {
+        console.log(post)
+        setPostData(post)
+    }, [post])
 
     return (
         <Column
@@ -372,13 +376,13 @@ function PostCard(props: {
                         <LikeModal
                             itemType='post'
                             itemData={postData}
-                            updateItem={(addingLike) => {
+                            updateItem={() =>
                                 setPostData({
                                     ...postData,
-                                    totalLikes: postData.totalLikes + (addingLike ? 1 : -1),
-                                    accountLike: addingLike,
+                                    totalLikes: totalLikes + (accountLike ? -1 : 1),
+                                    accountLike: !accountLike,
                                 })
-                            }}
+                            }
                             close={() => setLikeModalOpen(false)}
                         />
                     )}
@@ -391,8 +395,17 @@ function PostCard(props: {
                     )}
                     {ratingModalOpen && (
                         <RatingModal
-                            postData={postData}
-                            setPostData={setPostData}
+                            itemType='post'
+                            itemData={postData}
+                            updateItem={(rating) => {
+                                setPostData({
+                                    ...postData,
+                                    totalRatings: totalRatings + (accountRating ? -1 : 1),
+                                    totalRatingPoints:
+                                        +totalRatingPoints + (accountRating ? -rating : rating),
+                                    accountRating: !accountRating,
+                                })
+                            }}
                             close={() => setRatingModalOpen(false)}
                         />
                     )}
