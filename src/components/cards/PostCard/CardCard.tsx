@@ -118,11 +118,12 @@ function CardCard(props: { postData: any; setPostData: (data: any) => void }): J
             )}
             {linkModalOpen && (
                 <LinkModal
-                    type='card'
-                    location='space-posts'
-                    postId={postData.id}
-                    postData={card}
-                    setPostData={setCardData}
+                    itemType='post'
+                    itemData={card}
+                    updateItem={(link, state) => {
+                        console.log('link: ', link)
+                        console.log('state: ', state)
+                    }}
                     close={() => setLinkModalOpen(false)}
                 />
             )}

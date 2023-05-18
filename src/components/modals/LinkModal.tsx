@@ -17,14 +17,15 @@ import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 function LinkModal(props: {
-    type: 'post' | 'bead' | 'card'
-    location: string
-    postId?: number // required for beads
-    postData: any
-    setPostData: (payload: any) => void
+    // postId?: number // required for beads
+    itemType: 'post' | 'comment'
+    itemData: any
+    updateItem: (link: any, state: string) => void
     close: () => void
 }): JSX.Element {
-    const { type, location, postId, postData, setPostData, close } = props
+    // const { type, location, postId, postData, setPostData, close } = props
+    const { itemType, itemData, updateItem, close } = props
+    const { id, accountLink } = itemData
     const { loggedIn, accountData, setLogInModalOpen, setAlertMessage, setAlertModalOpen } =
         useContext(AccountContext)
     const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
@@ -36,7 +37,8 @@ function LinkModal(props: {
     const [formData, setFormData] = useState({
         linkTarget: {
             value: '',
-            validate: (v) => (!v || !+v || +v === postData.id ? ['Must be a valid post ID'] : []),
+            validate: (v) =>
+                !v || !+v || +v === itemData.id ? [`Must be a valid ${itemType} ID`] : [],
             ...defaultErrorState,
         },
         linkDescription: {
@@ -52,8 +54,9 @@ function LinkModal(props: {
 
     function getLinks() {
         axios
-            .get(`${config.apiURL}/post-links?postId=${postData.id}`)
+            .get(`${config.apiURL}/links?itemType=${itemType}&itemId=${id}`)
             .then((res) => {
+                console.log('res: ', res)
                 setIncomingLinks(res.data.IncomingLinks)
                 setOutgoingLinks(res.data.OutgoingLinks)
                 setLoading(false)
@@ -65,100 +68,97 @@ function LinkModal(props: {
         setFormData({ ...formData, [name]: { ...formData[name], value, state: 'default' } })
     }
 
-    function findPosts() {
-        switch (location) {
-            case 'space-posts':
-                return [...spacePosts]
-            case 'user-posts':
-                return [...userPosts]
-            case 'post-page':
-                return [{ ...postData }]
-            default:
-                return []
-        }
-    }
+    // function findPosts() {
+    //     switch (location) {
+    //         case 'space-posts':
+    //             return [...spacePosts]
+    //         case 'user-posts':
+    //             return [...userPosts]
+    //         case 'post-page':
+    //             return [{ ...postData }]
+    //         default:
+    //             return []
+    //     }
+    // }
 
     function addLink() {
         setResponseLoading(true)
-        const accessToken = cookies.get('accessToken')
-        if (!accessToken) {
-            close()
-            setAlertMessage('Log in to link posts')
-            setAlertModalOpen(true)
-        } else if (allValid(formData, setFormData)) {
+        if (allValid(formData, setFormData)) {
             const data = {
                 accountHandle: accountData.handle,
                 accountName: accountData.name,
                 spaceId: window.location.pathname.includes('/s/') ? spaceData.id : null,
                 description: linkDescription.value,
-                itemAId: postData.id,
+                itemAId: itemData.id,
                 itemBId: +linkTarget.value,
             }
-            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
             axios
                 .post(`${config.apiURL}/add-link`, data, options)
                 .then((res) => {
-                    // update link state
-                    setOutgoingLinks((links) => [
-                        ...links,
-                        {
-                            id: res.data.link.id,
-                            Creator: accountData,
-                            PostB: res.data.itemB,
-                        },
-                    ])
-                    // update post state
-                    const newPosts = findPosts()
-                    const post = newPosts.find((p) => p.id === (postId || postData.id))
-                    if (type === 'post') {
-                        post.totalLinks += 1
-                        post.accountLink = true
-                    }
-                    if (type === 'bead') {
-                        const bead = post.Beads.find((p) => p.id === postData.id)
-                        bead.totalLinks += 1
-                        bead.accountLink = true
-                    }
-                    if (type === 'card') {
-                        const card = post.CardSides.find((p) => p.id === postData.id)
-                        card.totalLinks += 1
-                        card.accountLink = true
-                    }
-                    // update linked post if in state
-                    const linkedPost = newPosts.find((p) => p.id === +linkTarget.value)
-                    if (linkedPost) {
-                        linkedPost.totalLinks += 1
-                        linkedPost.accountLink = true
-                    }
-                    // update linked bead if in state
-                    newPosts.forEach((p) => {
-                        const linkedBead = p.Beads.find((b) => b.id === +linkTarget.value)
-                        if (linkedBead) {
-                            linkedBead.totalLinks += 1
-                            linkedBead.accountLink = true
-                        }
-                    })
-                    // update linked card if in state
-                    newPosts.forEach((p) => {
-                        const linkedCard = p.CardSides.find((c) => c.id === +linkTarget.value)
-                        if (linkedCard) {
-                            linkedCard.totalLinks += 1
-                            linkedCard.accountLink = true
-                        }
-                    })
-                    if (location === 'space-posts') setSpacePosts(newPosts)
-                    if (location === 'user-posts') setUserPosts(newPosts)
-                    if (location === 'post-page') setPostData(newPosts[0])
-                    // reset form data
-                    setFormData({
-                        linkTarget: { ...formData.linkTarget, value: '', state: 'default' },
-                        linkDescription: {
-                            ...formData.linkDescription,
-                            value: '',
-                            state: 'default',
-                        },
-                    })
+                    console.log(res.data)
                     setResponseLoading(false)
+                    // // update link state
+                    // setOutgoingLinks((links) => [
+                    //     ...links,
+                    //     {
+                    //         id: res.data.link.id,
+                    //         Creator: accountData,
+                    //         PostB: res.data.itemB,
+                    //     },
+                    // ])
+                    // // update post state
+                    // const newPosts = findPosts()
+                    // const post = newPosts.find((p) => p.id === (postId || postData.id))
+                    // if (itemType === 'post') {
+                    //     post.totalLinks += 1
+                    //     post.accountLink = true
+                    // }
+                    // if (itemType === 'bead') {
+                    //     const bead = post.Beads.find((p) => p.id === postData.id)
+                    //     bead.totalLinks += 1
+                    //     bead.accountLink = true
+                    // }
+                    // if (itemType === 'card') {
+                    //     const card = post.CardSides.find((p) => p.id === postData.id)
+                    //     card.totalLinks += 1
+                    //     card.accountLink = true
+                    // }
+                    // // update linked post if in state
+                    // const linkedPost = newPosts.find((p) => p.id === +linkTarget.value)
+                    // if (linkedPost) {
+                    //     linkedPost.totalLinks += 1
+                    //     linkedPost.accountLink = true
+                    // }
+                    // // update linked bead if in state
+                    // newPosts.forEach((p) => {
+                    //     const linkedBead = p.Beads.find((b) => b.id === +linkTarget.value)
+                    //     if (linkedBead) {
+                    //         linkedBead.totalLinks += 1
+                    //         linkedBead.accountLink = true
+                    //     }
+                    // })
+                    // // update linked card if in state
+                    // newPosts.forEach((p) => {
+                    //     const linkedCard = p.CardSides.find((c) => c.id === +linkTarget.value)
+                    //     if (linkedCard) {
+                    //         linkedCard.totalLinks += 1
+                    //         linkedCard.accountLink = true
+                    //     }
+                    // })
+                    // if (location === 'space-posts') setSpacePosts(newPosts)
+                    // if (location === 'user-posts') setUserPosts(newPosts)
+                    // if (location === 'post-page') setPostData(newPosts[0])
+                    // // reset form data
+                    // setFormData({
+                    //     linkTarget: { ...formData.linkTarget, value: '', state: 'default' },
+                    //     linkDescription: {
+                    //         ...formData.linkDescription,
+                    //         value: '',
+                    //         state: 'default',
+                    //     },
+                    // })
+                    // setResponseLoading(false)
                 })
                 .catch((error) => {
                     console.log(error)
@@ -178,69 +178,63 @@ function LinkModal(props: {
     }
 
     function removeLink(direction, linkId, linkedPostId) {
-        const accessToken = cookies.get('accessToken')
-        if (!accessToken) {
-            close()
-            setAlertMessage('Log in to link posts')
-            setAlertModalOpen(true)
-        } else {
-            const data = { linkId, itemAId: postData.id, itemBId: linkedPostId }
-            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
-            axios
-                .post(`${config.apiURL}/remove-link`, data, options)
-                .then(() => {
-                    // update link state
-                    if (direction === 'incoming')
-                        setIncomingLinks((links) => links.filter((l) => l.id !== linkId))
-                    else setOutgoingLinks((links) => links.filter((l) => l.id !== linkId))
-                    // update post state
-                    const newPosts = findPosts()
-                    const post = newPosts.find((p) => p.id === (postId || postData.id))
-                    if (type === 'post') {
-                        post.totalLinks -= 1
-                        const links = direction === 'incoming' ? incomingLinks : outgoingLinks
-                        post.accountLink = !!links.find(
-                            (l) => l.Creator.id === accountData.id && l.id !== linkId
-                        )
-                    }
-                    if (type === 'bead') {
-                        const bead = post.Beads.find((p) => p.id === postData.id)
-                        bead.totalLinks -= 1
-                        bead.accountLink = false
-                    }
-                    if (type === 'card') {
-                        const card = post.CardSides.find((p) => p.id === postData.id)
-                        card.totalLinks -= 1
-                        card.accountLink = false
-                    }
-                    // update linked post if in state
-                    const linkedPost = newPosts.find((p) => p.id === linkedPostId)
-                    if (linkedPost) {
-                        linkedPost.totalLinks -= 1
-                        linkedPost.accountLink = false
-                    }
-                    // update linked beads if in state
-                    newPosts.forEach((p) => {
-                        const linkedBead = p.Beads.find((b) => b.id === linkedPostId)
-                        if (linkedBead) {
-                            linkedBead.totalLinks -= 1
-                            linkedBead.accountLink = false
-                        }
-                    })
-                    // update linked card if in state
-                    newPosts.forEach((p) => {
-                        const linkedCard = p.CardSides.find((c) => c.id === linkedPostId)
-                        if (linkedCard) {
-                            linkedCard.totalLinks -= 1
-                            linkedCard.accountLink = false
-                        }
-                    })
-                    if (location === 'space-posts') setSpacePosts(newPosts)
-                    if (location === 'user-posts') setUserPosts(newPosts)
-                    if (location === 'post-page') setPostData(newPosts[0])
-                })
-                .catch((error) => console.log(error))
-        }
+        const data = { linkId, itemAId: itemData.id, itemBId: linkedPostId }
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .post(`${config.apiURL}/remove-link`, data, options)
+            .then((res) => {
+                console.log(res.data)
+                // // update link state
+                // if (direction === 'incoming')
+                //     setIncomingLinks((links) => links.filter((l) => l.id !== linkId))
+                // else setOutgoingLinks((links) => links.filter((l) => l.id !== linkId))
+                // // update post state
+                // const newPosts = findPosts()
+                // const post = newPosts.find((p) => p.id === (postId || postData.id))
+                // if (type === 'post') {
+                //     post.totalLinks -= 1
+                //     const links = direction === 'incoming' ? incomingLinks : outgoingLinks
+                //     post.accountLink = !!links.find(
+                //         (l) => l.Creator.id === accountData.id && l.id !== linkId
+                //     )
+                // }
+                // if (type === 'bead') {
+                //     const bead = post.Beads.find((p) => p.id === postData.id)
+                //     bead.totalLinks -= 1
+                //     bead.accountLink = false
+                // }
+                // if (type === 'card') {
+                //     const card = post.CardSides.find((p) => p.id === postData.id)
+                //     card.totalLinks -= 1
+                //     card.accountLink = false
+                // }
+                // // update linked post if in state
+                // const linkedPost = newPosts.find((p) => p.id === linkedPostId)
+                // if (linkedPost) {
+                //     linkedPost.totalLinks -= 1
+                //     linkedPost.accountLink = false
+                // }
+                // // update linked beads if in state
+                // newPosts.forEach((p) => {
+                //     const linkedBead = p.Beads.find((b) => b.id === linkedPostId)
+                //     if (linkedBead) {
+                //         linkedBead.totalLinks -= 1
+                //         linkedBead.accountLink = false
+                //     }
+                // })
+                // // update linked card if in state
+                // newPosts.forEach((p) => {
+                //     const linkedCard = p.CardSides.find((c) => c.id === linkedPostId)
+                //     if (linkedCard) {
+                //         linkedCard.totalLinks -= 1
+                //         linkedCard.accountLink = false
+                //     }
+                // })
+                // if (location === 'space-posts') setSpacePosts(newPosts)
+                // if (location === 'user-posts') setUserPosts(newPosts)
+                // if (location === 'post-page') setPostData(newPosts[0])
+            })
+            .catch((error) => console.log(error))
     }
 
     useEffect(() => getLinks(), [])
@@ -367,8 +361,8 @@ function LinkModal(props: {
     )
 }
 
-LinkModal.defaultProps = {
-    postId: null,
-}
+// LinkModal.defaultProps = {
+//     postId: null,
+// }
 
 export default LinkModal

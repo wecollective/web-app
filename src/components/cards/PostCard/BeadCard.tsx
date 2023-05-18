@@ -295,11 +295,12 @@ function BeadCard(props: {
             )}
             {linkModalOpen && (
                 <LinkModal
-                    type='bead'
-                    location={location}
-                    postId={postId}
-                    postData={bead}
-                    setPostData={setBead}
+                    itemType='post'
+                    itemData={bead}
+                    updateItem={(link, state) => {
+                        console.log('link: ', link)
+                        console.log('state: ', state)
+                    }}
                     close={() => setLinkModalOpen(false)}
                 />
             )}

@@ -411,10 +411,12 @@ function PostCard(props: {
                     )}
                     {linkModalOpen && (
                         <LinkModal
-                            type='post'
-                            location={location}
-                            postData={postData}
-                            setPostData={setPostData}
+                            itemType='post'
+                            itemData={postData}
+                            updateItem={(link, state) => {
+                                console.log('link: ', link)
+                                console.log('state: ', state)
+                            }}
                             close={() => setLinkModalOpen(false)}
                         />
                     )}
