@@ -8,8 +8,12 @@ import { LikeIcon, LinkIcon, RepostIcon } from '@svgs/all'
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 
-function CardCard(props: { postData: any; setPostData: (data: any) => void }): JSX.Element {
-    const { postData, setPostData } = props
+function CardCard(props: {
+    postData: any
+    setPostData: (data: any) => void
+    location: string
+}): JSX.Element {
+    const { postData, setPostData, location } = props
     const [cardFocused, setCardFocused] = useState(false)
     const [cardRotating, setCardRotating] = useState(false)
     const [cardFlipped, setCardFlipped] = useState(false)
@@ -118,12 +122,13 @@ function CardCard(props: { postData: any; setPostData: (data: any) => void }): J
             )}
             {linkModalOpen && (
                 <LinkModal
-                    itemType='post'
+                    itemType='card'
                     itemData={card}
-                    updateItem={(link, state) => {
-                        console.log('link: ', link)
-                        console.log('state: ', state)
-                    }}
+                    location={location}
+                    // updateContext={(link, state) => {
+                    //     console.log('link: ', link)
+                    //     console.log('state: ', state)
+                    // }}
                     close={() => setLinkModalOpen(false)}
                 />
             )}

@@ -8,6 +8,7 @@ import Row from '@components/Row'
 import TextLink from '@components/TextLink'
 import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
+import { PostContext } from '@contexts/PostContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import { UserContext } from '@contexts/UserContext'
 import config from '@src/Config'
@@ -18,18 +19,21 @@ import Cookies from 'universal-cookie'
 
 function LinkModal(props: {
     // postId?: number // required for beads
-    itemType: 'post' | 'comment'
+    itemType: 'post' | 'card' | 'bead' | 'comment'
     itemData: any
-    updateItem: (link: any, state: string) => void
+    location: string
+    parentItemId?: number
+    // updateContext: (link: any, state: string) => void
     close: () => void
 }): JSX.Element {
     // const { type, location, postId, postData, setPostData, close } = props
-    const { itemType, itemData, updateItem, close } = props
+    const { itemType, itemData, location, parentItemId, close } = props
     const { id, totalLinks } = itemData
     const { loggedIn, accountData, setLogInModalOpen, setAlertMessage, setAlertModalOpen } =
         useContext(AccountContext)
     const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
     const { userPosts, setUserPosts } = useContext(UserContext)
+    const { setPostData } = useContext(PostContext)
     const [linkData, setLinkData] = useState<any>({
         IncomingPosts: [],
         IncomingComments: [],
@@ -40,7 +44,7 @@ function LinkModal(props: {
     const [loading, setLoading] = useState(true)
     const [addLinkLoading, setAddLinkLoading] = useState(false)
     const [newLinkTargetType, setNewLinkTargetType] = useState('Post')
-    const [newLinkTargetId, setNewLinkTargetId] = useState<any>(null)
+    const [newLinkTargetId, setNewLinkTargetId] = useState('')
     const [newLinkDescription, setNewLinkDescription] = useState('')
     const [targetError, setTargetError] = useState(false)
     const cookies = new Cookies()
@@ -48,9 +52,14 @@ function LinkModal(props: {
     const incomingLinks = IncomingPosts.length > 0 // || IncomingComments.length
     const outgoingLinks = OutgoingPosts.length > 0 // || OutgoingComments.length
 
+    function modelType() {
+        if (['card', 'bead'].includes(itemType)) return 'post'
+        return itemType
+    }
+
     function getLinks() {
         axios
-            .get(`${config.apiURL}/links?itemType=${itemType}&itemId=${id}`)
+            .get(`${config.apiURL}/links?itemType=${modelType()}&itemId=${id}`)
             .then((res) => {
                 console.log('res: ', res)
                 setLinkData(res.data)
@@ -59,30 +68,14 @@ function LinkModal(props: {
             .catch((error) => console.log(error))
     }
 
-    // function findPosts() {
-    //     switch (location) {
-    //         case 'space-posts':
-    //             return [...spacePosts]
-    //         case 'user-posts':
-    //             return [...userPosts]
-    //         case 'post-page':
-    //             return [{ ...postData }]
-    //         default:
-    //             return []
-    //     }
-    // }
-
     function addLink() {
-        // if (allValid(formData, setFormData)) {
-
         setAddLinkLoading(true)
         const data = {
-            sourceType: itemType,
+            sourceType: modelType(),
             sourceId: itemData.id,
-            sourceParentId: null, // todo: set up for comments
+            // sourceParentId: parentItemId, // todo: set up for comments
             targetType: newLinkTargetType.toLowerCase(),
             targetId: newLinkTargetId,
-            targetParentId: null, // todo: set up for comments
             description: newLinkDescription,
             spaceId: window.location.pathname.includes('/s/') ? spaceData.id : null,
             accountHandle: accountData.handle,
@@ -92,7 +85,48 @@ function LinkModal(props: {
         axios
             .post(`${config.apiURL}/add-link`, data, options)
             .then((res) => {
-                console.log(res.data)
+                console.log('add-link res: ', res.data)
+                const { target, link } = res.data
+                // update modal state
+                setNewLinkTargetId('')
+                setNewLinkDescription('')
+                if (newLinkTargetType === 'Post') {
+                    setLinkData({
+                        ...linkData,
+                        OutgoingPosts: [...OutgoingPosts, { ...target, Link: link }],
+                    })
+                }
+                // update context state
+                let newPosts = [] as any
+                if (location === 'space-posts') newPosts = [...spacePosts]
+                if (location === 'user-posts') newPosts = [...userPosts]
+                if (location === 'post-page') newPosts = [{ ...itemData }]
+                console.log('newPosts: ', newPosts)
+                // update source item
+                if (modelType() === 'post') {
+                    let item = newPosts.find((p) => p.id === (parentItemId || itemData.id))
+                    if (itemType === 'bead') item = item.Beads.find((p) => p.id === itemData.id)
+                    if (itemType === 'card') item = item.CardSides.find((p) => p.id === itemData.id)
+                    item.totalLinks += 1
+                    item.accountLink = true
+                }
+                // update target item
+                if (newLinkTargetType === 'Post') {
+                    let item = newPosts.find((p) => p.id === +newLinkTargetId)
+                    if (!item) {
+                        newPosts.forEach((post) => {
+                            const bead = post.Beads.find((b) => b.id === +newLinkTargetId)
+                            const card = post.CardSides.find((c) => c.id === +newLinkTargetId)
+                            if (bead) item = bead
+                            if (card) item = card
+                        })
+                    }
+                    item.totalLinks += 1
+                    item.accountLink = true
+                }
+                if (location === 'space-posts') setSpacePosts(newPosts)
+                if (location === 'user-posts') setUserPosts(newPosts)
+                if (location === 'post-page') setPostData(newPosts[0])
                 setAddLinkLoading(false)
                 // // update link state
                 // setOutgoingLinks((links) => [
@@ -158,12 +192,11 @@ function LinkModal(props: {
             })
             .catch((error) => {
                 console.log(error)
-                if (error.response.status === 404) {
+                if (error.response && error.response.status === 404) {
                     setTargetError(true)
                     setAddLinkLoading(false)
                 }
             })
-        // }
     }
 
     function removeLink(direction, linkId, linkedPostId) {
@@ -228,7 +261,7 @@ function LinkModal(props: {
 
     function renderLink(item, type, direction) {
         return (
-            <Row key={item.id} centerY>
+            <Row key={item.Link.id} centerY>
                 <p className='grey'>linked {direction}</p>
                 <ImageTitle
                     type='user'
@@ -245,6 +278,7 @@ function LinkModal(props: {
                         color='blue'
                         size='medium'
                         // onClick={() => removeLink('incoming', link.id, link.PostA.id)}
+                        style={{ marginLeft: 10 }}
                     />
                 )}
             </Row>
@@ -321,7 +355,11 @@ function LinkModal(props: {
                                 text='Add link'
                                 color='blue'
                                 onClick={addLink}
-                                disabled={!newLinkTargetId || newLinkDescription.length > 50}
+                                disabled={
+                                    addLinkLoading ||
+                                    !newLinkTargetId ||
+                                    newLinkDescription.length > 50
+                                }
                                 loading={addLinkLoading}
                             />
                         </Column>
@@ -345,8 +383,8 @@ function LinkModal(props: {
     )
 }
 
-// LinkModal.defaultProps = {
-//     postId: null,
-// }
+LinkModal.defaultProps = {
+    parentItemId: null,
+}
 
 export default LinkModal

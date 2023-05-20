@@ -284,7 +284,9 @@ function PostCard(props: {
                         location={location}
                     />
                 )}
-                {type === 'card' && <CardCard postData={postData} setPostData={setPostData} />}
+                {type === 'card' && (
+                    <CardCard postData={postData} setPostData={setPostData} location={location} />
+                )}
                 {Urls.length > 0 && (
                     <Column style={{ marginBottom: 10 }}>
                         {Urls.map((urlData) => (
@@ -413,10 +415,7 @@ function PostCard(props: {
                         <LinkModal
                             itemType='post'
                             itemData={postData}
-                            updateItem={(link, state) => {
-                                console.log('link: ', link)
-                                console.log('state: ', state)
-                            }}
+                            location={location}
                             close={() => setLinkModalOpen(false)}
                         />
                     )}
