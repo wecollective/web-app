@@ -18,12 +18,10 @@ import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 function LinkModal(props: {
-    // postId?: number // required for beads
     itemType: 'post' | 'card' | 'bead' | 'comment'
     itemData: any
     location: string
-    parentItemId?: number
-    // updateContext: (link: any, state: string) => void
+    parentItemId?: number // required for comments and beads
     close: () => void
 }): JSX.Element {
     // const { type, location, postId, postData, setPostData, close } = props
@@ -35,12 +33,13 @@ function LinkModal(props: {
     const { userPosts, setUserPosts } = useContext(UserContext)
     const { setPostData } = useContext(PostContext)
     const [linkData, setLinkData] = useState<any>({
-        IncomingPosts: [],
-        IncomingComments: [],
-        OutgoingPosts: [],
-        OutgoingComments: [],
+        IncomingPostLinks: [],
+        IncomingCommentLinks: [],
+        OutgoingPostLinks: [],
+        OutgoingCommentLinks: [],
     })
-    const { IncomingPosts, IncomingComments, OutgoingPosts, OutgoingComments } = linkData
+    const { IncomingPostLinks, IncomingCommentLinks, OutgoingPostLinks, OutgoingCommentLinks } =
+        linkData
     const [loading, setLoading] = useState(true)
     const [addLinkLoading, setAddLinkLoading] = useState(false)
     const [newLinkTargetType, setNewLinkTargetType] = useState('Post')
@@ -49,8 +48,8 @@ function LinkModal(props: {
     const [targetError, setTargetError] = useState(false)
     const cookies = new Cookies()
     const headerText = totalLinks ? `${totalLinks} link${pluralise(totalLinks)}` : 'No links yet...'
-    const incomingLinks = IncomingPosts.length > 0 // || IncomingComments.length
-    const outgoingLinks = OutgoingPosts.length > 0 // || OutgoingComments.length
+    const incomingLinks = IncomingPostLinks.length > 0 // || IncomingComments.length
+    const outgoingLinks = OutgoingPostLinks.length > 0 // || OutgoingComments.length
 
     function modelType() {
         if (['card', 'bead'].includes(itemType)) return 'post'
@@ -61,7 +60,7 @@ function LinkModal(props: {
         axios
             .get(`${config.apiURL}/links?itemType=${modelType()}&itemId=${id}`)
             .then((res) => {
-                console.log('res: ', res)
+                console.log('res: ', res.data)
                 setLinkData(res.data)
                 setLoading(false)
             })
@@ -73,7 +72,6 @@ function LinkModal(props: {
         const data = {
             sourceType: modelType(),
             sourceId: itemData.id,
-            // sourceParentId: parentItemId, // todo: set up for comments
             targetType: newLinkTargetType.toLowerCase(),
             targetId: newLinkTargetId,
             description: newLinkDescription,
@@ -90,12 +88,13 @@ function LinkModal(props: {
                 // update modal state
                 setNewLinkTargetId('')
                 setNewLinkDescription('')
-                if (newLinkTargetType === 'Post') {
-                    setLinkData({
-                        ...linkData,
-                        OutgoingPosts: [...OutgoingPosts, { ...target, Link: link }],
-                    })
-                }
+                setLinkData({
+                    ...linkData,
+                    [`Outgoing${newLinkTargetType}Links`]: [
+                        ...linkData[`Outgoing${newLinkTargetType}Links`],
+                        { ...link, Creator: accountData, [`Outgoing${newLinkTargetType}`]: target },
+                    ],
+                })
                 // update context state
                 let newPosts = [] as any
                 if (location === 'space-posts') newPosts = [...spacePosts]
@@ -259,20 +258,24 @@ function LinkModal(props: {
             .catch((error) => console.log(error))
     }
 
-    function renderLink(item, type, direction) {
+    function renderLink(link, type, direction) {
+        const linkedItem = link[`${direction === 'to' ? 'Outgoing' : 'Incoming'}${type}`]
+        let linkedItemUrl
+        if (type === 'Post') linkedItemUrl = `/p/${linkedItem.id}`
+        if (type === 'Comment') linkedItemUrl = `/p/${linkedItem.itemId}?commentId=${linkedItem.id}`
         return (
-            <Row key={item.Link.id} centerY>
+            <Row key={link.id} centerY style={{ marginBottom: 10 }}>
                 <p className='grey'>linked {direction}</p>
                 <ImageTitle
                     type='user'
-                    imagePath={item.Creator.flagImagePath}
-                    title={`${item.Creator.name}'s`}
-                    link={`/u/${item.Creator.handle}/posts`}
+                    imagePath={linkedItem.Creator.flagImagePath}
+                    title={`${linkedItem.Creator.name}'s`}
+                    link={`/u/${linkedItem.Creator.handle}/posts`}
                     fontSize={16}
                     style={{ margin: '0 5px' }}
                 />
-                <TextLink text={type} link={`/p/${item.id}`} />
-                {item.Creator.id === accountData.id && (
+                <TextLink text={type.toLowerCase()} link={linkedItemUrl} />
+                {linkedItem.Creator.id === accountData.id && (
                     <Button
                         text='Delete'
                         color='blue'
@@ -297,13 +300,17 @@ function LinkModal(props: {
                     {incomingLinks && (
                         <Column centerX style={{ marginBottom: 20 }}>
                             <h2>Incoming:</h2>
-                            {IncomingPosts.map((post) => renderLink(post, 'post', 'from'))}
+                            {IncomingPostLinks.map((link) => renderLink(link, 'Post', 'from'))}
+                            {IncomingCommentLinks.map((link) =>
+                                renderLink(link, 'Comment', 'from')
+                            )}
                         </Column>
                     )}
                     {outgoingLinks && (
                         <Column centerX style={{ marginBottom: 20 }}>
                             <h2>Outgoing:</h2>
-                            {OutgoingPosts.map((post) => renderLink(post, 'post', 'to'))}
+                            {OutgoingPostLinks.map((link) => renderLink(link, 'Post', 'to'))}
+                            {OutgoingCommentLinks.map((link) => renderLink(link, 'Comment', 'to'))}
                         </Column>
                     )}
                     {loggedIn ? (

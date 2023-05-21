@@ -9,6 +9,7 @@ import DeleteCommentModal from '@components/modals/DeleteCommentModal'
 import { AccountContext } from '@contexts/AccountContext'
 import { dateCreated, timeSinceCreated } from '@src/Helpers'
 import LikeModal from '@src/components/modals/LikeModal'
+import LinkModal from '@src/components/modals/LinkModal'
 import RatingModal from '@src/components/modals/RatingModal'
 import styles from '@styles/components/cards/Comments/CommentCard.module.scss'
 import {
@@ -193,7 +194,7 @@ function CommentCard(props: {
                         onClick={() => setLinkModalOpen(true)}
                     >
                         <LinkIcon />
-                        <p>0</p>
+                        <p>{totalLinks}</p>
                     </button>
                 </Row>
             )}
@@ -215,15 +216,14 @@ function CommentCard(props: {
                     close={() => setRatingModalOpen(false)}
                 />
             )}
-            {/* {linkModalOpen && (
+            {linkModalOpen && (
                 <LinkModal
-                    type='post'
-                    location={location}
-                    postData={postData}
-                    setPostData={setPostData}
+                    itemType='comment'
+                    itemData={comment}
+                    location='post-comments'
                     close={() => setLinkModalOpen(false)}
                 />
-            )} */}
+            )}
             {editCommentModalOpen && (
                 <EditCommentModal
                     comment={comment}
