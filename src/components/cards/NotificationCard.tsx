@@ -367,13 +367,24 @@ function NotificationCard(props: {
                         </Content>
                     )}
 
-                    {type === 'post-link' && (
+                    {['post-link-source', 'post-link-target'].includes(type) && (
                         <Content typeIcon={<LinkIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
-                            <p>linked your</p>
+                            <p>just added a link to your</p>
                             <TextLink text='post' link={`/p/${postId}`} />
                             {/* todo: add postAId and postBId columns in the database so secondary post can be linked */}
-                            <p>to another post</p>
+                            {triggerSpace && <p>in</p>}
+                            {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
+                            <CreatedAt date={createdAt} />
+                        </Content>
+                    )}
+
+                    {['comment-link-source', 'comment-link-target'].includes(type) && (
+                        <Content typeIcon={<LinkIcon />}>
+                            <ImageNameLink type='user' data={triggerUser} />
+                            <p>just added a link to your</p>
+                            <TextLink text='comment' link={`/p/${postId}?commentId=${commentId}`} />
+                            {/* todo: add postAId and postBId columns in the database so secondary post can be linked */}
                             {triggerSpace && <p>in</p>}
                             {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
                             <CreatedAt date={createdAt} />

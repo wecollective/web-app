@@ -227,7 +227,7 @@ function LinkModal(props: {
                                 <DropDownMenu
                                     title=''
                                     orientation='horizontal'
-                                    options={['Post', 'Comment', 'User', 'Space']}
+                                    options={['Post', 'Comment']} // 'User', 'Space'
                                     selectedOption={newLinkTargetType}
                                     setSelectedOption={(option) => {
                                         setTargetError(false)
