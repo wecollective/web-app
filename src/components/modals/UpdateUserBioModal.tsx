@@ -70,7 +70,7 @@ function UpdateUserBioModal(props: { close: () => void }): JSX.Element {
     return (
         <Modal close={close} centerX confirmClose>
             <h1>Change your account bio</h1>
-            <form onSubmit={updateUserBio} style={{ width: '100%', maxWidth: 500 }}>
+            <form onSubmit={updateUserBio} style={{ width: '100%', maxWidth: 530 }}>
                 <DraftTextEditor
                     type='other'
                     stringifiedDraft={inputValue}

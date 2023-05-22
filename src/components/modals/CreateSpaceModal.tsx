@@ -1,12 +1,12 @@
 import Button from '@components/Button'
 import Column from '@components/Column'
-import DraftTextEditor from '@components/draft-js/DraftTextEditor'
 import ImageTitle from '@components/ImageTitle'
 import Input from '@components/Input'
-import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
 import SuccessMessage from '@components/SuccessMessage'
 import Toggle from '@components/Toggle'
+import DraftTextEditor from '@components/draft-js/DraftTextEditor'
+import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
@@ -18,6 +18,7 @@ import {
     invalidateFormItem,
     updateFormItem,
 } from '@src/Helpers'
+import styles from '@styles/components/modals/CreateSpaceModal.module.scss'
 import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -169,7 +170,7 @@ function CreateSpaceModal(props: { close: () => void }): JSX.Element {
             {success ? (
                 <SuccessMessage text={successMessage} />
             ) : (
-                <Column centerX style={{ maxWidth: 500 }}>
+                <Column centerX className={styles.wrapper}>
                     <Column centerX style={{ marginBottom: 30, fontSize: 24 }}>
                         <p>Create a new space in</p>
                         <ImageTitle

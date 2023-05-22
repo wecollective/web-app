@@ -1,0 +1,15 @@
+@import '@styles/Variables';
+
+.wrapper {
+    max-width: 100%;
+    form {
+        max-width: inherit;
+    }
+
+    @include for-tablet-landscape-up {
+        width: 520px;
+        form {
+            width: inherit;
+        }
+    }
+}
