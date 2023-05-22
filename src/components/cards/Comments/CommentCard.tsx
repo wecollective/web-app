@@ -27,6 +27,7 @@ import { Link } from 'react-router-dom'
 function CommentCard(props: {
     comment: any
     highlighted: boolean
+    location: string
     toggleReplyInput: () => void
     removeComment: (comment: any) => void
     editComment: (comment: any, newText: string) => void
@@ -40,6 +41,7 @@ function CommentCard(props: {
     const {
         comment,
         highlighted,
+        location,
         toggleReplyInput,
         removeComment,
         editComment,
@@ -221,7 +223,7 @@ function CommentCard(props: {
                     itemType='comment'
                     itemData={comment}
                     parentItemId={comment.itemId}
-                    location='post-comments'
+                    location={location}
                     close={() => setLinkModalOpen(false)}
                 />
             )}

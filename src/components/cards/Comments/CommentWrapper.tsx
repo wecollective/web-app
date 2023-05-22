@@ -8,6 +8,7 @@ function CommentWrapper(props: {
     comment: any
     postId: number
     highlightedCommentId: any
+    location: string
     addComment: (newComment: string) => void
     removeComment: (comment: any) => void
     editComment: (comment: any, newText: string) => void
@@ -22,6 +23,7 @@ function CommentWrapper(props: {
         comment,
         postId,
         highlightedCommentId,
+        location,
         addComment,
         removeComment,
         editComment,
@@ -47,6 +49,7 @@ function CommentWrapper(props: {
                 removeComment={removeComment}
                 editComment={editComment}
                 updateCommentReactions={updateCommentReactions}
+                location={location}
             />
             <Column style={{ marginLeft: 36 }}>
                 {comment.Replies.map((reply) => (
@@ -58,6 +61,7 @@ function CommentWrapper(props: {
                         removeComment={removeComment}
                         editComment={editComment}
                         updateCommentReactions={updateCommentReactions}
+                        location={location}
                     />
                 ))}
                 {replyInputOpen && (

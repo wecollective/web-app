@@ -423,8 +423,7 @@ function PostCard(props: {
                 {commentsOpen && (
                     <Comments
                         postId={postData.id}
-                        // type='post'
-                        // location={location}
+                        location={location}
                         totalComments={totalComments}
                         incrementTotalComments={(value) =>
                             setPostData({ ...postData, totalComments: totalComments + value })

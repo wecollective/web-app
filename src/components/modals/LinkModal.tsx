@@ -29,7 +29,7 @@ function LinkModal(props: {
     const { loggedIn, accountData, setLogInModalOpen } = useContext(AccountContext)
     const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
     const { userPosts, setUserPosts } = useContext(UserContext)
-    const { setPostData } = useContext(PostContext)
+    const { postData, setPostData } = useContext(PostContext)
     const [linkData, setLinkData] = useState<any>({
         IncomingPostLinks: [],
         IncomingCommentLinks: [],
@@ -45,9 +45,17 @@ function LinkModal(props: {
     const [newLinkDescription, setNewLinkDescription] = useState('')
     const [targetError, setTargetError] = useState(false)
     const cookies = new Cookies()
-    const headerText = totalLinks ? `${totalLinks} link${pluralise(totalLinks)}` : 'No links yet...'
     const incomingLinks = IncomingPostLinks.length > 0 || IncomingCommentLinks.length > 0
     const outgoingLinks = OutgoingPostLinks.length > 0 || OutgoingCommentLinks.length > 0
+    // todo: replace with 'totalLinks' prop when comment state added to posts
+    const tempTotalLinks =
+        IncomingPostLinks.length +
+        IncomingCommentLinks.length +
+        OutgoingPostLinks.length +
+        OutgoingCommentLinks.length
+    const headerText = tempTotalLinks
+        ? `${tempTotalLinks} link${pluralise(tempTotalLinks)}`
+        : 'No links yet...'
 
     function modelType() {
         if (['card', 'bead'].includes(itemType)) return 'post'
@@ -71,7 +79,7 @@ function LinkModal(props: {
         let newPosts = [] as any
         if (location === 'space-posts') newPosts = [...spacePosts]
         if (location === 'user-posts') newPosts = [...userPosts]
-        if (location === 'post-page') newPosts = [{ ...itemData }]
+        if (location === 'post-page') newPosts = [{ ...postData }]
         // update source item
         if (modelType() === 'post') {
             let item = newPosts.find((p) => p.id === (parentItemId || itemData.id))
@@ -236,7 +244,10 @@ function LinkModal(props: {
                                         : 'Handle:'
                                 }
                                 value={newLinkTargetId}
-                                onChange={(value) => setNewLinkTargetId(value)}
+                                onChange={(value) => {
+                                    setTargetError(false)
+                                    setNewLinkTargetId(value)
+                                }}
                                 style={{ marginBottom: 20, minWidth: 200 }}
                             />
                             {targetError && (

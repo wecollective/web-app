@@ -14,7 +14,7 @@ import Cookies from 'universal-cookie'
 function Comments(props: {
     postId: number
     type?: string
-    location?: string
+    location: string
     totalComments: number
     incrementTotalComments: (value: number) => void
     style?: any
@@ -145,6 +145,7 @@ function Comments(props: {
                         removeComment={removeComment}
                         editComment={editComment}
                         updateCommentReactions={updateCommentReactions}
+                        location={location}
                     />
                 ))
             )}
@@ -154,7 +155,6 @@ function Comments(props: {
 
 Comments.defaultProps = {
     type: null,
-    location: null,
     style: null,
 }
 
