@@ -16,6 +16,7 @@
 
         width: $baseWidth + px;
         height: $baseHeight + px;
+        max-width: 100vw;
         font-size: $baseFontSize + px;
         border-radius: $baseBorderRadius + px;
         box-shadow: 0 0 30px 0 rgba(10, 8, 72, 0.2);
@@ -76,7 +77,8 @@
         }
     }
 
-    .icons {
+    .largeScreenIcons {
+        display: none;
         position: absolute;
         height: 100%;
         right: 0;
@@ -84,6 +86,23 @@
         padding: 30px 20px;
         align-items: end;
 
+        @include for-tablet-portrait-up {
+            display: flex;
+        }
+    }
+
+    .smallScreenHeader,
+    .smallScreenIcons {
+        display: flex;
+
+        @include for-tablet-portrait-up {
+            display: none;
+        }
+    }
+
+    .largeScreenIcons,
+    .smallScreenHeader,
+    .smallScreenIcons {
         button {
             all: unset;
             cursor: pointer;
@@ -110,6 +129,12 @@
                 margin-left: 7px;
                 font-size: 17px;
             }
+        }
+    }
+
+    .smallScreenIcons {
+        button {
+            margin: 0 10px;
         }
     }
 }

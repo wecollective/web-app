@@ -62,8 +62,24 @@ function CardCard(props: {
         )
     }
 
+    // todo: render card face id and icons in function to avoid HTML duplication
+
     return (
         <Column centerX className={styles.wrapper}>
+            <Row centerY className={styles.smallScreenHeader} style={{ marginBottom: 10 }}>
+                <Link to={`/p/${card.id}`} title='Open post page' style={{ marginRight: 20 }}>
+                    <Row centerX>
+                        <p className='grey'>ID:</p>
+                        <p style={{ marginLeft: 5 }}>{card.id}</p>
+                    </Row>
+                </Link>
+                <button type='button' title='Click to rotate' onClick={rotateCard}>
+                    <Row centerY>
+                        <RepostIcon />
+                        <p>Flip</p>
+                    </Row>
+                </button>
+            </Row>
             <Column
                 centerX
                 className={`${styles.card} ${cardRotating && styles.rotating} ${
@@ -73,7 +89,7 @@ function CardCard(props: {
                 {renderCardFace('front')}
                 {renderCardFace('back')}
             </Column>
-            <Column spaceBetween className={styles.icons}>
+            <Column spaceBetween className={styles.largeScreenIcons}>
                 <Column>
                     <Link to={`/p/${card.id}`} title='Open post page' style={{ marginBottom: 10 }}>
                         <Row centerX>
@@ -109,6 +125,28 @@ function CardCard(props: {
                     </Row>
                 </button>
             </Column>
+            <Row className={styles.smallScreenIcons} style={{ marginTop: 10 }}>
+                <button
+                    type='button'
+                    className={card.accountLike && styles.blue}
+                    onClick={() => setLikeModalOpen(true)}
+                >
+                    <Row centerY>
+                        <LikeIcon />
+                        <p>{card.totalLikes}</p>
+                    </Row>
+                </button>
+                <button
+                    type='button'
+                    className={card.accountLinks > 0 ? styles.blue : ''}
+                    onClick={() => setLinkModalOpen(true)}
+                >
+                    <Row centerY>
+                        <LinkIcon />
+                        <p>{card.totalLinks}</p>
+                    </Row>
+                </button>
+            </Row>
             {likeModalOpen && (
                 <LikeModal
                     itemType='post'
