@@ -40,14 +40,16 @@ function CardCard(props: {
         setPostData(newPostData)
     }
 
-    function renderCardFace() {
+    function renderCardFace(side) {
+        const data = side === 'front' ? cardFront : cardBack
+        const faceUp = side === 'front' ? !cardFlipped : cardFlipped
         return (
-            <Column centerY className={styles.cardContent}>
-                {card.Images[0] && (
+            <Column centerY className={`${styles.cardContent} ${faceUp && styles.visible}`}>
+                {data.Images[0] && (
                     <img
-                        src={card.Images[0].url}
+                        src={data.Images[0].url}
                         alt='background'
-                        style={{ opacity: card.watermark ? 0.3 : 1 }}
+                        style={{ opacity: data.watermark ? 0.3 : 1 }}
                     />
                 )}
                 <button
@@ -55,7 +57,7 @@ function CardCard(props: {
                     aria-label='click to focus'
                     onClick={() => setCardFocused(!cardFocused)}
                 />
-                {card.text && <DraftText stringifiedDraft={card.text} />}
+                {data.text && <DraftText stringifiedDraft={data.text} />}
             </Column>
         )
     }
@@ -68,7 +70,8 @@ function CardCard(props: {
                     cardFocused && styles.focused
                 }`}
             >
-                {renderCardFace()}
+                {renderCardFace('front')}
+                {renderCardFace('back')}
             </Column>
             <Column spaceBetween className={styles.icons}>
                 <Column>

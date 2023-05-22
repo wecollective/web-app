@@ -12,6 +12,7 @@
         $baseHeight: 350;
         $baseFontSize: 16;
         $baseBorderRadius: 15;
+        $basePadding: 20;
 
         width: $baseWidth + px;
         height: $baseHeight + px;
@@ -21,24 +22,15 @@
         background-color: white;
         transition: all ease-in-out 0.5s;
 
-        &.focused {
-            $focusScale: 1.4;
-            width: $baseWidth * $focusScale + px;
-            height: $baseHeight * $focusScale + px;
-            font-size: $baseFontSize * $focusScale + px;
-            border-radius: $baseBorderRadius * $focusScale + px;
-        }
-
-        &.rotating {
-            transform: rotateY(90deg);
-        }
-
         .cardContent {
-            position: relative;
+            position: absolute;
+            pointer-events: none;
+            opacity: 0;
             width: 100%;
             height: 100%;
             border-radius: inherit;
-            padding: 20px;
+            padding: $basePadding + px;
+            transition: padding ease-in-out 0.5s;
 
             > button {
                 all: unset;
@@ -59,6 +51,28 @@
                 height: 100%;
                 object-fit: cover;
             }
+
+            &.visible {
+                position: relative;
+                opacity: 1;
+                pointer-events: all;
+            }
+        }
+
+        &.focused {
+            $focusScale: 1.4;
+            width: $baseWidth * $focusScale + px;
+            height: $baseHeight * $focusScale + px;
+            font-size: $baseFontSize * $focusScale + px;
+            border-radius: $baseBorderRadius * $focusScale + px;
+
+            .cardContent {
+                padding: $basePadding * $focusScale + px;
+            }
+        }
+
+        &.rotating {
+            transform: rotateY(90deg);
         }
     }
 
