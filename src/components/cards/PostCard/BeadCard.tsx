@@ -55,7 +55,7 @@ function BeadCard(props: {
         totalLinks,
         accountLike,
         accountComment,
-        accountLink,
+        accountLinks,
         Creator,
         Links,
         Urls,
@@ -265,7 +265,7 @@ function BeadCard(props: {
                         iconSize={20}
                         text={totalLinks || ''}
                         title={statTitle('Link', totalLinks || 0)}
-                        color={accountLink && 'blue'}
+                        color={accountLinks > 0 ? 'blue' : undefined}
                         // disabled={location === 'preview'}
                         onClick={() => setLinkModalOpen(true)}
                     />
@@ -297,6 +297,7 @@ function BeadCard(props: {
                 <LinkModal
                     itemType='bead'
                     itemData={bead}
+                    parentItemId={postId}
                     location={location}
                     close={() => setLinkModalOpen(false)}
                 />

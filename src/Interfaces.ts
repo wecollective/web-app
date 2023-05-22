@@ -34,7 +34,7 @@ export interface IPost {
     urlTitle: string | null
     createdAt: string
     accountLike: number
-    accountLink: number
+    accountLinks: number
     accountRating: number
     accountRepost: number
     totalComments: number

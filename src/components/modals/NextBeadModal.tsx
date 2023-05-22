@@ -281,6 +281,10 @@ function NextBeadModal(props: {
             color,
             Link: { source: null },
             Creator: accountData,
+            accountLike: 0,
+            accountLinks: 0,
+            accountRating: 0,
+            accountRepost: 0,
         } as any
         if (type === 'text') {
             bead.text = text

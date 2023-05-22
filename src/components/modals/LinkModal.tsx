@@ -24,11 +24,9 @@ function LinkModal(props: {
     parentItemId?: number // required for comments and beads
     close: () => void
 }): JSX.Element {
-    // const { type, location, postId, postData, setPostData, close } = props
     const { itemType, itemData, location, parentItemId, close } = props
     const { id, totalLinks } = itemData
-    const { loggedIn, accountData, setLogInModalOpen, setAlertMessage, setAlertModalOpen } =
-        useContext(AccountContext)
+    const { loggedIn, accountData, setLogInModalOpen } = useContext(AccountContext)
     const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
     const { userPosts, setUserPosts } = useContext(UserContext)
     const { setPostData } = useContext(PostContext)
@@ -48,8 +46,8 @@ function LinkModal(props: {
     const [targetError, setTargetError] = useState(false)
     const cookies = new Cookies()
     const headerText = totalLinks ? `${totalLinks} link${pluralise(totalLinks)}` : 'No links yet...'
-    const incomingLinks = IncomingPostLinks.length > 0 // || IncomingComments.length
-    const outgoingLinks = OutgoingPostLinks.length > 0 // || OutgoingComments.length
+    const incomingLinks = IncomingPostLinks.length > 0 || IncomingCommentLinks.length > 0
+    const outgoingLinks = OutgoingPostLinks.length > 0 || OutgoingCommentLinks.length > 0
 
     function modelType() {
         if (['card', 'bead'].includes(itemType)) return 'post'
@@ -65,6 +63,40 @@ function LinkModal(props: {
                 setLoading(false)
             })
             .catch((error) => console.log(error))
+    }
+
+    function updateContextState(action, linkedItemType, linkedItemId) {
+        const addingLink = action === 'add-link'
+        // update context state
+        let newPosts = [] as any
+        if (location === 'space-posts') newPosts = [...spacePosts]
+        if (location === 'user-posts') newPosts = [...userPosts]
+        if (location === 'post-page') newPosts = [{ ...itemData }]
+        // update source item
+        if (modelType() === 'post') {
+            let item = newPosts.find((p) => p.id === (parentItemId || itemData.id))
+            if (itemType === 'bead') item = item.Beads.find((p) => p.id === itemData.id)
+            if (itemType === 'card') item = item.CardSides.find((p) => p.id === itemData.id)
+            item.totalLinks += addingLink ? 1 : -1
+            item.accountLinks += addingLink ? 1 : -1
+        }
+        // update target item
+        if (linkedItemType === 'Post') {
+            let item = newPosts.find((p) => p.id === linkedItemId)
+            if (!item) {
+                newPosts.forEach((post) => {
+                    const bead = post.Beads && post.Beads.find((b) => b.id === linkedItemId)
+                    const card = post.CardSides && post.CardSides.find((c) => c.id === linkedItemId)
+                    if (bead) item = bead
+                    if (card) item = card
+                })
+            }
+            item.totalLinks += addingLink ? 1 : -1
+            item.accountLinks += addingLink ? 1 : -1
+        }
+        if (location === 'space-posts') setSpacePosts(newPosts)
+        if (location === 'user-posts') setUserPosts(newPosts)
+        if (location === 'post-page') setPostData(newPosts[0])
     }
 
     function addLink() {
@@ -96,98 +128,8 @@ function LinkModal(props: {
                     ],
                 })
                 // update context state
-                let newPosts = [] as any
-                if (location === 'space-posts') newPosts = [...spacePosts]
-                if (location === 'user-posts') newPosts = [...userPosts]
-                if (location === 'post-page') newPosts = [{ ...itemData }]
-                console.log('newPosts: ', newPosts)
-                // update source item
-                if (modelType() === 'post') {
-                    let item = newPosts.find((p) => p.id === (parentItemId || itemData.id))
-                    if (itemType === 'bead') item = item.Beads.find((p) => p.id === itemData.id)
-                    if (itemType === 'card') item = item.CardSides.find((p) => p.id === itemData.id)
-                    item.totalLinks += 1
-                    item.accountLink = true
-                }
-                // update target item
-                if (newLinkTargetType === 'Post') {
-                    let item = newPosts.find((p) => p.id === +newLinkTargetId)
-                    if (!item) {
-                        newPosts.forEach((post) => {
-                            const bead = post.Beads.find((b) => b.id === +newLinkTargetId)
-                            const card = post.CardSides.find((c) => c.id === +newLinkTargetId)
-                            if (bead) item = bead
-                            if (card) item = card
-                        })
-                    }
-                    item.totalLinks += 1
-                    item.accountLink = true
-                }
-                if (location === 'space-posts') setSpacePosts(newPosts)
-                if (location === 'user-posts') setUserPosts(newPosts)
-                if (location === 'post-page') setPostData(newPosts[0])
+                updateContextState('add-link', newLinkTargetType, +newLinkTargetId)
                 setAddLinkLoading(false)
-                // // update link state
-                // setOutgoingLinks((links) => [
-                //     ...links,
-                //     {
-                //         id: res.data.link.id,
-                //         Creator: accountData,
-                //         PostB: res.data.itemB,
-                //     },
-                // ])
-                // // update post state
-                // const newPosts = findPosts()
-                // const post = newPosts.find((p) => p.id === (postId || postData.id))
-                // if (itemType === 'post') {
-                //     post.totalLinks += 1
-                //     post.accountLink = true
-                // }
-                // if (itemType === 'bead') {
-                //     const bead = post.Beads.find((p) => p.id === postData.id)
-                //     bead.totalLinks += 1
-                //     bead.accountLink = true
-                // }
-                // if (itemType === 'card') {
-                //     const card = post.CardSides.find((p) => p.id === postData.id)
-                //     card.totalLinks += 1
-                //     card.accountLink = true
-                // }
-                // // update linked post if in state
-                // const linkedPost = newPosts.find((p) => p.id === +linkTarget.value)
-                // if (linkedPost) {
-                //     linkedPost.totalLinks += 1
-                //     linkedPost.accountLink = true
-                // }
-                // // update linked bead if in state
-                // newPosts.forEach((p) => {
-                //     const linkedBead = p.Beads.find((b) => b.id === +linkTarget.value)
-                //     if (linkedBead) {
-                //         linkedBead.totalLinks += 1
-                //         linkedBead.accountLink = true
-                //     }
-                // })
-                // // update linked card if in state
-                // newPosts.forEach((p) => {
-                //     const linkedCard = p.CardSides.find((c) => c.id === +linkTarget.value)
-                //     if (linkedCard) {
-                //         linkedCard.totalLinks += 1
-                //         linkedCard.accountLink = true
-                //     }
-                // })
-                // if (location === 'space-posts') setSpacePosts(newPosts)
-                // if (location === 'user-posts') setUserPosts(newPosts)
-                // if (location === 'post-page') setPostData(newPosts[0])
-                // // reset form data
-                // setFormData({
-                //     linkTarget: { ...formData.linkTarget, value: '', state: 'default' },
-                //     linkDescription: {
-                //         ...formData.linkDescription,
-                //         value: '',
-                //         state: 'default',
-                //     },
-                // })
-                // setResponseLoading(false)
             })
             .catch((error) => {
                 console.log(error)
@@ -198,62 +140,19 @@ function LinkModal(props: {
             })
     }
 
-    function removeLink(direction, linkId, linkedPostId) {
-        const data = { linkId, itemAId: itemData.id, itemBId: linkedPostId }
+    function removeLink(direction, type, linkId, itemId) {
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
-            .post(`${config.apiURL}/remove-link`, data, options)
+            .post(`${config.apiURL}/remove-link`, { linkId }, options)
             .then((res) => {
-                console.log(res.data)
-                // // update link state
-                // if (direction === 'incoming')
-                //     setIncomingLinks((links) => links.filter((l) => l.id !== linkId))
-                // else setOutgoingLinks((links) => links.filter((l) => l.id !== linkId))
-                // // update post state
-                // const newPosts = findPosts()
-                // const post = newPosts.find((p) => p.id === (postId || postData.id))
-                // if (type === 'post') {
-                //     post.totalLinks -= 1
-                //     const links = direction === 'incoming' ? incomingLinks : outgoingLinks
-                //     post.accountLink = !!links.find(
-                //         (l) => l.Creator.id === accountData.id && l.id !== linkId
-                //     )
-                // }
-                // if (type === 'bead') {
-                //     const bead = post.Beads.find((p) => p.id === postData.id)
-                //     bead.totalLinks -= 1
-                //     bead.accountLink = false
-                // }
-                // if (type === 'card') {
-                //     const card = post.CardSides.find((p) => p.id === postData.id)
-                //     card.totalLinks -= 1
-                //     card.accountLink = false
-                // }
-                // // update linked post if in state
-                // const linkedPost = newPosts.find((p) => p.id === linkedPostId)
-                // if (linkedPost) {
-                //     linkedPost.totalLinks -= 1
-                //     linkedPost.accountLink = false
-                // }
-                // // update linked beads if in state
-                // newPosts.forEach((p) => {
-                //     const linkedBead = p.Beads.find((b) => b.id === linkedPostId)
-                //     if (linkedBead) {
-                //         linkedBead.totalLinks -= 1
-                //         linkedBead.accountLink = false
-                //     }
-                // })
-                // // update linked card if in state
-                // newPosts.forEach((p) => {
-                //     const linkedCard = p.CardSides.find((c) => c.id === linkedPostId)
-                //     if (linkedCard) {
-                //         linkedCard.totalLinks -= 1
-                //         linkedCard.accountLink = false
-                //     }
-                // })
-                // if (location === 'space-posts') setSpacePosts(newPosts)
-                // if (location === 'user-posts') setUserPosts(newPosts)
-                // if (location === 'post-page') setPostData(newPosts[0])
+                // update modal context
+                const linkArray = `${direction === 'to' ? 'Outgoing' : 'Incoming'}${type}Links`
+                setLinkData({
+                    ...linkData,
+                    [linkArray]: [...linkData[linkArray].filter((l) => l.id !== linkId)],
+                })
+                // update context state
+                updateContextState('remove-link', type, itemId)
             })
             .catch((error) => console.log(error))
     }
@@ -280,7 +179,7 @@ function LinkModal(props: {
                         text='Delete'
                         color='blue'
                         size='medium'
-                        // onClick={() => removeLink('incoming', link.id, link.PostA.id)}
+                        onClick={() => removeLink(direction, type, link.id, linkedItem.id)}
                         style={{ marginLeft: 10 }}
                     />
                 )}

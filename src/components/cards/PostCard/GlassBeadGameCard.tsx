@@ -4,22 +4,21 @@ import FlagImageHighlights from '@components/FlagImageHighlights'
 import ImageTitle from '@components/ImageTitle'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
+import { PostContext } from '@contexts/PostContext'
+import { SpaceContext } from '@contexts/SpaceContext'
+import { UserContext } from '@contexts/UserContext'
+import { formatTimeHHDDMMSS, pluralise } from '@src/Helpers'
 import Comments from '@src/components/cards/Comments/Comments'
 import BeadCard from '@src/components/cards/PostCard/BeadCard'
 import NextBeadModal from '@src/components/modals/NextBeadModal'
 import { AccountContext } from '@src/contexts/AccountContext'
-import { formatTimeHHDDMMSS, pluralise } from '@src/Helpers'
 import styles from '@styles/components/cards/PostCard/GlassBeadGameCard.module.scss'
 import { DNAIcon, DoorIcon, PlusIcon, UsersIcon } from '@svgs/all'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-function GlassBeadGameCard(props: {
-    postData: any
-    setPostData: (data: any) => void
-    location: string
-}): JSX.Element {
-    const { postData, setPostData, location } = props
+function GlassBeadGameCard(props: { postData: any; location: string }): JSX.Element {
+    const { postData, location } = props
     const { id, Creator, GlassBeadGame, Beads, Players } = postData
     const {
         synchronous,
@@ -31,6 +30,9 @@ function GlassBeadGameCard(props: {
         state,
     } = GlassBeadGame
     const { accountData, setAlertMessage, setAlertModalOpen, loggedIn } = useContext(AccountContext)
+    const { spacePosts, setSpacePosts } = useContext(SpaceContext)
+    const { userPosts, setUserPosts } = useContext(UserContext)
+    const { setPostData } = useContext(PostContext)
     const [beads, setBeads] = useState<any[]>(Beads.sort((a, b) => a.Link.index - b.Link.index))
     const [orderedPlayers, setOrderedPlayers] = useState<any[]>([])
     const [nextPlayer, setNextPlayer] = useState<any>(null)
@@ -39,7 +41,6 @@ function GlassBeadGameCard(props: {
     const [nextBeadModalOpen, setNextBeadModalOpen] = useState(false)
     const [beadCommentsOpen, setBeadCommentsOpen] = useState(false)
     const [selectedBead, setSelectedBead] = useState<any>(null)
-    const [renderKey, setRenderKey] = useState(0)
     const history = useNavigate()
     const pendingPlayers = Players.filter((p) => p.UserPost.state === 'pending')
     const rejectedPlayers = Players.filter((p) => p.UserPost.state === 'rejected')
@@ -247,7 +248,7 @@ function GlassBeadGameCard(props: {
             }
         }
         return () => clearInterval(timeLeftInMoveInterval.current)
-    }, [postData])
+    }, [postData, postData.Beads])
 
     return (
         <Column className={styles.wrapper}>
@@ -265,7 +266,7 @@ function GlassBeadGameCard(props: {
             {!hideBeadDraw && (
                 <Row centerX>
                     <Scrollbars className={styles.beads}>
-                        <Row key={renderKey}>
+                        <Row>
                             {beads.map((bead, i) => (
                                 <Row key={bead.id}>
                                     <BeadCard
@@ -300,9 +301,17 @@ function GlassBeadGameCard(props: {
                     postId={id}
                     players={Players}
                     addBead={(bead) => {
-                        const newPostData = { ...postData, Beads: [...beads, bead] }
-                        newPostData.GlassBeadGame.nextMoveDeadline = bead.nextMoveDeadline
-                        setPostData(newPostData)
+                        // update context state
+                        let newPosts = [] as any
+                        if (location === 'space-posts') newPosts = [...spacePosts]
+                        if (location === 'user-posts') newPosts = [...userPosts]
+                        if (location === 'post-page') newPosts = [{ ...postData }]
+                        const newPost = newPosts.find((p) => p.id === postData.id)
+                        newPost.Beads = [...beads, { ...bead, type: `gbg-${bead.type}` }]
+                        newPost.GlassBeadGame.nextMoveDeadline = bead.nextMoveDeadline
+                        if (location === 'space-posts') setSpacePosts(newPosts)
+                        if (location === 'user-posts') setUserPosts(newPosts)
+                        if (location === 'post-page') setPostData(newPosts[0])
                     }}
                     close={() => setNextBeadModalOpen(false)}
                 />
@@ -314,17 +323,11 @@ function GlassBeadGameCard(props: {
                     location={location}
                     totalComments={selectedBead.totalComments}
                     incrementTotalComments={(value) => {
-                        // console.log('selectedBead: ', selectedBead)
-                        // console.log('beads: ', postData.Beads)
-                        // const newPostData = { ...postData }
                         const newBeads = [...beads]
                         const bead = newBeads.find((b) => b.id === selectedBead.id)
                         bead.totalComments += value
                         bead.accountComment = value > 0
-                        // console.log('bead.totalComments: ', bead.totalComments)
                         setBeads(newBeads)
-                        // // setRenderKey(renderKey + 1)
-                        // setPostData(newPostData)
                     }}
                     style={{ margin: '10px 0' }}
                 />

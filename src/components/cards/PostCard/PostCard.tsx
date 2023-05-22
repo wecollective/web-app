@@ -73,7 +73,7 @@ function PostCard(props: {
         accountLike,
         accountRating,
         accountRepost,
-        accountLink,
+        accountLinks,
         sourcePostId,
         Creator,
         DirectSpaces,
@@ -100,6 +100,8 @@ function PostCard(props: {
     const cookies = new Cookies()
     const isOwnPost = accountData && Creator && accountData.id === Creator.id
     // const directSpaces = DirectSpaces.filter((s) => s.id !== 1)
+
+    // todo: store comments on post card so can be updated from other posts (linking)
 
     const urlParams = Object.fromEntries(new URLSearchParams(useLocation().search))
     const params = { ...spacePostsFilters }
@@ -278,11 +280,7 @@ function PostCard(props: {
                     />
                 )}
                 {type === 'glass-bead-game' && (
-                    <GlassBeadGameCard
-                        postData={postData}
-                        setPostData={setPostData}
-                        location={location}
-                    />
+                    <GlassBeadGameCard postData={postData} location={location} />
                 )}
                 {type === 'card' && (
                     <CardCard postData={postData} setPostData={setPostData} location={location} />
@@ -352,7 +350,7 @@ function PostCard(props: {
                         iconSize={20}
                         text={totalLinks}
                         title={statTitle('Link', totalLinks || 0)}
-                        color={accountLink && 'blue'}
+                        color={accountLinks > 0 ? 'blue' : undefined}
                         disabled={location === 'preview'}
                         onClick={() => setLinkModalOpen(true)}
                     />

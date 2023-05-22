@@ -21,7 +21,7 @@ const defaults = {
         createdAt: '',
         // todo: change account_ values to booleans
         accountLike: 0,
-        accountLink: 0,
+        accountLinks: 0,
         accountRating: 0,
         accountRepost: 0,
         totalComments: 0,

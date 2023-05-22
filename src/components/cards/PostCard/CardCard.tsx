@@ -97,7 +97,7 @@ function CardCard(props: {
                 </button>
                 <button
                     type='button'
-                    className={card.accountLink && styles.blue}
+                    className={card.accountLinks > 0 ? styles.blue : ''}
                     onClick={() => setLinkModalOpen(true)}
                 >
                     <Row centerY>
@@ -125,10 +125,7 @@ function CardCard(props: {
                     itemType='card'
                     itemData={card}
                     location={location}
-                    // updateContext={(link, state) => {
-                    //     console.log('link: ', link)
-                    //     console.log('state: ', state)
-                    // }}
+                    parentItemId={postData.id}
                     close={() => setLinkModalOpen(false)}
                 />
             )}

@@ -57,7 +57,7 @@ function CommentCard(props: {
         totalGlassBeadGames,
         accountLike,
         accountRating,
-        accountLink,
+        accountLinks,
         createdAt,
         updatedAt,
         Creator,
@@ -190,7 +190,7 @@ function CommentCard(props: {
                     </button>
                     <button
                         type='button'
-                        className={accountLink ? styles.blue : ''}
+                        className={accountLinks > 0 ? styles.blue : ''}
                         onClick={() => setLinkModalOpen(true)}
                     >
                         <LinkIcon />
@@ -220,6 +220,7 @@ function CommentCard(props: {
                 <LinkModal
                     itemType='comment'
                     itemData={comment}
+                    parentItemId={comment.itemId}
                     location='post-comments'
                     close={() => setLinkModalOpen(false)}
                 />

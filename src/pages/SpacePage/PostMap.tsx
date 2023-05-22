@@ -16,7 +16,6 @@ import Cookies from 'universal-cookie'
 
 function PostMap(props: { postMapData: any; params: any }): JSX.Element {
     const { postMapData, params } = props
-    console.log('postMapData: ', postMapData)
     const { accountData } = useContext(AccountContext)
     const { spaceData, setPostMapData, getPostMapData } = useContext(SpaceContext)
     const { sortBy, sortOrder } = params
@@ -125,7 +124,8 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
     }
 
     function findStroke(d) {
-        if (d.accountLike || d.accountRepost || d.accountRating || d.accountLink) return '#83b0ff'
+        if (d.accountLike || d.accountRepost || d.accountRating || d.accountLinks > 0)
+            return '#83b0ff'
         return 'rgb(140 140 140)'
     }
 
@@ -136,10 +136,10 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
         }
         const linkData = [] as ILinkData[]
         posts.forEach((post, postIndex) => {
-            post.OutgoingLinks.forEach((link) => {
+            post.OutgoingPostLinks.forEach((link) => {
                 let targetIndex = null
                 posts.forEach((p, i) => {
-                    if (p.id === link.PostB.id) targetIndex = i
+                    if (p.id === link.OutgoingPost.id) targetIndex = i
                 })
                 if (targetIndex !== null) {
                     const data = {
