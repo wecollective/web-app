@@ -114,7 +114,7 @@ function PostCard(props: {
         const addingLike = !postData.accountLike
         const accessToken = cookies.get('accessToken')
         if (loggedIn && accessToken) {
-            const data = { postId: postData.id } as any
+            const data = { itemType: 'post', itemId: postData.id } as any
             if (addingLike) {
                 data.accountHandle = accountData.handle
                 data.accountName = accountData.name
