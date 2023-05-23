@@ -93,6 +93,7 @@
 
             .hamburgerMenuTabs {
                 margin-bottom: 20px;
+                flex-shrink: 0;
 
                 > a {
                     display: flex;

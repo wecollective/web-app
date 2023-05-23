@@ -9,4 +9,9 @@
     color: #82bdff; // $blue5;
     margin-right: 10px;
     flex-shrink: 0;
+
+    > svg {
+        width: 20px;
+        height: 20px;
+    }
 }
