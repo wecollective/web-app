@@ -31,12 +31,7 @@ function CommentCard(props: {
     toggleReplyInput: () => void
     removeComment: (comment: any) => void
     editComment: (comment: any, newText: string) => void
-    updateCommentReactions: (
-        commentId: number,
-        reactionType: string,
-        increment: boolean,
-        rating?: number
-    ) => void
+    updateCommentReactions: (commentId: number, reactionType: string, increment: boolean) => void
 }): JSX.Element {
     const {
         comment,
@@ -212,9 +207,7 @@ function CommentCard(props: {
                 <RatingModal
                     itemType='comment'
                     itemData={comment}
-                    updateItem={(rating) =>
-                        updateCommentReactions(comment, 'Rating', !accountRating, rating)
-                    }
+                    updateItem={() => updateCommentReactions(comment, 'Rating', !accountRating)}
                     close={() => setRatingModalOpen(false)}
                 />
             )}

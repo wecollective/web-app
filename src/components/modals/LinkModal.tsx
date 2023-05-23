@@ -66,7 +66,6 @@ function LinkModal(props: {
         axios
             .get(`${config.apiURL}/links?itemType=${modelType()}&itemId=${id}`)
             .then((res) => {
-                console.log('res: ', res.data)
                 setLinkData(res.data)
                 setLoading(false)
             })

@@ -36,7 +36,7 @@ import {
 import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
 function PostCard(props: {
@@ -67,7 +67,6 @@ function PostCard(props: {
         totalComments,
         totalLikes,
         totalRatings,
-        totalRatingPoints,
         totalReposts,
         totalLinks,
         accountLike,
@@ -85,7 +84,6 @@ function PostCard(props: {
 
     // modals
     const [menuOpen, setMenuOpen] = useState(false)
-    const [otherSpacesModalOpen, setOtherSpacesModalOpen] = useState(false)
     const [likeModalOpen, setLikeModalOpen] = useState(false)
     const [repostModalOpen, setRepostModalOpen] = useState(false)
     const [ratingModalOpen, setRatingModalOpen] = useState(false)
@@ -96,10 +94,12 @@ function PostCard(props: {
 
     const [likeResponseLoading, setLikeResponseLoading] = useState(false)
     const mobileView = document.documentElement.clientWidth < 900
-    const history = useNavigate()
     const cookies = new Cookies()
     const isOwnPost = accountData && Creator && accountData.id === Creator.id
     // const directSpaces = DirectSpaces.filter((s) => s.id !== 1)
+
+    // change postData to array so consistent with post lists
+    // const state = { post, posts: [], setPosts: () => console.log('') }
 
     // todo: store comments on post card so can be updated from other posts (linking)
 
@@ -162,8 +162,9 @@ function PostCard(props: {
     //     }
     // }
 
+    // remove this useEffect alltogether if everything handled from props...?
     useEffect(() => {
-        console.log(post)
+        // console.log(post)
         setPostData(post)
     }, [post])
 
@@ -299,7 +300,6 @@ function PostCard(props: {
                 )}
             </Column>
             <Column className={styles.footer}>
-                {/* <Row spaceBetween> */}
                 <Row centerY className={styles.statButtons}>
                     <StatButton
                         icon={<LikeIcon />}
@@ -354,24 +354,6 @@ function PostCard(props: {
                         disabled={location === 'preview'}
                         onClick={() => setLinkModalOpen(true)}
                     />
-                    {/* <button
-                        className={styles.gbgFromPostButton}
-                        type='button'
-                        title='Create GBG from post'
-                        // disabled={location === 'preview'}
-                        onClick={startNewGbgFromPost}
-                    >
-                        <CastaliaIcon />
-                    </button> */}
-                    {/* {['prism', 'decision-tree'].includes(type) && (
-                        <StatButton
-                            icon={<ArrowRightIcon />}
-                            iconSize={20}
-                            text='Open game room'
-                            disabled={location === 'preview'}
-                            onClick={() => history(`/p/${id}`)}
-                        />
-                    )} */}
                     {likeModalOpen && (
                         <LikeModal
                             itemType='post'
@@ -397,12 +379,10 @@ function PostCard(props: {
                         <RatingModal
                             itemType='post'
                             itemData={postData}
-                            updateItem={(rating) => {
+                            updateItem={() => {
                                 setPostData({
                                     ...postData,
                                     totalRatings: totalRatings + (accountRating ? -1 : 1),
-                                    totalRatingPoints:
-                                        +totalRatingPoints + (accountRating ? -rating : rating),
                                     accountRating: !accountRating,
                                 })
                             }}
@@ -418,8 +398,6 @@ function PostCard(props: {
                         />
                     )}
                 </Row>
-
-                {/* </Row> */}
                 {commentsOpen && (
                     <Comments
                         postId={postData.id}
@@ -492,3 +470,23 @@ export default PostCard
         </button>
     )}
 </Row> */
+
+/* {['prism', 'decision-tree'].includes(type) && (
+    <StatButton
+        icon={<ArrowRightIcon />}
+        iconSize={20}
+        text='Open game room'
+        disabled={location === 'preview'}
+        onClick={() => history(`/p/${id}`)}
+    />
+)} */
+
+/* <button
+    className={styles.gbgFromPostButton}
+    type='button'
+    title='Create GBG from post'
+    // disabled={location === 'preview'}
+    onClick={startNewGbgFromPost}
+>
+    <CastaliaIcon />
+</button> */

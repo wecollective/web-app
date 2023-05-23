@@ -17,15 +17,16 @@ import Cookies from 'universal-cookie'
 function RatingModal(props: {
     itemType: 'post' | 'comment'
     itemData: any
-    updateItem: (rating: number) => void
+    updateItem: () => void
     close: () => void
 }): JSX.Element {
     const { itemType, itemData, updateItem, close } = props
-    const { id, accountRating, totalRatingPoints } = itemData
+    const { id, accountRating } = itemData
     const { loggedIn, accountData, setLogInModalOpen, setAlertMessage, setAlertModalOpen } =
         useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
     const [ratings, setRatings] = useState<any[]>([])
+    const [averageScore, setAverageScore] = useState(0)
     const [newRating, setNewRating] = useState(100)
     const [loading, setLoading] = useState(true)
     const [responseLoading, setResponseLoading] = useState(false)
@@ -33,7 +34,6 @@ function RatingModal(props: {
     const headerText = ratings.length
         ? `${ratings.length} rating${pluralise(ratings.length)}`
         : 'No ratings yet...'
-    const averageScore = `${(totalRatingPoints / ratings.length).toFixed(2)}%`
     const mobileView = document.documentElement.clientWidth < 900
 
     function getRatings() {
@@ -41,6 +41,9 @@ function RatingModal(props: {
             .get(`${config.apiURL}/ratings?itemType=${itemType}&itemId=${id}`)
             .then((res) => {
                 setRatings(res.data)
+                setAverageScore(
+                    res.data.map((r) => r.value).reduce((a, b) => a + b, 0) / res.data.length
+                )
                 setLoading(false)
             })
             .catch((error) => console.log(error))
@@ -60,10 +63,7 @@ function RatingModal(props: {
         axios
             .post(`${config.apiURL}/${!accountRating ? 'add' : 'remove'}-rating`, data, options)
             .then(() => {
-                const rating = accountRating
-                    ? +ratings.find((r) => r.Creator.id === accountData.id).value
-                    : +newRating
-                updateItem(rating)
+                updateItem()
                 close()
             })
             .catch((error) => console.log(error))
@@ -83,8 +83,8 @@ function RatingModal(props: {
                             <Row centerY spaceBetween style={{ marginBottom: 15 }}>
                                 <p>Average score:</p>
                                 <div className={`${styles.scoreBar} ${styles.aqua}`}>
-                                    <div style={{ width: averageScore }} />
-                                    <p>{averageScore}</p>
+                                    <div style={{ width: `${averageScore}%` }} />
+                                    <p>{averageScore}%</p>
                                 </div>
                             </Row>
                             {ratings.map((rating) => (

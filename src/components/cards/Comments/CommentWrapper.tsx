@@ -12,12 +12,7 @@ function CommentWrapper(props: {
     addComment: (newComment: string) => void
     removeComment: (comment: any) => void
     editComment: (comment: any, newText: string) => void
-    updateCommentReactions: (
-        commentId: number,
-        reactionType: string,
-        increment: boolean,
-        rating?: number
-    ) => void
+    updateCommentReactions: (commentId: number, reactionType: string, increment: boolean) => void
 }): JSX.Element {
     const {
         comment,
