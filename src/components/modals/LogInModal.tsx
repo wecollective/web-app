@@ -8,15 +8,13 @@ import config from '@src/Config'
 import { allValid, defaultErrorState, invalidateFormItem, updateFormItem } from '@src/Helpers'
 import styles from '@styles/components/modals/Modal.module.scss'
 import axios from 'axios'
-import React, { useContext, useEffect, useState } from 'react'
-import { useGoogleReCaptcha } from 'react-google-recaptcha-v3'
+import React, { useContext, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 function LogInModal(props: { close: () => void }): JSX.Element {
     const { close } = props
     const { getAccountData, setRegisterModalOpen, setForgotPasswordModalOpen } =
         useContext(AccountContext)
-    const { executeRecaptcha } = useGoogleReCaptcha()
     const [formData, setFormData] = useState({
         emailOrHandle: {
             value: '',
@@ -54,11 +52,9 @@ function LogInModal(props: { close: () => void }): JSX.Element {
         setShowResendVerificationEmail(false)
         if (allValid(formData, setFormData)) {
             setLoading(true)
-            const reCaptchaToken = await executeRecaptcha!('login')
             const data = {
                 emailOrHandle: emailOrHandle.value,
                 password: password.value,
-                reCaptchaToken,
             }
             axios
                 .post(`${config.apiURL}/log-in`, data)
@@ -83,9 +79,6 @@ function LogInModal(props: { close: () => void }): JSX.Element {
                             break
                         case 'Incorrect password':
                             invalidateItem('password', 'Incorrect password')
-                            break
-                        case 'Recaptcha failed':
-                            setErrorMessage('reCAPTCHA test failed')
                             break
                         case 'Spam account':
                             setErrorMessage(
@@ -119,16 +112,6 @@ function LogInModal(props: { close: () => void }): JSX.Element {
                 setVerificationEmailLoading(false)
             })
     }
-
-    useEffect(() => {
-        // make recaptcha flag visible
-        const recaptchaBadge = document.getElementsByClassName('grecaptcha-badge')[0] as HTMLElement
-        recaptchaBadge.style.visibility = 'visible'
-        recaptchaBadge.style.zIndex = '500'
-        return () => {
-            recaptchaBadge.style.visibility = 'hidden'
-        }
-    })
 
     return (
         <Modal centerX centerY close={close}>
