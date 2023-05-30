@@ -74,8 +74,12 @@ function GlassBeadGameCard(props: { postData: any; location: string }): JSX.Elem
     }
 
     function renderRestrictedPlayersRow() {
-        const move = `${beads.length + 1} / ${movesPerPlayer * Players.length}`
-        const movesLeft = state === 'active' && movesPerPlayer * Players.length > beads.length
+        const move = movesPerPlayer
+            ? `${beads.length + 1} / ${movesPerPlayer * Players.length}`
+            : beads.length + 1
+        const movesLeft =
+            state === 'active' &&
+            (!movesPerPlayer || movesPerPlayer * Players.length > beads.length)
         return (
             <Row spaceBetween centerY className={styles.infoRow}>
                 <FlagImageHighlights
@@ -236,7 +240,7 @@ function GlassBeadGameCard(props: { postData: any; location: string }): JSX.Elem
                 players.push(Players.find((p) => p.id === +playerId))
             })
             setOrderedPlayers(players)
-            const movesLeft = Beads.length < Players.length * movesPerPlayer
+            const movesLeft = !movesPerPlayer || Beads.length < Players.length * movesPerPlayer
             setNextPlayer(movesLeft ? players[Beads.length % Players.length] : null)
             const deadlineActive = nextMoveDeadline && new Date(nextMoveDeadline) > new Date()
             if (deadlineActive) {
