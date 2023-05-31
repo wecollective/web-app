@@ -14,7 +14,6 @@ import { UserContext } from '@contexts/UserContext'
 import config from '@src/Config'
 import { pluralise } from '@src/Helpers'
 import axios from 'axios'
-import * as d3 from 'd3'
 import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
@@ -31,7 +30,6 @@ function LinkModal(props: {
     const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
     const { userPosts, setUserPosts } = useContext(UserContext)
     const { postData, setPostData } = useContext(PostContext)
-    const [linkDataNew, setLinkDataNew] = useState<any>(null)
     const [linkData, setLinkData] = useState<any>({
         IncomingPostLinks: [],
         IncomingCommentLinks: [],
@@ -70,9 +68,7 @@ function LinkModal(props: {
             .then((res) => {
                 console.log('links: ', res.data)
                 setLoading(false)
-                setLinkDataNew(res.data)
-                // setLinkData(res.data)
-                // setLoading(false)
+                setLinkData(res.data)
             })
             .catch((error) => console.log(error))
     }
@@ -199,230 +195,7 @@ function LinkModal(props: {
         )
     }
 
-    const duration = 500
-
-    function findPathCoordinates(d) {
-        return `M${d.x},${d.y}C${d.x},${(d.y + d.parent.y) / 2} ${d.parent.x},${
-            (d.y + d.parent.y) / 2
-        } ${d.parent.x},${d.parent.y}`
-    }
-
-    function radialPoint(x, y) {
-        return [+y * Math.cos(x - Math.PI / 2), y * Math.sin(x)]
-    }
-
-    function createLinks(links) {
-        // const lineGen = d3
-        //     .lineRadial()
-        //     .angle((d) => (d.x * Math.PI) / 180)
-        //     .radius((d) => d.y)
-
-        d3.select(`#link-group`)
-            .selectAll('.link')
-            .data(links)
-            // .data(links, (d) => d.data.id)
-            .join(
-                (enter) =>
-                    enter
-                        .append('path')
-                        .classed('link', true)
-                        // .attr('id', (d) => `line-${d.data.id}`)
-                        .attr('stroke', 'black')
-                        .attr('fill', 'none')
-                        .attr('opacity', 0)
-                        // .attr('x1', (d) => radialPoint(d.source.x, d.source.y)[0])
-                        // .attr('y1', (d) => radialPoint(d.source.x, d.source.y)[1])
-                        // .attr('x2', (d) => radialPoint(d.target.x, d.target.y)[0])
-                        // .attr('y2', (d) => radialPoint(d.target.x, d.target.y)[1])
-                        .attr(
-                            'd',
-                            d3
-                                .linkRadial()
-                                .angle((d) => d.x)
-                                .radius((d) => d.y)
-                            // .curve()
-                        )
-                        // .attr('d', (d) => findPathCoordinates(d))
-                        .call((node) => {
-                            node.transition().duration(duration).attr('opacity', 0.2)
-                        }),
-                (update) =>
-                    update.call(
-                        (node) => node.transition('link-update').duration(duration)
-                        // .attr('d', (d) => findPathCoordinates(d))
-                    ),
-                (exit) =>
-                    exit.call((node) =>
-                        node
-                            .transition()
-                            .duration(duration / 2)
-                            .attr('opacity', 0)
-                            .remove()
-                    )
-            )
-    }
-
-    function createCircles(linkedItems) {
-        d3.select(`#node-group`)
-            .selectAll('.circle')
-            .data(linkedItems, (d) => d.data.id)
-            .join(
-                (enter) =>
-                    enter
-                        .append('circle')
-                        .attr('id', (d) => `circle-${d.data.id}`)
-                        .attr(
-                            'transform',
-                            (d) => `rotate(${(d.x * 180) / Math.PI - 90}),translate(${d.y}, 0)`
-                        )
-                        // .attr('cx', 0)
-                        // .attr('cy', (d) => -d.y)
-                        // .attr('transform', (d) => `rotate(${d.x}, 0, 0)`)
-                        .attr('r', (d) => 10)
-                        .attr('fill', 'red')
-                        .attr('stroke-width', 3)
-                        // .attr('transform', (d) => `translate(${d3.pointRadial(d.x, d.y)})`)
-                        // .attr('transform', (d) => `translate(${d.x},${d.y})`)
-                        .style('cursor', 'pointer')
-                        .call(
-                            (node) =>
-                                node
-                                    .transition('background-circle-enter')
-                                    .duration(duration)
-                                    .attr('opacity', 1)
-                            // .attr('transform', (d) => `translate(${d.x},${d.y})`)
-                        ),
-                (update) =>
-                    update.call(
-                        (node) =>
-                            node
-                                .transition('background-circle-update')
-                                .duration(duration)
-                                .attr('fill', '#aaa')
-                        // .attr('transform', (d) => `translate(${d.x},${d.y})`)
-                    ),
-                (exit) =>
-                    exit.call((node) =>
-                        node
-                            .transition('background-circle-exit')
-                            .duration(duration / 2)
-                            .attr('opacity', 0)
-                            .remove()
-                    )
-            )
-    }
-
-    const zoom = d3
-        .zoom()
-        .on('zoom', (event) =>
-            d3.select('#link-map-master-group').attr('transform', event.transform)
-        )
-
-    function buildCanvas() {
-        // build canvas
-        // console.log('linkmap: ', d3.select('#link-map').node())
-        const svg = d3
-            .select('#link-map')
-            .append('svg')
-            .attr('id', 'link-map-svg')
-            .attr('width', 500)
-            .attr('height', 500)
-        const masterGroup = svg.append('g').attr('id', 'link-map-master-group')
-        masterGroup.append('g').attr('id', 'link-group')
-        masterGroup.append('g').attr('id', 'node-group')
-        // set up zoom
-        svg.call(zoom).on('dblclick.zoom', null)
-        svg.call(zoom.transform, d3.zoomIdentity.translate(500 / 2, 500 / 2))
-    }
-
-    useEffect(() => {
-        getLinks()
-    }, [])
-
-    const sampleData = {
-        id: 0,
-        children: [
-            { id: 1, children: [] },
-            { id: 2, children: [] },
-            { id: 3, children: [] },
-            { id: 4, children: [] },
-            {
-                id: 5,
-                children: [
-                    { id: 10, children: [] },
-                    { id: 11, children: [] },
-                    { id: 12, children: [] },
-                ],
-            },
-            {
-                id: 6,
-                children: [
-                    { id: 7, children: [] },
-                    { id: 8, children: [] },
-                    {
-                        id: 9,
-                        children: [
-                            { id: 13, children: [] },
-                            { id: 14, children: [] },
-                            { id: 15, children: [] },
-                        ],
-                    },
-                ],
-            },
-        ],
-    }
-
-    useEffect(() => {
-        if (linkDataNew) {
-            buildCanvas()
-
-            const height = 600
-            const width = 600
-            const diameter = height * 0.75
-            const radius = diameter / 2
-
-            const tree = d3
-                .tree()
-                .size([2 * Math.PI, radius])
-                // .separation(() => 2)
-                .separation((a, b) => (a.parent === b.parent ? 1 : 2) / a.depth)
-
-            const data = d3.hierarchy(sampleData)
-            // const data = d3.hierarchy(
-            //     { ...itemData, children: linkDataNew.linkedItems },
-            //     (d) => d.children
-            // )
-
-            const treeData = tree(data)
-
-            const nodes = treeData.descendants()
-            const links = treeData.links()
-            createLinks(links)
-            createCircles(nodes)
-
-            // console.log('2 * Math.PI: ', 2 * Math.PI)
-            // // build radial tree
-            // const root = d3.hierarchy(
-            //     // { ...itemData, children: linkDataNew.linkedItems },
-            //     sampleData,
-            //     (d) => d.children
-            // )
-            // const tree = d3
-            //     .cluster()
-            //     .size([2 * Math.PI, 200])
-            //     .separation((a, b) => (a.parent === b.parent ? 1 : 2))
-            // // .separation((a, b) => (a.depth > b.depth ? a.depth : b.depth))
-            // // .nodeSize([50, 200])
-            // // .separation(() => 1)
-            // tree(root).links()
-            // const links = root.descendants().slice(1)
-            // const nodes = root.descendants()
-            // console.log({ links, nodes })
-
-            // // createLinks(links)
-            // createCircles(nodes)
-        }
-    }, [linkDataNew])
+    useEffect(() => getLinks(), [])
 
     return (
         <Modal close={close} centerX style={{ minWidth: 400 }}>
@@ -431,7 +204,6 @@ function LinkModal(props: {
             ) : (
                 <Column centerX>
                     <h1>{headerText}</h1>
-                    <div id='link-map' />
                     {incomingLinks && (
                         <Column centerX style={{ marginBottom: 20 }}>
                             <h2>Incoming:</h2>
