@@ -1,11 +1,10 @@
 import Button from '@components/Button'
 import Column from '@components/Column'
+import DropDown from '@components/DropDown'
 import DropDownMenu from '@components/DropDownMenu'
-import ImageTitle from '@components/ImageTitle'
 import Input from '@components/Input'
 import LoadingWheel from '@components/LoadingWheel'
 import Row from '@components/Row'
-import TextLink from '@components/TextLink'
 import PostCard from '@components/cards/PostCard/PostCard'
 import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
@@ -14,6 +13,7 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import { UserContext } from '@contexts/UserContext'
 import config from '@src/Config'
 import { pluralise } from '@src/Helpers'
+import { ArrowDownIcon } from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useState } from 'react'
@@ -47,6 +47,8 @@ function LinkModal(props: {
     const [newLinkTargetId, setNewLinkTargetId] = useState('')
     const [newLinkDescription, setNewLinkDescription] = useState('')
     const [targetError, setTargetError] = useState(false)
+    const [linkedItem, setLinkedItem] = useState<any>(null)
+    const [linkTypes, setLinkTypes] = useState('All Types')
     const cookies = new Cookies()
     const incomingLinks = IncomingPostLinks.length > 0 || IncomingCommentLinks.length > 0
     const outgoingLinks = OutgoingPostLinks.length > 0 || OutgoingCommentLinks.length > 0
@@ -109,6 +111,21 @@ function LinkModal(props: {
                 // setLoading(false)
             })
             .catch((error) => console.log(error))
+    }
+
+    function getLinkedItem(identifier) {
+        if (newLinkTargetType === 'Post') {
+            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+            axios
+                .get(`${config.apiURL}/post-data?postId=${identifier}`, options)
+                .then((res) => {
+                    setLinkedItem(res.data)
+                })
+                .catch((error) => {
+                    console.log(error)
+                    setLinkedItem(null)
+                })
+        }
     }
 
     function updateContextState(action, linkedItemType, linkedItemId) {
@@ -203,37 +220,39 @@ function LinkModal(props: {
             .catch((error) => console.log(error))
     }
 
-    function renderLink(link, type, direction) {
-        const linkedItem = link[`${direction === 'to' ? 'Outgoing' : 'Incoming'}${type}`]
-        let linkedItemUrl
-        if (type === 'Post') linkedItemUrl = `/p/${linkedItem.id}`
-        if (type === 'Comment') linkedItemUrl = `/p/${linkedItem.itemId}?commentId=${linkedItem.id}`
-        return (
-            <Row key={link.id} centerY style={{ marginBottom: 10 }}>
-                <p className='grey'>linked {direction}</p>
-                <ImageTitle
-                    type='user'
-                    imagePath={linkedItem.Creator.flagImagePath}
-                    title={`${linkedItem.Creator.name}'s`}
-                    link={`/u/${linkedItem.Creator.handle}/posts`}
-                    fontSize={16}
-                    style={{ margin: '0 5px' }}
-                />
-                <TextLink text={type.toLowerCase()} link={linkedItemUrl} />
-                {linkedItem.Creator.id === accountData.id && (
-                    <Button
-                        text='Delete'
-                        color='blue'
-                        size='medium'
-                        onClick={() => removeLink(direction, type, link.id, linkedItem.id)}
-                        style={{ marginLeft: 10 }}
-                    />
-                )}
-            </Row>
-        )
-    }
+    // function renderLink(link, type, direction) {
+    //     const linkedItem = link[`${direction === 'to' ? 'Outgoing' : 'Incoming'}${type}`]
+    //     let linkedItemUrl
+    //     if (type === 'Post') linkedItemUrl = `/p/${linkedItem.id}`
+    //     if (type === 'Comment') linkedItemUrl = `/p/${linkedItem.itemId}?commentId=${linkedItem.id}`
+    //     return (
+    //         <Row key={link.id} centerY style={{ marginBottom: 10 }}>
+    //             <p className='grey'>linked {direction}</p>
+    //             <ImageTitle
+    //                 type='user'
+    //                 imagePath={linkedItem.Creator.flagImagePath}
+    //                 title={`${linkedItem.Creator.name}'s`}
+    //                 link={`/u/${linkedItem.Creator.handle}/posts`}
+    //                 fontSize={16}
+    //                 style={{ margin: '0 5px' }}
+    //             />
+    //             <TextLink text={type.toLowerCase()} link={linkedItemUrl} />
+    //             {linkedItem.Creator.id === accountData.id && (
+    //                 <Button
+    //                     text='Delete'
+    //                     color='blue'
+    //                     size='medium'
+    //                     onClick={() => removeLink(direction, type, link.id, linkedItem.id)}
+    //                     style={{ marginLeft: 10 }}
+    //                 />
+    //             )}
+    //         </Row>
+    //     )
+    // }
 
     const duration = 500
+    const canvasSize = 600
+    const circleSize = canvasSize - 50
 
     function findPathCoordinates(d) {
         return `M${d.x},${d.y}C${d.x},${(d.y + d.parent.y) / 2} ${d.parent.x},${
@@ -256,7 +275,11 @@ function LinkModal(props: {
                         .append('path')
                         .classed('link', true)
                         // .attr('id', (d) => `line-${d.data.id}`)
-                        .attr('stroke', 'black')
+                        .attr('stroke', '#ccc')
+                        // .attr('stroke-width', (d) => {
+                        //     console.log('link d: ', d)
+                        //     return d.source.height + 1
+                        // })
                         .attr('fill', 'none')
                         .attr('opacity', 0)
                         // .attr('x1', (d) => radialPoint(d.source.x, d.source.y)[0])
@@ -273,7 +296,7 @@ function LinkModal(props: {
                         )
                         // .attr('d', (d) => findPathCoordinates(d))
                         .call((node) => {
-                            node.transition().duration(duration).attr('opacity', 0.2)
+                            node.transition().duration(duration).attr('opacity', 1)
                         }),
                 (update) =>
                     update.call(
@@ -307,9 +330,10 @@ function LinkModal(props: {
                         // .attr('cx', 0)
                         // .attr('cy', (d) => -d.y)
                         // .attr('transform', (d) => `rotate(${d.x}, 0, 0)`)
-                        .attr('r', (d) => 10)
-                        .attr('fill', 'red')
-                        .attr('stroke-width', 3)
+                        .attr('r', (d) => (d.parent ? 10 : 15))
+                        .attr('fill', (d) => (d.parent ? '#00b1a9' : '#826cff'))
+                        // .attr('stroke-width', 3)
+                        .attr('stroke', 'black')
                         // .attr('transform', (d) => `translate(${d3.pointRadial(d.x, d.y)})`)
                         // .attr('transform', (d) => `translate(${d.x},${d.y})`)
                         .style('cursor', 'pointer')
@@ -345,8 +369,12 @@ function LinkModal(props: {
         .zoom()
         .on('zoom', (event) => d3.select('#master-group').attr('transform', event.transform))
 
-    const canvasSize = 600
-    const circleSize = canvasSize - 50
+    function resetPosition() {
+        d3.select('#link-map-svg')
+            .transition('reset-position')
+            .duration(1000)
+            .call(zoom.transform, d3.zoomIdentity.translate(canvasSize / 2, canvasSize / 2))
+    }
 
     function buildCanvas() {
         const svg = d3
@@ -372,6 +400,7 @@ function LinkModal(props: {
         // set up zoom
         svg.call(zoom).on('dblclick.zoom', null)
         svg.call(zoom.transform, d3.zoomIdentity.translate(canvasSize / 2, canvasSize / 2))
+        svg.on('click', resetPosition)
     }
 
     useEffect(() => {
@@ -410,7 +439,15 @@ function LinkModal(props: {
                     <h1>{headerText}</h1>
                     <Row>
                         <Column centerX style={{ width: 700, marginRight: 50 }}>
-                            <PostCard post={itemData} location='space-posts' />
+                            <PostCard post={itemData} location='link-modal' />
+                            {/* <ArrowDownIcon
+                                style={{
+                                    height: 20,
+                                    width: 20,
+                                    color: '#ddd',
+                                    marginTop: 20,
+                                }}
+                            /> */}
                             {loggedIn ? (
                                 <Column centerX style={{ width: '100%', marginTop: 20 }}>
                                     <Row centerY style={{ width: '100%', marginBottom: 20 }}>
@@ -439,6 +476,7 @@ function LinkModal(props: {
                                             onChange={(value) => {
                                                 setTargetError(false)
                                                 setNewLinkTargetId(value)
+                                                getLinkedItem(value)
                                             }}
                                             style={{ marginRight: 20 }}
                                         />
@@ -459,13 +497,13 @@ function LinkModal(props: {
                                             {newLinkTargetType} not found
                                         </p>
                                     )}
-                                    <Row centerY style={{ width: '100%' }}>
-                                        <p style={{ flexShrink: 0, marginRight: 20 }}>
+                                    <Row centerY style={{ width: '100%', marginBottom: 20 }}>
+                                        <p style={{ flexShrink: 0, marginRight: 10 }}>
                                             Link description
                                         </p>
                                         <Input
                                             type='text'
-                                            placeholder='link description (optional)...'
+                                            placeholder='description (optional)...'
                                             value={newLinkDescription}
                                             onChange={(value) => setNewLinkDescription(value)}
                                         />
@@ -474,6 +512,19 @@ function LinkModal(props: {
                                         <p className='danger' style={{ marginBottom: 20 }}>
                                             Max 50 characters
                                         </p>
+                                    )}
+                                    {linkedItem && (
+                                        <Column centerX>
+                                            <ArrowDownIcon
+                                                style={{
+                                                    height: 20,
+                                                    width: 20,
+                                                    color: '#ccc',
+                                                    marginBottom: 20,
+                                                }}
+                                            />
+                                            <PostCard post={linkedItem} location='link-modal' />
+                                        </Column>
                                     )}
                                 </Column>
                             ) : (
@@ -491,7 +542,16 @@ function LinkModal(props: {
                                 </Row>
                             )}
                         </Column>
-                        <div id='link-map' />
+                        <Column centerX>
+                            <DropDown
+                                title='Link types'
+                                options={['All Types', 'Posts', 'Comments', 'Spaces', 'Users']}
+                                selectedOption={linkTypes}
+                                setSelectedOption={(option) => setLinkTypes(option)}
+                                style={{ marginBottom: 20 }}
+                            />
+                            <div id='link-map' />
+                        </Column>
                     </Row>
                     {/* {loggedIn ? (
                         <Column centerX style={{ marginTop: totalLinks ? 20 : 0 }}>
