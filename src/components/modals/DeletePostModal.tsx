@@ -12,7 +12,13 @@ import Cookies from 'universal-cookie'
 
 function DeletePostModal(props: {
     postId: number
-    location: 'post-page' | 'space-posts' | 'space-post-map' | 'user-posts' | 'preview'
+    location:
+        | 'post-page'
+        | 'space-posts'
+        | 'space-post-map'
+        | 'user-posts'
+        | 'link-modal'
+        | 'preview'
     close: () => void
 }): JSX.Element {
     const { postId, location, close } = props

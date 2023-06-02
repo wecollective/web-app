@@ -15,6 +15,7 @@ function AudioTimeSlider(props: {
     onEnded?: () => void
 }): JSX.Element {
     const { audioURL, audioElementId, location, onPlay, onPause, onEnded } = props
+    const [audioLoaded, setAudioLoaded] = useState(false)
     const [duration, setDuration] = useState(0)
     const [currentTime, setCurrentTime] = useState(0)
     const [sliderPercent, setSliderPercent] = useState(0)
@@ -48,11 +49,25 @@ function AudioTimeSlider(props: {
     }
 
     useEffect(() => {
+        // console.log('AudioTimeSlider useffect')
+        // console.log('navigator.userAgent: ', navigator.userAgent)
         const audio = d3.select(`#${audioElementId}`).node()
         if (audio) {
-            audio.crossOrigin = 'anonymous'
-            audio.src = audioURL
-            audio.currentTime = 0
+            // audio.
+            // document.body.addEventListener('touchstart', (event) => {
+            //     console.log(event)
+            //     // if (!audioLoaded) {
+            //     //     console.log('touchstart: audio.load()')
+            //     //     setAudioLoaded(true)
+            //     //     audio.load()
+            //     //     // setAudioLoaded(true)
+            //     // }
+            // })
+            // console.log('audioURL: ', audioURL)
+            // // audio.currentTime = 0
+            // console.log('audio.canPlayType("audio/mpeg"): ', audio.canPlayType('audio/mpeg'))
+            // console.log('audio.canPlayType("audio/ogg"): ', audio.canPlayType('audio/ogg'))
+            // console.log('audio.canPlayType("audio/wav"): ', audio.canPlayType('audio/wav'))
             d3.select(audio)
                 .on('progress.timeSlider', () => {
                     if (audio.duration > 0) {
@@ -87,7 +102,14 @@ function AudioTimeSlider(props: {
                 <p>{formatTimeMMSS(currentTime)}</p>
                 <p>{formatTimeMMSS(duration)}</p>
             </Row>
-            <audio id={audioElementId} onLoadedData={onLoadedData} onTimeUpdate={onTimeUpdate}>
+            <audio
+                id={audioElementId}
+                onLoadedData={onLoadedData}
+                onTimeUpdate={onTimeUpdate}
+                crossOrigin='anonymous'
+                // preload='none'
+            >
+                <source src={audioURL} type='audio/mpeg' />
                 <track kind='captions' />
             </audio>
         </Column>

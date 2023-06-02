@@ -5,15 +5,26 @@ import React, { useEffect, useRef } from 'react'
 function AudioVisualiser(props: {
     audioElementId: string
     audioURL: string
+    audioPlaying: boolean
     staticBars: number
     staticColor: string
     dynamicBars: number
     dynamicColor: string
     style?: any
 }): JSX.Element {
-    const { audioElementId, audioURL, staticBars, staticColor, dynamicBars, dynamicColor, style } =
-        props
+    const {
+        audioElementId,
+        audioURL,
+        audioPlaying,
+        staticBars,
+        staticColor,
+        dynamicBars,
+        dynamicColor,
+        style,
+    } = props
 
+    // const rendering = useRef(false)
+    // const renderIndex = useRef(0)
     const offlineAudioContext = useRef<OfflineAudioContext | null>(null)
     const audioContext = useRef<AudioContext | null>(null)
     const audioSource = useRef<MediaElementAudioSourceNode | null>(null)
@@ -85,14 +96,76 @@ function AudioVisualiser(props: {
 
     useEffect(() => {
         loadAudioForStaticVisualisation()
-        const audio = d3.select(`#${audioElementId}`)
-        if (audio.node()) {
-            const { height, width } = d3
-                .select(`#${audioElementId}-visualiser`)
-                .node()
-                .getBoundingClientRect()
+        // const audio = d3.select(`#${audioElementId}`)
+        // if (audio.node()) {
+        //     const { height, width } = d3
+        //         .select(`#${audioElementId}-visualiser`)
+        //         .node()
+        //         .getBoundingClientRect()
 
-            audio.on('play.visualiser', () => {
+        //     audio.on('play.visualiser', () => {
+        //         if (ready.current) {
+        //             console.log('startVisualiser')
+        //             const totalBars = Math.min(dynamicBars, 255)
+        //             audioContext.current = audioContext.current || new AudioContext()
+        //             audioSource.current =
+        //                 audioSource.current ||
+        //                 audioContext.current.createMediaElementSource(audio.node())
+        //             const analyser = audioContext.current.createAnalyser()
+        //             audioSource.current.connect(analyser)
+        //             audioSource.current.connect(audioContext.current.destination)
+        //             const frequencyData = new Uint8Array(analyser.frequencyBinCount)
+        //             analyser.getByteFrequencyData(frequencyData)
+
+        //             const oldSVG = d3.select(`#${audioElementId}-visualiser`).select('svg')
+        //             if (oldSVG.node()) oldSVG.remove()
+
+        //             const svg = d3
+        //                 .select(`#${audioElementId}-visualiser`)
+        //                 .append('svg')
+        //                 .attr('width', '100%')
+        //                 .attr('height', '100%')
+
+        //             for (let i = 0; i < totalBars; i += 1) {
+        //                 svg.append('rect')
+        //                     .attr('id', `bar-${i}`)
+        //                     .attr('x', (width / totalBars) * i)
+        //                     .attr('y', height / 2)
+        //                     .attr('width', width / totalBars)
+        //                     .attr('fill', dynamicColor)
+        //                     .style('opacity', 1)
+        //             }
+
+        //             const renderVisualizer = () => {
+        //                 analyser.getByteFrequencyData(frequencyData)
+        //                 for (let i = 0; i < totalBars; i += 1) {
+        //                     const barIndex = Math.floor((255 / totalBars) * i)
+        //                     const barHeight = (height / 255) * frequencyData[barIndex] // 0 to 255
+        //                     svg.select(`#bar-${i}`)
+        //                         .attr('height', barHeight)
+        //                         .attr('y', height / 2 - barHeight / 2)
+        //                 }
+        //                 window.requestAnimationFrame(renderVisualizer)
+        //             }
+        //             renderVisualizer()
+        //         }
+        //     })
+        // }
+    }, [])
+
+    useEffect(() => {
+        if (audioPlaying) {
+            // // if (!rendering.current) {
+            //     rendering.current = true
+            //     renderIndex.current += 1
+            const audio = d3.select(`#${audioElementId}`)
+            if (audio.node()) {
+                const { height, width } = d3
+                    .select(`#${audioElementId}-visualiser`)
+                    .node()
+                    .getBoundingClientRect()
+
+                // console.log('startVisualiser')
                 const totalBars = Math.min(dynamicBars, 255)
                 audioContext.current = audioContext.current || new AudioContext()
                 audioSource.current =
@@ -135,9 +208,24 @@ function AudioVisualiser(props: {
                     window.requestAnimationFrame(renderVisualizer)
                 }
                 renderVisualizer()
-            })
+            }
+            // }
         }
-    }, [])
+        // else {
+        //     // rendering.current = false
+        //     const currentIndex = renderIndex.current
+        //     // renderIndex.current = newIndex
+        //     setTimeout(() => {
+        //         const oldSVG = d3.select(`#${audioElementId}-visualiser`).select('svg')
+        //         // console.log('rendering.current: ', rendering.current)
+        //         if (oldSVG.node() && renderIndex.current === currentIndex) {
+        //             console.log('stop rendering')
+        //             oldSVG.remove()
+        //             rendering.current = false
+        //         }
+        //     }, 1000)
+        // }
+    }, [audioPlaying])
 
     return (
         <Column style={style}>

@@ -32,9 +32,10 @@ function GlobalSearchBar(props: { onLocationChange?: () => void; style?: any }):
     const [searchQuery, setSearchQuery] = useState('')
     const searchQueryRef = useRef('')
     const [searchType, setSearchType] = useState('Spaces')
-    const [searchConstraint, setSearchConstraint] = useState(
-        pageType === 'u' || (pageType === 's' && handle !== 'all')
-    )
+    const [searchConstraint, setSearchConstraint] = useState(pageType === 's' && handle !== 'all')
+    // const [searchConstraint, setSearchConstraint] = useState(
+    //     pageType === 'u' || (pageType === 's' && handle !== 'all')
+    // )
     const [suggestions, setSuggestions] = useState<any[]>([])
     const [suggestionsLoading, setSuggestionsLoading] = useState(false)
     const pageDataLoading =
@@ -92,6 +93,7 @@ function GlobalSearchBar(props: { onLocationChange?: () => void; style?: any }):
     useEffect(() => {
         if (firstRun) setFirstRun(false)
         else {
+            setSearchType('Spaces')
             // update search constraint
             const showSpaceConstraint =
                 pageType === 's' &&

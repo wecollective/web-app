@@ -20,7 +20,8 @@ import PostSpaces from '@src/components/cards/PostCard/PostSpaces'
 import UrlCard from '@src/components/cards/PostCard/UrlCard'
 import EditPostModal from '@src/components/modals/EditPostModal'
 import LikeModal from '@src/components/modals/LikeModal'
-import LinkModal from '@src/components/modals/LinkModal'
+// import LinkModal from '@src/components/modals/LinkModal'
+import LinkModal from '@src/components/modals/LinkModal2'
 import RatingModal from '@src/components/modals/RatingModal'
 import RepostModal from '@src/components/modals/RepostModal'
 import {
@@ -42,7 +43,13 @@ import Cookies from 'universal-cookie'
 function PostCard(props: {
     post: any
     index?: number
-    location: 'post-page' | 'space-posts' | 'space-post-map' | 'user-posts' | 'preview'
+    location:
+        | 'post-page'
+        | 'space-posts'
+        | 'space-post-map'
+        | 'user-posts'
+        | 'link-modal'
+        | 'preview'
     styling?: boolean
     style?: any
 }): JSX.Element {
@@ -96,6 +103,7 @@ function PostCard(props: {
     const mobileView = document.documentElement.clientWidth < 900
     const cookies = new Cookies()
     const isOwnPost = accountData && Creator && accountData.id === Creator.id
+    const showFooter = location !== 'link-modal'
     // const directSpaces = DirectSpaces.filter((s) => s.id !== 1)
 
     // change postData to array so consistent with post lists
@@ -299,117 +307,119 @@ function PostCard(props: {
                     </Column>
                 )}
             </Column>
-            <Column className={styles.footer}>
-                <Row centerY className={styles.statButtons}>
-                    <StatButton
-                        icon={<LikeIcon />}
-                        iconSize={20}
-                        text={totalLikes}
-                        title={statTitle('Like', totalLikes || 0)}
-                        color={accountLike && 'blue'}
-                        disabled={location === 'preview' || likeResponseLoading}
-                        loading={likeResponseLoading}
-                        onClickIcon={toggleLike}
-                        onClickStat={() => setLikeModalOpen(true)}
-                    />
-                    <StatButton
-                        icon={<CommentIcon />}
-                        iconSize={20}
-                        text={totalComments}
-                        title={statTitle('Comment', totalComments || 0)}
-                        // color={accountComment && 'blue'}
-                        disabled={location === 'preview'}
-                        onClick={() => {
-                            if (loggedIn || totalComments) setCommentsOpen(!commentsOpen)
-                            else {
-                                setAlertMessage('Log in to comment on posts')
-                                setAlertModalOpen(true)
-                            }
-                        }}
-                    />
-                    <StatButton
-                        icon={<RepostIcon />}
-                        iconSize={20}
-                        text={totalReposts}
-                        title={statTitle('Repost', totalReposts || 0)}
-                        color={accountRepost && 'blue'}
-                        disabled={location === 'preview'}
-                        onClick={() => setRepostModalOpen(true)}
-                    />
-                    <StatButton
-                        icon={<StarIcon />}
-                        iconSize={20}
-                        text={totalRatings}
-                        title={statTitle('Rating', totalRatings || 0)}
-                        color={accountRating && 'blue'}
-                        disabled={location === 'preview'}
-                        onClick={() => setRatingModalOpen(true)}
-                    />
-                    <StatButton
-                        icon={<LinkIcon />}
-                        iconSize={20}
-                        text={totalLinks}
-                        title={statTitle('Link', totalLinks || 0)}
-                        color={accountLinks > 0 ? 'blue' : undefined}
-                        disabled={location === 'preview'}
-                        onClick={() => setLinkModalOpen(true)}
-                    />
-                    {likeModalOpen && (
-                        <LikeModal
-                            itemType='post'
-                            itemData={postData}
-                            updateItem={() =>
-                                setPostData({
-                                    ...postData,
-                                    totalLikes: totalLikes + (accountLike ? -1 : 1),
-                                    accountLike: !accountLike,
-                                })
-                            }
-                            close={() => setLikeModalOpen(false)}
+            {showFooter && (
+                <Column className={styles.footer}>
+                    <Row centerY className={styles.statButtons}>
+                        <StatButton
+                            icon={<LikeIcon />}
+                            iconSize={20}
+                            text={totalLikes}
+                            title={statTitle('Like', totalLikes || 0)}
+                            color={accountLike && 'blue'}
+                            disabled={location === 'preview' || likeResponseLoading}
+                            loading={likeResponseLoading}
+                            onClickIcon={toggleLike}
+                            onClickStat={() => setLikeModalOpen(true)}
                         />
-                    )}
-                    {repostModalOpen && (
-                        <RepostModal
-                            postData={postData}
-                            setPostData={setPostData}
-                            close={() => setRepostModalOpen(false)}
-                        />
-                    )}
-                    {ratingModalOpen && (
-                        <RatingModal
-                            itemType='post'
-                            itemData={postData}
-                            updateItem={() => {
-                                setPostData({
-                                    ...postData,
-                                    totalRatings: totalRatings + (accountRating ? -1 : 1),
-                                    accountRating: !accountRating,
-                                })
+                        <StatButton
+                            icon={<CommentIcon />}
+                            iconSize={20}
+                            text={totalComments}
+                            title={statTitle('Comment', totalComments || 0)}
+                            // color={accountComment && 'blue'}
+                            disabled={location === 'preview'}
+                            onClick={() => {
+                                if (loggedIn || totalComments) setCommentsOpen(!commentsOpen)
+                                else {
+                                    setAlertMessage('Log in to comment on posts')
+                                    setAlertModalOpen(true)
+                                }
                             }}
-                            close={() => setRatingModalOpen(false)}
                         />
-                    )}
-                    {linkModalOpen && (
-                        <LinkModal
-                            itemType='post'
-                            itemData={postData}
+                        <StatButton
+                            icon={<RepostIcon />}
+                            iconSize={20}
+                            text={totalReposts}
+                            title={statTitle('Repost', totalReposts || 0)}
+                            color={accountRepost && 'blue'}
+                            disabled={location === 'preview'}
+                            onClick={() => setRepostModalOpen(true)}
+                        />
+                        <StatButton
+                            icon={<StarIcon />}
+                            iconSize={20}
+                            text={totalRatings}
+                            title={statTitle('Rating', totalRatings || 0)}
+                            color={accountRating && 'blue'}
+                            disabled={location === 'preview'}
+                            onClick={() => setRatingModalOpen(true)}
+                        />
+                        <StatButton
+                            icon={<LinkIcon />}
+                            iconSize={20}
+                            text={totalLinks}
+                            title={statTitle('Link', totalLinks || 0)}
+                            color={accountLinks > 0 ? 'blue' : undefined}
+                            disabled={location === 'preview'}
+                            onClick={() => setLinkModalOpen(true)}
+                        />
+                        {likeModalOpen && (
+                            <LikeModal
+                                itemType='post'
+                                itemData={postData}
+                                updateItem={() =>
+                                    setPostData({
+                                        ...postData,
+                                        totalLikes: totalLikes + (accountLike ? -1 : 1),
+                                        accountLike: !accountLike,
+                                    })
+                                }
+                                close={() => setLikeModalOpen(false)}
+                            />
+                        )}
+                        {repostModalOpen && (
+                            <RepostModal
+                                postData={postData}
+                                setPostData={setPostData}
+                                close={() => setRepostModalOpen(false)}
+                            />
+                        )}
+                        {ratingModalOpen && (
+                            <RatingModal
+                                itemType='post'
+                                itemData={postData}
+                                updateItem={() => {
+                                    setPostData({
+                                        ...postData,
+                                        totalRatings: totalRatings + (accountRating ? -1 : 1),
+                                        accountRating: !accountRating,
+                                    })
+                                }}
+                                close={() => setRatingModalOpen(false)}
+                            />
+                        )}
+                        {linkModalOpen && (
+                            <LinkModal
+                                itemType='post'
+                                itemData={postData}
+                                location={location}
+                                close={() => setLinkModalOpen(false)}
+                            />
+                        )}
+                    </Row>
+                    {commentsOpen && (
+                        <Comments
+                            postId={postData.id}
                             location={location}
-                            close={() => setLinkModalOpen(false)}
+                            totalComments={totalComments}
+                            incrementTotalComments={(value) =>
+                                setPostData({ ...postData, totalComments: totalComments + value })
+                            }
+                            style={{ marginTop: 10 }}
                         />
                     )}
-                </Row>
-                {commentsOpen && (
-                    <Comments
-                        postId={postData.id}
-                        location={location}
-                        totalComments={totalComments}
-                        incrementTotalComments={(value) =>
-                            setPostData({ ...postData, totalComments: totalComments + value })
-                        }
-                        style={{ marginTop: 10 }}
-                    />
-                )}
-            </Column>
+                </Column>
+            )}
             {editPostModalOpen && (
                 <EditPostModal
                     postData={postData}
