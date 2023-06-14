@@ -301,7 +301,7 @@ function PostCard(props: {
                                 key={urlData.url}
                                 type='post'
                                 urlData={urlData}
-                                style={{ marginTop: 10 }}
+                                style={{ marginTop: text ? 10 : 0 }}
                             />
                         ))}
                     </Column>
