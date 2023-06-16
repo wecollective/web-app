@@ -49,17 +49,18 @@ function LinkModal(props: {
     const [targetError, setTargetError] = useState(false)
     const [linkedItem, setLinkedItem] = useState<any>(null)
     const [linkTypes, setLinkTypes] = useState('All Types')
+    const [sizeBy, setSizeBy] = useState('Likes')
     const cookies = new Cookies()
-    const incomingLinks = IncomingPostLinks.length > 0 || IncomingCommentLinks.length > 0
-    const outgoingLinks = OutgoingPostLinks.length > 0 || OutgoingCommentLinks.length > 0
-    // todo: replace with 'totalLinks' prop when comment state added to posts
-    const tempTotalLinks =
-        IncomingPostLinks.length +
-        IncomingCommentLinks.length +
-        OutgoingPostLinks.length +
-        OutgoingCommentLinks.length
-    const headerText = tempTotalLinks
-        ? `${tempTotalLinks} link${pluralise(tempTotalLinks)}`
+    // const incomingLinks = IncomingPostLinks.length > 0 || IncomingCommentLinks.length > 0
+    // const outgoingLinks = OutgoingPostLinks.length > 0 || OutgoingCommentLinks.length > 0
+    // // todo: replace with 'totalLinks' prop when comment state added to posts
+    // const tempTotalLinks =
+    //     IncomingPostLinks.length +
+    //     IncomingCommentLinks.length +
+    //     OutgoingPostLinks.length +
+    //     OutgoingCommentLinks.length
+    const headerText = itemData.totalLinks
+        ? `${itemData.totalLinks} link${pluralise(itemData.totalLinks)}`
         : 'No links yet...'
 
     const sampleData = {
@@ -257,6 +258,32 @@ function LinkModal(props: {
     const canvasSize = 600
     const circleSize = canvasSize - 50
 
+    // function findDomain() {
+    //     let dMin = 0
+    //     let dMax
+    //     if (sortBy === 'Date Created') {
+    //         dMin = d3.min(postMapData.posts.map((post) => Date.parse(post.createdAt)))
+    //         dMax = d3.max(postMapData.posts.map((post) => Date.parse(post.createdAt)))
+    //     } else if (sortBy === 'Recent Activity') {
+    //         dMin = d3.min(postMapData.posts.map((post) => Date.parse(post.lastActivity)))
+    //         dMax = d3.max(postMapData.posts.map((post) => Date.parse(post.lastActivity)))
+    //     } else dMax = d3.max(postMapData.posts.map((child) => child[`total${sortBy}`]))
+    //     return sortOrder === 'Descending' ? [dMin, dMax] : [dMax, dMin]
+    // }
+
+    function findRadius(d) {
+        const radiusScale = d3
+            .scaleLinear()
+            .domain([1, 5]) // data values spread
+            .range([20, 60]) // radius size spread
+        const radius = d.data.item.totalLikes
+        // let radius
+        // if (sortBy === 'Date Created') radius = Date.parse(d.createdAt)
+        // else if (sortBy === 'Recent Activity') radius = Date.parse(d.lastActivity)
+        // else radius = d[`total${sortBy}`]
+        return radiusScale(radius)
+    }
+
     function radialLines(d, i) {
         const points = [d.source, d.target].map((d2) => {
             const radius = d2.y
@@ -272,7 +299,7 @@ function LinkModal(props: {
         .radius((d) => d.y)
 
     function createLinks(links) {
-        const curvedLinks = true
+        const curvedLinks = false
         d3.select(`#link-group`)
             .selectAll('.link')
             .data(links)
@@ -407,7 +434,8 @@ function LinkModal(props: {
                             'transform',
                             (d) => `rotate(${(d.x * 180) / Math.PI - 90}),translate(${d.y}, 0)`
                         )
-                        .attr('r', (d) => (d.parent ? 10 : 15))
+                        // .attr('r', (d) => (d.parent ? 10 : 15))
+                        .attr('r', (d) => findRadius(d))
                         .attr('fill', (d) =>
                             d.data.item.modelType === 'post' ? '#00b1a9' : '#826cff'
                         )
@@ -550,7 +578,7 @@ function LinkModal(props: {
                 .separation((a, b) => (a.parent === b.parent ? 1 : 2) / a.depth)
 
             const treeData = tree(data)
-
+            // console.log('treeData: ', treeData.children.length)
             const nodes = treeData.descendants()
             const links = treeData.links()
             createLinks(links)
@@ -567,8 +595,7 @@ function LinkModal(props: {
                 <LoadingWheel />
             ) : (
                 <Column centerX>
-                    {/* <h1>{headerText}</h1> */}
-                    <h1>6 Links</h1>
+                    <h1>{headerText}</h1>
                     <Row>
                         <Column centerX style={{ width: 700, marginRight: 50 }}>
                             <PostCard post={itemData} location='link-modal' />
@@ -675,13 +702,21 @@ function LinkModal(props: {
                             )}
                         </Column>
                         <Column centerX>
-                            <DropDown
-                                title='Link types'
-                                options={['All Types', 'Posts', 'Comments', 'Spaces', 'Users']}
-                                selectedOption={linkTypes}
-                                setSelectedOption={(option) => setLinkTypes(option)}
-                                style={{ marginBottom: 20 }}
-                            />
+                            <Row style={{ marginBottom: 20 }}>
+                                <DropDown
+                                    title='Link types'
+                                    options={['All Types', 'Posts', 'Comments', 'Spaces', 'Users']}
+                                    selectedOption={linkTypes}
+                                    setSelectedOption={(option) => setLinkTypes(option)}
+                                    style={{ marginRight: 20 }}
+                                />
+                                <DropDown
+                                    title='Size by'
+                                    options={['Likes', 'Links']}
+                                    selectedOption={sizeBy}
+                                    setSelectedOption={(option) => setSizeBy(option)}
+                                />
+                            </Row>
                             <div id='link-map' />
                         </Column>
                     </Row>
