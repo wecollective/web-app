@@ -319,7 +319,7 @@ function LinkModal(props: {
                     enter
                         .append('text')
                         .classed('link-text', true)
-                        .attr('dy', 2.5)
+                        .attr('dy', -5)
                         .append('textPath')
                         .classed('textPath', true)
                         .text((d) => {
@@ -330,6 +330,51 @@ function LinkModal(props: {
                         .attr('font-size', 10)
                         .attr('text-anchor', 'middle')
                         .attr('startOffset', '50%')
+                        .attr(
+                            'href',
+                            (d) => `#link-${d.source.data.item.id}-${d.target.data.item.id}`
+                        )
+                        .call((node) => {
+                            node.transition().duration(duration).attr('opacity', 1)
+                        }),
+                (update) =>
+                    update.call(
+                        (node) => node.transition('link-update').duration(duration)
+                        // .attr('d', (d) => findPathCoordinates(d))
+                    ),
+                (exit) =>
+                    exit.call((node) =>
+                        node
+                            .transition()
+                            .duration(duration / 2)
+                            .attr('opacity', 0)
+                            .remove()
+                    )
+            )
+    }
+
+    function createLinkArrows(links) {
+        const outgoing = (d) => d.target.data.item.direction === 'outgoing'
+        // add arrows
+        d3.select(`#link-group`)
+            .selectAll('.link-arrow')
+            .data(links)
+            .join(
+                (enter) =>
+                    enter
+                        .append('path')
+                        .attr('transform', (d) =>
+                            outgoing(d) ? 'translate(0, -2.5)' : 'translate(0, 2.5),rotate(180,0,0)'
+                        )
+                        .attr('d', 'M 0 0 L 5 2.5 L 0 5 z')
+                        .style('fill', (d) => (outgoing(d) ? 'blue' : 'red'))
+                        // position arrow at half way point along line
+                        .append('animateMotion')
+                        .attr('calcMode', 'linear')
+                        .attr('rotate', 'auto')
+                        .attr('keyPoints', '0.5;0.5')
+                        .attr('keyTimes', '0.0;1.0')
+                        .append('mpath')
                         .attr(
                             'href',
                             (d) => `#link-${d.source.data.item.id}-${d.target.data.item.id}`
@@ -366,15 +411,10 @@ function LinkModal(props: {
                             'transform',
                             (d) => `rotate(${(d.x * 180) / Math.PI - 90}),translate(${d.y}, 0)`
                         )
-                        // .attr('cx', 0)
-                        // .attr('cy', (d) => -d.y)
-                        // .attr('transform', (d) => `rotate(${d.x}, 0, 0)`)
                         .attr('r', (d) => (d.parent ? 10 : 15))
                         .attr('fill', (d) => (d.parent ? '#00b1a9' : '#826cff'))
                         // .attr('stroke-width', 3)
                         .attr('stroke', 'black')
-                        // .attr('transform', (d) => `translate(${d3.pointRadial(d.x, d.y)})`)
-                        // .attr('transform', (d) => `translate(${d.x},${d.y})`)
                         .style('cursor', 'pointer')
                         .call(
                             (node) =>
@@ -517,6 +557,7 @@ function LinkModal(props: {
             const links = treeData.links()
             createLinks(links)
             createLinkText(links)
+            createLinkArrows(links)
             createCircles(nodes)
             createCircleText(nodes)
         }
