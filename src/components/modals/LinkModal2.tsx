@@ -206,22 +206,22 @@ function LinkModal(props: {
             })
     }
 
-    function removeLink(direction, type, linkId, itemId) {
-        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-        axios
-            .post(`${config.apiURL}/remove-link`, { linkId }, options)
-            .then((res) => {
-                // update modal context
-                const linkArray = `${direction === 'to' ? 'Outgoing' : 'Incoming'}${type}Links`
-                setLinkData({
-                    ...linkData,
-                    [linkArray]: [...linkData[linkArray].filter((l) => l.id !== linkId)],
-                })
-                // update context state
-                updateContextState('remove-link', type, itemId)
-            })
-            .catch((error) => console.log(error))
-    }
+    // function removeLink(direction, type, linkId, itemId) {
+    //     const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+    //     axios
+    //         .post(`${config.apiURL}/remove-link`, { linkId }, options)
+    //         .then((res) => {
+    //             // update modal context
+    //             const linkArray = `${direction === 'to' ? 'Outgoing' : 'Incoming'}${type}Links`
+    //             setLinkData({
+    //                 ...linkData,
+    //                 [linkArray]: [...linkData[linkArray].filter((l) => l.id !== linkId)],
+    //             })
+    //             // update context state
+    //             updateContextState('remove-link', type, itemId)
+    //         })
+    //         .catch((error) => console.log(error))
+    // }
 
     // function renderLink(link, type, direction) {
     //     const linkedItem = link[`${direction === 'to' ? 'Outgoing' : 'Incoming'}${type}`]
@@ -257,110 +257,22 @@ function LinkModal(props: {
     const canvasSize = 600
     const circleSize = canvasSize - 50
 
-    function findPathCoordinates(d) {
-        return `M${d.x},${d.y}C${d.x},${(d.y + d.parent.y) / 2} ${d.parent.x},${
-            (d.y + d.parent.y) / 2
-        } ${d.parent.x},${d.parent.y}`
-    }
-
-    function radialPoint(x, y) {
-        return [+y * Math.cos(x - Math.PI / 2), y * Math.sin(x)]
-    }
-
-    function radialDiagonal(d, i) {
-        const projection = (d2) => {
-            // Because of the transformation, 0 is the centre, and d.y denotes the distance
-            // from that centre
+    function radialLines(d, i) {
+        const points = [d.source, d.target].map((d2) => {
             const radius = d2.y
-            // Subtract 90 because otherwise 0 degrees is left, instead of at the top
-            const angle = d2.x - 1.57 // (d2.x * 180) / Math.PI - 90
+            const angle = d2.x - Math.PI / 2
             return [radius * Math.cos(angle), radius * Math.sin(angle)]
-        }
-        const points = [d.source, d.target].map(projection)
-        // console.log('points: ', points)
-        // [[x,y], [x,y]]
-        // const lineD = [
-        //     { x: points[0][0], y: points[0][1] },
-        //     { x: points[1][0], y: points[1][1] },
-        // ]
-        // const line = d3
-        //     .line()
-        //     .x((dt) => dt.x)
-        //     .y((dt) => dt.y)
-        //     .curve(d3.curveBasis)
-
-        // return line(lineD)
-
-        // return `M${points[0]}C${points[1][0] + 100},${points[0][1]} ${points[1][0] + 100},${
-        //     points[1][1]
-        // } ${points[1]}`
-
-        return `M${points[0]}L${points[1]}` // 'M' + points[0] + 'L' + points[1]
+        })
+        return `M${points[0]}L${points[1]}`
     }
 
-    // function createLinks(links) {
-    //     d3.select(`#link-group`)
-    //         .selectAll('.link')
-    //         .data(links)
-    //         // .data(links, (d) => d.data.id)
-    //         .join(
-    //             (enter) =>
-    //                 enter
-    //                     .append('path')
-    //                     .classed('link', true)
-    //                     // .attr('id', (d) => `line-${d.data.id}`)
-    //                     .attr('stroke', '#ccc')
-    //                     // .attr('stroke-width', (d) => {
-    //                     //     console.log('link d: ', d)
-    //                     //     return d.source.height + 1
-    //                     // })
-    //                     .attr('fill', 'none')
-    //                     .attr('opacity', 0)
-    //                     // .attr('x1', (d) => radialPoint(d.source.x, d.source.y)[0])
-    //                     // .attr('y1', (d) => radialPoint(d.source.x, d.source.y)[1])
-    //                     // .attr('x2', (d) => radialPoint(d.target.x, d.target.y)[0])
-    //                     // .attr('y2', (d) => radialPoint(d.target.x, d.target.y)[1])
-    //                     .attr(
-    //                         'd',
-    //                         d3
-    //                             .linkRadial()
-    //                             .angle((d) => d.x)
-    //                             .radius((d) => d.y)
-    //                         // .curve()
-    //                         // d3
-    //                         //     .link(d3.curveBumpX)
-    //                         //     .x((d) => d.x)
-    //                         //     .y((d) => d.y)
-    //                     )
-    //                     // .attr('d', (d) => findPathCoordinates(d))
-    //                     .call((node) => {
-    //                         node.transition().duration(duration).attr('opacity', 1)
-    //                     }),
-    //             (update) =>
-    //                 update.call(
-    //                     (node) => node.transition('link-update').duration(duration)
-    //                     // .attr('d', (d) => findPathCoordinates(d))
-    //                 ),
-    //             (exit) =>
-    //                 exit.call((node) =>
-    //                     node
-    //                         .transition()
-    //                         .duration(duration / 2)
-    //                         .attr('opacity', 0)
-    //                         .remove()
-    //                 )
-    //         )
-    // }
+    const radialCurves = d3
+        .linkRadial()
+        .angle((d) => d.x)
+        .radius((d) => d.y)
 
     function createLinks(links) {
-        // const lineData = []
-
-        // const line = d3
-        //     .line()
-        //     .x((d) => d.x)
-        //     .y((d) => d.y)
-        //     .curve(d3.curveLinear)
-
+        const curvedLinks = true
         d3.select(`#link-group`)
             .selectAll('.link')
             .data(links)
@@ -370,47 +282,14 @@ function LinkModal(props: {
                     enter
                         .append('path')
                         .classed('link', true)
-                        .attr('d', radialDiagonal)
-                        // .attr('d', (d) => {
-                        //     return `M${d.source.y},${d.source.x}C${d.target.y + 100},${d.x} ${
-                        //         d.target.y + 100
-                        //     },${d.target.x} ${d.target.y},${d.target.x}`
-                        //     // console.log('create link d: ', d)
-                        //     // const lineD = [
-                        //     //     { x: d.source.x, y: d.source.y },
-                        //     //     { x: d.target.x, y: d.target.y },
-                        //     // ]
-                        //     // return line(lineD)
-                        // })
-                        // .attr('id', (d) => `line-${d.data.id}`)
-                        // .attr('fill', '#ccc')
+                        .attr('id', (d) => `link-${d.source.data.item.id}-${d.target.data.item.id}`)
                         .attr('stroke', '#ccc')
+                        .attr('fill', 'none')
                         // .attr('stroke-width', (d) => {
                         //     console.log('link d: ', d)
                         //     return d.source.height + 1
                         // })
-                        // .attr('fill', 'none')
-                        // .attr('opacity', 0)
-                        // .attr('x0', (d) => 20)
-                        // .attr('y0', (d) => 20)
-                        // .attr('x1', (d) => 100)
-                        // .attr('y1', (d) => 100)
-                        // .attr('x1', (d) => d.source.x)
-                        // .attr('y1', (d) => d.source.y)
-                        // .attr('x2', (d) => d.target.x)
-                        // .attr('y2', (d) => d.target.y)
-                        // .attr('y1', (d) => radialPoint(d.source.x, d.source.y)[1])
-                        // .attr('x2', (d) => radialPoint(d.target.x, d.target.y)[0])
-                        // .attr('y2', (d) => radialPoint(d.target.x, d.target.y)[1])
-                        // .attr(
-                        //     'd',
-                        //     d3
-                        //         .linkRadial()
-                        //         .angle((d) => d.x)
-                        //         .radius((d) => d.y)
-                        //     // .curve()
-                        // )
-                        // .attr('d', (d) => findPathCoordinates(d))
+                        .attr('d', curvedLinks ? radialCurves : radialLines)
                         .call((node) => {
                             node.transition().duration(duration).attr('opacity', 1)
                         }),
@@ -440,24 +319,21 @@ function LinkModal(props: {
                     enter
                         .append('text')
                         .classed('link-text', true)
+                        .attr('dy', 2.5)
                         .append('textPath')
                         .classed('textPath', true)
                         .text((d) => {
-                            // console.log('text d: ', d)
+                            console.log('text d: ', d.target.data.Link.description)
+                            return d.target.data.Link.description
                         })
+
+                        .attr('font-size', 10)
                         .attr('text-anchor', 'middle')
                         .attr('startOffset', '50%')
-                        .attr('href', (d) => `#link-${d.source.id}`)
-                        .attr('d', radialDiagonal)
-                        // .attr(
-                        //     'd',
-                        //     d3
-                        //         .linkRadial()
-                        //         .angle((d) => d.x)
-                        //         .radius((d) => d.y)
-                        //     // .curve()
-                        // )
-                        // .attr('d', (d) => findPathCoordinates(d))
+                        .attr(
+                            'href',
+                            (d) => `#link-${d.source.data.item.id}-${d.target.data.item.id}`
+                        )
                         .call((node) => {
                             node.transition().duration(duration).attr('opacity', 1)
                         }),
@@ -541,11 +417,8 @@ function LinkModal(props: {
                             'transform',
                             (d) => `rotate(${(d.x * 180) / Math.PI - 90}),translate(${d.y}, 0)`
                         )
-                        .text((d) => {
-                            console.log('yexy d: ', d)
-                            return d.data.item.id
-                        })
-                        .attr('font-size', 20)
+                        .text((d) => d.data.item.title)
+                        .attr('font-size', 10)
                         .attr('text-anchor', 'middle')
                         .attr('dominant-baseline', 'central')
                         .call(
@@ -621,9 +494,8 @@ function LinkModal(props: {
     useEffect(() => {
         if (linkDataNew) {
             buildCanvas()
-            // const data = d3.hierarchy(sampleData)
             const data = d3.hierarchy(linkDataNew, (d) => d.item.children)
-            // console.log('data: ', data)
+            console.log('data: ', data)
             let radius
             if (data.height === 1) radius = circleSize / 6
             if (data.height === 2) radius = circleSize / 3
@@ -631,17 +503,18 @@ function LinkModal(props: {
 
             const tree = d3
                 .tree()
-                .size([2 * Math.PI, radius])
-                // .separation(() => 2)
+                // .size([2 * Math.PI, radius])
+                .size([3, radius])
+                // .separation((a, b) => a.depth)
+                // .separation(() => 1)
+                // .separation((a, b) => ((a.parent === b.parent ? 1 : 2) / a.depth) * 4)
+                // .separation((a, b) => (a.parent === b.parent ? 1 : 3) / (a.depth * 4))
                 .separation((a, b) => (a.parent === b.parent ? 1 : 2) / a.depth)
 
             const treeData = tree(data)
 
             const nodes = treeData.descendants()
             const links = treeData.links()
-            const links2 = treeData.descendants().slice(1)
-            // console.log('link data: ', links)
-            // console.log('link data2: ', links2)
             createLinks(links)
             createLinkText(links)
             createCircles(nodes)
@@ -858,3 +731,31 @@ LinkModal.defaultProps = {
 }
 
 export default LinkModal
+
+// console.log('points: ', points)
+// [[x,y], [x,y]]
+// const lineD = [
+//     { x: points[0][0], y: points[0][1] },
+//     { x: points[1][0], y: points[1][1] },
+// ]
+// const line = d3
+//     .line()
+//     .x((dt) => dt.x)
+//     .y((dt) => dt.y)
+//     .curve(d3.curveBasis)
+
+// return line(lineD)
+
+// return `M${points[0]}C${points[1][0] + 100},${points[0][1]} ${points[1][0] + 100},${
+//     points[1][1]
+// } ${points[1]}`
+
+// function findPathCoordinates(d) {
+//     return `M${d.x},${d.y}C${d.x},${(d.y + d.parent.y) / 2} ${d.parent.x},${
+//         (d.y + d.parent.y) / 2
+//     } ${d.parent.x},${d.parent.y}`
+// }
+
+// function radialPoint(x, y) {
+//     return [+y * Math.cos(x - Math.PI / 2), y * Math.sin(x)]
+// }
