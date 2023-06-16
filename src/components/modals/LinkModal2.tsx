@@ -322,11 +322,7 @@ function LinkModal(props: {
                         .attr('dy', -5)
                         .append('textPath')
                         .classed('textPath', true)
-                        .text((d) => {
-                            console.log('text d: ', d.target.data.Link.description)
-                            return d.target.data.Link.description
-                        })
-
+                        .text((d) => d.target.data.Link.description)
                         .attr('font-size', 10)
                         .attr('text-anchor', 'middle')
                         .attr('startOffset', '50%')
@@ -412,7 +408,9 @@ function LinkModal(props: {
                             (d) => `rotate(${(d.x * 180) / Math.PI - 90}),translate(${d.y}, 0)`
                         )
                         .attr('r', (d) => (d.parent ? 10 : 15))
-                        .attr('fill', (d) => (d.parent ? '#00b1a9' : '#826cff'))
+                        .attr('fill', (d) =>
+                            d.data.item.modelType === 'post' ? '#00b1a9' : '#826cff'
+                        )
                         // .attr('stroke-width', 3)
                         .attr('stroke', 'black')
                         .style('cursor', 'pointer')
