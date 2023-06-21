@@ -27,7 +27,7 @@ function LinkModal(props: {
     close: () => void
 }): JSX.Element {
     const { itemType, itemData, location, parentItemId, close } = props
-    const { id, totalLinks } = itemData
+    const { totalLinks } = itemData
     const { loggedIn, accountData, setLogInModalOpen } = useContext(AccountContext)
     const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
     const { userPosts, setUserPosts } = useContext(UserContext)
@@ -99,20 +99,22 @@ function LinkModal(props: {
         ],
     }
 
-    function modelType() {
-        if (['card', 'bead'].includes(itemType)) return 'post'
-        return itemType
+    function modelType(type) {
+        if (['card', 'bead'].includes(type)) return 'post'
+        return type
     }
 
-    function getLinks() {
+    function getLinks(id, type) {
+        setLoading(true)
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
-            .get(`${config.apiURL}/links?itemType=${modelType()}&itemId=${id}`)
+            .get(`${config.apiURL}/links?itemType=${modelType(type)}&itemId=${id}`, options)
             .then((res) => {
-                console.log('links: ', res.data)
-                setLoading(false)
+                console.log('link data: ', res.data)
+                // setLoading(false)
                 setLinkDataNew(res.data)
                 // setLinkData(res.data)
-                // setLoading(false)
+                setLoading(false)
             })
             .catch((error) => console.log(error))
     }
@@ -140,7 +142,7 @@ function LinkModal(props: {
         if (location === 'user-posts') newPosts = [...userPosts]
         if (location === 'post-page') newPosts = [{ ...postData }]
         // update source item
-        if (modelType() === 'post') {
+        if (modelType(itemType) === 'post') {
             let item = newPosts.find((p) => p.id === (parentItemId || itemData.id))
             if (itemType === 'bead') item = item.Beads.find((p) => p.id === itemData.id)
             if (itemType === 'card') item = item.CardSides.find((p) => p.id === itemData.id)
@@ -169,7 +171,7 @@ function LinkModal(props: {
     function addLink() {
         setAddLinkLoading(true)
         const data = {
-            sourceType: modelType(),
+            sourceType: modelType(itemType),
             sourceId: itemData.id,
             targetType: newLinkTargetType.toLowerCase(),
             targetId: newLinkTargetId,
@@ -258,6 +260,17 @@ function LinkModal(props: {
     const canvasSize = 600
     const circleSize = canvasSize - 50
 
+    const zoom = d3
+        .zoom()
+        .on('zoom', (event) => d3.select('#master-group').attr('transform', event.transform))
+
+    function resetPosition() {
+        d3.select('#link-map-svg')
+            .transition('reset-position')
+            .duration(1000)
+            .call(zoom.transform, d3.zoomIdentity.translate(canvasSize / 2, canvasSize / 2))
+    }
+
     // function findDomain() {
     //     let dMin = 0
     //     let dMax
@@ -300,6 +313,7 @@ function LinkModal(props: {
 
     function createLinks(links) {
         const curvedLinks = false
+        const outgoing = (d) => d.target.data.item.direction === 'outgoing'
         d3.select(`#link-group`)
             .selectAll('.link')
             .data(links)
@@ -310,7 +324,8 @@ function LinkModal(props: {
                         .append('path')
                         .classed('link', true)
                         .attr('id', (d) => `link-${d.source.data.item.id}-${d.target.data.item.id}`)
-                        .attr('stroke', '#ccc')
+                        // .attr('stroke', '#ccc')
+                        .style('stroke', (d) => (outgoing(d) ? 'blue' : 'red'))
                         .attr('fill', 'none')
                         // .attr('stroke-width', (d) => {
                         //     console.log('link d: ', d)
@@ -441,13 +456,19 @@ function LinkModal(props: {
                         )
                         // .attr('stroke-width', 3)
                         .attr('stroke', 'black')
+                        .attr('cursor', 'pointer')
+                        .on('click', (event, circle) => {
+                            console.log('circle: ', circle)
+                            if (!circle.parent) resetPosition()
+                            else getLinks(circle.data.item.id, circle.data.item.modelType)
+                        })
                         .style('cursor', 'pointer')
                         .call(
                             (node) =>
                                 node
                                     .transition('background-circle-enter')
                                     .duration(duration)
-                                    .attr('opacity', 0.5)
+                                    .attr('opacity', 1)
                             // .attr('transform', (d) => `translate(${d.x},${d.y})`)
                         ),
                 (update) =>
@@ -487,6 +508,7 @@ function LinkModal(props: {
                         .attr('font-size', 10)
                         .attr('text-anchor', 'middle')
                         .attr('dominant-baseline', 'central')
+                        .attr('pointer-events', 'none')
                         .call(
                             (node) =>
                                 node
@@ -513,17 +535,6 @@ function LinkModal(props: {
                             .remove()
                     )
             )
-    }
-
-    const zoom = d3
-        .zoom()
-        .on('zoom', (event) => d3.select('#master-group').attr('transform', event.transform))
-
-    function resetPosition() {
-        d3.select('#link-map-svg')
-            .transition('reset-position')
-            .duration(1000)
-            .call(zoom.transform, d3.zoomIdentity.translate(canvasSize / 2, canvasSize / 2))
     }
 
     function buildCanvas() {
@@ -554,14 +565,14 @@ function LinkModal(props: {
     }
 
     useEffect(() => {
-        getLinks()
+        getLinks(itemData.id, itemType)
     }, [])
 
     useEffect(() => {
-        if (linkDataNew) {
+        if (!loading) {
             buildCanvas()
             const data = d3.hierarchy(linkDataNew, (d) => d.item.children)
-            console.log('data: ', data)
+            // console.log('data: ', data)
             let radius
             if (data.height === 1) radius = circleSize / 6
             if (data.height === 2) radius = circleSize / 3
@@ -587,7 +598,7 @@ function LinkModal(props: {
             createCircles(nodes)
             createCircleText(nodes)
         }
-    }, [linkDataNew])
+    }, [loading])
 
     return (
         <Modal close={close} centerX style={{ minWidth: 400 }}>
@@ -598,7 +609,7 @@ function LinkModal(props: {
                     <h1>{headerText}</h1>
                     <Row>
                         <Column centerX style={{ width: 700, marginRight: 50 }}>
-                            <PostCard post={itemData} location='link-modal' />
+                            <PostCard post={linkDataNew.item} location='link-modal' />
                             {/* <ArrowDownIcon
                                 style={{
                                     height: 20,
