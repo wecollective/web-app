@@ -256,7 +256,7 @@ function LinkModal(props: {
     //     )
     // }
 
-    const duration = 500
+    const duration = 1000
     const canvasSize = 600
     const circleSize = canvasSize - 50
 
@@ -316,8 +316,8 @@ function LinkModal(props: {
         const outgoing = (d) => d.target.data.item.direction === 'outgoing'
         d3.select(`#link-group`)
             .selectAll('.link')
-            .data(links)
-            // .data(links, (d) => d.data.id)
+            // .data(links)
+            .data(links, (d) => `link-${d.source.data.item.id}-${d.target.data.item.id}`)
             .join(
                 (enter) =>
                     enter
@@ -337,7 +337,11 @@ function LinkModal(props: {
                         }),
                 (update) =>
                     update.call(
-                        (node) => node.transition('link-update').duration(duration)
+                        (node) =>
+                            node
+                                .transition('link-update')
+                                .duration(duration)
+                                .attr('d', curvedLinks ? radialCurves : radialLines)
                         // .attr('d', (d) => findPathCoordinates(d))
                     ),
                 (exit) =>
@@ -438,13 +442,14 @@ function LinkModal(props: {
 
     function createCircles(linkedItems) {
         d3.select(`#node-group`)
-            .selectAll('.circle')
-            .data(linkedItems, (d) => d.data.id)
+            .selectAll('.circle-node')
+            .data(linkedItems, (d) => d.data.item.id)
             .join(
                 (enter) =>
                     enter
                         .append('circle')
-                        .attr('id', (d) => `circle-${d.data.id}`)
+                        .classed('circle-node', true)
+                        .attr('id', (d) => `circle-${d.data.item.id}`)
                         .attr(
                             'transform',
                             (d) => `rotate(${(d.x * 180) / Math.PI - 90}),translate(${d.y}, 0)`
@@ -477,7 +482,13 @@ function LinkModal(props: {
                             node
                                 .transition('background-circle-update')
                                 .duration(duration)
-                                .attr('fill', '#aaa')
+                                .attr('r', (d) => findRadius(d))
+                                .attr(
+                                    'transform',
+                                    (d) =>
+                                        `rotate(${(d.x * 180) / Math.PI - 90}),translate(${d.y}, 0)`
+                                )
+                        // .attr('fill', '#aaa')
                         // .attr('transform', (d) => `translate(${d.x},${d.y})`)
                     ),
                 (exit) =>
@@ -493,13 +504,14 @@ function LinkModal(props: {
 
     function createCircleText(linkedItems) {
         d3.select(`#node-group`)
-            .selectAll('.circle')
-            .data(linkedItems, (d) => d.data.id)
+            .selectAll('.circle-text')
+            .data(linkedItems, (d) => d.data.item.id)
             .join(
                 (enter) =>
                     enter
                         .append('text')
-                        .attr('id', (d) => `circle-text-${d.data.id}`)
+                        .attr('id', (d) => `circle-text-${d.data.item.id}`)
+                        .classed('circle-text', true)
                         .attr(
                             'transform',
                             (d) => `rotate(${(d.x * 180) / Math.PI - 90}),translate(${d.y}, 0)`
@@ -510,11 +522,15 @@ function LinkModal(props: {
                         .attr('dominant-baseline', 'central')
                         .attr('pointer-events', 'none')
                         .call(
-                            (node) =>
-                                node
-                                    .transition('background-circle-enter')
-                                    .duration(duration)
-                                    .attr('opacity', 1)
+                            (node) => node.transition('background-circle-enter').duration(duration)
+                            // .attr(
+                            //     'transform',
+                            //     (d) =>
+                            //         `rotate(${(d.x * 180) / Math.PI - 90}),translate(${
+                            //             d.y
+                            //         }, 0)`
+                            // )
+                            // .attr('opacity', 1)
                             // .attr('transform', (d) => `translate(${d.x},${d.y})`)
                         ),
                 (update) =>
@@ -523,7 +539,12 @@ function LinkModal(props: {
                             node
                                 .transition('background-circle-update')
                                 .duration(duration)
-                                .attr('fill', '#aaa')
+                                .attr(
+                                    'transform',
+                                    (d) =>
+                                        `rotate(${(d.x * 180) / Math.PI - 90}),translate(${d.y}, 0)`
+                                )
+                        // .attr('fill', '#aaa')
                         // .attr('transform', (d) => `translate(${d.x},${d.y})`)
                     ),
                 (exit) =>
@@ -565,12 +586,13 @@ function LinkModal(props: {
     }
 
     useEffect(() => {
+        buildCanvas()
         getLinks(itemData.id, itemType)
     }, [])
 
     useEffect(() => {
-        if (!loading) {
-            buildCanvas()
+        if (linkDataNew) {
+            // buildCanvas()
             const data = d3.hierarchy(linkDataNew, (d) => d.item.children)
             // console.log('data: ', data)
             let radius
@@ -598,215 +620,216 @@ function LinkModal(props: {
             createCircles(nodes)
             createCircleText(nodes)
         }
-    }, [loading])
+    }, [linkDataNew])
 
     return (
         <Modal close={close} centerX style={{ minWidth: 400 }}>
-            {loading ? (
+            {/* {loading ? (
                 <LoadingWheel />
-            ) : (
-                <Column centerX>
-                    <h1>{headerText}</h1>
-                    <Row>
-                        <Column centerX style={{ width: 700, marginRight: 50 }}>
-                            <PostCard post={linkDataNew.item} location='link-modal' />
-                            {/* <ArrowDownIcon
-                                style={{
-                                    height: 20,
-                                    width: 20,
-                                    color: '#ddd',
-                                    marginTop: 20,
-                                }}
-                            /> */}
-                            {loggedIn ? (
-                                <Column centerX style={{ width: '100%', marginTop: 20 }}>
-                                    <Row centerY style={{ width: '100%', marginBottom: 20 }}>
-                                        <Row centerY style={{ flexShrink: 0, marginRight: 20 }}>
-                                            <p>Link to another</p>
-                                            <DropDownMenu
-                                                title=''
-                                                orientation='horizontal'
-                                                options={['Post', 'Comment']} // 'User', 'Space'
-                                                selectedOption={newLinkTargetType}
-                                                setSelectedOption={(option) => {
-                                                    setTargetError(false)
-                                                    setNewLinkTargetId('')
-                                                    setNewLinkTargetType(option)
-                                                }}
-                                            />
-                                        </Row>
-                                        <Input
-                                            type='text'
-                                            prefix={
-                                                ['Post', 'Comment'].includes(newLinkTargetType)
-                                                    ? 'ID:'
-                                                    : 'Handle:'
-                                            }
-                                            value={newLinkTargetId}
-                                            onChange={(value) => {
+            ) : ( */}
+            <Column centerX>
+                <h1>{headerText}</h1>
+                <Row>
+                    <Column centerX style={{ width: 700, marginRight: 50 }}>
+                        {linkDataNew && <PostCard post={linkDataNew.item} location='link-modal' />}
+
+                        {/* <ArrowDownIcon
+                            style={{
+                                height: 20,
+                                width: 20,
+                                color: '#ddd',
+                                marginTop: 20,
+                            }}
+                        /> */}
+                        {loggedIn ? (
+                            <Column centerX style={{ width: '100%', marginTop: 20 }}>
+                                <Row centerY style={{ width: '100%', marginBottom: 20 }}>
+                                    <Row centerY style={{ flexShrink: 0, marginRight: 20 }}>
+                                        <p>Link to another</p>
+                                        <DropDownMenu
+                                            title=''
+                                            orientation='horizontal'
+                                            options={['Post', 'Comment']} // 'User', 'Space'
+                                            selectedOption={newLinkTargetType}
+                                            setSelectedOption={(option) => {
                                                 setTargetError(false)
-                                                setNewLinkTargetId(value)
-                                                getLinkedItem(value)
+                                                setNewLinkTargetId('')
+                                                setNewLinkTargetType(option)
                                             }}
-                                            style={{ marginRight: 20 }}
-                                        />
-                                        <Button
-                                            text='Add link'
-                                            color='blue'
-                                            onClick={addLink}
-                                            disabled={
-                                                addLinkLoading ||
-                                                !newLinkTargetId ||
-                                                newLinkDescription.length > 50
-                                            }
-                                            loading={addLinkLoading}
                                         />
                                     </Row>
-                                    {targetError && (
-                                        <p className='danger' style={{ marginBottom: 20 }}>
-                                            {newLinkTargetType} not found
-                                        </p>
-                                    )}
-                                    <Row centerY style={{ width: '100%', marginBottom: 20 }}>
-                                        <p style={{ flexShrink: 0, marginRight: 10 }}>
-                                            Link description
-                                        </p>
-                                        <Input
-                                            type='text'
-                                            placeholder='description (optional)...'
-                                            value={newLinkDescription}
-                                            onChange={(value) => setNewLinkDescription(value)}
-                                        />
-                                    </Row>
-                                    {newLinkDescription.length > 50 && (
-                                        <p className='danger' style={{ marginBottom: 20 }}>
-                                            Max 50 characters
-                                        </p>
-                                    )}
-                                    {linkedItem && (
-                                        <Column centerX>
-                                            <ArrowDownIcon
-                                                style={{
-                                                    height: 20,
-                                                    width: 20,
-                                                    color: '#ccc',
-                                                    marginBottom: 20,
-                                                }}
-                                            />
-                                            <PostCard post={linkedItem} location='link-modal' />
-                                        </Column>
-                                    )}
-                                </Column>
-                            ) : (
-                                <Row centerY style={{ marginTop: totalLinks ? 20 : 0 }}>
-                                    <Button
-                                        text='Log in'
-                                        color='blue'
-                                        style={{ marginRight: 5 }}
-                                        onClick={() => {
-                                            setLogInModalOpen(true)
-                                            close()
+                                    <Input
+                                        type='text'
+                                        prefix={
+                                            ['Post', 'Comment'].includes(newLinkTargetType)
+                                                ? 'ID:'
+                                                : 'Handle:'
+                                        }
+                                        value={newLinkTargetId}
+                                        onChange={(value) => {
+                                            setTargetError(false)
+                                            setNewLinkTargetId(value)
+                                            getLinkedItem(value)
                                         }}
+                                        style={{ marginRight: 20 }}
                                     />
-                                    <p>to link posts</p>
+                                    <Button
+                                        text='Add link'
+                                        color='blue'
+                                        onClick={addLink}
+                                        disabled={
+                                            addLinkLoading ||
+                                            !newLinkTargetId ||
+                                            newLinkDescription.length > 50
+                                        }
+                                        loading={addLinkLoading}
+                                    />
                                 </Row>
-                            )}
-                        </Column>
-                        <Column centerX>
-                            <Row style={{ marginBottom: 20 }}>
-                                <DropDown
-                                    title='Link types'
-                                    options={['All Types', 'Posts', 'Comments', 'Spaces', 'Users']}
-                                    selectedOption={linkTypes}
-                                    setSelectedOption={(option) => setLinkTypes(option)}
-                                    style={{ marginRight: 20 }}
-                                />
-                                <DropDown
-                                    title='Size by'
-                                    options={['Likes', 'Links']}
-                                    selectedOption={sizeBy}
-                                    setSelectedOption={(option) => setSizeBy(option)}
-                                />
-                            </Row>
-                            <div id='link-map' />
-                        </Column>
-                    </Row>
-                    {/* {loggedIn ? (
-                        <Column centerX style={{ marginTop: totalLinks ? 20 : 0 }}>
-                            <Row centerY style={{ marginBottom: 10 }}>
-                                <p>Link to another</p>
-                                <DropDownMenu
-                                    title=''
-                                    orientation='horizontal'
-                                    options={['Post', 'Comment']} // 'User', 'Space'
-                                    selectedOption={newLinkTargetType}
-                                    setSelectedOption={(option) => {
-                                        setTargetError(false)
-                                        setNewLinkTargetId('')
-                                        setNewLinkTargetType(option)
+                                {targetError && (
+                                    <p className='danger' style={{ marginBottom: 20 }}>
+                                        {newLinkTargetType} not found
+                                    </p>
+                                )}
+                                <Row centerY style={{ width: '100%', marginBottom: 20 }}>
+                                    <p style={{ flexShrink: 0, marginRight: 10 }}>
+                                        Link description
+                                    </p>
+                                    <Input
+                                        type='text'
+                                        placeholder='description (optional)...'
+                                        value={newLinkDescription}
+                                        onChange={(value) => setNewLinkDescription(value)}
+                                    />
+                                </Row>
+                                {newLinkDescription.length > 50 && (
+                                    <p className='danger' style={{ marginBottom: 20 }}>
+                                        Max 50 characters
+                                    </p>
+                                )}
+                                {linkedItem && (
+                                    <Column centerX>
+                                        <ArrowDownIcon
+                                            style={{
+                                                height: 20,
+                                                width: 20,
+                                                color: '#ccc',
+                                                marginBottom: 20,
+                                            }}
+                                        />
+                                        <PostCard post={linkedItem} location='link-modal' />
+                                    </Column>
+                                )}
+                            </Column>
+                        ) : (
+                            <Row centerY style={{ marginTop: totalLinks ? 20 : 0 }}>
+                                <Button
+                                    text='Log in'
+                                    color='blue'
+                                    style={{ marginRight: 5 }}
+                                    onClick={() => {
+                                        setLogInModalOpen(true)
+                                        close()
                                     }}
                                 />
+                                <p>to link posts</p>
                             </Row>
-                            <Input
-                                type='text'
-                                prefix={
-                                    ['Post', 'Comment'].includes(newLinkTargetType)
-                                        ? 'ID:'
-                                        : 'Handle:'
-                                }
-                                value={newLinkTargetId}
-                                onChange={(value) => {
-                                    setTargetError(false)
-                                    setNewLinkTargetId(value)
-                                }}
-                                style={{ marginBottom: 20, minWidth: 200 }}
+                        )}
+                    </Column>
+                    <Column centerX>
+                        <Row style={{ marginBottom: 20 }}>
+                            <DropDown
+                                title='Link types'
+                                options={['All Types', 'Posts', 'Comments', 'Spaces', 'Users']}
+                                selectedOption={linkTypes}
+                                setSelectedOption={(option) => setLinkTypes(option)}
+                                style={{ marginRight: 20 }}
                             />
-                            {targetError && (
-                                <p className='danger' style={{ marginBottom: 20 }}>
-                                    {newLinkTargetType} not found
-                                </p>
-                            )}
-                            <p style={{ marginBottom: 10 }}>Description (optional)</p>
-                            <Input
-                                type='text'
-                                placeholder='link description...'
-                                value={newLinkDescription}
-                                onChange={(value) => setNewLinkDescription(value)}
-                                style={{ minWidth: 300, marginBottom: 20 }}
+                            <DropDown
+                                title='Size by'
+                                options={['Likes', 'Links']}
+                                selectedOption={sizeBy}
+                                setSelectedOption={(option) => setSizeBy(option)}
                             />
-                            {newLinkDescription.length > 50 && (
-                                <p className='danger' style={{ marginBottom: 20 }}>
-                                    Max 50 characters
-                                </p>
-                            )}
-                            <Button
-                                text='Add link'
-                                color='blue'
-                                onClick={addLink}
-                                disabled={
-                                    addLinkLoading ||
-                                    !newLinkTargetId ||
-                                    newLinkDescription.length > 50
-                                }
-                                loading={addLinkLoading}
-                            />
-                        </Column>
-                    ) : (
-                        <Row centerY style={{ marginTop: totalLinks ? 20 : 0 }}>
-                            <Button
-                                text='Log in'
-                                color='blue'
-                                style={{ marginRight: 5 }}
-                                onClick={() => {
-                                    setLogInModalOpen(true)
-                                    close()
-                                }}
-                            />
-                            <p>to link posts</p>
                         </Row>
-                    )} */}
-                </Column>
-            )}
+                        <div id='link-map' />
+                    </Column>
+                </Row>
+                {/* {loggedIn ? (
+                    <Column centerX style={{ marginTop: totalLinks ? 20 : 0 }}>
+                        <Row centerY style={{ marginBottom: 10 }}>
+                            <p>Link to another</p>
+                            <DropDownMenu
+                                title=''
+                                orientation='horizontal'
+                                options={['Post', 'Comment']} // 'User', 'Space'
+                                selectedOption={newLinkTargetType}
+                                setSelectedOption={(option) => {
+                                    setTargetError(false)
+                                    setNewLinkTargetId('')
+                                    setNewLinkTargetType(option)
+                                }}
+                            />
+                        </Row>
+                        <Input
+                            type='text'
+                            prefix={
+                                ['Post', 'Comment'].includes(newLinkTargetType)
+                                    ? 'ID:'
+                                    : 'Handle:'
+                            }
+                            value={newLinkTargetId}
+                            onChange={(value) => {
+                                setTargetError(false)
+                                setNewLinkTargetId(value)
+                            }}
+                            style={{ marginBottom: 20, minWidth: 200 }}
+                        />
+                        {targetError && (
+                            <p className='danger' style={{ marginBottom: 20 }}>
+                                {newLinkTargetType} not found
+                            </p>
+                        )}
+                        <p style={{ marginBottom: 10 }}>Description (optional)</p>
+                        <Input
+                            type='text'
+                            placeholder='link description...'
+                            value={newLinkDescription}
+                            onChange={(value) => setNewLinkDescription(value)}
+                            style={{ minWidth: 300, marginBottom: 20 }}
+                        />
+                        {newLinkDescription.length > 50 && (
+                            <p className='danger' style={{ marginBottom: 20 }}>
+                                Max 50 characters
+                            </p>
+                        )}
+                        <Button
+                            text='Add link'
+                            color='blue'
+                            onClick={addLink}
+                            disabled={
+                                addLinkLoading ||
+                                !newLinkTargetId ||
+                                newLinkDescription.length > 50
+                            }
+                            loading={addLinkLoading}
+                        />
+                    </Column>
+                ) : (
+                    <Row centerY style={{ marginTop: totalLinks ? 20 : 0 }}>
+                        <Button
+                            text='Log in'
+                            color='blue'
+                            style={{ marginRight: 5 }}
+                            onClick={() => {
+                                setLogInModalOpen(true)
+                                close()
+                            }}
+                        />
+                        <p>to link posts</p>
+                    </Row>
+                )} */}
+            </Column>
+            {/* )} */}
         </Modal>
     )
 }
