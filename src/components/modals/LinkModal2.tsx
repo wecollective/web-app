@@ -287,8 +287,8 @@ function LinkModal(props: {
     function findRadius(d) {
         const radiusScale = d3
             .scaleLinear()
-            .domain([1, 5]) // data values spread
-            .range([20, 60]) // radius size spread
+            .domain([0, 5]) // data values spread
+            .range([10, 30]) // radius size spread
         const radius = d.data.item.totalLikes
         // let radius
         // if (sortBy === 'Date Created') radius = Date.parse(d.createdAt)
@@ -359,6 +359,7 @@ function LinkModal(props: {
         d3.select(`#link-group`)
             .selectAll('.link-text')
             .data(links)
+            // .data(links, (d) => `link-${d.source.data.item.id}-${d.target.data.item.id}`)
             // .data(links, (d) => d.data.id)
             .join(
                 (enter) =>
@@ -401,10 +402,12 @@ function LinkModal(props: {
         d3.select(`#link-group`)
             .selectAll('.link-arrow')
             .data(links)
+            // .data(links, (d) => `link-${d.source.data.item.id}-${d.target.data.item.id}`)
             .join(
                 (enter) =>
                     enter
                         .append('path')
+                        .classed('link-arrow', true)
                         .attr('transform', (d) =>
                             outgoing(d) ? 'translate(0, -2.5)' : 'translate(0, 2.5),rotate(180,0,0)'
                         )
@@ -426,7 +429,14 @@ function LinkModal(props: {
                         }),
                 (update) =>
                     update.call(
-                        (node) => node.transition('link-update').duration(duration)
+                        (node) =>
+                            node
+                                .transition('link-update')
+                                .duration(duration)
+                                .attr(
+                                    'href',
+                                    (d) => `#link-${d.source.data.item.id}-${d.target.data.item.id}`
+                                )
                         // .attr('d', (d) => findPathCoordinates(d))
                     ),
                 (exit) =>
