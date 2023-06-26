@@ -3,7 +3,6 @@ import Column from '@components/Column'
 import DropDown from '@components/DropDown'
 import DropDownMenu from '@components/DropDownMenu'
 import Input from '@components/Input'
-import LoadingWheel from '@components/LoadingWheel'
 import Row from '@components/Row'
 import PostCard from '@components/cards/PostCard/PostCard'
 import Modal from '@components/modals/Modal'
@@ -324,7 +323,6 @@ function LinkModal(props: {
                         .append('path')
                         .classed('link', true)
                         .attr('id', (d) => `link-${d.source.data.item.id}-${d.target.data.item.id}`)
-                        // .attr('stroke', '#ccc')
                         .style('stroke', (d) => (outgoing(d) ? 'blue' : 'red'))
                         .attr('fill', 'none')
                         // .attr('stroke-width', (d) => {
@@ -398,28 +396,24 @@ function LinkModal(props: {
 
     function createLinkArrows(links) {
         const outgoing = (d) => d.target.data.item.direction === 'outgoing'
-        // add arrows
         d3.select(`#link-group`)
             .selectAll('.link-arrow')
-            .data(links)
-            // .data(links, (d) => `link-${d.source.data.item.id}-${d.target.data.item.id}`)
+            // .data(links)
+            .data(links, (d) => `link-${d.source.data.item.id}-${d.target.data.item.id}`)
+            // .data(links, (d) => d.data.id)
             .join(
                 (enter) =>
                     enter
-                        .append('path')
+                        .append('text')
                         .classed('link-arrow', true)
-                        .attr('transform', (d) =>
-                            outgoing(d) ? 'translate(0, -2.5)' : 'translate(0, 2.5),rotate(180,0,0)'
-                        )
-                        .attr('d', 'M 0 0 L 5 2.5 L 0 5 z')
+                        .attr('dy', 3.4)
+                        .append('textPath')
+                        .classed('textPath', true)
+                        .text((d) => (outgoing(d) ? '▶' : '◀'))
                         .style('fill', (d) => (outgoing(d) ? 'blue' : 'red'))
-                        // position arrow at half way point along line
-                        .append('animateMotion')
-                        .attr('calcMode', 'linear')
-                        .attr('rotate', 'auto')
-                        .attr('keyPoints', '0.5;0.5')
-                        .attr('keyTimes', '0.0;1.0')
-                        .append('mpath')
+                        .attr('font-size', 10)
+                        .attr('text-anchor', 'middle')
+                        .attr('startOffset', '50%')
                         .attr(
                             'href',
                             (d) => `#link-${d.source.data.item.id}-${d.target.data.item.id}`
@@ -449,6 +443,57 @@ function LinkModal(props: {
                     )
             )
     }
+
+    // function createLinkArrows(links) {
+    //     const outgoing = (d) => d.target.data.item.direction === 'outgoing'
+    //     // add arrows
+    //     d3.select(`#link-group`)
+    //         .selectAll('.link-arrow')
+    //         .data(links)
+    //         // .data(links, (d) => `link-${d.source.data.item.id}-${d.target.data.item.id}`)
+    //         .join(
+    //             (enter) =>
+    //                 enter
+    //                     .append('path')
+    //                     .classed('link-arrow', true)
+    //                     // .attr('transform', (d) =>
+    //                     //     outgoing(d) ? 'translate(0, -2.5)' : 'translate(0, 2.5),rotate(180,0,0)'
+    //                     // )
+    //                     .attr('d', 'M 0 0 L 5 2.5 L 0 5 z')
+    //                     .style('fill', (d) => (outgoing(d) ? 'blue' : 'red'))
+    //                     // position arrow at half way point along line
+    //                     .append('animateMotion')
+    //                     .attr('calcMode', 'linear')
+    //                     .attr('rotate', 'auto')
+    //                     .attr('keyPoints', '0.5;0.5')
+    //                     .attr('keyTimes', '0.0;1.0')
+    //                     .append('mpath')
+    //                     .attr(
+    //                         'href',
+    //                         (d) => `#link-${d.source.data.item.id}-${d.target.data.item.id}`
+    //                     )
+    //                     .call((node) => {
+    //                         node.transition().duration(duration).attr('opacity', 1)
+    //                     }),
+    //             (update) =>
+    //                 update.call(
+    //                     (node) => node.transition('link-update').duration(duration)
+    //                     // .attr(
+    //                     //     'href',
+    //                     //     (d) => `#link-${d.source.data.item.id}-${d.target.data.item.id}`
+    //                     // )
+    //                     // .attr('d', (d) => findPathCoordinates(d))
+    //                 ),
+    //             (exit) =>
+    //                 exit.call((node) =>
+    //                     node
+    //                         .transition()
+    //                         .duration(duration / 2)
+    //                         .attr('opacity', 0)
+    //                         .remove()
+    //                 )
+    //         )
+    // }
 
     function createCircles(linkedItems) {
         d3.select(`#node-group`)
@@ -626,7 +671,7 @@ function LinkModal(props: {
             const links = treeData.links()
             createLinks(links)
             createLinkText(links)
-            createLinkArrows(links)
+            // createLinkArrows(links)
             createCircles(nodes)
             createCircleText(nodes)
         }
