@@ -270,6 +270,33 @@ function LinkModal(props: {
             .call(zoom.transform, d3.zoomIdentity.translate(canvasSize / 2, canvasSize / 2))
     }
 
+    function buildCanvas() {
+        const svg = d3
+            .select('#link-map')
+            .append('svg')
+            .attr('id', 'link-map-svg')
+            .attr('width', canvasSize)
+            .attr('height', canvasSize)
+        const masterGroup = svg.append('g').attr('id', 'master-group')
+        const rings = masterGroup.append('g').attr('id', 'background-rings')
+        const ringScale = circleSize / 6
+        const ringSizes = [ringScale, ringScale * 2, ringScale * 3]
+        ringSizes.forEach((ringSize) => {
+            rings
+                .append('circle')
+                .attr('r', ringSize)
+                .attr('fill', 'none')
+                .attr('stroke', 'black')
+                .attr('opacity', 0.1)
+        })
+        masterGroup.append('g').attr('id', 'links')
+        masterGroup.append('g').attr('id', 'nodes')
+        // set up zoom
+        svg.call(zoom).on('dblclick.zoom', null)
+        svg.call(zoom.transform, d3.zoomIdentity.translate(canvasSize / 2, canvasSize / 2))
+        svg.on('click', resetPosition)
+    }
+
     // function findDomain() {
     //     let dMin = 0
     //     let dMax
@@ -300,6 +327,11 @@ function LinkModal(props: {
         return d.target.data.item.direction === 'outgoing'
     }
 
+    function linkId(d) {
+        // use target link id (route node doesn't have source)
+        return d.target.data.Link.id
+    }
+
     function radialLines(d, i) {
         const anchors = outgoingLink(d) ? [d.source, d.target] : [d.target, d.source]
         const points = anchors.map((d2) => {
@@ -316,17 +348,29 @@ function LinkModal(props: {
         .radius((d) => d.y)
 
     function createLinks(links) {
-        // use target link id (route node doesn't have source link)
         const curvedLinks = false
-        d3.select(`#link-group`)
+        d3.select(`#links`)
             .selectAll('.link')
-            .data(links, (d) => d.target.data.Link.id)
+            .data(links, (d) => linkId(d))
             .join(
-                (enter) =>
-                    enter
+                (enter) => {
+                    // create group
+                    const group = enter
+                        .append('g')
+                        .attr('id', (d) => `link-${linkId(d)}`)
+                        .attr('class', (d) => `link`)
+                        .attr('opacity', 0)
+                        .call((node) => {
+                            node.transition('link-enter')
+                                .delay(200)
+                                .duration(duration)
+                                .attr('opacity', 1)
+                        })
+                    // create path
+                    group
                         .append('path')
-                        .classed('link', true)
-                        .attr('id', (d) => `link-${d.target.data.Link.id}`)
+                        .classed('link-path', true)
+                        .attr('id', (d) => `link-path-${linkId(d)}`)
                         .style('stroke', (d) => (outgoingLink(d) ? 'blue' : 'red'))
                         .attr('fill', 'none')
                         // .attr('stroke-width', (d) => {
@@ -334,35 +378,8 @@ function LinkModal(props: {
                         //     return d.source.height + 1
                         // })
                         .attr('d', curvedLinks ? radialCurves : radialLines)
-                        .call((node) => {
-                            node.transition().duration(duration).attr('opacity', 1)
-                        }),
-                (update) =>
-                    update.call((node) =>
-                        node
-                            .transition('link-update')
-                            .duration(duration)
-                            .style('stroke', (d) => (outgoingLink(d) ? 'blue' : 'red'))
-                            .attr('d', curvedLinks ? radialCurves : radialLines)
-                    ),
-                (exit) =>
-                    exit.call((node) =>
-                        node
-                            .transition()
-                            .duration(duration / 2)
-                            .attr('opacity', 0)
-                            .remove()
-                    )
-            )
-    }
-
-    function createLinkText(links) {
-        d3.select(`#link-group`)
-            .selectAll('.link-text')
-            .data(links, (d) => d.target.data.Link.id)
-            .join(
-                (enter) =>
-                    enter
+                    // create text
+                    group
                         .append('text')
                         .classed('link-text', true)
                         .attr('dy', -5)
@@ -372,65 +389,51 @@ function LinkModal(props: {
                         .attr('font-size', 10)
                         .attr('text-anchor', 'middle')
                         .attr('startOffset', '50%')
-                        .attr('href', (d) => `#link-${d.target.data.Link.id}`)
-                        .call((node) => {
-                            node.transition().duration(duration).attr('opacity', 1)
-                        }),
-                (update) =>
-                    update.call((node) => node.transition('link-text-update').duration(duration)),
-                (exit) =>
-                    exit.call((node) =>
-                        node
-                            .transition()
-                            .duration(duration / 2)
-                            .attr('opacity', 0)
-                            .remove()
-                    )
-            )
-    }
-
-    function createLinkArrows(links) {
-        d3.select(`#link-group`)
-            .selectAll('.link-arrow')
-            .data(links, (d) => d.target.data.Link.id)
-            .join(
-                (enter) =>
-                    enter
+                        .attr('href', (d) => `#link-path-${linkId(d)}`)
+                    // creat arrow
+                    group
                         .append('text')
                         .classed('link-arrow', true)
                         .attr('dy', 3.4)
                         .append('textPath')
                         .classed('textPath', true)
                         .text('▶')
-                        .style('fill', (d) => (outgoingLink(d) ? 'blue' : 'red'))
                         .attr('font-size', 10)
                         .attr('text-anchor', 'middle')
                         .attr('startOffset', '50%')
-                        .attr('href', (d) => `#link-${d.target.data.Link.id}`)
-                        .call((node) => {
-                            node.transition().duration(duration).attr('opacity', 1)
-                        }),
-                (update) =>
-                    update.call((node) =>
-                        node
-                            .select('textPath')
-                            .transition('link-arrow-update')
-                            .duration(duration)
-                            .style('fill', (d) => (outgoingLink(d) ? 'blue' : 'red'))
-                    ),
-                (exit) =>
-                    exit.call((node) =>
-                        node
-                            .transition()
-                            .duration(duration / 2)
-                            .attr('opacity', 0)
-                            .remove()
-                    )
+                        .attr('href', (d) => `#link-path-${linkId(d)}`)
+                        .style('fill', (d) => (outgoingLink(d) ? 'blue' : 'red'))
+                    return group
+                },
+                (update) => {
+                    // update path
+                    update
+                        .select('.link-path')
+                        .transition('link-path-update')
+                        .duration(duration)
+                        .attr('d', curvedLinks ? radialCurves : radialLines)
+                        .style('stroke', (d) => (outgoingLink(d) ? 'blue' : 'red'))
+                    // update arrow
+                    update
+                        .select('.link-arrow')
+                        .select('textPath')
+                        .transition('link-arrow-update')
+                        .duration(duration)
+                        .style('fill', (d) => (outgoingLink(d) ? 'blue' : 'red'))
+                    return update
+                },
+                (exit) => {
+                    exit.transition('link-exit')
+                        .duration(duration / 2)
+                        .attr('opacity', 0)
+                        .remove()
+                    return exit
+                }
             )
     }
 
     function createCircles(linkedItems) {
-        d3.select(`#node-group`)
+        d3.select(`#nodes`)
             .selectAll('.circle-node')
             .data(linkedItems, (d) => d.data.item.id)
             .join(
@@ -492,7 +495,7 @@ function LinkModal(props: {
     }
 
     function createCircleText(linkedItems) {
-        d3.select(`#node-group`)
+        d3.select(`#nodes`)
             .selectAll('.circle-text')
             .data(linkedItems, (d) => d.data.item.id)
             .join(
@@ -547,33 +550,6 @@ function LinkModal(props: {
             )
     }
 
-    function buildCanvas() {
-        const svg = d3
-            .select('#link-map')
-            .append('svg')
-            .attr('id', 'link-map-svg')
-            .attr('width', canvasSize)
-            .attr('height', canvasSize)
-        const masterGroup = svg.append('g').attr('id', 'master-group')
-        const rings = masterGroup.append('g').attr('id', 'background-rings')
-        const ringScale = circleSize / 6
-        const ringSizes = [ringScale, ringScale * 2, ringScale * 3]
-        ringSizes.forEach((ringSize) => {
-            rings
-                .append('circle')
-                .attr('r', ringSize)
-                .attr('fill', 'none')
-                .attr('stroke', 'black')
-                .attr('opacity', 0.1)
-        })
-        masterGroup.append('g').attr('id', 'link-group')
-        masterGroup.append('g').attr('id', 'node-group')
-        // set up zoom
-        svg.call(zoom).on('dblclick.zoom', null)
-        svg.call(zoom.transform, d3.zoomIdentity.translate(canvasSize / 2, canvasSize / 2))
-        svg.on('click', resetPosition)
-    }
-
     useEffect(() => {
         buildCanvas()
         getLinks(itemData.id, itemType)
@@ -604,8 +580,6 @@ function LinkModal(props: {
             const nodes = treeData.descendants()
             const links = treeData.links()
             createLinks(links)
-            createLinkText(links)
-            createLinkArrows(links)
             createCircles(nodes)
             createCircleText(nodes)
         }
