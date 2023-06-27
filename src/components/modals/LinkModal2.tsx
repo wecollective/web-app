@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import Button from '@components/Button'
 import Column from '@components/Column'
 import DropDown from '@components/DropDown'
@@ -11,7 +12,7 @@ import { PostContext } from '@contexts/PostContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import { UserContext } from '@contexts/UserContext'
 import config from '@src/Config'
-import { pluralise } from '@src/Helpers'
+import { getDraftPlainText, pluralise } from '@src/Helpers'
 import { ArrowDownIcon } from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
@@ -109,7 +110,7 @@ function LinkModal(props: {
         axios
             .get(`${config.apiURL}/links?itemType=${modelType(type)}&itemId=${id}`, options)
             .then((res) => {
-                console.log('link data: ', res.data)
+                // console.log('link data: ', res.data)
                 // setLoading(false)
                 setLinkDataNew(res.data)
                 // setLinkData(res.data)
@@ -261,9 +262,17 @@ function LinkModal(props: {
     const canvasSize = 600
     const circleSize = canvasSize - 50
 
-    const zoom = d3
-        .zoom()
-        .on('zoom', (event) => d3.select('#master-group').attr('transform', event.transform))
+    const zoom = d3.zoom().on('zoom', (event) => {
+        // scale master group
+        d3.select('#master-group').attr('transform', event.transform)
+        // scale circle and text attributes
+        const scale = event.transform.k
+        d3.selectAll('.node-circle').attr('stroke-width', 1 / scale)
+        d3.selectAll('.node-text').attr('font-size', 10 / scale)
+        d3.selectAll('.node-text').each((d) =>
+            d3.select(`#node-text-${d.data.item.id}`).text(findNodeText(d, scale))
+        )
+    })
 
     function resetPosition() {
         d3.select('#link-map-svg')
@@ -279,6 +288,7 @@ function LinkModal(props: {
             .attr('id', 'link-map-svg')
             .attr('width', canvasSize)
             .attr('height', canvasSize)
+        // set up groups
         const masterGroup = svg.append('g').attr('id', 'master-group')
         const rings = masterGroup.append('g').attr('id', 'background-rings')
         const ringScale = circleSize / 6
@@ -360,6 +370,19 @@ function LinkModal(props: {
         const anchors = outgoingLink(d) ? [d.source, d.target] : [d.target, d.source]
         const points = anchors.map((a) => findRadialPoints(a))
         return `M${points[0]}L${points[1]}`
+    }
+
+    function findNodeText(d, scale) {
+        // temporary solution until GBG posts title field used instead of topic
+        const { type, topic, title, text } = d.data.item
+        const plainText =
+            type === 'glass-bead-game'
+                ? topic || getDraftPlainText(text)
+                : title || getDraftPlainText(text)
+        // trim text
+        const maxChars = Math.round(4 * scale)
+        const trimmedText = plainText.substring(0, maxChars)
+        return plainText.length > maxChars ? trimmedText.concat('...') : plainText
     }
 
     function createLinks(links) {
@@ -471,7 +494,7 @@ function LinkModal(props: {
                         .attr('fill', (d) =>
                             d.data.item.modelType === 'post' ? '#00b1a9' : '#826cff'
                         )
-                        // .attr('stroke-width', 3)
+                        .attr('stroke-width', 1)
                         .attr('stroke', 'black')
                         .attr('cursor', 'pointer')
                         .on('click', (e, circle) => {
@@ -484,12 +507,12 @@ function LinkModal(props: {
                         .append('text')
                         .attr('id', (d) => `node-text-${d.data.item.id}`)
                         .classed('node-text', true)
-                        .attr('transform', findNodeTransform)
-                        .text((d) => d.data.item.title)
+                        .text((d) => findNodeText(d, 1))
                         .attr('font-size', 10)
                         .attr('text-anchor', 'middle')
                         .attr('dominant-baseline', 'central')
                         .attr('pointer-events', 'none')
+                        .attr('transform', findNodeTransform)
                     return group
                 },
                 (update) => {
