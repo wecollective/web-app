@@ -255,6 +255,8 @@ function LinkModal(props: {
     //     )
     // }
 
+    // settings
+    const curvedLinks = false
     const duration = 1000
     const canvasSize = 600
     const circleSize = canvasSize - 50
@@ -310,7 +312,7 @@ function LinkModal(props: {
     //     return sortOrder === 'Descending' ? [dMin, dMax] : [dMax, dMin]
     // }
 
-    function findRadius(d) {
+    function findNodeRadius(d) {
         const radiusScale = d3
             .scaleLinear()
             .domain([0, 5]) // data values spread
@@ -323,32 +325,44 @@ function LinkModal(props: {
         return radiusScale(radius)
     }
 
-    function outgoingLink(d) {
-        return d.target.data.item.direction === 'outgoing'
-    }
-
     function linkId(d) {
         // use target link id (route node doesn't have source)
         return d.target.data.Link.id
     }
 
-    function radialLines(d, i) {
+    function outgoingLink(d) {
+        return d.target.data.item.direction === 'outgoing'
+    }
+
+    function findLinkColor(d) {
+        return outgoingLink(d) ? 'blue' : 'red'
+    }
+
+    function findNodeTransform(d) {
+        return `rotate(${(d.x * 180) / Math.PI - 90}),translate(${d.y}, 0)`
+    }
+
+    function findRadialPoints(d) {
+        const radius = d.y
+        const angle = d.x - Math.PI / 2
+        return [radius * Math.cos(angle), radius * Math.sin(angle)]
+    }
+
+    function findLinkPath(d) {
+        // curved links
+        if (curvedLinks) {
+            return d3
+                .linkRadial()
+                .angle((r) => r.x)
+                .radius((r) => r.y)(d)
+        }
+        // straight links
         const anchors = outgoingLink(d) ? [d.source, d.target] : [d.target, d.source]
-        const points = anchors.map((d2) => {
-            const radius = d2.y
-            const angle = d2.x - Math.PI / 2
-            return [radius * Math.cos(angle), radius * Math.sin(angle)]
-        })
+        const points = anchors.map((a) => findRadialPoints(a))
         return `M${points[0]}L${points[1]}`
     }
 
-    const radialCurves = d3
-        .linkRadial()
-        .angle((d) => d.x)
-        .radius((d) => d.y)
-
     function createLinks(links) {
-        const curvedLinks = false
         d3.select(`#links`)
             .selectAll('.link')
             .data(links, (d) => linkId(d))
@@ -363,7 +377,7 @@ function LinkModal(props: {
                         .call((node) => {
                             node.transition('link-enter')
                                 .delay(200)
-                                .duration(duration)
+                                .duration(duration * 2)
                                 .attr('opacity', 1)
                         })
                     // create path
@@ -371,13 +385,13 @@ function LinkModal(props: {
                         .append('path')
                         .classed('link-path', true)
                         .attr('id', (d) => `link-path-${linkId(d)}`)
-                        .style('stroke', (d) => (outgoingLink(d) ? 'blue' : 'red'))
+                        .style('stroke', findLinkColor)
                         .attr('fill', 'none')
                         // .attr('stroke-width', (d) => {
                         //     console.log('link d: ', d)
                         //     return d.source.height + 1
                         // })
-                        .attr('d', curvedLinks ? radialCurves : radialLines)
+                        .attr('d', findLinkPath)
                     // create text
                     group
                         .append('text')
@@ -402,7 +416,7 @@ function LinkModal(props: {
                         .attr('text-anchor', 'middle')
                         .attr('startOffset', '50%')
                         .attr('href', (d) => `#link-path-${linkId(d)}`)
-                        .style('fill', (d) => (outgoingLink(d) ? 'blue' : 'red'))
+                        .style('fill', findLinkColor)
                     return group
                 },
                 (update) => {
@@ -411,15 +425,15 @@ function LinkModal(props: {
                         .select('.link-path')
                         .transition('link-path-update')
                         .duration(duration)
-                        .attr('d', curvedLinks ? radialCurves : radialLines)
-                        .style('stroke', (d) => (outgoingLink(d) ? 'blue' : 'red'))
+                        .attr('d', findLinkPath)
+                        .style('stroke', findLinkColor)
                     // update arrow
                     update
                         .select('.link-arrow')
                         .select('textPath')
                         .transition('link-arrow-update')
                         .duration(duration)
-                        .style('fill', (d) => (outgoingLink(d) ? 'blue' : 'red'))
+                        .style('fill', findLinkColor)
                     return update
                 },
                 (exit) => {
@@ -432,121 +446,75 @@ function LinkModal(props: {
             )
     }
 
-    function createCircles(linkedItems) {
+    function createNodes(nodes) {
         d3.select(`#nodes`)
-            .selectAll('.circle-node')
-            .data(linkedItems, (d) => d.data.item.id)
+            .selectAll('.node')
+            .data(nodes, (d) => d.data.item.id)
             .join(
-                (enter) =>
-                    enter
+                (enter) => {
+                    // create group
+                    const group = enter
+                        .append('g')
+                        .attr('id', (d) => `node-${d.data.item.id}`)
+                        .attr('class', (d) => `node`)
+                        .attr('opacity', 0)
+                        .call((node) => {
+                            node.transition('node-enter').duration(duration).attr('opacity', 1)
+                        })
+                    // create circle
+                    group
                         .append('circle')
-                        .classed('circle-node', true)
-                        .attr('id', (d) => `circle-${d.data.item.id}`)
-                        .attr(
-                            'transform',
-                            (d) => `rotate(${(d.x * 180) / Math.PI - 90}),translate(${d.y}, 0)`
-                        )
-                        // .attr('r', (d) => (d.parent ? 10 : 15))
-                        .attr('r', (d) => findRadius(d))
+                        .classed('node-circle', true)
+                        .attr('id', (d) => `node-circle-${d.data.item.id}`)
+                        .attr('transform', findNodeTransform)
+                        .attr('r', findNodeRadius)
                         .attr('fill', (d) =>
                             d.data.item.modelType === 'post' ? '#00b1a9' : '#826cff'
                         )
                         // .attr('stroke-width', 3)
                         .attr('stroke', 'black')
                         .attr('cursor', 'pointer')
-                        .on('click', (event, circle) => {
-                            console.log('circle: ', circle)
+                        .on('click', (e, circle) => {
                             if (!circle.parent) resetPosition()
                             else getLinks(circle.data.item.id, circle.data.item.modelType)
                         })
                         .style('cursor', 'pointer')
-                        .call(
-                            (node) =>
-                                node
-                                    .transition('background-circle-enter')
-                                    .duration(duration)
-                                    .attr('opacity', 1)
-                            // .attr('transform', (d) => `translate(${d.x},${d.y})`)
-                        ),
-                (update) =>
-                    update.call(
-                        (node) =>
-                            node
-                                .transition('background-circle-update')
-                                .duration(duration)
-                                .attr('r', (d) => findRadius(d))
-                                .attr(
-                                    'transform',
-                                    (d) =>
-                                        `rotate(${(d.x * 180) / Math.PI - 90}),translate(${d.y}, 0)`
-                                )
-                        // .attr('fill', '#aaa')
-                        // .attr('transform', (d) => `translate(${d.x},${d.y})`)
-                    ),
-                (exit) =>
-                    exit.call((node) =>
-                        node
-                            .transition('background-circle-exit')
-                            .duration(duration / 2)
-                            .attr('opacity', 0)
-                            .remove()
-                    )
-            )
-    }
-
-    function createCircleText(linkedItems) {
-        d3.select(`#nodes`)
-            .selectAll('.circle-text')
-            .data(linkedItems, (d) => d.data.item.id)
-            .join(
-                (enter) =>
-                    enter
+                    // create text
+                    group
                         .append('text')
-                        .attr('id', (d) => `circle-text-${d.data.item.id}`)
-                        .classed('circle-text', true)
-                        .attr(
-                            'transform',
-                            (d) => `rotate(${(d.x * 180) / Math.PI - 90}),translate(${d.y}, 0)`
-                        )
+                        .attr('id', (d) => `node-text-${d.data.item.id}`)
+                        .classed('node-text', true)
+                        .attr('transform', findNodeTransform)
                         .text((d) => d.data.item.title)
                         .attr('font-size', 10)
                         .attr('text-anchor', 'middle')
                         .attr('dominant-baseline', 'central')
                         .attr('pointer-events', 'none')
-                        .call(
-                            (node) => node.transition('background-circle-enter').duration(duration)
-                            // .attr(
-                            //     'transform',
-                            //     (d) =>
-                            //         `rotate(${(d.x * 180) / Math.PI - 90}),translate(${
-                            //             d.y
-                            //         }, 0)`
-                            // )
-                            // .attr('opacity', 1)
-                            // .attr('transform', (d) => `translate(${d.x},${d.y})`)
-                        ),
-                (update) =>
-                    update.call(
-                        (node) =>
-                            node
-                                .transition('background-circle-update')
-                                .duration(duration)
-                                .attr(
-                                    'transform',
-                                    (d) =>
-                                        `rotate(${(d.x * 180) / Math.PI - 90}),translate(${d.y}, 0)`
-                                )
-                        // .attr('fill', '#aaa')
-                        // .attr('transform', (d) => `translate(${d.x},${d.y})`)
-                    ),
-                (exit) =>
-                    exit.call((node) =>
-                        node
-                            .transition('background-circle-exit')
-                            .duration(duration / 2)
-                            .attr('opacity', 0)
-                            .remove()
-                    )
+                    return group
+                },
+                (update) => {
+                    // update circle
+                    update
+                        .select('.node-circle')
+                        .transition('node-circle-update')
+                        .duration(duration)
+                        .attr('r', findNodeRadius)
+                        .attr('transform', findNodeTransform)
+                    // update text
+                    update
+                        .select('.node-text')
+                        .transition('node-text-update')
+                        .duration(duration)
+                        .attr('transform', findNodeTransform)
+                    return update
+                },
+                (exit) => {
+                    exit.transition('node-exit')
+                        .duration(duration / 2)
+                        .attr('opacity', 0)
+                        .remove()
+                    return exit
+                }
             )
     }
 
@@ -557,9 +525,7 @@ function LinkModal(props: {
 
     useEffect(() => {
         if (linkDataNew) {
-            // buildCanvas()
             const data = d3.hierarchy(linkDataNew, (d) => d.item.children)
-            // console.log('data: ', data)
             let radius
             if (data.height === 1) radius = circleSize / 6
             if (data.height === 2) radius = circleSize / 3
@@ -576,12 +542,10 @@ function LinkModal(props: {
                 .separation((a, b) => (a.parent === b.parent ? 1 : 2) / a.depth)
 
             const treeData = tree(data)
-            // console.log('treeData: ', treeData.children.length)
-            const nodes = treeData.descendants()
             const links = treeData.links()
+            const nodes = treeData.descendants()
             createLinks(links)
-            createCircles(nodes)
-            createCircleText(nodes)
+            createNodes(nodes)
         }
     }, [linkDataNew])
 
