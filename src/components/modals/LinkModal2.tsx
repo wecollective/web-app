@@ -293,13 +293,14 @@ function LinkModal(props: {
         const rings = masterGroup.append('g').attr('id', 'background-rings')
         const ringScale = circleSize / 6
         const ringSizes = [ringScale, ringScale * 2, ringScale * 3]
-        ringSizes.forEach((ringSize) => {
+        ringSizes.forEach((ringSize, i) => {
             rings
                 .append('circle')
                 .attr('r', ringSize)
                 .attr('fill', 'none')
                 .attr('stroke', 'black')
                 .attr('opacity', 0.1)
+            // .attr('opacity', 0.3 - i / 10)
         })
         masterGroup.append('g').attr('id', 'links')
         masterGroup.append('g').attr('id', 'nodes')
@@ -375,14 +376,17 @@ function LinkModal(props: {
     function findNodeText(d, scale) {
         // temporary solution until GBG posts title field used instead of topic
         const { type, topic, title, text } = d.data.item
-        const plainText =
-            type === 'glass-bead-game'
-                ? topic || getDraftPlainText(text)
-                : title || getDraftPlainText(text)
-        // trim text
-        const maxChars = Math.round(4 * scale)
-        const trimmedText = plainText.substring(0, maxChars)
-        return plainText.length > maxChars ? trimmedText.concat('...') : plainText
+        if (d.data.item.modelType === 'post') {
+            const plainText =
+                type === 'glass-bead-game'
+                    ? topic || getDraftPlainText(text || '')
+                    : title || getDraftPlainText(text || '')
+            // trim text
+            const maxChars = Math.round(4 * scale)
+            const trimmedText = plainText.substring(0, maxChars)
+            return plainText.length > maxChars ? trimmedText.concat('...') : plainText
+        }
+        return ''
     }
 
     function createLinks(links) {
