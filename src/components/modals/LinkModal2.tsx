@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import Button from '@components/Button'
 import Column from '@components/Column'
@@ -16,7 +17,7 @@ import { getDraftPlainText, pluralise } from '@src/Helpers'
 import { ArrowDownIcon } from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 function LinkModal(props: {
@@ -50,6 +51,10 @@ function LinkModal(props: {
     const [linkedItem, setLinkedItem] = useState<any>(null)
     const [linkTypes, setLinkTypes] = useState('All Types')
     const [sizeBy, setSizeBy] = useState('Likes')
+    const [clickedSpaceUUID, setClickedSpaceUUID] = useState('')
+    const links = useRef<any>(null)
+    const nodes = useRef<any>(null)
+    const matchedNodeIds = useRef<number[]>([])
     const cookies = new Cookies()
     // const incomingLinks = IncomingPostLinks.length > 0 || IncomingCommentLinks.length > 0
     // const outgoingLinks = OutgoingPostLinks.length > 0 || OutgoingCommentLinks.length > 0
@@ -336,11 +341,6 @@ function LinkModal(props: {
         return radiusScale(radius)
     }
 
-    function linkId(d) {
-        // use target link id (route node doesn't have source)
-        return d.target.data.Link.id
-    }
-
     function outgoingLink(d) {
         return d.target.data.item.direction === 'outgoing'
     }
@@ -389,17 +389,40 @@ function LinkModal(props: {
         return ''
     }
 
-    function createLinks(links) {
+    function findNodeById(tree: any, id: number) {
+        // recursive function, traverses the node tree to find a space using its space id
+        if (tree.data.item.id === id) return tree
+        if (tree.children) {
+            for (let i = 0; i < tree.children.length; i += 1) {
+                const match = findNodeById(tree.children[i], id)
+                if (match) return match
+            }
+        }
+        return null
+    }
+
+    function recursivelyAddUUIDS(oldNode, newNode) {
+        newNode.data.item.uuid = oldNode.data.item.uuid
+        matchedNodeIds.current.push(oldNode.data.item.uuid)
+        if (newNode.children && oldNode.children) {
+            newNode.children.forEach((child) => {
+                const match = oldNode.children.find((c) => c.data.item.id === child.data.item.id)
+                if (match) recursivelyAddUUIDS(match, child)
+            })
+        }
+    }
+
+    function createLinks() {
         d3.select(`#links`)
             .selectAll('.link')
-            .data(links, (d) => linkId(d))
+            .data(links.current, (d) => d.uuid)
             .join(
                 (enter) => {
                     // create group
                     const group = enter
                         .append('g')
-                        .attr('id', (d) => `link-${linkId(d)}`)
-                        .attr('class', (d) => `link`)
+                        .attr('id', (d) => `link-${d.uuid}`)
+                        .attr('class', 'link')
                         .attr('opacity', 0)
                         .call((node) => {
                             node.transition('link-enter')
@@ -410,10 +433,10 @@ function LinkModal(props: {
                     // create path
                     group
                         .append('path')
-                        .classed('link-path', true)
-                        .attr('id', (d) => `link-path-${linkId(d)}`)
-                        .style('stroke', findLinkColor)
+                        .attr('id', (d) => `link-path-${d.uuid}`)
+                        .attr('class', 'link-path')
                         .attr('fill', 'none')
+                        .attr('stroke', findLinkColor)
                         // .attr('stroke-width', (d) => {
                         //     console.log('link d: ', d)
                         //     return d.source.height + 1
@@ -422,27 +445,24 @@ function LinkModal(props: {
                     // create text
                     group
                         .append('text')
-                        .classed('link-text', true)
                         .attr('dy', -5)
                         .append('textPath')
-                        .classed('textPath', true)
                         .text((d) => d.target.data.Link.description)
                         .attr('font-size', 10)
                         .attr('text-anchor', 'middle')
                         .attr('startOffset', '50%')
-                        .attr('href', (d) => `#link-path-${linkId(d)}`)
+                        .attr('href', (d) => `#link-path-${d.uuid}`)
                     // creat arrow
                     group
                         .append('text')
-                        .classed('link-arrow', true)
+                        .attr('class', 'link-arrow')
                         .attr('dy', 3.4)
                         .append('textPath')
-                        .classed('textPath', true)
                         .text('▶')
                         .attr('font-size', 10)
                         .attr('text-anchor', 'middle')
                         .attr('startOffset', '50%')
-                        .attr('href', (d) => `#link-path-${linkId(d)}`)
+                        .attr('href', (d) => `#link-path-${d.uuid}`)
                         .style('fill', findLinkColor)
                     return group
                 },
@@ -473,43 +493,76 @@ function LinkModal(props: {
             )
     }
 
-    function createNodes(nodes) {
+    function createNodes() {
         d3.select(`#nodes`)
             .selectAll('.node')
-            .data(nodes, (d) => d.data.item.id)
+            .data(nodes.current, (d) => d.data.item.uuid)
             .join(
                 (enter) => {
                     // create group
                     const group = enter
                         .append('g')
-                        .attr('id', (d) => `node-${d.data.item.id}`)
-                        .attr('class', (d) => `node`)
+                        .attr('id', (d) => `node-${d.data.item.uuid}`)
+                        .attr('class', 'node')
                         .attr('opacity', 0)
                         .call((node) => {
                             node.transition('node-enter').duration(duration).attr('opacity', 1)
                         })
+                    // create background
+                    group
+                        .append('circle')
+                        .attr('id', (d) => `node-background-${d.data.item.uuid}`)
+                        .attr('class', (d) => `node-background node-background-${d.data.item.id}`)
+                        .attr('transform', findNodeTransform)
+                        .attr('r', (d) => findNodeRadius(d) + 2)
+                        .attr('fill', '#aaa')
+                        .attr('cursor', 'pointer')
+                        .on('mouseover', (e, d) => {
+                            // highlight selected circle
+                            d3.select(`#node-background-${d.data.item.uuid}`)
+                                .transition()
+                                .duration(duration / 4)
+                                .attr('fill', '#8ad1ff') // blue
+                                .attr('r', findNodeRadius(d) + 6)
+                            // highlight other circles
+                            d3.selectAll(`.node-background-${d.data.item.id}`)
+                                .filter((n) => n.data.item.uuid !== d.data.item.uuid)
+                                .transition()
+                                .duration(duration / 4)
+                                .attr('fill', '#a090f7') // purple
+                                .attr('r', findNodeRadius(d) + 6)
+                        })
+                        .on('mouseout', (e, d) => {
+                            // fade out all highlighted circles
+                            d3.selectAll(`.node-background-${d.data.item.id}`)
+                                .transition()
+                                .duration(duration / 4)
+                                .attr('fill', '#aaa')
+                                .attr('r', findNodeRadius(d) + 2)
+                        })
+                        .on('click', (e, d) => {
+                            if (!d.parent) resetPosition()
+                            else {
+                                setClickedSpaceUUID(d.data.item.uuid)
+                                getLinks(d.data.item.id, d.data.item.modelType)
+                            }
+                        })
+                        .style('cursor', 'pointer')
                     // create circle
                     group
                         .append('circle')
                         .classed('node-circle', true)
-                        .attr('id', (d) => `node-circle-${d.data.item.id}`)
+                        .attr('id', (d) => `node-circle-${d.data.item.uuid}`)
                         .attr('transform', findNodeTransform)
                         .attr('r', findNodeRadius)
                         .attr('fill', (d) =>
                             d.data.item.modelType === 'post' ? '#00b1a9' : '#826cff'
                         )
-                        .attr('stroke-width', 1)
-                        .attr('stroke', 'black')
-                        .attr('cursor', 'pointer')
-                        .on('click', (e, circle) => {
-                            if (!circle.parent) resetPosition()
-                            else getLinks(circle.data.item.id, circle.data.item.modelType)
-                        })
-                        .style('cursor', 'pointer')
+                        .attr('pointer-events', 'none')
                     // create text
                     group
                         .append('text')
-                        .attr('id', (d) => `node-text-${d.data.item.id}`)
+                        .attr('id', (d) => `node-text-${d.data.item.uuid}`)
                         .classed('node-text', true)
                         .text((d) => findNodeText(d, 1))
                         .attr('font-size', 10)
@@ -520,6 +573,13 @@ function LinkModal(props: {
                     return group
                 },
                 (update) => {
+                    // update background
+                    update
+                        .select('.node-background')
+                        .transition('node-background-update')
+                        .duration(duration)
+                        .attr('r', (d) => findNodeRadius(d) + 2)
+                        .attr('transform', findNodeTransform)
                     // update circle
                     update
                         .select('.node-circle')
@@ -569,10 +629,73 @@ function LinkModal(props: {
                 .separation((a, b) => (a.parent === b.parent ? 1 : 2) / a.depth)
 
             const treeData = tree(data)
-            const links = treeData.links()
-            const nodes = treeData.descendants()
-            createLinks(links)
-            createNodes(nodes)
+            const newLinks = treeData.links()
+            const newNodes = treeData.descendants()
+
+            // add link ids
+            newLinks.forEach((link) => {
+                link.id = link.target.data.Link.id
+                link.uuid = link.target.data.Link.uuid
+            })
+            // update link uuids
+            // todo: match links using uuids like nodes
+            if (links.current) {
+                const matchedLinkIds = [] as number[]
+                newLinks.forEach((link) => {
+                    const match = links.current.find((l) => l.id === link.id)
+                    const alreadyMatched = matchedLinkIds.find((id) => id === link.id)
+                    if (match && !alreadyMatched) {
+                        matchedLinkIds.push(link.id)
+                        link.uuid = match.uuid
+                    }
+                })
+            }
+            // update node uuids
+            const oldNode = nodes.current && nodes.current[0]
+            if (oldNode) {
+                const newNode = newNodes[0]
+                matchedNodeIds.current = []
+                // if tree updates without navigation
+                if (oldNode.data.item.id === newNode.data.item.id) {
+                    recursivelyAddUUIDS(oldNode, newNode)
+                } else {
+                    // if navigating to new node use uuid to ensure the correct node is chosen, otherwise just the node id
+                    const id = clickedSpaceUUID || newNode.data.item.id
+                    const idType = clickedSpaceUUID ? 'uuid' : 'id'
+                    const oldChild = nodes.current.find((s) => s.data.item[idType] === id)
+                    if (oldChild) recursivelyAddUUIDS(oldChild, newNode)
+                    else {
+                        // if new space neither old parent or child, search for matching spaces by id
+                        const matchingChild = findNodeById(newNode, oldNode.data.item.id)
+                        if (matchingChild) recursivelyAddUUIDS(oldNode, matchingChild)
+                    }
+                }
+                // update other matches outside of old node tree
+                newNodes.forEach((node) => {
+                    const alreadyMatched = matchedNodeIds.current.find(
+                        (uuid) => uuid === node.data.item.uuid
+                    )
+                    if (!alreadyMatched) {
+                        const match = nodes.current
+                            .filter(
+                                (n) =>
+                                    !matchedNodeIds.current.find(
+                                        (uuid) => uuid === n.data.item.uuid
+                                    )
+                            )
+                            .find((n) => n.data.item.id === node.data.item.id)
+
+                        if (match) {
+                            matchedNodeIds.current.push(match.data.item.uuid)
+                            node.data.item.uuid = match.data.item.uuid
+                        }
+                    }
+                })
+            }
+            links.current = newLinks
+            nodes.current = newNodes
+            createLinks()
+            createNodes()
         }
     }, [linkDataNew])
 
