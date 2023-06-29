@@ -14,6 +14,7 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import { UserContext } from '@contexts/UserContext'
 import config from '@src/Config'
 import { getDraftPlainText, pluralise } from '@src/Helpers'
+import colors from '@styles/Colors.module.scss'
 import { ArrowDownIcon } from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
@@ -52,6 +53,7 @@ function LinkModal(props: {
     const [linkTypes, setLinkTypes] = useState('All Types')
     const [sizeBy, setSizeBy] = useState('Likes')
     const [clickedSpaceUUID, setClickedSpaceUUID] = useState('')
+    const transitioning = useRef(true)
     const links = useRef<any>(null)
     const nodes = useRef<any>(null)
     const matchedNodeIds = useRef<number[]>([])
@@ -104,7 +106,7 @@ function LinkModal(props: {
         ],
     }
 
-    function modelType(type) {
+    function findModelType(type) {
         if (['card', 'bead'].includes(type)) return 'post'
         return type
     }
@@ -113,7 +115,7 @@ function LinkModal(props: {
         setLoading(true)
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
-            .get(`${config.apiURL}/links?itemType=${modelType(type)}&itemId=${id}`, options)
+            .get(`${config.apiURL}/links?itemType=${findModelType(type)}&itemId=${id}`, options)
             .then((res) => {
                 // console.log('link data: ', res.data)
                 // setLoading(false)
@@ -147,7 +149,7 @@ function LinkModal(props: {
         if (location === 'user-posts') newPosts = [...userPosts]
         if (location === 'post-page') newPosts = [{ ...postData }]
         // update source item
-        if (modelType(itemType) === 'post') {
+        if (findModelType(itemType) === 'post') {
             let item = newPosts.find((p) => p.id === (parentItemId || itemData.id))
             if (itemType === 'bead') item = item.Beads.find((p) => p.id === itemData.id)
             if (itemType === 'card') item = item.CardSides.find((p) => p.id === itemData.id)
@@ -176,7 +178,7 @@ function LinkModal(props: {
     function addLink() {
         setAddLinkLoading(true)
         const data = {
-            sourceType: modelType(itemType),
+            sourceType: findModelType(itemType),
             sourceId: itemData.id,
             targetType: newLinkTargetType.toLowerCase(),
             targetId: newLinkTargetId,
@@ -272,10 +274,9 @@ function LinkModal(props: {
         d3.select('#master-group').attr('transform', event.transform)
         // scale circle and text attributes
         const scale = event.transform.k
-        d3.selectAll('.node-circle').attr('stroke-width', 1 / scale)
         d3.selectAll('.node-text').attr('font-size', 10 / scale)
         d3.selectAll('.node-text').each((d) =>
-            d3.select(`#node-text-${d.data.item.id}`).text(findNodeText(d, scale))
+            d3.select(`#node-text-${d.data.item.uuid}`).text(findNodeText(d, scale))
         )
     })
 
@@ -346,7 +347,7 @@ function LinkModal(props: {
     }
 
     function findLinkColor(d) {
-        return outgoingLink(d) ? 'blue' : 'red'
+        return outgoingLink(d) ? colors.linkBlue : colors.linkRed
     }
 
     function findNodeTransform(d) {
@@ -373,10 +374,19 @@ function LinkModal(props: {
         return `M${points[0]}L${points[1]}`
     }
 
+    function findNodeFill(d) {
+        const { modelType } = d.data.item
+        if (modelType === 'post') return colors.aqua
+        if (modelType === 'comment') return colors.purple
+        if (modelType === 'user') return colors.orange
+        if (modelType === 'space') return colors.green
+        return '#aaa'
+    }
+
     function findNodeText(d, scale) {
         // temporary solution until GBG posts title field used instead of topic
-        const { type, topic, title, text } = d.data.item
-        if (d.data.item.modelType === 'post') {
+        const { modelType, type, topic, title, text } = d.data.item
+        if (modelType === 'post') {
             const plainText =
                 type === 'glass-bead-game'
                     ? topic || getDraftPlainText(text || '')
@@ -522,14 +532,14 @@ function LinkModal(props: {
                             d3.select(`#node-background-${d.data.item.uuid}`)
                                 .transition()
                                 .duration(duration / 4)
-                                .attr('fill', '#8ad1ff') // blue
+                                .attr('fill', colors.cpBlue)
                                 .attr('r', findNodeRadius(d) + 6)
                             // highlight other circles
                             d3.selectAll(`.node-background-${d.data.item.id}`)
                                 .filter((n) => n.data.item.uuid !== d.data.item.uuid)
                                 .transition()
                                 .duration(duration / 4)
-                                .attr('fill', '#a090f7') // purple
+                                .attr('fill', colors.cpPurple)
                                 .attr('r', findNodeRadius(d) + 6)
                         })
                         .on('mouseout', (e, d) => {
@@ -541,10 +551,13 @@ function LinkModal(props: {
                                 .attr('r', findNodeRadius(d) + 2)
                         })
                         .on('click', (e, d) => {
-                            if (!d.parent) resetPosition()
-                            else {
-                                setClickedSpaceUUID(d.data.item.uuid)
-                                getLinks(d.data.item.id, d.data.item.modelType)
+                            if (!transitioning.current) {
+                                transitioning.current = true
+                                if (!d.parent) resetPosition()
+                                else {
+                                    setClickedSpaceUUID(d.data.item.uuid)
+                                    getLinks(d.data.item.id, d.data.item.modelType)
+                                }
                             }
                         })
                         .style('cursor', 'pointer')
@@ -555,9 +568,7 @@ function LinkModal(props: {
                         .attr('id', (d) => `node-circle-${d.data.item.uuid}`)
                         .attr('transform', findNodeTransform)
                         .attr('r', findNodeRadius)
-                        .attr('fill', (d) =>
-                            d.data.item.modelType === 'post' ? '#00b1a9' : '#826cff'
-                        )
+                        .attr('fill', findNodeFill)
                         .attr('pointer-events', 'none')
                     // create text
                     group
@@ -631,14 +642,13 @@ function LinkModal(props: {
             const treeData = tree(data)
             const newLinks = treeData.links()
             const newNodes = treeData.descendants()
-
+            // todo: clean up and match links using uuids like nodes
             // add link ids
             newLinks.forEach((link) => {
                 link.id = link.target.data.Link.id
                 link.uuid = link.target.data.Link.uuid
             })
             // update link uuids
-            // todo: match links using uuids like nodes
             if (links.current) {
                 const matchedLinkIds = [] as number[]
                 newLinks.forEach((link) => {
@@ -696,6 +706,10 @@ function LinkModal(props: {
             nodes.current = newNodes
             createLinks()
             createNodes()
+            // mark transition complete after duration
+            setTimeout(() => {
+                transitioning.current = false
+            }, duration)
         }
     }, [linkDataNew])
 
