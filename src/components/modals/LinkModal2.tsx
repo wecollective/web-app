@@ -1,3 +1,4 @@
+/* eslint-disable no-return-assign */
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import Button from '@components/Button'
@@ -54,6 +55,7 @@ function LinkModal(props: {
     const [sizeBy, setSizeBy] = useState('Likes')
     const [clickedSpaceUUID, setClickedSpaceUUID] = useState('')
     const transitioning = useRef(true)
+    const domain = useRef<number[]>([0, 0])
     const links = useRef<any>(null)
     const nodes = useRef<any>(null)
     const matchedNodeIds = useRef<number[]>([])
@@ -313,32 +315,39 @@ function LinkModal(props: {
         // set up zoom
         svg.call(zoom).on('dblclick.zoom', null)
         svg.call(zoom.transform, d3.zoomIdentity.translate(canvasSize / 2, canvasSize / 2))
-        svg.on('click', resetPosition)
+        svg.on('click', () => {
+            resetPosition()
+            setTimeout(() => {
+                transitioning.current = false
+            }, duration * 2 + 200)
+        })
     }
 
-    // function findDomain() {
-    //     let dMin = 0
-    //     let dMax
-    //     if (sortBy === 'Date Created') {
-    //         dMin = d3.min(postMapData.posts.map((post) => Date.parse(post.createdAt)))
-    //         dMax = d3.max(postMapData.posts.map((post) => Date.parse(post.createdAt)))
-    //     } else if (sortBy === 'Recent Activity') {
-    //         dMin = d3.min(postMapData.posts.map((post) => Date.parse(post.lastActivity)))
-    //         dMax = d3.max(postMapData.posts.map((post) => Date.parse(post.lastActivity)))
-    //     } else dMax = d3.max(postMapData.posts.map((child) => child[`total${sortBy}`]))
-    //     return sortOrder === 'Descending' ? [dMin, dMax] : [dMax, dMin]
-    // }
+    function findDomain() {
+        // calculate node radius domain
+        let dMin = 0
+        let dMax
+        if (sizeBy === 'Date Created') {
+            dMin = d3.min(nodes.current.map((node) => Date.parse(node.data.item.createdAt)))
+            dMax = d3.max(nodes.current.map((node) => Date.parse(node.data.item.createdAt)))
+        } else if (sizeBy === 'Recent Activity') {
+            dMin = d3.min(nodes.current.map((node) => Date.parse(node.data.item.updatedAt)))
+            dMax = d3.max(nodes.current.map((node) => Date.parse(node.data.item.updatedAt)))
+        } else {
+            dMax = d3.max(nodes.current.map((node) => node.data.item[`total${sizeBy}`]))
+        }
+        domain.current = [dMin, dMax]
+    }
 
     function findNodeRadius(d) {
+        let radius
+        if (sizeBy === 'Date Created') radius = Date.parse(d.data.item.createdAt)
+        else if (sizeBy === 'Recent Activity') radius = Date.parse(d.data.item.updatedAt)
+        else radius = d.data.item[`total${sizeBy}`]
         const radiusScale = d3
             .scaleLinear()
-            .domain([0, 5]) // data values spread
-            .range([10, 30]) // radius size spread
-        const radius = d.data.item.totalLikes
-        // let radius
-        // if (sortBy === 'Date Created') radius = Date.parse(d.createdAt)
-        // else if (sortBy === 'Recent Activity') radius = Date.parse(d.lastActivity)
-        // else radius = d[`total${sortBy}`]
+            .domain(domain.current) // data values spread
+            .range([10, 25]) // radius size spread
         return radiusScale(radius)
     }
 
@@ -397,6 +406,42 @@ function LinkModal(props: {
             return plainText.length > maxChars ? trimmedText.concat('...') : plainText
         }
         return ''
+    }
+
+    function circleMouseOver(e, d) {
+        // highlight selected circle
+        d3.select(`#node-background-${d.data.item.uuid}`)
+            .transition()
+            .duration(duration / 4)
+            .attr('fill', colors.cpBlue)
+            .attr('r', findNodeRadius(d) + 6)
+        // highlight other circles
+        d3.selectAll(`.node-background-${d.data.item.id}`)
+            .filter((n) => n.data.item.uuid !== d.data.item.uuid)
+            .transition()
+            .duration(duration / 4)
+            .attr('fill', colors.cpPurple)
+            .attr('r', findNodeRadius(d) + 6)
+    }
+
+    function circleMouseOut(e, d) {
+        // fade out all highlighted circles
+        d3.selectAll(`.node-background-${d.data.item.id}`)
+            .transition()
+            .duration(duration / 4)
+            .attr('fill', '#aaa')
+            .attr('r', findNodeRadius(d) + 2)
+    }
+
+    function circleClick(e, d) {
+        if (!transitioning.current) {
+            transitioning.current = true
+            if (!d.parent) resetPosition()
+            else {
+                setClickedSpaceUUID(d.data.item.uuid)
+                getLinks(d.data.item.id, d.data.item.modelType)
+            }
+        }
     }
 
     function findNodeById(tree: any, id: number) {
@@ -527,39 +572,9 @@ function LinkModal(props: {
                         .attr('r', (d) => findNodeRadius(d) + 2)
                         .attr('fill', '#aaa')
                         .attr('cursor', 'pointer')
-                        .on('mouseover', (e, d) => {
-                            // highlight selected circle
-                            d3.select(`#node-background-${d.data.item.uuid}`)
-                                .transition()
-                                .duration(duration / 4)
-                                .attr('fill', colors.cpBlue)
-                                .attr('r', findNodeRadius(d) + 6)
-                            // highlight other circles
-                            d3.selectAll(`.node-background-${d.data.item.id}`)
-                                .filter((n) => n.data.item.uuid !== d.data.item.uuid)
-                                .transition()
-                                .duration(duration / 4)
-                                .attr('fill', colors.cpPurple)
-                                .attr('r', findNodeRadius(d) + 6)
-                        })
-                        .on('mouseout', (e, d) => {
-                            // fade out all highlighted circles
-                            d3.selectAll(`.node-background-${d.data.item.id}`)
-                                .transition()
-                                .duration(duration / 4)
-                                .attr('fill', '#aaa')
-                                .attr('r', findNodeRadius(d) + 2)
-                        })
-                        .on('click', (e, d) => {
-                            if (!transitioning.current) {
-                                transitioning.current = true
-                                if (!d.parent) resetPosition()
-                                else {
-                                    setClickedSpaceUUID(d.data.item.uuid)
-                                    getLinks(d.data.item.id, d.data.item.modelType)
-                                }
-                            }
-                        })
+                        .on('mouseover', circleMouseOver)
+                        .on('mouseout', circleMouseOut)
+                        .on('click', circleClick)
                         .style('cursor', 'pointer')
                     // create circle
                     group
@@ -587,6 +602,9 @@ function LinkModal(props: {
                     // update background
                     update
                         .select('.node-background')
+                        .on('mouseover', circleMouseOver)
+                        .on('mouseout', circleMouseOut)
+                        .on('click', circleClick)
                         .transition('node-background-update')
                         .duration(duration)
                         .attr('r', (d) => findNodeRadius(d) + 2)
@@ -637,7 +655,10 @@ function LinkModal(props: {
                 // .separation(() => 1)
                 // .separation((a, b) => ((a.parent === b.parent ? 1 : 2) / a.depth) * 4)
                 // .separation((a, b) => (a.parent === b.parent ? 1 : 3) / (a.depth * 4))
-                .separation((a, b) => (a.parent === b.parent ? 1 : 2) / a.depth)
+                .separation((a, b) => {
+                    // return 1
+                    return (a.parent === b.parent ? 1 : 2) / a.depth
+                })
 
             const treeData = tree(data)
             const newLinks = treeData.links()
@@ -704,14 +725,27 @@ function LinkModal(props: {
             }
             links.current = newLinks
             nodes.current = newNodes
+            findDomain()
             createLinks()
             createNodes()
             // mark transition complete after duration
             setTimeout(() => {
                 transitioning.current = false
-            }, duration)
+            }, duration * 2 + 200)
         }
     }, [linkDataNew])
+
+    useEffect(() => {
+        if (nodes.current) {
+            findDomain()
+            createLinks()
+            createNodes()
+            // mark transition complete after duration
+            setTimeout(() => {
+                transitioning.current = false
+            }, duration * 2 + 200)
+        }
+    }, [sizeBy])
 
     return (
         <Modal close={close} centerX style={{ minWidth: 400 }}>
@@ -837,7 +871,7 @@ function LinkModal(props: {
                             />
                             <DropDown
                                 title='Size by'
-                                options={['Likes', 'Links']}
+                                options={['Likes', 'Links', 'Date Created', 'Recent Activity']}
                                 selectedOption={sizeBy}
                                 setSelectedOption={(option) => setSizeBy(option)}
                             />
