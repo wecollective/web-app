@@ -7,6 +7,7 @@ import DropDown from '@components/DropDown'
 import DropDownMenu from '@components/DropDownMenu'
 import Input from '@components/Input'
 import Row from '@components/Row'
+import CommentCard from '@components/cards/Comments/CommentCard'
 import PostCard from '@components/cards/PostCard/PostCard'
 import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
@@ -35,15 +36,15 @@ function LinkModal(props: {
     const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
     const { userPosts, setUserPosts } = useContext(UserContext)
     const { postData, setPostData } = useContext(PostContext)
-    const [linkDataNew, setLinkDataNew] = useState<any>(null)
-    const [linkData, setLinkData] = useState<any>({
-        IncomingPostLinks: [],
-        IncomingCommentLinks: [],
-        OutgoingPostLinks: [],
-        OutgoingCommentLinks: [],
-    })
-    const { IncomingPostLinks, IncomingCommentLinks, OutgoingPostLinks, OutgoingCommentLinks } =
-        linkData
+    const [linkData, setLinkData] = useState<any>(null)
+    // const [linkData, setLinkData] = useState<any>({
+    //     IncomingPostLinks: [],
+    //     IncomingCommentLinks: [],
+    //     OutgoingPostLinks: [],
+    //     OutgoingCommentLinks: [],
+    // })
+    // const { IncomingPostLinks, IncomingCommentLinks, OutgoingPostLinks, OutgoingCommentLinks } =
+    //     linkData
     const [loading, setLoading] = useState(true)
     const [addLinkLoading, setAddLinkLoading] = useState(false)
     const [newLinkTargetType, setNewLinkTargetType] = useState('Post')
@@ -51,6 +52,7 @@ function LinkModal(props: {
     const [newLinkDescription, setNewLinkDescription] = useState('')
     const [targetError, setTargetError] = useState(false)
     const [linkedItem, setLinkedItem] = useState<any>(null)
+    const [linkedItemOptions, setLinkedItemOptions] = useState<any[]>([])
     const [linkTypes, setLinkTypes] = useState('All Types')
     const [sizeBy, setSizeBy] = useState('Likes')
     const [clickedSpaceUUID, setClickedSpaceUUID] = useState('')
@@ -121,7 +123,7 @@ function LinkModal(props: {
             .then((res) => {
                 // console.log('link data: ', res.data)
                 // setLoading(false)
-                setLinkDataNew(res.data)
+                setLinkData(res.data)
                 // setLinkData(res.data)
                 setLoading(false)
             })
@@ -129,6 +131,7 @@ function LinkModal(props: {
     }
 
     function getLinkedItem(identifier) {
+        console.log('getLinkedItem: ', identifier)
         if (newLinkTargetType === 'Post') {
             const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
             axios
@@ -141,82 +144,132 @@ function LinkModal(props: {
                     setLinkedItem(null)
                 })
         }
+        if (newLinkTargetType === 'Comment') {
+            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+            axios
+                .get(`${config.apiURL}/comment-data?postId=${identifier}`, options)
+                .then((res) => {
+                    setLinkedItem(res.data)
+                })
+                .catch((error) => {
+                    console.log(error)
+                    setLinkedItem(null)
+                })
+        }
+        if (newLinkTargetType === 'User') {
+            const data = {
+                query: identifier,
+                blacklist: [], // ...usersWhoHaveBlockedLinking],
+            } as any
+            axios
+                .post(`${config.apiURL}/find-people`, data)
+                .then((res) => {
+                    console.log('find-people: ', res.data)
+                    setLinkedItemOptions(res.data)
+                    // setLinkedItem(res.data)
+                })
+                .catch((error) => {
+                    console.log(error)
+                    setLinkedItem(null)
+                })
+        }
     }
 
-    function updateContextState(action, linkedItemType, linkedItemId) {
-        const addingLink = action === 'add-link'
-        // update context state
-        let newPosts = [] as any
-        if (location === 'space-posts') newPosts = [...spacePosts]
-        if (location === 'user-posts') newPosts = [...userPosts]
-        if (location === 'post-page') newPosts = [{ ...postData }]
-        // update source item
-        if (findModelType(itemType) === 'post') {
-            let item = newPosts.find((p) => p.id === (parentItemId || itemData.id))
-            if (itemType === 'bead') item = item.Beads.find((p) => p.id === itemData.id)
-            if (itemType === 'card') item = item.CardSides.find((p) => p.id === itemData.id)
-            item.totalLinks += addingLink ? 1 : -1
-            item.accountLinks += addingLink ? 1 : -1
+    function renderSourceItem() {
+        if (linkData) {
+            // console.log('linkData: ', linkData)
+            const { modelType } = linkData.item
+            if (modelType === 'post') return <PostCard post={linkData.item} location='link-modal' />
+            if (modelType === 'comment')
+                return (
+                    <CommentCard
+                        comment={linkData.item}
+                        highlighted={false}
+                        location='link-modal'
+                        toggleReplyInput={() => null}
+                        removeComment={() => null}
+                        editComment={() => null}
+                        updateCommentReactions={() => null}
+                    />
+                )
         }
-        // update target item
-        if (linkedItemType === 'Post') {
-            let item = newPosts.find((p) => p.id === linkedItemId)
-            if (!item) {
-                newPosts.forEach((post) => {
-                    const bead = post.Beads && post.Beads.find((b) => b.id === linkedItemId)
-                    const card = post.CardSides && post.CardSides.find((c) => c.id === linkedItemId)
-                    if (bead) item = bead
-                    if (card) item = card
-                })
-            }
-            item.totalLinks += addingLink ? 1 : -1
-            item.accountLinks += addingLink ? 1 : -1
-        }
-        if (location === 'space-posts') setSpacePosts(newPosts)
-        if (location === 'user-posts') setUserPosts(newPosts)
-        if (location === 'post-page') setPostData(newPosts[0])
+        return null
     }
 
-    function addLink() {
-        setAddLinkLoading(true)
-        const data = {
-            sourceType: findModelType(itemType),
-            sourceId: itemData.id,
-            targetType: newLinkTargetType.toLowerCase(),
-            targetId: newLinkTargetId,
-            description: newLinkDescription,
-            spaceId: window.location.pathname.includes('/s/') ? spaceData.id : null,
-            accountHandle: accountData.handle,
-            accountName: accountData.name,
-        }
-        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-        axios
-            .post(`${config.apiURL}/add-link`, data, options)
-            .then((res) => {
-                console.log('add-link res: ', res.data)
-                const { target, link } = res.data
-                // update modal state
-                setNewLinkTargetId('')
-                setNewLinkDescription('')
-                setLinkData({
-                    ...linkData,
-                    [`Outgoing${newLinkTargetType}Links`]: [
-                        ...linkData[`Outgoing${newLinkTargetType}Links`],
-                        { ...link, Creator: accountData, [`Outgoing${newLinkTargetType}`]: target },
-                    ],
-                })
-                // update context state
-                updateContextState('add-link', newLinkTargetType, +newLinkTargetId)
-                setAddLinkLoading(false)
-            })
-            .catch((error) => {
-                console.log(error)
-                if (error.response && error.response.status === 404) {
-                    setTargetError(true)
-                    setAddLinkLoading(false)
-                }
-            })
-    }
+    // function updateContextState(action, linkedItemType, linkedItemId) {
+    //     const addingLink = action === 'add-link'
+    //     // update context state
+    //     let newPosts = [] as any
+    //     if (location === 'space-posts') newPosts = [...spacePosts]
+    //     if (location === 'user-posts') newPosts = [...userPosts]
+    //     if (location === 'post-page') newPosts = [{ ...postData }]
+    //     // update source item
+    //     if (findModelType(itemType) === 'post') {
+    //         let item = newPosts.find((p) => p.id === (parentItemId || itemData.id))
+    //         if (itemType === 'bead') item = item.Beads.find((p) => p.id === itemData.id)
+    //         if (itemType === 'card') item = item.CardSides.find((p) => p.id === itemData.id)
+    //         item.totalLinks += addingLink ? 1 : -1
+    //         item.accountLinks += addingLink ? 1 : -1
+    //     }
+    //     // update target item
+    //     if (linkedItemType === 'Post') {
+    //         let item = newPosts.find((p) => p.id === linkedItemId)
+    //         if (!item) {
+    //             newPosts.forEach((post) => {
+    //                 const bead = post.Beads && post.Beads.find((b) => b.id === linkedItemId)
+    //                 const card = post.CardSides && post.CardSides.find((c) => c.id === linkedItemId)
+    //                 if (bead) item = bead
+    //                 if (card) item = card
+    //             })
+    //         }
+    //         item.totalLinks += addingLink ? 1 : -1
+    //         item.accountLinks += addingLink ? 1 : -1
+    //     }
+    //     if (location === 'space-posts') setSpacePosts(newPosts)
+    //     if (location === 'user-posts') setUserPosts(newPosts)
+    //     if (location === 'post-page') setPostData(newPosts[0])
+    // }
+
+    // function addLink() {
+    //     setAddLinkLoading(true)
+    //     const data = {
+    //         sourceType: findModelType(itemType),
+    //         sourceId: itemData.id,
+    //         targetType: newLinkTargetType.toLowerCase(),
+    //         targetId: newLinkTargetId,
+    //         description: newLinkDescription,
+    //         spaceId: window.location.pathname.includes('/s/') ? spaceData.id : null,
+    //         accountHandle: accountData.handle,
+    //         accountName: accountData.name,
+    //     }
+    //     const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+    //     axios
+    //         .post(`${config.apiURL}/add-link`, data, options)
+    //         .then((res) => {
+    //             console.log('add-link res: ', res.data)
+    //             const { target, link } = res.data
+    //             // update modal state
+    //             setNewLinkTargetId('')
+    //             setNewLinkDescription('')
+    //             setLinkData({
+    //                 ...linkData,
+    //                 [`Outgoing${newLinkTargetType}Links`]: [
+    //                     ...linkData[`Outgoing${newLinkTargetType}Links`],
+    //                     { ...link, Creator: accountData, [`Outgoing${newLinkTargetType}`]: target },
+    //                 ],
+    //             })
+    //             // update context state
+    //             updateContextState('add-link', newLinkTargetType, +newLinkTargetId)
+    //             setAddLinkLoading(false)
+    //         })
+    //         .catch((error) => {
+    //             console.log(error)
+    //             if (error.response && error.response.status === 404) {
+    //                 setTargetError(true)
+    //                 setAddLinkLoading(false)
+    //             }
+    //         })
+    // }
 
     // function removeLink(direction, type, linkId, itemId) {
     //     const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
@@ -319,7 +372,7 @@ function LinkModal(props: {
             resetPosition()
             setTimeout(() => {
                 transitioning.current = false
-            }, duration * 2 + 200)
+            }, duration + 100)
         })
     }
 
@@ -359,6 +412,7 @@ function LinkModal(props: {
         return outgoingLink(d) ? colors.linkBlue : colors.linkRed
     }
 
+    // todo: use angles here combined with seperation function to improve radial spread
     function findNodeTransform(d) {
         return `rotate(${(d.x * 180) / Math.PI - 90}),translate(${d.y}, 0)`
     }
@@ -640,8 +694,8 @@ function LinkModal(props: {
     }, [])
 
     useEffect(() => {
-        if (linkDataNew) {
-            const data = d3.hierarchy(linkDataNew, (d) => d.item.children)
+        if (linkData) {
+            const data = d3.hierarchy(linkData, (d) => d.item.children)
             let radius
             if (data.height === 1) radius = circleSize / 6
             if (data.height === 2) radius = circleSize / 3
@@ -731,9 +785,9 @@ function LinkModal(props: {
             // mark transition complete after duration
             setTimeout(() => {
                 transitioning.current = false
-            }, duration * 2 + 200)
+            }, duration + 100)
         }
-    }, [linkDataNew])
+    }, [linkData])
 
     useEffect(() => {
         if (nodes.current) {
@@ -743,7 +797,7 @@ function LinkModal(props: {
             // mark transition complete after duration
             setTimeout(() => {
                 transitioning.current = false
-            }, duration * 2 + 200)
+            }, duration + 100)
         }
     }, [sizeBy])
 
@@ -756,7 +810,8 @@ function LinkModal(props: {
                 <h1>{headerText}</h1>
                 <Row>
                     <Column centerX style={{ width: 700, marginRight: 50 }}>
-                        {linkDataNew && <PostCard post={linkDataNew.item} location='link-modal' />}
+                        {/* {linkData && <PostCard post={linkData.item} location='link-modal' />} */}
+                        {renderSourceItem()}
 
                         {/* <ArrowDownIcon
                             style={{
@@ -774,7 +829,7 @@ function LinkModal(props: {
                                         <DropDownMenu
                                             title=''
                                             orientation='horizontal'
-                                            options={['Post', 'Comment']} // 'User', 'Space'
+                                            options={['Post', 'Comment', 'User', 'Space']}
                                             selectedOption={newLinkTargetType}
                                             setSelectedOption={(option) => {
                                                 setTargetError(false)
@@ -783,6 +838,7 @@ function LinkModal(props: {
                                             }}
                                         />
                                     </Row>
+                                    {/* <Column> */}
                                     <Input
                                         type='text'
                                         prefix={
@@ -798,10 +854,21 @@ function LinkModal(props: {
                                         }}
                                         style={{ marginRight: 20 }}
                                     />
+                                    {/* <Column>
+                                            {linkedItemOptions.map((option) => (
+                                                <ImageTitle
+                                                    type='user'
+                                                    imagePath={option.flagImagePath}
+                                                    title={`${option.name} (${option.handle})`}
+                                                    style={{ marginRight: 5 }}
+                                                />
+                                            ))}
+                                        </Column>
+                                    </Column> */}
                                     <Button
                                         text='Add link'
                                         color='blue'
-                                        onClick={addLink}
+                                        onClick={() => null}
                                         disabled={
                                             addLinkLoading ||
                                             !newLinkTargetId ||
