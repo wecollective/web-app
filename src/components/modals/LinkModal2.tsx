@@ -5,6 +5,7 @@ import Button from '@components/Button'
 import Column from '@components/Column'
 import DropDown from '@components/DropDown'
 import DropDownMenu from '@components/DropDownMenu'
+import ImageTitle from '@components/ImageTitle'
 import Input from '@components/Input'
 import Row from '@components/Row'
 import CommentCard from '@components/cards/Comments/CommentCard'
@@ -37,22 +38,14 @@ function LinkModal(props: {
     const { userPosts, setUserPosts } = useContext(UserContext)
     const { postData, setPostData } = useContext(PostContext)
     const [linkData, setLinkData] = useState<any>(null)
-    // const [linkData, setLinkData] = useState<any>({
-    //     IncomingPostLinks: [],
-    //     IncomingCommentLinks: [],
-    //     OutgoingPostLinks: [],
-    //     OutgoingCommentLinks: [],
-    // })
-    // const { IncomingPostLinks, IncomingCommentLinks, OutgoingPostLinks, OutgoingCommentLinks } =
-    //     linkData
     const [loading, setLoading] = useState(true)
     const [addLinkLoading, setAddLinkLoading] = useState(false)
-    const [newLinkTargetType, setNewLinkTargetType] = useState('Post')
-    const [newLinkTargetId, setNewLinkTargetId] = useState('')
-    const [newLinkDescription, setNewLinkDescription] = useState('')
+    const [targetType, setTargetType] = useState('Post')
+    const [targetIdentifier, setTargetIdentifier] = useState('')
+    const [linkDescription, setLinkDescription] = useState('')
     const [targetError, setTargetError] = useState(false)
-    const [linkedItem, setLinkedItem] = useState<any>(null)
-    const [linkedItemOptions, setLinkedItemOptions] = useState<any[]>([])
+    const [target, setTarget] = useState<any>(null)
+    const [targetOptions, setTargetOptions] = useState<any[]>([])
     const [linkTypes, setLinkTypes] = useState('All Types')
     const [sizeBy, setSizeBy] = useState('Likes')
     const [clickedSpaceUUID, setClickedSpaceUUID] = useState('')
@@ -62,14 +55,6 @@ function LinkModal(props: {
     const nodes = useRef<any>(null)
     const matchedNodeIds = useRef<number[]>([])
     const cookies = new Cookies()
-    // const incomingLinks = IncomingPostLinks.length > 0 || IncomingCommentLinks.length > 0
-    // const outgoingLinks = OutgoingPostLinks.length > 0 || OutgoingCommentLinks.length > 0
-    // // todo: replace with 'totalLinks' prop when comment state added to posts
-    // const tempTotalLinks =
-    //     IncomingPostLinks.length +
-    //     IncomingCommentLinks.length +
-    //     OutgoingPostLinks.length +
-    //     OutgoingCommentLinks.length
     const headerText = itemData.totalLinks
         ? `${itemData.totalLinks} link${pluralise(itemData.totalLinks)}`
         : 'No links yet...'
@@ -130,33 +115,50 @@ function LinkModal(props: {
             .catch((error) => console.log(error))
     }
 
-    function getLinkedItem(identifier) {
-        console.log('getLinkedItem: ', identifier)
-        if (newLinkTargetType === 'Post') {
+    function renderItem(item, type) {
+        if (type === 'post') return <PostCard post={item} location='link-modal' />
+        if (type === 'comment')
+            return (
+                <CommentCard
+                    comment={item}
+                    highlighted={false}
+                    location='link-map'
+                    toggleReplyInput={() => null}
+                    removeComment={() => null}
+                    editComment={() => null}
+                    updateCommentReactions={() => null}
+                />
+            )
+        return null
+    }
+
+    function getTarget(identifier) {
+        if (targetType === 'Post') {
             const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
             axios
                 .get(`${config.apiURL}/post-data?postId=${identifier}`, options)
                 .then((res) => {
-                    setLinkedItem(res.data)
+                    console.log('res: ', res)
+                    setTarget(res.data)
                 })
                 .catch((error) => {
                     console.log(error)
-                    setLinkedItem(null)
+                    setTarget(null)
                 })
         }
-        if (newLinkTargetType === 'Comment') {
+        if (targetType === 'Comment') {
             const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
             axios
-                .get(`${config.apiURL}/comment-data?postId=${identifier}`, options)
+                .get(`${config.apiURL}/comment-data?commentId=${identifier}`, options)
                 .then((res) => {
-                    setLinkedItem(res.data)
+                    setTarget(res.data)
                 })
                 .catch((error) => {
                     console.log(error)
-                    setLinkedItem(null)
+                    setTarget(null)
                 })
         }
-        if (newLinkTargetType === 'User') {
+        if (targetType === 'User') {
             const data = {
                 query: identifier,
                 blacklist: [], // ...usersWhoHaveBlockedLinking],
@@ -165,35 +167,14 @@ function LinkModal(props: {
                 .post(`${config.apiURL}/find-people`, data)
                 .then((res) => {
                     console.log('find-people: ', res.data)
-                    setLinkedItemOptions(res.data)
-                    // setLinkedItem(res.data)
+                    setTargetOptions(res.data)
+                    // setTarget(res.data)
                 })
                 .catch((error) => {
                     console.log(error)
-                    setLinkedItem(null)
+                    setTarget(null)
                 })
         }
-    }
-
-    function renderSourceItem() {
-        if (linkData) {
-            // console.log('linkData: ', linkData)
-            const { modelType } = linkData.item
-            if (modelType === 'post') return <PostCard post={linkData.item} location='link-modal' />
-            if (modelType === 'comment')
-                return (
-                    <CommentCard
-                        comment={linkData.item}
-                        highlighted={false}
-                        location='link-modal'
-                        toggleReplyInput={() => null}
-                        removeComment={() => null}
-                        editComment={() => null}
-                        updateCommentReactions={() => null}
-                    />
-                )
-        }
-        return null
     }
 
     // function updateContextState(action, linkedItemType, linkedItemId) {
@@ -235,9 +216,9 @@ function LinkModal(props: {
     //     const data = {
     //         sourceType: findModelType(itemType),
     //         sourceId: itemData.id,
-    //         targetType: newLinkTargetType.toLowerCase(),
-    //         targetId: newLinkTargetId,
-    //         description: newLinkDescription,
+    //         targetType: targetType.toLowerCase(),
+    //         targetId: targetIdentifier,
+    //         description: linkDescription,
     //         spaceId: window.location.pathname.includes('/s/') ? spaceData.id : null,
     //         accountHandle: accountData.handle,
     //         accountName: accountData.name,
@@ -249,17 +230,17 @@ function LinkModal(props: {
     //             console.log('add-link res: ', res.data)
     //             const { target, link } = res.data
     //             // update modal state
-    //             setNewLinkTargetId('')
-    //             setNewLinkDescription('')
+    //             setTargetIdentifier('')
+    //             setLinkDescription('')
     //             setLinkData({
     //                 ...linkData,
-    //                 [`Outgoing${newLinkTargetType}Links`]: [
-    //                     ...linkData[`Outgoing${newLinkTargetType}Links`],
-    //                     { ...link, Creator: accountData, [`Outgoing${newLinkTargetType}`]: target },
+    //                 [`Outgoing${targetType}Links`]: [
+    //                     ...linkData[`Outgoing${targetType}Links`],
+    //                     { ...link, Creator: accountData, [`Outgoing${targetType}`]: target },
     //                 ],
     //             })
     //             // update context state
-    //             updateContextState('add-link', newLinkTargetType, +newLinkTargetId)
+    //             updateContextState('add-link', targetType, +targetIdentifier)
     //             setAddLinkLoading(false)
     //         })
     //         .catch((error) => {
@@ -289,28 +270,28 @@ function LinkModal(props: {
     // }
 
     // function renderLink(link, type, direction) {
-    //     const linkedItem = link[`${direction === 'to' ? 'Outgoing' : 'Incoming'}${type}`]
+    //     const target = link[`${direction === 'to' ? 'Outgoing' : 'Incoming'}${type}`]
     //     let linkedItemUrl
-    //     if (type === 'Post') linkedItemUrl = `/p/${linkedItem.id}`
-    //     if (type === 'Comment') linkedItemUrl = `/p/${linkedItem.itemId}?commentId=${linkedItem.id}`
+    //     if (type === 'Post') linkedItemUrl = `/p/${target.id}`
+    //     if (type === 'Comment') linkedItemUrl = `/p/${target.itemId}?commentId=${target.id}`
     //     return (
     //         <Row key={link.id} centerY style={{ marginBottom: 10 }}>
     //             <p className='grey'>linked {direction}</p>
     //             <ImageTitle
     //                 type='user'
-    //                 imagePath={linkedItem.Creator.flagImagePath}
-    //                 title={`${linkedItem.Creator.name}'s`}
-    //                 link={`/u/${linkedItem.Creator.handle}/posts`}
+    //                 imagePath={target.Creator.flagImagePath}
+    //                 title={`${target.Creator.name}'s`}
+    //                 link={`/u/${target.Creator.handle}/posts`}
     //                 fontSize={16}
     //                 style={{ margin: '0 5px' }}
     //             />
     //             <TextLink text={type.toLowerCase()} link={linkedItemUrl} />
-    //             {linkedItem.Creator.id === accountData.id && (
+    //             {target.Creator.id === accountData.id && (
     //                 <Button
     //                     text='Delete'
     //                     color='blue'
     //                     size='medium'
-    //                     onClick={() => removeLink(direction, type, link.id, linkedItem.id)}
+    //                     onClick={() => removeLink(direction, type, link.id, target.id)}
     //                     style={{ marginLeft: 10 }}
     //                 />
     //             )}
@@ -803,59 +784,50 @@ function LinkModal(props: {
 
     return (
         <Modal close={close} centerX style={{ minWidth: 400 }}>
-            {/* {loading ? (
-                <LoadingWheel />
-            ) : ( */}
             <Column centerX>
                 <h1>{headerText}</h1>
                 <Row>
-                    <Column centerX style={{ width: 700, marginRight: 50 }}>
-                        {/* {linkData && <PostCard post={linkData.item} location='link-modal' />} */}
-                        {renderSourceItem()}
-
-                        {/* <ArrowDownIcon
-                            style={{
-                                height: 20,
-                                width: 20,
-                                color: '#ddd',
-                                marginTop: 20,
-                            }}
-                        /> */}
+                    <Column
+                        centerX
+                        style={{ width: 700, marginRight: 50, maxHeight: 600, overflow: 'scroll' }}
+                    >
+                        {linkData && renderItem(linkData.item, linkData.item.modelType)}
                         {loggedIn ? (
                             <Column centerX style={{ width: '100%', marginTop: 20 }}>
                                 <Row centerY style={{ width: '100%', marginBottom: 20 }}>
                                     <Row centerY style={{ flexShrink: 0, marginRight: 20 }}>
-                                        <p>Link to another</p>
+                                        <p>Link to</p>
                                         <DropDownMenu
                                             title=''
                                             orientation='horizontal'
                                             options={['Post', 'Comment', 'User', 'Space']}
-                                            selectedOption={newLinkTargetType}
+                                            selectedOption={targetType}
                                             setSelectedOption={(option) => {
                                                 setTargetError(false)
-                                                setNewLinkTargetId('')
-                                                setNewLinkTargetType(option)
+                                                setTarget(null)
+                                                setTargetIdentifier('')
+                                                setTargetType(option)
                                             }}
                                         />
                                     </Row>
-                                    {/* <Column> */}
-                                    <Input
-                                        type='text'
-                                        prefix={
-                                            ['Post', 'Comment'].includes(newLinkTargetType)
-                                                ? 'ID:'
-                                                : 'Handle:'
-                                        }
-                                        value={newLinkTargetId}
-                                        onChange={(value) => {
-                                            setTargetError(false)
-                                            setNewLinkTargetId(value)
-                                            getLinkedItem(value)
-                                        }}
-                                        style={{ marginRight: 20 }}
-                                    />
-                                    {/* <Column>
-                                            {linkedItemOptions.map((option) => (
+                                    <Column>
+                                        <Input
+                                            type='text'
+                                            prefix={
+                                                ['Post', 'Comment'].includes(targetType)
+                                                    ? 'ID:'
+                                                    : 'Handle:'
+                                            }
+                                            value={targetIdentifier}
+                                            onChange={(value) => {
+                                                setTargetError(false)
+                                                setTargetIdentifier(value)
+                                                getTarget(value)
+                                            }}
+                                            style={{ marginRight: 20 }}
+                                        />
+                                        <Column>
+                                            {targetOptions.map((option) => (
                                                 <ImageTitle
                                                     type='user'
                                                     imagePath={option.flagImagePath}
@@ -864,42 +836,39 @@ function LinkModal(props: {
                                                 />
                                             ))}
                                         </Column>
-                                    </Column> */}
-                                    <Button
-                                        text='Add link'
-                                        color='blue'
-                                        onClick={() => null}
-                                        disabled={
-                                            addLinkLoading ||
-                                            !newLinkTargetId ||
-                                            newLinkDescription.length > 50
-                                        }
-                                        loading={addLinkLoading}
-                                    />
+                                    </Column>
                                 </Row>
                                 {targetError && (
                                     <p className='danger' style={{ marginBottom: 20 }}>
-                                        {newLinkTargetType} not found
+                                        {targetType} not found
                                     </p>
                                 )}
                                 <Row centerY style={{ width: '100%', marginBottom: 20 }}>
                                     <p style={{ flexShrink: 0, marginRight: 10 }}>
-                                        Link description
+                                        Link description (optional)
                                     </p>
                                     <Input
                                         type='text'
-                                        placeholder='description (optional)...'
-                                        value={newLinkDescription}
-                                        onChange={(value) => setNewLinkDescription(value)}
+                                        placeholder='description...'
+                                        value={linkDescription}
+                                        onChange={(value) => setLinkDescription(value)}
                                     />
                                 </Row>
-                                {newLinkDescription.length > 50 && (
+                                {linkDescription.length > 50 && (
                                     <p className='danger' style={{ marginBottom: 20 }}>
                                         Max 50 characters
                                     </p>
                                 )}
-                                {linkedItem && (
+                                {target && (
                                     <Column centerX>
+                                        <Button
+                                            text='Add link'
+                                            color='blue'
+                                            onClick={() => null}
+                                            disabled={addLinkLoading || linkDescription.length > 50}
+                                            loading={addLinkLoading}
+                                            style={{ marginBottom: 15 }}
+                                        />
                                         <ArrowDownIcon
                                             style={{
                                                 height: 20,
@@ -908,7 +877,7 @@ function LinkModal(props: {
                                                 marginBottom: 20,
                                             }}
                                         />
-                                        <PostCard post={linkedItem} location='link-modal' />
+                                        {renderItem(target, targetType.toLowerCase())}
                                     </Column>
                                 )}
                             </Column>
@@ -946,82 +915,7 @@ function LinkModal(props: {
                         <div id='link-map' />
                     </Column>
                 </Row>
-                {/* {loggedIn ? (
-                    <Column centerX style={{ marginTop: totalLinks ? 20 : 0 }}>
-                        <Row centerY style={{ marginBottom: 10 }}>
-                            <p>Link to another</p>
-                            <DropDownMenu
-                                title=''
-                                orientation='horizontal'
-                                options={['Post', 'Comment']} // 'User', 'Space'
-                                selectedOption={newLinkTargetType}
-                                setSelectedOption={(option) => {
-                                    setTargetError(false)
-                                    setNewLinkTargetId('')
-                                    setNewLinkTargetType(option)
-                                }}
-                            />
-                        </Row>
-                        <Input
-                            type='text'
-                            prefix={
-                                ['Post', 'Comment'].includes(newLinkTargetType)
-                                    ? 'ID:'
-                                    : 'Handle:'
-                            }
-                            value={newLinkTargetId}
-                            onChange={(value) => {
-                                setTargetError(false)
-                                setNewLinkTargetId(value)
-                            }}
-                            style={{ marginBottom: 20, minWidth: 200 }}
-                        />
-                        {targetError && (
-                            <p className='danger' style={{ marginBottom: 20 }}>
-                                {newLinkTargetType} not found
-                            </p>
-                        )}
-                        <p style={{ marginBottom: 10 }}>Description (optional)</p>
-                        <Input
-                            type='text'
-                            placeholder='link description...'
-                            value={newLinkDescription}
-                            onChange={(value) => setNewLinkDescription(value)}
-                            style={{ minWidth: 300, marginBottom: 20 }}
-                        />
-                        {newLinkDescription.length > 50 && (
-                            <p className='danger' style={{ marginBottom: 20 }}>
-                                Max 50 characters
-                            </p>
-                        )}
-                        <Button
-                            text='Add link'
-                            color='blue'
-                            onClick={addLink}
-                            disabled={
-                                addLinkLoading ||
-                                !newLinkTargetId ||
-                                newLinkDescription.length > 50
-                            }
-                            loading={addLinkLoading}
-                        />
-                    </Column>
-                ) : (
-                    <Row centerY style={{ marginTop: totalLinks ? 20 : 0 }}>
-                        <Button
-                            text='Log in'
-                            color='blue'
-                            style={{ marginRight: 5 }}
-                            onClick={() => {
-                                setLogInModalOpen(true)
-                                close()
-                            }}
-                        />
-                        <p>to link posts</p>
-                    </Row>
-                )} */}
             </Column>
-            {/* )} */}
         </Modal>
     )
 }

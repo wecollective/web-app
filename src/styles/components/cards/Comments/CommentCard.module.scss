@@ -3,6 +3,13 @@
 .wrapper {
     margin-bottom: 10px;
 
+    &.linkMap {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        width: 100%;
+    }
+
     .content {
         position: relative;
         margin-left: 6px;

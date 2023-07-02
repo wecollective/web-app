@@ -72,7 +72,9 @@ function CommentCard(props: {
     return (
         <Column
             id={`comment-${comment.id}`}
-            className={`${styles.wrapper} ${highlighted && styles.highlighted}`}
+            className={`${styles.wrapper} ${highlighted && styles.highlighted} ${
+                location === 'link-map' && styles.linkMap
+            }`}
         >
             <Row>
                 <Link
@@ -160,7 +162,7 @@ function CommentCard(props: {
                     )}
                 </Column>
             </Row>
-            {state === 'visible' && (
+            {state === 'visible' && location !== 'link-map' && (
                 <Row className={styles.buttons}>
                     <button
                         type='button'
