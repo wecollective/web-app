@@ -1,8 +1,9 @@
 import GlobalHelpButton from '@components/GlobalHelpButton'
-import Modals from '@components/modals/Modals'
 import Navbar from '@components/Navbar'
+import Modals from '@components/modals/Modals'
 import ContextProviders from '@contexts/ContextProviders'
 import HomePage from '@pages/HomePage'
+import LinkMap from '@pages/LinkMap'
 import PageNotFound from '@pages/PageNotFound'
 import PostPage from '@pages/PostPage/PostPage'
 import SpacePage from '@pages/SpacePage/SpacePage'
@@ -24,6 +25,7 @@ function App(): JSX.Element {
                     <Route path='/s/:spaceHandle/*' element={<SpacePage />} />
                     <Route path='/p/:postId/*' element={<PostPage />} />
                     <Route path='/u/:userHandle/*' element={<UserPage />} />
+                    <Route path='/linkmap' element={<LinkMap />} />
                     <Route element={<PageNotFound />} />
                 </Routes>
             </ContextProviders>

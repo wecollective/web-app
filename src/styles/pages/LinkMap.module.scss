@@ -1,0 +1,62 @@
+@import '@styles/Variables';
+
+.wrapper {
+    position: relative;
+    height: 100vh;
+    width: 100%;
+    padding: 80px 20px 20px 20px;
+
+    .loading {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        background-color: $grey1;
+        opacity: 1;
+        z-index: 10;
+    }
+
+    .content {
+        display: flex;
+        flex-direction: column-reverse;
+        width: 100%;
+
+        @include for-desktop-small-up {
+            flex-direction: row;
+        }
+
+        .info {
+            @include for-desktop-small-up {
+                width: 780px;
+                margin-right: 50px;
+            }
+
+            .targetInput {
+                position: relative;
+
+                .targetOptions {
+                    position: absolute;
+                    top: 50px;
+                    background-color: white;
+                    padding: 5px;
+                    border-radius: 5px;
+                    box-shadow: 0 10px 10px 0 rgba(10, 8, 72, 0.06);
+                    z-index: 5;
+
+                    .targetOption {
+                        padding: 5px;
+                        border-radius: 5px;
+                        cursor: pointer;
+
+                        &:hover {
+                            background-color: $blue8;
+                        }
+                    }
+                }
+            }
+        }
+
+        .visualisation {
+            width: 100%;
+        }
+    }
+}

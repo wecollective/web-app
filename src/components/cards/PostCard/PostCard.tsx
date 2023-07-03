@@ -20,8 +20,6 @@ import PostSpaces from '@src/components/cards/PostCard/PostSpaces'
 import UrlCard from '@src/components/cards/PostCard/UrlCard'
 import EditPostModal from '@src/components/modals/EditPostModal'
 import LikeModal from '@src/components/modals/LikeModal'
-// import LinkModal from '@src/components/modals/LinkModal'
-import LinkModal from '@src/components/modals/LinkModal2'
 import RatingModal from '@src/components/modals/RatingModal'
 import RepostModal from '@src/components/modals/RepostModal'
 import {
@@ -37,7 +35,7 @@ import {
 import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
 function PostCard(props: {
@@ -111,6 +109,7 @@ function PostCard(props: {
 
     // todo: store comments on post card so can be updated from other posts (linking)
 
+    const history = useNavigate()
     const urlParams = Object.fromEntries(new URLSearchParams(useLocation().search))
     const params = { ...spacePostsFilters }
     Object.keys(urlParams).forEach((param) => {
@@ -361,7 +360,7 @@ function PostCard(props: {
                             title={statTitle('Link', totalLinks || 0)}
                             color={accountLinks > 0 ? 'blue' : undefined}
                             disabled={location === 'preview'}
-                            onClick={() => setLinkModalOpen(true)}
+                            onClick={() => history(`/linkmap?item=post&id=${id}`)}
                         />
                         {likeModalOpen && (
                             <LikeModal
@@ -396,14 +395,6 @@ function PostCard(props: {
                                     })
                                 }}
                                 close={() => setRatingModalOpen(false)}
-                            />
-                        )}
-                        {linkModalOpen && (
-                            <LinkModal
-                                itemType='post'
-                                itemData={postData}
-                                location={location}
-                                close={() => setLinkModalOpen(false)}
                             />
                         )}
                     </Row>

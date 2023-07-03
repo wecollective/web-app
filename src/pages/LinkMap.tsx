@@ -1,6 +1,7 @@
 /* eslint-disable no-return-assign */
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-use-before-define */
+
 import Button from '@components/Button'
 import Column from '@components/Column'
 import DropDown from '@components/DropDown'
@@ -12,37 +13,27 @@ import CommentCard from '@components/cards/Comments/CommentCard'
 import HorizontalSpaceCard from '@components/cards/HorizontalSpaceCard'
 import PostCard from '@components/cards/PostCard/PostCard'
 import VerticalUserCard from '@components/cards/VerticalUserCard'
-import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
-import { PostContext } from '@contexts/PostContext'
-import { SpaceContext } from '@contexts/SpaceContext'
-import { UserContext } from '@contexts/UserContext'
 import config from '@src/Config'
 import { getDraftPlainText, pluralise } from '@src/Helpers'
+import LoadingWheel from '@src/components/LoadingWheel'
 import colors from '@styles/Colors.module.scss'
-import styles from '@styles/components/modals/LinkModal.module.scss'
+import styles from '@styles/pages/LinkMap.module.scss'
 import { ArrowDownIcon } from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
-function LinkModal(props: {
-    itemType: 'post' | 'card' | 'bead' | 'comment'
-    itemData: any
-    location: string
-    parentItemId?: number // required for comments and beads
-    close: () => void
-}): JSX.Element {
-    const { itemType, itemData, location, parentItemId, close } = props
-    const { totalLinks } = itemData
+function LinkMap(): JSX.Element {
+    const location = useLocation()
+    const history = useNavigate()
+    const urlParams = Object.fromEntries(new URLSearchParams(location.search))
     const { loggedIn, accountData, setLogInModalOpen } = useContext(AccountContext)
-    const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
-    const { userPosts, setUserPosts } = useContext(UserContext)
-    const { postData, setPostData } = useContext(PostContext)
     const [linkData, setLinkData] = useState<any>(null)
     const [loading, setLoading] = useState(true)
-    const [addLinkLoading, setAddLinkLoading] = useState(false)
+    const [createLinkLoading, setCreateLinkLoading] = useState(false)
     const [targetType, setTargetType] = useState('Post')
     const [targetIdentifier, setTargetIdentifier] = useState('')
     const [linkDescription, setLinkDescription] = useState('')
@@ -58,61 +49,19 @@ function LinkModal(props: {
     const nodes = useRef<any>(null)
     const matchedNodeIds = useRef<number[]>([])
     const cookies = new Cookies()
-    const headerText = itemData.totalLinks
-        ? `${itemData.totalLinks} link${pluralise(itemData.totalLinks)}`
-        : 'No links yet...'
+    const headerText =
+        linkData && linkData.item
+            ? `${linkData.item.totalLinks} link${pluralise(linkData.item.totalLinks)}`
+            : 'No links yet...'
 
-    const sampleData = {
-        id: 0,
-        children: [
-            { id: 1, link: 'test 1', children: [] },
-            { id: 2, link: 'test 2', children: [] },
-            { id: 3, link: 'test 3', children: [] },
-            { id: 4, link: 'test 4', children: [] },
-            {
-                id: 5,
-                link: 'test 5',
-                children: [
-                    { id: 10, link: 'test 10', children: [] },
-                    { id: 11, link: 'test 11', children: [] },
-                    { id: 12, link: 'test 12', children: [] },
-                ],
-            },
-            {
-                id: 6,
-                link: 'test 6',
-                children: [
-                    { id: 7, link: 'test 7', children: [] },
-                    { id: 8, link: 'test 8', children: [] },
-                    {
-                        id: 9,
-                        link: 'test 9',
-                        children: [
-                            { id: 13, link: 'test 13', children: [] },
-                            { id: 14, link: 'test 14', children: [] },
-                            { id: 15, link: 'test 15', children: [] },
-                        ],
-                    },
-                ],
-            },
-        ],
-    }
-
-    function findModelType(type) {
-        if (['card', 'bead'].includes(type)) return 'post'
-        return type
-    }
-
-    function getLinks(id, type) {
-        setLoading(true)
+    function getLinks() {
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        const params = `?itemType=${urlParams.item}&itemId=${urlParams.id}`
+        console.log('getLinks params: ', params)
         axios
-            .get(`${config.apiURL}/links?itemType=${findModelType(type)}&itemId=${id}`, options)
+            .get(`${config.apiURL}/links${params}`, options)
             .then((res) => {
-                // console.log('link data: ', res.data)
-                // setLoading(false)
                 setLinkData(res.data)
-                // setLinkData(res.data)
                 setLoading(false)
             })
             .catch((error) => console.log(error))
@@ -160,80 +109,45 @@ function LinkModal(props: {
         }
     }
 
-    // function updateContextState(action, linkedItemType, linkedItemId) {
-    //     const addingLink = action === 'add-link'
-    //     // update context state
-    //     let newPosts = [] as any
-    //     if (location === 'space-posts') newPosts = [...spacePosts]
-    //     if (location === 'user-posts') newPosts = [...userPosts]
-    //     if (location === 'post-page') newPosts = [{ ...postData }]
-    //     // update source item
-    //     if (findModelType(itemType) === 'post') {
-    //         let item = newPosts.find((p) => p.id === (parentItemId || itemData.id))
-    //         if (itemType === 'bead') item = item.Beads.find((p) => p.id === itemData.id)
-    //         if (itemType === 'card') item = item.CardSides.find((p) => p.id === itemData.id)
-    //         item.totalLinks += addingLink ? 1 : -1
-    //         item.accountLinks += addingLink ? 1 : -1
-    //     }
-    //     // update target item
-    //     if (linkedItemType === 'Post') {
-    //         let item = newPosts.find((p) => p.id === linkedItemId)
-    //         if (!item) {
-    //             newPosts.forEach((post) => {
-    //                 const bead = post.Beads && post.Beads.find((b) => b.id === linkedItemId)
-    //                 const card = post.CardSides && post.CardSides.find((c) => c.id === linkedItemId)
-    //                 if (bead) item = bead
-    //                 if (card) item = card
-    //             })
-    //         }
-    //         item.totalLinks += addingLink ? 1 : -1
-    //         item.accountLinks += addingLink ? 1 : -1
-    //     }
-    //     if (location === 'space-posts') setSpacePosts(newPosts)
-    //     if (location === 'user-posts') setUserPosts(newPosts)
-    //     if (location === 'post-page') setPostData(newPosts[0])
-    // }
-
-    // function addLink() {
-    //     setAddLinkLoading(true)
-    //     const data = {
-    //         sourceType: findModelType(itemType),
-    //         sourceId: itemData.id,
-    //         targetType: targetType.toLowerCase(),
-    //         targetId: targetIdentifier,
-    //         description: linkDescription,
-    //         spaceId: window.location.pathname.includes('/s/') ? spaceData.id : null,
-    //         accountHandle: accountData.handle,
-    //         accountName: accountData.name,
-    //     }
-    //     const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-    //     axios
-    //         .post(`${config.apiURL}/add-link`, data, options)
-    //         .then((res) => {
-    //             console.log('add-link res: ', res.data)
-    //             const { target, link } = res.data
-    //             // update modal state
-    //             setTargetIdentifier('')
-    //             setLinkDescription('')
-    //             setLinkData({
-    //                 ...linkData,
-    //                 [`Outgoing${targetType}Links`]: [
-    //                     ...linkData[`Outgoing${targetType}Links`],
-    //                     { ...link, Creator: accountData, [`Outgoing${targetType}`]: target },
-    //                 ],
-    //             })
-    //             // update context state
-    //             updateContextState('add-link', targetType, +targetIdentifier)
-    //             setAddLinkLoading(false)
-    //         })
-    //         .catch((error) => {
-    //             console.log(error)
-    //             if (error.response && error.response.status === 404) {
-    //                 setTargetError(true)
-    //                 setAddLinkLoading(false)
-    //             }
-    //         })
-    // }
+    function createLink() {
+        setCreateLinkLoading(true)
+        const data = {
+            // sourceType: findModelType(itemType),
+            // sourceId: itemData.id,
+            targetType: targetType.toLowerCase(),
+            targetId: targetIdentifier,
+            description: linkDescription,
+            accountHandle: accountData.handle,
+            accountName: accountData.name,
+        }
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .post(`${config.apiURL}/add-link`, data, options)
+            .then((res) => {
+                console.log('add-link res: ', res.data)
+                // const { target, link } = res.data
+                // update modal state
+                setTargetIdentifier('')
+                setLinkDescription('')
+                // setLinkData({
+                //     ...linkData,
+                //     [`Outgoing${targetType}Links`]: [
+                //         ...linkData[`Outgoing${targetType}Links`],
+                //         { ...link, Creator: accountData, [`Outgoing${targetType}`]: target },
+                //     ],
+                // })
+                // // update context state
+                // updateContextState('add-link', targetType, +targetIdentifier)
+                setCreateLinkLoading(false)
+            })
+            .catch((error) => {
+                console.log(error)
+                if (error.response && error.response.status === 404) {
+                    setTargetError(true)
+                    setCreateLinkLoading(false)
+                }
+            })
+    }
 
     // function removeLink(direction, type, linkId, itemId) {
     //     const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
@@ -250,36 +164,6 @@ function LinkModal(props: {
     //             updateContextState('remove-link', type, itemId)
     //         })
     //         .catch((error) => console.log(error))
-    // }
-
-    // function renderLink(link, type, direction) {
-    //     const target = link[`${direction === 'to' ? 'Outgoing' : 'Incoming'}${type}`]
-    //     let linkedItemUrl
-    //     if (type === 'Post') linkedItemUrl = `/p/${target.id}`
-    //     if (type === 'Comment') linkedItemUrl = `/p/${target.itemId}?commentId=${target.id}`
-    //     return (
-    //         <Row key={link.id} centerY style={{ marginBottom: 10 }}>
-    //             <p className='grey'>linked {direction}</p>
-    //             <ImageTitle
-    //                 type='user'
-    //                 imagePath={target.Creator.flagImagePath}
-    //                 title={`${target.Creator.name}'s`}
-    //                 link={`/u/${target.Creator.handle}/posts`}
-    //                 fontSize={16}
-    //                 style={{ margin: '0 5px' }}
-    //             />
-    //             <TextLink text={type.toLowerCase()} link={linkedItemUrl} />
-    //             {target.Creator.id === accountData.id && (
-    //                 <Button
-    //                     text='Delete'
-    //                     color='blue'
-    //                     size='medium'
-    //                     onClick={() => removeLink(direction, type, link.id, target.id)}
-    //                     style={{ marginLeft: 10 }}
-    //                 />
-    //             )}
-    //         </Row>
-    //     )
     // }
 
     // settings
@@ -457,7 +341,7 @@ function LinkModal(props: {
             if (!d.parent) resetPosition()
             else {
                 setClickedSpaceUUID(d.data.item.uuid)
-                getLinks(d.data.item.id, d.data.item.modelType)
+                history(`/linkmap?item=${d.data.item.modelType}&id=${d.data.item.id}`)
             }
         }
     }
@@ -652,11 +536,16 @@ function LinkModal(props: {
             )
     }
 
-    useEffect(() => {
-        buildCanvas()
-        getLinks(itemData.id, itemType)
-    }, [])
+    useEffect(() => buildCanvas(), [])
 
+    useEffect(() => {
+        if (!loading)
+            d3.select('#loading').transition().duration(duration).style('opacity', 0).remove()
+    }, [loading])
+
+    useEffect(() => getLinks(), [location])
+
+    // todo: create seperate component for link map visualisation and merge useEffects below
     useEffect(() => {
         if (linkData) {
             const data = d3.hierarchy(linkData, (d) => d.item.children)
@@ -766,186 +655,146 @@ function LinkModal(props: {
     }, [sizeBy])
 
     return (
-        <Modal close={close} centerX style={{ minWidth: 400 }}>
-            <Column centerX>
-                <h1>{headerText}</h1>
-                <Row>
-                    <Column
-                        centerX
-                        style={{ width: 700, marginRight: 50, maxHeight: 600, overflow: 'scroll' }}
-                    >
-                        {linkData && renderItem(linkData.item, linkData.item.modelType)}
-                        {loggedIn ? (
-                            <Column centerX style={{ width: '100%', marginTop: 20 }}>
-                                <Row centerY style={{ width: '100%', marginBottom: 20 }}>
-                                    <Row centerY style={{ flexShrink: 0, marginRight: 20 }}>
-                                        <p>Link to</p>
-                                        <DropDownMenu
-                                            title=''
-                                            orientation='horizontal'
-                                            options={['Post', 'Comment', 'User', 'Space']}
-                                            selectedOption={targetType}
-                                            setSelectedOption={(option) => {
-                                                setTargetError(false)
-                                                setTarget(null)
-                                                setTargetIdentifier('')
-                                                setTargetType(option)
-                                            }}
-                                        />
-                                    </Row>
-                                    <Column className={styles.targetInput}>
-                                        <Input
-                                            type='text'
-                                            prefix={
-                                                ['Post', 'Comment'].includes(targetType)
-                                                    ? 'ID:'
-                                                    : 'Handle:'
-                                            }
-                                            value={targetIdentifier}
-                                            onChange={(value) => {
-                                                setTargetError(false)
-                                                setTargetIdentifier(value)
-                                                if (value) getTarget(value)
-                                                else {
-                                                    setTarget(null)
-                                                    setTargetOptions(null)
-                                                }
-                                            }}
-                                            style={{ marginRight: 20 }}
-                                        />
-                                        {targetOptions && (
-                                            <Column className={styles.targetOptions}>
-                                                {targetOptions.map((option) => (
-                                                    <ImageTitle
-                                                        className={styles.targetOption}
-                                                        type={
-                                                            targetType === 'User' ? 'user' : 'space'
-                                                        }
-                                                        imagePath={option.flagImagePath}
-                                                        title={`${option.name} (u/${option.handle})`}
-                                                        onClick={() => {
-                                                            setTarget(option)
-                                                            setTargetIdentifier(option.handle)
-                                                            setTargetOptions(null)
-                                                        }}
-                                                    />
-                                                ))}
-                                            </Column>
-                                        )}
-                                    </Column>
-                                </Row>
-                                {targetError && (
-                                    <p className='danger' style={{ marginBottom: 20 }}>
-                                        {targetType} not found
-                                    </p>
-                                )}
-                                <Row centerY style={{ width: '100%', marginBottom: 20 }}>
-                                    <p style={{ flexShrink: 0, marginRight: 10 }}>
-                                        Link description (optional)
-                                    </p>
-                                    <Input
-                                        type='text'
-                                        placeholder='description...'
-                                        value={linkDescription}
-                                        onChange={(value) => setLinkDescription(value)}
+        <Column centerX className={styles.wrapper}>
+            <Column centerX centerY id='loading' className={styles.loading}>
+                <LoadingWheel />
+            </Column>
+            <div className={styles.content}>
+                <Column centerX className={styles.info}>
+                    {linkData && renderItem(linkData.item, linkData.item.modelType)}
+                    {loggedIn ? (
+                        <Column centerX style={{ width: '100%', marginTop: 20 }}>
+                            <Row centerY style={{ width: '100%', marginBottom: 20 }}>
+                                <Row centerY style={{ flexShrink: 0, marginRight: 20 }}>
+                                    <p>Link to</p>
+                                    <DropDownMenu
+                                        title=''
+                                        orientation='horizontal'
+                                        options={['Post', 'Comment', 'User', 'Space']}
+                                        selectedOption={targetType}
+                                        setSelectedOption={(option) => {
+                                            setTargetError(false)
+                                            setTarget(null)
+                                            setTargetIdentifier('')
+                                            setTargetType(option)
+                                        }}
                                     />
                                 </Row>
-                                {linkDescription.length > 50 && (
-                                    <p className='danger' style={{ marginBottom: 20 }}>
-                                        Max 50 characters
-                                    </p>
-                                )}
-                                {target && (
-                                    <Column centerX style={{ width: '100%' }}>
-                                        <Button
-                                            text='Add link'
-                                            color='blue'
-                                            onClick={() => null}
-                                            disabled={addLinkLoading || linkDescription.length > 50}
-                                            loading={addLinkLoading}
-                                            style={{ marginBottom: 15 }}
-                                        />
-                                        <ArrowDownIcon
-                                            style={{
-                                                height: 20,
-                                                width: 20,
-                                                color: '#ccc',
-                                                marginBottom: 20,
-                                            }}
-                                        />
-                                        {renderItem(target, targetType.toLowerCase())}
-                                    </Column>
-                                )}
-                            </Column>
-                        ) : (
-                            <Row centerY style={{ marginTop: totalLinks ? 20 : 0 }}>
-                                <Button
-                                    text='Log in'
-                                    color='blue'
-                                    style={{ marginRight: 5 }}
-                                    onClick={() => {
-                                        setLogInModalOpen(true)
-                                        close()
-                                    }}
-                                />
-                                <p>to link posts</p>
+                                <Column className={styles.targetInput}>
+                                    <Input
+                                        type='text'
+                                        prefix={
+                                            ['Post', 'Comment'].includes(targetType)
+                                                ? 'ID:'
+                                                : 'Handle:'
+                                        }
+                                        value={targetIdentifier}
+                                        onChange={(value) => {
+                                            setTargetError(false)
+                                            setTargetIdentifier(value)
+                                            if (value) getTarget(value)
+                                            else {
+                                                setTarget(null)
+                                                setTargetOptions(null)
+                                            }
+                                        }}
+                                        style={{ marginRight: 20 }}
+                                    />
+                                    {targetOptions && (
+                                        <Column className={styles.targetOptions}>
+                                            {targetOptions.map((option) => (
+                                                <ImageTitle
+                                                    className={styles.targetOption}
+                                                    type={targetType === 'User' ? 'user' : 'space'}
+                                                    imagePath={option.flagImagePath}
+                                                    title={`${option.name} (u/${option.handle})`}
+                                                    onClick={() => {
+                                                        setTarget(option)
+                                                        setTargetIdentifier(option.handle)
+                                                        setTargetOptions(null)
+                                                    }}
+                                                />
+                                            ))}
+                                        </Column>
+                                    )}
+                                </Column>
                             </Row>
-                        )}
-                    </Column>
-                    <Column centerX>
-                        <Row style={{ marginBottom: 20 }}>
-                            <DropDown
-                                title='Link types'
-                                options={['All Types', 'Posts', 'Comments', 'Spaces', 'Users']}
-                                selectedOption={linkTypes}
-                                setSelectedOption={(option) => setLinkTypes(option)}
-                                style={{ marginRight: 20 }}
+                            {targetError && (
+                                <p className='danger' style={{ marginBottom: 20 }}>
+                                    {targetType} not found
+                                </p>
+                            )}
+                            <Row centerY style={{ width: '100%', marginBottom: 20 }}>
+                                <p style={{ flexShrink: 0, marginRight: 10 }}>
+                                    Link description (optional)
+                                </p>
+                                <Input
+                                    type='text'
+                                    placeholder='description...'
+                                    value={linkDescription}
+                                    onChange={(value) => setLinkDescription(value)}
+                                />
+                            </Row>
+                            {linkDescription.length > 50 && (
+                                <p className='danger' style={{ marginBottom: 20 }}>
+                                    Max 50 characters
+                                </p>
+                            )}
+                            {target && (
+                                <Column centerX style={{ width: '100%' }}>
+                                    <Button
+                                        text='Create link'
+                                        color='blue'
+                                        onClick={createLink}
+                                        disabled={createLinkLoading || linkDescription.length > 50}
+                                        loading={createLinkLoading}
+                                        style={{ marginBottom: 15 }}
+                                    />
+                                    <ArrowDownIcon
+                                        style={{
+                                            height: 20,
+                                            width: 20,
+                                            color: '#ccc',
+                                            marginBottom: 20,
+                                        }}
+                                    />
+                                    {renderItem(target, targetType.toLowerCase())}
+                                </Column>
+                            )}
+                        </Column>
+                    ) : (
+                        <Row centerY style={{ marginTop: linkData ? 20 : 0 }}>
+                            <Button
+                                text='Log in'
+                                color='blue'
+                                style={{ marginRight: 5 }}
+                                onClick={() => setLogInModalOpen(true)}
                             />
-                            <DropDown
-                                title='Size by'
-                                options={['Likes', 'Links', 'Date Created', 'Recent Activity']}
-                                selectedOption={sizeBy}
-                                setSelectedOption={(option) => setSizeBy(option)}
-                            />
+                            <p>to link posts</p>
                         </Row>
-                        <div id='link-map' />
-                    </Column>
-                </Row>
-            </Column>
-        </Modal>
+                    )}
+                </Column>
+                <Column centerX className={styles.visualisation}>
+                    <Row style={{ marginBottom: 20 }}>
+                        <DropDown
+                            title='Link types'
+                            options={['All Types', 'Posts', 'Comments', 'Spaces', 'Users']}
+                            selectedOption={linkTypes}
+                            setSelectedOption={(option) => setLinkTypes(option)}
+                            style={{ marginRight: 20 }}
+                        />
+                        <DropDown
+                            title='Size by'
+                            options={['Likes', 'Links', 'Date Created', 'Recent Activity']}
+                            selectedOption={sizeBy}
+                            setSelectedOption={(option) => setSizeBy(option)}
+                        />
+                    </Row>
+                    <div id='link-map' />
+                </Column>
+            </div>
+        </Column>
     )
 }
 
-LinkModal.defaultProps = {
-    parentItemId: null,
-}
-
-export default LinkModal
-
-// console.log('points: ', points)
-// [[x,y], [x,y]]
-// const lineD = [
-//     { x: points[0][0], y: points[0][1] },
-//     { x: points[1][0], y: points[1][1] },
-// ]
-// const line = d3
-//     .line()
-//     .x((dt) => dt.x)
-//     .y((dt) => dt.y)
-//     .curve(d3.curveBasis)
-
-// return line(lineD)
-
-// return `M${points[0]}C${points[1][0] + 100},${points[0][1]} ${points[1][0] + 100},${
-//     points[1][1]
-// } ${points[1]}`
-
-// function findPathCoordinates(d) {
-//     return `M${d.x},${d.y}C${d.x},${(d.y + d.parent.y) / 2} ${d.parent.x},${
-//         (d.y + d.parent.y) / 2
-//     } ${d.parent.x},${d.parent.y}`
-// }
-
-// function radialPoint(x, y) {
-//     return [+y * Math.cos(x - Math.PI / 2), y * Math.sin(x)]
-// }
+export default LinkMap

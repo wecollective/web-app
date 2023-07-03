@@ -14,7 +14,6 @@ import AudioCard from '@src/components/cards/PostCard/AudioCard'
 import UrlPreview from '@src/components/cards/PostCard/UrlCard'
 import EditPostModal from '@src/components/modals/EditPostModal'
 import LikeModal from '@src/components/modals/LikeModal'
-import LinkModal from '@src/components/modals/LinkModal'
 import styles from '@styles/components/cards/PostCard/BeadCard.module.scss'
 import { CommentIcon, EditIcon, LikeIcon, LinkIcon, VerticalEllipsisIcon } from '@svgs/all'
 import * as d3 from 'd3'
@@ -267,7 +266,7 @@ function BeadCard(props: {
                         title={statTitle('Link', totalLinks || 0)}
                         color={accountLinks > 0 ? 'blue' : undefined}
                         // disabled={location === 'preview'}
-                        onClick={() => setLinkModalOpen(true)}
+                        onClick={() => history(`/linkmap?item=post&id=${id}`)}
                     />
                 </Row>
             )}
@@ -291,15 +290,6 @@ function BeadCard(props: {
                         })
                     }}
                     close={() => setLikeModalOpen(false)}
-                />
-            )}
-            {linkModalOpen && (
-                <LinkModal
-                    itemType='bead'
-                    itemData={bead}
-                    parentItemId={postId}
-                    location={location}
-                    close={() => setLinkModalOpen(false)}
                 />
             )}
             {editPostModalOpen && (

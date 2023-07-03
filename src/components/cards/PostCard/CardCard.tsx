@@ -2,11 +2,10 @@ import Column from '@components/Column'
 import Row from '@components/Row'
 import DraftText from '@components/draft-js/DraftText'
 import LikeModal from '@src/components/modals/LikeModal'
-import LinkModal from '@src/components/modals/LinkModal'
 import styles from '@styles/components/cards/PostCard/CardCard.module.scss'
 import { LikeIcon, LinkIcon, RepostIcon } from '@svgs/all'
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 function CardCard(props: {
     postData: any
@@ -22,6 +21,7 @@ function CardCard(props: {
     const cardFront = postData.CardSides.find((s) => s.type === 'card-front')
     const cardBack = postData.CardSides.find((s) => s.type === 'card-back')
     const card = cardFlipped ? cardBack : cardFront
+    const history = useNavigate()
 
     function rotateCard() {
         setCardRotating(true)
@@ -117,7 +117,7 @@ function CardCard(props: {
                 <button
                     type='button'
                     className={card.accountLinks > 0 ? styles.blue : ''}
-                    onClick={() => setLinkModalOpen(true)}
+                    onClick={() => history(`/linkmap?item=post&id=${card.id}`)}
                 >
                     <Row centerY>
                         <LinkIcon />
@@ -139,7 +139,7 @@ function CardCard(props: {
                 <button
                     type='button'
                     className={card.accountLinks > 0 ? styles.blue : ''}
-                    onClick={() => setLinkModalOpen(true)}
+                    onClick={() => history(`/linkmap?item=post&id=${card.id}`)}
                 >
                     <Row centerY>
                         <LinkIcon />
@@ -159,15 +159,6 @@ function CardCard(props: {
                         })
                     }}
                     close={() => setLikeModalOpen(false)}
-                />
-            )}
-            {linkModalOpen && (
-                <LinkModal
-                    itemType='card'
-                    itemData={card}
-                    location={location}
-                    parentItemId={postData.id}
-                    close={() => setLinkModalOpen(false)}
                 />
             )}
         </Column>

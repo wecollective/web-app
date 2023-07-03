@@ -9,7 +9,6 @@ import DeleteCommentModal from '@components/modals/DeleteCommentModal'
 import { AccountContext } from '@contexts/AccountContext'
 import { dateCreated, timeSinceCreated } from '@src/Helpers'
 import LikeModal from '@src/components/modals/LikeModal'
-import LinkModal from '@src/components/modals/LinkModal'
 import RatingModal from '@src/components/modals/RatingModal'
 import styles from '@styles/components/cards/Comments/CommentCard.module.scss'
 import {
@@ -22,7 +21,7 @@ import {
     VerticalEllipsisIcon,
 } from '@svgs/all'
 import React, { useContext, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 function CommentCard(props: {
     comment: any
@@ -68,6 +67,7 @@ function CommentCard(props: {
     const [ratingModalOpen, setRatingModalOpen] = useState(false)
     const [linkModalOpen, setLinkModalOpen] = useState(false)
     const isOwnComment = Creator.id === accountData.id
+    const history = useNavigate()
 
     return (
         <Column
@@ -190,7 +190,7 @@ function CommentCard(props: {
                     <button
                         type='button'
                         className={accountLinks > 0 ? styles.blue : ''}
-                        onClick={() => setLinkModalOpen(true)}
+                        onClick={() => history(`/linkmap?item=comment&id=${id}`)}
                     >
                         <LinkIcon />
                         <p>{totalLinks}</p>
@@ -211,15 +211,6 @@ function CommentCard(props: {
                     itemData={comment}
                     updateItem={() => updateCommentReactions(comment, 'Rating', !accountRating)}
                     close={() => setRatingModalOpen(false)}
-                />
-            )}
-            {linkModalOpen && (
-                <LinkModal
-                    itemType='comment'
-                    itemData={comment}
-                    parentItemId={comment.itemId}
-                    location={location}
-                    close={() => setLinkModalOpen(false)}
                 />
             )}
             {editCommentModalOpen && (
