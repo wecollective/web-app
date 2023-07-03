@@ -9,6 +9,7 @@ import ImageTitle from '@components/ImageTitle'
 import Input from '@components/Input'
 import Row from '@components/Row'
 import CommentCard from '@components/cards/Comments/CommentCard'
+import HorizontalSpaceCard from '@components/cards/HorizontalSpaceCard'
 import PostCard from '@components/cards/PostCard/PostCard'
 import VerticalUserCard from '@components/cards/VerticalUserCard'
 import Modal from '@components/modals/Modal'
@@ -131,50 +132,27 @@ function LinkModal(props: {
                     updateCommentReactions={() => null}
                 />
             )
-        if (type === 'user') {
-            return <VerticalUserCard user={item} />
-        }
+        if (type === 'user') return <VerticalUserCard user={item} />
+        if (type === 'space') return <HorizontalSpaceCard space={item} />
         return null
     }
 
     function getTarget(identifier) {
-        if (targetType === 'Post') {
+        const type = targetType.toLowerCase()
+        if (['post', 'comment'].includes(type)) {
             const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
             axios
-                .get(`${config.apiURL}/post-data?postId=${identifier}`, options)
-                .then((res) => {
-                    console.log('res: ', res)
-                    setTarget(res.data)
-                })
+                .get(`${config.apiURL}/${type}-data?${type}Id=${identifier}`, options)
+                .then((res) => setTarget(res.data))
                 .catch((error) => {
                     console.log(error)
                     setTarget(null)
                 })
-        }
-        if (targetType === 'Comment') {
-            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        } else {
+            const data = { query: identifier, blacklist: [] }
             axios
-                .get(`${config.apiURL}/comment-data?commentId=${identifier}`, options)
-                .then((res) => {
-                    setTarget(res.data)
-                })
-                .catch((error) => {
-                    console.log(error)
-                    setTarget(null)
-                })
-        }
-        if (targetType === 'User') {
-            const data = {
-                query: identifier,
-                blacklist: [], // ...usersWhoHaveBlockedLinking],
-            } as any
-            axios
-                .post(`${config.apiURL}/find-people`, data)
-                .then((res) => {
-                    console.log('find-people: ', res.data)
-                    setTargetOptions(res.data)
-                    // setTarget(res.data)
-                })
+                .post(`${config.apiURL}/find-${type === 'user' ? 'people' : 'spaces'}`, data)
+                .then((res) => setTargetOptions(res.data))
                 .catch((error) => {
                     console.log(error)
                     setTarget(null)
