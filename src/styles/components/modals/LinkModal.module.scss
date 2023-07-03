@@ -1,1 +1,25 @@
 @import '@styles/Variables';
+
+.targetInput {
+    position: relative;
+
+    .targetOptions {
+        position: absolute;
+        top: 50px;
+        background-color: white;
+        padding: 5px;
+        border-radius: 5px;
+        box-shadow: 0 10px 10px 0 rgba(10, 8, 72, 0.06);
+        z-index: 5;
+
+        .targetOption {
+            padding: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+
+            &:hover {
+                background-color: $blue8;
+            }
+        }
+    }
+}

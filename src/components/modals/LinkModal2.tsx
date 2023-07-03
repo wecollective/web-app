@@ -10,6 +10,7 @@ import Input from '@components/Input'
 import Row from '@components/Row'
 import CommentCard from '@components/cards/Comments/CommentCard'
 import PostCard from '@components/cards/PostCard/PostCard'
+import VerticalUserCard from '@components/cards/VerticalUserCard'
 import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
 import { PostContext } from '@contexts/PostContext'
@@ -18,6 +19,7 @@ import { UserContext } from '@contexts/UserContext'
 import config from '@src/Config'
 import { getDraftPlainText, pluralise } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
+import styles from '@styles/components/modals/LinkModal.module.scss'
 import { ArrowDownIcon } from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
@@ -45,7 +47,7 @@ function LinkModal(props: {
     const [linkDescription, setLinkDescription] = useState('')
     const [targetError, setTargetError] = useState(false)
     const [target, setTarget] = useState<any>(null)
-    const [targetOptions, setTargetOptions] = useState<any[]>([])
+    const [targetOptions, setTargetOptions] = useState<any>(null)
     const [linkTypes, setLinkTypes] = useState('All Types')
     const [sizeBy, setSizeBy] = useState('Likes')
     const [clickedSpaceUUID, setClickedSpaceUUID] = useState('')
@@ -129,6 +131,9 @@ function LinkModal(props: {
                     updateCommentReactions={() => null}
                 />
             )
+        if (type === 'user') {
+            return <VerticalUserCard user={item} />
+        }
         return null
     }
 
@@ -810,7 +815,7 @@ function LinkModal(props: {
                                             }}
                                         />
                                     </Row>
-                                    <Column>
+                                    <Column className={styles.targetInput}>
                                         <Input
                                             type='text'
                                             prefix={
@@ -822,20 +827,33 @@ function LinkModal(props: {
                                             onChange={(value) => {
                                                 setTargetError(false)
                                                 setTargetIdentifier(value)
-                                                getTarget(value)
+                                                if (value) getTarget(value)
+                                                else {
+                                                    setTarget(null)
+                                                    setTargetOptions(null)
+                                                }
                                             }}
                                             style={{ marginRight: 20 }}
                                         />
-                                        <Column>
-                                            {targetOptions.map((option) => (
-                                                <ImageTitle
-                                                    type='user'
-                                                    imagePath={option.flagImagePath}
-                                                    title={`${option.name} (${option.handle})`}
-                                                    style={{ marginRight: 5 }}
-                                                />
-                                            ))}
-                                        </Column>
+                                        {targetOptions && (
+                                            <Column className={styles.targetOptions}>
+                                                {targetOptions.map((option) => (
+                                                    <ImageTitle
+                                                        className={styles.targetOption}
+                                                        type={
+                                                            targetType === 'User' ? 'user' : 'space'
+                                                        }
+                                                        imagePath={option.flagImagePath}
+                                                        title={`${option.name} (u/${option.handle})`}
+                                                        onClick={() => {
+                                                            setTarget(option)
+                                                            setTargetIdentifier(option.handle)
+                                                            setTargetOptions(null)
+                                                        }}
+                                                    />
+                                                ))}
+                                            </Column>
+                                        )}
                                     </Column>
                                 </Row>
                                 {targetError && (
@@ -860,7 +878,7 @@ function LinkModal(props: {
                                     </p>
                                 )}
                                 {target && (
-                                    <Column centerX>
+                                    <Column centerX style={{ width: '100%' }}>
                                         <Button
                                             text='Add link'
                                             color='blue'
