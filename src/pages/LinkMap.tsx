@@ -43,6 +43,7 @@ function LinkMap(): JSX.Element {
     const [linkTypes, setLinkTypes] = useState('All Types')
     const [sizeBy, setSizeBy] = useState('Likes')
     const [clickedSpaceUUID, setClickedSpaceUUID] = useState('')
+    const svgSize = useRef(0)
     const transitioning = useRef(true)
     const domain = useRef<number[]>([0, 0])
     const links = useRef<any>(null)
@@ -53,6 +54,9 @@ function LinkMap(): JSX.Element {
         linkData && linkData.item
             ? `${linkData.item.totalLinks} link${pluralise(linkData.item.totalLinks)}`
             : 'No links yet...'
+    // settings
+    const curvedLinks = false
+    const duration = 1000
 
     function getLinks() {
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
@@ -166,12 +170,6 @@ function LinkMap(): JSX.Element {
     //         .catch((error) => console.log(error))
     // }
 
-    // settings
-    const curvedLinks = false
-    const duration = 1000
-    const canvasSize = 600
-    const circleSize = canvasSize - 50
-
     const zoom = d3.zoom().on('zoom', (event) => {
         // scale master group
         d3.select('#master-group').attr('transform', event.transform)
@@ -187,20 +185,28 @@ function LinkMap(): JSX.Element {
         d3.select('#link-map-svg')
             .transition('reset-position')
             .duration(1000)
-            .call(zoom.transform, d3.zoomIdentity.translate(canvasSize / 2, canvasSize / 2))
+            .call(
+                zoom.transform,
+                d3.zoomIdentity.translate(svgSize.current / 2, svgSize.current / 2)
+            )
     }
 
     function buildCanvas() {
-        const svg = d3
-            .select('#link-map')
+        // calculate svg size from canvas dimensions
+        const canvas = d3.select('#link-map-canvas')
+        const width = parseInt(canvas.style('width'), 10)
+        const height = parseInt(canvas.style('height'), 10)
+        if (window.innerWidth < 1200) svgSize.current = width
+        else svgSize.current = width > height ? height : width
+        const svg = canvas
             .append('svg')
             .attr('id', 'link-map-svg')
-            .attr('width', canvasSize)
-            .attr('height', canvasSize)
-        // set up groups
+            .attr('width', svgSize.current)
+            .attr('height', svgSize.current)
+        // set up groups and create background rings
         const masterGroup = svg.append('g').attr('id', 'master-group')
         const rings = masterGroup.append('g').attr('id', 'background-rings')
-        const ringScale = circleSize / 6
+        const ringScale = (svgSize.current - 50) / 6
         const ringSizes = [ringScale, ringScale * 2, ringScale * 3]
         ringSizes.forEach((ringSize, i) => {
             rings
@@ -215,7 +221,10 @@ function LinkMap(): JSX.Element {
         masterGroup.append('g').attr('id', 'nodes')
         // set up zoom
         svg.call(zoom).on('dblclick.zoom', null)
-        svg.call(zoom.transform, d3.zoomIdentity.translate(canvasSize / 2, canvasSize / 2))
+        svg.call(
+            zoom.transform,
+            d3.zoomIdentity.translate(svgSize.current / 2, svgSize.current / 2)
+        )
         svg.on('click', () => {
             resetPosition()
             setTimeout(() => {
@@ -549,6 +558,7 @@ function LinkMap(): JSX.Element {
     useEffect(() => {
         if (linkData) {
             const data = d3.hierarchy(linkData, (d) => d.item.children)
+            const circleSize = svgSize.current - 50
             let radius
             if (data.height === 1) radius = circleSize / 6
             if (data.height === 2) radius = circleSize / 3
@@ -660,6 +670,24 @@ function LinkMap(): JSX.Element {
                 <LoadingWheel />
             </Column>
             <div className={styles.content}>
+                <Column centerX className={styles.visualisation}>
+                    <Row>
+                        <DropDown
+                            title='Link types'
+                            options={['All Types', 'Posts', 'Comments', 'Spaces', 'Users']}
+                            selectedOption={linkTypes}
+                            setSelectedOption={(option) => setLinkTypes(option)}
+                            style={{ marginRight: 20 }}
+                        />
+                        <DropDown
+                            title='Size by'
+                            options={['Likes', 'Links', 'Date Created', 'Recent Activity']}
+                            selectedOption={sizeBy}
+                            setSelectedOption={(option) => setSizeBy(option)}
+                        />
+                    </Row>
+                    <Column centerX centerY id='link-map-canvas' className={styles.canvas} />
+                </Column>
                 <Column centerX className={styles.info}>
                     {linkData && renderItem(linkData.item, linkData.item.modelType)}
                     {loggedIn ? (
@@ -773,24 +801,6 @@ function LinkMap(): JSX.Element {
                             <p>to link posts</p>
                         </Row>
                     )}
-                </Column>
-                <Column centerX className={styles.visualisation}>
-                    <Row style={{ marginBottom: 20 }}>
-                        <DropDown
-                            title='Link types'
-                            options={['All Types', 'Posts', 'Comments', 'Spaces', 'Users']}
-                            selectedOption={linkTypes}
-                            setSelectedOption={(option) => setLinkTypes(option)}
-                            style={{ marginRight: 20 }}
-                        />
-                        <DropDown
-                            title='Size by'
-                            options={['Likes', 'Links', 'Date Created', 'Recent Activity']}
-                            selectedOption={sizeBy}
-                            setSelectedOption={(option) => setSizeBy(option)}
-                        />
-                    </Row>
-                    <div id='link-map' />
                 </Column>
             </div>
         </Column>
