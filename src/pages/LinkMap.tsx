@@ -15,7 +15,7 @@ import PostCard from '@components/cards/PostCard/PostCard'
 import VerticalUserCard from '@components/cards/VerticalUserCard'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
-import { getDraftPlainText, pluralise } from '@src/Helpers'
+import { currentState, getDraftPlainText, pluralise } from '@src/Helpers'
 import LoadingWheel from '@src/components/LoadingWheel'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/pages/LinkMap.module.scss'
@@ -37,8 +37,9 @@ function LinkMap(): JSX.Element {
     const [targetType, setTargetType] = useState('Post')
     const [targetIdentifier, setTargetIdentifier] = useState('')
     const [linkDescription, setLinkDescription] = useState('')
-    const [targetError, setTargetError] = useState(false)
     const [target, setTarget] = useState<any>(null)
+    const [targetNotFound, setTargetNotFound] = useState(false)
+    const [targetError, setTargetError] = useState(false)
     const [targetOptions, setTargetOptions] = useState<any>(null)
     const [linkTypes, setLinkTypes] = useState('All Types')
     const [sizeBy, setSizeBy] = useState('Likes')
@@ -93,23 +94,29 @@ function LinkMap(): JSX.Element {
     function getTarget(identifier) {
         const type = targetType.toLowerCase()
         if (['post', 'comment'].includes(type)) {
-            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+            setTargetNotFound(false)
+            const options = {
+                headers: { Authorization: `Bearer ${cookies.get('accessToken')}` },
+            }
             axios
                 .get(`${config.apiURL}/${type}-data?${type}Id=${identifier}`, options)
-                .then((res) => setTarget(res.data))
+                .then((res) => {
+                    if (identifier === currentState(setTargetIdentifier)) setTarget(res.data)
+                })
                 .catch((error) => {
-                    console.log(error)
-                    setTarget(null)
+                    if (error.response.status === 404) {
+                        if (identifier === currentState(setTargetIdentifier)) {
+                            setTargetNotFound(true)
+                            setTarget(null)
+                        }
+                    } else console.log(error)
                 })
         } else {
             const data = { query: identifier, blacklist: [] }
             axios
                 .post(`${config.apiURL}/find-${type === 'user' ? 'people' : 'spaces'}`, data)
                 .then((res) => setTargetOptions(res.data))
-                .catch((error) => {
-                    console.log(error)
-                    setTarget(null)
-                })
+                .catch((error) => console.log(error))
         }
     }
 
@@ -545,7 +552,9 @@ function LinkMap(): JSX.Element {
             )
     }
 
-    useEffect(() => buildCanvas(), [])
+    useEffect(() => {
+        if (!d3.select('#link-map-svg').node()) buildCanvas()
+    }, [])
 
     useEffect(() => {
         if (!loading)
@@ -574,7 +583,17 @@ function LinkMap(): JSX.Element {
                 // .separation((a, b) => (a.parent === b.parent ? 1 : 3) / (a.depth * 4))
                 .separation((a, b) => {
                     // return 1
-                    return (a.parent === b.parent ? 1 : 2) / a.depth
+                    return (a.parent === b.parent ? 1 : 2) / (a.depth * 4)
+                    // const seperation = a.parent === b.parent ? 1 : a.depth * 2
+                    // const seperation = (a.parent === b.parent ? 10 : 20) - a.depth * 3
+                    // console.log(
+                    //     `siblings: ${a.parent === b.parent}, depthA: ${a.depth}, depthB: ${
+                    //         b.depth
+                    //     },seperation: ${seperation}, idA: ${a.data.item.title}, idB: ${
+                    //         b.data.item.title
+                    //     }`
+                    // )
+                    // return seperation
                 })
 
             const treeData = tree(data)
@@ -702,6 +721,7 @@ function LinkMap(): JSX.Element {
                                         selectedOption={targetType}
                                         setSelectedOption={(option) => {
                                             setTargetError(false)
+                                            setTargetNotFound(false)
                                             setTarget(null)
                                             setTargetIdentifier('')
                                             setTargetType(option)
@@ -723,6 +743,7 @@ function LinkMap(): JSX.Element {
                                             if (value) getTarget(value)
                                             else {
                                                 setTarget(null)
+                                                setTargetNotFound(false)
                                                 setTargetOptions(null)
                                             }
                                         }}
@@ -788,6 +809,11 @@ function LinkMap(): JSX.Element {
                                     />
                                     {renderItem(target, targetType.toLowerCase())}
                                 </Column>
+                            )}
+                            {targetNotFound && (
+                                <Row centerX className={styles.targetNotFound}>
+                                    {targetType} not found...
+                                </Row>
                             )}
                         </Column>
                     ) : (

@@ -27,6 +27,8 @@
         }
 
         .info {
+            padding: 5px;
+
             @include for-desktop-small-up {
                 width: 100%;
                 max-width: 780px;
@@ -57,9 +59,17 @@
                     }
                 }
             }
+
+            .targetNotFound {
+                width: 100%;
+                padding: 20px;
+                background-color: white;
+                border-radius: 10px;
+            }
         }
 
         .visualisation {
+            padding: 5px;
             width: 100%;
 
             @include for-desktop-small-up {
