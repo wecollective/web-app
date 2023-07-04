@@ -669,7 +669,7 @@ function LinkMap(): JSX.Element {
             <Column centerX centerY id='loading' className={styles.loading}>
                 <LoadingWheel />
             </Column>
-            <div className={styles.content}>
+            <div className={`${styles.content} hide-scrollbars`}>
                 <Column centerX className={styles.visualisation}>
                     <Row>
                         <DropDown
@@ -688,7 +688,7 @@ function LinkMap(): JSX.Element {
                     </Row>
                     <Column centerX centerY id='link-map-canvas' className={styles.canvas} />
                 </Column>
-                <Column centerX className={styles.info}>
+                <Column centerX className={`${styles.info} hide-scrollbars`}>
                     {linkData && renderItem(linkData.item, linkData.item.modelType)}
                     {loggedIn ? (
                         <Column centerX style={{ width: '100%', marginTop: 20 }}>
