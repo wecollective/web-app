@@ -219,7 +219,7 @@ function LinkMap(): JSX.Element {
         // set up groups and create background rings
         const masterGroup = svg.append('g').attr('id', 'master-group')
         const rings = masterGroup.append('g').attr('id', 'background-rings')
-        const ringScale = (svgSize.current - 50) / 6
+        const ringScale = (svgSize.current - 70) / 6
         const ringSizes = [ringScale, ringScale * 2, ringScale * 3]
         ringSizes.forEach((ringSize, i) => {
             rings
@@ -276,7 +276,9 @@ function LinkMap(): JSX.Element {
 
     // todo: use angles here combined with seperation function to improve radial spread?
     function findNodeTransform(d) {
-        return `rotate(${(d.x * 180) / Math.PI - 90}),translate(${d.y}, 0)`
+        return `rotate(${(d.x * 180) / Math.PI - 90}),translate(${d.y}, 0),rotate(${
+            (-d.x * 180) / Math.PI + 90
+        })`
     }
 
     function findDomain() {
@@ -301,10 +303,12 @@ function LinkMap(): JSX.Element {
         else if (sizeBy === 'Recent Activity')
             radius = Date.parse(d.data.item.updatedAt || d.data.item.createdAt)
         else radius = d.data.item[`total${sizeBy}`]
+        const minRadius = 0.015 * svgSize.current
+        const maxRadius = 0.035 * svgSize.current
         const radiusScale = d3
             .scaleLinear()
             .domain(domain.current) // data values spread
-            .range([10, 25]) // radius size spread
+            .range([minRadius, maxRadius]) // radius size spread
         return radiusScale(radius)
     }
 
@@ -318,19 +322,19 @@ function LinkMap(): JSX.Element {
     }
 
     function findNodeText(d, scale) {
-        // temporary solution until GBG posts title field used instead of topic
-        const { modelType, type, topic, title, text } = d.data.item
+        const { modelType, type, topic, title, text, name } = d.data.item
+        const maxChars = Math.round(4 * scale)
+        let nodeText = ''
         if (modelType === 'post') {
-            const plainText =
+            // temporary solution until GBG posts title field used instead of topic
+            nodeText =
                 type === 'glass-bead-game'
                     ? topic || getDraftPlainText(text || '')
                     : title || getDraftPlainText(text || '')
-            // trim text
-            const maxChars = Math.round(4 * scale)
-            const trimmedText = plainText.substring(0, maxChars)
-            return plainText.length > maxChars ? trimmedText.concat('...') : plainText
         }
-        return ''
+        if (modelType === 'comment') nodeText = getDraftPlainText(text || '')
+        if (['user', 'space'].includes(modelType)) nodeText = name
+        return nodeText.length > maxChars ? nodeText.substring(0, maxChars).concat('...') : nodeText
     }
 
     function circleMouseOver(e, node) {
@@ -521,6 +525,7 @@ function LinkMap(): JSX.Element {
                         .classed('node-text', true)
                         .text((d) => findNodeText(d, 1))
                         .attr('font-size', 10)
+                        .style('text-shadow', '0 0 3px white')
                         .attr('text-anchor', 'middle')
                         .attr('dominant-baseline', 'central')
                         .attr('pointer-events', 'none')
@@ -577,9 +582,8 @@ function LinkMap(): JSX.Element {
     // todo: create seperate component for link map visualisation and merge useEffects below
     useEffect(() => {
         if (linkData) {
-            // console.log('linkdata: ', linkData)
             const data = d3.hierarchy(linkData, (d) => d.item.children)
-            const circleSize = svgSize.current - 50
+            const circleSize = svgSize.current - 70
             let radius
             if (data.height === 1) radius = circleSize / 6
             if (data.height === 2) radius = circleSize / 3
@@ -587,8 +591,8 @@ function LinkMap(): JSX.Element {
 
             const tree = d3
                 .tree()
-                // .size([2 * Math.PI, radius])
-                .size([3, radius])
+                .size([2 * Math.PI, radius])
+                // .size([3, radius])
                 // .separation((a, b) => a.depth)
                 // .separation(() => 1)
                 // .separation((a, b) => ((a.parent === b.parent ? 1 : 2) / a.depth) * 4)
