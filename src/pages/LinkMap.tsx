@@ -25,6 +25,7 @@ import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
+import { v4 as uuidv4 } from 'uuid'
 
 function LinkMap(): JSX.Element {
     const location = useLocation()
@@ -86,7 +87,7 @@ function LinkMap(): JSX.Element {
                     updateCommentReactions={() => null}
                 />
             )
-        if (type === 'user') return <VerticalUserCard user={item} />
+        if (type === 'user') return <VerticalUserCard user={item} style={{ flexGrow: 0 }} />
         if (type === 'space') return <HorizontalSpaceCard space={item} />
         return null
     }
@@ -123,10 +124,10 @@ function LinkMap(): JSX.Element {
     function createLink() {
         setCreateLinkLoading(true)
         const data = {
-            // sourceType: findModelType(itemType),
-            // sourceId: itemData.id,
+            sourceType: linkData.item.modelType,
+            sourceId: linkData.item.id,
             targetType: targetType.toLowerCase(),
-            targetId: targetIdentifier,
+            targetId: target.id,
             description: linkDescription,
             accountHandle: accountData.handle,
             accountName: accountData.name,
@@ -135,20 +136,25 @@ function LinkMap(): JSX.Element {
         axios
             .post(`${config.apiURL}/add-link`, data, options)
             .then((res) => {
-                console.log('add-link res: ', res.data)
-                // const { target, link } = res.data
-                // update modal state
+                console.log('add-link: ', res.data)
                 setTargetIdentifier('')
                 setLinkDescription('')
-                // setLinkData({
-                //     ...linkData,
-                //     [`Outgoing${targetType}Links`]: [
-                //         ...linkData[`Outgoing${targetType}Links`],
-                //         { ...link, Creator: accountData, [`Outgoing${targetType}`]: target },
-                //     ],
-                // })
-                // // update context state
-                // updateContextState('add-link', targetType, +targetIdentifier)
+                setTarget(null)
+                const newNode = {
+                    item: {
+                        uuid: uuidv4(),
+                        modelType: targetType.toLowerCase(),
+                        direction: 'outgoing',
+                        totalLikes: target.totalLikes || 0,
+                        totalLinks: target.totalLinks || 0,
+                        ...target,
+                    },
+                    Link: { uuid: uuidv4(), ...res.data },
+                }
+                console.log('newNode: ', newNode)
+                setLinkData({
+                    item: { ...linkData.item, children: [newNode, ...linkData.item.children] },
+                })
                 setCreateLinkLoading(false)
             })
             .catch((error) => {
@@ -240,45 +246,12 @@ function LinkMap(): JSX.Element {
         })
     }
 
-    function findDomain() {
-        // calculate node radius domain
-        let dMin = 0
-        let dMax
-        if (sizeBy === 'Date Created') {
-            dMin = d3.min(nodes.current.map((node) => Date.parse(node.data.item.createdAt)))
-            dMax = d3.max(nodes.current.map((node) => Date.parse(node.data.item.createdAt)))
-        } else if (sizeBy === 'Recent Activity') {
-            dMin = d3.min(nodes.current.map((node) => Date.parse(node.data.item.updatedAt)))
-            dMax = d3.max(nodes.current.map((node) => Date.parse(node.data.item.updatedAt)))
-        } else {
-            dMax = d3.max(nodes.current.map((node) => node.data.item[`total${sizeBy}`]))
-        }
-        domain.current = [dMin, dMax]
-    }
-
-    function findNodeRadius(d) {
-        let radius
-        if (sizeBy === 'Date Created') radius = Date.parse(d.data.item.createdAt)
-        else if (sizeBy === 'Recent Activity') radius = Date.parse(d.data.item.updatedAt)
-        else radius = d.data.item[`total${sizeBy}`]
-        const radiusScale = d3
-            .scaleLinear()
-            .domain(domain.current) // data values spread
-            .range([10, 25]) // radius size spread
-        return radiusScale(radius)
-    }
-
     function outgoingLink(d) {
         return d.target.data.item.direction === 'outgoing'
     }
 
     function findLinkColor(d) {
         return outgoingLink(d) ? colors.linkBlue : colors.linkRed
-    }
-
-    // todo: use angles here combined with seperation function to improve radial spread
-    function findNodeTransform(d) {
-        return `rotate(${(d.x * 180) / Math.PI - 90}),translate(${d.y}, 0)`
     }
 
     function findRadialPoints(d) {
@@ -299,6 +272,40 @@ function LinkMap(): JSX.Element {
         const anchors = outgoingLink(d) ? [d.source, d.target] : [d.target, d.source]
         const points = anchors.map((a) => findRadialPoints(a))
         return `M${points[0]}L${points[1]}`
+    }
+
+    // todo: use angles here combined with seperation function to improve radial spread?
+    function findNodeTransform(d) {
+        return `rotate(${(d.x * 180) / Math.PI - 90}),translate(${d.y}, 0)`
+    }
+
+    function findDomain() {
+        // calculate node radius domain
+        let dMin = 0
+        let dMax
+        if (sizeBy === 'Date Created') {
+            dMin = d3.min(nodes.current.map((node) => Date.parse(node.data.item.createdAt)))
+            dMax = d3.max(nodes.current.map((node) => Date.parse(node.data.item.createdAt)))
+        } else if (sizeBy === 'Recent Activity') {
+            dMin = d3.min(nodes.current.map((node) => Date.parse(node.data.item.updatedAt)))
+            dMax = d3.max(nodes.current.map((node) => Date.parse(node.data.item.updatedAt)))
+        } else {
+            dMax = d3.max(nodes.current.map((node) => node.data.item[`total${sizeBy}`]))
+        }
+        domain.current = [dMin, dMax]
+    }
+
+    function findNodeRadius(d) {
+        let radius
+        if (sizeBy === 'Date Created') radius = Date.parse(d.data.item.createdAt)
+        else if (sizeBy === 'Recent Activity')
+            radius = Date.parse(d.data.item.updatedAt || d.data.item.createdAt)
+        else radius = d.data.item[`total${sizeBy}`]
+        const radiusScale = d3
+            .scaleLinear()
+            .domain(domain.current) // data values spread
+            .range([10, 25]) // radius size spread
+        return radiusScale(radius)
     }
 
     function findNodeFill(d) {
@@ -566,6 +573,7 @@ function LinkMap(): JSX.Element {
     // todo: create seperate component for link map visualisation and merge useEffects below
     useEffect(() => {
         if (linkData) {
+            // console.log('linkdata: ', linkData)
             const data = d3.hierarchy(linkData, (d) => d.item.children)
             const circleSize = svgSize.current - 50
             let radius
@@ -747,12 +755,14 @@ function LinkMap(): JSX.Element {
                                                 setTargetOptions(null)
                                             }
                                         }}
+                                        onBlur={() => setTimeout(() => setTargetOptions(null), 200)}
                                         style={{ marginRight: 20 }}
                                     />
                                     {targetOptions && (
                                         <Column className={styles.targetOptions}>
                                             {targetOptions.map((option) => (
                                                 <ImageTitle
+                                                    key={option.id}
                                                     className={styles.targetOption}
                                                     type={targetType === 'User' ? 'user' : 'space'}
                                                     imagePath={option.flagImagePath}
