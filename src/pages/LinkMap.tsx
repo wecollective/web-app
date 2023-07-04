@@ -333,38 +333,38 @@ function LinkMap(): JSX.Element {
         return ''
     }
 
-    function circleMouseOver(e, d) {
+    function circleMouseOver(e, node) {
         // highlight selected circle
-        d3.select(`#node-background-${d.data.item.uuid}`)
+        d3.select(`#node-background-${node.data.item.uuid}`)
             .transition()
             .duration(duration / 4)
             .attr('fill', colors.cpBlue)
-            .attr('r', findNodeRadius(d) + 6)
+            .attr('r', (d) => findNodeRadius(d) + 6)
         // highlight other circles
-        d3.selectAll(`.node-background-${d.data.item.id}`)
-            .filter((n) => n.data.item.uuid !== d.data.item.uuid)
+        d3.selectAll(`.node-background-${node.data.item.modelType}-${node.data.item.id}`)
+            .filter((n) => n.data.item.uuid !== node.data.item.uuid)
             .transition()
             .duration(duration / 4)
             .attr('fill', colors.cpPurple)
-            .attr('r', findNodeRadius(d) + 6)
+            .attr('r', (d) => findNodeRadius(d) + 6)
     }
 
-    function circleMouseOut(e, d) {
+    function circleMouseOut(e, node) {
         // fade out all highlighted circles
-        d3.selectAll(`.node-background-${d.data.item.id}`)
+        d3.selectAll(`.node-background-${node.data.item.modelType}-${node.data.item.id}`)
             .transition()
             .duration(duration / 4)
             .attr('fill', '#aaa')
-            .attr('r', findNodeRadius(d) + 2)
+            .attr('r', (d) => findNodeRadius(d) + 2)
     }
 
-    function circleClick(e, d) {
+    function circleClick(e, node) {
         if (!transitioning.current) {
             transitioning.current = true
-            if (!d.parent) resetPosition()
+            if (!node.parent) resetPosition()
             else {
-                setClickedSpaceUUID(d.data.item.uuid)
-                history(`/linkmap?item=${d.data.item.modelType}&id=${d.data.item.id}`)
+                setClickedSpaceUUID(node.data.item.uuid)
+                history(`/linkmap?item=${node.data.item.modelType}&id=${node.data.item.id}`)
             }
         }
     }
@@ -492,7 +492,11 @@ function LinkMap(): JSX.Element {
                     group
                         .append('circle')
                         .attr('id', (d) => `node-background-${d.data.item.uuid}`)
-                        .attr('class', (d) => `node-background node-background-${d.data.item.id}`)
+                        .attr(
+                            'class',
+                            (d) =>
+                                `node-background node-background-${d.data.item.modelType}-${d.data.item.id}`
+                        )
                         .attr('transform', findNodeTransform)
                         .attr('r', (d) => findNodeRadius(d) + 2)
                         .attr('fill', '#aaa')
