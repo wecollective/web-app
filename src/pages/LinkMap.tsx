@@ -476,10 +476,10 @@ function LinkMap(): JSX.Element {
                         .attr('class', 'link-path')
                         .attr('fill', 'none')
                         .attr('stroke', findLinkColor)
-                        // .attr('stroke-width', (d) => {
-                        //     console.log('link d: ', d)
-                        //     return d.source.height + 1
-                        // })
+                        .attr('stroke-width', (d) => {
+                            // console.log('link d: ', d)
+                            return d.source.height + 1
+                        })
                         .attr('d', findLinkPath)
                     // create text
                     group
@@ -514,6 +514,10 @@ function LinkMap(): JSX.Element {
                         .duration(duration)
                         .attr('d', findLinkPath)
                         .style('stroke', findLinkColor)
+                        .attr('stroke-width', (d) => {
+                            // console.log('link d: ', d)
+                            return d.source.height + 1
+                        })
                     // update arrow
                     update
                         .select('.link-arrow')
