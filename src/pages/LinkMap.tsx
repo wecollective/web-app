@@ -217,6 +217,8 @@ function LinkMap(): JSX.Element {
             .attr('id', 'link-map-svg')
             .attr('width', svgSize.current)
             .attr('height', svgSize.current)
+        // add image defs
+        svg.append('defs').attr('id', 'image-defs')
         // set up groups and create background rings
         const masterGroup = svg.append('g').attr('id', 'master-group')
         const rings = masterGroup.append('g').attr('id', 'background-rings')
@@ -313,12 +315,62 @@ function LinkMap(): JSX.Element {
         return radiusScale(radius)
     }
 
-    function findNodeFill(d) {
+    function findNodeFill(d, radius) {
         const { modelType } = d.data.item
         if (modelType === 'post') return colors.aqua
         if (modelType === 'comment') return colors.purple
-        if (modelType === 'user') return colors.orange
-        if (modelType === 'space') return colors.green
+        if (['user', 'space'].includes(modelType)) {
+            // check if image already exists in defs
+            const oldImage = d3.select(`#image-${d.data.item.uuid}`)
+            const node = d3.select(`#node-${d.data.item.uuid}`)
+            if (oldImage.node()) {
+                // check image size matches node start size
+                const matchingSizes = node.node() && oldImage.attr('height') / 2 === +node.attr('r')
+                // only include duration if node present and matching sizes
+                oldImage
+                    .transition()
+                    .duration(node.node() && matchingSizes ? duration : 0)
+                    .attr('height', radius * 2)
+                    .attr('width', radius * 2)
+            } else {
+                // create new pattern
+                const pattern = d3
+                    .select('#image-defs')
+                    .append('pattern')
+                    .attr('id', `pattern-${d.data.item.uuid}`)
+                    .attr('height', 1)
+                    .attr('width', 1)
+                // append new image to pattern
+                pattern
+                    .append('image')
+                    .attr('id', `image-${d.data.item.uuid}`)
+                    .attr('height', radius * 2)
+                    .attr('width', radius * 2)
+                    .attr('preserveAspectRatio', 'xMidYMid slice')
+                    .attr(
+                        'xlink:href',
+                        () =>
+                            d.data.item.flagImagePath ||
+                            `${config.publicAssets}/icons/default-space-flag.jpg`
+                    )
+                    .on('error', () => {
+                        // try image proxy
+                        const newImage = d3.select(`#image-${d.data.item.uuid}`)
+                        const proxyURL = '//images.weserv.nl/'
+                        if (!newImage.attr('xlink:href').includes(proxyURL)) {
+                            newImage.attr(
+                                'xlink:href',
+                                `${proxyURL}?url=${d.data.item.flagImagePath}`
+                            )
+                        } else {
+                            // fall back on placeholder
+                            const placeholderURL = 'images/placeholders/broken-image.jpg'
+                            newImage.attr('xlink:href', `${config.publicAssets}/${placeholderURL}`)
+                        }
+                    })
+            }
+            return `url(#pattern-${d.data.item.uuid})`
+        }
         return '#aaa'
     }
 
@@ -366,10 +418,12 @@ function LinkMap(): JSX.Element {
     function circleClick(e, node) {
         if (!transitioning.current) {
             transitioning.current = true
-            if (!node.parent) resetPosition()
+            const { uuid, id, modelType } = node.data.item
+            const mainNode = id === +urlParams.id && modelType === urlParams.item
+            if (mainNode) resetPosition()
             else {
-                setClickedSpaceUUID(node.data.item.uuid)
-                history(`/linkmap?item=${node.data.item.modelType}&id=${node.data.item.id}`)
+                setClickedSpaceUUID(uuid)
+                history(`/linkmap?item=${modelType}&id=${id}`)
             }
         }
     }
@@ -518,7 +572,7 @@ function LinkMap(): JSX.Element {
                         .attr('id', (d) => `node-circle-${d.data.item.uuid}`)
                         .attr('transform', findNodeTransform)
                         .attr('r', findNodeRadius)
-                        .attr('fill', findNodeFill)
+                        .attr('fill', (d) => findNodeFill(d, findNodeRadius(d)))
                         .attr('pointer-events', 'none')
                     // create text
                     group
@@ -551,6 +605,7 @@ function LinkMap(): JSX.Element {
                         .transition('node-circle-update')
                         .duration(duration)
                         .attr('r', findNodeRadius)
+                        .attr('fill', (d) => findNodeFill(d, findNodeRadius(d)))
                         .attr('transform', findNodeTransform)
                     // update text
                     update
