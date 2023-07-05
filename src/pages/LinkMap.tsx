@@ -192,6 +192,7 @@ function LinkMap(): JSX.Element {
         d3.selectAll('.node-text').each((d) =>
             d3.select(`#node-text-${d.data.item.uuid}`).text(findNodeText(d, scale))
         )
+        d3.selectAll('.link-text').attr('font-size', 10 / scale)
     })
 
     function resetPosition() {
@@ -431,6 +432,7 @@ function LinkMap(): JSX.Element {
                         .append('text')
                         .attr('dy', -5)
                         .append('textPath')
+                        .classed('link-text', true)
                         .text((d) => d.target.data.Link.description)
                         .attr('font-size', 10)
                         .attr('text-anchor', 'middle')
