@@ -231,7 +231,7 @@ function LinkMap(): JSX.Element {
                 .attr('fill', 'none')
                 .attr('stroke', 'black')
                 .attr('opacity', 0.1)
-            // .attr('opacity', 0.3 - i / 10)
+            // .attr('opacity', 0.5 - i / 3)
         })
         masterGroup.append('g').attr('id', 'links')
         masterGroup.append('g').attr('id', 'nodes')
@@ -643,6 +643,7 @@ function LinkMap(): JSX.Element {
     // todo: create seperate component for link map visualisation and merge useEffects below
     useEffect(() => {
         if (linkData) {
+            // console.log('linkData: ', linkData)
             const data = d3.hierarchy(linkData, (d) => d.item.children)
             const circleSize = svgSize.current - 70
             let radius
@@ -658,11 +659,20 @@ function LinkMap(): JSX.Element {
                 // .separation(() => 1)
                 // .separation((a, b) => ((a.parent === b.parent ? 1 : 2) / a.depth) * 4)
                 // .separation((a, b) => (a.parent === b.parent ? 1 : 3) / (a.depth * 4))
+                // .nodeSize([1, 1])
                 .separation((a, b) => {
+                    // console.log('a: ', a.depth)
+                    // if (a.depth < 2) return 2
+                    // return 0.1
                     // return 1
                     return (a.parent === b.parent ? 1 : 2) / (a.depth * 4)
                     // const seperation = a.parent === b.parent ? 1 : a.depth * 2
-                    // const seperation = (a.parent === b.parent ? 10 : 20) - a.depth * 3
+                    // const seperation = (a.parent === b.parent ? 1 : 2) / (a.depth * 4)
+                    // const seperation = (a.parent ===
+                    // console.log('seperation: ', seperation, a.depth, b.depth)
+                    // console.log('depths: ', a.depth, b.depth)
+                    // console.log('siblings: ', a.parent === b.parent)
+                    // console.log('seperation: ', seperation)
                     // console.log(
                     //     `siblings: ${a.parent === b.parent}, depthA: ${a.depth}, depthB: ${
                     //         b.depth
@@ -671,11 +681,19 @@ function LinkMap(): JSX.Element {
                     //     }`
                     // )
                     // return seperation
+                    return (a.parent === b.parent ? 1 : 2) / (a.depth * 4)
                 })
+            // .nodeSize([10, 10])
 
             const treeData = tree(data)
             const newLinks = treeData.links()
             const newNodes = treeData.descendants()
+            // newNodes.forEach((d) => {
+            //     if (d.depth > 1) {
+            //         console.log(d)
+            //         d.x /= 2
+            //     }
+            // })
             // todo: clean up and match links using uuids like nodes
             // add link ids
             newLinks.forEach((link) => {
