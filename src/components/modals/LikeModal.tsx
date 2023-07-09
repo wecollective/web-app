@@ -13,7 +13,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 function LikeModal(props: {
-    itemType: 'post' | 'comment'
+    itemType: 'post' | 'comment' | 'link'
     itemData: any
     updateItem: () => void
     close: () => void

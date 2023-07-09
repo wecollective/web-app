@@ -66,6 +66,37 @@
                 background-color: white;
                 border-radius: 10px;
             }
+
+            .link {
+                margin: 20px 0;
+                padding: 15px;
+                background-color: white;
+                border-radius: 10px;
+
+                > button {
+                    all: unset;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    color: $grey4;
+                    margin-top: 15px;
+                    transition: all 0.5s;
+
+                    svg {
+                        width: 16px;
+                        height: 16px;
+                        margin-right: 3px;
+                    }
+
+                    &:hover {
+                        color: $grey6;
+                    }
+
+                    &.blue > svg {
+                        color: $blue1;
+                    }
+                }
+            }
         }
 
         .visualisation {

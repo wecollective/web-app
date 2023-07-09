@@ -65,7 +65,6 @@ function CommentCard(props: {
     const [deleteCommentModalOpen, setDeleteCommentModalOpen] = useState(false)
     const [likeModalOpen, setLikeModalOpen] = useState(false)
     const [ratingModalOpen, setRatingModalOpen] = useState(false)
-    const [linkModalOpen, setLinkModalOpen] = useState(false)
     const isOwnComment = Creator.id === accountData.id
     const history = useNavigate()
 
@@ -162,7 +161,7 @@ function CommentCard(props: {
                     )}
                 </Column>
             </Row>
-            {state === 'visible' && location !== 'link-map' && (
+            {state === 'visible' && ( // location !== 'link-map' && (
                 <Row className={styles.buttons}>
                     <button
                         type='button'

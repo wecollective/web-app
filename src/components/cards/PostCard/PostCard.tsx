@@ -92,7 +92,6 @@ function PostCard(props: {
     const [likeModalOpen, setLikeModalOpen] = useState(false)
     const [repostModalOpen, setRepostModalOpen] = useState(false)
     const [ratingModalOpen, setRatingModalOpen] = useState(false)
-    const [linkModalOpen, setLinkModalOpen] = useState(false)
     const [commentsOpen, setCommentsOpen] = useState(location === 'post-page')
     const [deletePostModalOpen, setDeletePostModalOpen] = useState(false)
     const [editPostModalOpen, setEditPostModalOpen] = useState(false)
@@ -101,7 +100,7 @@ function PostCard(props: {
     const mobileView = document.documentElement.clientWidth < 900
     const cookies = new Cookies()
     const isOwnPost = accountData && Creator && accountData.id === Creator.id
-    const showFooter = location !== 'link-modal'
+    const showFooter = true // location !== 'link-modal'
     // const directSpaces = DirectSpaces.filter((s) => s.id !== 1)
 
     // change postData to array so consistent with post lists

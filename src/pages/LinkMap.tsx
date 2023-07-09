@@ -17,9 +17,10 @@ import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
 import { currentState, getDraftPlainText, pluralise } from '@src/Helpers'
 import LoadingWheel from '@src/components/LoadingWheel'
+import LikeModal from '@src/components/modals/LikeModal'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/pages/LinkMap.module.scss'
-import { ArrowDownIcon } from '@svgs/all'
+import { ArrowDownIcon, LikeIcon } from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
@@ -46,6 +47,7 @@ function LinkMap(): JSX.Element {
     const [linkTypes, setLinkTypes] = useState('All Types')
     const [sizeBy, setSizeBy] = useState('Likes')
     const [clickedSpaceUUID, setClickedSpaceUUID] = useState('')
+    const [likeModalOpen, setLikeModalOpen] = useState(false)
     const svgSize = useRef(0)
     const transitioning = useRef(true)
     const domain = useRef<number[]>([0, 0])
@@ -64,10 +66,10 @@ function LinkMap(): JSX.Element {
     function getLinks() {
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         const params = `?itemType=${urlParams.item}&itemId=${urlParams.id}`
-        console.log('getLinks params: ', params)
         axios
             .get(`${config.apiURL}/links${params}`, options)
             .then((res) => {
+                setLinkData2(null)
                 setLinkData(res.data)
                 setLoading(false)
             })
@@ -250,12 +252,8 @@ function LinkMap(): JSX.Element {
         })
     }
 
-    function outgoingLink(d) {
-        return d.target.data.item.direction === 'outgoing'
-    }
-
     function findLinkColor(d) {
-        return outgoingLink(d) ? colors.linkBlue : colors.linkRed
+        return d.direction === 'outgoing' ? colors.linkBlue : colors.linkRed
     }
 
     function findRadialPoints(d) {
@@ -273,7 +271,7 @@ function LinkMap(): JSX.Element {
                 .radius((r) => r.y)(d)
         }
         // straight links
-        const anchors = outgoingLink(d) ? [d.source, d.target] : [d.target, d.source]
+        const anchors = d.direction === 'outgoing' ? [d.source, d.target] : [d.target, d.source]
         const points = anchors.map((a) => findRadialPoints(a))
         return `M${points[0]}L${points[1]}`
     }
@@ -281,7 +279,14 @@ function LinkMap(): JSX.Element {
     function linkClick(e, link) {
         e.stopPropagation()
         console.log('link: ', link)
-        setLinkData2(link)
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .get(`${config.apiURL}/link-data?linkId=${link.id}`, options)
+            .then((res) => {
+                console.log('link-data res: ', res.data)
+                setLinkData2(res.data)
+            })
+            .catch((error) => console.log(error))
     }
 
     // todo: use angles here combined with seperation function to improve radial spread?
@@ -427,8 +432,10 @@ function LinkMap(): JSX.Element {
             transitioning.current = true
             const { uuid, id, modelType } = node.data.item
             const mainNode = id === +urlParams.id && modelType === urlParams.item
-            if (mainNode) resetPosition()
-            else {
+            if (mainNode) {
+                setLinkData2(null)
+                resetPosition()
+            } else {
                 setClickedSpaceUUID(uuid)
                 history(`/linkmap?item=${modelType}&id=${id}`)
             }
@@ -652,7 +659,7 @@ function LinkMap(): JSX.Element {
     // todo: create seperate component for link map visualisation and merge useEffects below
     useEffect(() => {
         if (linkData) {
-            // console.log('linkData: ', linkData)
+            console.log('linkData: ', linkData)
             const data = d3.hierarchy(linkData, (d) => d.item.children)
             const circleSize = svgSize.current - 70
             let radius
@@ -670,6 +677,8 @@ function LinkMap(): JSX.Element {
                 // .separation((a, b) => (a.parent === b.parent ? 1 : 3) / (a.depth * 4))
                 .nodeSize([0.4, radius / 3])
                 .separation((a, b) => {
+                    // console.log('depth: ', a.depth)
+                    // if (a.depth === 1) return 5
                     return (a.parent === b.parent ? 1 : 2) / a.depth
                     // const width = findNodeRadius(a) + findNodeRadius(b)
                     // return width / 2 + 10
@@ -701,20 +710,14 @@ function LinkMap(): JSX.Element {
             const treeData = tree(data)
             const newLinks = treeData.links()
             const newNodes = treeData.descendants()
-            // newNodes.forEach((d) => {
-            //     if (d.depth > 1) {
-            //         console.log(d)
-            //         d.x /= 2
-            //     }
-            // })
-
-            // todo: clean up and match links using uuids like nodes
-            // add link ids
+            // add link data
             newLinks.forEach((link) => {
                 link.id = link.target.data.Link.id
                 link.uuid = link.target.data.Link.uuid
+                link.direction = link.target.data.Link.direction
             })
             // update link uuids
+            // todo: clean up and match links using uuids like nodes
             if (links.current) {
                 const matchedLinkIds = [] as number[]
                 newLinks.forEach((link) => {
@@ -827,129 +830,181 @@ function LinkMap(): JSX.Element {
                     </Row>
                     <Column centerX centerY id='link-map-canvas' className={styles.canvas} />
                 </Column>
-                <Column centerX className={`${styles.info} hide-scrollbars`}>
-                    {linkData && renderItem(linkData.item, linkData.item.modelType)}
-                    {loggedIn ? (
-                        <Column centerX style={{ width: '100%', marginTop: 20 }}>
-                            <Row centerY style={{ width: '100%', marginBottom: 20 }}>
-                                <Row centerY style={{ flexShrink: 0, marginRight: 20 }}>
-                                    <p>Link to</p>
-                                    <DropDownMenu
-                                        title=''
-                                        orientation='horizontal'
-                                        options={['Post', 'Comment', 'User', 'Space']}
-                                        selectedOption={targetType}
-                                        setSelectedOption={(option) => {
-                                            setTargetError(false)
-                                            setTargetNotFound(false)
-                                            setTarget(null)
-                                            setTargetIdentifier('')
-                                            setTargetType(option)
+                {linkData2 ? (
+                    <Column centerX className={`${styles.info} hide-scrollbars`}>
+                        {renderItem(linkData2.source, linkData2.source.modelType)}
+                        <Column centerX style={{ width: '100%', margin: 10 }}>
+                            <ArrowDownIcon style={{ height: 20, width: 20, color: '#ccc' }} />
+                            <Column centerX className={styles.link}>
+                                <ImageTitle
+                                    type='user'
+                                    imagePath={linkData2.link.Creator.flagImagePath}
+                                    title={linkData2.link.Creator.name}
+                                    style={{ marginBottom: 12 }}
+                                />
+                                {linkData2.link.description || '[no description]'}
+                                <button
+                                    type='button'
+                                    className={linkData2.link.accountLike ? styles.blue : ''}
+                                    onClick={() => setLikeModalOpen(true)}
+                                >
+                                    <LikeIcon />
+                                    <p>{linkData2.link.totalLikes}</p>
+                                </button>
+                                {likeModalOpen && (
+                                    <LikeModal
+                                        itemType='link'
+                                        itemData={linkData2.link}
+                                        updateItem={() => {
+                                            const { totalLikes, accountLike } = linkData2.link
+                                            setLinkData2({
+                                                ...linkData2,
+                                                link: {
+                                                    ...linkData2.link,
+                                                    totalLikes: totalLikes + (accountLike ? -1 : 1),
+                                                    accountLike: !accountLike,
+                                                },
+                                            })
                                         }}
+                                        close={() => setLikeModalOpen(false)}
                                     />
+                                )}
+                            </Column>
+                            <ArrowDownIcon style={{ height: 20, width: 20, color: '#ccc' }} />
+                        </Column>
+                        {renderItem(linkData2.target, linkData2.target.modelType)}
+                    </Column>
+                ) : (
+                    <Column centerX className={`${styles.info} hide-scrollbars`}>
+                        {linkData && renderItem(linkData.item, linkData.item.modelType)}
+                        {loggedIn ? (
+                            <Column centerX style={{ width: '100%', marginTop: 20 }}>
+                                <Row centerY style={{ width: '100%', marginBottom: 20 }}>
+                                    <Row centerY style={{ flexShrink: 0, marginRight: 20 }}>
+                                        <p>Link to</p>
+                                        <DropDownMenu
+                                            title=''
+                                            orientation='horizontal'
+                                            options={['Post', 'Comment', 'User', 'Space']}
+                                            selectedOption={targetType}
+                                            setSelectedOption={(option) => {
+                                                setTargetError(false)
+                                                setTargetNotFound(false)
+                                                setTarget(null)
+                                                setTargetIdentifier('')
+                                                setTargetType(option)
+                                            }}
+                                        />
+                                    </Row>
+                                    <Column className={styles.targetInput}>
+                                        <Input
+                                            type='text'
+                                            prefix={
+                                                ['Post', 'Comment'].includes(targetType)
+                                                    ? 'ID:'
+                                                    : 'Handle:'
+                                            }
+                                            value={targetIdentifier}
+                                            onChange={(value) => {
+                                                setTargetError(false)
+                                                setTargetIdentifier(value)
+                                                if (value) getTarget(value)
+                                                else {
+                                                    setTarget(null)
+                                                    setTargetNotFound(false)
+                                                    setTargetOptions(null)
+                                                }
+                                            }}
+                                            onBlur={() =>
+                                                setTimeout(() => setTargetOptions(null), 200)
+                                            }
+                                            style={{ marginRight: 20 }}
+                                        />
+                                        {targetOptions && (
+                                            <Column className={styles.targetOptions}>
+                                                {targetOptions.map((option) => (
+                                                    <ImageTitle
+                                                        key={option.id}
+                                                        className={styles.targetOption}
+                                                        type={
+                                                            targetType === 'User' ? 'user' : 'space'
+                                                        }
+                                                        imagePath={option.flagImagePath}
+                                                        title={`${option.name} (u/${option.handle})`}
+                                                        onClick={() => {
+                                                            setTarget(option)
+                                                            setTargetIdentifier(option.handle)
+                                                            setTargetOptions(null)
+                                                        }}
+                                                    />
+                                                ))}
+                                            </Column>
+                                        )}
+                                    </Column>
                                 </Row>
-                                <Column className={styles.targetInput}>
+                                {targetError && (
+                                    <p className='danger' style={{ marginBottom: 20 }}>
+                                        {targetType} not found
+                                    </p>
+                                )}
+                                <Row centerY style={{ width: '100%', marginBottom: 20 }}>
+                                    <p style={{ flexShrink: 0, marginRight: 10 }}>
+                                        Link description (optional)
+                                    </p>
                                     <Input
                                         type='text'
-                                        prefix={
-                                            ['Post', 'Comment'].includes(targetType)
-                                                ? 'ID:'
-                                                : 'Handle:'
-                                        }
-                                        value={targetIdentifier}
-                                        onChange={(value) => {
-                                            setTargetError(false)
-                                            setTargetIdentifier(value)
-                                            if (value) getTarget(value)
-                                            else {
-                                                setTarget(null)
-                                                setTargetNotFound(false)
-                                                setTargetOptions(null)
-                                            }
-                                        }}
-                                        onBlur={() => setTimeout(() => setTargetOptions(null), 200)}
-                                        style={{ marginRight: 20 }}
+                                        placeholder='description...'
+                                        value={linkDescription}
+                                        onChange={(value) => setLinkDescription(value)}
                                     />
-                                    {targetOptions && (
-                                        <Column className={styles.targetOptions}>
-                                            {targetOptions.map((option) => (
-                                                <ImageTitle
-                                                    key={option.id}
-                                                    className={styles.targetOption}
-                                                    type={targetType === 'User' ? 'user' : 'space'}
-                                                    imagePath={option.flagImagePath}
-                                                    title={`${option.name} (u/${option.handle})`}
-                                                    onClick={() => {
-                                                        setTarget(option)
-                                                        setTargetIdentifier(option.handle)
-                                                        setTargetOptions(null)
-                                                    }}
-                                                />
-                                            ))}
-                                        </Column>
-                                    )}
-                                </Column>
-                            </Row>
-                            {targetError && (
-                                <p className='danger' style={{ marginBottom: 20 }}>
-                                    {targetType} not found
-                                </p>
-                            )}
-                            <Row centerY style={{ width: '100%', marginBottom: 20 }}>
-                                <p style={{ flexShrink: 0, marginRight: 10 }}>
-                                    Link description (optional)
-                                </p>
-                                <Input
-                                    type='text'
-                                    placeholder='description...'
-                                    value={linkDescription}
-                                    onChange={(value) => setLinkDescription(value)}
-                                />
-                            </Row>
-                            {linkDescription.length > 50 && (
-                                <p className='danger' style={{ marginBottom: 20 }}>
-                                    Max 50 characters
-                                </p>
-                            )}
-                            {target && (
-                                <Column centerX style={{ width: '100%' }}>
-                                    <Button
-                                        text='Create link'
-                                        color='blue'
-                                        onClick={createLink}
-                                        disabled={createLinkLoading || linkDescription.length > 50}
-                                        loading={createLinkLoading}
-                                        style={{ marginBottom: 15 }}
-                                    />
-                                    <ArrowDownIcon
-                                        style={{
-                                            height: 20,
-                                            width: 20,
-                                            color: '#ccc',
-                                            marginBottom: 20,
-                                        }}
-                                    />
-                                    {renderItem(target, targetType.toLowerCase())}
-                                </Column>
-                            )}
-                            {targetNotFound && (
-                                <Row centerX className={styles.targetNotFound}>
-                                    {targetType} not found...
                                 </Row>
-                            )}
-                        </Column>
-                    ) : (
-                        <Row centerY style={{ marginTop: linkData ? 20 : 0 }}>
-                            <Button
-                                text='Log in'
-                                color='blue'
-                                style={{ marginRight: 5 }}
-                                onClick={() => setLogInModalOpen(true)}
-                            />
-                            <p>to link posts</p>
-                        </Row>
-                    )}
-                </Column>
+                                {linkDescription.length > 50 && (
+                                    <p className='danger' style={{ marginBottom: 20 }}>
+                                        Max 50 characters
+                                    </p>
+                                )}
+                                {target && (
+                                    <Column centerX style={{ width: '100%' }}>
+                                        <Button
+                                            text='Create link'
+                                            color='blue'
+                                            onClick={createLink}
+                                            disabled={
+                                                createLinkLoading || linkDescription.length > 50
+                                            }
+                                            loading={createLinkLoading}
+                                            style={{ marginBottom: 15 }}
+                                        />
+                                        <ArrowDownIcon
+                                            style={{
+                                                height: 20,
+                                                width: 20,
+                                                color: '#ccc',
+                                                marginBottom: 20,
+                                            }}
+                                        />
+                                        {renderItem(target, targetType.toLowerCase())}
+                                    </Column>
+                                )}
+                                {targetNotFound && (
+                                    <Row centerX className={styles.targetNotFound}>
+                                        {targetType} not found...
+                                    </Row>
+                                )}
+                            </Column>
+                        ) : (
+                            <Row centerY style={{ marginTop: linkData ? 20 : 0 }}>
+                                <Button
+                                    text='Log in'
+                                    color='blue'
+                                    style={{ marginRight: 5 }}
+                                    onClick={() => setLogInModalOpen(true)}
+                                />
+                                <p>to link posts</p>
+                            </Row>
+                        )}
+                    </Column>
+                )}
             </div>
         </Column>
     )
