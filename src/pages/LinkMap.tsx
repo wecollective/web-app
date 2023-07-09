@@ -33,6 +33,7 @@ function LinkMap(): JSX.Element {
     const urlParams = Object.fromEntries(new URLSearchParams(location.search))
     const { loggedIn, accountData, setLogInModalOpen } = useContext(AccountContext)
     const [linkData, setLinkData] = useState<any>(null)
+    const [linkData2, setLinkData2] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const [createLinkLoading, setCreateLinkLoading] = useState(false)
     const [targetType, setTargetType] = useState('Post')
@@ -50,7 +51,7 @@ function LinkMap(): JSX.Element {
     const domain = useRef<number[]>([0, 0])
     const links = useRef<any>(null)
     const nodes = useRef<any>(null)
-    const matchedNodeIds = useRef<number[]>([])
+    const matchedNodeUUIDs = useRef<number[]>([])
     const cookies = new Cookies()
     const headerText =
         linkData && linkData.item
@@ -277,6 +278,12 @@ function LinkMap(): JSX.Element {
         return `M${points[0]}L${points[1]}`
     }
 
+    function linkClick(e, link) {
+        e.stopPropagation()
+        console.log('link: ', link)
+        setLinkData2(link)
+    }
+
     // todo: use angles here combined with seperation function to improve radial spread?
     function findNodeTransform(d) {
         return `rotate(${(d.x * 180) / Math.PI - 90}),translate(${d.y}, 0),rotate(${
@@ -442,7 +449,7 @@ function LinkMap(): JSX.Element {
 
     function recursivelyAddUUIDS(oldNode, newNode) {
         newNode.data.item.uuid = oldNode.data.item.uuid
-        matchedNodeIds.current.push(oldNode.data.item.uuid)
+        matchedNodeUUIDs.current.push(oldNode.data.item.uuid)
         if (newNode.children && oldNode.children) {
             newNode.children.forEach((child) => {
                 const match = oldNode.children.find((c) => c.data.item.id === child.data.item.id)
@@ -499,11 +506,13 @@ function LinkMap(): JSX.Element {
                         .attr('dy', 3.4)
                         .append('textPath')
                         .text('▶')
+                        // .attr('font-size', (d) => 10 + d.source.height)
                         .attr('font-size', 10)
                         .attr('text-anchor', 'middle')
                         .attr('startOffset', '50%')
                         .attr('href', (d) => `#link-path-${d.uuid}`)
                         .style('fill', findLinkColor)
+                        .on('click', linkClick)
                     return group
                 },
                 (update) => {
@@ -659,29 +668,33 @@ function LinkMap(): JSX.Element {
                 // .separation(() => 1)
                 // .separation((a, b) => ((a.parent === b.parent ? 1 : 2) / a.depth) * 4)
                 // .separation((a, b) => (a.parent === b.parent ? 1 : 3) / (a.depth * 4))
-                // .nodeSize([1, 1])
+                .nodeSize([0.4, radius / 3])
                 .separation((a, b) => {
-                    // console.log('a: ', a.depth)
+                    return (a.parent === b.parent ? 1 : 2) / a.depth
+                    // const width = findNodeRadius(a) + findNodeRadius(b)
+                    // return width / 2 + 10
+                    // console.log('a: ', findNodeRadius(a))
+                    // return (a.parent === b.parent ? 1 : 2) / a.depth
                     // if (a.depth < 2) return 2
                     // return 0.1
                     // return 1
-                    return (a.parent === b.parent ? 1 : 2) / (a.depth * 4)
-                    // const seperation = a.parent === b.parent ? 1 : a.depth * 2
-                    // const seperation = (a.parent === b.parent ? 1 : 2) / (a.depth * 4)
-                    // const seperation = (a.parent ===
-                    // console.log('seperation: ', seperation, a.depth, b.depth)
-                    // console.log('depths: ', a.depth, b.depth)
-                    // console.log('siblings: ', a.parent === b.parent)
-                    // console.log('seperation: ', seperation)
-                    // console.log(
-                    //     `siblings: ${a.parent === b.parent}, depthA: ${a.depth}, depthB: ${
-                    //         b.depth
-                    //     },seperation: ${seperation}, idA: ${a.data.item.title}, idB: ${
-                    //         b.data.item.title
-                    //     }`
-                    // )
-                    // return seperation
-                    return (a.parent === b.parent ? 1 : 2) / (a.depth * 4)
+                    // return (a.parent === b.parent ? 1 : 2) / (a.depth * 4)
+                    // // const seperation = a.parent === b.parent ? 1 : a.depth * 2
+                    // // const seperation = (a.parent === b.parent ? 1 : 2) / (a.depth * 4)
+                    // // const seperation = (a.parent ===
+                    // // console.log('seperation: ', seperation, a.depth, b.depth)
+                    // // console.log('depths: ', a.depth, b.depth)
+                    // // console.log('siblings: ', a.parent === b.parent)
+                    // // console.log('seperation: ', seperation)
+                    // // console.log(
+                    // //     `siblings: ${a.parent === b.parent}, depthA: ${a.depth}, depthB: ${
+                    // //         b.depth
+                    // //     },seperation: ${seperation}, idA: ${a.data.item.title}, idB: ${
+                    // //         b.data.item.title
+                    // //     }`
+                    // // )
+                    // // return seperation
+                    // return (a.parent === b.parent ? 1 : 2) / (a.depth * 4)
                 })
             // .nodeSize([10, 10])
 
@@ -694,6 +707,7 @@ function LinkMap(): JSX.Element {
             //         d.x /= 2
             //     }
             // })
+
             // todo: clean up and match links using uuids like nodes
             // add link ids
             newLinks.forEach((link) => {
@@ -716,15 +730,21 @@ function LinkMap(): JSX.Element {
             const oldNode = nodes.current && nodes.current[0]
             if (oldNode) {
                 const newNode = newNodes[0]
-                matchedNodeIds.current = []
+                matchedNodeUUIDs.current = []
                 // if tree updates without navigation
-                if (oldNode.data.item.id === newNode.data.item.id) {
+                if (
+                    oldNode.data.item.id === newNode.data.item.id &&
+                    oldNode.data.item.modelType === newNode.data.item.modelType
+                ) {
                     recursivelyAddUUIDS(oldNode, newNode)
                 } else {
-                    // if navigating to new node use uuid to ensure the correct node is chosen, otherwise just the node id
-                    const id = clickedSpaceUUID || newNode.data.item.id
-                    const idType = clickedSpaceUUID ? 'uuid' : 'id'
-                    const oldChild = nodes.current.find((s) => s.data.item[idType] === id)
+                    const oldChild = clickedSpaceUUID
+                        ? nodes.current.find((s) => s.data.item.uuid === clickedSpaceUUID)
+                        : nodes.current.find(
+                              (s) =>
+                                  s.data.item.id === newNode.data.item.id &&
+                                  s.data.item.modelType === newNode.data.item.modelType
+                          )
                     if (oldChild) recursivelyAddUUIDS(oldChild, newNode)
                     else {
                         // if new space neither old parent or child, search for matching spaces by id
@@ -734,21 +754,26 @@ function LinkMap(): JSX.Element {
                 }
                 // update other matches outside of old node tree
                 newNodes.forEach((node) => {
-                    const alreadyMatched = matchedNodeIds.current.find(
+                    const alreadyMatched = matchedNodeUUIDs.current.find(
                         (uuid) => uuid === node.data.item.uuid
                     )
                     if (!alreadyMatched) {
                         const match = nodes.current
                             .filter(
                                 (n) =>
-                                    !matchedNodeIds.current.find(
+                                    !matchedNodeUUIDs.current.find(
                                         (uuid) => uuid === n.data.item.uuid
                                     )
                             )
-                            .find((n) => n.data.item.id === node.data.item.id)
+                            .find((n) => {
+                                return (
+                                    n.data.item.id === node.data.item.id &&
+                                    n.data.item.modelType === node.data.item.modelType
+                                )
+                            })
 
                         if (match) {
-                            matchedNodeIds.current.push(match.data.item.uuid)
+                            matchedNodeUUIDs.current.push(match.data.item.uuid)
                             node.data.item.uuid = match.data.item.uuid
                         }
                     }
