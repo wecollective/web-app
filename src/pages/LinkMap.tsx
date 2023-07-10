@@ -211,7 +211,16 @@ function LinkMap(): JSX.Element {
     }
 
     function resetOpacity() {
-        d3.selectAll('.link, .node')
+        d3.select('#background-rings')
+            .transition()
+            .duration(duration / 2)
+            .style('opacity', 1)
+        d3.selectAll('.link')
+            .transition()
+            .duration(duration / 2)
+            .style('opacity', 1)
+        d3.selectAll('.node')
+            .selectAll('.node-background, .node-circle, .node-text')
             .transition()
             .duration(duration / 2)
             .style('opacity', 1)
@@ -317,14 +326,20 @@ function LinkMap(): JSX.Element {
             .duration(duration / 2)
             .style('opacity', 1)
         d3.select(`#node-${link.source.data.item.uuid}`)
+            .selectAll('.node-background, .node-circle, .node-text')
             .transition()
             .duration(duration / 2)
             .style('opacity', 1)
         d3.select(`#node-${link.target.data.item.uuid}`)
+            .selectAll('.node-background, .node-circle, .node-text')
             .transition()
             .duration(duration / 2)
             .style('opacity', 1)
         // fade out other content
+        d3.select('#background-rings')
+            .transition()
+            .duration(duration / 2)
+            .style('opacity', 0.5)
         d3.selectAll('.link')
             .filter((l) => l.uuid !== link.uuid)
             .transition()
@@ -336,6 +351,7 @@ function LinkMap(): JSX.Element {
                     n.data.item.uuid !== link.source.data.item.uuid &&
                     n.data.item.uuid !== link.target.data.item.uuid
             )
+            .selectAll('.node-background, .node-circle, .node-text')
             .transition()
             .duration(duration / 2)
             .style('opacity', 0.3)
@@ -603,6 +619,13 @@ function LinkMap(): JSX.Element {
                         .call((node) => {
                             node.transition('node-enter').duration(duration).attr('opacity', 1)
                         })
+                    // create white backdrop
+                    group
+                        .append('circle')
+                        .attr('class', 'node-backdrop')
+                        .attr('transform', findNodeTransform)
+                        .attr('r', (d) => findNodeRadius(d) + 1.95)
+                        .attr('fill', 'white')
                     // create background
                     group
                         .append('circle')
@@ -619,7 +642,6 @@ function LinkMap(): JSX.Element {
                         .on('mouseover', circleMouseOver)
                         .on('mouseout', circleMouseOut)
                         .on('click', circleClick)
-                        .style('cursor', 'pointer')
                     // create circle
                     group
                         .append('circle')
@@ -644,6 +666,13 @@ function LinkMap(): JSX.Element {
                     return group
                 },
                 (update) => {
+                    // update white backdrop
+                    update
+                        .select('.node-backdrop')
+                        .transition('node-backdrop-update')
+                        .duration(duration)
+                        .attr('transform', findNodeTransform)
+                        .attr('r', (d) => findNodeRadius(d) + 1.95)
                     // update background
                     update
                         .select('.node-background')
