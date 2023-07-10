@@ -15,7 +15,7 @@ import PostCard from '@components/cards/PostCard/PostCard'
 import VerticalUserCard from '@components/cards/VerticalUserCard'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
-import { currentState, getDraftPlainText, pluralise } from '@src/Helpers'
+import { currentState, getDraftPlainText } from '@src/Helpers'
 import LoadingWheel from '@src/components/LoadingWheel'
 import LikeModal from '@src/components/modals/LikeModal'
 import colors from '@styles/Colors.module.scss'
@@ -50,15 +50,16 @@ function LinkMap(): JSX.Element {
     const [likeModalOpen, setLikeModalOpen] = useState(false)
     const svgSize = useRef(0)
     const transitioning = useRef(true)
-    const domain = useRef<number[]>([0, 0])
+    const nodeScale = useRef((value: number) => 0)
+    const linkScale = useRef((value: number) => 0)
     const links = useRef<any>(null)
     const nodes = useRef<any>(null)
     const matchedNodeUUIDs = useRef<number[]>([])
     const cookies = new Cookies()
-    const headerText =
-        linkData && linkData.item
-            ? `${linkData.item.totalLinks} link${pluralise(linkData.item.totalLinks)}`
-            : 'No links yet...'
+    // const headerText =
+    //     linkData && linkData.item
+    //         ? `${linkData.item.totalLinks} link${pluralise(linkData.item.totalLinks)}`
+    //         : 'No links yet...'
     // settings
     const curvedLinks = false
     const duration = 1000
@@ -70,6 +71,7 @@ function LinkMap(): JSX.Element {
             .get(`${config.apiURL}/links${params}`, options)
             .then((res) => {
                 setLinkData2(null)
+                resetOpacity()
                 setLinkData(res.data)
                 setLoading(false)
             })
@@ -208,6 +210,13 @@ function LinkMap(): JSX.Element {
             )
     }
 
+    function resetOpacity() {
+        d3.selectAll('.link, .node')
+            .transition()
+            .duration(duration / 2)
+            .style('opacity', 1)
+    }
+
     function buildCanvas() {
         // calculate svg size from canvas dimensions
         const canvas = d3.select('#link-map-canvas')
@@ -252,6 +261,30 @@ function LinkMap(): JSX.Element {
         })
     }
 
+    function createNodeRadiusScale() {
+        let min
+        let max
+        if (sizeBy === 'Date Created') {
+            min = d3.min(nodes.current.map((node) => Date.parse(node.data.item.createdAt)))
+            max = d3.max(nodes.current.map((node) => Date.parse(node.data.item.createdAt)))
+        } else if (sizeBy === 'Recent Activity') {
+            min = d3.min(nodes.current.map((node) => Date.parse(node.data.item.updatedAt)))
+            max = d3.max(nodes.current.map((node) => Date.parse(node.data.item.updatedAt)))
+        } else {
+            min = d3.min(nodes.current.map((node) => node.data.item[`total${sizeBy}`]))
+            max = d3.max(nodes.current.map((node) => node.data.item[`total${sizeBy}`]))
+        }
+        const rangeMin = 0.015 * svgSize.current
+        const rangeMax = 0.035 * svgSize.current
+        nodeScale.current = d3.scaleLinear().domain([min, max]).range([rangeMin, rangeMax])
+    }
+
+    function createLinkWidthScale() {
+        const min = d3.min(links.current.map((link) => link.totalLikes))
+        const max = d3.max(links.current.map((link) => link.totalLikes))
+        linkScale.current = d3.scaleLinear().domain([min, max]).range([1, 6])
+    }
+
     function findLinkColor(d) {
         return d.direction === 'outgoing' ? colors.linkBlue : colors.linkRed
     }
@@ -278,7 +311,35 @@ function LinkMap(): JSX.Element {
 
     function linkClick(e, link) {
         e.stopPropagation()
-        console.log('link: ', link)
+        // highlight link and attached nodes
+        d3.select(`#link-${link.uuid}`)
+            .transition()
+            .duration(duration / 2)
+            .style('opacity', 1)
+        d3.select(`#node-${link.source.data.item.uuid}`)
+            .transition()
+            .duration(duration / 2)
+            .style('opacity', 1)
+        d3.select(`#node-${link.target.data.item.uuid}`)
+            .transition()
+            .duration(duration / 2)
+            .style('opacity', 1)
+        // fade out other content
+        d3.selectAll('.link')
+            .filter((l) => l.uuid !== link.uuid)
+            .transition()
+            .duration(duration / 2)
+            .style('opacity', 0.3)
+        d3.selectAll('.node')
+            .filter(
+                (n) =>
+                    n.data.item.uuid !== link.source.data.item.uuid &&
+                    n.data.item.uuid !== link.target.data.item.uuid
+            )
+            .transition()
+            .duration(duration / 2)
+            .style('opacity', 0.3)
+        // get link data
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
             .get(`${config.apiURL}/link-data?linkId=${link.id}`, options)
@@ -296,40 +357,18 @@ function LinkMap(): JSX.Element {
         })`
     }
 
-    function findDomain() {
-        // calculate node radius domain
-        let dMin = 0
-        let dMax
-        if (sizeBy === 'Date Created') {
-            dMin = d3.min(nodes.current.map((node) => Date.parse(node.data.item.createdAt)))
-            dMax = d3.max(nodes.current.map((node) => Date.parse(node.data.item.createdAt)))
-        } else if (sizeBy === 'Recent Activity') {
-            dMin = d3.min(nodes.current.map((node) => Date.parse(node.data.item.updatedAt)))
-            dMax = d3.max(nodes.current.map((node) => Date.parse(node.data.item.updatedAt)))
-        } else {
-            dMax = d3.max(nodes.current.map((node) => node.data.item[`total${sizeBy}`]))
-        }
-        domain.current = [dMin, dMax]
-    }
-
     function findNodeRadius(d) {
         let radius
         if (sizeBy === 'Date Created') radius = Date.parse(d.data.item.createdAt)
         else if (sizeBy === 'Recent Activity')
             radius = Date.parse(d.data.item.updatedAt || d.data.item.createdAt)
         else radius = d.data.item[`total${sizeBy}`]
-        const minRadius = 0.015 * svgSize.current
-        const maxRadius = 0.035 * svgSize.current
-        const radiusScale = d3
-            .scaleLinear()
-            .domain(domain.current) // data values spread
-            .range([minRadius, maxRadius]) // radius size spread
-        return radiusScale(radius)
+        return nodeScale.current(radius)
     }
 
     function findNodeFill(d, radius) {
         const { modelType } = d.data.item
-        if (modelType === 'post') return colors.aqua
+        if (modelType === 'post') return colors.nodeBlue
         if (modelType === 'comment') return colors.purple
         if (['user', 'space'].includes(modelType)) {
             // check if image already exists in defs
@@ -434,6 +473,7 @@ function LinkMap(): JSX.Element {
             const mainNode = id === +urlParams.id && modelType === urlParams.item
             if (mainNode) {
                 setLinkData2(null)
+                resetOpacity()
                 resetPosition()
             } else {
                 setClickedSpaceUUID(uuid)
@@ -487,13 +527,10 @@ function LinkMap(): JSX.Element {
                     group
                         .append('path')
                         .attr('id', (d) => `link-path-${d.uuid}`)
-                        .attr('class', 'link-path')
+                        .attr('class', (d) => `link-path link-path-${d.id}`)
                         .attr('fill', 'none')
                         .attr('stroke', findLinkColor)
-                        .attr('stroke-width', (d) => {
-                            // console.log('link d: ', d)
-                            return d.source.height + 1
-                        })
+                        .attr('stroke-width', (d) => linkScale.current(d.totalLikes))
                         .attr('d', findLinkPath)
                     // create text
                     group
@@ -519,6 +556,7 @@ function LinkMap(): JSX.Element {
                         .attr('startOffset', '50%')
                         .attr('href', (d) => `#link-path-${d.uuid}`)
                         .style('fill', findLinkColor)
+                        .style('cursor', 'pointer')
                         .on('click', linkClick)
                     return group
                 },
@@ -530,10 +568,7 @@ function LinkMap(): JSX.Element {
                         .duration(duration)
                         .attr('d', findLinkPath)
                         .style('stroke', findLinkColor)
-                        .attr('stroke-width', (d) => {
-                            // console.log('link d: ', d)
-                            return d.source.height + 1
-                        })
+                        .attr('stroke-width', (d) => linkScale.current(d.totalLikes))
                     // update arrow
                     update
                         .select('.link-arrow')
@@ -715,6 +750,7 @@ function LinkMap(): JSX.Element {
                 link.id = link.target.data.Link.id
                 link.uuid = link.target.data.Link.uuid
                 link.direction = link.target.data.Link.direction
+                link.totalLikes = link.target.data.Link.totalLikes
             })
             // update link uuids
             // todo: clean up and match links using uuids like nodes
@@ -784,7 +820,8 @@ function LinkMap(): JSX.Element {
             }
             links.current = newLinks
             nodes.current = newNodes
-            findDomain()
+            createLinkWidthScale()
+            createNodeRadiusScale()
             createLinks()
             createNodes()
             // mark transition complete after duration
@@ -796,7 +833,8 @@ function LinkMap(): JSX.Element {
 
     useEffect(() => {
         if (nodes.current) {
-            findDomain()
+            createLinkWidthScale()
+            createNodeRadiusScale()
             createLinks()
             createNodes()
             // mark transition complete after duration
@@ -856,15 +894,23 @@ function LinkMap(): JSX.Element {
                                         itemType='link'
                                         itemData={linkData2.link}
                                         updateItem={() => {
-                                            const { totalLikes, accountLike } = linkData2.link
+                                            // update info pannel
+                                            const { id, totalLikes, accountLike } = linkData2.link
+                                            const newLikes = totalLikes + (accountLike ? -1 : 1)
                                             setLinkData2({
                                                 ...linkData2,
                                                 link: {
                                                     ...linkData2.link,
-                                                    totalLikes: totalLikes + (accountLike ? -1 : 1),
+                                                    totalLikes: newLikes,
                                                     accountLike: !accountLike,
                                                 },
                                             })
+                                            // update map
+                                            // todo: update linkData state and re-render whole map to fix radius scale
+                                            d3.selectAll(`.link-path-${id}`)
+                                                .transition()
+                                                .duration(duration)
+                                                .attr('stroke-width', linkScale.current(newLikes))
                                         }}
                                         close={() => setLikeModalOpen(false)}
                                     />
