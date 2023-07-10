@@ -72,7 +72,7 @@ function LinkMap(): JSX.Element {
 
     function getLinks() {
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-        const params = `?itemType=${urlParams.item}&itemId=${urlParams.id}`
+        const params = `?itemType=${urlParams.item}&itemId=${urlParams.id}&linkTypes=${linkTypes}`
         axios
             .get(`${config.apiURL}/links${params}`, options)
             .then((res) => {
@@ -164,12 +164,11 @@ function LinkMap(): JSX.Element {
                     item: {
                         uuid: uuidv4(),
                         modelType: targetType.toLowerCase(),
-                        direction: 'outgoing',
                         totalLikes: target.totalLikes || 0,
                         totalLinks: target.totalLinks || 0,
                         ...target,
                     },
-                    Link: { uuid: uuidv4(), ...res.data },
+                    Link: { uuid: uuidv4(), direction: 'outgoing', ...res.data },
                 }
                 console.log('newNode: ', newNode)
                 setLinkData({
@@ -741,7 +740,7 @@ function LinkMap(): JSX.Element {
             d3.select('#loading').transition().duration(duration).style('opacity', 0).remove()
     }, [loading])
 
-    useEffect(() => getLinks(), [location])
+    useEffect(() => getLinks(), [location, linkTypes])
 
     // todo: create seperate component for link map visualisation and merge useEffects below
     useEffect(() => {
@@ -757,42 +756,15 @@ function LinkMap(): JSX.Element {
             const tree = d3
                 .tree()
                 .size([2 * Math.PI, radius])
-                // .size([3, radius])
-                // .separation((a, b) => a.depth)
-                // .separation(() => 1)
-                // .separation((a, b) => ((a.parent === b.parent ? 1 : 2) / a.depth) * 4)
-                // .separation((a, b) => (a.parent === b.parent ? 1 : 3) / (a.depth * 4))
-                .nodeSize([0.4, radius / 3])
+                .nodeSize([0.4, radius / data.height])
                 .separation((a, b) => {
                     // console.log('depth: ', a.depth)
-                    // if (a.depth === 1) return 5
+                    // if (a.depth === 1) {
+                    //     const nodeDegrees = (2 * Math.PI) / 0.4
+                    //     return nodeDegrees / linkData.item.children.length
+                    // }
                     return (a.parent === b.parent ? 1 : 2) / a.depth
-                    // const width = findNodeRadius(a) + findNodeRadius(b)
-                    // return width / 2 + 10
-                    // console.log('a: ', findNodeRadius(a))
-                    // return (a.parent === b.parent ? 1 : 2) / a.depth
-                    // if (a.depth < 2) return 2
-                    // return 0.1
-                    // return 1
-                    // return (a.parent === b.parent ? 1 : 2) / (a.depth * 4)
-                    // // const seperation = a.parent === b.parent ? 1 : a.depth * 2
-                    // // const seperation = (a.parent === b.parent ? 1 : 2) / (a.depth * 4)
-                    // // const seperation = (a.parent ===
-                    // // console.log('seperation: ', seperation, a.depth, b.depth)
-                    // // console.log('depths: ', a.depth, b.depth)
-                    // // console.log('siblings: ', a.parent === b.parent)
-                    // // console.log('seperation: ', seperation)
-                    // // console.log(
-                    // //     `siblings: ${a.parent === b.parent}, depthA: ${a.depth}, depthB: ${
-                    // //         b.depth
-                    // //     },seperation: ${seperation}, idA: ${a.data.item.title}, idB: ${
-                    // //         b.data.item.title
-                    // //     }`
-                    // // )
-                    // // return seperation
-                    // return (a.parent === b.parent ? 1 : 2) / (a.depth * 4)
                 })
-            // .nodeSize([10, 10])
 
             const treeData = tree(data)
             const newLinks = treeData.links()
