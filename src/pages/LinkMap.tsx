@@ -51,7 +51,9 @@ function LinkMap(): JSX.Element {
     const svgSize = useRef(0)
     const transitioning = useRef(true)
     const nodeScale = useRef((value: number) => 0)
-    const linkScale = useRef((value: number) => 0)
+    const linkWidthScale = useRef((value: number) => 0)
+    const linkArrowScale = useRef((value: number) => 0)
+    const linkArrowOffsetScale = useRef((value: number) => 0)
     const links = useRef<any>(null)
     const nodes = useRef<any>(null)
     const matchedNodeUUIDs = useRef<number[]>([])
@@ -288,10 +290,12 @@ function LinkMap(): JSX.Element {
         nodeScale.current = d3.scaleLinear().domain([min, max]).range([rangeMin, rangeMax])
     }
 
-    function createLinkWidthScale() {
+    function createLinkScales() {
         const min = d3.min(links.current.map((link) => link.totalLikes))
         const max = d3.max(links.current.map((link) => link.totalLikes))
-        linkScale.current = d3.scaleLinear().domain([min, max]).range([1, 6])
+        linkWidthScale.current = d3.scaleLinear().domain([min, max]).range([1, 6])
+        linkArrowScale.current = d3.scaleLinear().domain([min, max]).range([10, 25])
+        linkArrowOffsetScale.current = d3.scaleLinear().domain([min, max]).range([3.4, 8.5])
     }
 
     function findLinkColor(d) {
@@ -546,8 +550,23 @@ function LinkMap(): JSX.Element {
                         .attr('class', (d) => `link-path link-path-${d.id}`)
                         .attr('fill', 'none')
                         .attr('stroke', findLinkColor)
-                        .attr('stroke-width', (d) => linkScale.current(d.totalLikes))
+                        .attr('stroke-width', (d) => linkWidthScale.current(d.totalLikes))
                         .attr('d', findLinkPath)
+                    // creat arrow
+                    group
+                        .append('text')
+                        .attr('class', 'link-arrow')
+                        .attr('dy', (d) => linkArrowOffsetScale.current(d.totalLikes))
+                        .attr('dx', 2)
+                        .append('textPath')
+                        .text('▶')
+                        .attr('font-size', (d) => linkArrowScale.current(d.totalLikes))
+                        .attr('text-anchor', 'middle')
+                        .attr('startOffset', '50%')
+                        .attr('href', (d) => `#link-path-${d.uuid}`)
+                        .style('fill', findLinkColor)
+                        .style('cursor', 'pointer')
+                        .on('click', linkClick)
                     // create text
                     group
                         .append('text')
@@ -559,21 +578,6 @@ function LinkMap(): JSX.Element {
                         .attr('text-anchor', 'middle')
                         .attr('startOffset', '50%')
                         .attr('href', (d) => `#link-path-${d.uuid}`)
-                    // creat arrow
-                    group
-                        .append('text')
-                        .attr('class', 'link-arrow')
-                        .attr('dy', 3.4)
-                        .append('textPath')
-                        .text('▶')
-                        // .attr('font-size', (d) => 10 + d.source.height)
-                        .attr('font-size', 10)
-                        .attr('text-anchor', 'middle')
-                        .attr('startOffset', '50%')
-                        .attr('href', (d) => `#link-path-${d.uuid}`)
-                        .style('fill', findLinkColor)
-                        .style('cursor', 'pointer')
-                        .on('click', linkClick)
                     return group
                 },
                 (update) => {
@@ -584,13 +588,19 @@ function LinkMap(): JSX.Element {
                         .duration(duration)
                         .attr('d', findLinkPath)
                         .style('stroke', findLinkColor)
-                        .attr('stroke-width', (d) => linkScale.current(d.totalLikes))
+                        .attr('stroke-width', (d) => linkWidthScale.current(d.totalLikes))
                     // update arrow
                     update
                         .select('.link-arrow')
-                        .select('textPath')
                         .transition('link-arrow-update')
                         .duration(duration)
+                        .attr('dy', (d) => linkArrowOffsetScale.current(d.totalLikes))
+                    update
+                        .select('.link-arrow')
+                        .select('textPath')
+                        .transition('link-arrow-path-update')
+                        .duration(duration)
+                        .attr('font-size', (d) => linkArrowScale.current(d.totalLikes))
                         .style('fill', findLinkColor)
                     return update
                 },
@@ -849,7 +859,7 @@ function LinkMap(): JSX.Element {
             }
             links.current = newLinks
             nodes.current = newNodes
-            createLinkWidthScale()
+            createLinkScales()
             createNodeRadiusScale()
             createLinks()
             createNodes()
@@ -862,7 +872,7 @@ function LinkMap(): JSX.Element {
 
     useEffect(() => {
         if (nodes.current) {
-            createLinkWidthScale()
+            createLinkScales()
             createNodeRadiusScale()
             createLinks()
             createNodes()
@@ -939,7 +949,10 @@ function LinkMap(): JSX.Element {
                                             d3.selectAll(`.link-path-${id}`)
                                                 .transition()
                                                 .duration(duration)
-                                                .attr('stroke-width', linkScale.current(newLikes))
+                                                .attr(
+                                                    'stroke-width',
+                                                    linkWidthScale.current(newLikes)
+                                                )
                                         }}
                                         close={() => setLikeModalOpen(false)}
                                     />
