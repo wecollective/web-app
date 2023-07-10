@@ -42,6 +42,7 @@ function LinkMap(): JSX.Element {
     const [linkDescription, setLinkDescription] = useState('')
     const [target, setTarget] = useState<any>(null)
     const [targetNotFound, setTargetNotFound] = useState(false)
+    const [targetIsSourceError, setTargetIsSourceError] = useState(false)
     const [targetError, setTargetError] = useState(false)
     const [targetOptions, setTargetOptions] = useState<any>(null)
     const [linkTypes, setLinkTypes] = useState('All Types')
@@ -65,6 +66,9 @@ function LinkMap(): JSX.Element {
     // settings
     const curvedLinks = false
     const duration = 1000
+
+    // todo:
+    // + refactor error handling: use single state value instead of seperate booleans
 
     function getLinks() {
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
@@ -100,31 +104,40 @@ function LinkMap(): JSX.Element {
     }
 
     function getTarget(identifier) {
-        const type = targetType.toLowerCase()
-        if (['post', 'comment'].includes(type)) {
+        const { id, modelType } = linkData.item
+        const targetIsSource = +identifier === id && targetType.toLowerCase() === modelType
+        if (targetIsSource) {
+            setTargetIsSourceError(true)
+            setTarget(null)
             setTargetNotFound(false)
-            const options = {
-                headers: { Authorization: `Bearer ${cookies.get('accessToken')}` },
-            }
-            axios
-                .get(`${config.apiURL}/${type}-data?${type}Id=${identifier}`, options)
-                .then((res) => {
-                    if (identifier === currentState(setTargetIdentifier)) setTarget(res.data)
-                })
-                .catch((error) => {
-                    if (error.response.status === 404) {
-                        if (identifier === currentState(setTargetIdentifier)) {
-                            setTargetNotFound(true)
-                            setTarget(null)
-                        }
-                    } else console.log(error)
-                })
         } else {
-            const data = { query: identifier, blacklist: [] }
-            axios
-                .post(`${config.apiURL}/find-${type === 'user' ? 'people' : 'spaces'}`, data)
-                .then((res) => setTargetOptions(res.data))
-                .catch((error) => console.log(error))
+            setTargetIsSourceError(false)
+            const type = targetType.toLowerCase()
+            if (['post', 'comment'].includes(type)) {
+                setTargetNotFound(false)
+                const options = {
+                    headers: { Authorization: `Bearer ${cookies.get('accessToken')}` },
+                }
+                axios
+                    .get(`${config.apiURL}/${type}-data?${type}Id=${identifier}`, options)
+                    .then((res) => {
+                        if (identifier === currentState(setTargetIdentifier)) setTarget(res.data)
+                    })
+                    .catch((error) => {
+                        if (error.response.status === 404) {
+                            if (identifier === currentState(setTargetIdentifier)) {
+                                setTargetNotFound(true)
+                                setTarget(null)
+                            }
+                        } else console.log(error)
+                    })
+            } else {
+                const data = { query: identifier, blacklist: [linkData.item.id] }
+                axios
+                    .post(`${config.apiURL}/find-${type === 'user' ? 'people' : 'spaces'}`, data)
+                    .then((res) => setTargetOptions(res.data))
+                    .catch((error) => console.log(error))
+            }
         }
     }
 
@@ -978,6 +991,7 @@ function LinkMap(): JSX.Element {
                                             setSelectedOption={(option) => {
                                                 setTargetError(false)
                                                 setTargetNotFound(false)
+                                                setTargetIsSourceError(false)
                                                 setTarget(null)
                                                 setTargetIdentifier('')
                                                 setTargetType(option)
@@ -1077,6 +1091,11 @@ function LinkMap(): JSX.Element {
                                 {targetNotFound && (
                                     <Row centerX className={styles.targetNotFound}>
                                         {targetType} not found...
+                                    </Row>
+                                )}
+                                {targetIsSourceError && (
+                                    <Row centerX className={styles.targetNotFound}>
+                                        Can&apos;t link node to itself
                                     </Row>
                                 )}
                             </Column>
