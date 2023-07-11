@@ -754,20 +754,18 @@ function LinkMap(): JSX.Element {
             if (data.height === 1) radius = circleSize / 6
             if (data.height === 2) radius = circleSize / 3
             if (data.height === 3) radius = circleSize / 2
-
+            const count = data.copy().count().value
             const tree = d3
                 .tree()
                 .size([2 * Math.PI, radius])
                 .nodeSize([0.4, radius / data.height])
                 .separation((a, b) => {
-                    // console.log('depth: ', a.depth)
-                    // if (a.depth === 1) {
-                    //     const nodeDegrees = (2 * Math.PI) / 0.4
-                    //     return nodeDegrees / linkData.item.children.length
-                    // }
+                    if (count < 20 && a.depth === 1) {
+                        const nodeDegrees = (2 * Math.PI) / 0.4
+                        return nodeDegrees / linkData.item.children.length
+                    }
                     return (a.parent === b.parent ? 1 : 2) / a.depth
                 })
-
             const treeData = tree(data)
             const newLinks = treeData.links()
             const newNodes = treeData.descendants()
