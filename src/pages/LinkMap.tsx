@@ -20,7 +20,7 @@ import LoadingWheel from '@src/components/LoadingWheel'
 import LikeModal from '@src/components/modals/LikeModal'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/pages/LinkMap.module.scss'
-import { ArrowDownIcon, LikeIcon } from '@svgs/all'
+import { ArrowDownIcon, LikeIcon, SynapseSource, SynapseTarget } from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
@@ -88,6 +88,7 @@ function LinkMap(): JSX.Element {
         if (type === 'post') return <PostCard post={item} location='link-modal' />
         if (type === 'comment')
             return (
+                // todo: add styles prop to CommentCard, allow commenting on linkmap
                 <CommentCard
                     comment={item}
                     highlighted={false}
@@ -98,7 +99,8 @@ function LinkMap(): JSX.Element {
                     updateCommentReactions={() => null}
                 />
             )
-        if (type === 'user') return <VerticalUserCard user={item} style={{ flexGrow: 0 }} />
+        if (type === 'user')
+            return <VerticalUserCard user={item} style={{ flexGrow: 0, margin: 0 }} />
         if (type === 'space') return <HorizontalSpaceCard space={item} />
         return null
     }
@@ -895,8 +897,9 @@ function LinkMap(): JSX.Element {
                 {linkData2 ? (
                     <Column centerX className={`${styles.info} hide-scrollbars`}>
                         {renderItem(linkData2.source, linkData2.source.modelType)}
-                        <Column centerX style={{ width: '100%', margin: 10 }}>
-                            <ArrowDownIcon style={{ height: 20, width: 20, color: '#ccc' }} />
+                        <Column centerX style={{ width: '100%' }}>
+                            {/* <ArrowDownIcon style={{ height: 20, width: 20, color: '#ccc' }} /> */}
+                            <SynapseSource style={{ height: 80, width: 80, opacity: 0.6 }} />
                             <Column centerX className={styles.link}>
                                 <ImageTitle
                                     type='user'
@@ -943,7 +946,8 @@ function LinkMap(): JSX.Element {
                                     />
                                 )}
                             </Column>
-                            <ArrowDownIcon style={{ height: 20, width: 20, color: '#ccc' }} />
+                            {/* <ArrowDownIcon style={{ height: 20, width: 20, color: '#ccc' }} /> */}
+                            <SynapseTarget style={{ height: 80, width: 80, opacity: 0.6 }} />
                         </Column>
                         {renderItem(linkData2.target, linkData2.target.modelType)}
                     </Column>

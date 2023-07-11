@@ -1,0 +1,307 @@
+<svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="500"
+      height="500"
+      version="1.1"
+      viewBox="0 0 132.292 132.292"
+    >
+      <g
+        fillOpacity="1"
+        strokeDasharray="none"
+        strokeMiterlimit="4"
+        strokeOpacity="1"
+      >
+        <path
+          fill="#b7b6ca"
+          stroke="#000"
+          strokeLinecap="butt"
+          strokeLinejoin="miter"
+          strokeWidth="1.975"
+          d="M63.94 134.765l-.003-.015-16.995-.132c-2.791-30.299-3.051-40.33-26.913-60.557C6.135 60.37 8.625 39.156 21.997 26.467c4.921-3.904 12.01 5.96 44.216 6.79 29.754-.564 36.75-10.857 42.03-6.79 13.372 12.689 16.422 35.967 1.469 47.719-23.862 20.227-24.05 30.133-26.842 60.432l-16.994.132-.004.015-.966-.008z"
+        ></path>
+        <path
+          fill="#b7b6ca"
+          stroke="none"
+          strokeLinecap="square"
+          strokeLinejoin="round"
+          strokeWidth="1.995"
+          d="M48.074 137.377h33.77l.601-10.14-35.072.134z"
+        ></path>
+        <circle
+          cx="68.019"
+          cy="-68.905"
+          r="2.272"
+          fill="#3b96d9"
+          stroke="#000"
+          strokeLinecap="square"
+          strokeLinejoin="round"
+          strokeWidth="1.058"
+          transform="scale(1 -1)"
+        ></circle>
+        <circle
+          cx="92.448"
+          cy="-51.993"
+          r="2.272"
+          fill="#3b96d9"
+          stroke="#000"
+          strokeLinecap="square"
+          strokeLinejoin="round"
+          strokeWidth="1.058"
+          transform="scale(1 -1)"
+        ></circle>
+        <circle
+          cx="79.491"
+          cy="-49.192"
+          r="2.272"
+          fill="#3b96d9"
+          stroke="#000"
+          strokeLinecap="square"
+          strokeLinejoin="round"
+          strokeWidth="1.058"
+          transform="scale(1 -1)"
+        ></circle>
+        <circle
+          cx="45.915"
+          cy="-62.519"
+          r="2.272"
+          fill="#3b96d9"
+          stroke="#000"
+          strokeLinecap="square"
+          strokeLinejoin="round"
+          strokeWidth="1.058"
+          transform="scale(1 -1)"
+        ></circle>
+        <circle
+          cx="67.409"
+          cy="-55.436"
+          r="2.272"
+          fill="#3b96d9"
+          stroke="#000"
+          strokeLinecap="square"
+          strokeLinejoin="round"
+          strokeWidth="1.058"
+          transform="scale(1 -1)"
+        ></circle>
+        <circle
+          cx="35.578"
+          cy="-47.996"
+          r="2.272"
+          fill="#3b96d9"
+          stroke="#000"
+          strokeLinecap="square"
+          strokeLinejoin="round"
+          strokeWidth="1.058"
+          transform="scale(1 -1)"
+        ></circle>
+        <circle
+          cx="28.888"
+          cy="-29.191"
+          r="2.272"
+          fill="#3b96d9"
+          stroke="#000"
+          strokeLinecap="square"
+          strokeLinejoin="round"
+          strokeWidth="1.058"
+          transform="scale(1 -1) rotate(24.646)"
+        ></circle>
+        <circle
+          cx="39.605"
+          cy="-24.215"
+          r="2.272"
+          fill="#3b96d9"
+          stroke="#000"
+          strokeLinecap="square"
+          strokeLinejoin="round"
+          strokeWidth="1.058"
+          transform="scale(1 -1) rotate(24.646)"
+        ></circle>
+        <circle
+          cx="25.327"
+          cy="-18.171"
+          r="2.272"
+          fill="#3b96d9"
+          stroke="#000"
+          strokeLinecap="square"
+          strokeLinejoin="round"
+          strokeWidth="1.058"
+          transform="scale(1 -1) rotate(24.646)"
+        ></circle>
+        <circle
+          cx="58.105"
+          cy="-32.356"
+          r="2.272"
+          fill="#3b96d9"
+          stroke="#000"
+          strokeLinecap="square"
+          strokeLinejoin="round"
+          strokeWidth="1.058"
+          transform="scale(1 -1) rotate(14.162)"
+        ></circle>
+        <circle
+          cx="67.53"
+          cy="-24.834"
+          r="2.272"
+          fill="#3b96d9"
+          stroke="#000"
+          strokeLinecap="square"
+          strokeLinejoin="round"
+          strokeWidth="1.058"
+          transform="scale(1 -1) rotate(14.162)"
+        ></circle>
+        <circle
+          cx="53.934"
+          cy="-21.178"
+          r="2.272"
+          fill="#3b96d9"
+          stroke="#000"
+          strokeLinecap="square"
+          strokeLinejoin="round"
+          strokeWidth="1.058"
+          transform="scale(1 -1) rotate(14.162)"
+        ></circle>
+        <circle
+          cx="87.821"
+          cy="-20.492"
+          r="2.272"
+          fill="#3b96d9"
+          stroke="#000"
+          strokeLinecap="square"
+          strokeLinejoin="round"
+          strokeWidth="1.058"
+          transform="scale(1 -1) rotate(4.135)"
+        ></circle>
+        <circle
+          cx="96.816"
+          cy="-12.152"
+          r="2.272"
+          fill="#3b96d9"
+          stroke="#000"
+          strokeLinecap="square"
+          strokeLinejoin="round"
+          strokeWidth="1.058"
+          transform="scale(1 -1) rotate(4.135)"
+        ></circle>
+        <circle
+          cx="83.826"
+          cy="-11.946"
+          r="2.272"
+          fill="#3b96d9"
+          stroke="#000"
+          strokeLinecap="square"
+          strokeLinejoin="round"
+          strokeWidth="1.058"
+          transform="scale(1 -1) rotate(4.135)"
+        ></circle>
+        <g
+          stroke="#000"
+          strokeWidth="1.058"
+          transform="matrix(1 0 0 -1 0 135.439)"
+        >
+          <circle
+            cx="39.514"
+            cy="105.613"
+            r="2.272"
+            fill="#3b96d9"
+            strokeLinecap="square"
+            strokeLinejoin="round"
+          ></circle>
+          <path
+            fill="#8d4ab5"
+            strokeLinecap="butt"
+            strokeLinejoin="miter"
+            d="M35.716 95.085c-2.59-.057-4.206 3.429-5.103 5.859-1.123 3.044-1.249 6.78.095 9.733.942 2.071 1.862 4.639 5.102 4.535 1.443-.046 1.202-1.522 1.171-10.843-.026-7.832.37-9.248-1.265-9.284z"
+          ></path>
+          <path
+            fill="#8d4ab5"
+            strokeLinecap="butt"
+            strokeLinejoin="miter"
+            d="M43.202 95.085c2.589-.057 4.206 3.429 5.103 5.859 1.122 3.044 1.249 6.78-.095 9.733-.942 2.071-1.862 4.639-5.103 4.535-1.442-.046-1.201-1.522-1.17-10.843.026-7.832-.37-9.248 1.265-9.284z"
+          ></path>
+        </g>
+        <g
+          stroke="#000"
+          strokeWidth="1.058"
+          transform="matrix(1 0 0 -1 49.213 135.439)"
+        >
+          <circle
+            cx="39.514"
+            cy="105.613"
+            r="2.272"
+            fill="#3b96d9"
+            strokeLinecap="square"
+            strokeLinejoin="round"
+          ></circle>
+          <path
+            fill="#8d4ab5"
+            strokeLinecap="butt"
+            strokeLinejoin="miter"
+            d="M35.716 95.085c-2.59-.057-4.206 3.429-5.103 5.859-1.123 3.044-1.249 6.78.095 9.733.942 2.071 1.862 4.639 5.102 4.535 1.443-.046 1.202-1.522 1.171-10.843-.026-7.832.37-9.248-1.265-9.284z"
+          ></path>
+          <path
+            fill="#8d4ab5"
+            strokeLinecap="butt"
+            strokeLinejoin="miter"
+            d="M43.202 95.085c2.589-.057 4.206 3.429 5.103 5.859 1.122 3.044 1.249 6.78-.095 9.733-.942 2.071-1.862 4.639-5.103 4.535-1.442-.046-1.201-1.522-1.17-10.843.026-7.832-.37-9.248 1.265-9.284z"
+          ></path>
+        </g>
+        <g
+          stroke="#000"
+          strokeWidth="1.058"
+          transform="matrix(1 0 0 -1 24.87 138.614)"
+        >
+          <circle
+            cx="39.514"
+            cy="105.613"
+            r="2.272"
+            fill="#3b96d9"
+            strokeLinecap="square"
+            strokeLinejoin="round"
+          ></circle>
+          <path
+            fill="#8d4ab5"
+            strokeLinecap="butt"
+            strokeLinejoin="miter"
+            d="M35.716 95.085c-2.59-.057-4.206 3.429-5.103 5.859-1.123 3.044-1.249 6.78.095 9.733.942 2.071 1.862 4.639 5.102 4.535 1.443-.046 1.202-1.522 1.171-10.843-.026-7.832.37-9.248-1.265-9.284z"
+          ></path>
+          <path
+            fill="#8d4ab5"
+            strokeLinecap="butt"
+            strokeLinejoin="miter"
+            d="M43.202 95.085c2.589-.057 4.206 3.429 5.103 5.859 1.122 3.044 1.249 6.78-.095 9.733-.942 2.071-1.862 4.639-5.103 4.535-1.442-.046-1.201-1.522-1.17-10.843.026-7.832-.37-9.248 1.265-9.284z"
+          ></path>
+        </g>
+        <circle
+          cx="55.436"
+          cy="-74.926"
+          r="2.272"
+          fill="#3b96d9"
+          stroke="#000"
+          strokeLinecap="square"
+          strokeLinejoin="round"
+          strokeWidth="1.058"
+          transform="scale(1 -1)"
+        ></circle>
+        <circle
+          cx="84.301"
+          cy="-68.543"
+          r="2.272"
+          fill="#3b96d9"
+          stroke="#000"
+          strokeLinecap="square"
+          strokeLinejoin="round"
+          strokeWidth="1.058"
+          transform="scale(1 -1)"
+        ></circle>
+        <circle
+          cx="53.281"
+          cy="-52.668"
+          r="2.272"
+          fill="#3b96d9"
+          stroke="#000"
+          strokeLinecap="square"
+          strokeLinejoin="round"
+          strokeWidth="1.058"
+          transform="scale(1 -1)"
+        ></circle>
+      </g>
+    </svg>

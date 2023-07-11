@@ -64,6 +64,8 @@ import { ReactComponent as SpaceTreeIcon } from '@svgs/space-tree-icon.svg'
 import { ReactComponent as LoadingWheelIcon } from '@svgs/spinner.svg'
 import { ReactComponent as StarIcon } from '@svgs/star-solid.svg'
 import { ReactComponent as StringIcon } from '@svgs/string-icon.svg'
+import { ReactComponent as SynapseSource } from '@svgs/synapse-source.svg'
+import { ReactComponent as SynapseTarget } from '@svgs/synapse-target.svg'
 import { ReactComponent as ThumbsUpIcon } from '@svgs/thumbs-up-solid.svg'
 import { ReactComponent as FailIcon } from '@svgs/times-circle-regular.svg'
 import { ReactComponent as TimesIcon } from '@svgs/times-solid.svg'
@@ -156,4 +158,6 @@ export {
     UploadIcon,
     CardIcon,
     ReplyIcon,
+    SynapseSource,
+    SynapseTarget,
 }
