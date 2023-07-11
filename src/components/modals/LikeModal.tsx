@@ -46,6 +46,11 @@ function LikeModal(props: {
         setResponseLoading(true)
         const data = { itemType, itemId: id } as any
         if (itemType === 'comment') data.parentItemId = itemData.itemId
+        if (itemType === 'link') {
+            const type = itemData.type.split('-')[0]
+            data.sourceType = type
+            data.sourceId = itemData.itemAId
+        }
         if (!accountLike) {
             data.accountHandle = accountData.handle
             data.accountName = accountData.name

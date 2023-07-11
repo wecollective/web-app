@@ -14,6 +14,7 @@ import {
     CommentIcon,
     EnvelopeIcon,
     FailIcon,
+    LikeIcon,
     LinkIcon,
     PollIcon,
     RetweetIcon,
@@ -21,7 +22,6 @@ import {
     StarIcon,
     StringIcon,
     SuccessIcon,
-    ThumbsUpIcon,
     WeaveIcon,
 } from '@svgs/all'
 import axios from 'axios'
@@ -125,6 +125,7 @@ function NotificationCard(props: {
         state,
         postId,
         commentId,
+        spaceAId,
         triggerUser,
         triggerSpace,
         secondarySpace,
@@ -279,6 +280,14 @@ function NotificationCard(props: {
         }
     }
 
+    function linkUrl() {
+        // todo: include linkId when set up
+        if (postId) return `/linkmap?item=post&id=${postId}`
+        if (commentId) return `/linkmap?item=comment&id=${commentId}`
+        if (spaceAId) return `/linkmap?item=space&id=${spaceAId}`
+        return `/linkmap?item=user&id=${accountData.id}`
+    }
+
     // todo: use switch case to render different notification types
 
     return (
@@ -302,7 +311,7 @@ function NotificationCard(props: {
                     )}
 
                     {type === 'post-like' && (
-                        <Content typeIcon={<ThumbsUpIcon />}>
+                        <Content typeIcon={<LikeIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>liked your</p>
                             <TextLink text='post' link={`/p/${postId}`} />
@@ -313,7 +322,7 @@ function NotificationCard(props: {
                     )}
 
                     {type === 'comment-like' && (
-                        <Content typeIcon={<ThumbsUpIcon />}>
+                        <Content typeIcon={<LikeIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>liked your</p>
                             <TextLink text='comment' link={`/p/${postId}?commentId=${commentId}`} />
@@ -357,7 +366,7 @@ function NotificationCard(props: {
                     )}
 
                     {type === 'comment-rating' && (
-                        <Content typeIcon={<ThumbsUpIcon />}>
+                        <Content typeIcon={<LikeIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>rated your</p>
                             <TextLink text='comment' link={`/p/${postId}?commentId=${commentId}`} />
@@ -371,10 +380,7 @@ function NotificationCard(props: {
                         <Content typeIcon={<LinkIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>just added a link to your</p>
-                            <TextLink text='post' link={`/p/${postId}`} />
-                            {/* todo: add postAId and postBId columns in the database so secondary post can be linked */}
-                            {triggerSpace && <p>in</p>}
-                            {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
+                            <TextLink text='post' link={`/linkmap?item=post&id=${postId}`} />
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}
@@ -383,10 +389,37 @@ function NotificationCard(props: {
                         <Content typeIcon={<LinkIcon />}>
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>just added a link to your</p>
-                            <TextLink text='comment' link={`/p/${postId}?commentId=${commentId}`} />
-                            {/* todo: add postAId and postBId columns in the database so secondary post can be linked */}
-                            {triggerSpace && <p>in</p>}
-                            {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
+                            <TextLink
+                                text='comment'
+                                link={`/linkmap?item=comment&id=${commentId}`}
+                            />
+                            <CreatedAt date={createdAt} />
+                        </Content>
+                    )}
+
+                    {['user-link-source', 'user-link-target'].includes(type) && (
+                        <Content typeIcon={<LinkIcon />}>
+                            <ImageNameLink type='user' data={triggerUser} />
+                            <p>just added a link to</p>
+                            <TextLink text='you' link={`/linkmap?item=user&id=${accountData.id}`} />
+                            <CreatedAt date={createdAt} />
+                        </Content>
+                    )}
+
+                    {['space-link-source', 'space-link-target'].includes(type) && (
+                        <Content typeIcon={<LinkIcon />}>
+                            <ImageNameLink type='user' data={triggerUser} />
+                            <p>just added a link to your</p>
+                            <TextLink text='space' link={`/linkmap?item=space&id=${spaceAId}`} />
+                            <CreatedAt date={createdAt} />
+                        </Content>
+                    )}
+
+                    {type === 'link-like' && (
+                        <Content typeIcon={<LikeIcon />}>
+                            <ImageNameLink type='user' data={triggerUser} />
+                            <p>just liked your</p>
+                            <TextLink text='link' link={linkUrl()} />
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}
