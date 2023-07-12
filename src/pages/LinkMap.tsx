@@ -511,15 +511,25 @@ function LinkMap(): JSX.Element {
         return nodeText.length > maxChars ? nodeText.substring(0, maxChars).concat('...') : nodeText
     }
 
-    function circleMouseOver(e, node) {
+    function nodeMouseOver(e, node) {
+        const { uuid, id, modelType } = node.data.item
         // highlight selected circle
-        d3.select(`#node-background-${node.data.item.uuid}`)
+        d3.select(`#node-backdrop-${uuid}`)
+            .transition()
+            .duration(duration / 4)
+            .attr('r', (d) => findNodeRadius(d) + 6)
+        d3.select(`#node-background-${uuid}`)
             .transition()
             .duration(duration / 4)
             .attr('fill', colors.cpBlue)
             .attr('r', (d) => findNodeRadius(d) + 6)
         // highlight other circles
-        d3.selectAll(`.node-background-${node.data.item.modelType}-${node.data.item.id}`)
+        d3.selectAll(`.node-backdrop-${modelType}-${id}`)
+            .filter((n) => n.data.item.uuid !== node.data.item.uuid)
+            .transition()
+            .duration(duration / 4)
+            .attr('r', (d) => findNodeRadius(d) + 6)
+        d3.selectAll(`.node-background-${modelType}-${id}`)
             .filter((n) => n.data.item.uuid !== node.data.item.uuid)
             .transition()
             .duration(duration / 4)
@@ -527,16 +537,21 @@ function LinkMap(): JSX.Element {
             .attr('r', (d) => findNodeRadius(d) + 6)
     }
 
-    function circleMouseOut(e, node) {
+    function nodeMouseOut(e, node) {
+        const { id, modelType } = node.data.item
         // fade out all highlighted circles
-        d3.selectAll(`.node-background-${node.data.item.modelType}-${node.data.item.id}`)
+        d3.selectAll(`.node-backdrop-${modelType}-${id}`)
+            .transition()
+            .duration(duration / 4)
+            .attr('r', (d) => findNodeRadius(d) + 1.95)
+        d3.selectAll(`.node-background-${modelType}-${id}`)
             .transition()
             .duration(duration / 4)
             .attr('fill', '#aaa')
             .attr('r', (d) => findNodeRadius(d) + 2)
     }
 
-    function circleClick(e, node) {
+    function nodeClick(e, node) {
         if (!transitioning.current) {
             transitioning.current = true
             const { uuid, id, modelType } = node.data.item
@@ -695,7 +710,12 @@ function LinkMap(): JSX.Element {
                     // create white backdrop
                     group
                         .append('circle')
-                        .attr('class', 'node-backdrop')
+                        .attr('id', (d) => `node-backdrop-${d.data.item.uuid}`)
+                        .attr(
+                            'class',
+                            (d) =>
+                                `node-backdrop node-backdrop-${d.data.item.modelType}-${d.data.item.id}`
+                        )
                         .attr('transform', findNodeTransform)
                         .attr('r', (d) => findNodeRadius(d) + 1.95)
                         .attr('fill', 'white')
@@ -712,9 +732,9 @@ function LinkMap(): JSX.Element {
                         .attr('r', (d) => findNodeRadius(d) + 2)
                         .attr('fill', '#aaa')
                         .attr('cursor', 'pointer')
-                        .on('mouseover', circleMouseOver)
-                        .on('mouseout', circleMouseOut)
-                        .on('click', circleClick)
+                        .on('mouseover', nodeMouseOver)
+                        .on('mouseout', nodeMouseOut)
+                        .on('click', nodeClick)
                     // create circle
                     group
                         .append('circle')
@@ -749,9 +769,9 @@ function LinkMap(): JSX.Element {
                     // update background
                     update
                         .select('.node-background')
-                        .on('mouseover', circleMouseOver)
-                        .on('mouseout', circleMouseOut)
-                        .on('click', circleClick)
+                        .on('mouseover', nodeMouseOver)
+                        .on('mouseout', nodeMouseOut)
+                        .on('click', nodeClick)
                         .transition('node-background-update')
                         .duration(duration)
                         .attr('r', (d) => findNodeRadius(d) + 2)
