@@ -58,6 +58,7 @@ function LinkMap(): JSX.Element {
     const links = useRef<any>(null)
     const nodes = useRef<any>(null)
     const matchedNodeUUIDs = useRef<number[]>([])
+    const selectedLinkUUID = useRef('')
     const cookies = new Cookies()
     // const headerText =
     //     linkData && linkData.item
@@ -240,6 +241,9 @@ function LinkMap(): JSX.Element {
             .transition()
             .duration(duration / 2)
             .style('opacity', 1)
+        // reset colours of selected link
+        transitionLinkColor(selectedLinkUUID.current, false)
+        selectedLinkUUID.current = ''
     }
 
     function buildCanvas() {
@@ -344,8 +348,32 @@ function LinkMap(): JSX.Element {
         return `M${points[0]}L${points[1]}`
     }
 
+    function transitionLinkColor(uuid, focus: boolean) {
+        const red = focus ? colors.linkRedFocus : colors.linkRed
+        const blue = focus ? colors.linkBlueFocus : colors.linkBlue
+        d3.selectAll(`#link-path-${uuid}`)
+            .transition()
+            .duration(duration / 2)
+            .attr('stroke', (d) => (d.direction === 'outgoing' ? blue : red))
+        // highlight arrow
+        d3.selectAll(`#link-arrow-${uuid}`)
+            .transition()
+            .duration(duration / 2)
+            .attr('fill', (d) => (d.direction === 'outgoing' ? blue : red))
+    }
+
+    function linkMouseOver(e, link) {
+        transitionLinkColor(link.uuid, true)
+    }
+
+    function linkMouseOut(e, link) {
+        if (selectedLinkUUID.current !== link.uuid) transitionLinkColor(link.uuid, false)
+    }
+
     function linkClick(e, link) {
         e.stopPropagation()
+        transitionLinkColor(selectedLinkUUID.current, false)
+        selectedLinkUUID.current = link.uuid
         // highlight link and attached nodes
         d3.select(`#link-${link.uuid}`)
             .transition()
@@ -574,20 +602,27 @@ function LinkMap(): JSX.Element {
                         .attr('stroke', findLinkColor)
                         .attr('stroke-width', (d) => linkWidthScale.current(d.totalLikes))
                         .attr('d', findLinkPath)
-                    // creat arrow
+                        .attr('cursor', 'pointer')
+                        .on('mouseover', linkMouseOver)
+                        .on('mouseout', linkMouseOut)
+                        .on('click', linkClick)
+                    // create arrow
                     group
                         .append('text')
                         .attr('class', 'link-arrow')
                         .attr('dy', (d) => linkArrowOffsetScale.current(d.totalLikes))
                         .attr('dx', 2)
                         .append('textPath')
+                        .attr('id', (d) => `link-arrow-${d.uuid}`)
                         .text('▶')
                         .attr('font-size', (d) => linkArrowScale.current(d.totalLikes))
                         .attr('text-anchor', 'middle')
                         .attr('startOffset', '50%')
                         .attr('href', (d) => `#link-path-${d.uuid}`)
-                        .style('fill', findLinkColor)
-                        .style('cursor', 'pointer')
+                        .attr('fill', findLinkColor)
+                        .attr('cursor', 'pointer')
+                        .on('mouseover', linkMouseOver)
+                        .on('mouseout', linkMouseOut)
                         .on('click', linkClick)
                     // create text
                     group
@@ -606,10 +641,13 @@ function LinkMap(): JSX.Element {
                     // update path
                     update
                         .select('.link-path')
+                        .on('mouseover', linkMouseOver)
+                        .on('mouseout', linkMouseOut)
+                        .on('click', linkClick)
                         .transition('link-path-update')
                         .duration(duration)
                         .attr('d', findLinkPath)
-                        .style('stroke', findLinkColor)
+                        .attr('stroke', findLinkColor)
                         .attr('stroke-width', (d) => linkWidthScale.current(d.totalLikes))
                     // update arrow
                     update
@@ -620,10 +658,13 @@ function LinkMap(): JSX.Element {
                     update
                         .select('.link-arrow')
                         .select('textPath')
-                        .transition('link-arrow-path-update')
+                        .on('mouseover', linkMouseOver)
+                        .on('mouseout', linkMouseOut)
+                        .on('click', linkClick)
+                        .transition('link-arrow-text-path-update')
                         .duration(duration)
                         .attr('font-size', (d) => linkArrowScale.current(d.totalLikes))
-                        .style('fill', findLinkColor)
+                        .attr('fill', findLinkColor)
                     return update
                 },
                 (exit) => {
@@ -885,14 +926,14 @@ function LinkMap(): JSX.Element {
                 <Column centerX className={styles.visualisation}>
                     <Row centerX wrap>
                         <DropDown
-                            title='Node types'
+                            title='Node Types'
                             options={['All Types', 'Posts', 'Comments', 'Spaces', 'Users']}
                             selectedOption={linkTypes}
                             setSelectedOption={(option) => setLinkTypes(option)}
                             style={{ margin: '0 10px 10px 0' }}
                         />
                         <DropDown
-                            title='Size by'
+                            title='Size Nodes By'
                             options={['Likes', 'Links', 'Date Created', 'Recent Activity']}
                             selectedOption={sizeBy}
                             setSelectedOption={(option) => setSizeBy(option)}
