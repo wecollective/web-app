@@ -300,16 +300,24 @@ function LinkMap(): JSX.Element {
             max = d3.max(nodes.current.map((node) => node.data.item[`total${sizeBy}`]))
         }
         const rangeMin = 0.015 * svgSize.current
-        const rangeMax = 0.035 * svgSize.current
+        const rangeMax = 0.03 * svgSize.current
         nodeScale.current = d3.scaleLinear().domain([min, max]).range([rangeMin, rangeMax])
     }
 
     function createLinkScales() {
         const min = d3.min(links.current.map((link) => link.totalLikes))
         const max = d3.max(links.current.map((link) => link.totalLikes))
-        linkWidthScale.current = d3.scaleLinear().domain([min, max]).range([1, 6])
-        linkArrowScale.current = d3.scaleLinear().domain([min, max]).range([10, 25])
-        linkArrowOffsetScale.current = d3.scaleLinear().domain([min, max]).range([3.4, 8.5])
+        // scale logarithmically with svg size
+        const scale = (svgSize.current + 650) / 250
+        linkWidthScale.current = d3.scaleLinear().domain([min, max]).range([1, scale])
+        linkArrowScale.current = d3
+            .scaleLinear()
+            .domain([min, max])
+            .range([scale * 1.75, scale * 4])
+        linkArrowOffsetScale.current = d3
+            .scaleLinear()
+            .domain([min, max])
+            .range([scale * 0.6, scale * 1.36])
     }
 
     function findLinkColor(d) {
@@ -875,19 +883,20 @@ function LinkMap(): JSX.Element {
             </Column>
             <div className={`${styles.content} hide-scrollbars`}>
                 <Column centerX className={styles.visualisation}>
-                    <Row>
+                    <Row centerX wrap>
                         <DropDown
-                            title='Link types'
+                            title='Node types'
                             options={['All Types', 'Posts', 'Comments', 'Spaces', 'Users']}
                             selectedOption={linkTypes}
                             setSelectedOption={(option) => setLinkTypes(option)}
-                            style={{ marginRight: 20 }}
+                            style={{ margin: '0 10px 10px 0' }}
                         />
                         <DropDown
                             title='Size by'
                             options={['Likes', 'Links', 'Date Created', 'Recent Activity']}
                             selectedOption={sizeBy}
                             setSelectedOption={(option) => setSizeBy(option)}
+                            style={{ margin: '0 10px 10px 0' }}
                         />
                     </Row>
                     <Column centerX centerY id='link-map-canvas' className={styles.canvas} />
@@ -954,7 +963,10 @@ function LinkMap(): JSX.Element {
                         {linkData && renderItem(linkData.item, linkData.item.modelType)}
                         {loggedIn ? (
                             <Column centerX style={{ width: '100%', marginTop: 20 }}>
-                                <Row centerY style={{ width: '100%', marginBottom: 20 }}>
+                                <Row
+                                    centerY
+                                    style={{ width: '100%', marginBottom: 20, padding: '0 5px' }}
+                                >
                                     <Row centerY style={{ flexShrink: 0, marginRight: 20 }}>
                                         <p>Link to</p>
                                         <DropDownMenu
@@ -1023,9 +1035,12 @@ function LinkMap(): JSX.Element {
                                         {targetType} not found
                                     </p>
                                 )}
-                                <Row centerY style={{ width: '100%', marginBottom: 20 }}>
+                                <Row
+                                    centerY
+                                    style={{ width: '100%', marginBottom: 20, padding: '0 5px' }}
+                                >
                                     <p style={{ flexShrink: 0, marginRight: 10 }}>
-                                        Link description (optional)
+                                        Link description
                                     </p>
                                     <Input
                                         type='text'

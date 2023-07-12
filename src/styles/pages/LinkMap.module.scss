@@ -5,7 +5,11 @@
     height: calc(100vh - 60px);
     width: 100%;
     margin-top: 60px;
-    padding: 20px;
+    padding: 20px 0;
+
+    @include for-tablet-portrait-up {
+        padding: 20px;
+    }
 
     .loading {
         position: absolute;
@@ -27,7 +31,9 @@
         }
 
         .info {
-            padding: 5px;
+            @include for-tablet-portrait-up {
+                padding: 5px;
+            }
 
             @include for-desktop-small-up {
                 width: 100%;
