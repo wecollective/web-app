@@ -31,9 +31,7 @@
         }
 
         .info {
-            @include for-tablet-portrait-up {
-                padding: 5px;
-            }
+            padding: 5px;
 
             @include for-desktop-small-up {
                 width: 100%;

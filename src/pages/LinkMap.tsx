@@ -414,7 +414,7 @@ function LinkMap(): JSX.Element {
         axios
             .get(`${config.apiURL}/link-data?linkId=${link.id}`, options)
             .then((res) => {
-                console.log('link-data res: ', res.data)
+                // console.log('link-data res: ', res.data)
                 setLinkData2(res.data)
             })
             .catch((error) => console.log(error))
@@ -422,7 +422,7 @@ function LinkMap(): JSX.Element {
 
     // todo: use angles here combined with seperation function to improve radial spread?
     function findNodeTransform(d) {
-        return `rotate(${(d.x * 180) / Math.PI - 90}),translate(${d.y}, 0),rotate(${
+        return `rotate(${(d.x * 180) / Math.PI - 90}),translate(${d.y || 0}, 0),rotate(${
             (-d.x * 180) / Math.PI + 90
         })`
     }
@@ -816,7 +816,7 @@ function LinkMap(): JSX.Element {
     // todo: create seperate component for link map visualisation and merge useEffects below
     useEffect(() => {
         if (linkData) {
-            console.log('linkData: ', linkData)
+            // console.log('linkData: ', linkData)
             const data = d3.hierarchy(linkData, (d) => d.item.children)
             const circleSize = svgSize.current - 70
             let radius
@@ -1024,10 +1024,7 @@ function LinkMap(): JSX.Element {
                         {linkData && renderItem(linkData.item, linkData.item.modelType)}
                         {loggedIn ? (
                             <Column centerX style={{ width: '100%', marginTop: 20 }}>
-                                <Row
-                                    centerY
-                                    style={{ width: '100%', marginBottom: 20, padding: '0 5px' }}
-                                >
+                                <Row centerY style={{ width: '100%', marginBottom: 20 }}>
                                     <Row centerY style={{ flexShrink: 0, marginRight: 20 }}>
                                         <p>Link to</p>
                                         <DropDownMenu
@@ -1096,10 +1093,7 @@ function LinkMap(): JSX.Element {
                                         {targetType} not found
                                     </p>
                                 )}
-                                <Row
-                                    centerY
-                                    style={{ width: '100%', marginBottom: 20, padding: '0 5px' }}
-                                >
+                                <Row centerY style={{ width: '100%', marginBottom: 20 }}>
                                     <p style={{ flexShrink: 0, marginRight: 10 }}>
                                         Link description
                                     </p>
