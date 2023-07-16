@@ -42,7 +42,7 @@ function EditCommentModal(props: {
             setLoading(true)
             const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
             const data = {
-                postId: comment.postId,
+                postId: comment.itemId,
                 commentId: comment.id,
                 text: newText.value,
                 mentions: mentions.map((m) => m.link),
