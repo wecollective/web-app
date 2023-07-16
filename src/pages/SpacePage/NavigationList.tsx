@@ -17,11 +17,13 @@ function Space(props: {
     type: 'parent' | 'child'
     selectedSubPage: string
     expand: (space: any, type: 'parent' | 'child') => void
+    getNextChildren: (id: number, type: 'parent' | 'child') => void
     onLocationChange: (() => void) | undefined
 }): JSX.Element {
     // recursive component used to render space trees in the NavigationList component below
-    const { space, type, selectedSubPage, expand, onLocationChange } = props
+    const { space, type, selectedSubPage, expand, getNextChildren, onLocationChange } = props
     const {
+        id,
         handle,
         name,
         flagImagePath,
@@ -31,15 +33,17 @@ function Space(props: {
         totalChildren,
         expanded,
         loading,
+        nextChildrenLoading,
     } = space
     const showExpander = totalChildren > 0 && (privacy === 'public' || spaceAccess === 'active')
+    const title = name.length > 25 ? name.substring(0, 25).concat('...') : name
     return (
         <Column>
             <Row centerY style={{ marginBottom: 10 }}>
                 <ImageTitle
                     type='space'
                     imagePath={flagImagePath}
-                    title={name}
+                    title={title}
                     link={`/s/${handle}/${selectedSubPage}`}
                     fontSize={14}
                     imageSize={35}
@@ -61,7 +65,7 @@ function Space(props: {
                 )}
             </Row>
             {expanded && (
-                <Column scroll className={styles.childSpaces}>
+                <Column scroll className={styles.children}>
                     {children &&
                         children.map((child) => (
                             <Space
@@ -70,9 +74,25 @@ function Space(props: {
                                 type={type}
                                 selectedSubPage={selectedSubPage}
                                 expand={expand}
+                                getNextChildren={getNextChildren}
                                 onLocationChange={onLocationChange}
                             />
                         ))}
+                    {children.length < totalChildren && (
+                        <Row centerX centerY style={{ height: 30, overflow: 'hidden' }}>
+                            {nextChildrenLoading ? (
+                                <LoadingWheel size={20} />
+                            ) : (
+                                <button
+                                    type='button'
+                                    onClick={() => getNextChildren(id, type)}
+                                    className={styles.loadMore}
+                                >
+                                    Load more ({totalChildren - children.length})
+                                </button>
+                            )}
+                        </Row>
+                    )}
                 </Column>
             )}
         </Column>
@@ -82,32 +102,23 @@ function Space(props: {
 function NavigationList(props: { onLocationChange?: () => void; style?: any }): JSX.Element {
     const { onLocationChange, style } = props
     const { spaceData, selectedSpaceSubPage } = useContext(SpaceContext)
-    const [parentSpaces, setParentSpaces] = useState<any[]>([])
-    const [childSpaces, setChildSpaces] = useState<any[]>([])
+    const [parents, setParents] = useState<any[]>([])
+    const [children, setChildren] = useState<any[]>([])
+    const [totalChildren, setTotalChildren] = useState(0)
+    const [childrenOffset, setChildrenOffset] = useState(0)
     const [renderKey, setRenderKey] = useState(0)
     const [loading, setLoading] = useState(true)
+    const [nextSpacesLoading, setNextSpacesLoading] = useState(false)
     const cookies = new Cookies()
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]
 
-    async function getSpaces() {
-        const accessToken = cookies.get('accessToken')
-        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
-        const getParentSpaces = await axios.get(
-            `${config.apiURL}/nav-list-parent-spaces?spaceId=${spaceData.id}`,
+    async function getSpaces(id, offset, includeParents) {
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        return axios.get(
+            `${config.apiURL}/nav-list-spaces?spaceId=${id}&offset=${offset}&includeParents=${includeParents}`,
             options
         )
-        const getChildSpaces = await axios.get(
-            `${config.apiURL}/nav-list-child-spaces?spaceId=${spaceData.id}`,
-            options
-        )
-        Promise.all([getParentSpaces, getChildSpaces])
-            .then((responses) => {
-                setParentSpaces(responses[0].data)
-                setChildSpaces(responses[1].data)
-                setLoading(false)
-            })
-            .catch((error) => console.log(error))
     }
 
     function findSpace(spaces: any[], id: number) {
@@ -124,13 +135,13 @@ function NavigationList(props: { onLocationChange?: () => void; style?: any }): 
     }
 
     function setSpaces(type: 'parent' | 'child', spaces: any[]) {
-        if (type === 'parent') setParentSpaces(spaces)
-        else setChildSpaces(spaces)
+        if (type === 'parent') setParents(spaces)
+        else setChildren(spaces)
     }
 
     async function expandSpace(space: any, type: 'parent' | 'child') {
         const { id, expanded } = space
-        const spaces = type === 'parent' ? parentSpaces : childSpaces
+        const spaces = type === 'parent' ? parents : children
         const newSpaces = [...spaces]
         const newSpace = findSpace(newSpaces, id)
         if (expanded) {
@@ -138,13 +149,12 @@ function NavigationList(props: { onLocationChange?: () => void; style?: any }): 
             setSpaces(type, newSpaces)
         } else {
             newSpace.loading = true
+            newSpace.offset = 0
             setSpaces(type, newSpaces)
-            const accessToken = cookies.get('accessToken')
-            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
-            axios
-                .get(`${config.apiURL}/nav-list-child-spaces?spaceId=${id}`, options)
+            getSpaces(id, 0, false)
                 .then((res) => {
-                    newSpace.children = res.data
+                    newSpace.children = res.data.children
+                    newSpace.totalChildren = res.data.totalChildren
                     newSpace.expanded = true
                     newSpace.loading = false
                     setSpaces(type, newSpaces)
@@ -154,52 +164,108 @@ function NavigationList(props: { onLocationChange?: () => void; style?: any }): 
         }
     }
 
+    async function getNextChildren(id: any, type: 'parent' | 'child') {
+        const spaces = type === 'parent' ? parents : children
+        const newSpaces = [...spaces]
+        const newSpace = findSpace(newSpaces, id)
+        newSpace.nextChildrenLoading = true
+        setSpaces(type, newSpaces)
+        getSpaces(id, newSpace.offset || 10, false)
+            .then((res) => {
+                newSpace.children = [...newSpace.children, ...res.data.children]
+                newSpace.nextChildrenLoading = false
+                newSpace.offset = (newSpace.offset || 10) + 10
+                setSpaces(type, newSpaces)
+                setRenderKey(renderKey + 1)
+            })
+            .catch((error) => console.log(error))
+    }
+
     useEffect(() => {
         if (spaceData.handle !== spaceHandle) setLoading(true)
-        else getSpaces()
+        else {
+            getSpaces(spaceData.id, 0, true)
+                .then((res) => {
+                    setParents(res.data.parents)
+                    setChildren(res.data.children)
+                    setTotalChildren(res.data.totalChildren)
+                    setChildrenOffset(10)
+                    setLoading(false)
+                })
+                .catch((error) => console.log(error))
+        }
     }, [spaceData.id, location])
 
     return (
         <Scrollbars className={styles.wrapper} style={style}>
             {!loading && (
                 <Column>
-                    {parentSpaces.length > 0 && (
+                    {parents.length > 0 && (
                         <Column className={styles.spaces}>
                             <Row>
                                 <ArrowUpIcon />
                                 <p>Parent spaces</p>
                             </Row>
                             <Column key={renderKey}>
-                                {parentSpaces.map((space) => (
+                                {parents.map((space) => (
                                     <Space
                                         key={space.id}
                                         space={space}
                                         type='parent'
                                         selectedSubPage={selectedSpaceSubPage}
                                         expand={expandSpace}
+                                        getNextChildren={getNextChildren}
                                         onLocationChange={onLocationChange}
                                     />
                                 ))}
                             </Column>
                         </Column>
                     )}
-                    {childSpaces.length > 0 && (
+                    {children.length > 0 && (
                         <Column className={styles.spaces}>
                             <Row>
                                 <ArrowDownIcon />
                                 <p>Child spaces</p>
                             </Row>
                             <Column key={renderKey}>
-                                {childSpaces.map((space) => (
+                                {children.map((space) => (
                                     <Space
                                         key={space.id}
                                         space={space}
                                         type='child'
                                         selectedSubPage={selectedSpaceSubPage}
                                         expand={expandSpace}
+                                        getNextChildren={getNextChildren}
                                         onLocationChange={onLocationChange}
                                     />
                                 ))}
+                                {children.length < totalChildren && (
+                                    <Row centerX>
+                                        {nextSpacesLoading ? (
+                                            <LoadingWheel size={20} />
+                                        ) : (
+                                            <button
+                                                type='button'
+                                                onClick={() => {
+                                                    setNextSpacesLoading(true)
+                                                    getSpaces(spaceData.id, childrenOffset, false)
+                                                        .then((res) => {
+                                                            setChildren([
+                                                                ...children,
+                                                                ...res.data.children,
+                                                            ])
+                                                            setChildrenOffset(childrenOffset + 10)
+                                                            setNextSpacesLoading(false)
+                                                        })
+                                                        .catch((error) => console.log(error))
+                                                }}
+                                                className={styles.loadMore}
+                                            >
+                                                Load more ({totalChildren - children.length})
+                                            </button>
+                                        )}
+                                    </Row>
+                                )}
                             </Column>
                         </Column>
                     )}
