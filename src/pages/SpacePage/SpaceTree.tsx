@@ -20,11 +20,12 @@ function SpaceTree(props: { spaceTreeData: any; params: any }): JSX.Element {
     const [showSpaceModal, setShowSpaceModal] = useState(false)
     const [highlightedSpace, setHighlightedSpace] = useState<any>(null)
     const [highlightedSpacePosition, setHighlightedSpacePosition] = useState<any>({})
-    const spaceTransitioning = useRef<boolean>(true)
-    const parentNodes = useRef<any>(null)
-    const parentLinks = useRef<any>(null)
-    const childNodes = useRef<any>(null)
-    const childLinks = useRef<any>(null)
+    const svgWidth = useRef(0)
+    const transitioning = useRef<boolean>(true)
+    const parentNodes = useRef<any[]>([])
+    const parentLinks = useRef<any[]>([])
+    const childNodes = useRef<any[]>([])
+    const childLinks = useRef<any[]>([])
     const history = useNavigate()
     const circleRadius = 25
     const maxTextLength = 14
@@ -163,7 +164,7 @@ function SpaceTree(props: { spaceTreeData: any; params: any }): JSX.Element {
     }
 
     function circleMouseOver(d, type) {
-        if (!spaceTransitioning.current) {
+        if (!transitioning.current) {
             // highlight selected circle
             const circle = d3.select(`#${type}-background-circle-${d.data.uuid}`)
             circle
@@ -194,7 +195,7 @@ function SpaceTree(props: { spaceTreeData: any; params: any }): JSX.Element {
     }
 
     function circleMouseOut(d) {
-        if (!spaceTransitioning.current) {
+        if (!transitioning.current) {
             // fade out privacy image if required
             if (d.data.privacy === 'private' && !d.data.spaceAccess) {
                 d3.select(`#node-privacy-${d.data.uuid}`)
@@ -214,9 +215,10 @@ function SpaceTree(props: { spaceTreeData: any; params: any }): JSX.Element {
         }
     }
 
-    function circleMouseDown(d) {
-        if (!spaceTransitioning.current) {
-            spaceTransitioning.current = true
+    function circleClick(e, d) {
+        e.stopPropagation()
+        if (!transitioning.current) {
+            transitioning.current = true
             setShowSpaceModal(false)
             setHighlightedSpace(null)
             // if current space, open post page
@@ -242,9 +244,10 @@ function SpaceTree(props: { spaceTreeData: any; params: any }): JSX.Element {
         }
     }
 
-    function plusMinusMouseDown(d) {
-        if (!spaceTransitioning.current) {
-            spaceTransitioning.current = true
+    function plusMinusClick(e, d) {
+        e.stopPropagation()
+        if (!transitioning.current) {
+            transitioning.current = true
             const match = findSpaceByUUID(spaceTreeData, d.data.uuid)
             if (d.data.collapsed) {
                 // expand children
@@ -382,7 +385,7 @@ function SpaceTree(props: { spaceTreeData: any; params: any }): JSX.Element {
                         .style('cursor', 'pointer')
                         .on('mouseover', (e, d) => circleMouseOver(d, type))
                         .on('mouseout', (e, d) => circleMouseOut(d))
-                        .on('mousedown', (e, d) => circleMouseDown(d))
+                        .on('click', circleClick)
                         .call((node) =>
                             node
                                 .transition('background-circle-enter')
@@ -396,7 +399,7 @@ function SpaceTree(props: { spaceTreeData: any; params: any }): JSX.Element {
                         node
                             .on('mouseover', (e, d) => circleMouseOver(d, type))
                             .on('mouseout', (e, d) => circleMouseOut(d))
-                            .on('mousedown', (e, d) => circleMouseDown(d))
+                            .on('click', circleClick)
                             .transition('background-circle-update')
                             .duration(duration)
                             .attr('r', (d) => findRadius(d) + 2)
@@ -585,7 +588,7 @@ function SpaceTree(props: { spaceTreeData: any; params: any }): JSX.Element {
                         .attr('x', 32)
                         .attr('transform', (d) => `translate(${d.x},${d.y})`)
                         .style('cursor', 'pointer')
-                        .on('mousedown', (e, d) => plusMinusMouseDown(d))
+                        .on('click', plusMinusClick)
                         .call((node) =>
                             node
                                 .transition('node-button-enter')
@@ -608,7 +611,7 @@ function SpaceTree(props: { spaceTreeData: any; params: any }): JSX.Element {
                                 return access
                             })
                             .attr('pointer-events', (d) => (isRoot(d) ? 'none' : 'auto'))
-                            .on('mousedown', (e, d) => plusMinusMouseDown(d))
+                            .on('click', plusMinusClick)
                             .transition('node-text-update')
                             .duration(duration)
                             .attr('xlink:href', (d) => plusMinusImage(d))
@@ -666,16 +669,14 @@ function SpaceTree(props: { spaceTreeData: any; params: any }): JSX.Element {
     }
 
     function createCanvas() {
-        let width: string | number = '100%'
-        const height = '100%'
         const yOffset = spaceData.DirectParentSpaces.length ? 180 : 80
         const svg = d3
             .select('#space-tree-canvas')
             .append('svg')
             .attr('id', 'space-tree-svg')
-            .attr('width', width)
-            .attr('height', height)
-        width = parseInt(svg.style('width'), 10)
+            .attr('width', '100%')
+            .attr('height', '100%')
+        svgWidth.current = parseInt(svg.style('width'), 10)
         // create image defs
         const defs = svg.append('defs').attr('id', 'imgdefs')
         // create privacy image
@@ -705,7 +706,14 @@ function SpaceTree(props: { spaceTreeData: any; params: any }): JSX.Element {
         masterGroup.append('g').attr('id', 'child-node-group')
         // set up zoom
         svg.call(zoom).on('dblclick.zoom', null)
-        svg.call(zoom.transform, d3.zoomIdentity.translate(width / 2, yOffset))
+        svg.call(zoom.transform, d3.zoomIdentity.translate(svgWidth.current / 2, yOffset))
+        svg.on('click', () => {
+            transitioning.current = true
+            resetTreePosition()
+            setTimeout(() => {
+                transitioning.current = false
+            }, duration)
+        })
     }
 
     function findModalPosition() {
@@ -803,16 +811,15 @@ function SpaceTree(props: { spaceTreeData: any; params: any }): JSX.Element {
 
     function resetTreePosition() {
         const svg = d3.select('#space-tree-svg')
-        const svgWidth = parseInt(svg.style('width'), 10)
-        const yOffset = spaceTreeData && spaceTreeData.DirectParentSpaces.length ? 180 : 80
+        const yOffset = parentNodes.current.length ? 180 : 80
         svg.transition()
             .duration(duration)
-            .call(zoom.transform, d3.zoomIdentity.scale(1).translate(svgWidth / 2, yOffset))
+            .call(zoom.transform, d3.zoomIdentity.scale(1).translate(svgWidth.current / 2, yOffset))
     }
 
     function updateTree(resetPosition) {
-        if (resetPosition) resetTreePosition()
         buildTrees(resetPosition)
+        if (resetPosition) resetTreePosition()
         // create parent tree elements
         createLinks('parent')
         createBackgroundCircles('parent')
@@ -829,7 +836,7 @@ function SpaceTree(props: { spaceTreeData: any; params: any }): JSX.Element {
         createPrivacyCircles()
         // mark transition complete after duration
         setTimeout(() => {
-            spaceTransitioning.current = false
+            transitioning.current = false
         }, duration)
     }
 
