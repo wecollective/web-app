@@ -61,14 +61,14 @@ function Spaces(): JSX.Element {
         <Column className={styles.wrapper}>
             <SpacesHeader params={params} />
             <Row centerX className={styles.content}>
-                {params.lens === 'Circles' && (
-                    <Column className={styles.spaceMapView}>
-                        <SpaceCircles spaceCircleData={spaceCircleData} params={params} />
-                    </Column>
-                )}
                 {params.lens === 'Tree' && (
                     <Column className={styles.spaceMapView}>
                         <SpaceTree spaceTreeData={spaceTreeData} params={params} />
+                    </Column>
+                )}
+                {params.lens === 'Circles' && (
+                    <Column className={styles.spaceMapView}>
+                        <SpaceCircles spaceCircleData={spaceCircleData} params={params} />
                     </Column>
                 )}
                 {params.lens === 'List' && (

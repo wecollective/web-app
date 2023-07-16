@@ -49,7 +49,7 @@ const defaults = {
         sortOrder: 'Descending',
         timeRange: 'All Time',
         depth: 'Only Direct Descendants',
-        lens: 'Circles',
+        lens: 'Tree',
     },
     peopleFilters: {
         sortBy: 'Date Created',

@@ -148,19 +148,19 @@ function SpacesHeader(props: { params: any }): JSX.Element {
                     <div className={styles.lensOptions}>
                         <button
                             type='button'
-                            onClick={() => changeLens('Circles')}
-                            className={`${params.lens === 'Circles' && styles.selected}`}
-                        >
-                            <SpaceCirclesIcon />
-                            <p>Circles</p>
-                        </button>
-                        <button
-                            type='button'
                             onClick={() => changeLens('Tree')}
                             className={`${params.lens === 'Tree' && styles.selected}`}
                         >
                             <SpaceTreeIcon />
                             <p>Tree</p>
+                        </button>
+                        <button
+                            type='button'
+                            onClick={() => changeLens('Circles')}
+                            className={`${params.lens === 'Circles' && styles.selected}`}
+                        >
+                            <SpaceCirclesIcon />
+                            <p>Circles</p>
                         </button>
                         <button
                             type='button'
