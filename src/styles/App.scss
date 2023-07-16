@@ -74,9 +74,18 @@ body {
 }
 
 .flatpickr-calendar {
-    top: unset !important;
-    bottom: -345px !important;
-    left: 0 !important;
+    // width: 308px x height: 336px
+    position: fixed !important;
+    top: calc(100vh / 2 - 168px) !important;
+    left: calc(100vw / 2 - 154px) !important;
+}
+
+.flatpickr-calendar::before {
+    content: none !important;
+}
+
+.flatpickr-calendar::after {
+    content: none !important;
 }
 
 h1 {
