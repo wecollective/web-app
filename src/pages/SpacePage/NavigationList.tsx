@@ -201,7 +201,7 @@ function NavigationList(props: { onLocationChange?: () => void; style?: any }): 
             {!loading && (
                 <Column>
                     {parents.length > 0 && (
-                        <Column className={styles.spaces}>
+                        <Column className={styles.spaces} style={{ marginBottom: 20 }}>
                             <Row>
                                 <ArrowUpIcon />
                                 <p>Parent spaces</p>
