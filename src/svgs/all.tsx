@@ -6,6 +6,7 @@ import { ReactComponent as ArrowUpIcon } from '@svgs/arrow-up-solid.svg'
 import { ReactComponent as AtIcon } from '@svgs/at-solid.svg'
 import { ReactComponent as BabyIcon } from '@svgs/baby-solid.svg'
 import { ReactComponent as BellIcon } from '@svgs/bell-solid.svg'
+import { ReactComponent as ZapIcon } from '@svgs/bolt-solid.svg'
 import { ReactComponent as AboutIcon } from '@svgs/book-open-solid.svg'
 import { ReactComponent as GovernanceIcon } from '@svgs/building-columns-solid.svg'
 import { ReactComponent as CalendarIcon } from '@svgs/calendar-days-solid.svg'
@@ -160,4 +161,5 @@ export {
     ReplyIcon,
     SynapseSource,
     SynapseTarget,
+    ZapIcon,
 }

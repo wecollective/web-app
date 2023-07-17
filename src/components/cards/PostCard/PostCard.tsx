@@ -29,8 +29,8 @@ import {
     LikeIcon,
     LinkIcon,
     RepostIcon,
-    StarIcon,
     VerticalEllipsisIcon,
+    ZapIcon,
 } from '@src/svgs/all'
 import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
 import axios from 'axios'
@@ -335,16 +335,16 @@ function PostCard(props: {
                             }}
                         />
                         <StatButton
-                            icon={<RepostIcon />}
+                            icon={<LinkIcon />}
                             iconSize={20}
-                            text={totalReposts}
-                            title={statTitle('Repost', totalReposts || 0)}
-                            color={accountRepost && 'blue'}
+                            text={totalLinks}
+                            title={statTitle('Link', totalLinks || 0)}
+                            color={accountLinks > 0 ? 'blue' : undefined}
                             disabled={location === 'preview'}
-                            onClick={() => setRepostModalOpen(true)}
+                            onClick={() => history(`/linkmap?item=post&id=${id}`)}
                         />
                         <StatButton
-                            icon={<StarIcon />}
+                            icon={<ZapIcon />}
                             iconSize={20}
                             text={totalRatings}
                             title={statTitle('Rating', totalRatings || 0)}
@@ -353,13 +353,13 @@ function PostCard(props: {
                             onClick={() => setRatingModalOpen(true)}
                         />
                         <StatButton
-                            icon={<LinkIcon />}
+                            icon={<RepostIcon />}
                             iconSize={20}
-                            text={totalLinks}
-                            title={statTitle('Link', totalLinks || 0)}
-                            color={accountLinks > 0 ? 'blue' : undefined}
+                            text={totalReposts}
+                            title={statTitle('Repost', totalReposts || 0)}
+                            color={accountRepost && 'blue'}
                             disabled={location === 'preview'}
-                            onClick={() => history(`/linkmap?item=post&id=${id}`)}
+                            onClick={() => setRepostModalOpen(true)}
                         />
                         {likeModalOpen && (
                             <LikeModal

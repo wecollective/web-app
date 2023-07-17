@@ -17,8 +17,8 @@ import {
     LikeIcon,
     LinkIcon,
     ReplyIcon,
-    StarIcon,
     VerticalEllipsisIcon,
+    ZapIcon,
 } from '@svgs/all'
 import React, { useContext, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -180,19 +180,19 @@ function CommentCard(props: {
                     </button>
                     <button
                         type='button'
-                        className={accountRating ? styles.blue : ''}
-                        onClick={() => setRatingModalOpen(true)}
-                    >
-                        <StarIcon />
-                        <p>{totalRatings}</p>
-                    </button>
-                    <button
-                        type='button'
                         className={accountLinks > 0 ? styles.blue : ''}
                         onClick={() => history(`/linkmap?item=comment&id=${id}`)}
                     >
                         <LinkIcon />
                         <p>{totalLinks}</p>
+                    </button>
+                    <button
+                        type='button'
+                        className={accountRating ? styles.blue : ''}
+                        onClick={() => setRatingModalOpen(true)}
+                    >
+                        <ZapIcon />
+                        <p>{totalRatings}</p>
                     </button>
                 </Row>
             )}
