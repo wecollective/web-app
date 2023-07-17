@@ -1,6 +1,8 @@
 import Column from '@components/Column'
 import ImageTitle from '@components/ImageTitle'
+import LoadingWheel from '@components/LoadingWheel'
 import Row from '@components/Row'
+import Scrollbars from '@components/Scrollbars'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import styles from '@styles/pages/SpacePage/TopContributors.module.scss'
@@ -11,36 +13,41 @@ import { useLocation } from 'react-router-dom'
 
 function TopContributors(): JSX.Element {
     const { spaceData } = useContext(SpaceContext)
-    const [topContributors, setTopContributors] = useState<any[]>([])
+    const [users, setUsers] = useState<any[]>([])
+    const [moreUsers, setMoreUsers] = useState(false)
     const [loading, setLoading] = useState(true)
+    const [nextUsersLoading, setNextUsersLoading] = useState(false)
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]
 
     async function getUsers() {
         axios
-            .get(`${config.apiURL}/top-space-contributors?spaceId=${spaceData.id}`)
+            .get(`${config.apiURL}/top-contributors?spaceId=${spaceData.id}&offset=${users.length}`)
             .then((res) => {
-                setTopContributors(res.data)
+                setUsers([...users, ...res.data.users])
+                setMoreUsers(res.data.moreUsers)
                 setLoading(false)
+                setNextUsersLoading(false)
             })
             .catch((error) => console.log(error))
     }
 
     useEffect(() => {
-        if (spaceData.handle !== spaceHandle) setLoading(true)
-        else getUsers()
+        if (spaceData.handle !== spaceHandle) {
+            setLoading(true)
+            setUsers([])
+        } else getUsers()
     }, [spaceData.id, location])
 
     return (
-        <Column className={styles.wrapper}>
+        <Scrollbars className={styles.wrapper}>
             {!loading && (
                 <Column>
                     <Row className={styles.header}>
                         <RankingIcon />
                         <p>Top contributors</p>
                     </Row>
-
-                    {topContributors.map((user, index) => (
+                    {users.map((user, index) => (
                         <Row key={user.id} centerY style={{ marginTop: 10 }}>
                             <ImageTitle
                                 type='space'
@@ -59,9 +66,27 @@ function TopContributors(): JSX.Element {
                             </Row>
                         </Row>
                     ))}
+                    {moreUsers && (
+                        <Row centerX centerY style={{ marginTop: 10 }}>
+                            {nextUsersLoading ? (
+                                <LoadingWheel size={20} />
+                            ) : (
+                                <button
+                                    type='button'
+                                    onClick={() => {
+                                        setNextUsersLoading(true)
+                                        getUsers()
+                                    }}
+                                    className={styles.loadMore}
+                                >
+                                    Load more
+                                </button>
+                            )}
+                        </Row>
+                    )}
                 </Column>
             )}
-        </Column>
+        </Scrollbars>
     )
 }
 
