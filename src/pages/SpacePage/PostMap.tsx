@@ -6,7 +6,7 @@ import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
-import { getDraftPlainText } from '@src/Helpers'
+import { getDraftPlainText, trimText } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/pages/SpacePage/PostMap.module.scss'
 import axios from 'axios'
@@ -266,9 +266,7 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
     }
 
     function formatText(text) {
-        const formattedText = getDraftPlainText(text)
-        const trimmedText = formattedText.substring(0, 20)
-        return formattedText.length > 20 ? trimmedText.concat('...') : formattedText
+        return trimText(getDraftPlainText(text), 20)
     }
 
     function updateMap(data) {

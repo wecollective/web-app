@@ -494,6 +494,10 @@ export function trimNumber(number, maxValue) {
     return number ? (number > maxValue ? maxValue : number) : 0
 }
 
+export function trimText(text: string, maxChars: number) {
+    return text.length > maxChars ? text.substring(0, maxChars).concat('...') : text
+}
+
 export function findDHMFromMinutes(minutes) {
     // return { days, hours, minutes } object from minutes
     const days = Math.floor(minutes / 60 / 24)

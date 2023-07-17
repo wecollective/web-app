@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-param-reassign */
 import Column from '@components/Column'
-import DraftText from '@components/draft-js/DraftText'
 import Row from '@components/Row'
 import StatButton from '@components/StatButton'
+import DraftText from '@components/draft-js/DraftText'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
+import { trimText } from '@src/Helpers'
 import styles from '@styles/pages/SpacePage/SpaceTree.module.scss'
 import { CommentIcon, LockIcon, PostIcon, UsersIcon } from '@svgs/all'
 import axios from 'axios'
@@ -321,7 +322,7 @@ function SpaceTree(props: { spaceTreeData: any; params: any }): JSX.Element {
     function findCircleText(d) {
         const { name } = d.data
         if (name.length < maxTextLength || isRoot(d)) return name
-        return `${name.substring(0, maxTextLength - 3)}...`
+        return trimText(name, maxTextLength - 3)
     }
 
     function createLinks(type: 'child' | 'parent') {

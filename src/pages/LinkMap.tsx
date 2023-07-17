@@ -15,7 +15,7 @@ import PostCard from '@components/cards/PostCard/PostCard'
 import VerticalUserCard from '@components/cards/VerticalUserCard'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
-import { currentState, getDraftPlainText } from '@src/Helpers'
+import { currentState, getDraftPlainText, trimText } from '@src/Helpers'
 import LoadingWheel from '@src/components/LoadingWheel'
 import LikeModal from '@src/components/modals/LikeModal'
 import colors from '@styles/Colors.module.scss'
@@ -508,7 +508,7 @@ function LinkMap(): JSX.Element {
         }
         if (modelType === 'comment') nodeText = getDraftPlainText(text || '')
         if (['user', 'space'].includes(modelType)) nodeText = name
-        return nodeText.length > maxChars ? nodeText.substring(0, maxChars).concat('...') : nodeText
+        return trimText(nodeText, maxChars)
     }
 
     function nodeMouseOver(e, node) {

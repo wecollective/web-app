@@ -3,11 +3,12 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable react/no-this-in-sfc */
 import Column from '@components/Column'
-import DraftText from '@components/draft-js/DraftText'
 import Row from '@components/Row'
 import StatButton from '@components/StatButton'
+import DraftText from '@components/draft-js/DraftText'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
+import { trimText } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/pages/SpacePage/SpaceCircles.module.scss'
 import { CommentIcon, LockIcon, PostIcon, UsersIcon } from '@svgs/all'
@@ -74,7 +75,7 @@ function SpaceCircles(props: { spaceCircleData: any; params: any }): JSX.Element
     function findCircleText(d) {
         const { name } = d.data
         if (name.length < maxTextLength || isRoot(d)) return name
-        return `${name.substring(0, maxTextLength - 3)}...`
+        return trimText(name, maxTextLength - 3)
     }
 
     function getHighlightedSpaceData(space) {

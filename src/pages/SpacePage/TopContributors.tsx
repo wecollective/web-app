@@ -5,6 +5,7 @@ import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
+import { trimText } from '@src/Helpers'
 import styles from '@styles/pages/SpacePage/TopContributors.module.scss'
 import { LikeIcon, RankingIcon, TrophyIcon } from '@svgs/all'
 import axios from 'axios'
@@ -52,7 +53,7 @@ function TopContributors(): JSX.Element {
                             <ImageTitle
                                 type='space'
                                 imagePath={user.flagImagePath}
-                                title={user.name}
+                                title={trimText(user.name, 18)}
                                 link={`/u/${user.handle}/posts`}
                                 fontSize={14}
                                 imageSize={35}

@@ -5,6 +5,7 @@ import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
+import { trimText } from '@src/Helpers'
 import styles from '@styles/pages/SpacePage/NavigationList.module.scss'
 import { ArrowDownIcon, ArrowUpIcon, MinusIcon, PlusIcon } from '@svgs/all'
 import axios from 'axios'
@@ -36,14 +37,13 @@ function Space(props: {
         nextChildrenLoading,
     } = space
     const showExpander = totalChildren > 0 && (privacy === 'public' || spaceAccess === 'active')
-    const title = name.length > 25 ? name.substring(0, 25).concat('...') : name
     return (
         <Column>
             <Row centerY style={{ marginBottom: 10 }}>
                 <ImageTitle
                     type='space'
                     imagePath={flagImagePath}
-                    title={title}
+                    title={trimText(name, 25)}
                     link={`/s/${handle}/${selectedSubPage}`}
                     fontSize={14}
                     imageSize={35}
