@@ -96,7 +96,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     const [spacePeoplePaginationOffset, setSpacePeoplePaginationOffset] = useState(0)
     const [spacePeoplePaginationHasMore, setSpacePeoplePaginationHasMore] = useState(true)
 
-    const currentSpaceHandleRef = useRef('')
+    const currentSpaceHandle = useRef('')
     const cookies = new Cookies()
     const location = useLocation()
 
@@ -157,7 +157,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 options
             )
             .then((res) => {
-                if (currentSpaceHandleRef.current === spaceData.handle) {
+                if (currentSpaceHandle.current === spaceData.handle) {
                     setSpacePosts(firstLoad ? res.data : [...spacePosts, ...res.data])
                     setSpacePostsPaginationHasMore(res.data.length === spacePostsPaginationLimit)
                     setSpacePostsPaginationOffset(offset + spacePostsPaginationLimit)
@@ -326,7 +326,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     useEffect(() => updateSpaceUserStatus(spaceData), [loggedIn])
 
     useEffect(() => {
-        currentSpaceHandleRef.current = location.pathname.split('/')[2]
+        currentSpaceHandle.current = location.pathname.split('/')[2]
     }, [location])
 
     return (

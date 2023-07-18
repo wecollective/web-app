@@ -1,8 +1,10 @@
+/* eslint-disable prefer-destructuring */
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
 import { IPost, IUserContext } from '@src/Interfaces'
 import axios from 'axios'
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
 export const UserContext = createContext<IUserContext>({} as IUserContext)
@@ -44,6 +46,8 @@ function UserContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
     const [userPostsPaginationOffset, setUserPostsPaginationOffset] = useState(0)
     const [userPostsPaginationHasMore, setUserPostsPaginationHasMore] = useState(false)
     const cookies = new Cookies()
+    const location = useLocation()
+    const currentUserHandle = useRef('')
 
     function getUserData(userHandle, returnFunction) {
         console.log('UserContext: getUserData')
@@ -80,11 +84,13 @@ function UserContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
                 options
             )
             .then((res) => {
-                setUserPosts(firstLoad ? res.data : [...userPosts, ...res.data])
-                setUserPostsPaginationHasMore(res.data.length === userPostsPaginationLimit)
-                setUserPostsPaginationOffset(offset + userPostsPaginationLimit)
-                if (firstLoad) setUserPostsLoading(false)
-                else setNextUserPostsLoading(false)
+                if (currentUserHandle.current === userData.handle) {
+                    setUserPosts(firstLoad ? res.data : [...userPosts, ...res.data])
+                    setUserPostsPaginationHasMore(res.data.length === userPostsPaginationLimit)
+                    setUserPostsPaginationOffset(offset + userPostsPaginationLimit)
+                    if (firstLoad) setUserPostsLoading(false)
+                    else setNextUserPostsLoading(false)
+                }
             })
             .catch((error) => console.log('GET user-posts error: ', error))
     }
@@ -109,6 +115,10 @@ function UserContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
         if (loggedIn && userData.id === accountData.id) setIsOwnAccount(true)
         else setIsOwnAccount(false)
     }, [userData.id, loggedIn])
+
+    useEffect(() => {
+        currentUserHandle.current = location.pathname.split('/')[2]
+    }, [location])
 
     return (
         <UserContext.Provider

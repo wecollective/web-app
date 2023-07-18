@@ -16,7 +16,6 @@ function Spaces(): JSX.Element {
     const {
         spaceData,
         spaceNotFound,
-        spaceListData,
         getSpaceListData,
         spaceSpacesLoading,
         setSpaceSpacesLoading,
@@ -58,7 +57,7 @@ function Spaces(): JSX.Element {
 
     if (spaceNotFound) return <SpaceNotFound />
     return (
-        <Column className={styles.wrapper}>
+        <Column centerX className={styles.wrapper}>
             <SpacesHeader params={params} />
             <Row centerX className={styles.content}>
                 {params.lens === 'Tree' && (
@@ -73,12 +72,7 @@ function Spaces(): JSX.Element {
                 )}
                 {params.lens === 'List' && (
                     <Column centerX className={styles.spaceListView}>
-                        <SpaceList
-                            location='space-spaces'
-                            spaces={spaceListData}
-                            firstSpacesloading={spaceSpacesLoading}
-                            nextSpacesLoading={nextSpaceSpacesLoading}
-                        />
+                        <SpaceList location='space-spaces' />
                     </Column>
                 )}
             </Row>

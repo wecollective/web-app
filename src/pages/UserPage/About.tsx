@@ -25,7 +25,7 @@ function About(): JSX.Element {
                         <p>Joined</p>
                         <p title={dateCreated(createdAt)}>{timeSinceCreated(createdAt)}</p>
                     </Row>
-                    <DraftText stringifiedDraft={bio || ''} />
+                    {bio && <DraftText stringifiedDraft={bio || ''} style={{ marginTop: 30 }} />}
                 </Column>
             )}
         </Column>

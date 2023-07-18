@@ -15,7 +15,6 @@ function PeopleHeader(props: { params: any }): JSX.Element {
     const location = useLocation()
     const history = useNavigate()
     const mobileView = document.documentElement.clientWidth < 900
-    // const smallMobileView = document.documentElement.clientWidth < 400
 
     useEffect(() => setFilterParams(params), [params])
 
@@ -25,7 +24,6 @@ function PeopleHeader(props: { params: any }): JSX.Element {
                 icon={<SlidersIcon />}
                 text={mobileView ? '' : 'Filters'}
                 color='aqua'
-                style={{ marginRight: 10 }}
                 onClick={() => setFiltersModalOpen(true)}
             />
             {filtersModalOpen && (

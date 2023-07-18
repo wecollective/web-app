@@ -84,15 +84,14 @@ function Posts(): JSX.Element {
                     <Row centerX style={{ width: '100%' }}>
                         {largeScreen && (
                             <Column className={styles.spaceNavWrapper}>
-                                {/* <Column> */}
                                 <NavigationList />
-                                {/* </Column> */}
                             </Column>
                         )}
                         <PostList
                             location='space-posts'
                             posts={spacePosts}
-                            firstPostsloading={spacePostsLoading}
+                            totalPosts={spaceData.totalPosts}
+                            loading={spacePostsLoading}
                             nextPostsLoading={nextSpacePostsLoading}
                             className={styles.postList}
                             styling={wecoSpace}

@@ -12,17 +12,30 @@ import React, { useContext, useEffect } from 'react'
 function PostList(props: {
     location: 'space-posts' | 'user-posts'
     posts: any[]
-    firstPostsloading: boolean
+    totalPosts: number
+    loading: boolean
     nextPostsLoading: boolean
     className?: string
     styling?: boolean
     style?: any
 }): JSX.Element {
-    const { location, posts, firstPostsloading, nextPostsLoading, className, styling, style } =
+    const { location, posts, totalPosts, loading, nextPostsLoading, className, styling, style } =
         props
     const { resetSpacePosts } = useContext(SpaceContext)
     const { resetUserPosts } = useContext(UserContext)
     const mobileView = document.documentElement.clientWidth < 900
+
+    function renderPlaceholder() {
+        return (
+            <Column centerY centerX className={styles.noResults}>
+                {totalPosts ? (
+                    <p>No posts found that match those settings...</p>
+                ) : (
+                    <p>No posts created...</p>
+                )}
+            </Column>
+        )
+    }
 
     useEffect(
         () => () => {
@@ -34,23 +47,30 @@ function PostList(props: {
 
     return (
         <Column className={`${styles.wrapper} ${className}`} style={style}>
-            {firstPostsloading ? (
+            {loading ? (
                 <PostListPlaceholder />
-            ) : posts.length ? (
-                <Column className={styles.posts}>
-                    {posts.map((post) => (
-                        <PostCard post={post} key={post.id} location={location} styling={styling} />
-                    ))}
-                    {nextPostsLoading && (
-                        <Row centerX style={{ marginTop: mobileView ? 15 : 0 }}>
-                            <LoadingWheel />
-                        </Row>
+            ) : (
+                <Column>
+                    {!posts.length ? (
+                        renderPlaceholder()
+                    ) : (
+                        <Column className={styles.posts}>
+                            {posts.map((post) => (
+                                <PostCard
+                                    post={post}
+                                    key={post.id}
+                                    location={location}
+                                    styling={styling}
+                                />
+                            ))}
+                            {nextPostsLoading && (
+                                <Row centerX style={{ marginTop: mobileView ? 15 : 0 }}>
+                                    <LoadingWheel />
+                                </Row>
+                            )}
+                        </Column>
                     )}
                 </Column>
-            ) : (
-                <Row className={styles.noResults}>
-                    <p>No posts found that match those settings...</p>
-                </Row>
             )}
         </Column>
     )

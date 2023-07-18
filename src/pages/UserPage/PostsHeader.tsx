@@ -1,16 +1,20 @@
 import DropDown from '@components/DropDown'
 import { getParamString } from '@src/Helpers'
 import styles from '@styles/pages/SpacePage/Header.module.scss'
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 // import Toggle from '@components/Toggle'
 import Button from '@components/Button'
-import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
-import { SlidersIcon } from '@svgs/all'
+import Modal from '@components/modals/Modal'
+import { AccountContext } from '@contexts/AccountContext'
+import { UserContext } from '@contexts/UserContext'
+import { PlusIcon, SlidersIcon } from '@svgs/all'
 
 function PostsHeader(props: { params: any }): JSX.Element {
     const { params } = props
+    const { accountData, loggedIn, setCreatePostModalOpen } = useContext(AccountContext)
+    const { userData } = useContext(UserContext)
     const [filtersModalOpen, setFiltersModalOpen] = useState(false)
     const [filterParams, setFilterParams] = useState(params)
     const location = useLocation()
@@ -21,11 +25,19 @@ function PostsHeader(props: { params: any }): JSX.Element {
 
     return (
         <Row centerY centerX className={styles.wrapper}>
+            {loggedIn && accountData.id === userData.id && (
+                <Button
+                    icon={<PlusIcon />}
+                    text={mobileView ? '' : 'New post'}
+                    color='blue'
+                    onClick={() => setCreatePostModalOpen(true)}
+                />
+            )}
+
             <Button
                 icon={<SlidersIcon />}
                 text={mobileView ? '' : 'Filters'}
                 color='aqua'
-                style={{ marginRight: 10 }}
                 onClick={() => setFiltersModalOpen(true)}
             />
             {filtersModalOpen && (

@@ -1,12 +1,17 @@
 @import '@styles/Variables';
 
 .wrapper {
-    width: 100%;
-    padding: 15px 10px;
+    padding: 10px 5px;
     background-color: $grey1;
-    z-index: 100;
+    z-index: 80;
     position: fixed;
-    bottom: 0;
+    bottom: 15px;
+    border-radius: 30px;
+    box-shadow: 0 0 20px 0 rgba(10, 8, 72, 0.25);
+
+    > button {
+        margin: 0 5px;
+    }
 
     .header {
         margin-bottom: 20px;

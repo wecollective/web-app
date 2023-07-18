@@ -8,36 +8,52 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import styles from '@styles/components/PostList.module.scss'
 import React, { useContext, useEffect } from 'react'
 
-function SpaceList(props: {
-    location: 'space-spaces'
-    spaces: any[]
-    firstSpacesloading: boolean
-    nextSpacesLoading: boolean
-}): JSX.Element {
-    const { location, spaces, firstSpacesloading, nextSpacesLoading } = props
-    const { resetSpaceListData } = useContext(SpaceContext)
+function SpaceList(props: { location: 'space-spaces' }): JSX.Element {
+    const { location } = props
+    const {
+        spaceData,
+        spaceListData: spaces,
+        spaceSpacesLoading: loading,
+        nextSpaceSpacesLoading: nextSpacesLoading,
+        resetSpaceListData,
+    } = useContext(SpaceContext)
+    const { name, totalSpaces } = spaceData
+
+    function renderPlaceholder() {
+        return (
+            <Column centerY centerX className={styles.noResults}>
+                {totalSpaces ? (
+                    <p>No spaces found in {name} that match those settings...</p>
+                ) : (
+                    <p>No spaces created in {name}...</p>
+                )}
+            </Column>
+        )
+    }
 
     useEffect(() => () => resetSpaceListData(), [])
 
     return (
         <Column id={`${location}-scrollbars`} className={styles.wrapper}>
-            {firstSpacesloading ? (
+            {loading ? (
                 <SpaceListPlaceholder />
-            ) : spaces.length ? (
-                <Column className={styles.spaces}>
-                    {spaces.map((space) => (
-                        <HorizontalSpaceCard key={space.id} space={space} />
-                    ))}
-                    {nextSpacesLoading && (
-                        <Row centerX>
-                            <LoadingWheel />
-                        </Row>
+            ) : (
+                <Column>
+                    {!spaces.length ? (
+                        renderPlaceholder()
+                    ) : (
+                        <Column className={styles.spaces}>
+                            {spaces.map((space) => (
+                                <HorizontalSpaceCard key={space.id} space={space} />
+                            ))}
+                            {nextSpacesLoading && (
+                                <Row centerX>
+                                    <LoadingWheel />
+                                </Row>
+                            )}
+                        </Column>
                     )}
                 </Column>
-            ) : (
-                <Row className={styles.noResults}>
-                    <p>No spaces found that match those settings...</p>
-                </Row>
             )}
         </Column>
     )

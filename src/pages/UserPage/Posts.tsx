@@ -66,7 +66,8 @@ function Posts(): JSX.Element {
                         <PostList
                             location='user-posts'
                             posts={userPosts}
-                            firstPostsloading={userPostsLoading}
+                            totalPosts={userData.totalPosts}
+                            loading={userPostsLoading}
                             nextPostsLoading={nextUserPostsLoading}
                         />
                     </Row>

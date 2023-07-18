@@ -53,13 +53,11 @@ function SpacesHeader(props: { params: any }): JSX.Element {
                 text={mobileView ? '' : 'New space'}
                 color='blue'
                 onClick={openCreateSpaceModal}
-                style={{ marginRight: 10 }}
             />
             <Button
                 icon={<SlidersIcon />}
                 text={mobileView ? '' : 'Filters'}
                 color='aqua'
-                style={{ marginRight: 10 }}
                 onClick={() => setFiltersModalOpen(true)}
             />
             <Button

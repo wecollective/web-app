@@ -1,38 +1,29 @@
-import { AccountContext } from '@contexts/AccountContext'
-import React, { useContext, useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-// import { SpaceContext } from '@contexts/SpaceContext'
 import Button from '@components/Button'
 import DropDown from '@components/DropDown'
-import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
 import Toggle from '@components/Toggle'
+import Modal from '@components/modals/Modal'
+import { AccountContext } from '@contexts/AccountContext'
 import { getParamString } from '@src/Helpers'
 import styles from '@styles/pages/SpacePage/Header.module.scss'
 import { EyeIcon, PlusIcon, SlidersIcon } from '@svgs/all'
+import React, { useContext, useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 function PostsHeader(props: { params: any }): JSX.Element {
     const { params } = props
-    const {
-        loggedIn,
-        setAlertModalOpen,
-        setAlertMessage,
-        // setCreatePostModalSettings,
-        setCreatePostModalOpen,
-    } = useContext(AccountContext)
+    const { loggedIn, setAlertModalOpen, setAlertMessage, setCreatePostModalOpen } =
+        useContext(AccountContext)
     const [filtersModalOpen, setFiltersModalOpen] = useState(false)
     const [filterParams, setFilterParams] = useState(params)
     const [lensesModalOpen, setLensesModalOpen] = useState(false)
     const location = useLocation()
     const history = useNavigate()
     const mobileView = document.documentElement.clientWidth < 900
-    const smallMobileView = document.documentElement.clientWidth < 400
 
     function openCreatePostModal() {
-        if (loggedIn) {
-            // setCreatePostModalSettings({ type: 'text' })
-            setCreatePostModalOpen(true)
-        } else {
+        if (loggedIn) setCreatePostModalOpen(true)
+        else {
             setAlertModalOpen(true)
             setAlertMessage('Log in to create a post')
         }
@@ -43,26 +34,16 @@ function PostsHeader(props: { params: any }): JSX.Element {
     return (
         <Row centerY centerX className={styles.wrapper}>
             <Button
-                icon={smallMobileView ? <PlusIcon /> : undefined}
-                text={smallMobileView ? '' : 'New post'}
+                icon={<PlusIcon />}
+                text={mobileView ? '' : 'New post'}
                 color='blue'
-                onClick={() => openCreatePostModal()}
-                style={{ marginRight: 10 }}
+                onClick={openCreatePostModal}
             />
-            {/* {spaceData.SpaceAncestors.map((h) => h.handle).includes('castalia') && (
-                <Button
-                    text='New game'
-                    color='purple'
-                    onClick={() => openCreatePostModal('Glass Bead Game')}
-                    style={{ marginRight: 10 }}
-                />
-            )} */}
             <Button
                 icon={<SlidersIcon />}
                 text={mobileView ? '' : 'Filters'}
                 color='aqua'
                 onClick={() => setFiltersModalOpen(true)}
-                style={{ marginRight: 10 }}
             />
             <Button
                 icon={<EyeIcon />}
@@ -70,12 +51,6 @@ function PostsHeader(props: { params: any }): JSX.Element {
                 color='purple'
                 onClick={() => setLensesModalOpen(true)}
             />
-            {/* {createPostModalOpen && (
-                <CreatePostModal
-                    initialType={createPostModalSettings}
-                    close={() => setCreatePostModalOpen(false)}
-                />
-            )} */}
             {filtersModalOpen && (
                 <Modal centerX centerY close={() => setFiltersModalOpen(false)}>
                     <h1>Post Filters</h1>
@@ -190,3 +165,12 @@ function PostsHeader(props: { params: any }): JSX.Element {
 }
 
 export default PostsHeader
+
+/* {spaceData.SpaceAncestors.map((h) => h.handle).includes('castalia') && (
+    <Button
+        text='New game'
+        color='purple'
+        onClick={() => openCreatePostModal('Glass Bead Game')}
+        style={{ marginRight: 10 }}
+    />
+)} */

@@ -60,7 +60,7 @@ function People(): JSX.Element {
 
     if (spaceNotFound) return <SpaceNotFound />
     return (
-        <Column className={styles.wrapper}>
+        <Column centerX className={styles.wrapper}>
             <PeopleHeader params={params} />
             <Row className={styles.content}>
                 <PeopleList

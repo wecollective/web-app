@@ -11,6 +11,7 @@ import About from '@src/pages/UserPage/About'
 import Notifications from '@src/pages/UserPage/Notifications'
 import Posts from '@src/pages/UserPage/Posts'
 import Settings from '@src/pages/UserPage/Settings'
+// import Sidebar from '@src/pages/UserPage/Sidebar'
 import styles from '@styles/pages/UserPage/UserPage.module.scss'
 import { AboutIcon, BellIcon, PostIcon, SettingsIcon } from '@svgs/all'
 import React, { useContext, useEffect, useState } from 'react'
@@ -63,6 +64,7 @@ function UserPage(): JSX.Element {
 
     return (
         <Column centerX className={styles.wrapper}>
+            {/* <Sidebar /> */}
             <Column centerX className={`${styles.header} ${headerCollapsed && styles.collapsed}`}>
                 <CoverImage type='user' image={userData.coverImagePath} canEdit={isOwnAccount} />
                 <Row centerY className={styles.userData}>
