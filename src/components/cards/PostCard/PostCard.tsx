@@ -2,6 +2,7 @@ import CloseOnClickOutside from '@components/CloseOnClickOutside'
 import Column from '@components/Column'
 import ImageTitle from '@components/ImageTitle'
 import Row from '@components/Row'
+import ShowMoreLess from '@components/ShowMoreLess'
 import StatButton from '@components/StatButton'
 import DraftText from '@components/draft-js/DraftText'
 import DeletePostModal from '@components/modals/DeletePostModal'
@@ -48,10 +49,11 @@ function PostCard(props: {
         | 'user-posts'
         | 'link-modal'
         | 'preview'
+    collapse?: boolean
     styling?: boolean
     style?: any
 }): JSX.Element {
-    const { post, index, location, styling, style } = props
+    const { post, index, location, collapse, styling, style } = props
     const {
         accountData,
         loggedIn,
@@ -261,7 +263,14 @@ function PostCard(props: {
                 )}
                 {title && <h1 className={styles.title}>{title}</h1>}
                 {GlassBeadGame && GlassBeadGame.topic && renderTopic()}
-                {text && <DraftText stringifiedDraft={text} style={{ marginBottom: 10 }} />}
+                {text && collapse && (
+                    <ShowMoreLess height={250} gradientColor='white'>
+                        <DraftText stringifiedDraft={text} style={{ marginBottom: 10 }} />
+                    </ShowMoreLess>
+                )}
+                {text && !collapse && (
+                    <DraftText stringifiedDraft={text} style={{ marginBottom: 10 }} />
+                )}
                 {/* {todo: startTime && } */}
                 {postData.Event && (
                     <EventCard postData={postData} setPostData={setPostData} location={location} />
@@ -317,7 +326,7 @@ function PostCard(props: {
                             disabled={location === 'preview' || likeResponseLoading}
                             loading={likeResponseLoading}
                             onClickIcon={toggleLike}
-                            onClickStat={() => setLikeModalOpen(true)}
+                            onClickStat={() => (totalLikes ? setLikeModalOpen(true) : toggleLike())}
                         />
                         <StatButton
                             icon={<CommentIcon />}
@@ -430,6 +439,7 @@ function PostCard(props: {
 
 PostCard.defaultProps = {
     index: null,
+    collapse: false,
     styling: false,
     style: null,
 }
