@@ -46,6 +46,7 @@
                 .targetOptions {
                     position: absolute;
                     top: 50px;
+                    right: 0;
                     background-color: white;
                     padding: 5px;
                     border-radius: 5px;
@@ -60,6 +61,44 @@
                         &:hover {
                             background-color: $blue8;
                         }
+                    }
+                }
+            }
+
+            .targetSearchButton {
+                all: unset;
+                cursor: pointer;
+                width: 30px;
+                height: 30px;
+                margin-left: 15px;
+
+                > svg {
+                    width: inherit;
+                    height: inherit;
+                    color: $grey3;
+                    transition: color 0.5s;
+
+                    &:hover {
+                        color: $grey5;
+                    }
+                }
+            }
+
+            .targetSearchOptions {
+                > div {
+                    margin-bottom: 20px;
+                    padding: 5px;
+                    border: 2px solid $grey1;
+                    border-radius: 10px;
+                    transition: all 0.5s;
+
+                    &:hover {
+                        border: 2px solid $blue1;
+                        background-color: $blue6;
+                    }
+
+                    > button {
+                        margin-top: 10px;
                     }
                 }
             }

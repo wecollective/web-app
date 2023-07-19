@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 
 import Button from '@components/Button'
+import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
 import DropDown from '@components/DropDown'
 import DropDownMenu from '@components/DropDownMenu'
@@ -20,7 +21,7 @@ import LoadingWheel from '@src/components/LoadingWheel'
 import LikeModal from '@src/components/modals/LikeModal'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/pages/LinkMap.module.scss'
-import { ArrowDownIcon, LikeIcon, SynapseSource, SynapseTarget } from '@svgs/all'
+import { ArrowDownIcon, LikeIcon, SearchIcon, SynapseSource, SynapseTarget } from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
@@ -33,8 +34,8 @@ function LinkMap(): JSX.Element {
     const history = useNavigate()
     const urlParams = Object.fromEntries(new URLSearchParams(location.search))
     const { loggedIn, accountData, setLogInModalOpen } = useContext(AccountContext)
+    const [linkTreeData, setLinkTreeData] = useState<any>(null)
     const [linkData, setLinkData] = useState<any>(null)
-    const [linkData2, setLinkData2] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const [createLinkLoading, setCreateLinkLoading] = useState(false)
     const [targetType, setTargetType] = useState('Post')
@@ -49,6 +50,15 @@ function LinkMap(): JSX.Element {
     const [sizeBy, setSizeBy] = useState('Likes')
     const [clickedSpaceUUID, setClickedSpaceUUID] = useState('')
     const [likeModalOpen, setLikeModalOpen] = useState(false)
+    const [targetText, setTargetText] = useState('')
+    const [targetSearchOptions, setTargetSearchOptions] = useState<any>(null)
+    const [selectedUser, setSelectedUser] = useState<any>(null)
+    const [userSearch, setUserSearch] = useState('')
+    const [userOptions, setUserOptions] = useState<any>(null)
+    const [targetFromTextLoading, setTargetFromTextLoading] = useState(false)
+    const targetTextRef = useRef('')
+    const userSearchRef = useRef('')
+    const selectedUserRef = useRef(0)
     const svgSize = useRef(0)
     const transitioning = useRef(true)
     const nodeScale = useRef((value: number) => 0)
@@ -60,10 +70,6 @@ function LinkMap(): JSX.Element {
     const matchedNodeUUIDs = useRef<number[]>([])
     const selectedLinkUUID = useRef('')
     const cookies = new Cookies()
-    // const headerText =
-    //     linkData && linkData.item
-    //         ? `${linkData.item.totalLinks} link${pluralise(linkData.item.totalLinks)}`
-    //         : 'No links yet...'
     // settings
     const curvedLinks = false
     const duration = 1000
@@ -77,20 +83,22 @@ function LinkMap(): JSX.Element {
         axios
             .get(`${config.apiURL}/links${params}`, options)
             .then((res) => {
-                setLinkData2(null)
+                setLinkData(null)
                 resetOpacity()
-                setLinkData(res.data)
+                setLinkTreeData(res.data)
                 setLoading(false)
             })
             .catch((error) => console.log(error))
     }
 
     function renderItem(item, type) {
-        if (type === 'post') return <PostCard post={item} location='link-modal' />
+        if (type === 'post')
+            return <PostCard key={item.id} post={item} location='link-modal' collapse />
         if (type === 'comment')
             return (
                 // todo: add styles prop to CommentCard, allow commenting on linkmap
                 <CommentCard
+                    key={item.id}
                     comment={item}
                     highlighted={false}
                     location='link-map'
@@ -101,13 +109,13 @@ function LinkMap(): JSX.Element {
                 />
             )
         if (type === 'user')
-            return <VerticalUserCard user={item} style={{ flexGrow: 0, margin: 0 }} />
-        if (type === 'space') return <HorizontalSpaceCard space={item} />
+            return <VerticalUserCard key={item.id} user={item} style={{ flexGrow: 0, margin: 0 }} />
+        if (type === 'space') return <HorizontalSpaceCard key={item.id} space={item} />
         return null
     }
 
     function getTarget(identifier) {
-        const { id, modelType } = linkData.item
+        const { id, modelType } = linkTreeData.item
         const targetIsSource = +identifier === id && targetType.toLowerCase() === modelType
         if (targetIsSource) {
             setTargetIsSourceError(true)
@@ -135,7 +143,7 @@ function LinkMap(): JSX.Element {
                         } else console.log(error)
                     })
             } else {
-                const data = { query: identifier, blacklist: [linkData.item.id] }
+                const data = { query: identifier, blacklist: [linkTreeData.item.id] }
                 axios
                     .post(`${config.apiURL}/find-${type === 'user' ? 'people' : 'spaces'}`, data)
                     .then((res) => setTargetOptions(res.data))
@@ -147,8 +155,8 @@ function LinkMap(): JSX.Element {
     function createLink() {
         setCreateLinkLoading(true)
         const data = {
-            sourceType: linkData.item.modelType,
-            sourceId: linkData.item.id,
+            sourceType: linkTreeData.item.modelType,
+            sourceId: linkTreeData.item.id,
             targetType: targetType.toLowerCase(),
             targetId: target.id,
             description: linkDescription,
@@ -174,8 +182,11 @@ function LinkMap(): JSX.Element {
                     Link: { uuid: uuidv4(), direction: 'outgoing', ...res.data },
                 }
                 console.log('newNode: ', newNode)
-                setLinkData({
-                    item: { ...linkData.item, children: [newNode, ...linkData.item.children] },
+                setLinkTreeData({
+                    item: {
+                        ...linkTreeData.item,
+                        children: [newNode, ...linkTreeData.item.children],
+                    },
                 })
                 setCreateLinkLoading(false)
             })
@@ -188,6 +199,16 @@ function LinkMap(): JSX.Element {
             })
     }
 
+    function findUsers() {
+        const query = userSearchRef.current
+        axios
+            .post(`${config.apiURL}/find-people`, { query, blacklist: [] })
+            .then((res) => {
+                if (userSearchRef.current === query) setUserOptions(res.data)
+            })
+            .catch((error) => console.log(error))
+    }
+
     // function removeLink(direction, type, linkId, itemId) {
     //     const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
     //     axios
@@ -195,9 +216,9 @@ function LinkMap(): JSX.Element {
     //         .then((res) => {
     //             // update modal context
     //             const linkArray = `${direction === 'to' ? 'Outgoing' : 'Incoming'}${type}Links`
-    //             setLinkData({
-    //                 ...linkData,
-    //                 [linkArray]: [...linkData[linkArray].filter((l) => l.id !== linkId)],
+    //             setLinkTreeData({
+    //                 ...linkTreeData,
+    //                 [linkArray]: [...linkTreeData[linkArray].filter((l) => l.id !== linkId)],
     //             })
     //             // update context state
     //             updateContextState('remove-link', type, itemId)
@@ -293,12 +314,10 @@ function LinkMap(): JSX.Element {
     function createNodeRadiusScale() {
         let min
         let max
-        if (sizeBy === 'Date Created') {
-            min = d3.min(nodes.current.map((node) => Date.parse(node.data.item.createdAt)))
-            max = d3.max(nodes.current.map((node) => Date.parse(node.data.item.createdAt)))
-        } else if (sizeBy === 'Recent Activity') {
-            min = d3.min(nodes.current.map((node) => Date.parse(node.data.item.updatedAt)))
-            max = d3.max(nodes.current.map((node) => Date.parse(node.data.item.updatedAt)))
+        const dateValue = sizeBy === 'Date Created' ? 'createdAt' : 'updatedAt'
+        if (['Date Created', 'Recent Activity'].includes(sizeBy)) {
+            min = d3.min(nodes.current.map((node) => Date.parse(node.data.item[dateValue])))
+            max = d3.max(nodes.current.map((node) => Date.parse(node.data.item[dateValue])))
         } else {
             min = d3.min(nodes.current.map((node) => node.data.item[`total${sizeBy}`]))
             max = d3.max(nodes.current.map((node) => node.data.item[`total${sizeBy}`]))
@@ -415,7 +434,7 @@ function LinkMap(): JSX.Element {
             .get(`${config.apiURL}/link-data?linkId=${link.id}`, options)
             .then((res) => {
                 // console.log('link-data res: ', res.data)
-                setLinkData2(res.data)
+                setLinkData(res.data)
             })
             .catch((error) => console.log(error))
     }
@@ -557,7 +576,7 @@ function LinkMap(): JSX.Element {
             const { uuid, id, modelType } = node.data.item
             const mainNode = id === +urlParams.id && modelType === urlParams.item
             if (mainNode) {
-                setLinkData2(null)
+                setLinkData(null)
                 resetOpacity()
                 resetPosition()
             } else {
@@ -802,6 +821,146 @@ function LinkMap(): JSX.Element {
             )
     }
 
+    function userTitle(u) {
+        return `${trimText(u.name, 15)} (u/${trimText(u.handle, 15)})`
+    }
+
+    function findTargetFromText() {
+        const text = targetTextRef.current
+        if (!text) {
+            setTargetSearchOptions(null)
+            setTargetFromTextLoading(false)
+        } else {
+            setTargetFromTextLoading(true)
+            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+            const { id, item } = urlParams
+            // include sourceId if matching types to prevent link to self
+            const sourceId = item === targetType.toLowerCase() ? `&sourceId=${id}` : ''
+            const userId = selectedUserRef.current ? `&userId=${selectedUserRef.current}` : ''
+            const params = `?type=${targetType}&text=${text}${userId}${sourceId}`
+            axios
+                .get(`${config.apiURL}/target-from-text${params}`, options)
+                .then((res) => {
+                    console.log('findTargetFromText res: ', res.data)
+                    if (currentState(setTargetText) === text) {
+                        setTargetSearchOptions(res.data)
+                        setTargetFromTextLoading(false)
+                    }
+                })
+                .catch((error) => console.log(error))
+        }
+    }
+
+    function renderTargetSearch() {
+        return (
+            <Column style={{ width: '100%' }}>
+                <Row centerY style={{ width: '100%', marginBottom: 20 }}>
+                    <SearchIcon
+                        style={{
+                            width: 25,
+                            height: 25,
+                            color: '#bbb',
+                            marginRight: 10,
+                            flexShrink: 0,
+                        }}
+                    />
+                    <Input
+                        type='text'
+                        placeholder='text...'
+                        value={targetText}
+                        onChange={(text) => {
+                            setTargetText(text)
+                            targetTextRef.current = text
+                            findTargetFromText()
+                        }}
+                        loading={targetFromTextLoading}
+                        style={{ width: '100%' }}
+                    />
+                    <Row centerY style={{ marginLeft: 10 }}>
+                        <p style={{ marginRight: 10 }}>by</p>
+                        {selectedUser ? (
+                            <Row centerY className={styles.selectedUser}>
+                                <ImageTitle
+                                    type='user'
+                                    imagePath={selectedUser.flagImagePath}
+                                    title={trimText(selectedUser.name, 10)}
+                                    style={{ marginRight: 5 }}
+                                />
+                                <CloseButton
+                                    size={20}
+                                    onClick={() => {
+                                        setSelectedUser(null)
+                                        selectedUserRef.current = 0
+                                        findTargetFromText()
+                                    }}
+                                />
+                            </Row>
+                        ) : (
+                            <Column className={styles.targetInput}>
+                                <Input
+                                    type='text'
+                                    placeholder='user...'
+                                    value={userSearch}
+                                    onChange={(value) => {
+                                        setUserSearch(value)
+                                        userSearchRef.current = value
+                                        if (value) findUsers()
+                                        else {
+                                            setSelectedUser(null)
+                                            setUserOptions(null)
+                                        }
+                                    }}
+                                    onBlur={() => setTimeout(() => setUserOptions(null), 200)}
+                                    style={{
+                                        marginRight: 20,
+                                        minWidth: 160,
+                                    }}
+                                />
+                                {userOptions && (
+                                    <Column className={styles.targetOptions}>
+                                        {userOptions.map((option) => (
+                                            <ImageTitle
+                                                key={option.id}
+                                                className={styles.targetOption}
+                                                type='user'
+                                                imagePath={option.flagImagePath}
+                                                title={userTitle(option)}
+                                                onClick={() => {
+                                                    setSelectedUser(option)
+                                                    selectedUserRef.current = option.id
+                                                    setUserSearch('')
+                                                    setUserOptions(null)
+                                                    findTargetFromText()
+                                                }}
+                                            />
+                                        ))}
+                                    </Column>
+                                )}
+                            </Column>
+                        )}
+                    </Row>
+                </Row>
+                {targetSearchOptions && (
+                    <Column className={styles.targetSearchOptions}>
+                        {targetSearchOptions.map((option) => (
+                            <Column centerX key={option.id}>
+                                {renderItem(option, targetType.toLowerCase())}
+                                <Button
+                                    color='blue'
+                                    text='Select'
+                                    onClick={() => {
+                                        setTarget(option)
+                                        setTargetIdentifier(option.id)
+                                    }}
+                                />
+                            </Column>
+                        ))}
+                    </Column>
+                )}
+            </Column>
+        )
+    }
+
     useEffect(() => {
         if (!d3.select('#link-map-svg').node()) buildCanvas()
     }, [])
@@ -813,11 +972,20 @@ function LinkMap(): JSX.Element {
 
     useEffect(() => getLinks(), [location, linkTypes])
 
+    useEffect(() => {
+        // reset link search
+        setTargetSearchOptions(null)
+        setSelectedUser(null)
+        setTargetText('')
+        targetTextRef.current = ''
+        selectedUserRef.current = 0
+    }, [location])
+
     // todo: create seperate component for link map visualisation and merge useEffects below
     useEffect(() => {
-        if (linkData) {
-            // console.log('linkData: ', linkData)
-            const data = d3.hierarchy(linkData, (d) => d.item.children)
+        if (linkTreeData) {
+            // console.log('linkTreeData: ', linkTreeData)
+            const data = d3.hierarchy(linkTreeData, (d) => d.item.children)
             const circleSize = svgSize.current - 70
             let radius
             if (data.height === 1) radius = circleSize / 6
@@ -831,7 +999,7 @@ function LinkMap(): JSX.Element {
                 .separation((a, b) => {
                     if (count < 20 && a.depth === 1) {
                         const nodeDegrees = (2 * Math.PI) / 0.4
-                        return nodeDegrees / linkData.item.children.length
+                        return nodeDegrees / linkTreeData.item.children.length
                     }
                     return (a.parent === b.parent ? 1 : 2) / a.depth
                 })
@@ -922,7 +1090,11 @@ function LinkMap(): JSX.Element {
                 transitioning.current = false
             }, duration + 100)
         }
-    }, [linkData])
+    }, [linkTreeData])
+
+    useEffect(() => {
+        if (['Post', 'Comment'].includes(targetType)) findTargetFromText()
+    }, [targetType])
 
     useEffect(() => {
         if (nodes.current) {
@@ -962,46 +1134,45 @@ function LinkMap(): JSX.Element {
                     </Row>
                     <Column centerX centerY id='link-map-canvas' className={styles.canvas} />
                 </Column>
-                {linkData2 ? (
+                {linkData ? (
                     <Column centerX className={`${styles.info} hide-scrollbars`}>
-                        {renderItem(linkData2.source, linkData2.source.modelType)}
+                        {renderItem(linkData.source, linkData.source.modelType)}
                         <Column centerX style={{ width: '100%' }}>
-                            {/* <ArrowDownIcon style={{ height: 20, width: 20, color: '#ccc' }} /> */}
                             <SynapseSource style={{ height: 80, width: 80, opacity: 0.6 }} />
                             <Column centerX className={styles.link}>
                                 <ImageTitle
                                     type='user'
-                                    imagePath={linkData2.link.Creator.flagImagePath}
-                                    title={linkData2.link.Creator.name}
+                                    imagePath={linkData.link.Creator.flagImagePath}
+                                    title={linkData.link.Creator.name}
                                     style={{ marginBottom: 12 }}
                                 />
-                                {linkData2.link.description || '[no description]'}
+                                {linkData.link.description || '[no description]'}
                                 <button
                                     type='button'
-                                    className={linkData2.link.accountLike ? styles.blue : ''}
+                                    className={linkData.link.accountLike ? styles.blue : ''}
                                     onClick={() => setLikeModalOpen(true)}
                                 >
                                     <LikeIcon />
-                                    <p>{linkData2.link.totalLikes}</p>
+                                    <p>{linkData.link.totalLikes}</p>
                                 </button>
                                 {likeModalOpen && (
                                     <LikeModal
                                         itemType='link'
-                                        itemData={linkData2.link}
+                                        itemData={linkData.link}
                                         updateItem={() => {
                                             // update info pannel
-                                            const { id, totalLikes, accountLike } = linkData2.link
+                                            const { id, totalLikes, accountLike } = linkData.link
                                             const newLikes = totalLikes + (accountLike ? -1 : 1)
-                                            setLinkData2({
-                                                ...linkData2,
+                                            setLinkData({
+                                                ...linkData,
                                                 link: {
-                                                    ...linkData2.link,
+                                                    ...linkData.link,
                                                     totalLikes: newLikes,
                                                     accountLike: !accountLike,
                                                 },
                                             })
                                             // update map
-                                            // todo: update linkData state and re-render whole map to fix radius scale
+                                            // todo: update linkTreeData state and re-render whole map to fix radius scale
                                             d3.selectAll(`.link-path-${id}`)
                                                 .transition()
                                                 .duration(duration)
@@ -1014,14 +1185,13 @@ function LinkMap(): JSX.Element {
                                     />
                                 )}
                             </Column>
-                            {/* <ArrowDownIcon style={{ height: 20, width: 20, color: '#ccc' }} /> */}
                             <SynapseTarget style={{ height: 80, width: 80, opacity: 0.6 }} />
                         </Column>
-                        {renderItem(linkData2.target, linkData2.target.modelType)}
+                        {renderItem(linkData.target, linkData.target.modelType)}
                     </Column>
                 ) : (
                     <Column centerX className={`${styles.info} hide-scrollbars`}>
-                        {linkData && renderItem(linkData.item, linkData.item.modelType)}
+                        {linkTreeData && renderItem(linkTreeData.item, linkTreeData.item.modelType)}
                         {loggedIn ? (
                             <Column centerX style={{ width: '100%', marginTop: 20 }}>
                                 <Row centerY style={{ width: '100%', marginBottom: 20 }}>
@@ -1038,6 +1208,7 @@ function LinkMap(): JSX.Element {
                                                 setTargetIsSourceError(false)
                                                 setTarget(null)
                                                 setTargetIdentifier('')
+                                                setTargetSearchOptions(null)
                                                 setTargetType(option)
                                             }}
                                         />
@@ -1053,6 +1224,7 @@ function LinkMap(): JSX.Element {
                                             value={targetIdentifier}
                                             onChange={(value) => {
                                                 setTargetError(false)
+                                                setTargetSearchOptions(null)
                                                 setTargetIdentifier(value)
                                                 if (value) getTarget(value)
                                                 else {
@@ -1076,7 +1248,7 @@ function LinkMap(): JSX.Element {
                                                             targetType === 'User' ? 'user' : 'space'
                                                         }
                                                         imagePath={option.flagImagePath}
-                                                        title={`${option.name} (u/${option.handle})`}
+                                                        title={userTitle(option)}
                                                         onClick={() => {
                                                             setTarget(option)
                                                             setTargetIdentifier(option.handle)
@@ -1093,24 +1265,27 @@ function LinkMap(): JSX.Element {
                                         {targetType} not found
                                     </p>
                                 )}
-                                <Row centerY style={{ width: '100%', marginBottom: 20 }}>
-                                    <p style={{ flexShrink: 0, marginRight: 10 }}>
-                                        Link description
-                                    </p>
-                                    <Input
-                                        type='text'
-                                        placeholder='description...'
-                                        value={linkDescription}
-                                        onChange={(value) => setLinkDescription(value)}
-                                    />
-                                </Row>
-                                {linkDescription.length > 50 && (
-                                    <p className='danger' style={{ marginBottom: 20 }}>
-                                        Max 50 characters
-                                    </p>
-                                )}
+                                {!target &&
+                                    ['Post', 'Comment'].includes(targetType) &&
+                                    renderTargetSearch()}
                                 {target && (
                                     <Column centerX style={{ width: '100%' }}>
+                                        <Row centerY style={{ width: '100%', marginBottom: 20 }}>
+                                            <p style={{ flexShrink: 0, marginRight: 10 }}>
+                                                Link description
+                                            </p>
+                                            <Input
+                                                type='text'
+                                                placeholder='description...'
+                                                value={linkDescription}
+                                                onChange={(value) => setLinkDescription(value)}
+                                            />
+                                        </Row>
+                                        {linkDescription.length > 50 && (
+                                            <p className='danger' style={{ marginBottom: 20 }}>
+                                                Max 50 characters
+                                            </p>
+                                        )}
                                         <Button
                                             text='Create link'
                                             color='blue'
@@ -1129,7 +1304,25 @@ function LinkMap(): JSX.Element {
                                                 marginBottom: 20,
                                             }}
                                         />
-                                        {renderItem(target, targetType.toLowerCase())}
+                                        <Column
+                                            centerX
+                                            style={{ width: '100%', position: 'relative' }}
+                                        >
+                                            <CloseButton
+                                                size={20}
+                                                onClick={() => {
+                                                    setTarget(null)
+                                                    setTargetIdentifier('')
+                                                }}
+                                                style={{
+                                                    position: 'absolute',
+                                                    right: 5,
+                                                    top: 5,
+                                                    zIndex: 5,
+                                                }}
+                                            />
+                                            {renderItem(target, targetType.toLowerCase())}
+                                        </Column>
                                     </Column>
                                 )}
                                 {targetNotFound && (
@@ -1144,7 +1337,7 @@ function LinkMap(): JSX.Element {
                                 )}
                             </Column>
                         ) : (
-                            <Row centerY style={{ marginTop: linkData ? 20 : 0 }}>
+                            <Row centerY style={{ marginTop: linkTreeData ? 20 : 0 }}>
                                 <Button
                                     text='Log in'
                                     color='blue'
