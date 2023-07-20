@@ -7,7 +7,10 @@ import EditCommentModal from '@components/cards/Comments/EditCommentModal'
 import DraftText from '@components/draft-js/DraftText'
 import DeleteCommentModal from '@components/modals/DeleteCommentModal'
 import { AccountContext } from '@contexts/AccountContext'
+import { SpaceContext } from '@contexts/SpaceContext'
+import config from '@src/Config'
 import { dateCreated, timeSinceCreated } from '@src/Helpers'
+import LoadingWheel from '@src/components/LoadingWheel'
 import LikeModal from '@src/components/modals/LikeModal'
 import RatingModal from '@src/components/modals/RatingModal'
 import styles from '@styles/components/cards/Comments/CommentCard.module.scss'
@@ -20,8 +23,10 @@ import {
     VerticalEllipsisIcon,
     ZapIcon,
 } from '@svgs/all'
+import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import Cookies from 'universal-cookie'
 
 function CommentCard(props: {
     comment: any
@@ -59,14 +64,42 @@ function CommentCard(props: {
         Creator,
     } = comment
 
-    const { loggedIn, accountData } = useContext(AccountContext)
+    const { loggedIn, accountData, setAlertMessage, setAlertModalOpen } = useContext(AccountContext)
+    const { spaceData } = useContext(SpaceContext)
     const [menuOpen, setMenuOpen] = useState(false)
     const [editCommentModalOpen, setEditCommentModalOpen] = useState(false)
     const [deleteCommentModalOpen, setDeleteCommentModalOpen] = useState(false)
+    const [likeLoading, setLikeLoading] = useState(false)
     const [likeModalOpen, setLikeModalOpen] = useState(false)
     const [ratingModalOpen, setRatingModalOpen] = useState(false)
     const isOwnComment = Creator.id === accountData.id
     const history = useNavigate()
+    const cookies = new Cookies()
+
+    function toggleLike() {
+        setLikeLoading(true)
+        if (loggedIn) {
+            const data = { itemType: 'comment', itemId: id } as any
+            if (!accountLike) {
+                data.accountHandle = accountData.handle
+                data.accountName = accountData.name
+                data.parentItemId = itemId
+                data.spaceId = window.location.pathname.includes('/s/') ? spaceData.id : null
+            }
+            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+            axios
+                .post(`${config.apiURL}/${accountLike ? 'remove' : 'add'}-like`, data, options)
+                .then(() => {
+                    updateCommentReactions(comment, 'Like', !accountLike)
+                    setLikeLoading(false)
+                })
+                .catch((error) => console.log(error))
+        } else {
+            setLikeLoading(false)
+            setAlertMessage(`Log in to like comments`)
+            setAlertModalOpen(true)
+        }
+    }
 
     return (
         <Column
@@ -161,26 +194,34 @@ function CommentCard(props: {
                     )}
                 </Column>
             </Row>
-            {state === 'visible' && ( // location !== 'link-map' && (
-                <Row className={styles.buttons}>
+            {state === 'visible' && (
+                <Row className={styles.footer}>
                     <button
                         type='button'
-                        className={styles.reply}
+                        className={`${styles.stat} ${styles.reply}`}
                         onClick={() => toggleReplyInput()}
                     >
                         <ReplyIcon />
                     </button>
+                    <Row centerY className={`${styles.stat} ${accountLike ? styles.blue : ''}`}>
+                        {likeLoading ? (
+                            <LoadingWheel size={15} style={{ marginRight: 5 }} />
+                        ) : (
+                            <button type='button' onClick={toggleLike} disabled={likeLoading}>
+                                <LikeIcon />
+                            </button>
+                        )}
+                        <button
+                            type='button'
+                            onClick={() => (totalLikes ? setLikeModalOpen(true) : toggleLike())}
+                            disabled={likeLoading}
+                        >
+                            <p>{totalLikes}</p>
+                        </button>
+                    </Row>
                     <button
                         type='button'
-                        className={accountLike ? styles.blue : ''}
-                        onClick={() => setLikeModalOpen(true)}
-                    >
-                        <LikeIcon />
-                        <p>{totalLikes}</p>
-                    </button>
-                    <button
-                        type='button'
-                        className={accountLinks > 0 ? styles.blue : ''}
+                        className={`${styles.stat} ${accountLinks ? styles.blue : ''}`}
                         onClick={() => history(`/linkmap?item=comment&id=${id}`)}
                     >
                         <LinkIcon />
@@ -188,7 +229,7 @@ function CommentCard(props: {
                     </button>
                     <button
                         type='button'
-                        className={accountRating ? styles.blue : ''}
+                        className={`${styles.stat} ${accountRating ? styles.blue : ''}`}
                         onClick={() => setRatingModalOpen(true)}
                     >
                         <ZapIcon />

@@ -98,7 +98,7 @@ function PostCard(props: {
     const [deletePostModalOpen, setDeletePostModalOpen] = useState(false)
     const [editPostModalOpen, setEditPostModalOpen] = useState(false)
 
-    const [likeResponseLoading, setLikeResponseLoading] = useState(false)
+    const [likeLoading, setLikeLoading] = useState(false)
     const mobileView = document.documentElement.clientWidth < 900
     const cookies = new Cookies()
     const isOwnPost = accountData && Creator && accountData.id === Creator.id
@@ -118,7 +118,7 @@ function PostCard(props: {
     })
 
     function toggleLike() {
-        setLikeResponseLoading(true)
+        setLikeLoading(true)
         const addingLike = !postData.accountLike
         const accessToken = cookies.get('accessToken')
         if (loggedIn && accessToken) {
@@ -137,11 +137,11 @@ function PostCard(props: {
                         totalLikes: postData.totalLikes + (addingLike ? 1 : -1),
                         accountLike: addingLike,
                     })
-                    setLikeResponseLoading(false)
+                    setLikeLoading(false)
                 })
                 .catch((error) => console.log(error))
         } else {
-            setLikeResponseLoading(false)
+            setLikeLoading(false)
             setAlertMessage(`Log in to like posts`)
             setAlertModalOpen(true)
         }
@@ -323,8 +323,8 @@ function PostCard(props: {
                             text={totalLikes}
                             title={statTitle('Like', totalLikes || 0)}
                             color={accountLike && 'blue'}
-                            disabled={location === 'preview' || likeResponseLoading}
-                            loading={likeResponseLoading}
+                            disabled={location === 'preview' || likeLoading}
+                            loading={likeLoading}
                             onClickIcon={toggleLike}
                             onClickStat={() => (totalLikes ? setLikeModalOpen(true) : toggleLike())}
                         />
