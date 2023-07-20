@@ -96,15 +96,16 @@ $transitionSpeed: 0.5s;
                 align-items: center;
                 cursor: pointer;
                 pointer-events: auto;
-                height: 26px;
-                width: 26px;
+                height: 22px;
+                width: 22px;
                 margin: 0 2px 2px 0;
-                padding: 5px;
+                padding: 3px;
 
                 @include for-tablet-landscape-up {
                     height: 32px;
                     width: 32px;
                     margin: 0 5px 5px 0;
+                    padding: 5px;
                 }
 
                 &:hover {
