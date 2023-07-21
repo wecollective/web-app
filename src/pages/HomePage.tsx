@@ -130,11 +130,6 @@ function Homepage(): JSX.Element {
         })
     }
 
-    function enter() {
-        if (loggedIn) history('/s/all')
-        else setLogInModalOpen(true)
-    }
-
     // function test() {
     //     axios
     //         .get(`${config.apiURL}/test`)
@@ -177,7 +172,12 @@ function Homepage(): JSX.Element {
                 </h1>
                 <h2>play together</h2>
                 {/* <Button text='Test' color='blue' onClick={test} style={{ marginBottom: 20 }} /> */}
-                <Button text='Enter' icon={<DoorIcon />} color='blue' onClick={enter} />
+                <Button
+                    text='Enter'
+                    icon={<DoorIcon />}
+                    color='blue'
+                    onClick={() => history('/s/all')}
+                />
                 <CollapsibleCards data={cardData} style={{ marginTop: 40, marginBottom: 40 }} />
                 {highlights && (
                     <div className={styles.highlights}>
