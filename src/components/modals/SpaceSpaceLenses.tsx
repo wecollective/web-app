@@ -43,6 +43,14 @@ function SpaceSpaceLenses(props: { close: () => void }): JSX.Element {
             <div className={styles.lensOptions}>
                 <button
                     type='button'
+                    onClick={() => changeLens('List')}
+                    className={`${params.lens === 'List' && styles.selected}`}
+                >
+                    <SpaceListIcon />
+                    <p>List</p>
+                </button>
+                <button
+                    type='button'
                     onClick={() => changeLens('Tree')}
                     className={`${params.lens === 'Tree' && styles.selected}`}
                 >
@@ -56,14 +64,6 @@ function SpaceSpaceLenses(props: { close: () => void }): JSX.Element {
                 >
                     <SpaceCirclesIcon />
                     <p>Circles</p>
-                </button>
-                <button
-                    type='button'
-                    onClick={() => changeLens('List')}
-                    className={`${params.lens === 'List' && styles.selected}`}
-                >
-                    <SpaceListIcon />
-                    <p>List</p>
                 </button>
             </div>
         </Modal>
