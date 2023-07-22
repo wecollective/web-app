@@ -112,32 +112,34 @@ function ToyBar(): JSX.Element {
                         </button>
                     </Tooltip>
                 </CircleButton>
-                <CircleButton size={46} icon={<SpacesIcon />}>
-                    <Tooltip top={40} width={200} centered>
-                        {followedSpaces.length ? (
-                            <>
-                                <p className='grey' style={{ marginBottom: 10, fontSize: 14 }}>
-                                    Followed spaces
-                                </p>
-                                {followedSpaces.map((space) => (
-                                    <ImageTitle
-                                        key={space.id}
-                                        type='space'
-                                        imagePath={space.flagImagePath}
-                                        imageSize={35}
-                                        title={space.name}
-                                        link={`/s/${space.handle}/posts`}
-                                        fontSize={14}
-                                        style={{ marginBottom: 5 }}
-                                    />
-                                ))}
-                            </>
-                        ) : (
-                            <p style={{ fontSize: 14 }}>No followed spaces...</p>
-                        )}
-                        {/* <p>See all</p> */}
-                    </Tooltip>
-                </CircleButton>
+                {loggedIn && (
+                    <CircleButton size={46} icon={<SpacesIcon />}>
+                        <Tooltip top={40} width={200} centered>
+                            {followedSpaces.length ? (
+                                <>
+                                    <p className='grey' style={{ marginBottom: 10, fontSize: 14 }}>
+                                        Followed spaces
+                                    </p>
+                                    {followedSpaces.map((space) => (
+                                        <ImageTitle
+                                            key={space.id}
+                                            type='space'
+                                            imagePath={space.flagImagePath}
+                                            imageSize={35}
+                                            title={space.name}
+                                            link={`/s/${space.handle}/posts`}
+                                            fontSize={14}
+                                            style={{ marginBottom: 5 }}
+                                        />
+                                    ))}
+                                </>
+                            ) : (
+                                <p style={{ fontSize: 14 }}>No followed spaces...</p>
+                            )}
+                            {/* <p>See all</p> */}
+                        </Tooltip>
+                    </CircleButton>
+                )}
                 {renderFilters()}
                 {renderLenses()}
                 <CircleButton
