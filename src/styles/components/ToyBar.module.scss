@@ -5,6 +5,7 @@
     z-index: 90;
     position: fixed;
     bottom: 15px;
+    pointer-events: none;
 
     .container {
         background-color: white;
@@ -12,6 +13,7 @@
         padding: 12px;
         border-radius: 37px;
         box-shadow: 0 0px 20px 0 rgba(10, 8, 72, 0.14);
+        pointer-events: all;
 
         > button {
             &:not(:last-child) {
