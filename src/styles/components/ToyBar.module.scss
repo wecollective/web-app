@@ -1,0 +1,56 @@
+@import '@styles/Variables';
+
+.wrapper {
+    width: 100%;
+    z-index: 90;
+    position: fixed;
+    bottom: 15px;
+
+    .container {
+        background-color: white;
+        border: 1px solid rgb(228, 228, 228);
+        padding: 12px;
+        border-radius: 37px;
+        box-shadow: 0 0px 20px 0 rgba(10, 8, 72, 0.14);
+
+        > button {
+            &:not(:last-child) {
+                margin-right: 10px;
+            }
+        }
+
+        .newButtons {
+            button {
+                all: unset;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                color: $grey7;
+                transition: color 0.3s;
+
+                svg {
+                    width: 25px;
+                    height: 25px;
+                    margin-right: 8px;
+                }
+
+                &:not(:last-child) {
+                    margin-bottom: 8px;
+                }
+
+                &:hover {
+                    color: $blue5;
+                }
+            }
+        }
+
+        .divider {
+            height: 30px;
+            width: 2px;
+            background-color: $grey3;
+            border-radius: 2px;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+    }
+}

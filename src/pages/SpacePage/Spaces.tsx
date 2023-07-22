@@ -5,7 +5,6 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import SpaceNotFound from '@pages/SpaceNotFound'
 import SpaceCircles from '@src/pages/SpacePage/SpaceCircles'
 import SpaceList from '@src/pages/SpacePage/SpaceList'
-import SpacesHeader from '@src/pages/SpacePage/SpacesHeader'
 import SpaceTree from '@src/pages/SpacePage/SpaceTree'
 import styles from '@styles/pages/SpacePage/Spaces.module.scss'
 import React, { useContext, useEffect } from 'react'
@@ -58,7 +57,6 @@ function Spaces(): JSX.Element {
     if (spaceNotFound) return <SpaceNotFound />
     return (
         <Column centerX className={styles.wrapper}>
-            <SpacesHeader params={params} />
             <Row centerX className={styles.content}>
                 {params.lens === 'Tree' && (
                     <Column className={styles.spaceMapView}>

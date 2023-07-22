@@ -126,6 +126,8 @@ export interface IAccountContext {
     setCreatePostModalSettings: (payload: any) => void
     createPostModalOpen: boolean
     setCreatePostModalOpen: (payload: boolean) => void
+    createSpaceModalOpen: boolean
+    setCreateSpaceModalOpen: (payload: boolean) => void
     createCommentModalOpen: boolean
     setCreateCommentModalOpen: (payload: boolean) => void
     settingModalOpen: boolean
@@ -194,7 +196,7 @@ export interface ISpaceContext {
     spaceSpacesPaginationHasMore: boolean
 
     spacePeople: any[]
-    defaultPeopleFilters: any
+    spacePeopleFilters: any
     spacePeoplePaginationLimit: number
     spacePeoplePaginationOffset: number
     spacePeoplePaginationHasMore: boolean

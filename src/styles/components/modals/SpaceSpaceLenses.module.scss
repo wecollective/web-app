@@ -1,0 +1,53 @@
+@import '@styles/Variables';
+
+.header {
+    margin-bottom: 20px;
+
+    h1 {
+        margin: 0;
+    }
+
+    svg {
+        color: $grey5;
+        width: 30px;
+        height: 30px;
+        margin-left: 10px;
+    }
+}
+
+.lensOptions {
+    display: flex;
+    flex-direction: column;
+    @include for-tablet-landscape-up {
+        flex-direction: row;
+    }
+
+    button {
+        all: unset;
+        cursor: pointer;
+        border: 1px solid $grey3;
+        border-radius: 10px;
+        margin: 10px;
+        width: 140px;
+        height: 140px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        transition: all 0.3s;
+
+        &.selected {
+            background-color: $blue8;
+        }
+
+        &:hover {
+            box-shadow: 0 0 0 3px $blue5;
+        }
+
+        svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 10px;
+        }
+    }
+}

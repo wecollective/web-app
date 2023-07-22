@@ -7,6 +7,7 @@ import RegisterModal from '@components/modals/RegisterModal'
 import ResetPasswordModal from '@components/modals/ResetPasswordModal'
 import { AccountContext } from '@contexts/AccountContext'
 import CreatePostModal from '@src/components/modals/CreatePostModal'
+import CreateSpaceModal from '@src/components/modals/CreateSpaceModal'
 import React, { useContext } from 'react'
 
 function Modals(): JSX.Element {
@@ -23,6 +24,7 @@ function Modals(): JSX.Element {
         resetPasswordModalOpen,
         imageUploadModalOpen,
         createPostModalOpen,
+        createSpaceModalOpen,
     } = useContext(AccountContext)
 
     return (
@@ -37,6 +39,7 @@ function Modals(): JSX.Element {
             {resetPasswordModalOpen && <ResetPasswordModal />}
             {imageUploadModalOpen && <GlobalImageUploadModal />}
             {createPostModalOpen && <CreatePostModal />}
+            {createSpaceModalOpen && <CreateSpaceModal />}
         </>
     )
 }

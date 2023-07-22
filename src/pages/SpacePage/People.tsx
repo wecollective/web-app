@@ -4,7 +4,6 @@ import Row from '@components/Row'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import SpaceNotFound from '@pages/SpaceNotFound'
-import PeopleHeader from '@pages/SpacePage/PeopleHeader'
 import styles from '@styles/pages/SpacePage/People.module.scss'
 import React, { useContext, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
@@ -16,7 +15,7 @@ function People(): JSX.Element {
         spaceNotFound,
         spacePeople,
         getSpacePeople,
-        defaultPeopleFilters,
+        spacePeopleFilters,
         spacePeoplePaginationOffset,
         spacePeoplePaginationLimit,
         spacePeopleLoading,
@@ -30,7 +29,7 @@ function People(): JSX.Element {
 
     // calculate params
     const urlParams = Object.fromEntries(new URLSearchParams(location.search))
-    const params = { ...defaultPeopleFilters }
+    const params = { ...spacePeopleFilters }
     Object.keys(urlParams).forEach((param) => {
         params[param] = urlParams[param]
     })
@@ -61,7 +60,6 @@ function People(): JSX.Element {
     if (spaceNotFound) return <SpaceNotFound />
     return (
         <Column centerX className={styles.wrapper}>
-            <PeopleHeader params={params} />
             <Row className={styles.content}>
                 <PeopleList
                     people={spacePeople}

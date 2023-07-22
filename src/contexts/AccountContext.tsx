@@ -35,7 +35,7 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
     const [forgotPasswordModalOpen, setForgotPasswordModalOpen] = useState(false)
     const [createPostModalSettings, setCreatePostModalSettings] = useState('Text')
     const [createPostModalOpen, setCreatePostModalOpen] = useState(false)
-    // const [createSpaceModalOpen, setCreateSpaceModalOpen] = useState(false)
+    const [createSpaceModalOpen, setCreateSpaceModalOpen] = useState(false)
     const [createCommentModalOpen, setCreateCommentModalOpen] = useState(false)
     const [settingModalOpen, setSettingModalOpen] = useState(false)
     const [settingModalType, setSettingModalType] = useState('')
@@ -116,6 +116,8 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                 setCreatePostModalSettings,
                 createPostModalOpen,
                 setCreatePostModalOpen,
+                createSpaceModalOpen,
+                setCreateSpaceModalOpen,
                 createCommentModalOpen,
                 setCreateCommentModalOpen,
                 settingModalOpen,

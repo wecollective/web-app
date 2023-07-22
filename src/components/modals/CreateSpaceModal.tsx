@@ -13,7 +13,6 @@ import config from '@src/Config'
 import {
     allValid,
     defaultErrorState,
-    defaultSpaceData,
     findDraftLength,
     invalidateFormItem,
     updateFormItem,
@@ -21,13 +20,11 @@ import {
 import styles from '@styles/components/modals/CreateSpaceModal.module.scss'
 import axios from 'axios'
 import React, { useContext, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
-import { v4 as uuidv4 } from 'uuid'
 
-function CreateSpaceModal(props: { close: () => void }): JSX.Element {
-    const { close } = props
-    const { accountData, setAlertModalOpen, setAlertMessage } = useContext(AccountContext)
+function CreateSpaceModal(): JSX.Element {
+    const { accountData, setCreateSpaceModalOpen } = useContext(AccountContext)
     const {
         isModerator,
         spaceData,
@@ -77,6 +74,7 @@ function CreateSpaceModal(props: { close: () => void }): JSX.Element {
     const [loading, setLoading] = useState(false)
     const [success, setSuccess] = useState(false)
     const [successMessage, setSuccessMessage] = useState('')
+    const location = useLocation()
     const history = useNavigate()
     const cookies = new Cookies()
     const authorized = isModerator || spaceData.id === 1
@@ -87,11 +85,7 @@ function CreateSpaceModal(props: { close: () => void }): JSX.Element {
 
     function createSpace(e) {
         e.preventDefault()
-        const accessToken = cookies.get('accessToken')
-        if (!accessToken) {
-            setAlertMessage('Log in to create a new space')
-            setAlertModalOpen(true)
-        } else if (allValid(formData, setFormData)) {
+        if (allValid(formData, setFormData)) {
             setLoading(true)
             const data = {
                 // todo: get account details server side?
@@ -103,45 +97,47 @@ function CreateSpaceModal(props: { close: () => void }): JSX.Element {
                 description: description.value,
                 private: privateSpace,
             }
-            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
             axios
                 .post(`${config.apiURL}/create-space`, data, options)
                 .then((res) => {
-                    setLoading(false)
-                    if (res.data.message === 'pending-acceptance') {
+                    if (res.data.message === 'pending-acceptance')
                         setSuccessMessage('Space created and request sent to moderators')
-                        setSuccess(true)
-                    } else {
-                        const newSpaceData = {
-                            ...defaultSpaceData,
-                            uuid: uuidv4(),
-                            id: res.data.spaceId,
-                            handle: handle.value,
-                            name: name.value,
-                            description: description.value,
-                        }
-                        const { lens } = spaceSpacesFilters
-                        if (lens === 'Circles') {
-                            setSpaceCircleData({
-                                ...spaceCircleData,
-                                children: [newSpaceData, ...spaceCircleData.children],
-                            })
-                        } else if (lens === 'Tree') {
-                            setSpaceTreeData({
-                                ...spaceTreeData,
-                                children: [newSpaceData, ...spaceTreeData.children],
-                            })
-                        } else if (lens === 'List') {
-                            setSpaceListData([newSpaceData, ...spaceListData])
-                        }
+                    else {
+                        // const newSpaceData = {
+                        //     ...defaultSpaceData,
+                        //     uuid: uuidv4(),
+                        //     id: res.data.spaceId,
+                        //     handle: handle.value,
+                        //     name: name.value,
+                        //     description: description.value,
+                        // }
+                        // if (onSpacesPage) {
+                        //     const { lens } = spaceSpacesFilters
+                        //     if (lens === 'Circles') {
+                        //         setSpaceCircleData({
+                        //             ...spaceCircleData,
+                        //             children: [newSpaceData, ...spaceCircleData.children],
+                        //         })
+                        //     } else if (lens === 'Tree') {
+                        //         setSpaceTreeData({
+                        //             ...spaceTreeData,
+                        //             children: [newSpaceData, ...spaceTreeData.children],
+                        //         })
+                        //     } else if (lens === 'List') {
+                        //         setSpaceListData([newSpaceData, ...spaceListData])
+                        //     }
+                        // }
                         setSuccessMessage(`Space created and attached to '${spaceData.name}'`)
-                        setSuccess(true)
                     }
+                    setSuccess(true)
+                    setLoading(false)
                     setTimeout(() => {
-                        if (spaceSpacesFilters.lens === 'Circles') {
-                            history(`/s/${data.handle}/spaces`)
-                        }
-                        close()
+                        // if (onSpacesPage && spaceSpacesFilters.lens === 'Circles') {
+                        history(`/s/${data.handle}/posts`)
+                        // }
+                        setCreateSpaceModalOpen(false)
+                        // close()
                     }, 1000)
                 })
                 .catch((error) => {
@@ -166,7 +162,7 @@ function CreateSpaceModal(props: { close: () => void }): JSX.Element {
     }
 
     return (
-        <Modal close={close} centerX confirmClose={!success}>
+        <Modal close={() => setCreateSpaceModalOpen(false)} centerX confirmClose={!success}>
             {success ? (
                 <SuccessMessage text={successMessage} />
             ) : (
@@ -204,16 +200,16 @@ function CreateSpaceModal(props: { close: () => void }): JSX.Element {
                     <form onSubmit={createSpace}>
                         <Row centerX style={{ marginBottom: 20 }}>
                             <Toggle
-                                leftText='Private'
+                                leftText='Public'
                                 rightColor='blue'
-                                positionLeft={!privateSpace}
+                                positionLeft={privateSpace}
                                 onClick={() => setPrivateSpace(!privateSpace)}
                                 onOffText
                             />
                         </Row>
                         <Input
                             type='text'
-                            title='Space handle (the unique identifier used in your spaces URL)'
+                            title='Space handle (must be unique)'
                             prefix='weco.io/s/'
                             placeholder='handle...'
                             value={handle.value}

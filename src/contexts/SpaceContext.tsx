@@ -91,7 +91,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     const [spaceSpacesPaginationHasMore, setSpaceSpacesPaginationHasMore] = useState(true)
     // space people
     const [spacePeople, setSpacePeople] = useState<any[]>([])
-    const [defaultPeopleFilters, setDefaultPeopleFilters] = useState(defaults.peopleFilters)
+    const [spacePeopleFilters, setSpacePeopleFilters] = useState(defaults.peopleFilters)
     const [spacePeoplePaginationLimit, setSpacePeoplePaginationLimit] = useState(20)
     const [spacePeoplePaginationOffset, setSpacePeoplePaginationOffset] = useState(0)
     const [spacePeoplePaginationHasMore, setSpacePeoplePaginationHasMore] = useState(true)
@@ -375,7 +375,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 spaceSpacesPaginationHasMore,
 
                 spacePeople,
-                defaultPeopleFilters,
+                spacePeopleFilters,
                 spacePeoplePaginationLimit,
                 spacePeoplePaginationOffset,
                 spacePeoplePaginationHasMore,

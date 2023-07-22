@@ -1,5 +1,5 @@
-import GlobalHelpButton from '@components/GlobalHelpButton'
 import Navbar from '@components/Navbar'
+import ToyBar from '@components/ToyBar'
 import Modals from '@components/modals/Modals'
 import ContextProviders from '@contexts/ContextProviders'
 import HomePage from '@pages/HomePage'
@@ -18,8 +18,7 @@ function App(): JSX.Element {
             <ContextProviders>
                 <Modals />
                 <Navbar />
-                <GlobalHelpButton />
-                {/* <SidebarSmall /> */}
+                <ToyBar />
                 <Routes>
                     <Route path='/' element={<HomePage />} />
                     <Route path='/s/:spaceHandle/*' element={<SpacePage />} />

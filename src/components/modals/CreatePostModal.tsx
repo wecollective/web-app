@@ -98,8 +98,6 @@ function CreatePostModal(): JSX.Element {
         setCreatePostModalOpen,
         createPostModalSettings,
         setCreatePostModalSettings,
-        setAlertModalOpen,
-        setAlertMessage,
     } = useContext(AccountContext)
     const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
     const [loading, setLoading] = useState(false)

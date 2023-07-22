@@ -3,7 +3,6 @@ import PostList from '@components/PostList'
 import Row from '@components/Row'
 import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
-import PostsHeader from '@pages/UserPage/PostsHeader'
 import UserNotFound from '@pages/UserPage/UserNotFound'
 import styles from '@styles/pages/UserPage/Posts.module.scss'
 import React, { useContext, useEffect } from 'react'
@@ -59,7 +58,6 @@ function Posts(): JSX.Element {
     if (userNotFound) return <UserNotFound />
     return (
         <Column centerX className={styles.wrapper}>
-            <PostsHeader params={params} />
             <Column className={styles.content}>
                 {params.lens === 'List' && (
                     <Row className={styles.postListView}>

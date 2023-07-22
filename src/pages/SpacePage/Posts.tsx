@@ -6,7 +6,6 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import SpaceNotFound from '@pages/SpaceNotFound'
 import NavigationList from '@src/pages/SpacePage/NavigationList'
 import PostMap from '@src/pages/SpacePage/PostMap'
-import PostsHeader from '@src/pages/SpacePage/PostsHeader'
 import TopContributors from '@src/pages/SpacePage/TopContributors'
 import styles from '@styles/pages/SpacePage/Posts.module.scss'
 import React, { useContext, useEffect, useState } from 'react'
@@ -78,7 +77,6 @@ function Posts(): JSX.Element {
     if (spaceNotFound) return <SpaceNotFound />
     return (
         <Column centerX className={styles.wrapper}>
-            <PostsHeader params={params} />
             <Column className={styles.content}>
                 {params.lens === 'List' && (
                     <Row centerX style={{ width: '100%' }}>

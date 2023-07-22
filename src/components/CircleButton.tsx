@@ -12,24 +12,22 @@ function Button(props: {
     children?: any
 }): JSX.Element {
     const { icon, size, style, disabled, loading, onClick, children } = props
-    const [mouseOver, setMouseOver] = useState(false)
+    const [showContent, setShowContent] = useState(false)
 
     return (
-        <div className={styles.wrapper}>
-            <button
-                className={`${styles.button} ${(disabled || loading) && styles.disabled}`}
-                style={{ ...style, height: size, width: size }}
-                type='button'
-                disabled={disabled || loading}
-                onClick={onClick}
-                onMouseEnter={() => setMouseOver(true)}
-                onMouseLeave={() => setMouseOver(false)}
-            >
-                {!!icon && icon}
-                {loading && <LoadingWheel size={25} />}
-                {mouseOver && children}
-            </button>
-        </div>
+        <button
+            className={`${styles.wrapper} ${(disabled || loading) && styles.disabled}`}
+            style={{ ...style, height: size, width: size }}
+            type='button'
+            disabled={disabled || loading}
+            onClick={onClick}
+            onMouseEnter={() => setShowContent(true)}
+            onMouseLeave={() => setShowContent(false)}
+        >
+            {!!icon && icon}
+            {loading && <LoadingWheel size={25} />}
+            {showContent && children}
+        </button>
     )
 }
 
