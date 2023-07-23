@@ -15,12 +15,6 @@
         box-shadow: 0 0px 20px 0 rgba(10, 8, 72, 0.14);
         pointer-events: all;
 
-        > button {
-            &:not(:last-child) {
-                margin-right: 10px;
-            }
-        }
-
         .newButtons {
             button {
                 all: unset;

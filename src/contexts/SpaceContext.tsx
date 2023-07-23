@@ -187,7 +187,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 options
             )
             .then((res) => {
-                console.log('post-map-data: ', res.data)
+                // console.log('post-map-data: ', res.data)
                 setPostMapData(res.data)
             })
     }

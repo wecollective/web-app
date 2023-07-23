@@ -76,7 +76,14 @@ function ToyBar(): JSX.Element {
         }
         if (page === 'u' && subpage === 'posts') openModal = setUserPostFiltersOpen
         if (openModal) {
-            return <CircleButton size={45} icon={<SlidersIcon />} onClick={() => openModal(true)} />
+            return (
+                <CircleButton
+                    size={45}
+                    icon={<SlidersIcon />}
+                    onClick={() => openModal(true)}
+                    style={{ marginRight: 10 }}
+                />
+            )
         }
         return null
     }
@@ -88,7 +95,14 @@ function ToyBar(): JSX.Element {
             if (subpage === 'spaces') openModal = setSpaceSpaceLensesOpen
         }
         if (openModal) {
-            return <CircleButton size={45} icon={<EyeIcon />} onClick={() => openModal(true)} />
+            return (
+                <CircleButton
+                    size={45}
+                    icon={<EyeIcon />}
+                    onClick={() => openModal(true)}
+                    style={{ marginRight: 10 }}
+                />
+            )
         }
         return null
     }
@@ -100,7 +114,7 @@ function ToyBar(): JSX.Element {
     return (
         <Row centerY centerX className={styles.wrapper}>
             <Row centerY centerX className={styles.container}>
-                <CircleButton size={46} icon={<PlusIcon />}>
+                <CircleButton size={46} icon={<PlusIcon />} style={{ marginRight: 10 }}>
                     <Tooltip centered top={40} width={150} className={styles.newButtons}>
                         <button type='button' onClick={newPost}>
                             <PostIcon />
@@ -113,7 +127,7 @@ function ToyBar(): JSX.Element {
                     </Tooltip>
                 </CircleButton>
                 {loggedIn && (
-                    <CircleButton size={46} icon={<SpacesIcon />}>
+                    <CircleButton size={46} icon={<SpacesIcon />} style={{ marginRight: 10 }}>
                         <Tooltip top={40} width={200} centered>
                             {followedSpaces.length ? (
                                 <>
@@ -147,22 +161,26 @@ function ToyBar(): JSX.Element {
                     icon={<HelpIcon />}
                     onClick={() => setHelpModalOpen(true)}
                 />
+                {spacePostFiltersOpen && (
+                    <SpacePostFilters close={() => setSpacePostFiltersOpen(false)} />
+                )}
+                {spacePostLensesOpen && (
+                    <SpacePostLenses close={() => setSpacePostLensesOpen(false)} />
+                )}
+                {spaceSpaceFiltersOpen && (
+                    <SpaceSpaceFilters close={() => setSpaceSpaceFiltersOpen(false)} />
+                )}
+                {spaceSpaceLensesOpen && (
+                    <SpaceSpaceLenses close={() => setSpaceSpaceLensesOpen(false)} />
+                )}
+                {spacePeopleFiltersOpen && (
+                    <SpacePeopleFilters close={() => setSpacePeopleFiltersOpen(false)} />
+                )}
+                {userPostFiltersOpen && (
+                    <UserPostFilters close={() => setUserPostFiltersOpen(false)} />
+                )}
+                {helpModalOpen && <GlobalHelpModal close={() => setHelpModalOpen(false)} />}
             </Row>
-            {spacePostFiltersOpen && (
-                <SpacePostFilters close={() => setSpacePostFiltersOpen(false)} />
-            )}
-            {spacePostLensesOpen && <SpacePostLenses close={() => setSpacePostLensesOpen(false)} />}
-            {spaceSpaceFiltersOpen && (
-                <SpaceSpaceFilters close={() => setSpaceSpaceFiltersOpen(false)} />
-            )}
-            {spaceSpaceLensesOpen && (
-                <SpaceSpaceLenses close={() => setSpaceSpaceLensesOpen(false)} />
-            )}
-            {spacePeopleFiltersOpen && (
-                <SpacePeopleFilters close={() => setSpacePeopleFiltersOpen(false)} />
-            )}
-            {userPostFiltersOpen && <UserPostFilters close={() => setUserPostFiltersOpen(false)} />}
-            {helpModalOpen && <GlobalHelpModal close={() => setHelpModalOpen(false)} />}
         </Row>
     )
 }
