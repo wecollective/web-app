@@ -116,13 +116,13 @@ function ToyBar(): JSX.Element {
             <Row centerY centerX className={styles.container}>
                 <CircleButton size={46} icon={<PlusIcon />} style={{ marginRight: 10 }}>
                     <Tooltip centered top={40} width={150} className={styles.newButtons}>
-                        <button type='button' onClick={newPost}>
-                            <PostIcon />
-                            New post
-                        </button>
                         <button type='button' onClick={newSpace}>
                             <SpacesIcon />
                             New space
+                        </button>
+                        <button type='button' onClick={newPost}>
+                            <PostIcon />
+                            New post
                         </button>
                     </Tooltip>
                 </CircleButton>
