@@ -3,6 +3,7 @@ import styles from '@styles/components/CircleButton.module.scss'
 import React, { useState } from 'react'
 
 function Button(props: {
+    color: string
     icon?: JSX.Element
     size?: number
     style?: any
@@ -11,12 +12,14 @@ function Button(props: {
     onClick?: () => void
     children?: any
 }): JSX.Element {
-    const { icon, size, style, disabled, loading, onClick, children } = props
+    const { color, icon, size, style, disabled, loading, onClick, children } = props
     const [showContent, setShowContent] = useState(false)
 
     return (
         <button
-            className={`${styles.wrapper} ${(disabled || loading) && styles.disabled}`}
+            className={`${styles.wrapper} ${(disabled || loading) && styles.disabled} ${
+                styles[color]
+            }`}
             style={{ ...style, height: size, width: size }}
             type='button'
             disabled={disabled || loading}

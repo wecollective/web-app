@@ -78,6 +78,7 @@ function ToyBar(): JSX.Element {
         if (openModal) {
             return (
                 <CircleButton
+                    color='yellow'
                     size={45}
                     icon={<SlidersIcon />}
                     onClick={() => openModal(true)}
@@ -97,6 +98,7 @@ function ToyBar(): JSX.Element {
         if (openModal) {
             return (
                 <CircleButton
+                    color='orange'
                     size={45}
                     icon={<EyeIcon />}
                     onClick={() => openModal(true)}
@@ -114,7 +116,12 @@ function ToyBar(): JSX.Element {
     return (
         <Row centerY centerX className={styles.wrapper}>
             <Row centerY centerX className={styles.container}>
-                <CircleButton size={46} icon={<PlusIcon />} style={{ marginRight: 10 }}>
+                <CircleButton
+                    color='blue'
+                    size={46}
+                    icon={<PlusIcon />}
+                    style={{ marginRight: 10 }}
+                >
                     <Tooltip centered top={40} width={150} className={styles.newButtons}>
                         <button type='button' onClick={newPost}>
                             <PostIcon />
@@ -127,7 +134,12 @@ function ToyBar(): JSX.Element {
                     </Tooltip>
                 </CircleButton>
                 {loggedIn && (
-                    <CircleButton size={46} icon={<SpacesIcon />} style={{ marginRight: 10 }}>
+                    <CircleButton
+                        color='green'
+                        size={46}
+                        icon={<SpacesIcon />}
+                        style={{ marginRight: 10 }}
+                    >
                         <Tooltip top={40} width={200} centered>
                             {followedSpaces.length ? (
                                 <>
@@ -157,6 +169,7 @@ function ToyBar(): JSX.Element {
                 {renderFilters()}
                 {renderLenses()}
                 <CircleButton
+                    color='red'
                     size={45}
                     icon={<HelpIcon />}
                     onClick={() => setHelpModalOpen(true)}

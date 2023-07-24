@@ -5,7 +5,7 @@
     position: relative;
     cursor: pointer;
     border-radius: 50%;
-    background-color: $grey1;
+    background-color: $grey1; // $bluegrey1;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -16,6 +16,66 @@
     -webkit-box-sizing: border-box;
     transition: all 0.5s;
 
+    &.blue {
+        background-color: rgba($blue5, 0.3);
+        &:hover {
+            background-color: rgba($blue5, 0.8); // $blue5
+            // border: 1px solid $blue5;
+
+            // > svg {
+            //     color: $blue5; // $grey7;
+            // }
+        }
+    }
+
+    &.green {
+        background-color: rgba($green, 0.3);
+        &:hover {
+            background-color: rgba($green, 0.8); // $blue5
+            // border: 1px solid $green;
+
+            // > svg {
+            //     color: $green; // $grey7;
+            // }
+        }
+    }
+
+    &.yellow {
+        background-color: rgba(244, 244, 93, 0.3);
+        &:hover {
+            background-color: rgba(244, 244, 93, 0.8); // $blue5
+            // border: 1px solid rgb(244, 244, 93);
+
+            // > svg {
+            //     color: rgb(244, 244, 93); // $grey7;
+            // }
+        }
+    }
+
+    &.orange {
+        background-color: rgba($orange, 0.3);
+        &:hover {
+            background-color: rgba($orange, 0.8); // $blue5
+            // border: 1px solid $orange;
+
+            // > svg {
+            //     color: $orange; // $grey7;
+            // }
+        }
+    }
+
+    &.red {
+        background-color: rgba($red2, 0.3);
+        &:hover {
+            background-color: rgba($red2, 0.8); // $blue5
+            // border: 1px solid $red2;
+
+            // > svg {
+            //     color: $red2; // $grey7;
+            // }
+        }
+    }
+
     > svg {
         color: $grey7;
         height: 50%;
@@ -23,12 +83,12 @@
         transition: all 0.5s;
     }
 
-    &:hover {
-        background-color: $bluegrey1;
-        border: 1px solid black;
+    // &:hover {
+    //     background-color: $bluegrey1; // $blue5
+    //     border: 1px solid $blue5;
 
-        > svg {
-            color: $grey7;
-        }
-    }
+    //     > svg {
+    //         color: $blue5; // $grey7;
+    //     }
+    // }
 }
