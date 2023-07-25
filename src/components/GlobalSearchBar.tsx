@@ -23,29 +23,23 @@ function GlobalSearchBar(props: { onLocationChange?: () => void; style?: any }):
     const { onLocationChange, style } = props
     const { spaceData } = useContext(SpaceContext)
     const { userData } = useContext(UserContext)
-    const history = useNavigate()
-    const location = useLocation()
-    const pageType = location.pathname.split('/')[1]
-    const handle = location.pathname.split('/')[2]
-    const subpage = location.pathname.split('/')[3]
-    const [firstRun, setFirstRun] = useState(true)
+    const [params, setParams] = useState<any>({})
     const [searchQuery, setSearchQuery] = useState('')
-    const searchQueryRef = useRef('')
     const [searchType, setSearchType] = useState('Spaces')
-    const [searchConstraint, setSearchConstraint] = useState(pageType === 's' && handle !== 'all')
-    // const [searchConstraint, setSearchConstraint] = useState(
-    //     pageType === 'u' || (pageType === 's' && handle !== 'all')
-    // )
+    const [showConstraint, setShowConstraint] = useState(false)
+    const searchQueryRef = useRef('')
     const [suggestions, setSuggestions] = useState<any[]>([])
     const [suggestionsLoading, setSuggestionsLoading] = useState(false)
-    const pageDataLoading =
-        (pageType === 's' && !spaceData.id) || (pageType === 'u' && !userData.id)
-    const urlParams = Object.fromEntries(new URLSearchParams(location.search))
-    const params = {} as any
-    Object.keys(urlParams).forEach((param) => {
-        params[param] = urlParams[param]
-    })
+    const history = useNavigate()
     const cookies = new Cookies()
+    const location = useLocation()
+    const path = location.pathname.split('/')
+    const page = path[1]
+    const handle = path[2]
+    const subpage = path[3]
+    const pageLoading =
+        (page === 's' && spaceData.handle !== handle) ||
+        (page === 'u' && userData.handle !== handle)
 
     function getSuggestions(query) {
         setSearchQuery(query)
@@ -58,7 +52,7 @@ function GlobalSearchBar(props: { onLocationChange?: () => void; style?: any }):
             const route = `find-${searchType.toLowerCase()}`
             const data = {
                 query,
-                spaceId: searchConstraint ? spaceData.id : null,
+                spaceId: showConstraint ? spaceData.id : null,
                 spaceAccessRequired: false,
             }
             const accessToken = cookies.get('accessToken')
@@ -82,26 +76,23 @@ function GlobalSearchBar(props: { onLocationChange?: () => void; style?: any }):
         if (searchType === 'Spaces')
             params.depth = searchQuery ? 'All Contained Spaces' : 'Only Direct Descendents'
         history({
-            pathname: `/${searchConstraint ? pageType : 's'}/${
-                searchConstraint ? handle : 'all'
+            pathname: `/${showConstraint ? page : 's'}/${
+                showConstraint ? handle : 'all'
             }/${searchType.toLowerCase()}`,
             search: getParamString(params, 'searchQuery', searchQuery),
         })
         if (onLocationChange) onLocationChange()
     }
 
+    function updateConstraint() {
+        const spaceConstraint = page === 's' && handle !== 'all'
+        const userConstraint = page === 'u' && subpage === 'posts' && searchType === 'Posts'
+        setShowConstraint(spaceConstraint || userConstraint)
+    }
+
     useEffect(() => {
-        if (firstRun) setFirstRun(false)
-        else {
-            setSearchType('Spaces')
-            // update search constraint
-            const showSpaceConstraint =
-                pageType === 's' &&
-                handle !== 'all' &&
-                (['posts', 'spaces', 'people'].includes(subpage) || searchConstraint)
-            const showUserConstraint = pageType === 'u' && (subpage === 'posts' || searchConstraint)
-            setSearchConstraint(showSpaceConstraint || showUserConstraint)
-        }
+        const urlParams = Object.fromEntries(new URLSearchParams(location.search))
+        setParams(urlParams)
     }, [location])
 
     useEffect(() => {
@@ -110,35 +101,31 @@ function GlobalSearchBar(props: { onLocationChange?: () => void; style?: any }):
         setSuggestions([])
     }, [subpage, handle])
 
-    // update suggestions if search type or constraint changed
+    // // update suggestions if search type or constraint changed
+    // useEffect(() => {
+    //     getSuggestions(searchQuery)
+    // }, [searchType, showConstraint])
+
     useEffect(() => {
-        getSuggestions(searchQuery)
-    }, [searchType, searchConstraint])
+        updateConstraint()
+    }, [location, searchType])
 
     return (
         <form className={styles.searchBar} onSubmit={search} style={style}>
-            {searchConstraint &&
-                !pageDataLoading &&
-                (pageType !== 's' || spaceData.handle !== 'all') && (
-                    <Row centerY className={styles.searchConstraint}>
-                        <ImageTitle
-                            type={pageType === 's' ? 'space' : 'user'}
-                            imagePath={
-                                pageType === 's' ? spaceData.flagImagePath : userData.flagImagePath
-                            }
-                            imageSize={20}
-                            title={`${pageType}/${
-                                pageType === 's' ? spaceData.handle : userData.handle
-                            }`}
-                        />
-                        <CloseButton size={14} onClick={() => setSearchConstraint(false)} />
-                    </Row>
-                )}
+            {showConstraint && !pageLoading && (
+                <Row centerY className={styles.searchConstraint}>
+                    <ImageTitle
+                        type={page === 's' ? 'space' : 'user'}
+                        imagePath={page === 's' ? spaceData.flagImagePath : userData.flagImagePath}
+                        imageSize={20}
+                        title={`${page}/${page === 's' ? spaceData.handle : userData.handle}`}
+                    />
+                    <CloseButton size={14} onClick={() => setShowConstraint(false)} />
+                </Row>
+            )}
             <input
                 type='text'
-                placeholder={`Search ${
-                    searchConstraint ? '' : 'all '
-                }${searchType.toLowerCase()}...`}
+                placeholder={`Search ${showConstraint ? '' : 'all '}${searchType.toLowerCase()}...`}
                 value={searchQuery}
                 data-lpignore='true'
                 onChange={(e) => getSuggestions(e.target.value)}
@@ -183,7 +170,7 @@ function GlobalSearchBar(props: { onLocationChange?: () => void; style?: any }):
                 options={['Spaces', 'Posts', 'People']}
                 selectedOption={searchType}
                 setSelectedOption={(value) => {
-                    if (pageType === 'u' && value !== 'Posts') setSearchConstraint(false)
+                    if (page === 'u' && value !== 'Posts') setShowConstraint(false)
                     setSearchType(value)
                 }}
             />
@@ -200,7 +187,7 @@ export default GlobalSearchBar
 
 // old code used to match search type with page type:
 // const [searchType, setSearchType] = useState(
-//     pageType === 's'
+//     page === 's'
 //         ? ['posts', 'spaces', 'people'].includes(subpage)
 //             ? capitalise(subpage)
 //             : 'Spaces'
@@ -209,6 +196,6 @@ export default GlobalSearchBar
 
 // update search type in location useEffect
 // const updateSpaceSearchType =
-//     pageType === 's' && ['posts', 'spaces', 'people'].includes(subpage)
-// const updateUserSearchType = pageType === 'u' && subpage === 'posts'
+//     page === 's' && ['posts', 'spaces', 'people'].includes(subpage)
+// const updateUserSearchType = page === 'u' && subpage === 'posts'
 // if (updateSpaceSearchType || updateUserSearchType) setSearchType(capitalise(subpage))
