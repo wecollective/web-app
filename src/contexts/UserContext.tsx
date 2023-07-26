@@ -108,6 +108,7 @@ function UserContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
     function resetUserPosts() {
         console.log('UserContext: resetUserPosts')
         setUserPosts([])
+        setUserPostsFilters(defaults.postFilters)
     }
 
     // determine if user is owned by account

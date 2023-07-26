@@ -211,7 +211,7 @@ export interface ISpaceContext {
 
     resetSpaceData: () => void
     resetSpacePosts: () => void
-    resetSpaceListData: () => void
+    resetSpaceList: () => void
     resetSpacePeople: () => void
 }
 

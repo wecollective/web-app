@@ -15,7 +15,7 @@ function SpaceList(props: { location: 'space-spaces' }): JSX.Element {
         spaceListData: spaces,
         spaceSpacesLoading: loading,
         nextSpaceSpacesLoading: nextSpacesLoading,
-        resetSpaceListData,
+        resetSpaceList,
     } = useContext(SpaceContext)
     const { name, totalSpaces } = spaceData
 
@@ -31,7 +31,7 @@ function SpaceList(props: { location: 'space-spaces' }): JSX.Element {
         )
     }
 
-    useEffect(() => () => resetSpaceListData(), [])
+    useEffect(() => () => resetSpaceList(), [])
 
     return (
         <Column id={`${location}-scrollbars`} className={styles.wrapper}>

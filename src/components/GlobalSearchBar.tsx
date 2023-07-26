@@ -9,7 +9,7 @@ import Row from '@components/Row'
 import { SpaceContext } from '@contexts/SpaceContext'
 import { UserContext } from '@contexts/UserContext'
 import config from '@src/Config'
-import { getParamString } from '@src/Helpers'
+import { capitalise, getParamString } from '@src/Helpers'
 import styles from '@styles/components/GlobalSearchBar.module.scss'
 import { SearchIcon } from '@svgs/all'
 import axios from 'axios'
@@ -17,8 +17,6 @@ import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
-// todo: simply and clarify logic where possible, put some of it into functions
-// todo: include search query if in params
 function GlobalSearchBar(props: { onLocationChange?: () => void; style?: any }): JSX.Element {
     const { onLocationChange, style } = props
     const { spaceData } = useContext(SpaceContext)
@@ -44,7 +42,7 @@ function GlobalSearchBar(props: { onLocationChange?: () => void; style?: any }):
     function getSuggestions(query) {
         setSearchQuery(query)
         searchQueryRef.current = query
-        if (!query || !['Spaces', 'People'].includes(searchType)) {
+        if (!query || searchType === 'Posts') {
             setSuggestions([])
             setSuggestionsLoading(false)
         } else {
@@ -73,13 +71,17 @@ function GlobalSearchBar(props: { onLocationChange?: () => void; style?: any }):
     function search(e) {
         e.preventDefault()
         setSuggestions([])
+        // update depth is searchQuery used
         if (searchType === 'Spaces')
             params.depth = searchQuery ? 'All Contained Spaces' : 'Only Direct Descendents'
+        // reset to global path values if constraint removed
+        const pathPage = showConstraint ? page : 's'
+        const pathHandle = showConstraint ? handle : 'all'
         history({
-            pathname: `/${showConstraint ? page : 's'}/${
-                showConstraint ? handle : 'all'
-            }/${searchType.toLowerCase()}`,
+            pathname: `/${pathPage}/${pathHandle}/${searchType.toLowerCase()}`,
             search: getParamString(params, 'searchQuery', searchQuery),
+            // todo: figure out how to remove empty serach query from search (below not working because doesn't reset query)
+            // search: searchQuery ? getParamString(params, 'searchQuery', searchQuery) : '',
         })
         if (onLocationChange) onLocationChange()
     }
@@ -91,20 +93,16 @@ function GlobalSearchBar(props: { onLocationChange?: () => void; style?: any }):
     }
 
     useEffect(() => {
+        // update params
         const urlParams = Object.fromEntries(new URLSearchParams(location.search))
         setParams(urlParams)
-    }, [location])
-
-    useEffect(() => {
-        searchQueryRef.current = ''
-        setSearchQuery('')
+        // update query and suggestions
+        searchQueryRef.current = urlParams.searchQuery || ''
+        setSearchQuery(urlParams.searchQuery || '')
         setSuggestions([])
-    }, [subpage, handle])
-
-    // // update suggestions if search type or constraint changed
-    // useEffect(() => {
-    //     getSuggestions(searchQuery)
-    // }, [searchType, showConstraint])
+        // update search type if query present
+        if (urlParams.searchQuery) setSearchType(capitalise(subpage))
+    }, [location])
 
     useEffect(() => {
         updateConstraint()
@@ -184,18 +182,3 @@ GlobalSearchBar.defaultProps = {
 }
 
 export default GlobalSearchBar
-
-// old code used to match search type with page type:
-// const [searchType, setSearchType] = useState(
-//     page === 's'
-//         ? ['posts', 'spaces', 'people'].includes(subpage)
-//             ? capitalise(subpage)
-//             : 'Spaces'
-//         : 'Posts'
-// )
-
-// update search type in location useEffect
-// const updateSpaceSearchType =
-//     page === 's' && ['posts', 'spaces', 'people'].includes(subpage)
-// const updateUserSearchType = page === 'u' && subpage === 'posts'
-// if (updateSpaceSearchType || updateUserSearchType) setSearchType(capitalise(subpage))

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable prefer-destructuring */
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
@@ -115,6 +116,9 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         console.log(`SpaceContext: getSpaceData (${handle})`)
         const accessToken = cookies.get('accessToken')
         const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+        resetSpaceList()
+        resetSpacePosts()
+        resetSpacePeople()
         setSpaceNotFound(false)
         axios
             .get(`${config.apiURL}/space-data?handle=${handle}`, options)
@@ -307,13 +311,15 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         setSpacePostsPaginationLimit(10)
         setSpacePostsPaginationOffset(0)
         setSpacePostsPaginationHasMore(true)
+        setSpacePostsFilters(defaults.postFilters)
     }
 
-    function resetSpaceListData() {
+    function resetSpaceList() {
         setSpaceListData([])
         setSpaceSpacesPaginationLimit(10)
         setSpaceSpacesPaginationOffset(0)
         setSpaceSpacesPaginationHasMore(true)
+        setSpaceSpacesFilters(defaults.spaceFilters)
     }
 
     function resetSpacePeople() {
@@ -321,6 +327,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         setSpacePeoplePaginationLimit(20)
         setSpacePeoplePaginationOffset(0)
         setSpacePeoplePaginationHasMore(true)
+        setSpacePeopleFilters(defaults.peopleFilters)
     }
 
     useEffect(() => updateSpaceUserStatus(spaceData), [loggedIn])
@@ -390,7 +397,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
 
                 resetSpaceData,
                 resetSpacePosts,
-                resetSpaceListData,
+                resetSpaceList,
                 resetSpacePeople,
             }}
         >

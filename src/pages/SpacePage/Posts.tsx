@@ -35,6 +35,7 @@ function Posts(): JSX.Element {
         spaceData.id && (spaceData.id === 51 || spaceData.SpaceAncestors.find((a) => a.id === 51))
 
     // calculate params
+    // todo: move into context and update space post filters there?
     const urlParams = Object.fromEntries(new URLSearchParams(location.search))
     const params = { ...spacePostsFilters }
     Object.keys(urlParams).forEach((param) => {
