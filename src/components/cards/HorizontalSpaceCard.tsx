@@ -6,7 +6,7 @@ import ShowMoreLess from '@components/ShowMoreLess'
 import StatButton from '@components/StatButton'
 import { statTitle } from '@src/Helpers'
 import styles from '@styles/components/cards/HorizontalSpaceCard.module.scss'
-import { CommentIcon, PostIcon, ReactionIcon, UsersIcon } from '@svgs/all'
+import { CommentIcon, LikeIcon, PostIcon, UsersIcon } from '@svgs/all'
 import React from 'react'
 import { Link } from 'react-router-dom'
 
@@ -21,7 +21,7 @@ function HorizontalSpaceCard(props: { space: any; style?: any }): JSX.Element {
         totalFollowers,
         totalPosts,
         totalComments,
-        totalReactions,
+        totalLikes,
     } = space
 
     const backgroundImage = coverImagePath
@@ -68,9 +68,9 @@ function HorizontalSpaceCard(props: { space: any; style?: any }): JSX.Element {
                         title={statTitle('Comment', totalComments)}
                     />
                     <StatButton
-                        icon={<ReactionIcon />}
-                        text={totalReactions}
-                        title={statTitle('Reaction', totalReactions)}
+                        icon={<LikeIcon />}
+                        text={totalLikes}
+                        title={statTitle('Like', totalLikes)}
                     />
                 </Row>
             </Column>
