@@ -1,41 +1,63 @@
+import Button from '@components/Button'
 import Column from '@components/Column'
 import CoverImage from '@components/CoverImage'
 import EditableFlagImage from '@components/EditableFlagImage'
 import PageTabs from '@components/PageTabs'
 import Row from '@components/Row'
+import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
-import FlagImage from '@src/components/FlagImage'
 import { onPageBottomReached } from '@src/Helpers'
+import FlagImage from '@src/components/FlagImage'
 import About from '@src/pages/UserPage/About'
 import Notifications from '@src/pages/UserPage/Notifications'
 import Posts from '@src/pages/UserPage/Posts'
 import Settings from '@src/pages/UserPage/Settings'
 // import Sidebar from '@src/pages/UserPage/Sidebar'
+import config from '@src/Config'
+import Following from '@src/pages/UserPage/Following'
+import Streams from '@src/pages/UserPage/Streams'
 import styles from '@styles/pages/UserPage/UserPage.module.scss'
-import { AboutIcon, BellIcon, PostIcon, SettingsIcon } from '@svgs/all'
+import {
+    AboutIcon,
+    BellIcon,
+    EyeIcon,
+    PostIcon,
+    SettingsIcon,
+    StreamIcon,
+    SuccessIcon,
+} from '@svgs/all'
+import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import Cookies from 'universal-cookie'
 
 // todo: load UserNotFound component here instead of in each subpage?
 
 function UserPage(): JSX.Element {
-    const { accountDataLoading, setPageBottomReached, loggedIn } = useContext(AccountContext)
+    const { accountData, accountDataLoading, setPageBottomReached, loggedIn } =
+        useContext(AccountContext)
     const { userData, getUserData, resetUserData, isOwnAccount, setSelectedUserSubPage } =
         useContext(UserContext)
 
     const [headerCollapsed, setHeaderColapsed] = useState(false)
+    const [isFollowing, setIsFollowing] = useState(false)
+    const [followingModalOpen, setFollowingModalOpen] = useState(false)
+    const [followUserLoading, setFollowUserLoading] = useState(false)
     const location = useLocation()
     const userHandle = location.pathname.split('/')[2]
     const subpage = location.pathname.split('/')[3]
     const { clientWidth } = document.documentElement
     const mobileView = clientWidth < 900
     const tabletView = clientWidth >= 900 && clientWidth < 1200
+    const cookies = new Cookies()
     const tabs = {
         baseRoute: `/u/${userHandle}`,
         left: [
             { text: 'About', visible: true, icon: <AboutIcon /> },
             { text: 'Posts', visible: true, icon: <PostIcon /> },
+            { text: 'Streams', visible: isOwnAccount, icon: <StreamIcon /> },
+            { text: 'Following', visible: true, icon: <EyeIcon /> },
             { text: 'Notifications', visible: isOwnAccount, icon: <BellIcon /> },
         ],
         right: [
@@ -47,11 +69,31 @@ function UserPage(): JSX.Element {
         ],
     }
 
+    function toggleFollowing() {
+        setFollowUserLoading(true)
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        const data = { userId: userData.id, isFollowing }
+        axios
+            .post(`${config.apiURL}/toggle-follow-user`, data, options)
+            .then(() => {
+                setFollowUserLoading(false)
+                setIsFollowing(!isFollowing)
+            })
+            .catch((error) => console.log(error))
+    }
+
+    function followButtonClick() {
+        if (isFollowing) setFollowingModalOpen(true)
+        else toggleFollowing()
+    }
+
     useEffect(() => {
         if (!accountDataLoading && userHandle !== userData.handle) getUserData(userHandle)
     }, [accountDataLoading, userHandle])
 
     useEffect(() => setSelectedUserSubPage(subpage), [location])
+
+    useEffect(() => setIsFollowing(!!userData.isFollowing), [userData.id])
 
     useEffect(() => {
         document.addEventListener('scroll', () => {
@@ -81,15 +123,16 @@ function UserPage(): JSX.Element {
                             <p className='grey'>u/{userData.handle}</p>
                         </Column>
                     </Row>
-                    {/* {loggedIn && (
+                    {loggedIn && !isOwnAccount && (
                         <Button
-                            icon={isFollowing ? <SuccessIconSVG /> : undefined}
+                            icon={isFollowing ? <SuccessIcon /> : undefined}
                             text={isFollowing ? 'Following' : 'Follow'}
                             color='blue'
                             disabled={userHandle !== userData.handle}
-                            onClick={followUser}
+                            loading={followUserLoading}
+                            onClick={followButtonClick}
                         />
-                    )} */}
+                    )}
                 </Row>
                 <Row centerX className={styles.tabRow}>
                     <Row centerY className={styles.userDataSmall}>
@@ -114,10 +157,33 @@ function UserPage(): JSX.Element {
                     <Route path='/' element={<Navigate to='posts' replace />} />
                     <Route path='about' element={<About />} />
                     <Route path='posts' element={<Posts />} />
+                    <Route path='streams' element={<Streams />} />
+                    <Route path='following' element={<Following />} />
                     <Route path='notifications' element={<Notifications />} />
                     <Route path='settings' element={<Settings />} />
                 </Routes>
             </Column>
+            {followingModalOpen && (
+                <Modal centerX close={() => setFollowingModalOpen(false)}>
+                    <h1>Are you sure you want to unfollow this user?</h1>
+                    <Row centerX style={{ marginTop: 10 }}>
+                        <Button
+                            text='Yes'
+                            color='red'
+                            onClick={() => {
+                                toggleFollowing()
+                                setFollowingModalOpen(false)
+                            }}
+                            style={{ marginRight: 10 }}
+                        />
+                        <Button
+                            text='No'
+                            color='blue'
+                            onClick={() => setFollowingModalOpen(false)}
+                        />
+                    </Row>
+                </Modal>
+            )}
         </Column>
     )
 }

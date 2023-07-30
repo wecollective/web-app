@@ -51,8 +51,9 @@ function UserContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
 
     function getUserData(userHandle, returnFunction) {
         console.log('UserContext: getUserData')
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
-            .get(`${config.apiURL}/user-data?userHandle=${userHandle}`)
+            .get(`${config.apiURL}/user-data?userHandle=${userHandle}`, options)
             .then((res) => {
                 setUserData(res.data || defaults.userData)
                 if (returnFunction) returnFunction(res.data)
@@ -68,8 +69,7 @@ function UserContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
         const firstLoad = offset === 0
         if (firstLoad) setUserPostsLoading(true)
         else setNextUserPostsLoading(true)
-        const accessToken = cookies.get('accessToken')
-        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
             .get(
                 // prettier-ignore
@@ -84,6 +84,7 @@ function UserContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
                 options
             )
             .then((res) => {
+                console.log('user-posts: ', res.data)
                 if (currentUserHandle.current === userData.handle) {
                     setUserPosts(firstLoad ? res.data : [...userPosts, ...res.data])
                     setUserPostsPaginationHasMore(res.data.length === userPostsPaginationLimit)
