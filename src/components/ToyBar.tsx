@@ -12,7 +12,7 @@ import UserPostFilters from '@components/modals/UserPostFilters'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
 import styles from '@styles/components/ToyBar.module.scss'
-import { EyeIcon, HelpIcon, PlusIcon, PostIcon, SlidersIcon, SpacesIcon } from '@svgs/all'
+import { EyeIcon, HelpIcon, PlusIcon, PostIcon, SlidersIcon, SpacesIcon, UserIcon } from '@svgs/all'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
@@ -28,6 +28,7 @@ function ToyBar(): JSX.Element {
         setCreateSpaceModalOpen,
     } = useContext(AccountContext)
     const [followedSpaces, setFollowedSpaces] = useState<any[]>([])
+    const [followedUsers, setFollowedUsers] = useState<any[]>([])
     const [spacePostFiltersOpen, setSpacePostFiltersOpen] = useState(false)
     const [spacePostLensesOpen, setSpacePostLensesOpen] = useState(false)
     const [spaceSpaceFiltersOpen, setSpaceSpaceFiltersOpen] = useState(false)
@@ -41,11 +42,14 @@ function ToyBar(): JSX.Element {
     const page = path[1]
     const subpage = path[3]
 
-    function getFollowedSpaces() {
+    function getToyBarData() {
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
-            .get(`${config.apiURL}/followed-spaces`, options)
-            .then((res) => setFollowedSpaces(res.data))
+            .get(`${config.apiURL}/toybar-data`, options)
+            .then((res) => {
+                setFollowedSpaces(res.data.spaces)
+                setFollowedUsers(res.data.users)
+            })
             .catch((error) => console.log(error))
     }
 
@@ -108,7 +112,7 @@ function ToyBar(): JSX.Element {
     }
 
     useEffect(() => {
-        if (accountData.id) getFollowedSpaces()
+        if (accountData.id) getToyBarData()
     }, [accountData.id])
 
     return (
@@ -149,6 +153,34 @@ function ToyBar(): JSX.Element {
                                 </>
                             ) : (
                                 <p style={{ fontSize: 14 }}>No followed spaces...</p>
+                            )}
+                            {/* <p>See all</p> */}
+                        </Tooltip>
+                    </CircleButton>
+                )}
+                {loggedIn && (
+                    <CircleButton size={46} icon={<UserIcon />} style={{ marginRight: 10 }}>
+                        <Tooltip top={40} width={200} centered>
+                            {followedUsers.length ? (
+                                <>
+                                    <p className='grey' style={{ marginBottom: 10, fontSize: 14 }}>
+                                        Followed users
+                                    </p>
+                                    {followedUsers.map((user) => (
+                                        <ImageTitle
+                                            key={user.id}
+                                            type='user'
+                                            imagePath={user.flagImagePath}
+                                            imageSize={35}
+                                            title={user.name}
+                                            link={`/u/${user.handle}/posts`}
+                                            fontSize={14}
+                                            style={{ marginBottom: 5 }}
+                                        />
+                                    ))}
+                                </>
+                            ) : (
+                                <p style={{ fontSize: 14 }}>No followed users...</p>
                             )}
                             {/* <p>See all</p> */}
                         </Tooltip>
