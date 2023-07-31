@@ -12,6 +12,7 @@ function Input(props: {
     placeholder?: string
     value?: string | number
     rows?: number
+    maxLength?: number
     min?: number
     max?: number
     disabled?: boolean
@@ -33,6 +34,7 @@ function Input(props: {
         errors,
         value,
         rows,
+        maxLength,
         min,
         max,
         style,
@@ -65,6 +67,7 @@ function Input(props: {
                         rows={rows}
                         placeholder={placeholder}
                         value={value}
+                        maxLength={maxLength}
                         onChange={(e) => {
                             if (onChange) onChange(e.target.value)
                             resizeTextArea(e.target)
@@ -79,6 +82,7 @@ function Input(props: {
                         placeholder={placeholder}
                         type={type}
                         value={value}
+                        maxLength={maxLength}
                         min={min}
                         max={max}
                         onChange={(e) => handleChange(e.target.value)}
@@ -108,6 +112,7 @@ Input.defaultProps = {
     onChange: null,
     onBlur: null,
     rows: null,
+    maxLength: null,
     min: null,
     max: null,
     style: null,

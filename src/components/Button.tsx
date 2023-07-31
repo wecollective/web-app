@@ -5,7 +5,16 @@ import React from 'react'
 function Button(props: {
     text?: string
     icon?: JSX.Element
-    color: 'blue' | 'aqua' | 'red' | 'purple' | 'grey' | 'light-green' | 'gbg-black' | 'gbg-white'
+    color:
+        | 'blue'
+        | 'aqua'
+        | 'red'
+        | 'purple'
+        | 'grey'
+        | 'light-green'
+        | 'gbg-black'
+        | 'gbg-white'
+        | 'aqua-gradient'
     size?: 'small' | 'medium' | 'medium-large' | 'large'
     style?: any
     disabled?: boolean
