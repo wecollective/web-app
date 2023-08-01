@@ -5,47 +5,43 @@ import ImageTitle from '@components/ImageTitle'
 import Input from '@components/Input'
 import Row from '@components/Row'
 import SearchSelector from '@components/SearchSelector'
-import SuccessMessage from '@components/SuccessMessage'
 import Modal from '@components/modals/Modal'
-import { AccountContext } from '@contexts/AccountContext'
-import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import { imageMBLimit } from '@src/Helpers'
 import styles from '@styles/components/modals/CreateStreamModal.module.scss'
 import { ImageIcon, SpacesIcon, UsersIcon } from '@svgs/all'
 import axios from 'axios'
-import React, { useContext, useRef, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import React, { useRef, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-function CreateStreamModal(props: { close: () => void }): JSX.Element {
-    const { close } = props
-    const { accountData, setCreateSpaceModalOpen } = useContext(AccountContext)
-    const { isModerator, spaceData } = useContext(SpaceContext)
-    const [image, setImage] = useState<any>(null)
-    const [name, setName] = useState('')
-    const [handle, setHandle] = useState('')
+function CreateStreamModal(props: {
+    editing: boolean
+    currentData: any
+    onSave: (newStream: any) => void
+    close: () => void
+}): JSX.Element {
+    const { editing, currentData, onSave, close } = props
+    const [imageFile, setImageFile] = useState<any>(null)
+    const [imageURL, setImageURL] = useState<any>(editing ? currentData.stream.image : '')
+    const [name, setName] = useState(editing ? currentData.stream.name : '')
     const [spaceOptions, setSpaceOptions] = useState<any[]>([])
-    const [spaces, setSpaces] = useState<any[]>([])
+    const [spaces, setSpaces] = useState<any[]>(editing ? currentData.spaces : [])
     const [userOptions, setUserOptions] = useState<any[]>([])
-    const [users, setUsers] = useState<any[]>([])
+    const [users, setUsers] = useState<any[]>(editing ? currentData.users : [])
     const spaceSearch = useRef('')
     const userSearch = useRef('')
     const [loading, setLoading] = useState(false)
-    const [success, setSuccess] = useState(false)
-    const [successMessage, setSuccessMessage] = useState('')
-    const location = useLocation()
-    const history = useNavigate()
     const cookies = new Cookies()
 
     function addImage() {
         const input = document.getElementById('stream-image-file-input') as HTMLInputElement
         if (input && input.files && input.files[0]) {
             if (input.files[0].size > imageMBLimit * 1024 * 1024) {
-                // display error
+                // todo: display error
                 input.value = ''
             } else {
-                setImage(input.files[0])
+                setImageFile(input.files[0])
+                setImageURL(URL.createObjectURL(input.files[0]))
             }
         }
     }
@@ -80,134 +76,127 @@ function CreateStreamModal(props: { close: () => void }): JSX.Element {
         }
     }
 
-    function createStreamDisabled() {
-        const noSources = spaces.length === 0 && users.length === 0
-        return !name || !handle || noSources
+    function saveStreamDisabled() {
+        return loading || !name || (spaces.length === 0 && users.length === 0)
     }
 
-    function createStream() {
-        console.log('create stream')
+    function saveStream() {
+        setLoading(true)
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        const data = {
+            streamId: editing ? currentData.stream.id : null,
+            spaceIds: spaces.map((s) => s.id),
+            userIds: users.map((u) => u.id),
+            name,
+        }
+        const formData = new FormData()
+        if (imageFile) formData.append('file', imageFile)
+        formData.append('data', JSON.stringify(data))
+        axios
+            .post(`${config.apiURL}/${editing ? 'edit' : 'create'}-stream`, formData, options)
+            .then((res) => {
+                onSave(res.data)
+                close()
+            })
+            .catch((error) => console.log(error))
     }
 
     return (
         <Modal centerX close={close} className={styles.wrapper}>
-            {success ? (
-                <SuccessMessage text={successMessage} />
-            ) : (
-                <Column centerX style={{ width: 350 }}>
-                    <h1>Create a new stream</h1>
-                    <Column centerX centerY className={styles.image}>
-                        {image && <img src={URL.createObjectURL(image)} alt='' />}
-                        <ImageIcon />
-                        <label htmlFor='stream-image-file-input'>
-                            <input
-                                type='file'
-                                id='stream-image-file-input'
-                                accept='.png, .jpg, .jpeg, .gif'
-                                onChange={addImage}
-                                hidden
-                            />
-                        </label>
-                    </Column>
-                    <Input
-                        type='text'
-                        title='Name'
-                        placeholder='name...'
-                        value={name}
-                        maxLength={30}
-                        onChange={(v) => {
-                            setName(v)
-                            setHandle(v.toLowerCase().replace(/[^a-z0-9]/g, '-'))
-                        }}
-                        style={{ marginBottom: 20 }}
-                    />
-                    <Input
-                        type='text'
-                        title='Unique handle'
-                        prefix='streams/'
-                        placeholder='handle...'
-                        value={handle}
-                        maxLength={30}
-                        // state={handle.state}
-                        // errors={handle.errors}
-                        onChange={(v) => setHandle(v.toLowerCase().replace(/[^a-z0-9]/g, '-'))}
-                        style={{ marginBottom: 40 }}
-                    />
-                    <p style={{ marginBottom: 20 }}>Add sources to your stream:</p>
-                    <Row centerY style={{ width: '100%', marginBottom: 10 }}>
-                        <SpacesIcon
-                            style={{ width: 25, height: 25, color: '#bbb', marginRight: 10 }}
+            <Column centerX style={{ width: 350 }}>
+                {editing ? <h1>Edit your stream</h1> : <h1>Create a new stream</h1>}
+                <Column centerX centerY className={styles.image}>
+                    {imageURL && <img src={imageURL} alt='' />}
+                    <ImageIcon />
+                    <label htmlFor='stream-image-file-input'>
+                        <input
+                            type='file'
+                            id='stream-image-file-input'
+                            accept='.png, .jpg, .jpeg, .gif'
+                            onChange={addImage}
+                            hidden
                         />
-                        <SearchSelector
-                            type='space'
-                            placeholder='Space name or handle...'
-                            onSearchQuery={(query) => findSpaces(query)}
-                            onOptionSelected={(space) => {
-                                setSpaces([...spaces, space])
-                                setSpaceOptions([])
-                            }}
-                            onBlur={() => setTimeout(() => setSpaceOptions([]), 200)}
-                            options={spaceOptions}
-                            style={{ width: '100%' }}
-                        />
-                    </Row>
-                    {spaces.map((space) => (
-                        <Row centerY style={{ marginBottom: 10 }}>
-                            <ImageTitle
-                                type='space'
-                                imagePath={space.flagImagePath}
-                                title={`s/${space.handle}`}
-                                fontSize={16}
-                                style={{ marginRight: 10 }}
-                            />
-                            <CloseButton
-                                size={17}
-                                onClick={() => setSpaces(spaces.filter((s) => s.id !== space.id))}
-                            />
-                        </Row>
-                    ))}
-                    <Row centerY style={{ width: '100%', margin: '20px 0 10px 0' }}>
-                        <UsersIcon
-                            style={{ width: 25, height: 25, color: '#bbb', marginRight: 10 }}
-                        />
-                        <SearchSelector
-                            type='user'
-                            placeholder='User name or handle...'
-                            onSearchQuery={(query) => findUsers(query)}
-                            onOptionSelected={(user) => {
-                                setUsers([...users, user])
-                                setUserOptions([])
-                            }}
-                            onBlur={() => setTimeout(() => setUserOptions([]), 200)}
-                            options={userOptions}
-                            style={{ width: '100%' }}
-                        />
-                    </Row>
-                    {users.map((user) => (
-                        <Row centerY style={{ marginBottom: 10 }}>
-                            <ImageTitle
-                                type='space'
-                                imagePath={user.flagImagePath}
-                                title={`u/${user.handle}`}
-                                fontSize={16}
-                                style={{ marginRight: 10 }}
-                            />
-                            <CloseButton
-                                size={17}
-                                onClick={() => setUsers(users.filter((u) => u.id !== user.id))}
-                            />
-                        </Row>
-                    ))}
-                    <Button
-                        text='Create stream'
-                        color='blue'
-                        disabled={createStreamDisabled()}
-                        loading={false}
-                        onClick={createStream}
-                        style={{ marginTop: 30 }}
-                    />
+                    </label>
                 </Column>
-            )}
+                <Input
+                    type='text'
+                    title='Name'
+                    placeholder='name...'
+                    value={name}
+                    maxLength={30}
+                    onChange={(v) => setName(v)}
+                    style={{ marginBottom: 30 }}
+                />
+                <p style={{ marginBottom: 20 }}>Add sources to your stream:</p>
+                <Row centerY style={{ width: '100%', marginBottom: 10 }}>
+                    <SpacesIcon style={{ width: 25, height: 25, color: '#bbb', marginRight: 10 }} />
+                    <SearchSelector
+                        type='space'
+                        placeholder='Space name or handle...'
+                        onSearchQuery={(query) => findSpaces(query)}
+                        onOptionSelected={(space) => {
+                            setSpaces([...spaces, space])
+                            setSpaceOptions([])
+                        }}
+                        onBlur={() => setTimeout(() => setSpaceOptions([]), 200)}
+                        options={spaceOptions}
+                        style={{ width: '100%' }}
+                    />
+                </Row>
+                {spaces.map((space) => (
+                    <Row key={space.id} centerY style={{ marginBottom: 10 }}>
+                        <ImageTitle
+                            type='space'
+                            imagePath={space.flagImagePath}
+                            title={`s/${space.handle}`}
+                            fontSize={16}
+                            style={{ marginRight: 10 }}
+                        />
+                        <CloseButton
+                            size={17}
+                            onClick={() => setSpaces(spaces.filter((s) => s.id !== space.id))}
+                        />
+                    </Row>
+                ))}
+                <Row centerY style={{ width: '100%', margin: '20px 0 10px 0' }}>
+                    <UsersIcon style={{ width: 25, height: 25, color: '#bbb', marginRight: 10 }} />
+                    <SearchSelector
+                        type='user'
+                        placeholder='User name or handle...'
+                        onSearchQuery={(query) => findUsers(query)}
+                        onOptionSelected={(user) => {
+                            setUsers([...users, user])
+                            setUserOptions([])
+                        }}
+                        onBlur={() => setTimeout(() => setUserOptions([]), 200)}
+                        options={userOptions}
+                        style={{ width: '100%' }}
+                    />
+                </Row>
+                {users.map((user) => (
+                    <Row key={user.id} centerY style={{ marginBottom: 10 }}>
+                        <ImageTitle
+                            type='space'
+                            imagePath={user.flagImagePath}
+                            title={`u/${user.handle}`}
+                            fontSize={16}
+                            style={{ marginRight: 10 }}
+                        />
+                        <CloseButton
+                            size={17}
+                            onClick={() => setUsers(users.filter((u) => u.id !== user.id))}
+                        />
+                    </Row>
+                ))}
+                <Button
+                    text={`${editing ? 'Save' : 'Create'} stream`}
+                    color='blue'
+                    disabled={saveStreamDisabled()}
+                    loading={loading}
+                    onClick={saveStream}
+                    style={{ marginTop: 30 }}
+                />
+            </Column>
         </Modal>
     )
 }

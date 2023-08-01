@@ -4,7 +4,7 @@ import styles from '@styles/components/FlagImage.module.scss'
 import React from 'react'
 
 function FlagImage(props: {
-    type: 'space' | 'user' | 'post'
+    type: 'space' | 'user' | 'post' | 'stream'
     size: number
     imagePath: string | null
     className?: string

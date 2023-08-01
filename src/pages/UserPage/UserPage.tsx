@@ -158,6 +158,7 @@ function UserPage(): JSX.Element {
                     <Route path='about' element={<About />} />
                     <Route path='posts' element={<Posts />} />
                     <Route path='streams/:stream/*' element={<Streams />} />
+                    <Route path='streams' element={<Navigate to='spaces' replace />} />
                     <Route path='following' element={<Following />} />
                     <Route path='notifications' element={<Notifications />} />
                     <Route path='settings' element={<Settings />} />

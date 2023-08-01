@@ -1,9 +1,9 @@
 import Row from '@components/Row'
 import styles from '@styles/components/FlagImagePlaceholder.module.scss'
-import { PostIcon, UserIcon, UsersIcon } from '@svgs/all'
+import { PostIcon, StreamIcon, UserIcon, UsersIcon } from '@svgs/all'
 import React from 'react'
 
-function FlagImagePlaceholder(props: { type: 'space' | 'user' | 'post' }): JSX.Element {
+function FlagImagePlaceholder(props: { type: 'space' | 'user' | 'post' | 'stream' }): JSX.Element {
     const { type } = props
 
     let iconSVG
@@ -19,6 +19,10 @@ function FlagImagePlaceholder(props: { type: 'space' | 'user' | 'post' }): JSX.E
             break
         case 'post':
             iconSVG = <PostIcon />
+            iconWidth = '50%'
+            break
+        case 'stream':
+            iconSVG = <StreamIcon />
             iconWidth = '50%'
             break
         default:
