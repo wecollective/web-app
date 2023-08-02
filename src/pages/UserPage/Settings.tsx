@@ -60,9 +60,11 @@ function Settings(): JSX.Element {
                     </Row>
                     <Column centerX>
                         <h1>Bio:</h1>
-                        <ShowMoreLess height={75}>
-                            <DraftText stringifiedDraft={bio} />
-                        </ShowMoreLess>
+                        {bio && (
+                            <ShowMoreLess height={75}>
+                                <DraftText stringifiedDraft={bio} />
+                            </ShowMoreLess>
+                        )}
                         <Button
                             text='Edit'
                             color='blue'
