@@ -119,6 +119,7 @@ function CreatePostModal(): JSX.Element {
     const [spacesModalOpen, setSpacesModalOpen] = useState(false)
     const maxChars = 5000
     const cookies = new Cookies()
+    const maxUrls = 5
     const urlRequestIndex = useRef(0)
     const contentButtonTypes = ['image', 'audio', 'event', 'poll', 'glass-bead-game', 'card']
     // if (createPostModalSettings.type === 'gbg-from-post') contentButtonTypes = ['glass-bead-game']
@@ -938,7 +939,7 @@ function CreatePostModal(): JSX.Element {
 
     // grab metadata for new urls when added to text
     useEffect(() => {
-        if (urlsWithMetaData.length <= 5) {
+        if (urlsWithMetaData.length <= maxUrls) {
             // requestIndex used to pause requests until user has finished updating the url
             urlRequestIndex.current += 1
             const requestIndex = urlRequestIndex.current
@@ -1075,7 +1076,7 @@ function CreatePostModal(): JSX.Element {
                                 onChange={(value, textMentions, textUrls) => {
                                     setText(value)
                                     setMentions(textMentions)
-                                    setUrls(textUrls)
+                                    setUrls(textUrls.slice(0, maxUrls))
                                     setNoTextError(false)
                                     setMaxCharsErrors(false)
                                     setEventTextError(false)
