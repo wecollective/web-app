@@ -8,7 +8,7 @@ import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
 import UserNotFound from '@pages/UserPage/UserNotFound'
 import config from '@src/Config'
-import { capitalise } from '@src/Helpers'
+import { capitalise, trimText } from '@src/Helpers'
 import LoadingWheel from '@src/components/LoadingWheel'
 import CreateStreamModal from '@src/components/modals/CreateStreamModal'
 import styles from '@styles/pages/UserPage/Streams.module.scss'
@@ -197,7 +197,7 @@ function Streams(): JSX.Element {
                                     type='stream'
                                     imagePath={stream.image}
                                     imageSize={32}
-                                    title={stream.name}
+                                    title={trimText(stream.name, 25)}
                                     fontSize={16}
                                     link={`/u/${userHandle}/streams/custom?id=${stream.id}`}
                                     style={{ marginBottom: 10 }}
@@ -293,7 +293,7 @@ function Streams(): JSX.Element {
                                     key={s.id}
                                     type='space'
                                     imagePath={s.flagImagePath}
-                                    title={s.name}
+                                    title={trimText(s.name, 25)}
                                     link={`/s/${s.handle}`}
                                     style={{ marginBottom: 10 }}
                                 />
@@ -309,7 +309,7 @@ function Streams(): JSX.Element {
                                     key={u.id}
                                     type='user'
                                     imagePath={u.flagImagePath}
-                                    title={u.name}
+                                    title={trimText(u.name, 25)}
                                     link={`/u/${u.handle}`}
                                     style={{ marginBottom: 10 }}
                                 />
