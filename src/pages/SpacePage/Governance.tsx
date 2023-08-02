@@ -2,7 +2,6 @@ import Column from '@components/Column'
 import TextLink from '@components/TextLink'
 import { SpaceContext } from '@contexts/SpaceContext'
 import SpaceNotFound from '@pages/SpaceNotFound'
-import config from '@src/Config'
 import styles from '@styles/pages/SpacePage/Governance.module.scss'
 import React, { useContext } from 'react'
 import { useLocation } from 'react-router-dom'
@@ -33,13 +32,6 @@ function Governance(): JSX.Element {
                     </p>
                     <a href='http://wiki.weco.io/#/governance' className='blueText'>
                         http://wiki.weco.io/#/governance
-                    </a>
-                    <a href='http://wiki.weco.io/#/governance'>
-                        <img
-                            width='100%'
-                            src={`${config.publicAssets}/images/images/decision-pipeline.jpg`}
-                            alt='Stages: Suggestions, Proposals, Pending Tasks, Active Tasks, Completed Tasks'
-                        />
                     </a>
                     <br />
                     <p>
