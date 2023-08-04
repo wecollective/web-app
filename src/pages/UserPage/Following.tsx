@@ -28,6 +28,7 @@ function Following(): JSX.Element {
     const path = location.pathname.split('/')
     const userHandle = path[2]
     const itemType = path[4]
+    const mobileView = document.documentElement.clientWidth < 900
     const urlParams = Object.fromEntries(new URLSearchParams(location.search))
     const params = { ...userPostsFilters }
     Object.keys(urlParams).forEach((param) => {
@@ -73,24 +74,32 @@ function Following(): JSX.Element {
     return (
         <Column centerX className={styles.wrapper}>
             <Row className={styles.content}>
-                <Column className={styles.sideBar}>
-                    <Row className={styles.header}>
-                        <EyeIcon />
-                        <p>Following</p>
-                    </Row>
-                    <Link to={`/u/${userHandle}/following/spaces`} className={styles.streamButton}>
-                        <Column centerY centerX>
-                            <SpacesIcon />
-                        </Column>
-                        <p>Spaces</p>
-                    </Link>
-                    <Link to={`/u/${userHandle}/following/people`} className={styles.streamButton}>
-                        <Column centerY centerX>
-                            <UsersIcon />
-                        </Column>
-                        <p>People</p>
-                    </Link>
-                </Column>
+                {!mobileView && (
+                    <Column className={styles.sideBar}>
+                        <Row className={styles.header}>
+                            <EyeIcon />
+                            <p>Following</p>
+                        </Row>
+                        <Link
+                            to={`/u/${userHandle}/following/spaces`}
+                            className={styles.streamButton}
+                        >
+                            <Column centerY centerX>
+                                <SpacesIcon />
+                            </Column>
+                            <p>Spaces</p>
+                        </Link>
+                        <Link
+                            to={`/u/${userHandle}/following/people`}
+                            className={styles.streamButton}
+                        >
+                            <Column centerY centerX>
+                                <UsersIcon />
+                            </Column>
+                            <p>People</p>
+                        </Link>
+                    </Column>
+                )}
                 {params.lens === 'List' && (
                     <Row className={styles.postListView}>
                         {itemType === 'spaces' && (
@@ -103,7 +112,7 @@ function Following(): JSX.Element {
                             />
                         )}
                         {itemType === 'people' && (
-                            <Column style={{ width: 800 }}>
+                            <Column style={{ width: mobileView ? '100%' : 800 }}>
                                 <PeopleList
                                     people={items}
                                     firstPeopleloading={itemsLoading}
@@ -113,7 +122,7 @@ function Following(): JSX.Element {
                         )}
                     </Row>
                 )}
-                <Column className={styles.sideBar} />
+                {!mobileView && <Column className={styles.sideBar} />}
             </Row>
         </Column>
     )

@@ -56,6 +56,8 @@ function ToyBar(): JSX.Element {
     const path = location.pathname.split('/')
     const page = path[1]
     const subpage = path[3]
+    const mobileView = document.documentElement.clientWidth < 900
+    const buttonSize = mobileView ? 36 : 46
 
     function getToyBarData() {
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
@@ -105,7 +107,7 @@ function ToyBar(): JSX.Element {
         if (openModal) {
             return (
                 <CircleButton
-                    size={45}
+                    size={buttonSize}
                     icon={<SlidersIcon />}
                     onClick={() => openModal(true)}
                     style={{ marginRight: 10 }}
@@ -124,7 +126,7 @@ function ToyBar(): JSX.Element {
         if (openModal) {
             return (
                 <CircleButton
-                    size={45}
+                    size={buttonSize}
                     icon={<EyeIcon />}
                     onClick={() => openModal(true)}
                     style={{ marginRight: 10 }}
@@ -141,7 +143,7 @@ function ToyBar(): JSX.Element {
     return (
         <Row centerY centerX className={styles.wrapper}>
             <Row centerY centerX className={styles.container}>
-                <CircleButton size={46} icon={<PlusIcon />} style={{ marginRight: 10 }}>
+                <CircleButton size={buttonSize} icon={<PlusIcon />} style={{ marginRight: 10 }}>
                     <Tooltip centered top={40} width={150} className={styles.newButtons}>
                         <button type='button' onClick={newSpace}>
                             <SpacesIcon />
@@ -154,7 +156,11 @@ function ToyBar(): JSX.Element {
                     </Tooltip>
                 </CircleButton>
                 {loggedIn && (
-                    <CircleButton size={46} icon={<StreamIcon />} style={{ marginRight: 10 }}>
+                    <CircleButton
+                        size={buttonSize}
+                        icon={<StreamIcon />}
+                        style={{ marginRight: 10 }}
+                    >
                         <Tooltip top={40} width={250} centered>
                             <p className='grey' style={{ marginBottom: 10, fontSize: 14 }}>
                                 Your Streams
@@ -187,7 +193,11 @@ function ToyBar(): JSX.Element {
                     </CircleButton>
                 )}
                 {loggedIn && (
-                    <CircleButton size={46} icon={<SpacesIcon />} style={{ marginRight: 10 }}>
+                    <CircleButton
+                        size={buttonSize}
+                        icon={<SpacesIcon />}
+                        style={{ marginRight: 10 }}
+                    >
                         <Tooltip top={40} width={250} centered>
                             {followedSpaces.length ? (
                                 <>
@@ -218,7 +228,7 @@ function ToyBar(): JSX.Element {
                     </CircleButton>
                 )}
                 {loggedIn && (
-                    <CircleButton size={46} icon={<UserIcon />} style={{ marginRight: 10 }}>
+                    <CircleButton size={buttonSize} icon={<UserIcon />} style={{ marginRight: 10 }}>
                         <Tooltip top={40} width={250} centered>
                             {followedUsers.length ? (
                                 <>
@@ -251,7 +261,7 @@ function ToyBar(): JSX.Element {
                 {renderFilters()}
                 {renderLenses()}
                 <CircleButton
-                    size={45}
+                    size={buttonSize}
                     icon={<HelpIcon />}
                     onClick={() => setHelpModalOpen(true)}
                 />
