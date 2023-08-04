@@ -40,6 +40,26 @@
             }
         }
 
+        .streamButton {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+
+            > div {
+                width: 32px;
+                height: 32px;
+                background-image: linear-gradient(141deg, #9fb8ad 0%, #1fc8db 51%, #2cb5e8 75%);
+                border-radius: 50%;
+                color: white;
+                margin-right: 5px;
+
+                svg {
+                    width: 20px;
+                    height: 20px;
+                }
+            }
+        }
+
         .divider {
             height: 30px;
             width: 2px;
