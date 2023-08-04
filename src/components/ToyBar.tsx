@@ -2,6 +2,7 @@ import CircleButton from '@components/CircleButton'
 import Column from '@components/Column'
 import ImageTitle from '@components/ImageTitle'
 import Row from '@components/Row'
+import TextLink from '@components/TextLink'
 import Tooltip from '@components/Tooltip'
 import GlobalHelpModal from '@components/modals/GlobalHelpModal'
 import SpacePeopleFilters from '@components/modals/SpacePeopleFilters'
@@ -182,7 +183,6 @@ function ToyBar(): JSX.Element {
                                     style={{ marginBottom: 8 }}
                                 />
                             ))}
-                            {/* <p>See all</p> */}
                         </Tooltip>
                     </CircleButton>
                 )}
@@ -210,7 +210,10 @@ function ToyBar(): JSX.Element {
                             ) : (
                                 <p style={{ fontSize: 14 }}>No followed spaces...</p>
                             )}
-                            {/* <p>See all</p> */}
+                            <TextLink
+                                text='See all'
+                                link={`/u/${accountData.handle}/following/spaces`}
+                            />
                         </Tooltip>
                     </CircleButton>
                 )}
@@ -238,7 +241,10 @@ function ToyBar(): JSX.Element {
                             ) : (
                                 <p style={{ fontSize: 14 }}>No followed users...</p>
                             )}
-                            {/* <p>See all</p> */}
+                            <TextLink
+                                text='See all'
+                                link={`/u/${accountData.handle}/following/people`}
+                            />
                         </Tooltip>
                     </CircleButton>
                 )}

@@ -57,7 +57,7 @@ function UserPage(): JSX.Element {
             { text: 'About', visible: true, icon: <AboutIcon /> },
             { text: 'Posts', visible: true, icon: <PostIcon /> },
             { text: 'Streams', visible: isOwnAccount, icon: <StreamIcon /> },
-            { text: 'Following', visible: true, icon: <EyeIcon /> },
+            { text: 'Following', visible: isOwnAccount, icon: <EyeIcon /> },
             { text: 'Notifications', visible: isOwnAccount, icon: <BellIcon /> },
         ],
         right: [
@@ -159,7 +159,8 @@ function UserPage(): JSX.Element {
                     <Route path='posts' element={<Posts />} />
                     <Route path='streams/:stream/*' element={<Streams />} />
                     <Route path='streams' element={<Navigate to='spaces' replace />} />
-                    <Route path='following' element={<Following />} />
+                    <Route path='following/:itemType' element={<Following />} />
+                    <Route path='following' element={<Navigate to='spaces' replace />} />
                     <Route path='notifications' element={<Notifications />} />
                     <Route path='settings' element={<Settings />} />
                 </Routes>

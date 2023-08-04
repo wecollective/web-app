@@ -3,8 +3,8 @@ import Row from '@components/Row'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import SpaceNotFound from '@pages/SpaceNotFound'
+import SpaceList from '@src/components/SpaceList'
 import SpaceCircles from '@src/pages/SpacePage/SpaceCircles'
-import SpaceList from '@src/pages/SpacePage/SpaceList'
 import SpaceTree from '@src/pages/SpacePage/SpaceTree'
 import styles from '@styles/pages/SpacePage/Spaces.module.scss'
 import React, { useContext, useEffect } from 'react'
@@ -16,6 +16,7 @@ function Spaces(): JSX.Element {
         spaceData,
         spaceNotFound,
         getSpaceListData,
+        spaceListData,
         spaceSpacesLoading,
         setSpaceSpacesLoading,
         nextSpaceSpacesLoading,
@@ -70,7 +71,13 @@ function Spaces(): JSX.Element {
                 )}
                 {params.lens === 'List' && (
                     <Column centerX className={styles.spaceListView}>
-                        <SpaceList location='space-spaces' />
+                        <SpaceList
+                            location='space-spaces'
+                            spaces={spaceListData}
+                            totalSpaces={spaceData.totalSpaces}
+                            loading={spaceSpacesLoading}
+                            nextSpacesLoading={nextSpaceSpacesLoading}
+                        />
                     </Column>
                 )}
             </Row>

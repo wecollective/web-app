@@ -8,16 +8,18 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import styles from '@styles/components/PostList.module.scss'
 import React, { useContext, useEffect } from 'react'
 
-function SpaceList(props: { location: 'space-spaces' }): JSX.Element {
-    const { location } = props
-    const {
-        spaceData,
-        spaceListData: spaces,
-        spaceSpacesLoading: loading,
-        nextSpaceSpacesLoading: nextSpacesLoading,
-        resetSpaceList,
-    } = useContext(SpaceContext)
-    const { name, totalSpaces } = spaceData
+function SpaceList(props: {
+    location: 'space-spaces' | 'followed-spaces'
+    spaces: any[]
+    totalSpaces: number
+    loading: boolean
+    nextSpacesLoading: boolean
+    className?: string
+    style?: any
+}): JSX.Element {
+    const { location, spaces, totalSpaces, loading, nextSpacesLoading, className, style } = props
+    const { spaceData, resetSpaceList } = useContext(SpaceContext)
+    const { name } = spaceData
 
     function renderPlaceholder() {
         return (
@@ -34,7 +36,11 @@ function SpaceList(props: { location: 'space-spaces' }): JSX.Element {
     useEffect(() => () => resetSpaceList(), [])
 
     return (
-        <Column id={`${location}-scrollbars`} className={styles.wrapper}>
+        <Column
+            id={`${location}-scrollbars`}
+            className={`${styles.wrapper} ${className}`}
+            style={style}
+        >
             {loading ? (
                 <SpaceListPlaceholder />
             ) : (
@@ -57,6 +63,11 @@ function SpaceList(props: { location: 'space-spaces' }): JSX.Element {
             )}
         </Column>
     )
+}
+
+SpaceList.defaultProps = {
+    className: null,
+    style: null,
 }
 
 export default SpaceList
