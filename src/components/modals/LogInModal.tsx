@@ -63,7 +63,7 @@ function LogInModal(props: { close: () => void }): JSX.Element {
                     setSuccessMessage('Logged in')
                     setSuccess(true)
                     // add access token to cookies
-                    document.cookie = `accessToken=${res.data}; path=/`
+                    document.cookie = `accessToken=${res.data}; path=/ ; max-age=604800`
                     // get account data and navigate to 'all' if on home page
                     getAccountData()
                     setTimeout(() => {
