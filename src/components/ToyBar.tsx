@@ -206,14 +206,14 @@ function ToyBar(): JSX.Element {
                                             style={{ marginBottom: 8 }}
                                         />
                                     ))}
+                                    <TextLink
+                                        text='See all'
+                                        link={`/u/${accountData.handle}/following/spaces`}
+                                    />
                                 </>
                             ) : (
                                 <p style={{ fontSize: 14 }}>No followed spaces...</p>
                             )}
-                            <TextLink
-                                text='See all'
-                                link={`/u/${accountData.handle}/following/spaces`}
-                            />
                         </Tooltip>
                     </CircleButton>
                 )}
@@ -237,14 +237,14 @@ function ToyBar(): JSX.Element {
                                             style={{ marginBottom: 8 }}
                                         />
                                     ))}
+                                    <TextLink
+                                        text='See all'
+                                        link={`/u/${accountData.handle}/following/people`}
+                                    />
                                 </>
                             ) : (
                                 <p style={{ fontSize: 14 }}>No followed users...</p>
                             )}
-                            <TextLink
-                                text='See all'
-                                link={`/u/${accountData.handle}/following/people`}
-                            />
                         </Tooltip>
                     </CircleButton>
                 )}
