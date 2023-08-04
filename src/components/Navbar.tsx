@@ -16,11 +16,13 @@ import {
     BellIcon,
     CalendarIcon,
     ChevronDownIcon,
+    EyeIcon,
     GovernanceIcon,
     PostIcon,
     SearchIcon,
     SettingsIcon,
     SpacesIcon,
+    StreamIcon,
     TreeIcon,
     UserIcon,
     UsersIcon,
@@ -436,12 +438,20 @@ function Navbar(): JSX.Element {
                             {profileDropDownOpen && (
                                 <div className={styles.profileDropDown}>
                                     <Link to={`/u/${accountData.handle}/about`}>
-                                        <UserIcon />
-                                        <p>Profile</p>
+                                        <AboutIcon />
+                                        <p>About</p>
                                     </Link>
                                     <Link to={`/u/${accountData.handle}/posts`}>
                                         <PostIcon />
                                         <p>Posts</p>
+                                    </Link>
+                                    <Link to={`/u/${accountData.handle}/streams/spaces`}>
+                                        <StreamIcon />
+                                        <p>Streams</p>
+                                    </Link>
+                                    <Link to={`/u/${accountData.handle}/following`}>
+                                        <EyeIcon />
+                                        <p>Following</p>
                                     </Link>
                                     <Link to={`/u/${accountData.handle}/notifications`}>
                                         <BellIcon />
