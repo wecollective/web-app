@@ -42,7 +42,7 @@ function UpdateUserBioModal(props: { close: () => void }): JSX.Element {
 
     return (
         <Modal close={close} centerX confirmClose style={{ width: mobileView ? '100%' : 800 }}>
-            <h1>Change your account bio</h1>
+            <h1>Edit your account bio</h1>
             <DraftTextEditor
                 type='other'
                 stringifiedDraft={newBio}
