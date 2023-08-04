@@ -25,17 +25,7 @@ import Cookies from 'universal-cookie'
 
 function CreateSpaceModal(): JSX.Element {
     const { accountData, setCreateSpaceModalOpen } = useContext(AccountContext)
-    const {
-        isModerator,
-        spaceData,
-        spaceListData,
-        setSpaceListData,
-        spaceTreeData,
-        setSpaceTreeData,
-        spaceCircleData,
-        setSpaceCircleData,
-        spaceSpacesFilters,
-    } = useContext(SpaceContext)
+    const { isModerator, spaceData } = useContext(SpaceContext)
     const [formData, setFormData] = useState({
         handle: {
             value: '',
@@ -77,7 +67,8 @@ function CreateSpaceModal(): JSX.Element {
     const location = useLocation()
     const history = useNavigate()
     const cookies = new Cookies()
-    const authorized = isModerator || spaceData.id === 1
+    const authorized = isModerator || spaceData.id === 1 || !spaceData.id
+    const allFlag = 'https://weco-prod-space-flag-images.s3.eu-west-1.amazonaws.com/1614556880362'
 
     function updateItem(item, value) {
         updateFormItem(formData, setFormData, item, value)
@@ -91,7 +82,7 @@ function CreateSpaceModal(): JSX.Element {
                 // todo: get account details server side?
                 accountName: accountData.name,
                 accountHandle: accountData.handle,
-                parentId: spaceData.id,
+                parentId: spaceData.id || 1,
                 handle: handle.value,
                 name: name.value,
                 description: description.value,
@@ -103,41 +94,12 @@ function CreateSpaceModal(): JSX.Element {
                 .then((res) => {
                     if (res.data.message === 'pending-acceptance')
                         setSuccessMessage('Space created and request sent to moderators')
-                    else {
-                        // const newSpaceData = {
-                        //     ...defaultSpaceData,
-                        //     uuid: uuidv4(),
-                        //     id: res.data.spaceId,
-                        //     handle: handle.value,
-                        //     name: name.value,
-                        //     description: description.value,
-                        // }
-                        // if (onSpacesPage) {
-                        //     const { lens } = spaceSpacesFilters
-                        //     if (lens === 'Circles') {
-                        //         setSpaceCircleData({
-                        //             ...spaceCircleData,
-                        //             children: [newSpaceData, ...spaceCircleData.children],
-                        //         })
-                        //     } else if (lens === 'Tree') {
-                        //         setSpaceTreeData({
-                        //             ...spaceTreeData,
-                        //             children: [newSpaceData, ...spaceTreeData.children],
-                        //         })
-                        //     } else if (lens === 'List') {
-                        //         setSpaceListData([newSpaceData, ...spaceListData])
-                        //     }
-                        // }
-                        setSuccessMessage(`Space created and attached to '${spaceData.name}'`)
-                    }
+                    else setSuccessMessage(`Space created and attached to '${spaceData.name}'`)
                     setSuccess(true)
                     setLoading(false)
                     setTimeout(() => {
-                        // if (onSpacesPage && spaceSpacesFilters.lens === 'Circles') {
                         history(`/s/${data.handle}/posts`)
-                        // }
                         setCreateSpaceModalOpen(false)
-                        // close()
                     }, 1000)
                 })
                 .catch((error) => {
@@ -171,9 +133,13 @@ function CreateSpaceModal(): JSX.Element {
                         <p>Create a new space in</p>
                         <ImageTitle
                             type='space'
-                            imagePath={spaceData.flagImagePath}
+                            imagePath={spaceData.id ? spaceData.flagImagePath : allFlag}
                             imageSize={40}
-                            title={`${spaceData.name} (s/${spaceData.handle})`}
+                            title={
+                                spaceData.id
+                                    ? `${spaceData.name} (s/${spaceData.handle})`
+                                    : 'All (s/all)'
+                            }
                             fontSize={24}
                         />
                     </Column>
