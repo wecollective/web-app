@@ -3,6 +3,7 @@ import Column from '@components/Column'
 import ImageTitle from '@components/ImageTitle'
 import PostList from '@components/PostList'
 import Row from '@components/Row'
+import Scrollbars from '@components/Scrollbars'
 import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
@@ -172,48 +173,50 @@ function Streams(): JSX.Element {
             <Row className={styles.content}>
                 {!mobileView && (
                     <Column className={styles.sideBar}>
-                        <Row className={styles.header}>
-                            <StreamIcon />
-                            <p>Your streams</p>
-                        </Row>
-                        {['all', 'spaces', 'people'].map((type) => (
-                            <Link
-                                key={type}
-                                to={`/u/${userHandle}/streams/${type}`}
-                                className={styles.streamButton}
-                            >
-                                <Column centerY centerX>
-                                    {findStreamIcon(type)}
+                        <Scrollbars style={{ padding: '0 10px 5px 0' }}>
+                            <Row className={styles.header}>
+                                <StreamIcon />
+                                <p>Your streams</p>
+                            </Row>
+                            {['all', 'spaces', 'people'].map((type) => (
+                                <Link
+                                    key={type}
+                                    to={`/u/${userHandle}/streams/${type}`}
+                                    className={styles.streamButton}
+                                >
+                                    <Column centerY centerX>
+                                        {findStreamIcon(type)}
+                                    </Column>
+                                    <p>{capitalise(type)}</p>
+                                </Link>
+                            ))}
+                            <div className={styles.divider} />
+                            {streamsLoading ? (
+                                <LoadingWheel size={30} style={{ marginBottom: 10 }} />
+                            ) : (
+                                <Column>
+                                    {streams.map((stream) => (
+                                        <ImageTitle
+                                            key={stream.id}
+                                            type='stream'
+                                            imagePath={stream.image}
+                                            imageSize={32}
+                                            title={trimText(stream.name, 25)}
+                                            fontSize={16}
+                                            link={`/u/${userHandle}/streams/custom?id=${stream.id}`}
+                                            style={{ marginBottom: 10 }}
+                                        />
+                                    ))}
                                 </Column>
-                                <p>{capitalise(type)}</p>
-                            </Link>
-                        ))}
-                        <div className={styles.divider} />
-                        {streamsLoading ? (
-                            <LoadingWheel size={30} style={{ marginBottom: 10 }} />
-                        ) : (
-                            <Column>
-                                {streams.map((stream) => (
-                                    <ImageTitle
-                                        key={stream.id}
-                                        type='stream'
-                                        imagePath={stream.image}
-                                        imageSize={32}
-                                        title={trimText(stream.name, 25)}
-                                        fontSize={16}
-                                        link={`/u/${userHandle}/streams/custom?id=${stream.id}`}
-                                        style={{ marginBottom: 10 }}
-                                    />
-                                ))}
-                            </Column>
-                        )}
-                        <Button
-                            icon={<PlusIcon />}
-                            text='New stream'
-                            color='blue'
-                            onClick={() => setCreateStreamModalOpen(true)}
-                            style={{ marginTop: 10 }}
-                        />
+                            )}
+                            <Button
+                                icon={<PlusIcon />}
+                                text='New stream'
+                                color='blue'
+                                onClick={() => setCreateStreamModalOpen(true)}
+                                style={{ marginTop: 10 }}
+                            />
+                        </Scrollbars>
                     </Column>
                 )}
                 {params.lens === 'List' && (
@@ -235,91 +238,93 @@ function Streams(): JSX.Element {
                 )}
                 {!mobileView && (
                     <Column className={styles.sideBar} style={{ marginLeft: 20 }}>
-                        <Row className={styles.header}>
-                            <StreamIcon />
-                            <p>This stream</p>
-                        </Row>
-                        {streamType === 'custom' && sources.stream && (
-                            <Row centerY style={{ marginBottom: 10 }}>
-                                <ImageTitle
-                                    type='stream'
-                                    imagePath={sources.stream.image}
-                                    imageSize={40}
-                                    title={sources.stream.name}
-                                    fontSize={18}
-                                    style={{ marginRight: 5 }}
-                                />
-                                <button
-                                    type='button'
-                                    className={styles.editButton}
-                                    onClick={() => {
-                                        setEditingStream(true)
-                                        setCreateStreamModalOpen(true)
-                                    }}
-                                >
-                                    <EditIcon />
-                                </button>
-                                <button
-                                    type='button'
-                                    className={styles.editButton}
-                                    onClick={() => setDeleteStreamModalOpen(true)}
-                                >
-                                    <DeleteIcon />
-                                </button>
+                        <Scrollbars style={{ padding: '0 10px 5px 0' }}>
+                            <Row className={styles.header}>
+                                <StreamIcon />
+                                <p>This stream</p>
                             </Row>
-                        )}
-                        {['all', 'spaces', 'people'].includes(streamType) && (
-                            <Row className={`${styles.streamButton} ${styles.large}`}>
-                                <Column centerY centerX>
-                                    {findStreamIcon(streamType)}
+                            {streamType === 'custom' && sources.stream && (
+                                <Row centerY style={{ marginBottom: 10 }}>
+                                    <ImageTitle
+                                        type='stream'
+                                        imagePath={sources.stream.image}
+                                        imageSize={40}
+                                        title={sources.stream.name}
+                                        fontSize={18}
+                                        style={{ marginRight: 5 }}
+                                    />
+                                    <button
+                                        type='button'
+                                        className={styles.editButton}
+                                        onClick={() => {
+                                            setEditingStream(true)
+                                            setCreateStreamModalOpen(true)
+                                        }}
+                                    >
+                                        <EditIcon />
+                                    </button>
+                                    <button
+                                        type='button'
+                                        className={styles.editButton}
+                                        onClick={() => setDeleteStreamModalOpen(true)}
+                                    >
+                                        <DeleteIcon />
+                                    </button>
+                                </Row>
+                            )}
+                            {['all', 'spaces', 'people'].includes(streamType) && (
+                                <Row className={`${styles.streamButton} ${styles.large}`}>
+                                    <Column centerY centerX>
+                                        {findStreamIcon(streamType)}
+                                    </Column>
+                                    <p>{capitalise(streamType)}</p>
+                                </Row>
+                            )}
+                            {sourcesLoading ? (
+                                <LoadingWheel size={30} style={{ marginBottom: 10 }} />
+                            ) : (
+                                <Column>
+                                    {streamType === 'spaces' && !sources.spaces.length && (
+                                        <p className={styles.greyText}>No followed spaces...</p>
+                                    )}
+                                    {streamType === 'people' && !sources.users.length && (
+                                        <p className={styles.greyText}>No followed people...</p>
+                                    )}
+                                    {sources.spaces.length > 0 && (
+                                        <Row className={styles.header}>
+                                            <SpacesIcon />
+                                            <p>Spaces</p>
+                                        </Row>
+                                    )}
+                                    {sources.spaces.map((s) => (
+                                        <ImageTitle
+                                            key={s.id}
+                                            type='space'
+                                            imagePath={s.flagImagePath}
+                                            title={trimText(s.name, 25)}
+                                            link={`/s/${s.handle}`}
+                                            style={{ marginBottom: 10 }}
+                                        />
+                                    ))}
+                                    {sources.users.length > 0 && (
+                                        <Row className={styles.header}>
+                                            <UsersIcon />
+                                            <p>People</p>
+                                        </Row>
+                                    )}
+                                    {sources.users.map((u) => (
+                                        <ImageTitle
+                                            key={u.id}
+                                            type='user'
+                                            imagePath={u.flagImagePath}
+                                            title={trimText(u.name, 25)}
+                                            link={`/u/${u.handle}`}
+                                            style={{ marginBottom: 10 }}
+                                        />
+                                    ))}
                                 </Column>
-                                <p>{capitalise(streamType)}</p>
-                            </Row>
-                        )}
-                        {sourcesLoading ? (
-                            <LoadingWheel size={30} style={{ marginBottom: 10 }} />
-                        ) : (
-                            <Column>
-                                {streamType === 'spaces' && !sources.spaces.length && (
-                                    <p className={styles.greyText}>No followed spaces...</p>
-                                )}
-                                {streamType === 'people' && !sources.users.length && (
-                                    <p className={styles.greyText}>No followed people...</p>
-                                )}
-                                {sources.spaces.length > 0 && (
-                                    <Row className={styles.header}>
-                                        <SpacesIcon />
-                                        <p>Spaces</p>
-                                    </Row>
-                                )}
-                                {sources.spaces.map((s) => (
-                                    <ImageTitle
-                                        key={s.id}
-                                        type='space'
-                                        imagePath={s.flagImagePath}
-                                        title={trimText(s.name, 25)}
-                                        link={`/s/${s.handle}`}
-                                        style={{ marginBottom: 10 }}
-                                    />
-                                ))}
-                                {sources.users.length > 0 && (
-                                    <Row className={styles.header}>
-                                        <UsersIcon />
-                                        <p>People</p>
-                                    </Row>
-                                )}
-                                {sources.users.map((u) => (
-                                    <ImageTitle
-                                        key={u.id}
-                                        type='user'
-                                        imagePath={u.flagImagePath}
-                                        title={trimText(u.name, 25)}
-                                        link={`/u/${u.handle}`}
-                                        style={{ marginBottom: 10 }}
-                                    />
-                                ))}
-                            </Column>
-                        )}
+                            )}
+                        </Scrollbars>
                     </Column>
                 )}
             </Row>
