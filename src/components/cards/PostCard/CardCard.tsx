@@ -116,7 +116,7 @@ function CardCard(props: {
                 </button>
                 <button
                     type='button'
-                    className={card.accountLinks > 0 ? styles.blue : ''}
+                    className={card.accountLink && styles.blue}
                     onClick={() => history(`/linkmap?item=post&id=${card.id}`)}
                 >
                     <Row centerY>
@@ -138,7 +138,7 @@ function CardCard(props: {
                 </button>
                 <button
                     type='button'
-                    className={card.accountLinks > 0 ? styles.blue : ''}
+                    className={card.accountLink && styles.blue}
                     onClick={() => history(`/linkmap?item=post&id=${card.id}`)}
                 >
                     <Row centerY>

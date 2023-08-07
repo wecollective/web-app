@@ -3,13 +3,13 @@ import Column from '@components/Column'
 import ImageTitle from '@components/ImageTitle'
 import Row from '@components/Row'
 import ShowMoreLess from '@components/ShowMoreLess'
-import StatButton from '@components/StatButton'
 import DraftText from '@components/draft-js/DraftText'
 import DeletePostModal from '@components/modals/DeletePostModal'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
-import { dateCreated, statTitle, timeSinceCreated, timeSinceCreatedShort } from '@src/Helpers'
+import { dateCreated, timeSinceCreated, timeSinceCreatedShort } from '@src/Helpers'
+import LoadingWheel from '@src/components/LoadingWheel'
 import Comments from '@src/components/cards/Comments/Comments'
 import AudioCard from '@src/components/cards/PostCard/AudioCard'
 import CardCard from '@src/components/cards/PostCard/CardCard'
@@ -77,9 +77,10 @@ function PostCard(props: {
         totalReposts,
         totalLinks,
         accountLike,
+        accountComment,
+        accountLink,
         accountRating,
         accountRepost,
-        accountLinks,
         sourcePostId,
         Creator,
         DirectSpaces,
@@ -316,25 +317,27 @@ function PostCard(props: {
             </Column>
             {showFooter && (
                 <Column className={styles.footer}>
-                    <Row centerY className={styles.statButtons}>
-                        <StatButton
-                            icon={<LikeIcon />}
-                            iconSize={20}
-                            text={totalLikes}
-                            title={statTitle('Like', totalLikes || 0)}
-                            color={accountLike && 'blue'}
-                            disabled={location === 'preview' || likeLoading}
-                            loading={likeLoading}
-                            onClickIcon={toggleLike}
-                            onClickStat={() => (totalLikes ? setLikeModalOpen(true) : toggleLike())}
-                        />
-                        <StatButton
-                            icon={<CommentIcon />}
-                            iconSize={20}
-                            text={totalComments}
-                            title={statTitle('Comment', totalComments || 0)}
-                            // color={accountComment && 'blue'}
-                            disabled={location === 'preview'}
+                    <Row centerY className={styles.reactions}>
+                        <Row
+                            centerY
+                            className={`${styles.like} ${accountLike ? styles.highlighted : ''}`}
+                        >
+                            {likeLoading ? (
+                                <LoadingWheel size={22} style={{ margin: '0 8px 0 7px' }} />
+                            ) : (
+                                <button type='button' onClick={toggleLike}>
+                                    <LikeIcon />
+                                </button>
+                            )}
+                            <button type='button' onClick={() => setLikeModalOpen(true)}>
+                                <p>{totalLikes}</p>
+                            </button>
+                        </Row>
+                        <button
+                            type='button'
+                            className={`${styles.comment} ${
+                                accountComment ? styles.highlighted : ''
+                            }`}
                             onClick={() => {
                                 if (loggedIn || totalComments) setCommentsOpen(!commentsOpen)
                                 else {
@@ -342,34 +345,46 @@ function PostCard(props: {
                                     setAlertModalOpen(true)
                                 }
                             }}
-                        />
-                        <StatButton
-                            icon={<LinkIcon />}
-                            iconSize={20}
-                            text={totalLinks}
-                            title={statTitle('Link', totalLinks || 0)}
-                            color={accountLinks > 0 ? 'blue' : undefined}
-                            disabled={location === 'preview'}
+                        >
+                            <Column centerX centerY>
+                                <CommentIcon />
+                            </Column>
+                            <p>{totalComments}</p>
+                        </button>
+                        <button
+                            type='button'
+                            className={`${styles.link} ${accountLink ? styles.highlighted : ''}`}
                             onClick={() => history(`/linkmap?item=post&id=${id}`)}
-                        />
-                        <StatButton
-                            icon={<ZapIcon />}
-                            iconSize={20}
-                            text={totalRatings}
-                            title={statTitle('Rating', totalRatings || 0)}
-                            color={accountRating && 'blue'}
-                            disabled={location === 'preview'}
+                        >
+                            <Column centerX centerY>
+                                <LinkIcon />
+                            </Column>
+                            <p>{totalLinks}</p>
+                        </button>
+                        <button
+                            type='button'
+                            className={`${styles.rating} ${
+                                accountRating ? styles.highlighted : ''
+                            }`}
                             onClick={() => setRatingModalOpen(true)}
-                        />
-                        <StatButton
-                            icon={<RepostIcon />}
-                            iconSize={20}
-                            text={totalReposts}
-                            title={statTitle('Repost', totalReposts || 0)}
-                            color={accountRepost && 'blue'}
-                            disabled={location === 'preview'}
+                        >
+                            <Column centerX centerY>
+                                <ZapIcon />
+                            </Column>
+                            <p>{totalRatings}</p>
+                        </button>
+                        <button
+                            type='button'
+                            className={`${styles.repost} ${
+                                accountRepost ? styles.highlighted : ''
+                            }`}
                             onClick={() => setRepostModalOpen(true)}
-                        />
+                        >
+                            <Column centerX centerY>
+                                <RepostIcon />
+                            </Column>
+                            <p>{totalReposts}</p>
+                        </button>
                         {likeModalOpen && (
                             <LikeModal
                                 itemType='post'

@@ -58,7 +58,7 @@ function CommentCard(props: {
         totalGlassBeadGames,
         accountLike,
         accountRating,
-        accountLinks,
+        accountLink,
         createdAt,
         updatedAt,
         Creator,
@@ -221,7 +221,7 @@ function CommentCard(props: {
                     </Row>
                     <button
                         type='button'
-                        className={`${styles.stat} ${accountLinks ? styles.blue : ''}`}
+                        className={`${styles.stat} ${accountLink ? styles.blue : ''}`}
                         onClick={() => history(`/linkmap?item=comment&id=${id}`)}
                     >
                         <LinkIcon />

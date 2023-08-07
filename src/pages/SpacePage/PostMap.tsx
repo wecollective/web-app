@@ -124,8 +124,7 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
     }
 
     function findStroke(d) {
-        if (d.accountLike || d.accountRepost || d.accountRating || d.accountLinks > 0)
-            return '#83b0ff'
+        if (d.accountLike || d.accountRepost || d.accountRating || d.accountLink) return '#83b0ff'
         return 'rgb(140 140 140)'
     }
 

@@ -282,7 +282,7 @@ function NextBeadModal(props: {
             Link: { source: null },
             Creator: accountData,
             accountLike: 0,
-            accountLinks: 0,
+            accountLink: 0,
             accountRating: 0,
             accountRepost: 0,
         } as any

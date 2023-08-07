@@ -146,26 +146,116 @@
     }
 
     .footer {
-        margin-top: 2px;
+        margin: 0 -8px;
 
-        .statButtons {
-            height: 24px;
-            flex-shrink: 0;
+        .reactions {
+            // like button styled seperately due to different html
+            .like {
+                $color: $likeRed;
+                margin-right: 14px;
+                &:hover,
+                &.highlighted {
+                    > button {
+                        color: $color;
+                        &:first-child {
+                            background-color: rgba($color, 0.1);
+                        }
+                    }
+                }
 
-            > div > button {
-                font-size: 15px;
+                > button {
+                    all: unset;
+                    cursor: pointer;
+                    color: $grey5;
+                    transition: background-color 0.5s;
+
+                    &:first-child {
+                        width: 34px;
+                        height: 34px;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin-right: 3px;
+                    }
+
+                    svg {
+                        width: 20px;
+                        height: 20px;
+                        transition: color 0.3s;
+                    }
+
+                    p {
+                        transition: color 0.3s;
+                    }
+                }
             }
 
-            .gbgFromPostButton {
+            > button {
                 all: unset;
                 cursor: pointer;
-                width: 22px;
-                height: 22px;
+                display: flex;
+                align-items: center;
+                margin-right: 14px;
+                color: $grey5;
 
-                > svg {
-                    width: 22px;
-                    height: 22px;
-                    color: $grey6;
+                > div {
+                    width: 34px;
+                    height: 34px;
+                    border-radius: 50%;
+                    margin-right: 3px;
+                    transition: background-color 0.5s;
+
+                    svg {
+                        width: 20px;
+                        height: 20px;
+                        transition: color 0.3s;
+                    }
+                }
+
+                > p {
+                    transition: color 0.3s;
+                }
+
+                &.comment {
+                    $color: $commentGreen;
+                    &:hover,
+                    &.highlighted {
+                        color: $color;
+                        > div {
+                            background-color: rgba($color, 0.1);
+                        }
+                    }
+                }
+                &.link {
+                    $color: $linkPurple;
+                    &:hover,
+                    &.highlighted {
+                        color: $color;
+                        > div {
+                            background-color: rgba($color, 0.1);
+                        }
+                    }
+                }
+                &.rating {
+                    $color: $ratingOrange;
+                    &:hover,
+                    &.highlighted {
+                        color: $color;
+                        > div {
+                            background-color: rgba($color, 0.1);
+                        }
+                    }
+                }
+                &.repost {
+                    $color: $repostBlue;
+                    &:hover,
+                    &.highlighted {
+                        color: $color;
+                        > div {
+                            background-color: rgba($color, 0.1);
+                        }
+                    }
                 }
             }
         }

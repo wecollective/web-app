@@ -54,7 +54,7 @@ function BeadCard(props: {
         totalLinks,
         accountLike,
         accountComment,
-        accountLinks,
+        accountLink,
         Creator,
         Links,
         Urls,
@@ -264,7 +264,7 @@ function BeadCard(props: {
                         iconSize={20}
                         text={totalLinks || ''}
                         title={statTitle('Link', totalLinks || 0)}
-                        color={accountLinks > 0 ? 'blue' : undefined}
+                        color={accountLink && 'blue'}
                         // disabled={location === 'preview'}
                         onClick={() => history(`/linkmap?item=post&id=${id}`)}
                     />
