@@ -43,7 +43,7 @@ function Space(props: {
                 <ImageTitle
                     type='space'
                     imagePath={flagImagePath}
-                    title={trimText(name, 25)}
+                    title={trimText(name, 24)}
                     link={`/s/${handle}/${selectedSubPage}`}
                     fontSize={14}
                     imageSize={35}
