@@ -507,6 +507,7 @@ function GlassBeadGame(): JSX.Element {
     const iceConfig = {
         // iceTransportPolicy: 'relay',
         iceServers: [
+            // { urls: 'stun:stun.l.google.com:19302' },
             { urls: `stun:${config.turnServerUrl}` },
             {
                 urls: `turn:${config.turnServerUrl}`,
@@ -591,8 +592,10 @@ function GlassBeadGame(): JSX.Element {
                     // auto disable video and audio tracks when connected
                     // streamRef.current.getTracks().forEach((track) => (track.enabled = false))
                     peersRef.current.forEach((p) => p.peer.addStream(stream))
-                    videoRef.current = document.getElementById('your-video')
-                    videoRef.current.srcObject = stream
+                    setTimeout(() => {
+                        videoRef.current = document.getElementById('your-video')
+                        videoRef.current.srcObject = stream
+                    }, 1000)
                     const newPlayer = {
                         id: accountData.id,
                         name: accountData.name,
@@ -615,8 +618,10 @@ function GlassBeadGame(): JSX.Element {
                                 .getTracks()
                                 .forEach((track) => (track.enabled = false))
                             peersRef.current.forEach((p) => p.peer.addStream(stream))
-                            videoRef.current = document.getElementById('your-video')
-                            videoRef.current.srcObject = stream
+                            setTimeout(() => {
+                                videoRef.current = document.getElementById('your-video')
+                                videoRef.current.srcObject = stream
+                            }, 1000)
                             const newPlayer = {
                                 id: accountData.id,
                                 name: accountData.name,
@@ -1019,14 +1024,16 @@ function GlassBeadGame(): JSX.Element {
     }
 
     function addStreamToVideo(socketId, stream) {
-        const video = document.getElementById(socketId) as HTMLVideoElement
-        if (video) {
-            video.srcObject = stream
-            if (showVideoRef.current) {
-                video.muted = false
-                video.play()
+        setTimeout(() => {
+            const video = document.getElementById(socketId) as HTMLVideoElement
+            if (video) {
+                video.srcObject = stream
+                if (showVideoRef.current) {
+                    video.muted = false
+                    video.play()
+                }
             }
-        }
+        }, 1000)
     }
 
     function openVideoWall() {

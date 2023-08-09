@@ -149,6 +149,7 @@
         margin: 0 -8px;
 
         .reactions {
+            $backgroundOpacity: 0.1;
             // like button styled seperately due to different html
             .like {
                 $color: $likeRed;
@@ -158,7 +159,7 @@
                     > button {
                         color: $color;
                         &:first-child {
-                            background-color: rgba($color, 0.1);
+                            background-color: rgba($color, $backgroundOpacity);
                         }
                     }
                 }
@@ -223,7 +224,7 @@
                     &.highlighted {
                         color: $color;
                         > div {
-                            background-color: rgba($color, 0.1);
+                            background-color: rgba($color, $backgroundOpacity);
                         }
                     }
                 }
@@ -233,7 +234,7 @@
                     &.highlighted {
                         color: $color;
                         > div {
-                            background-color: rgba($color, 0.1);
+                            background-color: rgba($color, $backgroundOpacity);
                         }
                     }
                 }
@@ -243,7 +244,7 @@
                     &.highlighted {
                         color: $color;
                         > div {
-                            background-color: rgba($color, 0.1);
+                            background-color: rgba($color, $backgroundOpacity);
                         }
                     }
                 }
@@ -253,7 +254,7 @@
                     &.highlighted {
                         color: $color;
                         > div {
-                            background-color: rgba($color, 0.1);
+                            background-color: rgba($color, $backgroundOpacity);
                         }
                     }
                 }
