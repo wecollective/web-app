@@ -101,7 +101,8 @@ function CreatePostModal(): JSX.Element {
     } = useContext(AccountContext)
     const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
     const [loading, setLoading] = useState(false)
-    const [postType, setPostType] = useState(createPostModalSettings.type || 'text')
+    const [linkDescription, setLinkDescription] = useState('')
+    const [postType, setPostType] = useState('text')
     const [spaces, setSpaces] = useState<any[]>([spaceData.id ? spaceData : defaultSelectedSpace])
     const [showTitle, setShowTitle] = useState(true)
     const [title, setTitle] = useState('')
@@ -122,11 +123,10 @@ function CreatePostModal(): JSX.Element {
     const maxUrls = 5
     const urlRequestIndex = useRef(0)
     const contentButtonTypes = ['image', 'audio', 'event', 'poll', 'glass-bead-game', 'card']
-    // if (createPostModalSettings.type === 'gbg-from-post') contentButtonTypes = ['glass-bead-game']
 
     function closeModal() {
         setCreatePostModalOpen(false)
-        setCreatePostModalSettings({ type: 'text' })
+        setCreatePostModalSettings(null)
     }
 
     function findModalHeader() {
@@ -137,7 +137,6 @@ function CreatePostModal(): JSX.Element {
         if (postType === 'poll') return 'New poll'
         if (postType === 'card') return 'New card'
         if (postType === 'glass-bead-game') return 'New Glass Bead Game'
-        if (postType === 'gbg-from-post') return 'New Glass Bead Game from post'
         return ''
     }
 
@@ -977,6 +976,20 @@ function CreatePostModal(): JSX.Element {
                             </button>
                         )}
                     </Row>
+                    {createPostModalSettings && (
+                        <Column centerX style={{ width: '100%', maxWidth: 350, marginBottom: 20 }}>
+                            <p style={{ marginBottom: 10 }}>
+                                linked from post ID: {createPostModalSettings.sourceId}
+                            </p>
+                            <Input
+                                type='text'
+                                placeholder='Link description...'
+                                value={linkDescription}
+                                onChange={(value) => setLinkDescription(value)}
+                                style={{ width: '100%', marginRight: 10 }}
+                            />
+                        </Column>
+                    )}
                     <Column className={styles.postCard}>
                         <Row centerY className={styles.header}>
                             <ImageTitle
@@ -1408,7 +1421,7 @@ function CreatePostModal(): JSX.Element {
                                 />
                             </Row>
                         )}
-                        {['glass-bead-game', 'gbg-from-post'].includes(postType) && (
+                        {postType === 'glass-bead-game' && (
                             <Row>
                                 <Button
                                     text='Game settings'
@@ -1419,18 +1432,16 @@ function CreatePostModal(): JSX.Element {
                             </Row>
                         )}
                     </Column>
-                    {createPostModalSettings.type !== 'gbg-from-post' && (
-                        <Row style={{ marginBottom: 20 }}>
-                            {contentButtonTypes.map((type) => (
-                                <ContentButton
-                                    key={type}
-                                    type={type}
-                                    postType={postType}
-                                    setPostType={setPostType}
-                                />
-                            ))}
-                        </Row>
-                    )}
+                    <Row style={{ marginBottom: 20 }}>
+                        {contentButtonTypes.map((type) => (
+                            <ContentButton
+                                key={type}
+                                type={type}
+                                postType={postType}
+                                setPostType={setPostType}
+                            />
+                        ))}
+                    </Row>
                     <Column centerX className={styles.errors}>
                         {noTextError && <p>No content added</p>}
                         {maxCharsErrors && <p>Text must be less than {maxChars} characters</p>}

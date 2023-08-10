@@ -33,7 +33,7 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
     const [logInModalOpen, setLogInModalOpen] = useState(false)
     const [registerModalOpen, setRegisterModalOpen] = useState(false)
     const [forgotPasswordModalOpen, setForgotPasswordModalOpen] = useState(false)
-    const [createPostModalSettings, setCreatePostModalSettings] = useState('Text')
+    const [createPostModalSettings, setCreatePostModalSettings] = useState<any>(null)
     const [createPostModalOpen, setCreatePostModalOpen] = useState(false)
     const [createSpaceModalOpen, setCreateSpaceModalOpen] = useState(false)
     const [createCommentModalOpen, setCreateCommentModalOpen] = useState(false)

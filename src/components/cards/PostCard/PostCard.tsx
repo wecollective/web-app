@@ -30,6 +30,7 @@ import {
     LikeIcon,
     LinkIcon,
     RepostIcon,
+    SourceIcon,
     VerticalEllipsisIcon,
     ZapIcon,
 } from '@src/svgs/all'
@@ -158,18 +159,15 @@ function PostCard(props: {
         )
     }
 
-    // function startNewGbgFromPost() {
-    //     if (loggedIn) {
-    //         setCreatePostModalSettings({
-    //             type: 'gbg-from-post',
-    //             source: postData,
-    //         })
-    //         setCreatePostModalOpen(true)
-    //     } else {
-    //         setAlertMessage('Log in to create glass bead games from posts')
-    //         setAlertModalOpen(true)
-    //     }
-    // }
+    function linkNewPost() {
+        if (loggedIn) {
+            setCreatePostModalSettings({ sourceType: 'post', sourceId: id })
+            setCreatePostModalOpen(true)
+        } else {
+            setAlertMessage('Log in to create new posts')
+            setAlertModalOpen(true)
+        }
+    }
 
     // remove this useEffect alltogether if everything handled from props...?
     useEffect(() => {
@@ -317,109 +315,85 @@ function PostCard(props: {
             </Column>
             {showFooter && (
                 <Column className={styles.footer}>
-                    <Row centerY className={styles.reactions}>
-                        <Row
-                            centerY
-                            className={`${styles.like} ${accountLike ? styles.highlighted : ''}`}
-                        >
-                            {likeLoading ? (
-                                <LoadingWheel size={22} style={{ margin: '0 8px 0 7px' }} />
-                            ) : (
-                                <button type='button' onClick={toggleLike}>
-                                    <LikeIcon />
+                    <Row spaceBetween centerY>
+                        <Row centerY className={styles.reactions}>
+                            <Row
+                                centerY
+                                className={`${styles.like} ${
+                                    accountLike ? styles.highlighted : ''
+                                }`}
+                            >
+                                {likeLoading ? (
+                                    <LoadingWheel size={22} style={{ margin: '0 8px 0 7px' }} />
+                                ) : (
+                                    <button type='button' onClick={toggleLike}>
+                                        <LikeIcon />
+                                    </button>
+                                )}
+                                <button type='button' onClick={() => setLikeModalOpen(true)}>
+                                    <p>{totalLikes}</p>
                                 </button>
-                            )}
-                            <button type='button' onClick={() => setLikeModalOpen(true)}>
-                                <p>{totalLikes}</p>
+                            </Row>
+                            <button
+                                type='button'
+                                className={`${styles.comment} ${
+                                    accountComment ? styles.highlighted : ''
+                                }`}
+                                onClick={() => {
+                                    if (loggedIn || totalComments) setCommentsOpen(!commentsOpen)
+                                    else {
+                                        setAlertMessage('Log in to comment on posts')
+                                        setAlertModalOpen(true)
+                                    }
+                                }}
+                            >
+                                <Column centerX centerY>
+                                    <CommentIcon />
+                                </Column>
+                                <p>{totalComments}</p>
+                            </button>
+                            <button
+                                type='button'
+                                className={`${styles.link} ${
+                                    accountLink ? styles.highlighted : ''
+                                }`}
+                                onClick={() => history(`/linkmap?item=post&id=${id}`)}
+                            >
+                                <Column centerX centerY>
+                                    <LinkIcon />
+                                </Column>
+                                <p>{totalLinks}</p>
+                            </button>
+                            <button
+                                type='button'
+                                className={`${styles.rating} ${
+                                    accountRating ? styles.highlighted : ''
+                                }`}
+                                onClick={() => setRatingModalOpen(true)}
+                            >
+                                <Column centerX centerY>
+                                    <ZapIcon />
+                                </Column>
+                                <p>{totalRatings}</p>
+                            </button>
+                            <button
+                                type='button'
+                                className={`${styles.repost} ${
+                                    accountRepost ? styles.highlighted : ''
+                                }`}
+                                onClick={() => setRepostModalOpen(true)}
+                            >
+                                <Column centerX centerY>
+                                    <RepostIcon />
+                                </Column>
+                                <p>{totalReposts}</p>
                             </button>
                         </Row>
-                        <button
-                            type='button'
-                            className={`${styles.comment} ${
-                                accountComment ? styles.highlighted : ''
-                            }`}
-                            onClick={() => {
-                                if (loggedIn || totalComments) setCommentsOpen(!commentsOpen)
-                                else {
-                                    setAlertMessage('Log in to comment on posts')
-                                    setAlertModalOpen(true)
-                                }
-                            }}
-                        >
+                        <button type='button' className={styles.linkPost} onClick={linkNewPost}>
                             <Column centerX centerY>
-                                <CommentIcon />
+                                <SourceIcon />
                             </Column>
-                            <p>{totalComments}</p>
                         </button>
-                        <button
-                            type='button'
-                            className={`${styles.link} ${accountLink ? styles.highlighted : ''}`}
-                            onClick={() => history(`/linkmap?item=post&id=${id}`)}
-                        >
-                            <Column centerX centerY>
-                                <LinkIcon />
-                            </Column>
-                            <p>{totalLinks}</p>
-                        </button>
-                        <button
-                            type='button'
-                            className={`${styles.rating} ${
-                                accountRating ? styles.highlighted : ''
-                            }`}
-                            onClick={() => setRatingModalOpen(true)}
-                        >
-                            <Column centerX centerY>
-                                <ZapIcon />
-                            </Column>
-                            <p>{totalRatings}</p>
-                        </button>
-                        <button
-                            type='button'
-                            className={`${styles.repost} ${
-                                accountRepost ? styles.highlighted : ''
-                            }`}
-                            onClick={() => setRepostModalOpen(true)}
-                        >
-                            <Column centerX centerY>
-                                <RepostIcon />
-                            </Column>
-                            <p>{totalReposts}</p>
-                        </button>
-                        {likeModalOpen && (
-                            <LikeModal
-                                itemType='post'
-                                itemData={postData}
-                                updateItem={() =>
-                                    setPostData({
-                                        ...postData,
-                                        totalLikes: totalLikes + (accountLike ? -1 : 1),
-                                        accountLike: !accountLike,
-                                    })
-                                }
-                                close={() => setLikeModalOpen(false)}
-                            />
-                        )}
-                        {repostModalOpen && (
-                            <RepostModal
-                                postData={postData}
-                                setPostData={setPostData}
-                                close={() => setRepostModalOpen(false)}
-                            />
-                        )}
-                        {ratingModalOpen && (
-                            <RatingModal
-                                itemType='post'
-                                itemData={postData}
-                                updateItem={() => {
-                                    setPostData({
-                                        ...postData,
-                                        totalRatings: totalRatings + (accountRating ? -1 : 1),
-                                        accountRating: !accountRating,
-                                    })
-                                }}
-                                close={() => setRatingModalOpen(false)}
-                            />
-                        )}
                     </Row>
                     {commentsOpen && (
                         <Comments
@@ -433,6 +407,41 @@ function PostCard(props: {
                         />
                     )}
                 </Column>
+            )}
+            {likeModalOpen && (
+                <LikeModal
+                    itemType='post'
+                    itemData={postData}
+                    updateItem={() =>
+                        setPostData({
+                            ...postData,
+                            totalLikes: totalLikes + (accountLike ? -1 : 1),
+                            accountLike: !accountLike,
+                        })
+                    }
+                    close={() => setLikeModalOpen(false)}
+                />
+            )}
+            {repostModalOpen && (
+                <RepostModal
+                    postData={postData}
+                    setPostData={setPostData}
+                    close={() => setRepostModalOpen(false)}
+                />
+            )}
+            {ratingModalOpen && (
+                <RatingModal
+                    itemType='post'
+                    itemData={postData}
+                    updateItem={() => {
+                        setPostData({
+                            ...postData,
+                            totalRatings: totalRatings + (accountRating ? -1 : 1),
+                            accountRating: !accountRating,
+                        })
+                    }}
+                    close={() => setRatingModalOpen(false)}
+                />
             )}
             {editPostModalOpen && (
                 <EditPostModal

@@ -146,10 +146,10 @@
     }
 
     .footer {
+        $backgroundOpacity: 0.1;
         margin: 0 -8px;
 
         .reactions {
-            $backgroundOpacity: 0.1;
             // like button styled seperately due to different html
             .like {
                 $color: $likeRed;
@@ -261,37 +261,33 @@
             }
         }
 
-        .otherButtons {
-            button {
-                all: unset;
-                cursor: pointer;
-                width: 25px;
-                height: 20px;
-                display: flex;
-                align-items: center;
-                margin-right: 10px;
+        .linkPost {
+            all: unset;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            color: $grey5;
 
-                > svg {
-                    width: 25px;
-                    height: 25px;
-                    color: $grey4;
-                    transition: color 0.3s;
-                    &:hover {
-                        color: $grey6;
-                    }
+            &:hover,
+            &.highlighted {
+                $color: $repostBlue;
+                color: $color;
+                > div {
+                    background-color: rgba($color, $backgroundOpacity);
                 }
             }
-            a {
-                width: 20px;
-                height: 20px;
-                > svg {
+
+            > div {
+                width: 34px;
+                height: 34px;
+                border-radius: 50%;
+                margin-right: 3px;
+                transition: background-color 0.5s;
+
+                svg {
                     width: 20px;
                     height: 20px;
-                    color: $grey4;
                     transition: color 0.3s;
-                    &:hover {
-                        color: $grey6;
-                    }
                 }
             }
         }
