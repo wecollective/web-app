@@ -840,7 +840,7 @@ function CreatePostModal(): JSX.Element {
                     }
                     setLoading(false)
                     setSaved(true)
-                    setTimeout(() => setCreatePostModalOpen(false), 1000)
+                    setTimeout(() => closeModal(), 1000)
                 })
                 .catch((error) => {
                     if (!error.response) console.log(error)
