@@ -728,10 +728,10 @@ function CreatePostModal(): JSX.Element {
                 cardFrontWatermark,
                 cardBackWatermark,
             } as any
-            if (postType === 'gbg-from-post') {
-                postData.type = 'glass-bead-game'
-                postData.sourcePostId = createPostModalSettings.source.id
-                postData.sourceCreatorId = createPostModalSettings.source.Creator.id
+            if (createPostModalSettings) {
+                postData.sourceType = createPostModalSettings.sourceType
+                postData.sourceId = createPostModalSettings.sourceId
+                postData.linkDescription = linkDescription || null
             }
             // set up file uploads if required
             let fileData
@@ -804,6 +804,7 @@ function CreatePostModal(): JSX.Element {
                                   }
                                 : null,
                         }
+                        if (createPostModalSettings) newPost.accountLink = true
                         if (postType === 'audio') newPost.Audios = [{ url: res.data.audio.url }]
                         if (postType === 'image') newPost.Images = images
                         if (postType === 'poll')
@@ -814,16 +815,6 @@ function CreatePostModal(): JSX.Element {
                                 }),
                             }
                         if (postData.type === 'glass-bead-game') {
-                            // newPost.Beads = [
-                            //     createPostModalSettings.source,
-                            //     ...beads.map((bead, i) => {
-                            //         return {
-                            //             ...bead,
-                            //             id: res.data.gbg.beads[i].newBead.id,
-                            //             Reactions: [],
-                            //         }
-                            //     }),
-                            // ]
                             newPost.Beads = postData.beads.map((bead, i) => {
                                 return {
                                     ...bead,
@@ -867,19 +858,6 @@ function CreatePostModal(): JSX.Element {
                 })
         }
     }
-
-    // handle new gbg from post
-    // useEffect(() => {
-    //     if (postType === 'gbg-from-post') {
-    //         const sourceBead = {
-    //             // ...defaultPostData,
-    //             ...createPostModalSettings.source,
-    //             Link: { relationship: 'source' },
-    //             // sourceBead: true,
-    //         }
-    //         setBeads([sourceBead])
-    //     }
-    // }, [])
 
     // remove errors and initialise date picker if post type is event
     useEffect(() => {
