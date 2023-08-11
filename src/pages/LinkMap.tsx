@@ -10,6 +10,7 @@ import DropDownMenu from '@components/DropDownMenu'
 import ImageTitle from '@components/ImageTitle'
 import Input from '@components/Input'
 import Row from '@components/Row'
+import TextLink from '@components/TextLink'
 import CommentCard from '@components/cards/Comments/CommentCard'
 import HorizontalSpaceCard from '@components/cards/HorizontalSpaceCard'
 import PostCard from '@components/cards/PostCard/PostCard'
@@ -1191,6 +1192,17 @@ function LinkMap(): JSX.Element {
                     </Column>
                 ) : (
                     <Column centerX className={`${styles.info} hide-scrollbars`}>
+                        {/* Show link to post map on Pronoia posts */}
+                        {urlParams.item === 'post' &&
+                            linkTreeData &&
+                            linkTreeData.item.DirectSpaces.find((s) => s.id === 616) && (
+                                <Row style={{ marginBottom: 20 }}>
+                                    <TextLink
+                                        text='Open full Pronoia post map!'
+                                        link='/s/pronoia/posts?lens=Map'
+                                    />
+                                </Row>
+                            )}
                         {linkTreeData && renderItem(linkTreeData.item, linkTreeData.item.modelType)}
                         {loggedIn ? (
                             <Column centerX style={{ width: '100%', marginTop: 20 }}>
