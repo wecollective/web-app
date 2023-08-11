@@ -389,11 +389,14 @@ function PostCard(props: {
                                 <p>{totalReposts}</p>
                             </button>
                         </Row>
-                        <button type='button' className={styles.linkPost} onClick={linkNewPost}>
-                            <Column centerX centerY>
-                                <SourceIcon />
-                            </Column>
-                        </button>
+                        {/* Hide link post button on Pronoia posts */}
+                        {!DirectSpaces.find((s) => s.id === 616) && (
+                            <button type='button' className={styles.linkPost} onClick={linkNewPost}>
+                                <Column centerX centerY>
+                                    <SourceIcon />
+                                </Column>
+                            </button>
+                        )}
                     </Row>
                     {commentsOpen && (
                         <Comments
