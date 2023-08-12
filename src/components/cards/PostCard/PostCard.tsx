@@ -30,7 +30,7 @@ import {
     LikeIcon,
     LinkIcon,
     RepostIcon,
-    SourceIcon,
+    SynapseIcon,
     VerticalEllipsisIcon,
     ZapIcon,
 } from '@src/svgs/all'
@@ -393,7 +393,7 @@ function PostCard(props: {
                         {!DirectSpaces.find((s) => s.id === 616) && (
                             <button type='button' className={styles.linkPost} onClick={linkNewPost}>
                                 <Column centerX centerY>
-                                    <SourceIcon />
+                                    <SynapseIcon />
                                 </Column>
                             </button>
                         )}

@@ -67,6 +67,7 @@ import { ReactComponent as LoadingWheelIcon } from '@svgs/spinner.svg'
 import { ReactComponent as StarIcon } from '@svgs/star-solid.svg'
 import { ReactComponent as StreamIcon } from '@svgs/stream-icon.svg'
 import { ReactComponent as StringIcon } from '@svgs/string-icon.svg'
+import { ReactComponent as SynapseIcon } from '@svgs/synapse-icon.svg'
 import { ReactComponent as SynapseSource } from '@svgs/synapse-source.svg'
 import { ReactComponent as SynapseTarget } from '@svgs/synapse-target.svg'
 import { ReactComponent as ThumbsUpIcon } from '@svgs/thumbs-up-solid.svg'
@@ -166,4 +167,5 @@ export {
     SynapseTarget,
     ZapIcon,
     StreamIcon,
+    SynapseIcon,
 }
