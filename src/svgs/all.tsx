@@ -42,6 +42,7 @@ import { ReactComponent as LockIcon } from '@svgs/lock-solid.svg'
 import { ReactComponent as AudioSlashIcon } from '@svgs/microphone-slash-solid.svg'
 import { ReactComponent as MinusIcon } from '@svgs/minus-solid.svg'
 import { ReactComponent as WeaveIcon } from '@svgs/multiplayer-string-icon.svg'
+import { ReactComponent as NeuronIcon } from '@svgs/neuron-icon.svg'
 import { ReactComponent as OSIcon } from '@svgs/osi-brands.svg'
 import { ReactComponent as SpacesIcon } from '@svgs/overlapping-circles-thick.svg'
 import { ReactComponent as PauseIcon } from '@svgs/pause-solid.svg'
@@ -168,4 +169,5 @@ export {
     ZapIcon,
     StreamIcon,
     SynapseIcon,
+    NeuronIcon,
 }

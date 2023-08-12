@@ -270,7 +270,7 @@
 
             &:hover,
             &.highlighted {
-                $color: $repostBlue;
+                $color: $linkPurple;
                 color: $color;
                 > div {
                     background-color: rgba($color, $backgroundOpacity);
@@ -285,8 +285,8 @@
                 transition: background-color 0.5s;
 
                 svg {
-                    width: 20px;
-                    height: 20px;
+                    width: 23px;
+                    height: 23px;
                     transition: color 0.3s;
                 }
             }

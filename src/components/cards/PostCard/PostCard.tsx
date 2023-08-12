@@ -28,7 +28,7 @@ import {
     DeleteIcon,
     EditIcon,
     LikeIcon,
-    LinkIcon,
+    NeuronIcon,
     RepostIcon,
     SynapseIcon,
     VerticalEllipsisIcon,
@@ -360,7 +360,7 @@ function PostCard(props: {
                                 onClick={() => history(`/linkmap?item=post&id=${id}`)}
                             >
                                 <Column centerX centerY>
-                                    <LinkIcon />
+                                    <NeuronIcon />
                                 </Column>
                                 <p>{totalLinks}</p>
                             </button>
