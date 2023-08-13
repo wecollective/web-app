@@ -116,13 +116,36 @@
                 background-color: white;
                 border-radius: 10px;
 
+                .header {
+                    margin-bottom: 10px;
+
+                    > p {
+                        margin-left: 7px;
+                        font-size: 14px;
+                        color: $grey4;
+                    }
+
+                    > button {
+                        all: unset;
+                        cursor: pointer;
+                        margin-left: 15px;
+                        width: 16px;
+                        height: 16px;
+
+                        svg {
+                            width: inherit;
+                            height: inherit;
+                            color: $grey5;
+                        }
+                    }
+                }
+
                 > button {
                     all: unset;
                     cursor: pointer;
                     display: flex;
                     align-items: center;
                     color: $grey4;
-                    margin-top: 15px;
                     transition: all 0.5s;
 
                     svg {

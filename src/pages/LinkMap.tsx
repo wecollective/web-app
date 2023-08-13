@@ -15,14 +15,22 @@ import CommentCard from '@components/cards/Comments/CommentCard'
 import HorizontalSpaceCard from '@components/cards/HorizontalSpaceCard'
 import PostCard from '@components/cards/PostCard/PostCard'
 import VerticalUserCard from '@components/cards/VerticalUserCard'
+import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
-import { currentState, getDraftPlainText, trimText } from '@src/Helpers'
+import { currentState, getDraftPlainText, timeSinceCreated, trimText } from '@src/Helpers'
 import LoadingWheel from '@src/components/LoadingWheel'
 import LikeModal from '@src/components/modals/LikeModal'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/pages/LinkMap.module.scss'
-import { ArrowDownIcon, LikeIcon, SearchIcon, SynapseSource, SynapseTarget } from '@svgs/all'
+import {
+    ArrowDownIcon,
+    DeleteIcon,
+    LikeIcon,
+    SearchIcon,
+    SynapseSource,
+    SynapseTarget,
+} from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
@@ -51,6 +59,8 @@ function LinkMap(): JSX.Element {
     const [sizeBy, setSizeBy] = useState('Likes')
     const [clickedSpaceUUID, setClickedSpaceUUID] = useState('')
     const [likeModalOpen, setLikeModalOpen] = useState(false)
+    const [deleteLinkModalOpen, setDeleteLinkModalOpen] = useState(false)
+    const [deleteLinkLoading, setDeleteLinkLoading] = useState(false)
     const [targetText, setTargetText] = useState('')
     const [targetSearchOptions, setTargetSearchOptions] = useState<any>(null)
     const [selectedUser, setSelectedUser] = useState<any>(null)
@@ -210,22 +220,18 @@ function LinkMap(): JSX.Element {
             .catch((error) => console.log(error))
     }
 
-    // function removeLink(direction, type, linkId, itemId) {
-    //     const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-    //     axios
-    //         .post(`${config.apiURL}/remove-link`, { linkId }, options)
-    //         .then((res) => {
-    //             // update modal context
-    //             const linkArray = `${direction === 'to' ? 'Outgoing' : 'Incoming'}${type}Links`
-    //             setLinkTreeData({
-    //                 ...linkTreeData,
-    //                 [linkArray]: [...linkTreeData[linkArray].filter((l) => l.id !== linkId)],
-    //             })
-    //             // update context state
-    //             updateContextState('remove-link', type, itemId)
-    //         })
-    //         .catch((error) => console.log(error))
-    // }
+    function deleteLink() {
+        setDeleteLinkLoading(true)
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .post(`${config.apiURL}/delete-link`, { linkId: linkData.link.id }, options)
+            .then(() => {
+                setDeleteLinkLoading(false)
+                setDeleteLinkModalOpen(false)
+                getLinks()
+            })
+            .catch((error) => console.log(error))
+    }
 
     const zoom = d3.zoom().on('zoom', (event) => {
         // scale master group
@@ -1141,13 +1147,25 @@ function LinkMap(): JSX.Element {
                         <Column centerX style={{ width: '100%' }}>
                             <SynapseSource style={{ height: 80, width: 80, opacity: 0.6 }} />
                             <Column centerX className={styles.link}>
-                                <ImageTitle
-                                    type='user'
-                                    imagePath={linkData.link.Creator.flagImagePath}
-                                    title={linkData.link.Creator.name}
-                                    style={{ marginBottom: 12 }}
-                                />
-                                {linkData.link.description || '[no description]'}
+                                <Row centerY className={styles.header}>
+                                    <ImageTitle
+                                        type='user'
+                                        imagePath={linkData.link.Creator.flagImagePath}
+                                        title={linkData.link.Creator.name}
+                                    />
+                                    <p>{timeSinceCreated(linkData.link.createdAt)}</p>
+                                    {linkData.link.Creator.id === accountData.id && (
+                                        <button
+                                            type='button'
+                                            onClick={() => setDeleteLinkModalOpen(true)}
+                                        >
+                                            <DeleteIcon />
+                                        </button>
+                                    )}
+                                </Row>
+                                {linkData.link.description && (
+                                    <p style={{ marginBottom: 14 }}>{linkData.link.description}</p>
+                                )}
                                 <button
                                     type='button'
                                     className={linkData.link.accountLike ? styles.blue : ''}
@@ -1156,6 +1174,26 @@ function LinkMap(): JSX.Element {
                                     <LikeIcon />
                                     <p>{linkData.link.totalLikes}</p>
                                 </button>
+                                {deleteLinkModalOpen && (
+                                    <Modal centerX close={() => setDeleteLinkModalOpen(false)}>
+                                        <h1>Are you sure you want to delete your link?</h1>
+                                        <Row>
+                                            <Button
+                                                text='Yes, delete'
+                                                color='red'
+                                                loading={deleteLinkLoading}
+                                                disabled={deleteLinkLoading}
+                                                onClick={deleteLink}
+                                                style={{ marginRight: 10 }}
+                                            />
+                                            <Button
+                                                text='Cancel'
+                                                color='blue'
+                                                onClick={() => setDeleteLinkModalOpen(false)}
+                                            />
+                                        </Row>
+                                    </Modal>
+                                )}
                                 {likeModalOpen && (
                                     <LikeModal
                                         itemType='link'
