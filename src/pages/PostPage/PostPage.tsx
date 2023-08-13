@@ -13,6 +13,7 @@ import { useLocation } from 'react-router-dom'
 function PostPage(): JSX.Element {
     const location = useLocation()
     const postId = location.pathname.split('/')[2]
+    const subPage = location.pathname.split('/')[3]
     const { accountDataLoading, loggedIn } = useContext(AccountContext)
     const { getPostData, postData, postDataLoading, postState, resetPostContext } =
         useContext(PostContext)
@@ -27,6 +28,7 @@ function PostPage(): JSX.Element {
         return <Prism />
     }
     if (
+        subPage === 'game-room' &&
         postData.type === 'glass-bead-game' &&
         postData.GlassBeadGame &&
         postData.GlassBeadGame.synchronous
