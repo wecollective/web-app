@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-param-reassign */
 import Button from '@components/Button'
 import Column from '@components/Column'
@@ -6,6 +7,7 @@ import PieChart from '@components/PieChart'
 import Row from '@components/Row'
 import TimeGraph from '@components/TimeGraph'
 import PollAnswer from '@src/components/cards/PostCard/PollAnswer'
+import LoadingWheel from '@src/components/LoadingWheel'
 import config from '@src/Config'
 import { AccountContext } from '@src/contexts/AccountContext'
 import { PostContext } from '@src/contexts/PostContext'
@@ -14,7 +16,7 @@ import { UserContext } from '@src/contexts/UserContext'
 import styles from '@styles/components/cards/PostCard/PollCard.module.scss'
 import axios from 'axios'
 import * as d3 from 'd3'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 function PollCard(props: {
@@ -24,13 +26,14 @@ function PollCard(props: {
     params: any
 }): JSX.Element {
     const { postData, setPostData, location, params } = props
-    const { id, text, Poll } = postData
-    const { type, answersLocked, PollAnswers } = Poll
+    const { id } = postData
     const { accountData, setAlertMessage, setAlertModalOpen, loggedIn } = useContext(AccountContext)
     // todo: update component directly instead of refreshing posts
     const { spaceData, getSpacePosts, spacePostsPaginationLimit } = useContext(SpaceContext)
     const { userData, getUserPosts, userPostsPaginationLimit } = useContext(UserContext)
     const { getPostData } = useContext(PostContext)
+    const [loading, setLoading] = useState(true)
+    const [pollData, setPollData] = useState<any>(null)
     const [newAnswer, setNewAnswer] = useState('')
     const [newAnswerLoading, setNewAnswerLoading] = useState(false)
     const [totalVotes, setTotalVotes] = useState(0)
@@ -43,15 +46,68 @@ function PollCard(props: {
     const [pollAnswers, setPollAnswers] = useState<any[]>([])
     const [newPollAnswers, setNewPollAnswers] = useState<any[]>([])
     const [totalUsedPoints, setTotalUsedPoints] = useState(0)
-    const colorScale = d3
-        .scaleSequential()
-        .domain([0, Poll ? PollAnswers.length : 0])
-        .interpolator(d3.interpolateViridis)
     const cookies = new Cookies()
+    const colorScale = useRef<any>(null)
+
+    function getPollData() {
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .get(`${config.apiURL}/poll-data?postId=${id}`, options)
+            .then((res) => {
+                setPollData(res.data)
+                buildPollData(res.data)
+            })
+            .catch((error) => console.log(error))
+    }
+
+    function buildPollData(data) {
+        const { type, PollAnswers } = data
+        colorScale.current = d3
+            .scaleSequential()
+            .domain([0, PollAnswers.length])
+            .interpolator(d3.interpolateViridis)
+        const weighted = type === 'weighted-choice'
+        const answers = [] as any[]
+        let totalPollVotes = 0
+        let totalPollPoints = 0
+        const pollUsers = [] as number[]
+        PollAnswers.forEach((answer) => {
+            const activeReactions = answer.Reactions.filter((r) => r.state === 'active')
+            // find all users
+            activeReactions.forEach((r) => {
+                if (!pollUsers.includes(r.Creator.id)) pollUsers.push(r.Creator.id)
+            })
+            const points = weighted
+                ? activeReactions.map((r) => +r.value).reduce((a, b) => a + b, 0)
+                : 0
+            totalPollVotes += activeReactions.length
+            totalPollPoints += points
+            const accountVote = activeReactions.find((r) => r.Creator.id === accountData.id)
+            if (accountVote && !accountHasVoted) {
+                setAccountHasVoted(true)
+                setTotalUsedPoints(100)
+            }
+            answers.push({
+                ...answer,
+                totalVotes: activeReactions.length,
+                accountVote: !!accountVote,
+                accountPoints: accountVote ? +accountVote.value : 0,
+                totalPoints: points,
+            })
+        })
+        if (weighted) answers.sort((a, b) => b.totalPoints - a.totalPoints)
+        else answers.sort((a, b) => b.totalVotes - a.totalVotes)
+        setTotalVotes(totalPollVotes)
+        setTotalPoints(totalPollPoints)
+        setTotalUsers(pollUsers.length)
+        setPollAnswers(answers)
+        setNewPollAnswers(answers)
+        setLoading(false)
+    }
 
     function vote() {
         if (!loggedIn) {
-            setAlertMessage('Log in to vote on inquiries')
+            setAlertMessage('Log in to vote on polls')
             setAlertModalOpen(true)
         } else {
             setVoteLoading(true)
@@ -92,7 +148,7 @@ function PollCard(props: {
 
     function updateAnswers(answerId, value) {
         const newAnswers = [...newPollAnswers]
-        if (type === 'single-choice') {
+        if (pollData.type === 'single-choice') {
             newAnswers.forEach((a) => {
                 if (a.accountVote) {
                     a.accountVote = false
@@ -101,7 +157,7 @@ function PollCard(props: {
             })
         }
         const selectedAnswer = newAnswers.find((a) => a.id === answerId)
-        if (type === 'weighted-choice') {
+        if (pollData.type === 'weighted-choice') {
             selectedAnswer.accountVote = !!value
             selectedAnswer.accountPoints = value > 100 ? 100 : value
             setTotalUsedPoints(newAnswers.map((a) => +a.accountPoints).reduce((a, b) => a + b, 0))
@@ -114,7 +170,7 @@ function PollCard(props: {
     }
 
     function voteDisabled() {
-        const weighted = type === 'weighted-choice'
+        const weighted = pollData.type === 'weighted-choice'
         if (location === 'preview') return true
         if (loggedIn) {
             if (weighted) {
@@ -128,20 +184,22 @@ function PollCard(props: {
 
     function addNewAnswer() {
         if (!loggedIn) {
-            setAlertMessage('Log in to vote on inquiries')
+            setAlertMessage('Log in to add poll answers')
             setAlertModalOpen(true)
         } else {
             setNewAnswerLoading(true)
             const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-            const data = { pollId: Poll.id, newAnswer }
+            const data = { pollId: pollData.id, newAnswer }
             axios
                 .post(`${config.apiURL}/new-poll-answer`, data, options)
                 .then((res) => {
                     const answer = { ...res.data.pollAnswer, Creator: accountData, Reactions: [] }
-                    setPostData({
-                        ...postData,
-                        Poll: { ...Poll, PollAnswers: [...PollAnswers, answer] },
-                    })
+                    const newPollData = {
+                        ...pollData,
+                        PollAnswers: [...pollData.PollAnswers, answer],
+                    }
+                    setPollData(newPollData)
+                    buildPollData(newPollData)
                     setNewAnswer('')
                     setNewAnswerLoading(false)
                 })
@@ -149,51 +207,20 @@ function PollCard(props: {
         }
     }
 
-    // build poll data
-    useEffect(() => {
-        const weighted = type === 'weighted-choice'
-        const answers = [] as any[]
-        let totalPollVotes = 0
-        let totalPollPoints = 0
-        const pollUsers = [] as number[]
-        PollAnswers.forEach((answer) => {
-            const activeReactions = answer.Reactions.filter((r) => r.state === 'active')
-            // find all users
-            activeReactions.forEach((r) => {
-                if (!pollUsers.includes(r.Creator.id)) pollUsers.push(r.Creator.id)
-            })
-            const points = weighted
-                ? activeReactions.map((r) => +r.value).reduce((a, b) => a + b, 0)
-                : 0
-            totalPollVotes += activeReactions.length
-            totalPollPoints += points
-            const accountVote = activeReactions.find((r) => r.Creator.id === accountData.id)
-            if (accountVote && !accountHasVoted) {
-                setAccountHasVoted(true)
-                setTotalUsedPoints(100)
-            }
-            answers.push({
-                ...answer,
-                totalVotes: activeReactions.length,
-                accountVote: !!accountVote,
-                accountPoints: accountVote ? +accountVote.value : 0,
-                totalPoints: points,
-            })
-        })
-        if (weighted) answers.sort((a, b) => b.totalPoints - a.totalPoints)
-        else answers.sort((a, b) => b.totalVotes - a.totalVotes)
-        setTotalVotes(totalPollVotes)
-        setTotalPoints(totalPollPoints)
-        setTotalUsers(pollUsers.length)
-        setPollAnswers(answers)
-        setNewPollAnswers(answers)
-    }, [postData])
+    useEffect(() => getPollData(), [])
 
+    if (loading)
+        return (
+            <Row centerY centerX className={styles.loading}>
+                Poll data loading...
+                <LoadingWheel size={30} style={{ marginLeft: 20 }} />
+            </Row>
+        )
     return (
         <Column>
             <Row centerX className={styles.results}>
                 <PieChart
-                    type={type}
+                    type={pollData.type}
                     postId={id}
                     totalVotes={totalVotes}
                     totalPoints={totalPoints}
@@ -202,7 +229,7 @@ function PollCard(props: {
                 />
                 {totalVotes > 0 && (
                     <TimeGraph
-                        type={type}
+                        type={pollData.type}
                         postId={id}
                         answers={pollAnswers}
                         startTime={postData.createdAt}
@@ -211,8 +238,8 @@ function PollCard(props: {
             </Row>
             <Row centerY spaceBetween style={{ marginBottom: 15 }}>
                 <Row>
-                    <p className='grey'>Vote type: {type}</p>
-                    {type === 'weighted-choice' && (
+                    <p className='grey'>Vote type: {pollData.type}</p>
+                    {pollData.type === 'weighted-choice' && (
                         <p
                             className={voteChanged && totalUsedPoints !== 100 ? 'danger' : 'grey'}
                             style={{ marginLeft: 10 }}
@@ -236,18 +263,18 @@ function PollCard(props: {
                         <PollAnswer
                             key={answer.id}
                             index={i}
-                            type={type}
+                            type={pollData.type}
                             answer={answer}
                             totalVotes={totalVotes}
                             totalPoints={totalPoints}
-                            color={colorScale(i)}
+                            color={colorScale.current(i)}
                             selected={answer.accountVote}
                             onChange={(v) => updateAnswers(answer.id, v)}
                         />
                     ))}
                 </Column>
             )}
-            {!answersLocked && (
+            {!pollData.answersLocked && (
                 <Row style={{ marginBottom: 10 }}>
                     <Input
                         type='text'

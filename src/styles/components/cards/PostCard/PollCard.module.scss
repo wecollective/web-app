@@ -1,5 +1,12 @@
 @import '@styles/Variables';
 
+.loading {
+    background-color: $grey1;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
 .results {
     flex-wrap: wrap;
     @include for-tablet-portrait-up {
