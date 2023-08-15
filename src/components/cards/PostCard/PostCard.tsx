@@ -164,7 +164,7 @@ function PostCard(props: {
             setCreatePostModalSettings({ sourceType: 'post', sourceId: id })
             setCreatePostModalOpen(true)
         } else {
-            setAlertMessage('Log in to create new posts')
+            setAlertMessage('Log in to link posts')
             setAlertModalOpen(true)
         }
     }
@@ -307,7 +307,7 @@ function PostCard(props: {
                                 key={urlData.url}
                                 type='post'
                                 urlData={urlData}
-                                style={{ marginTop: text ? 10 : 0 }}
+                                style={{ marginTop: text || type === 'glass-bead-game' ? 10 : 0 }}
                             />
                         ))}
                     </Column>

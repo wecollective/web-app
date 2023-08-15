@@ -1,8 +1,13 @@
 @import '@styles/Variables';
 
-.wrapper {
+.loading {
+    background-color: $grey1;
+    padding: 20px;
+    border-radius: 10px;
     margin-bottom: 10px;
+}
 
+.wrapper {
     .infoRow {
         margin-bottom: 10px;
         color: $grey5;

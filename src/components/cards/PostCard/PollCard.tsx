@@ -50,9 +50,8 @@ function PollCard(props: {
     const colorScale = useRef<any>(null)
 
     function getPollData() {
-        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
-            .get(`${config.apiURL}/poll-data?postId=${id}`, options)
+            .get(`${config.apiURL}/poll-data?postId=${id}`)
             .then((res) => {
                 setPollData(res.data)
                 buildPollData(res.data)
