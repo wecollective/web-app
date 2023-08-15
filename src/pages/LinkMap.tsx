@@ -18,7 +18,7 @@ import VerticalUserCard from '@components/cards/VerticalUserCard'
 import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
-import { currentState, getDraftPlainText, timeSinceCreated, trimText } from '@src/Helpers'
+import { getDraftPlainText, timeSinceCreated, trimText } from '@src/Helpers'
 import LoadingWheel from '@src/components/LoadingWheel'
 import LikeModal from '@src/components/modals/LikeModal'
 import colors from '@styles/Colors.module.scss'
@@ -48,7 +48,7 @@ function LinkMap(): JSX.Element {
     const [loading, setLoading] = useState(true)
     const [createLinkLoading, setCreateLinkLoading] = useState(false)
     const [targetType, setTargetType] = useState('Post')
-    const [targetIdentifier, setTargetIdentifier] = useState('')
+    const [targetId, setTargetId] = useState('')
     const [linkDescription, setLinkDescription] = useState('')
     const [target, setTarget] = useState<any>(null)
     const [targetNotFound, setTargetNotFound] = useState(false)
@@ -67,6 +67,7 @@ function LinkMap(): JSX.Element {
     const [userSearch, setUserSearch] = useState('')
     const [userOptions, setUserOptions] = useState<any>(null)
     const [targetFromTextLoading, setTargetFromTextLoading] = useState(false)
+    const targetIdRef = useRef('')
     const targetTextRef = useRef('')
     const userSearchRef = useRef('')
     const selectedUserRef = useRef(0)
@@ -81,7 +82,6 @@ function LinkMap(): JSX.Element {
     const matchedNodeUUIDs = useRef<number[]>([])
     const selectedLinkUUID = useRef('')
     const cookies = new Cookies()
-    // settings
     const curvedLinks = false
     const duration = 1000
 
@@ -125,9 +125,9 @@ function LinkMap(): JSX.Element {
         return null
     }
 
-    function getTarget(identifier) {
-        const { id, modelType } = linkTreeData.item
-        const targetIsSource = +identifier === id && targetType.toLowerCase() === modelType
+    function getTarget(id) {
+        const { item } = linkTreeData
+        const targetIsSource = +id === item.id && targetType.toLowerCase() === item.modelType
         if (targetIsSource) {
             setTargetIsSourceError(true)
             setTarget(null)
@@ -141,20 +141,21 @@ function LinkMap(): JSX.Element {
                     headers: { Authorization: `Bearer ${cookies.get('accessToken')}` },
                 }
                 axios
-                    .get(`${config.apiURL}/${type}-data?${type}Id=${identifier}`, options)
+                    .get(`${config.apiURL}/${type}-data?${type}Id=${id}`, options)
                     .then((res) => {
-                        if (identifier === currentState(setTargetIdentifier)) setTarget(res.data)
+                        if (id === targetIdRef.current) setTarget(res.data)
                     })
                     .catch((error) => {
                         if (error.response.status === 404) {
-                            if (identifier === currentState(setTargetIdentifier)) {
+                            if (id === targetIdRef.current) {
                                 setTargetNotFound(true)
                                 setTarget(null)
                             }
                         } else console.log(error)
                     })
             } else {
-                const data = { query: identifier, blacklist: [linkTreeData.item.id] }
+                const data = { query: id, blacklist: [linkTreeData.item.id] }
+                // todo: handle overlapping results
                 axios
                     .post(`${config.apiURL}/find-${type === 'user' ? 'people' : 'spaces'}`, data)
                     .then((res) => setTargetOptions(res.data))
@@ -179,7 +180,7 @@ function LinkMap(): JSX.Element {
             .post(`${config.apiURL}/add-link`, data, options)
             .then((res) => {
                 console.log('add-link: ', res.data)
-                setTargetIdentifier('')
+                setTargetId('')
                 setLinkDescription('')
                 setTarget(null)
                 const newNode = {
@@ -833,7 +834,7 @@ function LinkMap(): JSX.Element {
     }
 
     function findTargetFromText() {
-        const text = targetTextRef.current
+        const text = `${targetTextRef.current}`
         if (!text) {
             setTargetSearchOptions(null)
             setTargetFromTextLoading(false)
@@ -848,8 +849,7 @@ function LinkMap(): JSX.Element {
             axios
                 .get(`${config.apiURL}/target-from-text${params}`, options)
                 .then((res) => {
-                    console.log('findTargetFromText res: ', res.data)
-                    if (currentState(setTargetText) === text) {
+                    if (text === targetTextRef.current) {
                         setTargetSearchOptions(res.data)
                         setTargetFromTextLoading(false)
                     }
@@ -957,7 +957,7 @@ function LinkMap(): JSX.Element {
                                     text='Select'
                                     onClick={() => {
                                         setTarget(option)
-                                        setTargetIdentifier(option.id)
+                                        setTargetId(option.id)
                                     }}
                                 />
                             </Column>
@@ -1257,7 +1257,7 @@ function LinkMap(): JSX.Element {
                                                 setTargetNotFound(false)
                                                 setTargetIsSourceError(false)
                                                 setTarget(null)
-                                                setTargetIdentifier('')
+                                                setTargetId('')
                                                 setTargetSearchOptions(null)
                                                 setTargetType(option)
                                             }}
@@ -1271,11 +1271,12 @@ function LinkMap(): JSX.Element {
                                                     ? 'ID:'
                                                     : 'Handle:'
                                             }
-                                            value={targetIdentifier}
+                                            value={targetId}
                                             onChange={(value) => {
                                                 setTargetError(false)
                                                 setTargetSearchOptions(null)
-                                                setTargetIdentifier(value)
+                                                setTargetId(value)
+                                                targetIdRef.current = value
                                                 if (value) getTarget(value)
                                                 else {
                                                     setTarget(null)
@@ -1301,7 +1302,7 @@ function LinkMap(): JSX.Element {
                                                         title={userTitle(option)}
                                                         onClick={() => {
                                                             setTarget(option)
-                                                            setTargetIdentifier(option.handle)
+                                                            setTargetId(option.handle)
                                                             setTargetOptions(null)
                                                         }}
                                                     />
@@ -1362,7 +1363,7 @@ function LinkMap(): JSX.Element {
                                                 size={20}
                                                 onClick={() => {
                                                     setTarget(null)
-                                                    setTargetIdentifier('')
+                                                    setTargetId('')
                                                 }}
                                                 style={{
                                                     position: 'absolute',

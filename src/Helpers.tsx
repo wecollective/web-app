@@ -510,14 +510,3 @@ export function findMinutesFromDHM(values) {
     // find minutes from { days, hours, minutes } object
     return values.days * 24 * 60 + values.hours * 60 + values.minutes
 }
-
-export function currentState(setState) {
-    // hack to avoid storing duplicate refs for state hooks when current value needed in pre-calcuated functions
-    // note: updates state in the process so causes rerender of effected components
-    let state
-    setState((s) => {
-        state = s
-        return s
-    })
-    return state
-}

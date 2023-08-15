@@ -31,7 +31,7 @@
         }
 
         .info {
-            padding: 5px;
+            padding: 5px 5px 80px 5px;
 
             @include for-tablet-landscape-up {
                 width: 100%;
