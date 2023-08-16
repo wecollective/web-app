@@ -124,7 +124,7 @@ export const defaultGBGSettings = {
     synchronous: true,
     startTime: '',
     endTime: '',
-    multiplayer: false,
+    multiplayer: true,
     players: [],
     allowedBeadTypes: ['audio'],
     totalMoves: 0,
