@@ -40,9 +40,8 @@ function Following(): JSX.Element {
         if (offset) setNextItemsLoading(true)
         else setItemsLoading(true)
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-        const data = { offset }
         axios
-            .post(`${config.apiURL}/followed-${itemType}`, data, options)
+            .post(`${config.apiURL}/followed-${itemType}`, { offset }, options)
             .then((res) => {
                 if (itemRef.current === `${userHandle}-${itemType}`) {
                     setMoreItems(res.data.length === 10)
@@ -56,14 +55,15 @@ function Following(): JSX.Element {
     }
 
     useEffect(() => {
-        if (accountData.id) {
-            // get followed items if own account, otherwise redirect to posts
+        if (userData.id) {
             if (userHandle === accountData.handle) getItems(0)
-            else history(`/u/${userData.handle}/posts`)
+            else history(`/u/${userHandle}/posts`)
         }
-    }, [accountData.id])
+    }, [userData.id, loggedIn])
 
-    useEffect(() => getItems(0), [location])
+    useEffect(() => {
+        if (!itemsLoading) getItems(0)
+    }, [location])
 
     useEffect(() => {
         const loading = itemsLoading || nextItemsLoading || userData.handle !== userHandle
