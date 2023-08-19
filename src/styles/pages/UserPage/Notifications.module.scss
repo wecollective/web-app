@@ -7,4 +7,14 @@
     @include for-tablet-portrait-up {
         padding: 0 15px;
     }
+
+    .placeholder {
+        padding: 40px;
+        background-color: white;
+        border-radius: 10px;
+
+        > p {
+            margin-right: 20px;
+        }
+    }
 }

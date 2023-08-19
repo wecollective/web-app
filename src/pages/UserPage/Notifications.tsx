@@ -1,8 +1,10 @@
-/* eslint-disable no-nested-ternary */
-import NotificationCard from '@components/cards/NotificationCard'
 import Column from '@components/Column'
+import LoadingWheel from '@components/LoadingWheel'
+import Row from '@components/Row'
+import NotificationCard from '@components/cards/NotificationCard'
 import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
+import UserNotFound from '@pages/UserPage/UserNotFound'
 import config from '@src/Config'
 import styles from '@styles/pages/UserPage/Notifications.module.scss'
 import axios from 'axios'
@@ -10,40 +12,41 @@ import React, { useContext, useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
+// todo: add search and filters
+
 function Notifications(): JSX.Element {
-    const { accountData, accountDataLoading, setAccountData } = useContext(AccountContext)
-    const { userData, getUserData, setSelectedUserSubPage, isOwnAccount } = useContext(UserContext)
-    const cookies = new Cookies()
+    const { accountData, pageBottomReached, setAccountData, loggedIn } = useContext(AccountContext)
+    const { userData, userNotFound, isOwnAccount } = useContext(UserContext)
+    const [notifications, setNotifications] = useState<any[]>([])
+    const [itemsLoading, setItemsLoading] = useState(true)
+    const [nextItemsLoading, setNextItemsLoading] = useState(false)
+    const [moreItems, setMoreItems] = useState(false)
+    const [itemOffset, setItemOffset] = useState(0)
     const history = useNavigate()
+    const cookies = new Cookies()
     const location = useLocation()
     const userHandle = location.pathname.split('/')[2]
+    const mobileView = document.documentElement.clientWidth < 900
 
-    const [notifications, setNotifications] = useState<any[]>([])
-    const [notificationsLoading, setNotificationsLoading] = useState(true)
-
-    // todo: add pagination, search, filters, loading state etc
-
-    function getNotifications() {
-        const accessToken = cookies.get('accessToken')
-        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
-        if (!accessToken) setNotificationsLoading(false)
-        else {
-            axios
-                .get(`${config.apiURL}/account-notifications`, options)
-                .then((res) => {
-                    setNotifications(res.data)
-                    setNotificationsLoading(false)
-                    // mark notifications as seen
-                    setAccountData({ ...accountData, unseenNotifications: 0 })
-                    const ids = res.data.map((notification) => notification.id)
-                    axios.post(`${config.apiURL}/mark-notifications-seen`, ids, options)
-                })
-                .catch((error) => {
-                    // todo: handle errors
-                    console.log(error)
-                    setNotificationsLoading(false)
-                })
-        }
+    function getNotifications(offset: number) {
+        if (offset) setNextItemsLoading(true)
+        else setItemsLoading(true)
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .get(`${config.apiURL}/account-notifications?offset=${offset}`, options)
+            .then((res) => {
+                setMoreItems(res.data.length === 10)
+                setItemOffset(offset + res.data.length)
+                setNotifications(offset ? [...notifications, ...res.data] : res.data)
+                if (offset) setNextItemsLoading(false)
+                else setItemsLoading(false)
+                // mark notifications seen
+                const ids = res.data.filter((n) => !n.seen).map((n) => n.id)
+                const totalUnseen = accountData.unseenNotifications - ids.length
+                setAccountData({ ...accountData, unseenNotifications: totalUnseen })
+                axios.post(`${config.apiURL}/mark-notifications-seen`, ids, options)
+            })
+            .catch((error) => console.log(error))
     }
 
     function updateNotification(id, key, payload) {
@@ -53,38 +56,40 @@ function Notifications(): JSX.Element {
         setNotifications(newNotifications)
     }
 
-    function getFirstNotifications(res) {
-        if (res.handle === accountData.handle) getNotifications()
-        else history(`/u/${res.handle}/about`)
-    }
+    useEffect(() => {
+        if (userData.id) {
+            if (userHandle === accountData.handle) getNotifications(0)
+            else history(`/u/${userHandle}/posts`)
+        }
+    }, [userData.id, loggedIn])
 
     useEffect(() => {
-        if (!accountDataLoading) {
-            if (userHandle !== userData.handle) {
-                getUserData(userHandle, getFirstNotifications)
-            } else getFirstNotifications({ handle: userHandle })
-        }
-    }, [accountDataLoading, location])
+        const loading = itemsLoading || nextItemsLoading || userData.handle !== userHandle
+        if (pageBottomReached && moreItems && !loading) getNotifications(itemOffset)
+    }, [pageBottomReached])
 
-    useEffect(() => setSelectedUserSubPage('notifications'), [])
-
+    if (userNotFound) return <UserNotFound />
     return (
         <Column className={styles.wrapper}>
-            {isOwnAccount && (
-                <Column centerX className={styles.notifications}>
-                    {notifications.length > 0 ? (
-                        notifications.map((notification) => (
-                            <NotificationCard
-                                key={notification.id}
-                                notification={notification}
-                                location='account'
-                                updateNotification={updateNotification}
-                            />
-                        ))
-                    ) : notificationsLoading ? (
-                        <p>Notifications loading...</p>
-                    ) : (
-                        <p>No notifications yet</p>
+            {itemsLoading ? (
+                <Row centerY centerX className={styles.placeholder}>
+                    <p>Notifications loading...</p>
+                    <LoadingWheel size={30} />
+                </Row>
+            ) : (
+                <Column>
+                    {notifications.map((notification) => (
+                        <NotificationCard
+                            key={notification.id}
+                            notification={notification}
+                            location='account'
+                            updateNotification={updateNotification}
+                        />
+                    ))}
+                    {nextItemsLoading && (
+                        <Row centerX style={{ marginBottom: 100, marginTop: mobileView ? 15 : 0 }}>
+                            <LoadingWheel />
+                        </Row>
                     )}
                 </Column>
             )}
