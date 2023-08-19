@@ -2,21 +2,18 @@
 
 .wrapper {
     position: relative;
-    padding: 10px 90px 10px 10px;
+    padding: 10px;
     border-radius: 10px;
     background-color: $grey1;
     margin-bottom: 10px;
     min-height: 60px;
+    word-break: break-word;
 
-    // answer number
     .index {
         width: 40px;
         height: 40px;
         border-radius: 5px;
         margin-right: 15px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
         flex-shrink: 0;
 
         > p {
@@ -24,18 +21,27 @@
         }
     }
 
-    .points {
-        font-weight: 800;
+    .statsButton {
+        all: unset;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         margin-right: 10px;
+        border-radius: 5px;
+        padding: 7px;
+        background-color: white;
+        transition: background-color 0.3s;
+
+        &:hover {
+            background-color: $blue8;
+        }
+
+        > p {
+            font-weight: 800;
+        }
     }
 
-    .percentage {
-        font-weight: 800;
-        margin-right: 10px;
-    }
-
-    .buttons {
-        position: absolute;
-        right: 10px;
+    .input {
     }
 }

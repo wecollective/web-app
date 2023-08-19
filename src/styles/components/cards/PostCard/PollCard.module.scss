@@ -16,7 +16,13 @@
 }
 
 .answers {
+    margin: 0 -8px;
+
     > div {
         background-color: $grey1;
     }
+}
+
+.newAnswers {
+    margin: 0 -8px 10px -8px;
 }

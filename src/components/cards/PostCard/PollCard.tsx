@@ -274,7 +274,7 @@ function PollCard(props: {
                 </Column>
             )}
             {!pollData.answersLocked && (
-                <Row style={{ marginBottom: 10 }}>
+                <Row className={styles.newAnswers}>
                     <Input
                         type='text'
                         placeholder='New answer...'

@@ -23,6 +23,11 @@ function PieChart(props: {
         .domain([0, answers.length])
         .interpolator(d3.interpolateViridis)
 
+    function findPercentage(d) {
+        if (weighted) return +((d.data.totalPoints / totalPoints) * 100).toFixed(1)
+        return +((d.data.totalVotes / totalVotes) * 100).toFixed(1)
+    }
+
     useEffect(() => {
         const canvas = d3.select(`#pie-chart-${postId}`)
         // remove old chart if present
@@ -88,53 +93,50 @@ function PieChart(props: {
                 .style('opacity', 1)
         }
 
-        // total votes / points
+        // percentage text
         answerGroup
             .append('text')
-            .attr('transform', (d) => {
-                const centroid = arc.centroid(d)
-                centroid[0] *= 1.5
-                centroid[1] = centroid[1] * 1.5 - 10
-                return `translate(${centroid})`
-            })
-            .attr('dy', 5)
-            .attr('font-size', 14)
+            .attr('font-size', 12)
             .style('font-weight', 800)
+            .attr('dy', -10)
             .style('text-anchor', 'middle')
             .style('opacity', 0)
-            .transition()
-            .duration(2000)
-            .style('opacity', 1)
-            .text((d) => {
-                if (weighted) return d.data.totalPoints ? `${d.data.totalPoints / 100} ↑` : ''
-                return d.data.totalVotes ? `${d.data.totalVotes} ↑` : '' // ↑⇧⇑⇪⬆
-            })
-
-        // percentage of votes / points
-        answerGroup
-            .append('text')
-            .attr('class', 'percentage')
-            .attr('font-size', 12)
             .attr('transform', (d) => {
                 const centroid = arc.centroid(d)
                 centroid[0] *= 1.5
                 centroid[1] = centroid[1] * 1.5 + 10
                 return `translate(${centroid})`
             })
-            .attr('dy', '.50em')
-            .style('text-anchor', 'middle')
-            .style('opacity', 0)
             .transition()
             .duration(2000)
             .style('opacity', 1)
             .text((d) => {
-                if (weighted)
-                    return totalPoints && d.data.totalPoints
-                        ? `${+((d.data.totalPoints / totalPoints) * 100).toFixed(1)}%`
-                        : ''
-                return totalVotes && d.data.totalVotes
-                    ? `${+((d.data.totalVotes / totalVotes) * 100).toFixed(1)}%`
-                    : ''
+                const percentage = findPercentage(d)
+                return percentage > 4 ? `${percentage}%` : ''
+            })
+
+        // points text
+        answerGroup
+            .append('text')
+            .attr('dy', 25)
+            .attr('font-size', 12)
+            .style('text-anchor', 'middle')
+            .style('opacity', 0)
+            .attr('transform', (d) => {
+                const centroid = arc.centroid(d)
+                centroid[0] *= 1.5
+                centroid[1] = centroid[1] * 1.5 - 10
+                return `translate(${centroid})`
+            })
+            .transition()
+            .duration(2000)
+            .style('opacity', 1)
+            .text((d) => {
+                if (findPercentage(d) > 4) {
+                    if (weighted) return d.data.totalPoints ? `${d.data.totalPoints / 100} ↑` : ''
+                    return d.data.totalVotes ? `${d.data.totalVotes} ↑` : '' // ↑⇧⇑⇪⬆
+                }
+                return ''
             })
 
         // arc index
@@ -144,16 +146,12 @@ function PieChart(props: {
             .attr('dy', 5)
             .style('text-anchor', 'middle')
             .style('fill', 'white')
+            .attr('font-size', 12)
             .style('opacity', 0)
             .transition()
             .duration(2000)
             .style('opacity', 1)
-            .text((d, i) => {
-                if (+((d.data.totalVotes / totalVotes) * 100).toFixed(2) < 4) {
-                    return ''
-                }
-                return `${i + 1}`
-            })
+            .text((d, i) => (findPercentage(d) > 4 ? `${i + 1}` : ''))
 
         // total text
         d3.select(canvas.node())

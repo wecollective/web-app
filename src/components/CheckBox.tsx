@@ -27,7 +27,7 @@ function CheckBox(props: {
             />
             <div />
             <CheckIcon />
-            {text && <p>{text}</p>}
+            {text && <p style={{ marginLeft: 5 }}>{text}</p>}
         </label>
     )
 }
