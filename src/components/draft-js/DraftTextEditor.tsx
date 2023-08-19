@@ -92,10 +92,12 @@ function DraftTextEditor(props: {
                 input: styles.linkInput,
             },
             placeholder: 'Add a valid URL & press Enter...',
+            linkTarget: '_blank',
         })
     )
     const [linkifyPlugin] = useState(
         createLinkifyPlugin({
+            target: '_blank',
             component: (linkifyProps) => <a {...linkifyProps} />,
         })
     )

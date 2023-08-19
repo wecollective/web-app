@@ -52,9 +52,10 @@ function DraftText(props: {
             },
         })
     )
-    const [linkPlugin] = useState(createLinkPlugin())
+    const [linkPlugin] = useState(createLinkPlugin({ linkTarget: '_blank' }))
     const [linkifyPlugin] = useState(
         createLinkifyPlugin({
+            target: '_blank',
             component: (linkifyProps) => <a {...linkifyProps} />,
         })
     )
