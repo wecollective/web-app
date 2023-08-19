@@ -27,6 +27,8 @@ import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
+// todo: set up filters and search
+
 function Streams(): JSX.Element {
     const { accountData, pageBottomReached, loggedIn } = useContext(AccountContext)
     const { userData, userNotFound, userPostsFilters } = useContext(UserContext)
@@ -101,7 +103,6 @@ function Streams(): JSX.Element {
         if (offset) setNextPostsLoading(true)
         else setPostsLoading(true)
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-        // todo: set up filter modal (and search?)
         const data = {
             type: streamType,
             id: streamId,
@@ -149,18 +150,19 @@ function Streams(): JSX.Element {
     }
 
     useEffect(() => {
-        if (accountData.id) {
-            // get streams if own account, otherwise redirect to posts
+        if (userData.id) {
             if (userHandle === accountData.handle) getStreams()
-            else history(`/u/${userData.handle}/posts`)
+            else history(`/u/${userHandle}/posts`)
         }
-    }, [accountData.id])
+    }, [userData.id, loggedIn])
 
     useEffect(() => {
-        setStreamNotFound(false)
-        getSources()
-        getPosts(0)
-    }, [location])
+        if (!streamsLoading) {
+            setStreamNotFound(false)
+            getSources()
+            getPosts(0)
+        }
+    }, [streamsLoading, location])
 
     useEffect(() => {
         const loading = postsLoading || nextPostsLoading || userData.handle !== userHandle
