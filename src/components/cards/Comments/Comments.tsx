@@ -38,10 +38,12 @@ function Comments(props: {
             .then((res) => {
                 setComments(res.data)
                 setLoading(false)
-                // if commentId in urlParams, scroll to comment
+                // if commentId in params, scroll to comment
                 if (urlParams.commentId) {
-                    const comment = document.getElementById(`comment-${urlParams.commentId}`)
-                    if (comment) setTimeout(() => scrollToElement(comment), 500)
+                    setTimeout(() => {
+                        const comment = document.getElementById(`comment-${urlParams.commentId}`)
+                        if (comment) scrollToElement(comment)
+                    }, 500)
                 }
             })
             .catch((error) => console.log(error))
@@ -96,7 +98,6 @@ function Comments(props: {
     }
 
     function updateCommentReactions(comment, reactionType, increment) {
-        console.log(comment, reactionType, increment)
         const { id, parentCommentId } = comment
         const newComments = [...comments]
         let selectedComment

@@ -89,7 +89,6 @@ function PostCard(props: {
         Audios,
         GlassBeadGame,
     } = postData
-    // const { topic, topicImage } = GlassBeadGame
 
     // modals
     const [menuOpen, setMenuOpen] = useState(false)
@@ -105,12 +104,6 @@ function PostCard(props: {
     const cookies = new Cookies()
     const isOwnPost = accountData && Creator && accountData.id === Creator.id
     const showFooter = true // location !== 'link-modal'
-    // const directSpaces = DirectSpaces.filter((s) => s.id !== 1)
-
-    // change postData to array so consistent with post lists
-    // const state = { post, posts: [], setPosts: () => console.log('') }
-
-    // todo: store comments on post card so can be updated from other posts (linking)
 
     const history = useNavigate()
     const urlParams = Object.fromEntries(new URLSearchParams(useLocation().search))
@@ -170,10 +163,7 @@ function PostCard(props: {
     }
 
     // remove this useEffect alltogether if everything handled from props...?
-    useEffect(() => {
-        // console.log(post)
-        setPostData(post)
-    }, [post])
+    useEffect(() => setPostData(post), [post])
 
     return (
         <Column
