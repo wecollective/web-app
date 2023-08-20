@@ -28,10 +28,10 @@ function PostPage(): JSX.Element {
         return <Prism />
     }
     if (
-        subPage === 'game-room' &&
         postData.type === 'glass-bead-game' &&
         postData.GlassBeadGame &&
-        postData.GlassBeadGame.synchronous
+        postData.GlassBeadGame.synchronous &&
+        subPage === 'game-room'
     ) {
         return <GlassBeadGame />
     }

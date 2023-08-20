@@ -98,12 +98,15 @@ function PostCard(props: {
     const [commentsOpen, setCommentsOpen] = useState(location === 'post-page')
     const [deletePostModalOpen, setDeletePostModalOpen] = useState(false)
     const [editPostModalOpen, setEditPostModalOpen] = useState(false)
+    const [removePostModalOpen, setRemovePostModalOpen] = useState(false)
 
     const [likeLoading, setLikeLoading] = useState(false)
     const mobileView = document.documentElement.clientWidth < 900
     const cookies = new Cookies()
     const isOwnPost = accountData && Creator && accountData.id === Creator.id
     const showFooter = true // location !== 'link-modal'
+    const isMod = spaceData.Moderators.find((m) => m.id === accountData.id)
+    const showDropDown = location !== 'preview' && (isOwnPost || isMod)
 
     const history = useNavigate()
     const urlParams = Object.fromEntries(new URLSearchParams(useLocation().search))
@@ -206,8 +209,8 @@ function PostCard(props: {
                         <p className='grey'>ID:</p>
                         <p style={{ marginLeft: 5 }}>{id}</p>
                     </Link>
-                    {location !== 'preview' && isOwnPost && (
-                        <>
+                    {showDropDown && (
+                        <Column>
                             <button
                                 type='button'
                                 className={styles.menuButton}
@@ -219,25 +222,38 @@ function PostCard(props: {
                                 <CloseOnClickOutside onClick={() => setMenuOpen(false)}>
                                     <Column className={styles.menu}>
                                         <Column>
-                                            <button
-                                                type='button'
-                                                onClick={() => setEditPostModalOpen(true)}
-                                            >
-                                                <EditIcon />
-                                                Edit text
-                                            </button>
-                                            <button
-                                                type='button'
-                                                onClick={() => setDeletePostModalOpen(true)}
-                                            >
-                                                <DeleteIcon />
-                                                Delete post
-                                            </button>
+                                            {isOwnPost && (
+                                                <button
+                                                    type='button'
+                                                    onClick={() => setEditPostModalOpen(true)}
+                                                >
+                                                    <EditIcon />
+                                                    Edit text
+                                                </button>
+                                            )}
+                                            {isOwnPost && (
+                                                <button
+                                                    type='button'
+                                                    onClick={() => setDeletePostModalOpen(true)}
+                                                >
+                                                    <DeleteIcon />
+                                                    Delete post
+                                                </button>
+                                            )}
+                                            {isMod && (
+                                                <button
+                                                    type='button'
+                                                    onClick={() => setRemovePostModalOpen(true)}
+                                                >
+                                                    <DeleteIcon />
+                                                    Remove from s/{spaceData.handle}
+                                                </button>
+                                            )}
                                         </Column>
                                     </Column>
                                 </CloseOnClickOutside>
                             )}
-                        </>
+                        </Column>
                     )}
                 </Row>
             </Row>
@@ -448,6 +464,13 @@ function PostCard(props: {
                     postId={postData.id}
                     location={location}
                     close={() => setDeletePostModalOpen(false)}
+                />
+            )}
+            {removePostModalOpen && (
+                <DeletePostModal
+                    postId={postData.id}
+                    location={location}
+                    close={() => setRemovePostModalOpen(false)}
                 />
             )}
         </Column>
