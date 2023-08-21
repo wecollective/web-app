@@ -695,7 +695,7 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
             {postModalOpen && (
                 <Modal centerX close={() => setPostModalOpen(false)} style={{ width: 900 }}>
                     {selectedPost ? (
-                        <PostCard location='post-page' post={selectedPost} />
+                        <PostCard location='space-post-map' post={selectedPost} />
                     ) : (
                         <LoadingWheel />
                     )}

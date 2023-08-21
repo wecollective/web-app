@@ -17,6 +17,7 @@ import {
     LikeIcon,
     LinkIcon,
     PollIcon,
+    PostIcon,
     RetweetIcon,
     SpacesIcon,
     StarIcon,
@@ -429,6 +430,17 @@ function NotificationCard(props: {
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>just mentioned you in a</p>
                             <TextLink text='post' link={`/p/${postId}`} />
+                            <CreatedAt date={createdAt} />
+                        </Content>
+                    )}
+
+                    {type === 'post-removed-by-mods' && (
+                        <Content typeIcon={<PostIcon />}>
+                            <p>Your</p>
+                            <TextLink text='post' link={`/p/${postId}`} />
+                            <p>was removed from</p>
+                            <ImageNameLink type='space' data={triggerSpace} />
+                            <p>by its mods</p>
                             <CreatedAt date={createdAt} />
                         </Content>
                     )}

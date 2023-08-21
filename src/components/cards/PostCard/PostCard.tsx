@@ -5,6 +5,7 @@ import Row from '@components/Row'
 import ShowMoreLess from '@components/ShowMoreLess'
 import DraftText from '@components/draft-js/DraftText'
 import DeletePostModal from '@components/modals/DeletePostModal'
+import RemovePostModal from '@components/modals/RemovePostModal'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
@@ -105,7 +106,9 @@ function PostCard(props: {
     const cookies = new Cookies()
     const isOwnPost = accountData && Creator && accountData.id === Creator.id
     const showFooter = true // location !== 'link-modal'
-    const isMod = spaceData.Moderators.find((m) => m.id === accountData.id)
+    const isMod =
+        ['space-posts', 'space-post-map'].includes(location) &&
+        spaceData.Moderators.find((m) => m.id === accountData.id)
     const showDropDown = location !== 'preview' && (isOwnPost || isMod)
 
     const history = useNavigate()
@@ -467,7 +470,7 @@ function PostCard(props: {
                 />
             )}
             {removePostModalOpen && (
-                <DeletePostModal
+                <RemovePostModal
                     postId={postData.id}
                     location={location}
                     close={() => setRemovePostModalOpen(false)}
