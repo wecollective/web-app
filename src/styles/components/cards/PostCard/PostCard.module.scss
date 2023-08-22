@@ -36,6 +36,12 @@
         font-size: 15px;
         margin-bottom: 10px;
         overflow: hidden;
+        padding: 2px;
+
+        @include for-tablet-portrait-up {
+            overflow: visible;
+            padding: 0;
+        }
 
         .id {
             display: flex;
