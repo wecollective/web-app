@@ -338,6 +338,7 @@ function CreatePostModal(): JSX.Element {
                 id: uuidv4(),
                 text: newPollAnswer,
                 Reactions: [],
+                Creator: accountData,
             },
         ])
         setNewPollAnswer('')
@@ -990,31 +991,30 @@ function CreatePostModal(): JSX.Element {
                             </button>
                         </Row>
                         <Column className={styles.content}>
-                            {showTitle &&
-                                !['glass-bead-game', 'gbg-from-post'].includes(postType) && (
-                                    <Row centerY spaceBetween className={styles.title}>
-                                        <input
-                                            placeholder='Title...'
-                                            type='text'
-                                            value={title}
-                                            maxLength={100}
-                                            onChange={(e) => {
-                                                setTitle(e.target.value)
-                                                setNoTextError(false)
-                                                setEventTextError(false)
-                                                setPollTextError(false)
-                                            }}
-                                        />
-                                        <CloseButton
-                                            size={20}
-                                            onClick={() => {
-                                                setTitle('')
-                                                setShowTitle(false)
-                                            }}
-                                        />
-                                    </Row>
-                                )}
-                            {['glass-bead-game', 'gbg-from-post'].includes(postType) && (
+                            {showTitle && postType !== 'glass-bead-game' && (
+                                <Row centerY spaceBetween className={styles.title}>
+                                    <input
+                                        placeholder='Title...'
+                                        type='text'
+                                        value={title}
+                                        maxLength={100}
+                                        onChange={(e) => {
+                                            setTitle(e.target.value)
+                                            setNoTextError(false)
+                                            setEventTextError(false)
+                                            setPollTextError(false)
+                                        }}
+                                    />
+                                    <CloseButton
+                                        size={20}
+                                        onClick={() => {
+                                            setTitle('')
+                                            setShowTitle(false)
+                                        }}
+                                    />
+                                </Row>
+                            )}
+                            {postType === 'glass-bead-game' && (
                                 <Row centerY spaceBetween className={styles.topic}>
                                     <Column centerX centerY className={styles.imageWrapper}>
                                         {topicImageURL && <img src={topicImageURL} alt='' />}
