@@ -294,16 +294,7 @@ function PostCard(props: {
                         style={{ height: 200, margin: '10px 0' }}
                     />
                 )}
-                {type === 'poll' && (
-                    <PollCard
-                        postData={postData}
-                        setPostData={setPostData}
-                        // todo: pass down isOwnPost value
-                        // todo: remove when state updated locally
-                        location={location}
-                        params={params}
-                    />
-                )}
+                {type === 'poll' && <PollCard postData={postData} location={location} />}
                 {type === 'glass-bead-game' && (
                     <GlassBeadGameCard postData={postData} location={location} />
                 )}

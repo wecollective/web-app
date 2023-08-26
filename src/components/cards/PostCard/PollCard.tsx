@@ -11,28 +11,18 @@ import LoadingWheel from '@src/components/LoadingWheel'
 import PollAnswer from '@src/components/cards/PostCard/PollAnswer'
 import Modal from '@src/components/modals/Modal'
 import { AccountContext } from '@src/contexts/AccountContext'
-import { PostContext } from '@src/contexts/PostContext'
 import { SpaceContext } from '@src/contexts/SpaceContext'
-import { UserContext } from '@src/contexts/UserContext'
 import styles from '@styles/components/cards/PostCard/PollCard.module.scss'
 import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-function PollCard(props: {
-    postData: any
-    setPostData: (data: any) => void
-    location: string
-    params: any
-}): JSX.Element {
-    const { postData, setPostData, location, params } = props
+function PollCard(props: { postData: any; location: string }): JSX.Element {
+    const { postData, location } = props
     const { id } = postData
     const { accountData, setAlertMessage, setAlertModalOpen, loggedIn } = useContext(AccountContext)
-    // todo: update component directly instead of refreshing posts
-    const { spaceData, getSpacePosts, spacePostsPaginationLimit } = useContext(SpaceContext)
-    const { userData, getUserPosts, userPostsPaginationLimit } = useContext(UserContext)
-    const { getPostData } = useContext(PostContext)
+    const { spaceData } = useContext(SpaceContext)
     const [loading, setLoading] = useState(true)
     const [pollData, setPollData] = useState<any>(null)
     const [newAnswer, setNewAnswer] = useState('')
@@ -43,18 +33,14 @@ function PollCard(props: {
     const [accountHasVoted, setAccountHasVoted] = useState(false)
     const [voteChanged, setVoteChanged] = useState(false)
     const [voteLoading, setVoteLoading] = useState(false)
-    const [answers, setAnswers] = useState<any[]>([])
+    const [visualisationAnswers, setVisualisationAnswers] = useState<any[]>([])
+    const [listAnswers, setListAnswers] = useState<any[]>([])
     const [removeAnswerModalOpen, setRemoveAnswerModalOpen] = useState(false)
     const [removeAnswerId, setRemoveAnswerId] = useState(0)
     const [removeAnswerLoading, setRemoveAnswerLoading] = useState(false)
-    // const [newPollAnswers, setNewPollAnswers] = useState<any[]>([])
     const [totalUsedPoints, setTotalUsedPoints] = useState(0)
     const cookies = new Cookies()
     const colorScale = useRef<any>(null)
-
-    // todo:
-    // + seperate visualisation and list answer state (so updating input doesn't refresh viz)
-    // + update visualisation locally rather than requesting new data from db after vote
 
     function getPollData() {
         axios
@@ -106,8 +92,8 @@ function PollCard(props: {
         setTotalVotes(totalPollVotes)
         setTotalPoints(totalPollPoints)
         setTotalUsers(pollUsers.length)
-        setAnswers(answersWithData)
-        // setNewPollAnswers(answers)
+        setListAnswers(answersWithData)
+        setVisualisationAnswers(answersWithData)
         setLoading(false)
     }
 
@@ -118,7 +104,7 @@ function PollCard(props: {
         } else {
             setVoteLoading(true)
             const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-            const voteData = answers
+            const voteData = listAnswers
                 .filter((a) => a.accountVote)
                 .map((a) => {
                     return {
@@ -138,19 +124,17 @@ function PollCard(props: {
                 .then(() => {
                     setVoteLoading(false)
                     getPollData()
+                    setVoteChanged(false)
                 })
                 .catch((error) => console.log(error))
         }
     }
 
     function updateAnswers(answerId, value) {
-        const newAnswers = [...answers]
+        const newAnswers = [...listAnswers]
         if (pollData.type === 'single-choice') {
             newAnswers.forEach((a) => {
-                if (a.accountVote) {
-                    a.accountVote = false
-                    // a.totalVotes -= 1
-                }
+                if (a.accountVote) a.accountVote = false
             })
         }
         const selectedAnswer = newAnswers.find((a) => a.id === answerId)
@@ -158,12 +142,8 @@ function PollCard(props: {
             selectedAnswer.accountVote = !!value
             selectedAnswer.accountPoints = value > 100 ? 100 : value
             setTotalUsedPoints(newAnswers.map((a) => +a.accountPoints).reduce((a, b) => a + b, 0))
-        } else {
-            selectedAnswer.accountVote = value
-            // selectedAnswer.totalVotes += value ? 1 : -1
-        }
-        // setNewPollAnswers(newAnswers)
-        setAnswers(newAnswers)
+        } else selectedAnswer.accountVote = value
+        setListAnswers(newAnswers)
         setVoteChanged(true)
     }
 
@@ -173,7 +153,7 @@ function PollCard(props: {
         if (loggedIn) {
             if (weighted) {
                 if (!voteChanged || totalUsedPoints !== 100) return true
-            } else if (!voteChanged || !answers.find((a) => a.accountVote)) {
+            } else if (!voteChanged || !listAnswers.find((a) => a.accountVote)) {
                 return true
             }
         }
@@ -244,13 +224,13 @@ function PollCard(props: {
                     totalVotes={totalVotes}
                     totalPoints={totalPoints}
                     totalUsers={totalUsers}
-                    answers={answers}
+                    answers={visualisationAnswers}
                 />
                 {totalVotes > 0 && (
                     <TimeGraph
                         type={pollData.type}
                         postId={id}
-                        answers={answers}
+                        answers={visualisationAnswers}
                         startTime={postData.createdAt}
                     />
                 )}
@@ -275,9 +255,9 @@ function PollCard(props: {
                     onClick={() => vote()}
                 />
             </Row>
-            {answers.length > 0 && (
+            {listAnswers.length > 0 && (
                 <Column className={styles.answers}>
-                    {answers.map((answer, i) => (
+                    {listAnswers.map((answer, i) => (
                         <PollAnswer
                             key={answer.id}
                             index={i}
