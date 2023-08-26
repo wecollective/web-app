@@ -52,7 +52,7 @@ function UserPostFilters(props: { close: () => void }): JSX.Element {
                     'Likes',
                     'Comments',
                     'Reposts',
-                    'Ratings',
+                    'Signal',
                     'Links',
                 ]}
                 selectedOption={params.sortBy}

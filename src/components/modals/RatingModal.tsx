@@ -32,8 +32,8 @@ function RatingModal(props: {
     const [responseLoading, setResponseLoading] = useState(false)
     const cookies = new Cookies()
     const headerText = ratings.length
-        ? `${ratings.length} rating${pluralise(ratings.length)}`
-        : 'No ratings yet...'
+        ? `${ratings.length} signal${pluralise(ratings.length)}`
+        : 'No signal yet...'
     const mobileView = document.documentElement.clientWidth < 900
 
     function getRatings() {
@@ -81,7 +81,7 @@ function RatingModal(props: {
                     {ratings.length > 0 && (
                         <Column style={{ marginBottom: 10 }}>
                             <Row centerY spaceBetween style={{ marginBottom: 15 }}>
-                                <p>Average score:</p>
+                                <p>Average signal:</p>
                                 <div className={`${styles.scoreBar} ${styles.aqua}`}>
                                     <div style={{ width: `${averageScore}%` }} />
                                     <p>{averageScore}%</p>
@@ -122,7 +122,7 @@ function RatingModal(props: {
                                 </Row>
                             )}
                             <Button
-                                text={`${accountRating ? 'Remove' : 'Add'} rating`}
+                                text={`${accountRating ? 'Remove' : 'Add'} signal`}
                                 color={accountRating ? 'red' : 'blue'}
                                 disabled={newRating > 100}
                                 loading={responseLoading}
@@ -140,7 +140,7 @@ function RatingModal(props: {
                                     close()
                                 }}
                             />
-                            <p>to rate {itemType}s</p>
+                            <p>to add signal to {itemType}s</p>
                         </Row>
                     )}
                 </Column>
