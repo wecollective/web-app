@@ -15,38 +15,18 @@ function PollAnswer(props: {
     index: number
     type: string // 'single-choice' | 'multiple-choice' | 'weighted-choice'
     answer: any
-    totalVotes: number
-    totalPoints: number
+    percentage: number
     color: string
     preview?: boolean
-    selected?: boolean
+    removable: boolean
+    remove: () => void
     onChange?: (value: boolean | number) => void
-    close?: () => void
 }): JSX.Element {
-    const {
-        index,
-        type,
-        answer,
-        totalVotes,
-        totalPoints,
-        color,
-        preview,
-        selected,
-        onChange,
-        close,
-    } = props
+    const { index, type, answer, percentage, color, preview, removable, remove, onChange } = props
     const [statModalOpen, setStatModalOpen] = useState(false)
     const weighted = type === 'weighted-choice'
-    const points = weighted ? answer.totalPoints / 100 : answer.totalVotes
     const votes = answer.Reactions.filter((r) => r.state === 'active')
     const mobileView = document.documentElement.clientWidth < 900
-
-    function findPercentage() {
-        let percent = 0
-        if (weighted && totalPoints) percent = (answer.totalPoints / totalPoints) * 100
-        if (!weighted && totalVotes) percent = (100 / totalVotes) * answer.totalVotes
-        return +percent.toFixed(1)
-    }
 
     return (
         <Column centerY className={styles.wrapper}>
@@ -83,10 +63,10 @@ function PollAnswer(props: {
                                     style={{ marginRight: 10 }}
                                 />
                             )}
-                            <p>{findPercentage()}%</p>
+                            <p>{percentage}%</p>
                         </button>
                     )}
-                    <Row className={styles.input}>
+                    <Row centerY className={styles.input}>
                         {weighted && !preview && (
                             <Input
                                 type='text'
@@ -98,12 +78,14 @@ function PollAnswer(props: {
                         )}
                         {!weighted && !preview && (
                             <CheckBox
-                                checked={selected || false}
+                                checked={answer.accountVote}
                                 disabled={preview}
                                 onChange={(v) => onChange && onChange(v)}
                             />
                         )}
-                        {close && <CloseButton size={20} onClick={() => close()} />}
+                        {removable && (
+                            <CloseButton size={20} onClick={remove} style={{ marginLeft: 5 }} />
+                        )}
                     </Row>
                 </Row>
             </Row>
@@ -138,9 +120,7 @@ function PollAnswer(props: {
 
 PollAnswer.defaultProps = {
     preview: false,
-    selected: false,
     onChange: null,
-    close: null,
 }
 
 export default PollAnswer

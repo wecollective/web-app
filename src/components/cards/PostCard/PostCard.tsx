@@ -298,6 +298,7 @@ function PostCard(props: {
                     <PollCard
                         postData={postData}
                         setPostData={setPostData}
+                        // todo: pass down isOwnPost value
                         // todo: remove when state updated locally
                         location={location}
                         params={params}

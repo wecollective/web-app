@@ -1096,10 +1096,10 @@ function CreatePostModal(): JSX.Element {
                                             index={index}
                                             type={pollType}
                                             answer={answer}
-                                            totalVotes={0}
-                                            totalPoints={0}
+                                            percentage={0}
                                             color={pollColorScale(index)}
-                                            close={() => removePollAnswer(answer.id)}
+                                            remove={() => removePollAnswer(answer.id)}
+                                            removable
                                             preview
                                         />
                                     ))}

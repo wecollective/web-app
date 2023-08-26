@@ -6,9 +6,10 @@ import Input from '@components/Input'
 import PieChart from '@components/PieChart'
 import Row from '@components/Row'
 import TimeGraph from '@components/TimeGraph'
-import PollAnswer from '@src/components/cards/PostCard/PollAnswer'
-import LoadingWheel from '@src/components/LoadingWheel'
 import config from '@src/Config'
+import LoadingWheel from '@src/components/LoadingWheel'
+import PollAnswer from '@src/components/cards/PostCard/PollAnswer'
+import Modal from '@src/components/modals/Modal'
 import { AccountContext } from '@src/contexts/AccountContext'
 import { PostContext } from '@src/contexts/PostContext'
 import { SpaceContext } from '@src/contexts/SpaceContext'
@@ -42,12 +43,18 @@ function PollCard(props: {
     const [accountHasVoted, setAccountHasVoted] = useState(false)
     const [voteChanged, setVoteChanged] = useState(false)
     const [voteLoading, setVoteLoading] = useState(false)
-    const [showVoteSavedMessage, setShowVoteSavedMessage] = useState(false)
-    const [pollAnswers, setPollAnswers] = useState<any[]>([])
-    const [newPollAnswers, setNewPollAnswers] = useState<any[]>([])
+    const [answers, setAnswers] = useState<any[]>([])
+    const [removeAnswerModalOpen, setRemoveAnswerModalOpen] = useState(false)
+    const [removeAnswerId, setRemoveAnswerId] = useState(0)
+    const [removeAnswerLoading, setRemoveAnswerLoading] = useState(false)
+    // const [newPollAnswers, setNewPollAnswers] = useState<any[]>([])
     const [totalUsedPoints, setTotalUsedPoints] = useState(0)
     const cookies = new Cookies()
     const colorScale = useRef<any>(null)
+
+    // todo:
+    // + seperate visualisation and list answer state (so updating input doesn't refresh viz)
+    // + update visualisation locally rather than requesting new data from db after vote
 
     function getPollData() {
         axios
@@ -66,7 +73,7 @@ function PollCard(props: {
             .domain([0, PollAnswers.length])
             .interpolator(d3.interpolateViridis)
         const weighted = type === 'weighted-choice'
-        const answers = [] as any[]
+        const answersWithData = [] as any[]
         let totalPollVotes = 0
         let totalPollPoints = 0
         const pollUsers = [] as number[]
@@ -86,7 +93,7 @@ function PollCard(props: {
                 setAccountHasVoted(true)
                 setTotalUsedPoints(100)
             }
-            answers.push({
+            answersWithData.push({
                 ...answer,
                 totalVotes: activeReactions.length,
                 accountVote: !!accountVote,
@@ -94,13 +101,13 @@ function PollCard(props: {
                 totalPoints: points,
             })
         })
-        if (weighted) answers.sort((a, b) => b.totalPoints - a.totalPoints)
-        else answers.sort((a, b) => b.totalVotes - a.totalVotes)
+        if (weighted) answersWithData.sort((a, b) => b.totalPoints - a.totalPoints)
+        else answersWithData.sort((a, b) => b.totalVotes - a.totalVotes)
         setTotalVotes(totalPollVotes)
         setTotalPoints(totalPollPoints)
         setTotalUsers(pollUsers.length)
-        setPollAnswers(answers)
-        setNewPollAnswers(answers)
+        setAnswers(answersWithData)
+        // setNewPollAnswers(answers)
         setLoading(false)
     }
 
@@ -111,7 +118,7 @@ function PollCard(props: {
         } else {
             setVoteLoading(true)
             const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-            const voteData = newPollAnswers
+            const voteData = answers
                 .filter((a) => a.accountVote)
                 .map((a) => {
                     return {
@@ -130,23 +137,14 @@ function PollCard(props: {
                 .post(`${config.apiURL}/vote-on-poll`, data, options)
                 .then(() => {
                     setVoteLoading(false)
-                    setShowVoteSavedMessage(true)
-                    setTimeout(() => {
-                        setShowVoteSavedMessage(false)
-                        // todo: update state locally
-                        if (location === 'space-posts')
-                            getSpacePosts(spaceData.id, 0, spacePostsPaginationLimit, params)
-                        if (location === 'user-posts')
-                            getUserPosts(userData.id, 0, userPostsPaginationLimit, params)
-                        if (location === 'post-page') getPostData(id)
-                    }, 1000)
+                    getPollData()
                 })
                 .catch((error) => console.log(error))
         }
     }
 
     function updateAnswers(answerId, value) {
-        const newAnswers = [...newPollAnswers]
+        const newAnswers = [...answers]
         if (pollData.type === 'single-choice') {
             newAnswers.forEach((a) => {
                 if (a.accountVote) {
@@ -164,7 +162,8 @@ function PollCard(props: {
             selectedAnswer.accountVote = value
             // selectedAnswer.totalVotes += value ? 1 : -1
         }
-        setNewPollAnswers(newAnswers)
+        // setNewPollAnswers(newAnswers)
+        setAnswers(newAnswers)
         setVoteChanged(true)
     }
 
@@ -174,7 +173,7 @@ function PollCard(props: {
         if (loggedIn) {
             if (weighted) {
                 if (!voteChanged || totalUsedPoints !== 100) return true
-            } else if (!voteChanged || !newPollAnswers.find((a) => a.accountVote)) {
+            } else if (!voteChanged || !answers.find((a) => a.accountVote)) {
                 return true
             }
         }
@@ -206,6 +205,27 @@ function PollCard(props: {
         }
     }
 
+    function removeAnswer() {
+        setRemoveAnswerLoading(true)
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .post(`${config.apiURL}/remove-poll-answer`, { id: removeAnswerId }, options)
+            .then(() => {
+                getPollData()
+                setRemoveAnswerLoading(false)
+                setRemoveAnswerModalOpen(false)
+            })
+            .catch((error) => console.log(error))
+    }
+
+    function findPercentage(answer) {
+        const weighted = pollData && pollData.type === 'weighted-choice'
+        let percent = 0
+        if (weighted && totalPoints) percent = (answer.totalPoints / totalPoints) * 100
+        if (!weighted && totalVotes) percent = (100 / totalVotes) * answer.totalVotes
+        return +percent.toFixed(1)
+    }
+
     useEffect(() => getPollData(), [])
 
     if (loading)
@@ -224,13 +244,13 @@ function PollCard(props: {
                     totalVotes={totalVotes}
                     totalPoints={totalPoints}
                     totalUsers={totalUsers}
-                    answers={pollAnswers}
+                    answers={answers}
                 />
                 {totalVotes > 0 && (
                     <TimeGraph
                         type={pollData.type}
                         postId={id}
-                        answers={pollAnswers}
+                        answers={answers}
                         startTime={postData.createdAt}
                     />
                 )}
@@ -247,7 +267,6 @@ function PollCard(props: {
                         </p>
                     )}
                 </Row>
-                {showVoteSavedMessage && <p>Vote saved!</p>}
                 <Button
                     color='blue'
                     text={accountHasVoted ? 'Change vote' : 'Vote'}
@@ -256,19 +275,22 @@ function PollCard(props: {
                     onClick={() => vote()}
                 />
             </Row>
-            {newPollAnswers.length > 0 && (
+            {answers.length > 0 && (
                 <Column className={styles.answers}>
-                    {newPollAnswers.map((answer, i) => (
+                    {answers.map((answer, i) => (
                         <PollAnswer
                             key={answer.id}
                             index={i}
                             type={pollData.type}
                             answer={answer}
-                            totalVotes={totalVotes}
-                            totalPoints={totalPoints}
+                            percentage={findPercentage(answer)}
                             color={colorScale.current(i)}
-                            selected={answer.accountVote}
                             onChange={(v) => updateAnswers(answer.id, v)}
+                            removable={postData.Creator.id === accountData.id}
+                            remove={() => {
+                                setRemoveAnswerId(answer.id)
+                                setRemoveAnswerModalOpen(true)
+                            }}
                         />
                     ))}
                 </Column>
@@ -290,6 +312,26 @@ function PollCard(props: {
                         onClick={addNewAnswer}
                     />
                 </Row>
+            )}
+            {removeAnswerModalOpen && (
+                <Modal centerX close={() => setRemoveAnswerModalOpen(false)}>
+                    <h1>Are you sure you want to remove this answer?</h1>
+                    <Row>
+                        <Button
+                            text='Yes, remove'
+                            color='red'
+                            loading={removeAnswerLoading}
+                            disabled={removeAnswerLoading}
+                            onClick={removeAnswer}
+                            style={{ marginRight: 10 }}
+                        />
+                        <Button
+                            text='Cancel'
+                            color='blue'
+                            onClick={() => setRemoveAnswerModalOpen(false)}
+                        />
+                    </Row>
+                </Modal>
             )}
         </Column>
     )
