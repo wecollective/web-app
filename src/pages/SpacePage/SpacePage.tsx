@@ -43,7 +43,6 @@ function SpacePage(): JSX.Element {
     const {
         accountData,
         accountDataLoading,
-        updateAccountData,
         loggedIn,
         setPageBottomReached,
         setAlertMessage,
@@ -83,9 +82,7 @@ function SpacePage(): JSX.Element {
         ],
         right: [{ text: 'Settings', visible: isModerator, icon: <SettingsIcon /> }],
     }
-
     type errorState = 'default' | 'valid' | 'invalid'
-
     const [mmEmail, setMMEmail] = useState('')
     const [mmEmailState, setMMEmailState] = useState<errorState>('default')
     const [mmEmailErrors, setMMEmailErrors] = useState<string[]>([])
@@ -97,25 +94,6 @@ function SpacePage(): JSX.Element {
     const [mmPassword2Errors, setMMPassword2Errors] = useState<string[]>([])
     const [mmLoading, setMMLoading] = useState(false)
     const [success, setSuccess] = useState(false)
-
-    function showAccessButton() {
-        return (
-            loggedIn &&
-            spaceData.privacy === 'private' &&
-            ['blocked', 'pending'].includes(spaceData.access)
-        )
-    }
-
-    function findAccessIcon() {
-        if (spaceData.access === 'pending') return <SuccessIcon />
-        return undefined
-    }
-
-    function findAccessText() {
-        if (spaceData.access === 'pending') return 'Access requested'
-        if (spaceData.access === 'blocked') return 'Request access'
-        return ''
-    }
 
     function requestAccess() {
         const accessToken = cookies.get('accessToken')
@@ -138,10 +116,6 @@ function SpacePage(): JSX.Element {
                 })
                 .catch((error) => console.log(error))
         }
-    }
-
-    function showFollowingButton() {
-        return loggedIn && spaceData.access === 'granted' && spaceHandle !== 'all'
     }
 
     function toggleFollowing() {
@@ -192,6 +166,45 @@ function SpacePage(): JSX.Element {
                     setMMLoading(false)
                 })
         } else setMMLoading(false)
+    }
+
+    function renderAccessButton(): JSX.Element | null {
+        if (loggedIn) {
+            if (spaceData.access !== 'granted') {
+                // show access button
+                let accessText = ''
+                if (spaceData.access === 'pending') accessText = 'Access requested'
+                if (spaceData.access === 'blocked') accessText = 'Request access'
+                return (
+                    <Button
+                        icon={spaceData.access === 'pending' ? <SuccessIcon /> : undefined}
+                        text={accessText}
+                        color='aqua'
+                        loading={accessRequestLoading}
+                        disabled={
+                            awaitingSpaceData ||
+                            spaceData.access === 'pending' ||
+                            accessRequestLoading
+                        }
+                        onClick={requestAccess}
+                        style={{ marginRight: 10 }}
+                    />
+                )
+            }
+            if (spaceHandle !== 'all')
+                // show following button
+                return (
+                    <Button
+                        icon={isFollowing ? <SuccessIcon /> : undefined}
+                        text={isFollowing ? 'Following' : 'Follow'}
+                        color='blue'
+                        loading={followSpaceLoading}
+                        disabled={awaitingSpaceData || followSpaceLoading}
+                        onClick={followButtonClick}
+                    />
+                )
+        }
+        return null
     }
 
     // todo: use promises in space context to get space data first, then content?
@@ -289,39 +302,16 @@ function SpacePage(): JSX.Element {
                             canEdit={isModerator}
                             className={styles.flagImageLarge}
                         />
-                        <Row centerY style={{ height: 50 }}>
+                        <Row centerY>
                             <Column className={styles.spaceName}>
                                 <h1>{spaceData.name}</h1>
                                 <p className='grey'>s/{spaceData.handle}</p>
                             </Column>
-                            {showAccessButton() && (
-                                <Button
-                                    icon={findAccessIcon()}
-                                    text={findAccessText()}
-                                    color='aqua'
-                                    loading={accessRequestLoading}
-                                    disabled={
-                                        awaitingSpaceData ||
-                                        spaceData.access === 'pending' ||
-                                        accessRequestLoading
-                                    }
-                                    onClick={requestAccess}
-                                    style={{ marginRight: 10 }}
-                                />
-                            )}
-                            {showFollowingButton() && (
-                                <Button
-                                    icon={isFollowing ? <SuccessIcon /> : undefined}
-                                    text={isFollowing ? 'Following' : 'Follow'}
-                                    color='blue'
-                                    loading={followSpaceLoading}
-                                    disabled={awaitingSpaceData || followSpaceLoading}
-                                    onClick={followButtonClick}
-                                />
-                            )}
+                            {!mobileView && renderAccessButton()}
                         </Row>
                     </Row>
                 )}
+                {mobileView && renderAccessButton()}
                 <Row centerX className={styles.tabRow}>
                     <Row centerY className={styles.spaceDataSmall}>
                         <FlagImage
