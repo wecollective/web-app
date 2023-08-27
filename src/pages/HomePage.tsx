@@ -17,11 +17,12 @@ import Cookies from 'universal-cookie'
 function Homepage(): JSX.Element {
     const {
         loggedIn,
+        accountDataLoading,
         setAlertMessage,
         setAlertModalOpen,
-        setLogInModalOpen,
         setResetPasswordModalOpen,
         setResetPasswordToken,
+        setRegisterModalOpen,
     } = useContext(AccountContext)
     const urlParams = new URLSearchParams(window.location.search)
     const alert = urlParams.get('alert')
@@ -146,6 +147,11 @@ function Homepage(): JSX.Element {
         showRedirectAlerts()
         getHomepageHighlights()
     }, [])
+
+    useEffect(() => {
+        if (!accountDataLoading && !loggedIn && alert === 'create-account')
+            setRegisterModalOpen(true)
+    }, [accountDataLoading])
 
     return (
         <Column className={styles.wrapper}>

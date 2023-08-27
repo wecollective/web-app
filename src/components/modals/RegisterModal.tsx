@@ -117,10 +117,12 @@ function RegisterModal(props: { close: () => void }): JSX.Element {
     useEffect(() => {
         // make recaptcha flag visible
         const recaptchaBadge = document.getElementsByClassName('grecaptcha-badge')[0] as HTMLElement
-        recaptchaBadge.style.visibility = 'visible'
-        recaptchaBadge.style.zIndex = '500'
+        if (recaptchaBadge) {
+            recaptchaBadge.style.visibility = 'visible'
+            recaptchaBadge.style.zIndex = '500'
+        }
         return () => {
-            recaptchaBadge.style.visibility = 'hidden'
+            if (recaptchaBadge) recaptchaBadge.style.visibility = 'hidden'
         }
     })
 
