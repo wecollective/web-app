@@ -1,5 +1,7 @@
 import Button from '@components/Button'
 import Column from '@components/Column'
+import Input from '@components/Input'
+import Row from '@components/Row'
 import DraftText from '@components/draft-js/DraftText'
 import DeleteSpaceModal from '@components/modals/DeleteSpaceModal'
 import InviteSpaceModeratorModal from '@components/modals/InviteSpaceModeratorModal'
@@ -10,9 +12,9 @@ import RemoveSpaceModeratorModal from '@components/modals/RemoveSpaceModeratorMo
 import UpdateSpaceDescriptionModal from '@components/modals/UpdateSpaceDescriptionModal'
 import UpdateSpaceHandleModal from '@components/modals/UpdateSpaceHandleModal'
 import UpdateSpaceNameModal from '@components/modals/UpdateSpaceNameModal'
-import Row from '@components/Row'
 import { SpaceContext } from '@contexts/SpaceContext'
 import SpaceNotFound from '@pages/SpaceNotFound'
+import config from '@src/Config'
 import InviteSpaceUsersModal from '@src/components/modals/InviteSpaceUsersModal'
 import styles from '@styles/pages/SpacePage/Settings.module.scss'
 import React, { useContext, useEffect, useState } from 'react'
@@ -79,11 +81,19 @@ function Settings(): JSX.Element {
                         />
                     </Column>
                     {spaceData.privacy === 'private' && (
-                        <Button
-                            text='Invite users'
-                            color='blue'
-                            onClick={() => setInviteSpaceUsersModalOpen(true)}
-                        />
+                        <>
+                            <Button
+                                text='Invite users'
+                                color='blue'
+                                onClick={() => setInviteSpaceUsersModalOpen(true)}
+                            />
+                            <p>User invite link:</p>
+                            <Input
+                                type='text'
+                                value={`${config.appURL}/s/${spaceData.handle}/posts?inviteToken=${spaceData.inviteToken}`}
+                                style={{ width: '100%', maxWidth: 300, marginTop: 10 }}
+                            />
+                        </>
                     )}
                     <Button
                         text='Invite moderator'

@@ -27,6 +27,7 @@ import {
     AboutIcon,
     CalendarIcon,
     GovernanceIcon,
+    LockIcon,
     PostIcon,
     SettingsIcon,
     SpacesIcon,
@@ -204,17 +205,45 @@ function SpacePage(): JSX.Element {
 
     useEffect(() => setSelectedSpaceSubPage(subpage), [location])
 
-    // todo: combine with reset space data
     useEffect(() => {
+        // add scroll listener
         document.addEventListener('scroll', () => {
             setHeaderColapsed(window.pageYOffset > (mobileView ? 260 : 290))
             onPageBottomReached(setPageBottomReached)
         })
         // window.scrollTo(0, 300)
         // window.onunload = () => window.scrollTo(0, 300)
+        return () => resetSpaceData()
     }, [])
 
-    useEffect(() => () => resetSpaceData(), [])
+    // handle invite token if present
+    useEffect(() => {
+        // problem: after log in, space data access not updated before token check...
+        if (spaceData.id) {
+            const urlParams = Object.fromEntries(new URLSearchParams(location.search))
+            const { inviteToken } = urlParams
+            if (inviteToken && spaceData.access !== 'granted') {
+                if (loggedIn) {
+                    const data = { spaceId: spaceData.id, inviteToken }
+                    const accessToken = cookies.get('accessToken')
+                    const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+                    axios
+                        .post(`${config.apiURL}/accept-space-invite-link`, data, options)
+                        .then(() => setSpaceData({ ...spaceData, access: 'granted' }))
+                        .catch((error) => {
+                            console.log(error)
+                            if (error.response && error.response.data.message === 'Invalid token') {
+                                setAlertMessage('Invalid invite token')
+                                setAlertModalOpen(true)
+                            }
+                        })
+                } else {
+                    setAlertMessage('Log in and refresh page to use this invite link')
+                    setAlertModalOpen(true)
+                }
+            }
+        }
+    }, [spaceData.id, spaceData.access])
 
     // const wecoSpace =
     //     spaceData.id && (spaceData.id === 51 || spaceData.SpaceAncestors.find((a) => a.id === 51))
@@ -327,8 +356,11 @@ function SpacePage(): JSX.Element {
                     </Routes>
                 ) : (
                     <Column centerX style={{ zIndex: 40 }}>
-                        <h2>Access blocked!</h2>
-                        {!loggedIn && <p>Log in to request access</p>}
+                        <Column className={styles.lockIcon}>
+                            <LockIcon />
+                        </Column>
+                        <h2>This space is private</h2>
+                        {loggedIn ? <p>Request access above</p> : <p>Log in to request access</p>}
                         {spaceHandle === 'the-metamodern-forum' && (
                             <Column centerX style={{ marginTop: 20, maxWidth: 500 }}>
                                 <p style={{ marginBottom: 20 }}>
