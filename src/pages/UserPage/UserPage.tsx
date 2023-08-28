@@ -16,12 +16,14 @@ import Settings from '@src/pages/UserPage/Settings'
 // import Sidebar from '@src/pages/UserPage/Sidebar'
 import config from '@src/Config'
 import Following from '@src/pages/UserPage/Following'
+import Likes from '@src/pages/UserPage/Likes'
 import Streams from '@src/pages/UserPage/Streams'
 import styles from '@styles/pages/UserPage/UserPage.module.scss'
 import {
     AboutIcon,
     BellIcon,
     EyeIcon,
+    LikeIcon,
     PostIcon,
     SettingsIcon,
     StreamIcon,
@@ -58,6 +60,7 @@ function UserPage(): JSX.Element {
             { text: 'Posts', visible: true, icon: <PostIcon /> },
             { text: 'Streams', visible: isOwnAccount, icon: <StreamIcon /> },
             { text: 'Following', visible: isOwnAccount, icon: <EyeIcon /> },
+            { text: 'Likes', visible: isOwnAccount, icon: <LikeIcon /> },
             { text: 'Notifications', visible: isOwnAccount, icon: <BellIcon /> },
         ],
         right: [
@@ -161,6 +164,7 @@ function UserPage(): JSX.Element {
                     <Route path='streams' element={<Navigate to='spaces' replace />} />
                     <Route path='following/:itemType' element={<Following />} />
                     <Route path='following' element={<Navigate to='spaces' replace />} />
+                    <Route path='likes' element={<Likes />} />
                     <Route path='notifications' element={<Notifications />} />
                     <Route path='settings' element={<Settings />} />
                 </Routes>

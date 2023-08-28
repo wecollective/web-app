@@ -18,6 +18,7 @@ import {
     ChevronDownIcon,
     EyeIcon,
     GovernanceIcon,
+    LikeIcon,
     PostIcon,
     SearchIcon,
     SettingsIcon,
@@ -382,6 +383,27 @@ function Navbar(): JSX.Element {
                                             <p>Posts</p>
                                         </Link>
                                         <Link
+                                            to={`/u/${accountData.handle}/streams/spaces`}
+                                            onClick={() => toggleAccountMenu()}
+                                        >
+                                            <StreamIcon />
+                                            <p>Streams</p>
+                                        </Link>
+                                        <Link
+                                            to={`/u/${accountData.handle}/following`}
+                                            onClick={() => toggleAccountMenu()}
+                                        >
+                                            <EyeIcon />
+                                            <p>Following</p>
+                                        </Link>
+                                        <Link
+                                            to={`/u/${accountData.handle}/likes`}
+                                            onClick={() => toggleAccountMenu()}
+                                        >
+                                            <LikeIcon />
+                                            <p>Likes</p>
+                                        </Link>
+                                        <Link
                                             to={`/u/${accountData.handle}/notifications`}
                                             onClick={() => toggleAccountMenu()}
                                         >
@@ -452,6 +474,10 @@ function Navbar(): JSX.Element {
                                     <Link to={`/u/${accountData.handle}/following`}>
                                         <EyeIcon />
                                         <p>Following</p>
+                                    </Link>
+                                    <Link to={`/u/${accountData.handle}/likes`}>
+                                        <LikeIcon />
+                                        <p>Likes</p>
                                     </Link>
                                     <Link to={`/u/${accountData.handle}/notifications`}>
                                         <BellIcon />
