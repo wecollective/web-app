@@ -1,0 +1,9 @@
+@import '@styles/Variables';
+
+.wrapper {
+    margin-bottom: 10px;
+    width: 100%;
+    @include for-post-width-up {
+        width: auto;
+    }
+}
