@@ -3,7 +3,6 @@ import Button from '@components/Button'
 import Column from '@components/Column'
 import CoverImage from '@components/CoverImage'
 import EditableFlagImage from '@components/EditableFlagImage'
-import Input from '@components/Input'
 import Modal from '@components/modals/Modal'
 import PageTabs from '@components/PageTabs'
 import Row from '@components/Row'
@@ -12,7 +11,6 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import PageNotFound from '@pages/PageNotFound'
 import Settings from '@pages/SpacePage/Settings'
 import FlagImage from '@src/components/FlagImage'
-import SuccessMessage from '@src/components/SuccessMessage'
 import config from '@src/Config'
 import { onPageBottomReached } from '@src/Helpers'
 import About from '@src/pages/SpacePage/About'
@@ -47,6 +45,7 @@ function SpacePage(): JSX.Element {
         setPageBottomReached,
         setAlertMessage,
         setAlertModalOpen,
+        setClaimAccountModalOpen,
     } = useContext(AccountContext)
     const {
         spaceData,
@@ -82,18 +81,6 @@ function SpacePage(): JSX.Element {
         ],
         right: [{ text: 'Settings', visible: isModerator, icon: <SettingsIcon /> }],
     }
-    type errorState = 'default' | 'valid' | 'invalid'
-    const [mmEmail, setMMEmail] = useState('')
-    const [mmEmailState, setMMEmailState] = useState<errorState>('default')
-    const [mmEmailErrors, setMMEmailErrors] = useState<string[]>([])
-    const [mmPassword, setMMPassword] = useState('')
-    const [mmPasswordState, setMMPasswordState] = useState<errorState>('default')
-    const [mmPasswordErrors, setMMPasswordErrors] = useState<string[]>([])
-    const [mmPassword2, setMMPassword2] = useState('')
-    const [mmPassword2State, setMMPassword2State] = useState<errorState>('default')
-    const [mmPassword2Errors, setMMPassword2Errors] = useState<string[]>([])
-    const [mmLoading, setMMLoading] = useState(false)
-    const [success, setSuccess] = useState(false)
 
     function requestAccess() {
         const accessToken = cookies.get('accessToken')
@@ -140,32 +127,6 @@ function SpacePage(): JSX.Element {
     function followButtonClick() {
         if (isFollowing) setFollowingModalOpen(true)
         else toggleFollowing()
-    }
-
-    function verifyEmail() {
-        setMMLoading(true)
-        setMMEmailState(mmEmail ? 'valid' : 'invalid')
-        setMMEmailErrors(mmEmail ? [] : ['Required'])
-        setMMPasswordState(mmPassword ? 'valid' : 'invalid')
-        setMMPasswordErrors(mmPassword ? [] : ['Required'])
-        setMMPassword2State(mmPassword2 && mmPassword2 === mmPassword ? 'valid' : 'invalid')
-        setMMPassword2Errors(
-            mmPassword2 && mmPassword2 === mmPassword ? [] : ['Must match new password']
-        )
-        if (mmEmail && mmPassword && mmPassword2 === mmPassword) {
-            axios
-                .post(`${config.apiURL}/verfiy-mm-email`, { mmEmail, mmPassword })
-                .then(() => {
-                    setSuccess(true)
-                    setMMLoading(false)
-                })
-                .catch((error) => {
-                    const { message } = error.response.data
-                    setMMEmailState('invalid')
-                    setMMEmailErrors([message])
-                    setMMLoading(false)
-                })
-        } else setMMLoading(false)
     }
 
     function renderAccessButton(): JSX.Element | null {
@@ -352,67 +313,16 @@ function SpacePage(): JSX.Element {
                         <h2>This space is private</h2>
                         {loggedIn ? <p>Request access above</p> : <p>Log in to request access</p>}
                         {spaceHandle === 'the-metamodern-forum' && (
-                            <Column centerX style={{ marginTop: 20, maxWidth: 500 }}>
-                                <p style={{ marginBottom: 20 }}>
+                            <Column centerX style={{ marginTop: 20, maxWidth: 400 }}>
+                                <p style={{ textAlign: 'center', marginBottom: 20 }}>
                                     {loggedIn ? 'If' : 'Or if'} you previously had an account at{' '}
-                                    <b>forum.metamoderna.org</b> you can reclaim it using your old
-                                    metamodern forum email below:
+                                    <b>forum.metamoderna.org</b> you can reclaim it below:
                                 </p>
-                                <Input
-                                    title='Old metamodern forum email'
-                                    type='email'
-                                    style={{ marginBottom: 10 }}
-                                    disabled={mmLoading}
-                                    state={mmEmailState}
-                                    errors={mmEmailErrors}
-                                    value={mmEmail}
-                                    onChange={(v) => {
-                                        setMMEmail(v)
-                                        setMMEmailState('default')
-                                        setMMEmailErrors([])
-                                    }}
-                                />
-                                <Input
-                                    title='New password'
-                                    type='password'
-                                    style={{ marginBottom: 10 }}
-                                    disabled={mmLoading}
-                                    state={mmPasswordState}
-                                    errors={mmPasswordErrors}
-                                    value={mmPassword}
-                                    onChange={(v) => {
-                                        setMMPassword(v)
-                                        setMMPasswordState('default')
-                                        setMMPasswordErrors([])
-                                    }}
-                                />
-                                <Input
-                                    title='Confirm new password'
-                                    type='password'
-                                    style={{ marginBottom: 20 }}
-                                    disabled={mmLoading}
-                                    state={mmPassword2State}
-                                    errors={mmPassword2Errors}
-                                    value={mmPassword2}
-                                    onChange={(v) => {
-                                        setMMPassword2(v)
-                                        setMMPassword2State('default')
-                                        setMMPassword2Errors([])
-                                    }}
-                                />
                                 <Button
-                                    text='Send verification email'
+                                    text='Reclaim account'
                                     color='blue'
-                                    disabled={mmLoading}
-                                    loading={mmLoading}
-                                    onClick={verifyEmail}
-                                    style={{ marginBottom: 20 }}
+                                    onClick={() => setClaimAccountModalOpen(true)}
                                 />
-                                {success && (
-                                    <SuccessMessage
-                                        text={`Success! We've sent you a verification email. Follow the instructions there to reclaim your account.`}
-                                    />
-                                )}
                             </Column>
                         )}
                     </Column>

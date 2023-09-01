@@ -146,6 +146,8 @@ export interface IAccountContext {
     setDonateModalOpen: (payload: boolean) => void
     pageBottomReached: boolean
     setPageBottomReached: (payload: boolean) => void
+    claimAccountModalOpen: boolean
+    setClaimAccountModalOpen: (payload: boolean) => void
     // functions
     getAccountData: () => void
     updateAccountData: (key: string, payload: any) => void

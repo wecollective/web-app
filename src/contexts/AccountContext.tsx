@@ -24,9 +24,7 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
     const [accountData, setAccountData] = useState(defaults.accountData)
     const [accountDataLoading, setAccountDataLoading] = useState(true)
     const [pageBottomReached, setPageBottomReached] = useState(false)
-    // const [notifications, setNotifications] = useState<any[]>([])
-    // const [notificationsLoading, setNotificationsLoading] = useState(true)
-    // modals (todo: most to be removed...)
+    // modals
     const [alertModalOpen, setAlertModalOpen] = useState(false)
     const [alertMessage, setAlertMessage] = useState('')
     const [authModalOpen, setAuthModalOpen] = useState(false)
@@ -44,6 +42,7 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
     const [resetPasswordModalOpen, setResetPasswordModalOpen] = useState(false)
     const [resetPasswordToken, setResetPasswordToken] = useState<string | null>('')
     const [donateModalOpen, setDonateModalOpen] = useState(false)
+    const [claimAccountModalOpen, setClaimAccountModalOpen] = useState(false)
 
     const cookies = new Cookies()
 
@@ -136,6 +135,8 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                 setDonateModalOpen,
                 pageBottomReached,
                 setPageBottomReached,
+                claimAccountModalOpen,
+                setClaimAccountModalOpen,
                 // functions
                 getAccountData,
                 updateAccountData,

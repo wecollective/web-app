@@ -23,6 +23,7 @@ function Homepage(): JSX.Element {
         setResetPasswordModalOpen,
         setResetPasswordToken,
         setRegisterModalOpen,
+        setClaimAccountModalOpen,
     } = useContext(AccountContext)
     const urlParams = new URLSearchParams(window.location.search)
     const alert = urlParams.get('alert')
@@ -121,6 +122,7 @@ function Homepage(): JSX.Element {
             setResetPasswordModalOpen(true)
             setResetPasswordToken(urlParams.get('token'))
         }
+        if (alert === 'claim-account') setClaimAccountModalOpen(true)
     }
 
     function getHomepageHighlights() {
