@@ -11,10 +11,18 @@
         border-radius: 10px;
         padding: 40px;
 
+        h1 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid $grey3;
+        }
+
         // rows
         > div {
             margin-bottom: 15px;
-            > h1 {
+            > h2 {
                 font-size: 16px;
                 font-weight: 600;
                 margin: 0 5px 0 0;
