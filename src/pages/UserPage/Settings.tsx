@@ -1,13 +1,13 @@
 import Button from '@components/Button'
 import Column from '@components/Column'
+import Row from '@components/Row'
+import ShowMoreLess from '@components/ShowMoreLess'
 import DraftText from '@components/draft-js/DraftText'
 import DeleteAccountModal from '@components/modals/DeleteAccountModal'
+import MuteUserModal from '@components/modals/MuteUserModal'
 import UpdateUserBioModal from '@components/modals/UpdateUserBioModal'
 import UpdateUserEmailModal from '@components/modals/UpdateUserEmailModal'
 import UpdateUserNameModal from '@components/modals/UpdateUserNameModal'
-import MuteUserModal from '@components/modals/MuteUserModal'
-import Row from '@components/Row'
-import ShowMoreLess from '@components/ShowMoreLess'
 import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
 import styles from '@styles/pages/UserPage/Settings.module.scss'
@@ -83,7 +83,7 @@ function Settings(): JSX.Element | null {
                 </Row>
                 <h1>Account preferences</h1>
                 <Button
-                    text='Mute users'
+                    text='Muted users'
                     color='blue'
                     onClick={() => setMuteUserModalOpen(true)}
                     style={{ marginBottom: 40 }}

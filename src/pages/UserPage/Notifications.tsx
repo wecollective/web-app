@@ -31,9 +31,10 @@ function Notifications(): JSX.Element {
     function getNotifications(offset: number) {
         if (offset) setNextItemsLoading(true)
         else setItemsLoading(true)
+        const data = { offset, mutedUsers: accountData.mutedUsers }
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
-            .get(`${config.apiURL}/account-notifications?offset=${offset}`, options)
+            .post(`${config.apiURL}/account-notifications`, data, options)
             .then((res) => {
                 setMoreItems(res.data.length === 10)
                 setItemOffset(offset + res.data.length)

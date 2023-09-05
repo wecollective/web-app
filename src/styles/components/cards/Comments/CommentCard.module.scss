@@ -1,5 +1,25 @@
 @import '@styles/Variables';
 
+.mutedComment {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    background-color: $grey1;
+    color: $grey5;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    line-height: 14px;
+    font-size: 14px;
+    align-items: center;
+
+    svg {
+        width: 20px;
+        height: 20px;
+        margin-right: 5px;
+    }
+}
+
 .wrapper {
     margin-bottom: 10px;
 

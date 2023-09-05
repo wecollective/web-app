@@ -30,6 +30,7 @@ import { ReactComponent as VerticalEllipsisIcon } from '@svgs/ellipsis-vertical-
 import { ReactComponent as EnvelopeIcon } from '@svgs/envelope-solid.svg'
 import { ReactComponent as DangerIcon } from '@svgs/exclamation-circle-solid.svg'
 import { ReactComponent as ExpandIcon } from '@svgs/expand-icon.svg'
+import { ReactComponent as EyeClosedIcon } from '@svgs/eye-slash-solid.svg'
 import { ReactComponent as EyeIcon } from '@svgs/eye-solid.svg'
 import { ReactComponent as ReactionIcon } from '@svgs/fire-alt-solid.svg'
 import { ReactComponent as TextIcon } from '@svgs/font-solid.svg'
@@ -170,4 +171,5 @@ export {
     StreamIcon,
     SynapseIcon,
     NeuronIcon,
+    EyeClosedIcon,
 }

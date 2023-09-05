@@ -97,7 +97,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     const [spacePeoplePaginationOffset, setSpacePeoplePaginationOffset] = useState(0)
     const [spacePeoplePaginationHasMore, setSpacePeoplePaginationHasMore] = useState(true)
 
-    const currentSpaceHandle = useRef('')
+    const spaceHandleRef = useRef('')
     const cookies = new Cookies()
     const location = useLocation()
 
@@ -144,24 +144,19 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         const firstLoad = offset === 0
         if (firstLoad) setSpacePostsLoading(true)
         else setNextSpacePostsLoading(true)
-        const accessToken = cookies.get('accessToken')
-        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+        const data = {
+            ...params,
+            spaceId,
+            offset,
+            limit,
+            searchQuery: params.searchQuery || '',
+            mutedUsers: accountData.mutedUsers || [],
+        }
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
-            .get(
-                /* prettier-ignore */
-                `${config.apiURL}/space-posts?spaceId=${spaceId
-                }&postType=${params.type
-                }&sortBy=${params.sortBy
-                }&sortOrder=${params.sortOrder
-                }&timeRange=${params.timeRange
-                }&depth=${params.depth
-                }&searchQuery=${params.searchQuery || ''
-                }&limit=${limit
-                }&offset=${offset}`,
-                options
-            )
+            .post(`${config.apiURL}/space-posts`, data, options)
             .then((res) => {
-                if (currentSpaceHandle.current === spaceData.handle) {
+                if (spaceHandleRef.current === spaceData.handle) {
                     setSpacePosts(firstLoad ? res.data : [...spacePosts, ...res.data])
                     setSpacePostsPaginationHasMore(res.data.length === spacePostsPaginationLimit)
                     setSpacePostsPaginationOffset(offset + spacePostsPaginationLimit)
@@ -169,31 +164,25 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                     else setNextSpacePostsLoading(false)
                 }
             })
+            .catch((error) => console.log(error))
     }
 
     function getPostMapData(spaceId, params, limit) {
         console.log(`SpaceContext: getPostMapData`, spaceId, params, limit)
         setSpacePostsFilters(params)
-        const accessToken = cookies.get('accessToken')
-        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+        const data = {
+            ...params,
+            spaceId,
+            limit,
+            offset: 0,
+            searchQuery: params.searchQuery || '',
+            mutedUsers: accountData.mutedUsers || [],
+        }
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
-            .get(
-                /* prettier-ignore */
-                `${config.apiURL}/post-map-data?spaceId=${spaceId
-                }&postType=${params.type
-                }&offset=${0
-                }&limit=${limit
-                }&sortBy=${params.sortBy
-                }&sortOrder=${params.sortOrder
-                }&timeRange=${params.timeRange
-                }&depth=${params.depth
-                }&searchQuery=${params.searchQuery || ''}`,
-                options
-            )
-            .then((res) => {
-                // console.log('post-map-data: ', res.data)
-                setPostMapData(res.data)
-            })
+            .post(`${config.apiURL}/post-map-data`, data, options)
+            .then((res) => setPostMapData(res.data))
+            .catch((error) => console.log(error))
     }
 
     function getSpaceListData(spaceId, offset, limit, params) {
@@ -333,7 +322,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     useEffect(() => updateSpaceUserStatus(spaceData), [loggedIn])
 
     useEffect(() => {
-        currentSpaceHandle.current = location.pathname.split('/')[2]
+        spaceHandleRef.current = location.pathname.split('/')[2]
     }, [location])
 
     return (

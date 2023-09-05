@@ -8,14 +8,13 @@ import Row from '@components/Row'
 import SearchSelector from '@components/SearchSelector'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
-import styles from '@styles/components/modals/Modal.module.scss'
 import axios from 'axios'
-import React, { useContext, useState, useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 function MuteUserModal(props: { close: () => void }): JSX.Element {
     const { close } = props
-    const { accountData } = useContext(AccountContext)
+    const { accountData, setAccountData } = useContext(AccountContext)
     const [usersLoading, setUsersLoading] = useState(true)
     const [updateLoading, setUpdateLoading] = useState(false)
     const [selectedUsers, setSelectedUsers] = useState<any[]>([])
@@ -60,8 +59,8 @@ function MuteUserModal(props: { close: () => void }): JSX.Element {
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
             .post(`${config.apiURL}/save-muted-users`, data, options)
-            .then((res) => {
-                console.log(res.data)
+            .then(() => {
+                setAccountData({ ...accountData, mutedUsers: data.userIds })
                 setUpdateLoading(false)
                 close()
             })
@@ -76,15 +75,15 @@ function MuteUserModal(props: { close: () => void }): JSX.Element {
         <Modal centerX close={close} style={{ width: '100%', maxWidth: mobileView ? 900 : 600 }}>
             <h1>Muted users</h1>
             <p style={{ textAlign: 'center' }}>
-                All activity including posts, comments, and notifications from muted users will be
-                hidden until you unmute them
+                All activity including posts, comments, reactions, and email notifications from
+                muted users will be hidden until you unmute them
             </p>
             {usersLoading ? (
                 <LoadingWheel />
             ) : (
                 <SearchSelector
                     type='user'
-                    title='Search for their name or handle below'
+                    title='Search for users to mute below'
                     placeholder='name or handle...'
                     onSearchQuery={(query) => findUsers(query)}
                     onOptionSelected={(user) => addUser(user)}

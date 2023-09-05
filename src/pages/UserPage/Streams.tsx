@@ -113,6 +113,7 @@ function Streams(): JSX.Element {
             depth: 'All Contained Posts', // 'Only Direct Descendents'
             searchQuery: '',
             offset,
+            mutedUsers: accountData.mutedUsers,
         }
         axios
             .post(`${config.apiURL}/stream-posts`, data, options)

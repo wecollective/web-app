@@ -17,6 +17,7 @@ import styles from '@styles/components/cards/Comments/CommentCard.module.scss'
 import {
     DeleteIcon,
     EditIcon,
+    EyeClosedIcon,
     LikeIcon,
     LinkIcon,
     ReplyIcon,
@@ -72,7 +73,9 @@ function CommentCard(props: {
     const [likeLoading, setLikeLoading] = useState(false)
     const [likeModalOpen, setLikeModalOpen] = useState(false)
     const [ratingModalOpen, setRatingModalOpen] = useState(false)
+    const [showMutedComment, setShowMutedComment] = useState(false)
     const isOwnComment = Creator.id === accountData.id
+    const muted = accountData.mutedUsers.includes(Creator.id)
     const history = useNavigate()
     const cookies = new Cookies()
 
@@ -101,6 +104,18 @@ function CommentCard(props: {
         }
     }
 
+    if (muted && !showMutedComment)
+        return (
+            <button
+                type='button'
+                id={`comment-${comment.id}`}
+                className={styles.mutedComment}
+                onClick={() => setShowMutedComment(true)}
+            >
+                <EyeClosedIcon />
+                <p>muted comment by u/{Creator.handle} (click to reveal)</p>
+            </button>
+        )
     return (
         <Column
             id={`comment-${comment.id}`}
