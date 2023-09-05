@@ -75,7 +75,7 @@ function CommentCard(props: {
     const [ratingModalOpen, setRatingModalOpen] = useState(false)
     const [showMutedComment, setShowMutedComment] = useState(false)
     const isOwnComment = Creator.id === accountData.id
-    const muted = accountData.mutedUsers.includes(Creator.id)
+    const muted = accountData.id && accountData.mutedUsers.includes(Creator.id)
     const history = useNavigate()
     const cookies = new Cookies()
 
