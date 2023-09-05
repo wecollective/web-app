@@ -41,8 +41,6 @@ function EventCard(props: {
             else setInterestedLoading(true)
             const options = { headers: { Authorization: `Bearer ${accessToken}` } }
             const data = {
-                userName: accountData.name,
-                userEmail: accountData.email,
                 postId: id,
                 eventId: Event.id,
                 startTime,

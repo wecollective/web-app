@@ -75,8 +75,8 @@ function MuteUserModal(props: { close: () => void }): JSX.Element {
         <Modal centerX close={close} style={{ width: '100%', maxWidth: mobileView ? 900 : 600 }}>
             <h1>Muted users</h1>
             <p style={{ textAlign: 'center' }}>
-                All activity including posts, comments, reactions, and email notifications from
-                muted users will be hidden until you unmute them
+                All activity including posts, comments, reactions, and notifications from muted
+                users will be hidden until you unmute them
             </p>
             {usersLoading ? (
                 <LoadingWheel />

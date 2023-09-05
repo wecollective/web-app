@@ -2,6 +2,7 @@ import Button from '@components/Button'
 import Column from '@components/Column'
 import Row from '@components/Row'
 import ShowMoreLess from '@components/ShowMoreLess'
+import Toggle from '@components/Toggle'
 import DraftText from '@components/draft-js/DraftText'
 import DeleteAccountModal from '@components/modals/DeleteAccountModal'
 import MuteUserModal from '@components/modals/MuteUserModal'
@@ -10,14 +11,17 @@ import UpdateUserEmailModal from '@components/modals/UpdateUserEmailModal'
 import UpdateUserNameModal from '@components/modals/UpdateUserNameModal'
 import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
+import config from '@src/Config'
 import styles from '@styles/pages/UserPage/Settings.module.scss'
+import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import Cookies from 'universal-cookie'
 
 function Settings(): JSX.Element | null {
-    const { accountData, accountDataLoading } = useContext(AccountContext)
+    const { accountData, accountDataLoading, setAccountData } = useContext(AccountContext)
     const { setSelectedUserSubPage, userData, getUserData, isOwnAccount } = useContext(UserContext)
-    const { handle, name, bio, email } = accountData
+    const { handle, name, bio, email, emailsDisabled } = accountData
     const [userNameModalOpen, setUserNameModalOpen] = useState(false)
     const [userBioModalOpen, setUserBioModalOpen] = useState(false)
     const [userEmailModalOpen, setUserEmailModalOpen] = useState(false)
@@ -26,7 +30,19 @@ function Settings(): JSX.Element | null {
     const history = useNavigate()
     const location = useLocation()
     const userHandle = location.pathname.split('/')[2]
+    const cookies = new Cookies()
 
+    function toggleEmailsDisabled() {
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .post(`${config.apiURL}/toggle-emails-disabled`, { emailsDisabled }, options)
+            .then(() => {
+                setAccountData({ ...accountData, emailsDisabled: !emailsDisabled })
+            })
+            .catch((error) => console.log(error))
+    }
+
+    // todo: update redirection
     function redirect(res) {
         if (res.handle !== handle) history(`/u/${res.handle}/about`)
     }
@@ -82,6 +98,14 @@ function Settings(): JSX.Element | null {
                     />
                 </Row>
                 <h1>Account preferences</h1>
+                <Toggle
+                    leftText='Disable emails'
+                    positionLeft={!emailsDisabled}
+                    rightColor='blue'
+                    onClick={toggleEmailsDisabled}
+                    onOffText
+                    style={{ marginBottom: 15 }}
+                />
                 <Button
                     text='Muted users'
                     color='blue'
@@ -93,7 +117,6 @@ function Settings(): JSX.Element | null {
                     text='Delete account'
                     color='red'
                     onClick={() => setDeleteAccountModalOpen(true)}
-                    // style={{ marginTop: 20 }}
                 />
             </Column>
             {userNameModalOpen && <UpdateUserNameModal close={() => setUserNameModalOpen(false)} />}
