@@ -217,7 +217,7 @@ function SpaceCircles(props: { spaceCircleData: any; params: any }): JSX.Element
             // else, navigate to new space
             else {
                 setClickedSpaceUUID(circle.data.uuid)
-                history(`/s/${circle.data.handle}/spaces`)
+                history(`/s/${circle.data.handle}/spaces?lens=Circles`)
             }
         }
     }
