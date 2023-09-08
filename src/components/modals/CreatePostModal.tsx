@@ -142,13 +142,17 @@ function CreatePostModal(): JSX.Element {
 
     function scrapeUrlMetaData(url) {
         setUrlsWithMetaData((us) => [...us, { url, loading: true }])
-        axios.get(`${config.apiURL}/scrape-url?url=${url}`).then((res) => {
-            setUrlsWithMetaData((us) => {
-                const newUrlsMetaData = [...us.filter((u) => u.url !== url)]
-                newUrlsMetaData.push({ url, loading: false, ...res.data })
-                return newUrlsMetaData
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .get(`${config.apiURL}/scrape-url?url=${url}`, options)
+            .then((res) => {
+                setUrlsWithMetaData((us) => {
+                    const newUrlsMetaData = [...us.filter((u) => u.url !== url)]
+                    newUrlsMetaData.push({ url, loading: false, ...res.data })
+                    return newUrlsMetaData
+                })
             })
-        })
+            .catch((error) => console.log(error))
     }
 
     function removeUrlMetaData(url) {

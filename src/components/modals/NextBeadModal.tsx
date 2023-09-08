@@ -62,8 +62,9 @@ function NextBeadModal(props: {
 
     function scrapeUrl() {
         setUrlLoading(true)
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
-            .get(`${config.apiURL}/scrape-url?url=${url}`)
+            .get(`${config.apiURL}/scrape-url?url=${url}`, options)
             .then((res) => {
                 setUrlData({ url, ...res.data })
                 setUrl('')
