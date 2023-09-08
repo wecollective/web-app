@@ -174,6 +174,7 @@ function DraftTextEditor(props: {
                 setSuggestions(
                     res.data.map((user) => {
                         return {
+                            id: user.id,
                             name: user.name,
                             link: user.handle,
                             avatar: user.flagImagePath,

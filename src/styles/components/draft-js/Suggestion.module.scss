@@ -1,9 +1,18 @@
 @import '@styles/Variables';
 
 .wrapper {
-    margin-bottom: 2px;
-    font-size: 14px;
+    all: unset;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    padding: 8px 10px;
+    width: calc(100% - 20px);
+    transition: background-color 0.3s;
+
+    &:hover {
+        background-color: $blue7;
+    }
 
     > p {
         margin-left: 5px;
