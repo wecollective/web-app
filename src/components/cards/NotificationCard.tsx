@@ -1,11 +1,19 @@
 import Button from '@components/Button'
+import Column from '@components/Column'
 import ImageNameLink from '@components/ImageNameLink'
+import ImageTitle from '@components/ImageTitle'
 import Row from '@components/Row'
 import TextLink from '@components/TextLink'
 import { AccountContext } from '@contexts/AccountContext'
-import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
-import { dateCreated, timeSinceCreated } from '@src/Helpers'
+import {
+    dateCreated,
+    getDraftPlainText,
+    timeSinceCreated,
+    timeSinceCreatedShort,
+    trimText,
+} from '@src/Helpers'
+import PostSpaces from '@src/components/cards/PostCard/PostSpaces'
 import styles from '@styles/components/cards/NotificationCard.module.scss'
 import {
     AtIcon,
@@ -32,10 +40,12 @@ import Cookies from 'universal-cookie'
 function Content(props: { typeIcon: JSX.Element; children: any }): JSX.Element {
     const { typeIcon, children } = props
     return (
+        // <Row centerY style={{ width: '100%' }}>
         <>
             <div className={styles.typeIcon}>{typeIcon}</div>
             <div className={styles.content}>{children}</div>
         </>
+        // </Row>
     )
 }
 
@@ -136,9 +146,9 @@ function NotificationCard(props: {
 
     const { accountData, updateAccountData, setAlertMessage, setAlertModalOpen } =
         useContext(AccountContext)
-    const { spaceData } = useContext(SpaceContext)
     const [seen, setSeen] = useState(notification.seen)
     const cookies = new Cookies()
+    const mobileView = document.documentElement.clientWidth < 900
 
     function respondToSpaceInvite(response) {
         const accessToken = cookies.get('accessToken')
@@ -289,6 +299,57 @@ function NotificationCard(props: {
         return `/linkmap?item=user&id=${accountData.id}`
     }
 
+    function renderPostPreview() {
+        const { title, text, updatedAt, DirectSpaces, Urls } = relatedPost
+        const url = Urls[0] || null
+        const urlText = url ? url.title || url.description : ''
+        return (
+            <Column className={styles.post}>
+                <Row spaceBetween centerY className={styles.header}>
+                    <Row centerY>
+                        <ImageTitle
+                            type='user'
+                            imagePath={accountData.flagImagePath}
+                            imageSize={28}
+                            title={accountData.name}
+                            style={{ marginRight: 5 }}
+                            shadow
+                        />
+                        <PostSpaces spaces={DirectSpaces} preview />
+                        <Row style={{ marginLeft: 2 }}>
+                            <p className='grey' title={`Posted at ${dateCreated(createdAt)}`}>
+                                {mobileView
+                                    ? timeSinceCreatedShort(relatedPost.createdAt)
+                                    : timeSinceCreated(relatedPost.createdAt)}
+                            </p>
+                            {relatedPost.createdAt !== updatedAt && (
+                                <p
+                                    className='grey'
+                                    title={`Edited at ${dateCreated(updatedAt)}`}
+                                    style={{ paddingLeft: 5 }}
+                                >
+                                    *
+                                </p>
+                            )}
+                        </Row>
+                    </Row>
+                    <Row>
+                        <p className='grey'>ID:</p>
+                        <p style={{ marginLeft: 5 }}>{relatedPost.id}</p>
+                    </Row>
+                </Row>
+                {title && <h1>{title}</h1>}
+                {text && <p>{trimText(getDraftPlainText(text), 100)}</p>}
+                {url && (
+                    <Row centerY className={styles.url}>
+                        <img src={url.image} alt='URL' />
+                        <p>{trimText(urlText, 100)}</p>
+                    </Row>
+                )}
+            </Column>
+        )
+    }
+
     // todo: use switch case to render different notification types
 
     return (
@@ -319,6 +380,7 @@ function NotificationCard(props: {
                             {triggerSpace && <p>in</p>}
                             {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
                             <CreatedAt date={createdAt} />
+                            {renderPostPreview()}
                         </Content>
                     )}
 
