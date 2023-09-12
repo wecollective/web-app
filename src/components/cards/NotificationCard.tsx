@@ -1,19 +1,12 @@
 import Button from '@components/Button'
 import Column from '@components/Column'
 import ImageNameLink from '@components/ImageNameLink'
-import ImageTitle from '@components/ImageTitle'
 import Row from '@components/Row'
 import TextLink from '@components/TextLink'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
-import {
-    dateCreated,
-    getDraftPlainText,
-    timeSinceCreated,
-    timeSinceCreatedShort,
-    trimText,
-} from '@src/Helpers'
-import PostSpaces from '@src/components/cards/PostCard/PostSpaces'
+import { dateCreated, timeSinceCreated } from '@src/Helpers'
+import PostCardPreview from '@src/components/cards/PostCard/PostCardPreview'
 import styles from '@styles/components/cards/NotificationCard.module.scss'
 import {
     AtIcon,
@@ -37,17 +30,27 @@ import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-function Content(props: { typeIcon: JSX.Element; children: any }): JSX.Element {
-    const { typeIcon, children } = props
+function Content(props: {
+    typeIcon: JSX.Element
+    children: any
+    preview?: JSX.Element
+}): JSX.Element {
+    const { typeIcon, children, preview } = props
     return (
-        // <Row centerY style={{ width: '100%' }}>
-        <>
-            <div className={styles.typeIcon}>{typeIcon}</div>
-            <div className={styles.content}>{children}</div>
-        </>
-        // </Row>
+        <Column style={{ width: '100%' }}>
+            <Row centerY style={{ width: '100%' }}>
+                <Column centerX centerY className={styles.typeIcon}>
+                    {typeIcon}
+                </Column>
+                <Row wrap className={styles.content}>
+                    {children}
+                </Row>
+            </Row>
+            {preview}
+        </Column>
     )
 }
+Content.defaultProps = { preview: null }
 
 function CreatedAt(props: { date: string }): JSX.Element {
     const { date } = props
@@ -299,57 +302,6 @@ function NotificationCard(props: {
         return `/linkmap?item=user&id=${accountData.id}`
     }
 
-    function renderPostPreview() {
-        const { title, text, updatedAt, DirectSpaces, Urls } = relatedPost
-        const url = Urls[0] || null
-        const urlText = url ? url.title || url.description : ''
-        return (
-            <Column className={styles.post}>
-                <Row spaceBetween centerY className={styles.header}>
-                    <Row centerY>
-                        <ImageTitle
-                            type='user'
-                            imagePath={accountData.flagImagePath}
-                            imageSize={28}
-                            title={accountData.name}
-                            style={{ marginRight: 5 }}
-                            shadow
-                        />
-                        <PostSpaces spaces={DirectSpaces} preview />
-                        <Row style={{ marginLeft: 2 }}>
-                            <p className='grey' title={`Posted at ${dateCreated(createdAt)}`}>
-                                {mobileView
-                                    ? timeSinceCreatedShort(relatedPost.createdAt)
-                                    : timeSinceCreated(relatedPost.createdAt)}
-                            </p>
-                            {relatedPost.createdAt !== updatedAt && (
-                                <p
-                                    className='grey'
-                                    title={`Edited at ${dateCreated(updatedAt)}`}
-                                    style={{ paddingLeft: 5 }}
-                                >
-                                    *
-                                </p>
-                            )}
-                        </Row>
-                    </Row>
-                    <Row>
-                        <p className='grey'>ID:</p>
-                        <p style={{ marginLeft: 5 }}>{relatedPost.id}</p>
-                    </Row>
-                </Row>
-                {title && <h1>{title}</h1>}
-                {text && <p>{trimText(getDraftPlainText(text), 100)}</p>}
-                {url && (
-                    <Row centerY className={styles.url}>
-                        <img src={url.image} alt='URL' />
-                        <p>{trimText(urlText, 100)}</p>
-                    </Row>
-                )}
-            </Column>
-        )
-    }
-
     // todo: use switch case to render different notification types
 
     return (
@@ -373,14 +325,18 @@ function NotificationCard(props: {
                     )}
 
                     {type === 'post-like' && (
-                        <Content typeIcon={<LikeIcon />}>
+                        <Content
+                            typeIcon={<LikeIcon />}
+                            preview={
+                                <PostCardPreview postData={relatedPost} style={{ marginTop: 10 }} />
+                            }
+                        >
                             <ImageNameLink type='user' data={triggerUser} />
                             <p>liked your</p>
                             <TextLink text='post' link={`/p/${postId}`} />
                             {triggerSpace && <p>in</p>}
                             {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
                             <CreatedAt date={createdAt} />
-                            {renderPostPreview()}
                         </Content>
                     )}
 

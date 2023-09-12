@@ -2,7 +2,7 @@
 
 .wrapper {
     margin-bottom: 5px;
-    padding: 15px;
+    padding: 10px;
     width: 100%;
     background-color: white;
     position: relative;
@@ -13,128 +13,83 @@
         border-radius: 10px;
         margin-bottom: 10px;
     }
-}
-.typeIcon {
-    width: 50px;
-    height: 50px;
-    margin-right: 20px;
-    border-radius: 50%;
-    background-color: $grey1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    svg {
-        width: 30px;
-        height: 30px;
-        color: $grey5;
-    }
-}
 
-.content {
-    width: 100%;
-    $contentMargin: 5px;
-    font-size: 14px;
-    color: $grey5;
-    margin-bottom: -$contentMargin;
-    margin-right: 10px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: wrap;
-    > a,
-    > p,
-    > div,
-    > button {
+    .typeIcon {
+        width: 50px;
+        height: 50px;
+        margin-right: 20px;
+        border-radius: 50%;
+        background-color: $grey1;
         flex-shrink: 0;
-        margin: 0 $contentMargin $contentMargin 0;
-    }
-    .inlineIcon {
-        width: 25px;
-        height: 25px;
-        &.green > svg > path {
-            fill: $green2;
-        }
-        &.red > svg > path {
-            fill: $red;
-        }
-    }
-    > p {
-        &.green {
-            color: $green2;
-        }
-        &.red {
-            color: $red;
+
+        svg {
+            width: 30px;
+            height: 30px;
+            color: $grey5;
         }
     }
 
-    .post {
+    .content {
         width: 100%;
-        box-shadow: 0 0 10px 0 rgba(10, 8, 72, 0.04);
-        border: 1px solid $grey2;
-        border-radius: 10px;
-        margin-top: 10px;
-        padding: 15px;
-        color: black;
+        $contentMargin: 5px;
+        font-size: 14px;
+        color: $grey5;
+        margin-bottom: -$contentMargin;
+        margin-right: 10px;
+        align-items: center;
 
-        .header {
-            font-size: 15px;
-            margin-bottom: 5px;
-            overflow: hidden;
-            padding: 2px;
-
-            @include for-tablet-portrait-up {
-                overflow: visible;
-                padding: 0;
+        .inlineIcon {
+            width: 25px;
+            height: 25px;
+            &.green > svg > path {
+                fill: $green2;
+            }
+            &.red > svg > path {
+                fill: $red;
             }
         }
 
-        > h1 {
-            font-size: 24px;
-            line-height: 30px;
-            margin-bottom: 0;
+        .state {
+            display: flex;
+            align-items: center;
+            > p {
+                flex-shrink: 0;
+                margin-right: 5px;
+            }
         }
 
         > p {
-            font-size: 16px;
-        }
-
-        .url {
-            margin-top: 10px;
-            background-color: $grey1;
-            padding: 8px;
-            border-radius: 5px;
-
-            > img {
-                width: 50px;
-                height: 30px;
-                margin-right: 8px;
-                border-radius: 5px;
+            &.green {
+                color: $green2;
+            }
+            &.red {
+                color: $red;
             }
         }
-    }
-}
-.seenButton {
-    width: 30px;
-    height: 30px;
-    border: none;
-    padding: 0;
-    background-color: transparent;
-    cursor: pointer;
-    flex-shrink: 0;
-    svg {
-        width: 30px;
-        height: 30px;
-        path {
-            fill: $grey3;
+
+        > a,
+        > p,
+        > div,
+        > button {
+            flex-shrink: 0;
+            margin: 0 $contentMargin $contentMargin 0;
         }
     }
-}
-.state {
-    display: flex;
-    align-items: center;
-    > p {
+
+    .seenButton {
+        width: 30px;
+        height: 30px;
+        border: none;
+        padding: 0;
+        background-color: transparent;
+        cursor: pointer;
         flex-shrink: 0;
-        margin-right: 5px;
+        svg {
+            width: 30px;
+            height: 30px;
+            path {
+                fill: $grey3;
+            }
+        }
     }
 }
