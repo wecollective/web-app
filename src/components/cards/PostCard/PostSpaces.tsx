@@ -5,8 +5,8 @@ import { trimText } from '@src/Helpers'
 import styles from '@styles/components/cards/PostCard/PostSpaces.module.scss'
 import React, { useState } from 'react'
 
-function PostSpaces(props: { spaces: any[]; preview?: boolean }): JSX.Element {
-    const { spaces, preview } = props
+function PostSpaces(props: { spaces: any[]; size?: number; preview?: boolean }): JSX.Element {
+    const { spaces, size, preview } = props
     const [modalOpen, setModalOpen] = useState(false)
     const mobileView = document.documentElement.clientWidth < 900
     // filter out root space 'all' and deleted spaces if included
@@ -28,7 +28,7 @@ function PostSpaces(props: { spaces: any[]; preview?: boolean }): JSX.Element {
                 <ImageTitle
                     type='space'
                     imagePath={filteredSpaces[0].flagImagePath}
-                    imageSize={32}
+                    imageSize={size}
                     title={trimText(filteredSpaces[0].name, mobileView ? 20 : 36)}
                     fontSize={15}
                     link={preview ? null : `/s/${filteredSpaces[0].handle}/posts`}
@@ -42,6 +42,7 @@ function PostSpaces(props: { spaces: any[]; preview?: boolean }): JSX.Element {
                     className={styles.otherSpacesButton}
                     title={otherSpacesTitle()}
                     onClick={() => setModalOpen(true)}
+                    style={{ width: size, height: size }}
                 >
                     <p>+{filteredSpaces.length - 1}</p>
                 </button>
@@ -54,7 +55,7 @@ function PostSpaces(props: { spaces: any[]; preview?: boolean }): JSX.Element {
                             key={space.id}
                             type='space'
                             imagePath={space.flagImagePath}
-                            imageSize={32}
+                            imageSize={size}
                             title={space.name}
                             fontSize={15}
                             link={preview ? null : `/s/${space.handle}/posts`}
@@ -69,6 +70,7 @@ function PostSpaces(props: { spaces: any[]; preview?: boolean }): JSX.Element {
 }
 
 PostSpaces.defaultProps = {
+    size: 32,
     preview: false,
 }
 
