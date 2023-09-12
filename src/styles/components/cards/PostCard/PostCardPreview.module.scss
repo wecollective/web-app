@@ -1,0 +1,99 @@
+@import '@styles/Variables';
+
+.post {
+    width: 100%;
+    box-shadow: 0 0 10px 0 rgba(10, 8, 72, 0.04);
+    border: 1px solid $grey2;
+    border-radius: 10px;
+    margin-top: 10px;
+    padding: 15px;
+    color: black;
+
+    .header {
+        font-size: 15px;
+        overflow: hidden;
+        padding: 2px;
+
+        @include for-tablet-portrait-up {
+            overflow: visible;
+            padding: 0;
+        }
+
+        .time {
+            margin-left: 2px;
+            font-size: 14px;
+        }
+    }
+
+    .title {
+        height: 30px;
+        overflow: hidden;
+        font-size: 24px;
+        line-height: 30px;
+        margin-bottom: 0;
+    }
+
+    .gbg {
+        margin-top: 5px;
+
+        .gbgIcon {
+            width: 30px;
+            height: 30px;
+
+            > svg {
+                color: $grey5;
+            }
+        }
+
+        > p {
+            margin: 0 5px;
+            color: $grey4;
+        }
+
+        .topic {
+            > img {
+                width: 30px;
+                height: 30px;
+                margin-right: 5px;
+                border-radius: 15px;
+                object-fit: cover;
+            }
+        }
+    }
+
+    .text {
+        font-size: 16px;
+        line-height: 26px;
+        height: 26px;
+        overflow: hidden;
+    }
+
+    .url {
+        margin-top: 10px;
+        background-color: $grey1;
+        padding: 8px;
+        border-radius: 5px;
+        width: 100%;
+
+        > img {
+            width: 80px;
+            height: 50px;
+            margin-right: 10px;
+            border-radius: 5px;
+            object-fit: cover;
+        }
+
+        .urlTitle {
+            font-weight: 800;
+            font-size: 16px;
+            line-height: 20px;
+            height: 20px;
+        }
+
+        .urlDescription {
+            font-size: 16px;
+            line-height: 20px;
+            height: 20px;
+        }
+    }
+}
