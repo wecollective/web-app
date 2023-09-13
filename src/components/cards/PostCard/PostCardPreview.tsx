@@ -5,13 +5,13 @@ import { AccountContext } from '@contexts/AccountContext'
 import {
     dateCreated,
     getDraftPlainText,
+    postTypeIcons,
     timeSinceCreated,
     timeSinceCreatedShort,
     trimText,
 } from '@src/Helpers'
 import PostSpaces from '@src/components/cards/PostCard/PostSpaces'
 import styles from '@styles/components/cards/PostCard/PostCardPreview.module.scss'
-import { CastaliaIcon } from '@svgs/all'
 import React, { useContext } from 'react'
 
 function PostCardPreview(props: { postData: any; style?: any }): JSX.Element {
@@ -25,7 +25,9 @@ function PostCardPreview(props: { postData: any; style?: any }): JSX.Element {
         updatedAt,
         DirectSpaces,
         Urls,
+        Images,
         GlassBeadGame: GBG,
+        CardSides,
     } = postData
     const { accountData } = useContext(AccountContext)
     const mobileView = document.documentElement.clientWidth < 900
@@ -67,23 +69,36 @@ function PostCardPreview(props: { postData: any; style?: any }): JSX.Element {
                 </Row>
             </Row>
             <Row className={styles.content}>
+                <Column centerY style={{ height: '100%' }}>
+                    <Column centerX centerY className={styles.typeIcon}>
+                        {postTypeIcons[type]}
+                    </Column>
+                </Column>
                 <Column style={{ width: '100%' }}>
                     {title && <h1 className={styles.title}>{trimText(title, 50)}</h1>}
-                    {GBG && (
+                    {type === 'glass-bead-game' && (
                         <Row centerY className={styles.gbg}>
-                            <Column centerY centerX className={styles.gbgIcon}>
-                                <CastaliaIcon />
-                            </Column>
-                            <p>on</p>
-                            <Row className={styles.topic}>
-                                {GBG.topicImage && <img src={GBG.topicImage} alt='topic' />}
-                                {GBG.topic && (
-                                    <h1 className={styles.title}>{trimText(GBG.topic, 30)}</h1>
+                            {GBG.topicImage && <img src={GBG.topicImage} alt='topic' />}
+                            {GBG.topic && (
+                                <h1 className={styles.title}>{trimText(GBG.topic, 30)}</h1>
+                            )}
+                        </Row>
+                    )}
+                    {text && <p className={styles.text}>{trimText(getDraftPlainText(text), 80)}</p>}
+                    {type === 'card' && (
+                        <Row centerY className={styles.card}>
+                            <Row className={styles.cardFace}>
+                                {CardSides[0].Images[0] && (
+                                    <img src={CardSides[0].Images[0].url} alt='card front' />
+                                )}
+                            </Row>
+                            <Row className={styles.cardFace}>
+                                {CardSides[1].Images[0] && (
+                                    <img src={CardSides[1].Images[0].url} alt='card back' />
                                 )}
                             </Row>
                         </Row>
                     )}
-                    {text && <p className={styles.text}>{trimText(getDraftPlainText(text), 80)}</p>}
                     {Urls[0] && (
                         <Row centerY className={styles.url}>
                             <img src={Urls[0].image} alt='URL' />
@@ -97,6 +112,13 @@ function PostCardPreview(props: { postData: any; style?: any }): JSX.Element {
                                     </p>
                                 )}
                             </Column>
+                        </Row>
+                    )}
+                    {type === 'image' && (
+                        <Row centerY className={styles.images}>
+                            {Images.map((image) => (
+                                <img key={image.id} src={image.url} alt='' />
+                            ))}
                         </Row>
                     )}
                 </Column>

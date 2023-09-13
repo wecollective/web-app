@@ -25,32 +25,37 @@
         }
     }
 
-    .title {
-        height: 30px;
+    .content {
+        width: 100%;
         overflow: hidden;
-        font-size: 24px;
-        line-height: 30px;
-        margin-bottom: 0;
-    }
 
-    .gbg {
-        margin-top: 5px;
-
-        .gbgIcon {
-            width: 30px;
+        .title {
             height: 30px;
+            overflow: hidden;
+            font-size: 24px;
+            line-height: 30px;
+            margin-bottom: 0;
+        }
 
-            > svg {
+        .typeIcon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: $grey1;
+            margin-right: 10px;
+            margin-top: 5px;
+            flex-shrink: 0;
+
+            svg {
+                width: 22px;
+                height: 22px;
                 color: $grey5;
             }
         }
 
-        > p {
-            margin: 0 5px;
-            color: $grey4;
-        }
+        .gbg {
+            margin-top: 5px;
 
-        .topic {
             > img {
                 width: 30px;
                 height: 30px;
@@ -59,41 +64,74 @@
                 object-fit: cover;
             }
         }
-    }
 
-    .text {
-        font-size: 16px;
-        line-height: 26px;
-        height: 26px;
-        overflow: hidden;
-    }
+        .card {
+            margin-top: 10px;
 
-    .url {
-        margin-top: 10px;
-        background-color: $grey1;
-        padding: 8px;
-        border-radius: 5px;
-        width: 100%;
+            .cardFace {
+                width: 40px;
+                height: 56px;
+                border-radius: 3px;
+                box-shadow: 0 0 6px 0 rgba(10, 8, 72, 0.18);
+                overflow: hidden;
+                margin-right: 15px;
 
-        > img {
-            width: 80px;
-            height: 50px;
-            margin-right: 10px;
+                > img {
+                    width: inherit;
+                    height: inherit;
+                    object-fit: cover;
+                }
+            }
+        }
+
+        .text {
+            font-size: 16px;
+            line-height: 26px;
+            height: 26px;
+            overflow: hidden;
+        }
+
+        .images {
+            margin-top: 10px;
+
+            > img {
+                width: 80px;
+                height: 80px;
+                border-radius: 5px;
+                object-fit: cover;
+                margin-right: 10px;
+            }
+        }
+
+        .url {
+            margin-top: 5px;
+            background-color: $grey1;
+            padding: 8px;
             border-radius: 5px;
-            object-fit: cover;
-        }
+            width: 100%;
 
-        .urlTitle {
-            font-weight: 800;
-            font-size: 16px;
-            line-height: 20px;
-            height: 20px;
-        }
+            > img {
+                width: 80px;
+                height: 50px;
+                margin-right: 10px;
+                border-radius: 5px;
+                object-fit: cover;
+            }
 
-        .urlDescription {
-            font-size: 16px;
-            line-height: 20px;
-            height: 20px;
+            .urlTitle {
+                font-weight: 800;
+                font-size: 16px;
+                line-height: 20px;
+                height: 20px;
+                overflow: hidden;
+            }
+
+            .urlDescription {
+                font-size: 16px;
+                line-height: 20px;
+                height: 20px;
+                overflow: hidden;
+            }
         }
     }
 }
