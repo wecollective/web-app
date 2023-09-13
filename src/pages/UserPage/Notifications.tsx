@@ -41,11 +41,6 @@ function Notifications(): JSX.Element {
                 setNotifications(offset ? [...notifications, ...res.data] : res.data)
                 if (offset) setNextItemsLoading(false)
                 else setItemsLoading(false)
-                // mark notifications seen
-                const ids = res.data.filter((n) => !n.seen).map((n) => n.id)
-                const totalUnseen = accountData.unseenNotifications - ids.length
-                setAccountData({ ...accountData, unseenNotifications: totalUnseen })
-                axios.post(`${config.apiURL}/mark-notifications-seen`, ids, options)
             })
             .catch((error) => console.log(error))
     }

@@ -7,6 +7,12 @@
     background-color: white;
     position: relative;
     overflow: hidden;
+    box-shadow: 0 0 10px 0 rgba(10, 8, 72, 0.04);
+    border: 1px solid $grey2;
+
+    &.unseen {
+        background-color: $blue6;
+    }
 
     @include for-tablet-portrait-up {
         padding: 20px 30px;
@@ -14,10 +20,34 @@
         margin-bottom: 10px;
     }
 
+    .seenButton {
+        all: unset;
+        cursor: pointer;
+        position: absolute;
+        right: 15px;
+        top: 15px;
+
+        svg {
+            width: 20px;
+            height: 20px;
+            color: $grey3;
+        }
+
+        @include for-tablet-portrait-up {
+            right: 30px;
+            top: 33px;
+
+            svg {
+                width: 25px;
+                height: 25px;
+            }
+        }
+    }
+
     .typeIcon {
         width: 50px;
         height: 50px;
-        margin-right: 20px;
+        margin-right: 10px;
         border-radius: 50%;
         background-color: $grey1;
         flex-shrink: 0;
@@ -33,7 +63,7 @@
         width: 100%;
         $contentMargin: 5px;
         font-size: 14px;
-        color: $grey5;
+        color: $grey4;
         margin-bottom: -$contentMargin;
         margin-right: 10px;
         align-items: center;
@@ -73,23 +103,6 @@
         > button {
             flex-shrink: 0;
             margin: 0 $contentMargin $contentMargin 0;
-        }
-    }
-
-    .seenButton {
-        width: 30px;
-        height: 30px;
-        border: none;
-        padding: 0;
-        background-color: transparent;
-        cursor: pointer;
-        flex-shrink: 0;
-        svg {
-            width: 30px;
-            height: 30px;
-            path {
-                fill: $grey3;
-            }
         }
     }
 }

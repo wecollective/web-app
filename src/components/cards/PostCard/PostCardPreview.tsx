@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/control-has-associated-label */
 import Column from '@components/Column'
 import ImageTitle from '@components/ImageTitle'
 import Row from '@components/Row'
@@ -14,8 +15,8 @@ import PostSpaces from '@src/components/cards/PostCard/PostSpaces'
 import styles from '@styles/components/cards/PostCard/PostCardPreview.module.scss'
 import React, { useContext } from 'react'
 
-function PostCardPreview(props: { postData: any; style?: any }): JSX.Element {
-    const { postData, style } = props
+function PostCardPreview(props: { postData: any; onClick?: () => void; style?: any }): JSX.Element {
+    const { postData, onClick, style } = props
     const {
         id,
         type,
@@ -35,6 +36,7 @@ function PostCardPreview(props: { postData: any; style?: any }): JSX.Element {
 
     return (
         <Column className={styles.post} style={style}>
+            {onClick && <button className={styles.button} type='button' onClick={onClick} />}
             <Row spaceBetween centerY className={styles.header}>
                 <Row centerY>
                     <ImageTitle
@@ -129,6 +131,7 @@ function PostCardPreview(props: { postData: any; style?: any }): JSX.Element {
 
 PostCardPreview.defaultProps = {
     style: null,
+    onClick: null,
 }
 
 export default PostCardPreview

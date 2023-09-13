@@ -14,6 +14,8 @@ import {
     BellIcon,
     CommentIcon,
     EnvelopeIcon,
+    EyeClosedIcon,
+    EyeIcon,
     FailIcon,
     LikeIcon,
     LinkIcon,
@@ -28,6 +30,7 @@ import {
 } from '@svgs/all'
 import axios from 'axios'
 import React, { useContext, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
 function Content(props: {
@@ -54,7 +57,7 @@ Content.defaultProps = { preview: null }
 
 function CreatedAt(props: { date: string }): JSX.Element {
     const { date } = props
-    return <p title={dateCreated(date)}>• {timeSinceCreated(date)}</p>
+    return <p title={dateCreated(date)}>{timeSinceCreated(date)}</p>
 }
 
 function Success(): JSX.Element {
@@ -147,11 +150,28 @@ function NotificationCard(props: {
         createdAt,
     } = notification
 
-    const { accountData, updateAccountData, setAlertMessage, setAlertModalOpen } =
+    const { accountData, setAccountData, updateAccountData, setAlertMessage, setAlertModalOpen } =
         useContext(AccountContext)
     const [seen, setSeen] = useState(notification.seen)
+    const [seenLoading, setSeenLoading] = useState(false)
     const cookies = new Cookies()
-    const mobileView = document.documentElement.clientWidth < 900
+    const history = useNavigate()
+
+    function toggleSeen() {
+        setSeenLoading(true)
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .post(`${config.apiURL}/toggle-notification-seen`, { id, seen: !seen }, options)
+            .then(() => {
+                setSeen(!seen)
+                setAccountData({
+                    ...accountData,
+                    unseenNotifications: accountData.unseenNotifications + (seen ? 1 : -1),
+                })
+                setSeenLoading(false)
+            })
+            .catch((error) => console.log(error))
+    }
 
     function respondToSpaceInvite(response) {
         const accessToken = cookies.get('accessToken')
@@ -305,442 +325,422 @@ function NotificationCard(props: {
     // todo: use switch case to render different notification types
 
     return (
-        <Row centerX className={styles.wrapper}>
-            {location === 'account' && (
-                <>
-                    {type === 'welcome-message' && (
-                        <Content typeIcon={<BabyIcon />}>
-                            <p>Account created</p>
-                            <Success />
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
+        <Row centerX className={`${styles.wrapper} ${!seen && styles.unseen}`}>
+            <button
+                className={styles.seenButton}
+                type='button'
+                onClick={toggleSeen}
+                disabled={seenLoading}
+            >
+                {seen ? <EyeIcon /> : <EyeClosedIcon />}
+            </button>
 
-                    {type === 'email-verified' && (
-                        <Content typeIcon={<EnvelopeIcon />}>
-                            <p>Email verified</p>
-                            <Success />
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'post-like' && (
-                        <Content
-                            typeIcon={<LikeIcon />}
-                            preview={
-                                <PostCardPreview postData={relatedPost} style={{ marginTop: 10 }} />
-                            }
-                        >
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>liked your</p>
-                            <TextLink text='post' link={`/p/${postId}`} />
-                            {triggerSpace && <p>in</p>}
-                            {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'comment-like' && (
-                        <Content typeIcon={<LikeIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>liked your</p>
-                            <TextLink text='comment' link={`/p/${postId}?commentId=${commentId}`} />
-                            {triggerSpace && <p>in</p>}
-                            {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'post-comment' && (
-                        <Content typeIcon={<CommentIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>commented on your</p>
-                            <TextLink text='post' link={`/p/${postId}?commentId=${commentId}`} />
-                            {triggerSpace && <p>in</p>}
-                            {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'post-repost' && (
-                        <Content typeIcon={<RetweetIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>reposted your</p>
-                            <TextLink text='post' link={`/p/${postId}`} />
-                            {triggerSpace && <p>in</p>}
-                            {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'post-rating' && (
-                        <Content typeIcon={<StarIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>rated your</p>
-                            <TextLink text='post' link={`/p/${postId}`} />
-                            {triggerSpace && <p>in</p>}
-                            {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'comment-rating' && (
-                        <Content typeIcon={<LikeIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>rated your</p>
-                            <TextLink text='comment' link={`/p/${postId}?commentId=${commentId}`} />
-                            {triggerSpace && <p>in</p>}
-                            {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {['post-link-source', 'post-link-target'].includes(type) && (
-                        <Content typeIcon={<LinkIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>just added a link to your</p>
-                            <TextLink text='post' link={`/linkmap?item=post&id=${postId}`} />
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {['comment-link-source', 'comment-link-target'].includes(type) && (
-                        <Content typeIcon={<LinkIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>just added a link to your</p>
-                            <TextLink
-                                text='comment'
-                                link={`/linkmap?item=comment&id=${commentId}`}
-                            />
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {['user-link-source', 'user-link-target'].includes(type) && (
-                        <Content typeIcon={<LinkIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>just added a link to</p>
-                            <TextLink text='you' link={`/linkmap?item=user&id=${accountData.id}`} />
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {['space-link-source', 'space-link-target'].includes(type) && (
-                        <Content typeIcon={<LinkIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>just added a link to your</p>
-                            <TextLink text='space' link={`/linkmap?item=space&id=${spaceAId}`} />
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'link-like' && (
-                        <Content typeIcon={<LikeIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>just liked your</p>
-                            <TextLink text='link' link={linkUrl()} />
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'post-mention' && (
-                        <Content typeIcon={<AtIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>just mentioned you in a</p>
-                            <TextLink text='post' link={`/p/${postId}`} />
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'post-removed-by-mods' && (
-                        <Content typeIcon={<PostIcon />}>
-                            <p>Your</p>
-                            <TextLink text='post' link={`/p/${postId}`} />
-                            <p>was removed from</p>
-                            <ImageNameLink type='space' data={triggerSpace} />
-                            <p>by its mods</p>
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'bead-mention' && (
-                        <Content typeIcon={<AtIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>just mentioned you in a</p>
-                            <TextLink text='bead' link={`/p/${postId}`} />
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'comment-reply' && (
-                        <Content typeIcon={<CommentIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>replied to your</p>
-                            <TextLink text='comment' link={`/p/${postId}?commentId=${commentId}`} />
-                            {triggerSpace && <p>in</p>}
-                            {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'comment-mention' && (
-                        <Content typeIcon={<AtIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>just mentioned you in a</p>
-                            <TextLink text='comment' link={`/p/${postId}?commentId=${commentId}`} />
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'parent-space-request' && (
-                        <Content typeIcon={<SpacesIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>wants to make</p>
-                            <ImageNameLink type='space' data={triggerSpace} />
-                            <p>a child space of</p>
-                            <ImageNameLink type='space' data={secondarySpace} />
-                            <CreatedAt date={createdAt} />
-                            <State
-                                state={state}
-                                respond={(response) => respondToParentSpaceRequest(response)}
-                            />
-                        </Content>
-                    )}
-
-                    {type === 'parent-space-request-response' && (
-                        <Content typeIcon={<SpacesIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>{state} your request to make</p>
-                            <ImageNameLink type='space' data={triggerSpace} />
-                            <p>a child space of</p>
-                            <ImageNameLink type='space' data={secondarySpace} />
-                            {/* {state === 'accepted' ? <Success /> : <Fail />} */}
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'space-invite' && (
-                        <Content typeIcon={<SpacesIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>invited you to join</p>
-                            <ImageNameLink type='space' data={triggerSpace} />
-                            <CreatedAt date={createdAt} />
-                            <State
-                                state={state}
-                                respond={(response) => respondToSpaceInvite(response)}
-                            />
-                        </Content>
-                    )}
-
-                    {type === 'space-invite-response' && (
-                        <Content typeIcon={<SpacesIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>{state} your invitation to join</p>
-                            <ImageNameLink type='space' data={triggerSpace} />
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'space-access-request' && (
-                        <Content typeIcon={<SpacesIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>requested access to</p>
-                            <ImageNameLink type='space' data={triggerSpace} />
-                            <CreatedAt date={createdAt} />
-                            <State
-                                state={state}
-                                respond={(response) => respondToSpaceAccessRequest(response)}
-                            />
-                        </Content>
-                    )}
-
-                    {type === 'space-access-response' && (
-                        <Content typeIcon={<SpacesIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>{state} your request to access</p>
-                            <ImageNameLink type='space' data={triggerSpace} />
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'mod-invite' && (
-                        <Content typeIcon={<SpacesIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>invited you to moderate</p>
-                            <ImageNameLink type='space' data={triggerSpace} />
-                            <CreatedAt date={createdAt} />
-                            <State
-                                state={state}
-                                respond={(response) => respondToModInvite(response)}
-                            />
-                        </Content>
-                    )}
-
-                    {type === 'mod-invite-response' && (
-                        <Content typeIcon={<SpacesIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>{state} your invitation to moderate</p>
-                            <ImageNameLink type='space' data={triggerSpace} />
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'mod-removed' && (
-                        <Content typeIcon={<SpacesIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>just removed you from moderating</p>
-                            <ImageNameLink type='space' data={triggerSpace} />
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'event-going-reminder' && (
-                        <Content typeIcon={<BellIcon />}>
-                            <p>An</p>
-                            <TextLink text='event' link={`/p/${postId}`} />
-                            <p>you marked yourself as going to is starting in 15 minutes</p>
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'event-interested-reminder' && (
-                        <Content typeIcon={<BellIcon />}>
-                            <p>An</p>
-                            <TextLink text='event' link={`/p/${postId}`} />
-                            <p>you marked yourself as interested in is starting in 15 minutes</p>
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'gbg-invitation' && (
-                        <Content typeIcon={<WeaveIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>invited you to join a</p>
-                            <TextLink text='glass bead game' link={`/p/${postId}`} />
-                            <State
-                                state={state}
-                                respond={(response) => respondToWeaveInvite(response)}
-                            />
-                            {/* {relatedPost.Weave.state === 'cancelled' && <p>Game cancelled</p>} */}
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'gbg-accepted' && (
-                        <Content typeIcon={<WeaveIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>accepted your</p>
-                            <TextLink text='glass bead game' link={`/p/${postId}`} />
-                            <p>invite</p>
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'gbg-rejected' && (
-                        <Content typeIcon={<WeaveIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>has rejected their</p>
-                            <TextLink text='glass bead game' link={`/p/${postId}`} />
-                            <p>invite so the game has been cancelled</p>
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'gbg-move' && (
-                        <Content typeIcon={<WeaveIcon />}>
-                            <p>It&apos;s your move! Add the next bead to the</p>
-                            <TextLink text='glass bead game' link={`/p/${postId}`} />
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'gbg-move-from-other-player' && (
-                        <Content typeIcon={<WeaveIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>just added a new bead to a</p>
-                            <TextLink text='glass bead game' link={`/p/${postId}`} />
-                            <p>you have particpated in</p>
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'gbg-creator-move-from-other-player' && (
-                        <Content typeIcon={<WeaveIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>just added a new bead to a</p>
-                            <TextLink text='glass bead game' link={`/p/${postId}`} />
-                            <p>you created</p>
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'gbg-move-reminder' && (
-                        <Content typeIcon={<WeaveIcon />}>
-                            <p>You have 15 minutes left to complete your move on</p>
-                            <TextLink text='this glass bead game!' link={`/p/${postId}`} />
-                            <p>If you fail to do this, the game ends!</p>
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'gbg-cancelled' && (
-                        <Content typeIcon={<WeaveIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>failed to make their move in time on</p>
-                            <TextLink text='this glass bead game.' link={`/p/${postId}`} />
-                            <p>The game has now ended!</p>
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'gbg-ended' && (
-                        <Content typeIcon={<WeaveIcon />}>
-                            <p>A</p>
-                            <TextLink text='glass bead game' link={`/p/${postId}`} />
-                            <p>you participated in has ended</p>
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'new-gbg-from-your-post' && (
-                        <Content typeIcon={<StringIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>just created a</p>
-                            <TextLink text='string' link={`/p/${postId}`} />
-                            <p>from your post</p>
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-
-                    {type === 'poll-vote' && (
-                        <Content typeIcon={<PollIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>just voted on your</p>
-                            <TextLink text='Poll' link={`/p/${postId}`} />
-                            <CreatedAt date={createdAt} />
-                        </Content>
-                    )}
-                </>
+            {type === 'welcome-message' && (
+                <Content typeIcon={<BabyIcon />}>
+                    <p>Account created</p>
+                    <Success />
+                    <CreatedAt date={createdAt} />
+                </Content>
             )}
 
-            {/* {location === 'space' && (
-                <>
-                    {type === 'parent-space-request' && (
-                        <Content typeIcon={<SpacesIcon />}>
-                            <ImageNameLink type='user' data={triggerUser} />
-                            <p>wants to make</p>
-                            <ImageNameLink type='space' data={triggerSpace} />
-                            <p>a child space of</p>
-                            <ImageNameLink type='space' data={spaceData} />
-                            <CreatedAt date={createdAt} />
-                            <State
-                                state={state}
-                                respond={(response) => respondToParentSpaceRequest(response)}
-                            />
-                        </Content>
-                    )}
-                </>
-            )} */}
+            {type === 'email-verified' && (
+                <Content typeIcon={<EnvelopeIcon />}>
+                    <p>Email verified</p>
+                    <Success />
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'post-like' && (
+                <Content
+                    typeIcon={<LikeIcon />}
+                    preview={
+                        <PostCardPreview
+                            postData={relatedPost}
+                            onClick={() => {
+                                history(`/p/${postId}`)
+                                if (!seen) toggleSeen()
+                            }}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>liked your post</p>
+                    {triggerSpace && <p>in</p>}
+                    {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'comment-like' && (
+                <Content typeIcon={<LikeIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>liked your</p>
+                    <TextLink text='comment' link={`/p/${postId}?commentId=${commentId}`} />
+                    {triggerSpace && <p>in</p>}
+                    {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'post-comment' && (
+                <Content typeIcon={<CommentIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>commented on your</p>
+                    <TextLink text='post' link={`/p/${postId}?commentId=${commentId}`} />
+                    {triggerSpace && <p>in</p>}
+                    {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'post-repost' && (
+                <Content typeIcon={<RetweetIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>reposted your</p>
+                    <TextLink text='post' link={`/p/${postId}`} />
+                    {triggerSpace && <p>in</p>}
+                    {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'post-rating' && (
+                <Content typeIcon={<StarIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>rated your</p>
+                    <TextLink text='post' link={`/p/${postId}`} />
+                    {triggerSpace && <p>in</p>}
+                    {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'comment-rating' && (
+                <Content typeIcon={<LikeIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>rated your</p>
+                    <TextLink text='comment' link={`/p/${postId}?commentId=${commentId}`} />
+                    {triggerSpace && <p>in</p>}
+                    {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {['post-link-source', 'post-link-target'].includes(type) && (
+                <Content typeIcon={<LinkIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>just added a link to your</p>
+                    <TextLink text='post' link={`/linkmap?item=post&id=${postId}`} />
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {['comment-link-source', 'comment-link-target'].includes(type) && (
+                <Content typeIcon={<LinkIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>just added a link to your</p>
+                    <TextLink text='comment' link={`/linkmap?item=comment&id=${commentId}`} />
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {['user-link-source', 'user-link-target'].includes(type) && (
+                <Content typeIcon={<LinkIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>just added a link to</p>
+                    <TextLink text='you' link={`/linkmap?item=user&id=${accountData.id}`} />
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {['space-link-source', 'space-link-target'].includes(type) && (
+                <Content typeIcon={<LinkIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>just added a link to your</p>
+                    <TextLink text='space' link={`/linkmap?item=space&id=${spaceAId}`} />
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'link-like' && (
+                <Content typeIcon={<LikeIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>just liked your</p>
+                    <TextLink text='link' link={linkUrl()} />
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'post-mention' && (
+                <Content typeIcon={<AtIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>just mentioned you in a</p>
+                    <TextLink text='post' link={`/p/${postId}`} />
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'post-removed-by-mods' && (
+                <Content typeIcon={<PostIcon />}>
+                    <p>Your</p>
+                    <TextLink text='post' link={`/p/${postId}`} />
+                    <p>was removed from</p>
+                    <ImageNameLink type='space' data={triggerSpace} />
+                    <p>by its mods</p>
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'bead-mention' && (
+                <Content typeIcon={<AtIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>just mentioned you in a</p>
+                    <TextLink text='bead' link={`/p/${postId}`} />
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'comment-reply' && (
+                <Content typeIcon={<CommentIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>replied to your</p>
+                    <TextLink text='comment' link={`/p/${postId}?commentId=${commentId}`} />
+                    {triggerSpace && <p>in</p>}
+                    {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'comment-mention' && (
+                <Content typeIcon={<AtIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>just mentioned you in a</p>
+                    <TextLink text='comment' link={`/p/${postId}?commentId=${commentId}`} />
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'parent-space-request' && (
+                <Content typeIcon={<SpacesIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>wants to make</p>
+                    <ImageNameLink type='space' data={triggerSpace} />
+                    <p>a child space of</p>
+                    <ImageNameLink type='space' data={secondarySpace} />
+                    <CreatedAt date={createdAt} />
+                    <State
+                        state={state}
+                        respond={(response) => respondToParentSpaceRequest(response)}
+                    />
+                </Content>
+            )}
+
+            {type === 'parent-space-request-response' && (
+                <Content typeIcon={<SpacesIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>{state} your request to make</p>
+                    <ImageNameLink type='space' data={triggerSpace} />
+                    <p>a child space of</p>
+                    <ImageNameLink type='space' data={secondarySpace} />
+                    {/* {state === 'accepted' ? <Success /> : <Fail />} */}
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'space-invite' && (
+                <Content typeIcon={<SpacesIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>invited you to join</p>
+                    <ImageNameLink type='space' data={triggerSpace} />
+                    <CreatedAt date={createdAt} />
+                    <State state={state} respond={(response) => respondToSpaceInvite(response)} />
+                </Content>
+            )}
+
+            {type === 'space-invite-response' && (
+                <Content typeIcon={<SpacesIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>{state} your invitation to join</p>
+                    <ImageNameLink type='space' data={triggerSpace} />
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'space-access-request' && (
+                <Content typeIcon={<SpacesIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>requested access to</p>
+                    <ImageNameLink type='space' data={triggerSpace} />
+                    <CreatedAt date={createdAt} />
+                    <State
+                        state={state}
+                        respond={(response) => respondToSpaceAccessRequest(response)}
+                    />
+                </Content>
+            )}
+
+            {type === 'space-access-response' && (
+                <Content typeIcon={<SpacesIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>{state} your request to access</p>
+                    <ImageNameLink type='space' data={triggerSpace} />
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'mod-invite' && (
+                <Content typeIcon={<SpacesIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>invited you to moderate</p>
+                    <ImageNameLink type='space' data={triggerSpace} />
+                    <CreatedAt date={createdAt} />
+                    <State state={state} respond={(response) => respondToModInvite(response)} />
+                </Content>
+            )}
+
+            {type === 'mod-invite-response' && (
+                <Content typeIcon={<SpacesIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>{state} your invitation to moderate</p>
+                    <ImageNameLink type='space' data={triggerSpace} />
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'mod-removed' && (
+                <Content typeIcon={<SpacesIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>just removed you from moderating</p>
+                    <ImageNameLink type='space' data={triggerSpace} />
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'event-going-reminder' && (
+                <Content typeIcon={<BellIcon />}>
+                    <p>An</p>
+                    <TextLink text='event' link={`/p/${postId}`} />
+                    <p>you marked yourself as going to is starting in 15 minutes</p>
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'event-interested-reminder' && (
+                <Content typeIcon={<BellIcon />}>
+                    <p>An</p>
+                    <TextLink text='event' link={`/p/${postId}`} />
+                    <p>you marked yourself as interested in is starting in 15 minutes</p>
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'gbg-invitation' && (
+                <Content typeIcon={<WeaveIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>invited you to join a</p>
+                    <TextLink text='glass bead game' link={`/p/${postId}`} />
+                    <State state={state} respond={(response) => respondToWeaveInvite(response)} />
+                    {/* {relatedPost.Weave.state === 'cancelled' && <p>Game cancelled</p>} */}
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'gbg-accepted' && (
+                <Content typeIcon={<WeaveIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>accepted your</p>
+                    <TextLink text='glass bead game' link={`/p/${postId}`} />
+                    <p>invite</p>
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'gbg-rejected' && (
+                <Content typeIcon={<WeaveIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>has rejected their</p>
+                    <TextLink text='glass bead game' link={`/p/${postId}`} />
+                    <p>invite so the game has been cancelled</p>
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'gbg-move' && (
+                <Content typeIcon={<WeaveIcon />}>
+                    <p>It&apos;s your move! Add the next bead to the</p>
+                    <TextLink text='glass bead game' link={`/p/${postId}`} />
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'gbg-move-from-other-player' && (
+                <Content typeIcon={<WeaveIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>just added a new bead to a</p>
+                    <TextLink text='glass bead game' link={`/p/${postId}`} />
+                    <p>you have particpated in</p>
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'gbg-creator-move-from-other-player' && (
+                <Content typeIcon={<WeaveIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>just added a new bead to a</p>
+                    <TextLink text='glass bead game' link={`/p/${postId}`} />
+                    <p>you created</p>
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'gbg-move-reminder' && (
+                <Content typeIcon={<WeaveIcon />}>
+                    <p>You have 15 minutes left to complete your move on</p>
+                    <TextLink text='this glass bead game!' link={`/p/${postId}`} />
+                    <p>If you fail to do this, the game ends!</p>
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'gbg-cancelled' && (
+                <Content typeIcon={<WeaveIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>failed to make their move in time on</p>
+                    <TextLink text='this glass bead game.' link={`/p/${postId}`} />
+                    <p>The game has now ended!</p>
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'gbg-ended' && (
+                <Content typeIcon={<WeaveIcon />}>
+                    <p>A</p>
+                    <TextLink text='glass bead game' link={`/p/${postId}`} />
+                    <p>you participated in has ended</p>
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'new-gbg-from-your-post' && (
+                <Content typeIcon={<StringIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>just created a</p>
+                    <TextLink text='string' link={`/p/${postId}`} />
+                    <p>from your post</p>
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
+
+            {type === 'poll-vote' && (
+                <Content typeIcon={<PollIcon />}>
+                    <ImageNameLink type='user' data={triggerUser} />
+                    <p>just voted on your</p>
+                    <TextLink text='Poll' link={`/p/${postId}`} />
+                    <CreatedAt date={createdAt} />
+                </Content>
+            )}
         </Row>
     )
 }
