@@ -1,0 +1,24 @@
+@import '@styles/Variables';
+
+.wrapper {
+    position: relative;
+    display: flex;
+    width: 100%;
+    box-shadow: 0 0 10px 0 rgba(10, 8, 72, 0.04);
+    border: 1px solid $grey2;
+    border-radius: 10px;
+    margin-top: 10px;
+    padding: 15px;
+    color: black;
+    background-color: white;
+
+    .content {
+        width: 100%;
+        overflow: hidden;
+        background-color: $grey1;
+        margin-left: 6px;
+        border-radius: 15px;
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+}
