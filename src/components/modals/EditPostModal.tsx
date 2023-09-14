@@ -28,7 +28,9 @@ function EditPostModal(props: {
     const [text, setText] = useState(postData.text)
     const [mentions, setMentions] = useState<any[]>([])
     const [urls, setUrls] = useState<any[]>([])
-    const [urlsWithMetaData, setUrlsWithMetaData] = useState<any[]>(postData.Urls)
+    const [urlsWithMetaData, setUrlsWithMetaData] = useState<any[]>(
+        JSON.parse(JSON.stringify(postData.Urls))
+    )
     const [textError, setTextError] = useState('')
     const [loading, setLoading] = useState(false)
     const [success, setSuccess] = useState(false)
@@ -45,15 +47,18 @@ function EditPostModal(props: {
             .then((res) => {
                 setUrlsWithMetaData((us) => {
                     const newUrlsMetaData = [...us.filter((u) => u.url !== url)]
-                    newUrlsMetaData.push({ url, loading: false, ...res.data })
+                    newUrlsMetaData.push({ url, loading: false, new: true, ...res.data })
                     return newUrlsMetaData
                 })
             })
             .catch((error) => console.log(error))
     }
 
-    function removeUrlMetaData(url) {
-        setUrlsWithMetaData((us) => [...us.filter((u) => u.url !== url)])
+    function removeUrl(url) {
+        const newUrls = [...urlsWithMetaData]
+        const removedUrl = newUrls.find((u) => u.url === url)
+        removedUrl.removed = true
+        setUrlsWithMetaData(newUrls)
     }
 
     function textValid() {
@@ -72,41 +77,44 @@ function EditPostModal(props: {
         return true
     }
 
+    function saveDisabled() {
+        const unchanged =
+            (postData.text === text || (!postData.text && findDraftLength(text) === 0)) &&
+            (postData.title === title || (!postData.title && title === '')) &&
+            postData.Urls.length === urlsWithMetaData.filter((u) => !u.removed).length
+        return loading || unchanged || urlsWithMetaData.find((u) => u.loading)
+    }
+
     function saveChanges() {
         if (textValid()) {
             console.log('urlsWithMetaData: ', urlsWithMetaData)
             console.log('mentions: ', mentions)
-            if (false) {
-                setLoading(true)
-                const options = {
-                    headers: { Authorization: `Bearer ${cookies.get('accessToken')}` },
-                }
-                const data = {
-                    postId: postData.id,
-                    title,
-                    text,
-                    mentions: mentions.map((m) => m.link),
-                    urls: urlsWithMetaData,
-                    // todo: get these details server side
-                    creatorName: accountData.name,
-                    creatorHandle: accountData.handle,
-                }
-                axios
-                    .post(`${config.apiURL}/update-post`, data, options)
-                    .then(() => {
-                        setPostData({
-                            ...postData,
-                            title,
-                            text,
-                            // Urls: urlsWithMetaData,
-                            updatedAt: new Date().toISOString(),
-                        })
-                        setSuccess(true)
-                        setLoading(false)
-                        setTimeout(() => close(), 1000)
-                    })
-                    .catch((error) => console.log(error))
+            setLoading(true)
+            const options = {
+                headers: { Authorization: `Bearer ${cookies.get('accessToken')}` },
             }
+            const data = {
+                postId: postData.id,
+                title: title.length ? title : null,
+                text: text && findDraftLength(text) ? text : null,
+                mentions: mentions.map((m) => m.link),
+                urls: urlsWithMetaData,
+            }
+            axios
+                .post(`${config.apiURL}/update-post`, data, options)
+                .then(() => {
+                    setPostData({
+                        ...postData,
+                        title,
+                        text,
+                        Urls: urlsWithMetaData.filter((u) => !u.removed),
+                        updatedAt: new Date().toISOString(),
+                    })
+                    setSuccess(true)
+                    setLoading(false)
+                    setTimeout(() => close(), 1000)
+                })
+                .catch((error) => console.log(error))
         }
     }
 
@@ -133,7 +141,7 @@ function EditPostModal(props: {
                 <SuccessMessage text='Changes saved' />
             ) : (
                 <Column centerX style={{ width: '100%', maxWidth: 800 }}>
-                    <h1>Edit post text</h1>
+                    <h1>Edit text</h1>
                     <Column className={styles.postCard}>
                         <Row spaceBetween centerY className={styles.header}>
                             <Row centerY>
@@ -204,16 +212,18 @@ function EditPostModal(props: {
                                 setUrls(textUrls.slice(0, maxUrls))
                             }}
                         />
-                        {urlsWithMetaData.map((u) => (
-                            <UrlPreview
-                                key={u.url}
-                                type='post'
-                                urlData={u}
-                                loading={u.loading}
-                                remove={removeUrlMetaData}
-                                style={{ marginTop: 10 }}
-                            />
-                        ))}
+                        {urlsWithMetaData
+                            .filter((u) => !u.removed)
+                            .map((u) => (
+                                <UrlPreview
+                                    key={u.url}
+                                    type='post'
+                                    urlData={u}
+                                    loading={u.loading}
+                                    remove={removeUrl}
+                                    style={{ marginTop: 10 }}
+                                />
+                            ))}
                     </Column>
                     {textError && (
                         <p className='danger' style={{ marginBottom: 20 }}>
@@ -223,7 +233,7 @@ function EditPostModal(props: {
                     <Button
                         color='blue'
                         text='Save changes'
-                        disabled={loading || urlsWithMetaData.find((u) => u.loading)}
+                        disabled={saveDisabled()}
                         loading={loading}
                         onClick={saveChanges}
                     />

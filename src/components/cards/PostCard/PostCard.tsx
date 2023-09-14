@@ -231,7 +231,7 @@ function PostCard(props: {
                                                     onClick={() => setEditPostModalOpen(true)}
                                                 >
                                                     <EditIcon />
-                                                    Edit post text
+                                                    Edit text
                                                 </button>
                                             )}
                                             {isOwnPost && (

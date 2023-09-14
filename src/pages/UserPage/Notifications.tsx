@@ -72,7 +72,7 @@ function Notifications(): JSX.Element {
     return (
         <Column centerX className={styles.wrapper}>
             <Toggle
-                leftText='Include seen notifications'
+                leftText='Show seen notifications'
                 positionLeft={!showSeenItems}
                 rightColor='blue'
                 onClick={() => {
