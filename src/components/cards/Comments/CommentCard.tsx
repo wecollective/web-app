@@ -198,7 +198,7 @@ function CommentCard(props: {
                         </Row>
                     </Row>
                     {state !== 'account-deleted' && (
-                        <ShowMoreLess height={250} gradientColor='grey'>
+                        <ShowMoreLess height={250} gradientColor={highlighted ? 'blue' : 'grey'}>
                             <DraftText
                                 stringifiedDraft={state === 'deleted' ? '[comment deleted]' : text}
                                 markdownStyles={`${styles.markdown} ${

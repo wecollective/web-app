@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react'
 
 function ShowMoreLess(props: {
     height: number
-    gradientColor?: 'white' | 'grey'
+    gradientColor?: 'white' | 'grey' | 'blue'
     style?: any
     children: any
 }): JSX.Element {
@@ -41,11 +41,12 @@ function ShowMoreLess(props: {
     }
 
     return (
-        <div className={styles.wrapper} style={style}>
+        <div className={styles.wrapper}>
             <div
                 ref={contentRef}
                 className={styles.content}
                 style={{
+                    ...style,
                     maxHeight: expanded ? contentHeight() : height,
                     overflow: overflow && !expanded ? 'hidden' : 'visible',
                 }}
@@ -64,6 +65,7 @@ function ShowMoreLess(props: {
                     <ChevronDownIcon />
                 </button>
             )}
+            {overflow && <div style={{ height: 30 }} />}
         </div>
     )
 }
