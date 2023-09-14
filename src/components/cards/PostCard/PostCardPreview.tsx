@@ -14,9 +14,15 @@ import {
 import PostSpaces from '@src/components/cards/PostCard/PostSpaces'
 import styles from '@styles/components/cards/PostCard/PostCardPreview.module.scss'
 import React, { useContext } from 'react'
+import { Link } from 'react-router-dom'
 
-function PostCardPreview(props: { postData: any; onClick?: () => void; style?: any }): JSX.Element {
-    const { postData, onClick, style } = props
+function PostCardPreview(props: {
+    post: any
+    link: string
+    onClick?: () => void
+    style?: any
+}): JSX.Element {
+    const { post, link, onClick, style } = props
     const {
         id,
         type,
@@ -29,14 +35,20 @@ function PostCardPreview(props: { postData: any; onClick?: () => void; style?: a
         Images,
         GlassBeadGame: GBG,
         CardSides,
-    } = postData
+    } = post
     const { accountData } = useContext(AccountContext)
     const mobileView = document.documentElement.clientWidth < 900
     const imageSize = 28
 
+    function findType() {
+        if (type.includes('card')) return 'card'
+        const t = type.split('gbg-')
+        if (t.length > 1) return t[1]
+        return type
+    }
+
     return (
-        <Column className={styles.post} style={style}>
-            {onClick && <button className={styles.button} type='button' onClick={onClick} />}
+        <Link to={link} onClick={onClick} className={styles.post} style={style}>
             <Row spaceBetween centerY className={styles.header}>
                 <Row centerY>
                     <ImageTitle
@@ -73,7 +85,7 @@ function PostCardPreview(props: { postData: any; onClick?: () => void; style?: a
             <Row className={styles.content}>
                 <Column centerY style={{ height: '100%' }}>
                     <Column centerX centerY className={styles.typeIcon}>
-                        {postTypeIcons[type]}
+                        {postTypeIcons[findType()]}
                     </Column>
                 </Column>
                 <Column style={{ width: '100%' }}>
@@ -101,6 +113,13 @@ function PostCardPreview(props: { postData: any; onClick?: () => void; style?: a
                             </Row>
                         </Row>
                     )}
+                    {['card-front', 'card-back'].includes(type) && (
+                        <Row centerY className={styles.card}>
+                            <Row className={styles.cardFace}>
+                                {Images[0] && <img src={Images[0].url} alt='card front' />}
+                            </Row>
+                        </Row>
+                    )}
                     {Urls[0] && (
                         <Row centerY className={styles.url}>
                             <img src={Urls[0].image} alt='URL' />
@@ -116,7 +135,7 @@ function PostCardPreview(props: { postData: any; onClick?: () => void; style?: a
                             </Column>
                         </Row>
                     )}
-                    {type === 'image' && (
+                    {type.includes('image') && (
                         <Row centerY className={styles.images}>
                             {Images.map((image) => (
                                 <img key={image.id} src={image.url} alt='' />
@@ -125,7 +144,7 @@ function PostCardPreview(props: { postData: any; onClick?: () => void; style?: a
                     )}
                 </Column>
             </Row>
-        </Column>
+        </Link>
     )
 }
 
