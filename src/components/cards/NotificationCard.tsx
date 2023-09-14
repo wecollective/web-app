@@ -6,12 +6,14 @@ import TextLink from '@components/TextLink'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
 import { dateCreated, timeSinceCreated } from '@src/Helpers'
+import CommentCardPreview from '@src/components/cards/Comments/CommentCardPreview'
 import PostCardPreview from '@src/components/cards/PostCard/PostCardPreview'
 import styles from '@styles/components/cards/NotificationCard.module.scss'
 import {
     AtIcon,
     BabyIcon,
     BellIcon,
+    CastaliaIcon,
     CommentIcon,
     EnvelopeIcon,
     EyeClosedIcon,
@@ -24,13 +26,10 @@ import {
     RetweetIcon,
     SpacesIcon,
     StarIcon,
-    StringIcon,
     SuccessIcon,
-    WeaveIcon,
 } from '@svgs/all'
 import axios from 'axios'
 import React, { useContext, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
 function Content(props: {
@@ -147,6 +146,7 @@ function NotificationCard(props: {
         triggerSpace,
         secondarySpace,
         relatedPost,
+        relatedComment,
         createdAt,
     } = notification
 
@@ -155,7 +155,6 @@ function NotificationCard(props: {
     const [seen, setSeen] = useState(notification.seen)
     const [seenLoading, setSeenLoading] = useState(false)
     const cookies = new Cookies()
-    const history = useNavigate()
 
     function toggleSeen() {
         setSeenLoading(true)
@@ -171,6 +170,10 @@ function NotificationCard(props: {
                 setSeenLoading(false)
             })
             .catch((error) => console.log(error))
+    }
+
+    function markAsSeen() {
+        if (!seen) toggleSeen()
     }
 
     function respondToSpaceInvite(response) {
@@ -356,11 +359,9 @@ function NotificationCard(props: {
                     typeIcon={<LikeIcon />}
                     preview={
                         <PostCardPreview
-                            postData={relatedPost}
-                            onClick={() => {
-                                history(`/p/${postId}`)
-                                if (!seen) toggleSeen()
-                            }}
+                            post={relatedPost}
+                            link={`/p/${postId}`}
+                            onClick={markAsSeen}
                             style={{ marginTop: 10 }}
                         />
                     }
@@ -374,10 +375,19 @@ function NotificationCard(props: {
             )}
 
             {type === 'comment-like' && (
-                <Content typeIcon={<LikeIcon />}>
+                <Content
+                    typeIcon={<LikeIcon />}
+                    preview={
+                        <CommentCardPreview
+                            comment={relatedComment}
+                            link={`/p/${postId}?commentId=${commentId}`}
+                            onClick={markAsSeen}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
                     <ImageNameLink type='user' data={triggerUser} />
-                    <p>liked your</p>
-                    <TextLink text='comment' link={`/p/${postId}?commentId=${commentId}`} />
+                    <p>liked your comment</p>
                     {triggerSpace && <p>in</p>}
                     {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
                     <CreatedAt date={createdAt} />
@@ -385,10 +395,27 @@ function NotificationCard(props: {
             )}
 
             {type === 'post-comment' && (
-                <Content typeIcon={<CommentIcon />}>
+                <Content
+                    typeIcon={<CommentIcon />}
+                    preview={
+                        <Column>
+                            <PostCardPreview
+                                post={relatedPost}
+                                link={`/p/${postId}?commentId=${commentId}`}
+                                onClick={markAsSeen}
+                                style={{ marginTop: 10 }}
+                            />
+                            <CommentCardPreview
+                                comment={relatedComment}
+                                link={`/p/${postId}?commentId=${commentId}`}
+                                onClick={markAsSeen}
+                                style={{ marginTop: 10 }}
+                            />
+                        </Column>
+                    }
+                >
                     <ImageNameLink type='user' data={triggerUser} />
-                    <p>commented on your</p>
-                    <TextLink text='post' link={`/p/${postId}?commentId=${commentId}`} />
+                    <p>commented on your post</p>
                     {triggerSpace && <p>in</p>}
                     {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
                     <CreatedAt date={createdAt} />
@@ -396,10 +423,19 @@ function NotificationCard(props: {
             )}
 
             {type === 'post-repost' && (
-                <Content typeIcon={<RetweetIcon />}>
+                <Content
+                    typeIcon={<RetweetIcon />}
+                    preview={
+                        <PostCardPreview
+                            post={relatedPost}
+                            link={`/p/${postId}`}
+                            onClick={markAsSeen}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
                     <ImageNameLink type='user' data={triggerUser} />
-                    <p>reposted your</p>
-                    <TextLink text='post' link={`/p/${postId}`} />
+                    <p>reposted your post</p>
                     {triggerSpace && <p>in</p>}
                     {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
                     <CreatedAt date={createdAt} />
@@ -407,10 +443,19 @@ function NotificationCard(props: {
             )}
 
             {type === 'post-rating' && (
-                <Content typeIcon={<StarIcon />}>
+                <Content
+                    typeIcon={<StarIcon />}
+                    preview={
+                        <PostCardPreview
+                            post={relatedPost}
+                            link={`/p/${postId}`}
+                            onClick={markAsSeen}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
                     <ImageNameLink type='user' data={triggerUser} />
-                    <p>rated your</p>
-                    <TextLink text='post' link={`/p/${postId}`} />
+                    <p>rated your post</p>
                     {triggerSpace && <p>in</p>}
                     {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
                     <CreatedAt date={createdAt} />
@@ -418,10 +463,19 @@ function NotificationCard(props: {
             )}
 
             {type === 'comment-rating' && (
-                <Content typeIcon={<LikeIcon />}>
+                <Content
+                    typeIcon={<StarIcon />}
+                    preview={
+                        <CommentCardPreview
+                            comment={relatedComment}
+                            link={`/p/${postId}?commentId=${commentId}`}
+                            onClick={markAsSeen}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
                     <ImageNameLink type='user' data={triggerUser} />
-                    <p>rated your</p>
-                    <TextLink text='comment' link={`/p/${postId}?commentId=${commentId}`} />
+                    <p>rated your comment</p>
                     {triggerSpace && <p>in</p>}
                     {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
                     <CreatedAt date={createdAt} />
@@ -429,19 +483,37 @@ function NotificationCard(props: {
             )}
 
             {['post-link-source', 'post-link-target'].includes(type) && (
-                <Content typeIcon={<LinkIcon />}>
+                <Content
+                    typeIcon={<LinkIcon />}
+                    preview={
+                        <PostCardPreview
+                            post={relatedPost}
+                            link={`/linkmap?item=post&id=${postId}`}
+                            onClick={markAsSeen}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
                     <ImageNameLink type='user' data={triggerUser} />
-                    <p>just added a link to your</p>
-                    <TextLink text='post' link={`/linkmap?item=post&id=${postId}`} />
+                    <p>added a link to your post</p>
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
 
             {['comment-link-source', 'comment-link-target'].includes(type) && (
-                <Content typeIcon={<LinkIcon />}>
+                <Content
+                    typeIcon={<LinkIcon />}
+                    preview={
+                        <CommentCardPreview
+                            comment={relatedComment}
+                            link={`/linkmap?item=comment&id=${commentId}`}
+                            onClick={markAsSeen}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
                     <ImageNameLink type='user' data={triggerUser} />
-                    <p>just added a link to your</p>
-                    <TextLink text='comment' link={`/linkmap?item=comment&id=${commentId}`} />
+                    <p>added a link to your comment</p>
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
@@ -449,7 +521,7 @@ function NotificationCard(props: {
             {['user-link-source', 'user-link-target'].includes(type) && (
                 <Content typeIcon={<LinkIcon />}>
                     <ImageNameLink type='user' data={triggerUser} />
-                    <p>just added a link to</p>
+                    <p>added a link to</p>
                     <TextLink text='you' link={`/linkmap?item=user&id=${accountData.id}`} />
                     <CreatedAt date={createdAt} />
                 </Content>
@@ -458,7 +530,7 @@ function NotificationCard(props: {
             {['space-link-source', 'space-link-target'].includes(type) && (
                 <Content typeIcon={<LinkIcon />}>
                     <ImageNameLink type='user' data={triggerUser} />
-                    <p>just added a link to your</p>
+                    <p>added a link to your</p>
                     <TextLink text='space' link={`/linkmap?item=space&id=${spaceAId}`} />
                     <CreatedAt date={createdAt} />
                 </Content>
@@ -467,26 +539,43 @@ function NotificationCard(props: {
             {type === 'link-like' && (
                 <Content typeIcon={<LikeIcon />}>
                     <ImageNameLink type='user' data={triggerUser} />
-                    <p>just liked your</p>
+                    <p>liked your</p>
                     <TextLink text='link' link={linkUrl()} />
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
 
             {type === 'post-mention' && (
-                <Content typeIcon={<AtIcon />}>
+                <Content
+                    typeIcon={<AtIcon />}
+                    preview={
+                        <PostCardPreview
+                            post={relatedPost}
+                            link={`/p/${postId}`}
+                            onClick={markAsSeen}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
                     <ImageNameLink type='user' data={triggerUser} />
-                    <p>just mentioned you in a</p>
-                    <TextLink text='post' link={`/p/${postId}`} />
+                    <p>mentioned you in a post</p>
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
 
             {type === 'post-removed-by-mods' && (
-                <Content typeIcon={<PostIcon />}>
-                    <p>Your</p>
-                    <TextLink text='post' link={`/p/${postId}`} />
-                    <p>was removed from</p>
+                <Content
+                    typeIcon={<PostIcon />}
+                    preview={
+                        <PostCardPreview
+                            post={relatedPost}
+                            link={`/p/${postId}`}
+                            onClick={markAsSeen}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
+                    <p>Your post was removed from</p>
                     <ImageNameLink type='space' data={triggerSpace} />
                     <p>by its mods</p>
                     <CreatedAt date={createdAt} />
@@ -494,19 +583,38 @@ function NotificationCard(props: {
             )}
 
             {type === 'bead-mention' && (
-                <Content typeIcon={<AtIcon />}>
+                <Content
+                    typeIcon={<AtIcon />}
+                    preview={
+                        <PostCardPreview
+                            post={relatedPost}
+                            link={`/p/${postId}`}
+                            onClick={markAsSeen}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
                     <ImageNameLink type='user' data={triggerUser} />
-                    <p>just mentioned you in a</p>
-                    <TextLink text='bead' link={`/p/${postId}`} />
+                    <p>mentioned you in a bead</p>
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
 
+            {/* todo: set up dual comments */}
             {type === 'comment-reply' && (
-                <Content typeIcon={<CommentIcon />}>
+                <Content
+                    typeIcon={<CommentIcon />}
+                    preview={
+                        <CommentCardPreview
+                            comment={relatedComment}
+                            link={`/p/${postId}?commentId=${commentId}`}
+                            onClick={markAsSeen}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
                     <ImageNameLink type='user' data={triggerUser} />
-                    <p>replied to your</p>
-                    <TextLink text='comment' link={`/p/${postId}?commentId=${commentId}`} />
+                    <p>replied to your comment</p>
                     {triggerSpace && <p>in</p>}
                     {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
                     <CreatedAt date={createdAt} />
@@ -514,10 +622,19 @@ function NotificationCard(props: {
             )}
 
             {type === 'comment-mention' && (
-                <Content typeIcon={<AtIcon />}>
+                <Content
+                    typeIcon={<AtIcon />}
+                    preview={
+                        <CommentCardPreview
+                            comment={relatedComment}
+                            link={`/p/${postId}?commentId=${commentId}`}
+                            onClick={markAsSeen}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
                     <ImageNameLink type='user' data={triggerUser} />
-                    <p>just mentioned you in a</p>
-                    <TextLink text='comment' link={`/p/${postId}?commentId=${commentId}`} />
+                    <p>mentioned you in a comment</p>
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
@@ -612,35 +729,60 @@ function NotificationCard(props: {
             {type === 'mod-removed' && (
                 <Content typeIcon={<SpacesIcon />}>
                     <ImageNameLink type='user' data={triggerUser} />
-                    <p>just removed you from moderating</p>
+                    <p>removed you from moderating</p>
                     <ImageNameLink type='space' data={triggerSpace} />
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
 
             {type === 'event-going-reminder' && (
-                <Content typeIcon={<BellIcon />}>
-                    <p>An</p>
-                    <TextLink text='event' link={`/p/${postId}`} />
-                    <p>you marked yourself as going to is starting in 15 minutes</p>
+                <Content
+                    typeIcon={<BellIcon />}
+                    preview={
+                        <PostCardPreview
+                            post={relatedPost}
+                            link={`/p/${postId}`}
+                            onClick={markAsSeen}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
+                    <p>An event you marked yourself as going to is starting in 15 minutes</p>
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
 
             {type === 'event-interested-reminder' && (
-                <Content typeIcon={<BellIcon />}>
-                    <p>An</p>
-                    <TextLink text='event' link={`/p/${postId}`} />
-                    <p>you marked yourself as interested in is starting in 15 minutes</p>
+                <Content
+                    typeIcon={<BellIcon />}
+                    preview={
+                        <PostCardPreview
+                            post={relatedPost}
+                            link={`/p/${postId}`}
+                            onClick={markAsSeen}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
+                    <p>An event you marked yourself as interested in is starting in 15 minutes</p>
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
 
             {type === 'gbg-invitation' && (
-                <Content typeIcon={<WeaveIcon />}>
+                <Content
+                    typeIcon={<CastaliaIcon />}
+                    preview={
+                        <PostCardPreview
+                            post={relatedPost}
+                            link={`/p/${postId}`}
+                            onClick={markAsSeen}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
                     <ImageNameLink type='user' data={triggerUser} />
-                    <p>invited you to join a</p>
-                    <TextLink text='glass bead game' link={`/p/${postId}`} />
+                    <p>invited you to join a glass bead game</p>
                     <State state={state} respond={(response) => respondToWeaveInvite(response)} />
                     {/* {relatedPost.Weave.state === 'cancelled' && <p>Game cancelled</p>} */}
                     <CreatedAt date={createdAt} />
@@ -648,96 +790,184 @@ function NotificationCard(props: {
             )}
 
             {type === 'gbg-accepted' && (
-                <Content typeIcon={<WeaveIcon />}>
+                <Content
+                    typeIcon={<CastaliaIcon />}
+                    preview={
+                        <PostCardPreview
+                            post={relatedPost}
+                            link={`/p/${postId}`}
+                            onClick={markAsSeen}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
                     <ImageNameLink type='user' data={triggerUser} />
-                    <p>accepted your</p>
-                    <TextLink text='glass bead game' link={`/p/${postId}`} />
-                    <p>invite</p>
+                    <p>accepted your glass bead game invite</p>
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
 
             {type === 'gbg-rejected' && (
-                <Content typeIcon={<WeaveIcon />}>
+                <Content
+                    typeIcon={<CastaliaIcon />}
+                    preview={
+                        <PostCardPreview
+                            post={relatedPost}
+                            link={`/p/${postId}`}
+                            onClick={markAsSeen}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
                     <ImageNameLink type='user' data={triggerUser} />
-                    <p>has rejected their</p>
-                    <TextLink text='glass bead game' link={`/p/${postId}`} />
-                    <p>invite so the game has been cancelled</p>
+                    <p>has rejected their glass bead game invite so the game has been cancelled</p>
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
 
             {type === 'gbg-move' && (
-                <Content typeIcon={<WeaveIcon />}>
-                    <p>It&apos;s your move! Add the next bead to the</p>
-                    <TextLink text='glass bead game' link={`/p/${postId}`} />
+                <Content
+                    typeIcon={<CastaliaIcon />}
+                    preview={
+                        <PostCardPreview
+                            post={relatedPost}
+                            link={`/p/${postId}`}
+                            onClick={markAsSeen}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
+                    <p>It&apos;s your move! Add the next bead to the glass bead game</p>
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
 
             {type === 'gbg-move-from-other-player' && (
-                <Content typeIcon={<WeaveIcon />}>
+                <Content
+                    typeIcon={<CastaliaIcon />}
+                    preview={
+                        <PostCardPreview
+                            post={relatedPost}
+                            link={`/p/${postId}`}
+                            onClick={markAsSeen}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
                     <ImageNameLink type='user' data={triggerUser} />
-                    <p>just added a new bead to a</p>
-                    <TextLink text='glass bead game' link={`/p/${postId}`} />
-                    <p>you have particpated in</p>
+                    <p>added a new bead to a glass bead game you have particpated in</p>
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
 
             {type === 'gbg-creator-move-from-other-player' && (
-                <Content typeIcon={<WeaveIcon />}>
+                <Content
+                    typeIcon={<CastaliaIcon />}
+                    preview={
+                        <PostCardPreview
+                            post={relatedPost}
+                            link={`/p/${postId}`}
+                            onClick={markAsSeen}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
                     <ImageNameLink type='user' data={triggerUser} />
-                    <p>just added a new bead to a</p>
-                    <TextLink text='glass bead game' link={`/p/${postId}`} />
-                    <p>you created</p>
+                    <p>added a new bead to a glass bead game you created</p>
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
 
             {type === 'gbg-move-reminder' && (
-                <Content typeIcon={<WeaveIcon />}>
-                    <p>You have 15 minutes left to complete your move on</p>
-                    <TextLink text='this glass bead game!' link={`/p/${postId}`} />
-                    <p>If you fail to do this, the game ends!</p>
+                <Content
+                    typeIcon={<CastaliaIcon />}
+                    preview={
+                        <PostCardPreview
+                            post={relatedPost}
+                            link={`/p/${postId}`}
+                            onClick={markAsSeen}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
+                    <p>
+                        You have 15 minutes left to complete your move on this glass bead game. If
+                        you fail to do this, the game ends!
+                    </p>
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
 
             {type === 'gbg-cancelled' && (
-                <Content typeIcon={<WeaveIcon />}>
+                <Content
+                    typeIcon={<CastaliaIcon />}
+                    preview={
+                        <PostCardPreview
+                            post={relatedPost}
+                            link={`/p/${postId}`}
+                            onClick={markAsSeen}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
                     <ImageNameLink type='user' data={triggerUser} />
-                    <p>failed to make their move in time on</p>
-                    <TextLink text='this glass bead game.' link={`/p/${postId}`} />
-                    <p>The game has now ended!</p>
+                    <p>
+                        failed to make their move in time on this glass bead game. The game has now
+                        ended!
+                    </p>
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
 
             {type === 'gbg-ended' && (
-                <Content typeIcon={<WeaveIcon />}>
-                    <p>A</p>
-                    <TextLink text='glass bead game' link={`/p/${postId}`} />
-                    <p>you participated in has ended</p>
+                <Content
+                    typeIcon={<CastaliaIcon />}
+                    preview={
+                        <PostCardPreview
+                            post={relatedPost}
+                            link={`/p/${postId}`}
+                            onClick={markAsSeen}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
+                    <p>A glass bead game you participated in has ended</p>
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
 
             {type === 'new-gbg-from-your-post' && (
-                <Content typeIcon={<StringIcon />}>
+                <Content
+                    typeIcon={<CastaliaIcon />}
+                    preview={
+                        <PostCardPreview
+                            post={relatedPost}
+                            link={`/p/${postId}`}
+                            onClick={markAsSeen}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
                     <ImageNameLink type='user' data={triggerUser} />
-                    <p>just created a</p>
-                    <TextLink text='string' link={`/p/${postId}`} />
-                    <p>from your post</p>
+                    <p>created a glass bead game from your post</p>
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
 
             {type === 'poll-vote' && (
-                <Content typeIcon={<PollIcon />}>
+                <Content
+                    typeIcon={<PollIcon />}
+                    preview={
+                        <PostCardPreview
+                            post={relatedPost}
+                            link={`/p/${postId}`}
+                            onClick={markAsSeen}
+                            style={{ marginTop: 10 }}
+                        />
+                    }
+                >
                     <ImageNameLink type='user' data={triggerUser} />
-                    <p>just voted on your</p>
-                    <TextLink text='Poll' link={`/p/${postId}`} />
+                    <p>voted on your poll</p>
                     <CreatedAt date={createdAt} />
                 </Content>
             )}

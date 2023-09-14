@@ -30,7 +30,7 @@
         svg {
             width: 20px;
             height: 20px;
-            color: $grey3;
+            color: $grey4;
         }
 
         @include for-tablet-portrait-up {
@@ -65,7 +65,7 @@
         font-size: 14px;
         color: $grey4;
         margin-bottom: -$contentMargin;
-        margin-right: 10px;
+        margin-right: 20px;
         align-items: center;
 
         .inlineIcon {
