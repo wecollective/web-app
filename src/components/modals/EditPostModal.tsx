@@ -95,7 +95,7 @@ function EditPostModal(props: {
             }
             const data = {
                 postId: postData.id,
-                title: title.length ? title : null,
+                title: title && title.length ? title : null,
                 text: text && findDraftLength(text) ? text : null,
                 mentions: mentions.map((m) => m.link),
                 urls: urlsWithMetaData,
