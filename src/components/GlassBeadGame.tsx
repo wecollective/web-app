@@ -11,6 +11,7 @@ import Markdown from '@components/Markdown'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
 import SuccessMessage from '@components/SuccessMessage'
+import BeadCard from '@components/cards/PostCard/BeadCard'
 import GBGBackgroundModal from '@components/modals/GBGBackgroundModal'
 import ImageUploadModal from '@components/modals/ImageUploadModal'
 import Modal from '@components/modals/Modal'
@@ -25,7 +26,6 @@ import {
     notNull,
     timeSinceCreated,
 } from '@src/Helpers'
-import BeadCard from '@src/components/cards/PostCard/BeadCard'
 import styles from '@styles/components/GlassBeadGame.module.scss'
 import {
     AudioIcon,

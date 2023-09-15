@@ -2,6 +2,7 @@
 import Column from '@components/Column'
 import ImageTitle from '@components/ImageTitle'
 import Row from '@components/Row'
+import PostSpaces from '@components/cards/PostCard/PostSpaces'
 import { AccountContext } from '@contexts/AccountContext'
 import {
     dateCreated,
@@ -11,7 +12,6 @@ import {
     timeSinceCreatedShort,
     trimText,
 } from '@src/Helpers'
-import PostSpaces from '@src/components/cards/PostCard/PostSpaces'
 import styles from '@styles/components/cards/PostCard/PostCardPreview.module.scss'
 import React, { useContext } from 'react'
 import { Link } from 'react-router-dom'
@@ -36,6 +36,7 @@ function PostCardPreview(props: {
         GlassBeadGame: GBG,
         CardSides,
     } = post
+    // todo: include creator and use instead of account data
     const { accountData } = useContext(AccountContext)
     const mobileView = document.documentElement.clientWidth < 900
     const imageSize = 28

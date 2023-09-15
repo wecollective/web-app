@@ -1,7 +1,7 @@
 import Column from '@components/Column'
 import Row from '@components/Row'
 import DraftText from '@components/draft-js/DraftText'
-import LikeModal from '@src/components/modals/LikeModal'
+import LikeModal from '@components/modals/LikeModal'
 import styles from '@styles/components/cards/PostCard/CardCard.module.scss'
 import { LikeIcon, LinkIcon, RepostIcon } from '@svgs/all'
 import React, { useState } from 'react'

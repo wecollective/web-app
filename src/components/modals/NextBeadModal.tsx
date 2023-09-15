@@ -5,6 +5,8 @@ import Column from '@components/Column'
 import Input from '@components/Input'
 import Row from '@components/Row'
 import SuccessMessage from '@components/SuccessMessage'
+import AudioCard from '@components/cards/PostCard/AudioCard'
+import UrlPreview from '@components/cards/PostCard/UrlCard'
 import DraftTextEditor from '@components/draft-js/DraftTextEditor'
 import ImageModal from '@components/modals/ImageModal'
 import Modal from '@components/modals/Modal'
@@ -18,8 +20,6 @@ import {
     imageMBLimit,
     postTypeIcons,
 } from '@src/Helpers'
-import AudioCard from '@src/components/cards/PostCard/AudioCard'
-import UrlPreview from '@src/components/cards/PostCard/UrlCard'
 import { AccountContext } from '@src/contexts/AccountContext'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/NextBeadModal2.module.scss'

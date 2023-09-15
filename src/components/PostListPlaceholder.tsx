@@ -1,5 +1,5 @@
 import Column from '@components/Column'
-import Placeholder from '@src/components/cards/PostCard/Placeholder'
+import Placeholder from '@components/cards/PostCard/Placeholder'
 import styles from '@styles/components/ListPlaceholder.module.scss'
 import React from 'react'
 

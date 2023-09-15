@@ -1,10 +1,10 @@
 import Button from '@components/Button'
 import Column from '@components/Column'
 import Input from '@components/Input'
+import SuccessMessage from '@components/SuccessMessage'
 import Modal from '@components/modals/Modal'
 import config from '@src/Config'
 import { isValidEmail } from '@src/Helpers'
-import SuccessMessage from '@src/components/SuccessMessage'
 import axios from 'axios'
 import React, { useState } from 'react'
 

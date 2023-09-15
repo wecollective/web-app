@@ -3,11 +3,11 @@ import Column from '@components/Column'
 import ImageNameLink from '@components/ImageNameLink'
 import Row from '@components/Row'
 import TextLink from '@components/TextLink'
+import CommentCardPreview from '@components/cards/Comments/CommentCardPreview'
+import PostCardPreview from '@components/cards/PostCard/PostCardPreview'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
 import { dateCreated, timeSinceCreated } from '@src/Helpers'
-import CommentCardPreview from '@src/components/cards/Comments/CommentCardPreview'
-import PostCardPreview from '@src/components/cards/PostCard/PostCardPreview'
 import styles from '@styles/components/cards/NotificationCard.module.scss'
 import {
     AtIcon,
