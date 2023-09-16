@@ -154,6 +154,16 @@ function CommentCard(props: {
                                     *
                                 </p>
                             )}
+                            {muted && (
+                                <button
+                                    type='button'
+                                    className={styles.muteButton}
+                                    title='Click to hide again'
+                                    onClick={() => setShowMutedComment(false)}
+                                >
+                                    <EyeClosedIcon />
+                                </button>
+                            )}
                         </Row>
                         <Row>
                             <Link
