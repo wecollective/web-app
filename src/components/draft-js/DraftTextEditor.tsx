@@ -255,7 +255,7 @@ function DraftTextEditor(props: {
                                 text='Add'
                                 loading={submitLoading}
                                 onClick={onSubmit}
-                                style={{ marginTop: 10 }}
+                                style={{ marginBottom: 10, alignSelf: 'flex-end' }}
                             />
                         )}
                     </Row>

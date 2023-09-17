@@ -231,7 +231,8 @@ $transitionSpeed: 0.5s;
 
     &.comment {
         :global(.DraftEditor-root) {
-            padding: 5px 10px 10px 10px;
+            padding: 5px 10px 5px 10px;
+            width: calc(100% - 90px);
         }
 
         :global(.DraftEditor-editorContainer) {
@@ -250,7 +251,7 @@ $transitionSpeed: 0.5s;
         }
 
         .characters {
-            display: none;
+            margin-bottom: 5px;
         }
 
         &.invalid {
