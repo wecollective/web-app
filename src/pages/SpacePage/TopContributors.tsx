@@ -9,7 +9,7 @@ import { trimText } from '@src/Helpers'
 import styles from '@styles/pages/SpacePage/TopContributors.module.scss'
 import { LikeIcon, RankingIcon, TrophyIcon } from '@svgs/all'
 import axios from 'axios'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
 function TopContributors(): JSX.Element {
@@ -20,15 +20,19 @@ function TopContributors(): JSX.Element {
     const [nextUsersLoading, setNextUsersLoading] = useState(false)
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]
+    const currentSpaceId = useRef(0)
 
     async function getUsers() {
+        currentSpaceId.current = spaceData.id
         axios
             .get(`${config.apiURL}/top-contributors?spaceId=${spaceData.id}&offset=${users.length}`)
             .then((res) => {
-                setUsers([...users, ...res.data.users])
-                setMoreUsers(res.data.moreUsers)
-                setLoading(false)
-                setNextUsersLoading(false)
+                if (currentSpaceId.current === spaceData.id) {
+                    setUsers([...users, ...res.data.users])
+                    setMoreUsers(res.data.moreUsers)
+                    setLoading(false)
+                    setNextUsersLoading(false)
+                }
             })
             .catch((error) => console.log(error))
     }
@@ -38,7 +42,7 @@ function TopContributors(): JSX.Element {
             setLoading(true)
             setUsers([])
         } else getUsers()
-    }, [spaceData.id, location])
+    }, [spaceData.id, location.pathname])
 
     return (
         <Scrollbars className={styles.wrapper}>

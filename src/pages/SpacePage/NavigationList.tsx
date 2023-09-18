@@ -198,7 +198,7 @@ function NavigationList(props: { onLocationChange?: () => void; style?: any }): 
                 })
                 .catch((error) => console.log(error))
         }
-    }, [spaceData.id, location])
+    }, [spaceData.id, location.pathname])
 
     return (
         <Scrollbars className={styles.wrapper} style={style}>
