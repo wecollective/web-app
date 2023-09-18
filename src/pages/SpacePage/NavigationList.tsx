@@ -9,7 +9,7 @@ import { trimText } from '@src/Helpers'
 import styles from '@styles/pages/SpacePage/NavigationList.module.scss'
 import { ArrowDownIcon, ArrowUpIcon, MinusIcon, PlusIcon } from '@svgs/all'
 import axios from 'axios'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
@@ -112,8 +112,10 @@ function NavigationList(props: { onLocationChange?: () => void; style?: any }): 
     const cookies = new Cookies()
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]
+    const currentSpaceId = useRef(0)
 
     async function getSpaces(id, offset, includeParents) {
+        if (!offset) currentSpaceId.current = id
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         return axios.get(
             `${config.apiURL}/nav-list-spaces?spaceId=${id}&offset=${offset}&includeParents=${includeParents}`,
@@ -186,11 +188,13 @@ function NavigationList(props: { onLocationChange?: () => void; style?: any }): 
         else {
             getSpaces(spaceData.id, 0, true)
                 .then((res) => {
-                    setParents(res.data.parents)
-                    setChildren(res.data.children)
-                    setTotalChildren(res.data.totalChildren)
-                    setChildrenOffset(10)
-                    setLoading(false)
+                    if (spaceData.id === currentSpaceId.current) {
+                        setParents(res.data.parents)
+                        setChildren(res.data.children)
+                        setTotalChildren(res.data.totalChildren)
+                        setChildrenOffset(10)
+                        setLoading(false)
+                    }
                 })
                 .catch((error) => console.log(error))
         }
