@@ -30,10 +30,11 @@ function Spaces(): JSX.Element {
     } = useContext(SpaceContext)
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]
+    const mobileView = document.documentElement.clientWidth < 900
 
     // calculate params
     const urlParams = Object.fromEntries(new URLSearchParams(location.search))
-    const params = { ...spaceSpacesFilters }
+    const params = { ...spaceSpacesFilters, lens: mobileView ? 'List' : 'Tree' }
     Object.keys(urlParams).forEach((param) => {
         params[param] = urlParams[param]
     })
