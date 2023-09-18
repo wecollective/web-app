@@ -1,4 +1,5 @@
 import config from '@src/Config'
+import { getDraftPlainText } from '@src/Helpers'
 import { IAccountContext } from '@src/Interfaces'
 import axios from 'axios'
 import React, { createContext, useEffect, useState } from 'react'
@@ -56,13 +57,14 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
             axios
                 .get(`${config.apiURL}/account-data`, options)
                 .then((res) => {
-                    const { id, handle, name, bio } = res.data
+                    const { id, handle, name, bio, flagImagePath } = res.data
                     const script = document.getElementById('greencheck')
                     script!.innerHTML = JSON.stringify({
-                        uuid: id,
+                        id,
                         username: handle,
                         fullname: name,
-                        description: bio,
+                        description: getDraftPlainText(bio),
+                        image: flagImagePath,
                     })
                     setAccountData(res.data)
                     setLoggedIn(true)
