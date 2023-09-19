@@ -26,6 +26,7 @@ import UrlPreview from '@components/cards/PostCard/UrlCard'
 import NextBeadModal from '@components/modals/NextBeadModal'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
+import { UserContext } from '@contexts/UserContext'
 import config from '@src/Config'
 import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import {
@@ -61,6 +62,7 @@ import * as d3 from 'd3'
 import flatpickr from 'flatpickr'
 import 'flatpickr/dist/themes/material_green.css'
 import React, { useContext, useEffect, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import RecordRTC from 'recordrtc'
 import Cookies from 'universal-cookie'
 import { v4 as uuidv4 } from 'uuid'
@@ -100,6 +102,7 @@ function CreatePostModal(): JSX.Element {
         setCreatePostModalSettings,
     } = useContext(AccountContext)
     const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
+    const { userPosts, setUserPosts } = useContext(UserContext)
     const [loading, setLoading] = useState(false)
     const [linkDescription, setLinkDescription] = useState('')
     const [postType, setPostType] = useState('text')
@@ -123,6 +126,11 @@ function CreatePostModal(): JSX.Element {
     const maxUrls = 5
     const urlRequestIndex = useRef(0)
     const contentButtonTypes = ['image', 'audio', 'event', 'poll', 'glass-bead-game', 'card']
+    const location = useLocation()
+    const path = location.pathname.split('/')
+    const page = path[1]
+    const handle = path[2]
+    const subPage = path[3]
 
     function closeModal() {
         setCreatePostModalOpen(false)
@@ -792,7 +800,13 @@ function CreatePostModal(): JSX.Element {
                         ...spaces.map((space) => space.id),
                         ...res.data.indirectSpaces.map((s) => s.spaceId),
                     ]
-                    if (allPostSpaceIds.includes(spaceData.id)) {
+                    const addPostToSpaceFeed =
+                        page === 's' &&
+                        subPage === 'posts' &&
+                        allPostSpaceIds.includes(spaceData.id)
+                    const addPostToUserFeed =
+                        page === 'u' && subPage === 'posts' && handle === accountData.handle
+                    if (addPostToSpaceFeed || addPostToUserFeed) {
                         const newPost = {
                             ...defaultPostData,
                             ...res.data.post,
@@ -841,7 +855,9 @@ function CreatePostModal(): JSX.Element {
                         }
                         if (postData.type === 'card')
                             newPost.CardSides = [res.data.card.front, res.data.card.back]
-                        setSpacePosts([newPost, ...spacePosts])
+                        // add new post to feed
+                        if (addPostToSpaceFeed) setSpacePosts([newPost, ...spacePosts])
+                        if (addPostToUserFeed) setUserPosts([newPost, ...userPosts])
                     }
                     setLoading(false)
                     setSaved(true)
