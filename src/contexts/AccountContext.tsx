@@ -63,7 +63,7 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                         id,
                         username: handle,
                         fullname: name,
-                        description: getDraftPlainText(bio),
+                        description: bio ? getDraftPlainText(bio) : '',
                         image: flagImagePath,
                     })
                     setAccountData(res.data)
