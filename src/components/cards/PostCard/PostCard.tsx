@@ -272,7 +272,7 @@ function PostCard(props: {
                 {title && <h1 className={styles.title}>{title}</h1>}
                 {GlassBeadGame && GlassBeadGame.topic && renderTopic()}
                 {text && collapse && (
-                    <ShowMoreLess height={500} gradientColor='white'>
+                    <ShowMoreLess height={700} gradientColor='white'>
                         <DraftText stringifiedDraft={text} style={{ marginBottom: 10 }} />
                     </ShowMoreLess>
                 )}
