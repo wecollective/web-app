@@ -15,5 +15,57 @@
                 margin-right: 5px;
             }
         }
+
+        .greenCheck {
+            margin-top: 20px;
+
+            a {
+                color: $blue3;
+            }
+
+            .scoreIcon {
+                width: 60px;
+                height: 60px;
+                position: relative;
+
+                .shield {
+                    width: inherit;
+                    height: inherit;
+                    color: #00c362;
+                    filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.1));
+                }
+
+                .check {
+                    width: 40px;
+                    height: 40px;
+                    color: white;
+                    position: absolute;
+                    opacity: 0.4;
+                    filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.2));
+                }
+
+                p {
+                    position: absolute;
+                    font-size: 18px;
+                    color: white;
+                }
+            }
+
+            .linkedAccount {
+                margin-bottom: 5px;
+
+                p {
+                    margin-right: 5px;
+                }
+
+                img {
+                    width: 30px;
+                    height: 30px;
+                    border-radius: 50%;
+                    object-fit: cover;
+                    margin-right: 5px;
+                }
+            }
+        }
     }
 }

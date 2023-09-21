@@ -1,10 +1,11 @@
 import Column from '@components/Column'
-import DraftText from '@components/draft-js/DraftText'
 import Row from '@components/Row'
+import DraftText from '@components/draft-js/DraftText'
 import { UserContext } from '@contexts/UserContext'
 import UserNotFound from '@pages/UserPage/UserNotFound'
 import { dateCreated, timeSinceCreated } from '@src/Helpers'
 import styles from '@styles/pages/UserPage/About.module.scss'
+import { CheckIcon, ShieldIcon } from '@svgs/all'
 import React, { useContext } from 'react'
 import { useLocation } from 'react-router-dom'
 
@@ -13,6 +14,40 @@ function About(): JSX.Element {
     const { handle, createdAt, bio } = userData
     const location = useLocation()
     const userHandle = location.pathname.split('/')[2]
+    const data = {
+        score: 4.6,
+        linkedAccounts: [
+            {
+                site: 'GITHUB',
+                name: 'jhweir',
+                handle: '@jhweir',
+                image: '',
+                url: 'https://github.com/jhweir',
+            },
+            {
+                site: 'TWITTER',
+                name: 'James Weir',
+                handle: '@jamestheweir',
+                image: 'https://pbs.twimg.com/profile_images/1184526228700762112/KToVrqOz_bigger.jpg',
+                url: 'https://twitter.com/jamestheweir',
+            },
+            {
+                site: 'YOUTUBE',
+                name: 'we { collective }',
+                handle: '@we-collective',
+                image: 'https://yt3.ggpht.com/N6crxjhR2HItoeT0L_JqnMBpAVvnGU_nTJorLKKkb2K-Cvh_WYzjE-indzsPsSYkmio0uUJG5g=s108-c-k-c0x00ffffff-no-rj',
+                url: 'https://youtube.com/we-collective',
+            },
+            {
+                site: 'LINKEDIN',
+                name: 'James Weir',
+                handle: '@jhweir',
+                image: 'https://media.licdn.com/dms/image/C4D03AQFQ1cBhLi7rjw/profile-displayphoto-shrink_400_400/0/1551370357610?e=1697673600&v=beta&t=RJQ-OQmaBhggv2T7nW-_d-rLGC6eXvwju1glnkrtsO0',
+                url: 'https://linkedin.com/in/jhweir',
+            },
+        ],
+    }
+    const { score, linkedAccounts } = data
 
     if (userNotFound) return <UserNotFound />
     return (
@@ -25,7 +60,44 @@ function About(): JSX.Element {
                         <p>Joined</p>
                         <p title={dateCreated(createdAt)}>{timeSinceCreated(createdAt)}</p>
                     </Row>
-                    {bio && <DraftText stringifiedDraft={bio || ''} style={{ marginTop: 30 }} />}
+                    <Column centerX className={styles.greenCheck}>
+                        <Row centerY style={{ marginBottom: 20 }}>
+                            <a
+                                href='https://greencheck.world/'
+                                target='_blank'
+                                rel='noopener noreferrer'
+                            >
+                                GreenCheck
+                            </a>
+                            <p style={{ margin: '0 10px 0 5px' }}>proof of humanity score:</p>
+                            <Column centerX centerY className={styles.scoreIcon}>
+                                <ShieldIcon className={styles.shield} />
+                                <CheckIcon className={styles.check} />
+                                <p>{score}</p>
+                            </Column>
+                        </Row>
+                        <p className='grey' style={{ marginBottom: 10 }}>
+                            Claimed accounts:
+                        </p>
+                        {linkedAccounts.map((account) => (
+                            <Row key={account.site} centerY className={styles.linkedAccount}>
+                                <p>{account.site}</p>
+                                {account.image && <img src={account.image} alt='' />}
+                                <p>{account.name}</p>
+                                <a href={account.url} target='_blank' rel='noopener noreferrer'>
+                                    {account.handle}
+                                </a>
+                            </Row>
+                        ))}
+                    </Column>
+                    {bio && (
+                        <Column centerX style={{ marginTop: 30 }}>
+                            <p className='grey' style={{ marginBottom: 10 }}>
+                                Bio:
+                            </p>
+                            <DraftText stringifiedDraft={bio || ''} />
+                        </Column>
+                    )}
                 </Column>
             )}
         </Column>
