@@ -28,7 +28,7 @@ function SpaceSpaceFilters(props: { close: () => void }): JSX.Element {
             <h1>Space Filters</h1>
             <DropDown
                 title='Sort By'
-                options={['Followers', 'Posts', 'Comments', 'Date Created', 'Likes']}
+                options={['Likes', 'Posts', 'Comments', 'Followers', 'Date Created']}
                 selectedOption={params.sortBy}
                 setSelectedOption={(value) => setParams({ ...params, sortBy: value })}
                 style={{ marginBottom: 20 }}

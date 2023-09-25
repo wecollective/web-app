@@ -21,7 +21,7 @@ function HorizontalSpaceCard(props: { space: any; style?: any }): JSX.Element {
         totalFollowers,
         totalPosts,
         totalComments,
-        totalLikes,
+        totalPostLikes,
     } = space
 
     const backgroundImage = coverImagePath
@@ -69,8 +69,8 @@ function HorizontalSpaceCard(props: { space: any; style?: any }): JSX.Element {
                     />
                     <StatButton
                         icon={<LikeIcon />}
-                        text={totalLikes}
-                        title={statTitle('Like', totalLikes)}
+                        text={totalPostLikes}
+                        title={statTitle('Like', totalPostLikes)}
                     />
                 </Row>
             </Column>

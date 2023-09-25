@@ -53,7 +53,7 @@ function About(): JSX.Element {
     return (
         <Column centerX className={styles.wrapper}>
             {handle !== userHandle ? (
-                <p>User data loading... </p>
+                <p>User data loading...</p>
             ) : (
                 <Column className={styles.content}>
                     <Row centerY centerX className={styles.creation}>
