@@ -78,36 +78,34 @@ function Posts(): JSX.Element {
     if (spaceNotFound) return <SpaceNotFound />
     return (
         <Column centerX className={styles.wrapper}>
-            <Column className={styles.content}>
-                {params.lens === 'List' && (
-                    <Row centerX style={{ width: '100%' }}>
-                        {largeScreen && (
-                            <Column className={styles.spaceNavWrapper}>
-                                <NavigationList />
-                            </Column>
-                        )}
-                        <PostList
-                            location='space-posts'
-                            posts={spacePosts}
-                            totalPosts={spaceData.totalPosts}
-                            loading={spacePostsLoading}
-                            nextPostsLoading={nextSpacePostsLoading}
-                            className={styles.postList}
-                            styling={wecoSpace}
-                        />
-                        {largeScreen && (
-                            <Column className={styles.topContributorsWrapper}>
-                                <TopContributors />
-                            </Column>
-                        )}
-                    </Row>
-                )}
-                {params.lens === 'Map' && (
-                    <Column className={styles.postMapView}>
-                        <PostMap postMapData={postMapData} params={params} />
-                    </Column>
-                )}
-            </Column>
+            {params.lens === 'List' && (
+                <Row centerX style={{ width: '100%' }}>
+                    {largeScreen && (
+                        <Column className={styles.spaceNavWrapper}>
+                            <NavigationList />
+                        </Column>
+                    )}
+                    <PostList
+                        location='space-posts'
+                        posts={spacePosts}
+                        totalPosts={spaceData.totalPosts}
+                        loading={spacePostsLoading}
+                        nextPostsLoading={nextSpacePostsLoading}
+                        className={styles.postList}
+                        styling={wecoSpace}
+                    />
+                    {largeScreen && (
+                        <Column className={styles.topContributorsWrapper}>
+                            <TopContributors />
+                        </Column>
+                    )}
+                </Row>
+            )}
+            {params.lens === 'Map' && (
+                <Column className={styles.postMapView}>
+                    <PostMap postMapData={postMapData} params={params} />
+                </Column>
+            )}
         </Column>
     )
 }

@@ -25,18 +25,6 @@ function PostList(props: {
     const { resetUserPosts } = useContext(UserContext)
     const mobileView = document.documentElement.clientWidth < 900
 
-    function renderPlaceholder() {
-        return (
-            <Column centerY centerX className={styles.noResults}>
-                {totalPosts ? (
-                    <p>No posts found that match those settings...</p>
-                ) : (
-                    <p>No posts created...</p>
-                )}
-            </Column>
-        )
-    }
-
     useEffect(
         () => () => {
             if (location === 'space-posts') resetSpacePosts()
@@ -52,7 +40,13 @@ function PostList(props: {
             ) : (
                 <Column>
                     {!posts.length ? (
-                        renderPlaceholder()
+                        <Column centerY centerX className={styles.noResults}>
+                            {totalPosts ? (
+                                <p>No posts found that match those settings...</p>
+                            ) : (
+                                <p>No posts created...</p>
+                            )}
+                        </Column>
                     ) : (
                         <Column className={styles.posts}>
                             {posts.map((post) => (

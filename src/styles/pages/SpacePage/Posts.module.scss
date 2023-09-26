@@ -7,46 +7,39 @@
         width: auto;
     }
 
-    .content {
+    .postList {
         width: 100%;
         @include for-desktop-small-up {
-            width: auto;
+            width: 800px;
         }
+    }
 
-        .postList {
-            width: 100%;
-            @include for-desktop-small-up {
-                width: 800px;
-            }
-        }
+    .spaceNavWrapper {
+        flex-shrink: 0;
+        position: sticky !important;
+        top: 120px;
+        left: 0;
+        max-height: calc(100vh - 140px);
+        min-width: 240px;
+    }
 
-        .spaceNavWrapper {
-            flex-shrink: 0;
-            position: sticky !important;
-            top: 120px;
-            left: 0;
-            max-height: calc(100vh - 140px);
-            min-width: 240px;
-        }
+    .topContributorsWrapper {
+        flex-shrink: 0;
+        position: sticky !important;
+        top: 120px;
+        left: 0;
+        max-height: calc(100vh - 140px);
+        min-width: 260px;
+        margin-left: 20px;
+    }
 
-        .topContributorsWrapper {
-            flex-shrink: 0;
-            position: sticky !important;
-            top: 120px;
-            left: 0;
-            max-height: calc(100vh - 140px);
-            min-width: 260px;
-            margin-left: 20px;
-        }
+    .postMapView {
+        width: 100%;
+        min-width: calc(100vw - 20px);
+        padding: 0 10px;
 
-        .postMapView {
-            width: 100%;
-            min-width: calc(100vw - 20px);
-            padding: 0 10px;
-
-            @include for-desktop-small-up {
-                width: calc(100vw - 40px);
-            }
+        @include for-desktop-small-up {
+            width: calc(100vw - 40px);
         }
     }
 }
