@@ -112,12 +112,12 @@ function NavigationList(props: { onLocationChange?: () => void; style?: any }): 
     const cookies = new Cookies()
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]
-    const currentSpaceId = useRef(0)
+    const spaceHandleRef = useRef('')
 
-    async function getSpaces(id, offset, includeParents) {
-        if (!offset) currentSpaceId.current = id
+    async function getSpaces(spaceId, offset, includeParents) {
+        if (!offset) spaceHandleRef.current = spaceHandle
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-        const data = { spaceId: id, offset, includeParents }
+        const data = { spaceId, offset, includeParents }
         return axios.post(`${config.apiURL}/nav-list-spaces`, data, options)
     }
 
@@ -197,7 +197,7 @@ function NavigationList(props: { onLocationChange?: () => void; style?: any }): 
         else {
             getSpaces(spaceData.id, 0, true)
                 .then((res) => {
-                    if (spaceData.id === currentSpaceId.current) {
+                    if (spaceHandleRef.current === spaceHandle) {
                         setParents(res.data.parents)
                         setChildren(res.data.children)
                         setTotalChildren(res.data.totalChildren)

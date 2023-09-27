@@ -15,21 +15,21 @@ import { useLocation } from 'react-router-dom'
 function TopContributors(): JSX.Element {
     const { spaceData } = useContext(SpaceContext)
     const [users, setUsers] = useState<any[]>([])
-    const [moreUsers, setMoreUsers] = useState(false)
+    const [totalUsers, setTotalUsers] = useState(0)
     const [loading, setLoading] = useState(true)
     const [nextUsersLoading, setNextUsersLoading] = useState(false)
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]
-    const currentSpaceId = useRef(0)
+    const spaceHandleRef = useRef('')
 
     async function getUsers() {
-        currentSpaceId.current = spaceData.id
+        spaceHandleRef.current = spaceHandle
         axios
             .get(`${config.apiURL}/top-contributors?spaceId=${spaceData.id}&offset=${users.length}`)
             .then((res) => {
-                if (currentSpaceId.current === spaceData.id) {
+                if (spaceHandleRef.current === spaceHandle) {
                     setUsers([...users, ...res.data.users])
-                    setMoreUsers(res.data.moreUsers)
+                    setTotalUsers(res.data.totalUsers)
                     setLoading(false)
                     setNextUsersLoading(false)
                 }
@@ -66,12 +66,12 @@ function TopContributors(): JSX.Element {
                             />
                             <Row centerY className={styles.stats}>
                                 <LikeIcon />
-                                <p>{user.likesReceived}</p>
+                                <p>{user.totalPostLikes}</p>
                                 {index === 0 && <TrophyIcon />}
                             </Row>
                         </Row>
                     ))}
-                    {moreUsers && (
+                    {users.length < totalUsers && (
                         <Row centerX centerY style={{ marginTop: 10 }}>
                             {nextUsersLoading ? (
                                 <LoadingWheel size={20} />
@@ -84,7 +84,7 @@ function TopContributors(): JSX.Element {
                                     }}
                                     className={styles.loadMore}
                                 >
-                                    Load more
+                                    Load more ({totalUsers - users.length})
                                 </button>
                             )}
                         </Row>
