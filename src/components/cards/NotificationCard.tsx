@@ -195,7 +195,10 @@ function NotificationCard(props: {
             const options = { headers: { Authorization: `Bearer ${accessToken}` } }
             axios
                 .post(`${config.apiURL}/respond-to-space-invite`, data, options)
-                .then(() => updateNotification(id, 'state', response))
+                .then(() => {
+                    updateNotification(id, 'state', response)
+                    markAsSeen()
+                })
                 .catch((error) => console.log(error))
         }
     }
@@ -219,7 +222,10 @@ function NotificationCard(props: {
             const options = { headers: { Authorization: `Bearer ${accessToken}` } }
             axios
                 .post(`${config.apiURL}/respond-to-space-access-request`, data, options)
-                .then(() => updateNotification(id, 'state', response))
+                .then(() => {
+                    updateNotification(id, 'state', response)
+                    markAsSeen()
+                })
                 .catch((error) => console.log(error))
         }
     }
@@ -241,8 +247,8 @@ function NotificationCard(props: {
                 .post(`${config.apiURL}/respond-to-mod-invite`, data, authHeader)
                 .then((res) => {
                     if (res.status === 200) {
-                        // update account context
                         updateNotification(id, 'state', response)
+                        markAsSeen()
                         // todo: update if/when required
                         // if (response === 'accepted') {
                         //     const newModeratedSpaces = [
@@ -255,15 +261,6 @@ function NotificationCard(props: {
                         //     ]
                         //     updateAccountData('ModeratedSpaces', newModeratedSpaces)
                         // }
-                        if (!seen) {
-                            setSeen(true)
-                            // todo: remove updateNotification function when notifications fetched on component mount
-                            updateNotification(id, 'seen', true)
-                            updateAccountData(
-                                'unseenNotifications',
-                                accountData.unseenNotifications - 1
-                            )
-                        }
                     } else {
                         // handle errors
                         console.log(res.data.message)
@@ -290,13 +287,7 @@ function NotificationCard(props: {
                 .post(`${config.apiURL}/respond-to-parent-space-request`, data, options)
                 .then(() => {
                     updateNotification(id, 'state', response)
-                    if (!notification.seen) {
-                        updateNotification(id, 'seen', true)
-                        updateAccountData(
-                            'unseenNotifications',
-                            accountData.unseenNotifications - 1
-                        )
-                    }
+                    markAsSeen()
                 })
                 .catch((error) => console.log('error: ', error))
         }
@@ -312,7 +303,10 @@ function NotificationCard(props: {
             const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
             axios
                 .post(`${config.apiURL}/respond-to-gbg-invite`, data, authHeader)
-                .then(() => updateNotification(id, 'state', response))
+                .then(() => {
+                    updateNotification(id, 'state', response)
+                    markAsSeen()
+                })
                 .catch((error) => console.log(error))
         }
     }
