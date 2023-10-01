@@ -3,7 +3,6 @@ import Column from '@components/Column'
 import ImageTitle from '@components/ImageTitle'
 import Row from '@components/Row'
 import PostSpaces from '@components/cards/PostCard/PostSpaces'
-import { AccountContext } from '@contexts/AccountContext'
 import {
     dateCreated,
     getDraftPlainText,
@@ -13,7 +12,7 @@ import {
     trimText,
 } from '@src/Helpers'
 import styles from '@styles/components/cards/PostCard/PostCardPreview.module.scss'
-import React, { useContext } from 'react'
+import React from 'react'
 import { Link } from 'react-router-dom'
 
 function PostCardPreview(props: {
@@ -30,14 +29,13 @@ function PostCardPreview(props: {
         text,
         createdAt,
         updatedAt,
+        Creator,
         DirectSpaces,
         Urls,
         Images,
         GlassBeadGame: GBG,
         CardSides,
     } = post
-    // todo: include creator and use instead of account data
-    const { accountData } = useContext(AccountContext)
     const mobileView = document.documentElement.clientWidth < 900
     const imageSize = 28
 
@@ -54,9 +52,9 @@ function PostCardPreview(props: {
                 <Row centerY>
                     <ImageTitle
                         type='user'
-                        imagePath={accountData.flagImagePath}
+                        imagePath={Creator.flagImagePath}
                         imageSize={imageSize}
-                        title={accountData.name}
+                        title={Creator.name}
                         style={{ marginRight: 5 }}
                         shadow
                     />
