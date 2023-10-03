@@ -111,7 +111,6 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         }
     }
 
-    // todo: use authenticate token to grab space data and posts when logged in
     function getSpaceData(handle: string) {
         console.log(`SpaceContext: getSpaceData (${handle})`)
         const accessToken = cookies.get('accessToken')
@@ -144,18 +143,12 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         const firstLoad = offset === 0
         if (firstLoad) setSpacePostsLoading(true)
         else setNextSpacePostsLoading(true)
-        const data = {
-            ...params,
-            spaceId,
-            offset,
-            limit,
-            searchQuery: params.searchQuery || '',
-            mutedUsers: accountData.mutedUsers || [],
-        }
+        const data = { spaceId, offset, limit, params, mutedUsers: accountData.mutedUsers || [] }
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
             .post(`${config.apiURL}/space-posts`, data, options)
             .then((res) => {
+                // console.log('space-posts: ', res.data)
                 if (spaceHandleRef.current === spaceData.handle) {
                     setSpacePosts(firstLoad ? res.data : [...spacePosts, ...res.data])
                     setSpacePostsPaginationHasMore(res.data.length === spacePostsPaginationLimit)
