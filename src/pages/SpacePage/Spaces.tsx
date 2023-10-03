@@ -23,6 +23,8 @@ function Spaces(): JSX.Element {
         spaceCircleData,
         spaceTreeData,
         getSpaceMapData,
+        setSpaceTreeData,
+        setSpaceCircleData,
         spaceSpacesFilters,
         spaceSpacesPaginationOffset,
         spaceSpacesPaginationHasMore,
@@ -43,7 +45,14 @@ function Spaces(): JSX.Element {
         if (spaceData.handle !== spaceHandle) setSpaceSpacesLoading(true)
         else if (params.lens === 'List')
             getSpaceListData(spaceData.id, 0, spaceSpacesPaginationLimit, params)
-        else getSpaceMapData(spaceData.id, params)
+        else
+            getSpaceMapData(spaceData.id, params, 0, true)
+                .then((res) => {
+                    console.log('getSpaceMapData res: ', res.data)
+                    if (params.lens === 'Tree') setSpaceTreeData(res.data)
+                    if (params.lens === 'Circles') setSpaceCircleData(res.data)
+                })
+                .catch((error) => console.log(error))
     }, [spaceData.handle, location, loggedIn])
 
     useEffect(() => {

@@ -208,49 +208,12 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
             })
     }
 
-    // todo: consider merging getSpaceMapData and getSpaceMapChildren as both use the same space-map-data route
-    // todo: use post request and pass in params as object
-    function getSpaceMapData(spaceId, params) {
+    function getSpaceMapData(spaceId, params, offset, isParent) {
         console.log(`SpaceContext: getSpaceMapData`)
         setSpaceSpacesFilters(params)
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-        axios
-            .get(
-                /* prettier-ignore */
-                `${config.apiURL}/space-map-data?spaceId=${spaceId
-                }&lens=${params.lens
-                }&offset=${0
-                }&sortBy=${params.sortBy
-                }&sortOrder=${params.sortOrder
-                }&timeRange=${params.timeRange
-                }&depth=${params.depth
-                }&searchQuery=${params.searchQuery || ''
-                }&isParent=${true}`,
-                options
-            )
-            .then((res) => {
-                if (params.lens === 'Tree') setSpaceTreeData(res.data)
-                if (params.lens === 'Circles') setSpaceCircleData(res.data)
-            })
-            .catch((error) => console.log(error))
-    }
-
-    function getSpaceMapChildren(spaceId, offset, params, isParent) {
-        setSpaceSpacesFilters(params)
-        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-        return axios.get(
-            /* prettier-ignore */
-            `${config.apiURL}/space-map-data?spaceId=${spaceId
-                }&lens=${params.lens
-                }&offset=${offset
-                }&sortBy=${params.sortBy
-                }&sortOrder=${params.sortOrder
-                }&timeRange=${params.timeRange
-                }&depth=${params.depth
-                }&searchQuery=${params.searchQuery || ''
-                }&isParent=${isParent}`,
-            options
-        )
+        const data = { spaceId, params, offset, isParent }
+        return axios.post(`${config.apiURL}/space-map-data`, data, options)
     }
 
     function getSpacePeople(spaceId, offset, limit, params) {
@@ -374,7 +337,6 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 getPostMapData,
                 getSpaceListData,
                 getSpaceMapData,
-                getSpaceMapChildren,
                 getSpacePeople,
 
                 resetSpaceData,

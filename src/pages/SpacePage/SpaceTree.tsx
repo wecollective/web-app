@@ -16,7 +16,7 @@ import { useNavigate } from 'react-router-dom'
 
 function SpaceTree(props: { spaceTreeData: any; params: any }): JSX.Element {
     const { spaceTreeData, params } = props
-    const { spaceData, setSpaceTreeData, getSpaceMapChildren } = useContext(SpaceContext)
+    const { spaceData, setSpaceTreeData, getSpaceMapData } = useContext(SpaceContext)
     const [clickedSpaceUUID, setClickedSpaceUUID] = useState('')
     const [showSpaceModal, setShowSpaceModal] = useState(false)
     const [highlightedSpace, setHighlightedSpace] = useState<any>(null)
@@ -229,7 +229,7 @@ function SpaceTree(props: { spaceTreeData: any; params: any }): JSX.Element {
                 const spaceId = d.parent.data.id
                 const offset = d.parent.children.length - 1
                 const isParent = d.parent.data.id === spaceData.id
-                getSpaceMapChildren(spaceId, offset, params, isParent)
+                getSpaceMapData(spaceId, params, offset, isParent)
                     .then((res) => {
                         const parent = findSpaceByUUID(spaceTreeData, d.parent.data.uuid)
                         parent.children = parent.children.filter((child) => !child.expander)
@@ -260,7 +260,7 @@ function SpaceTree(props: { spaceTreeData: any; params: any }): JSX.Element {
                     updateTree(false)
                 } else {
                     // get new children
-                    getSpaceMapChildren(d.data.id, 0, params, false)
+                    getSpaceMapData(d.data.id, params, 0, false)
                         .then((res) => {
                             match.children.push(...res.data.children)
                             updateTree(false)
