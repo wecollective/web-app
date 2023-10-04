@@ -208,11 +208,11 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
             })
     }
 
-    function getSpaceMapData(spaceId, params, offset, isParent) {
+    function getSpaceMapData(scenario, spaceId, params, offset) {
         console.log(`SpaceContext: getSpaceMapData`)
         setSpaceSpacesFilters(params)
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-        const data = { spaceId, params, offset, isParent }
+        const data = { scenario, spaceId, params, offset }
         return axios.post(`${config.apiURL}/space-map-data`, data, options)
     }
 

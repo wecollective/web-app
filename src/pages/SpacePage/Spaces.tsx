@@ -46,9 +46,8 @@ function Spaces(): JSX.Element {
         else if (params.lens === 'List')
             getSpaceListData(spaceData.id, 0, spaceSpacesPaginationLimit, params)
         else
-            getSpaceMapData(spaceData.id, params, 0, true)
+            getSpaceMapData('full-tree', spaceData.id, params, 0)
                 .then((res) => {
-                    console.log('getSpaceMapData res: ', res.data)
                     if (params.lens === 'Tree') setSpaceTreeData(res.data)
                     if (params.lens === 'Circles') setSpaceCircleData(res.data)
                 })

@@ -207,7 +207,12 @@ export interface ISpaceContext {
     getSpacePosts: (spaceId: number, offset: number, limit: number, params: any) => void
     getPostMapData: (spaceId: number, params: any, limit: number) => void
     getSpaceListData: (spaceId: number, offset: number, limit: number, params: any) => void
-    getSpaceMapData: (spaceId: number, params: any, offset: number, isParent: boolean) => any
+    getSpaceMapData: (
+        scenario: 'full-tree' | 'children-of-root' | 'children-of-child',
+        spaceId: number,
+        params: any,
+        offset: number
+    ) => any
     getSpacePeople: (spaceId: number, offset: number, limit: number, params: any) => void
 
     resetSpaceData: () => void

@@ -226,10 +226,9 @@ function SpaceTree(props: { spaceTreeData: any; params: any }): JSX.Element {
             if (!d.parent) history(`/s/${d.data.handle}/posts`)
             else if (d.data.expander) {
                 // if expander, fetch next set of children
-                const spaceId = d.parent.data.id
+                const scenario = isRoot(d.parent) ? 'children-of-root' : 'children-of-child'
                 const offset = d.parent.children.length - 1
-                const isParent = d.parent.data.id === spaceData.id
-                getSpaceMapData(spaceId, params, offset, isParent)
+                getSpaceMapData(scenario, d.parent.data.id, params, offset)
                     .then((res) => {
                         const parent = findSpaceByUUID(spaceTreeData, d.parent.data.uuid)
                         parent.children = parent.children.filter((child) => !child.expander)
@@ -260,9 +259,9 @@ function SpaceTree(props: { spaceTreeData: any; params: any }): JSX.Element {
                     updateTree(false)
                 } else {
                     // get new children
-                    getSpaceMapData(d.data.id, params, 0, false)
+                    getSpaceMapData('children-of-child', d.data.id, params, 0)
                         .then((res) => {
-                            match.children.push(...res.data.children)
+                            match.children.push(...res.data)
                             updateTree(false)
                         })
                         .catch((error) => console.log(error))
