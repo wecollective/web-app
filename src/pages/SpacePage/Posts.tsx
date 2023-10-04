@@ -43,6 +43,8 @@ function Posts(): JSX.Element {
     })
 
     useEffect(() => {
+        if (params.lens === 'List') window.scrollTo({ top: 0, behavior: 'smooth' })
+        else window.scrollTo({ top: 310, behavior: 'smooth' })
         if (spaceData.handle !== spaceHandle) setSpacePostsLoading(true)
         else {
             if (params.lens === 'List')
