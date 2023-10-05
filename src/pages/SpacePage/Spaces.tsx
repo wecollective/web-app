@@ -42,7 +42,7 @@ function Spaces(): JSX.Element {
     })
 
     useEffect(() => {
-        if (params.lens !== 'List') window.scrollTo({ top: 310, behavior: 'smooth' })
+        if (params.lens !== 'List') window.scrollTo({ top: 320, behavior: 'smooth' })
         if (spaceData.handle !== spaceHandle) setSpaceSpacesLoading(true)
         else if (params.lens === 'List')
             getSpaceListData(spaceData.id, 0, spaceSpacesPaginationLimit, params)

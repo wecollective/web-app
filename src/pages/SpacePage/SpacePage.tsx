@@ -148,7 +148,7 @@ function SpacePage(): JSX.Element {
                             accessRequestLoading
                         }
                         onClick={requestAccess}
-                        style={{ marginRight: 10 }}
+                        style={{ marginRight: 10, marginTop: mobileView ? 5 : 0 }}
                     />
                 )
             }
@@ -162,6 +162,7 @@ function SpacePage(): JSX.Element {
                         loading={followSpaceLoading}
                         disabled={awaitingSpaceData || followSpaceLoading}
                         onClick={followButtonClick}
+                        style={{ marginTop: mobileView ? 5 : 0 }}
                     />
                 )
         }
@@ -182,7 +183,7 @@ function SpacePage(): JSX.Element {
     useEffect(() => {
         // add scroll listener
         document.addEventListener('scroll', () => {
-            setHeaderColapsed(window.pageYOffset > (mobileView ? 260 : 290))
+            setHeaderColapsed(window.pageYOffset > (mobileView ? 260 : 170))
             onPageBottomReached(setPageBottomReached)
         })
         // window.scrollTo(0, 300)
@@ -253,7 +254,7 @@ function SpacePage(): JSX.Element {
             <Column centerX className={`${styles.header} ${headerCollapsed && styles.collapsed}`}>
                 <CoverImage type='space' image={spaceData.coverImagePath} canEdit={isModerator} />
                 {awaitingSpaceData ? (
-                    <Row centerY style={{ height: 77 }} />
+                    <Row centerY style={{ height: 65 }} />
                 ) : (
                     <Row centerY className={styles.spaceData}>
                         <EditableFlagImage
