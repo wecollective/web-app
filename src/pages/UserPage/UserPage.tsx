@@ -100,7 +100,7 @@ function UserPage(): JSX.Element {
 
     useEffect(() => {
         document.addEventListener('scroll', () => {
-            setHeaderColapsed(window.pageYOffset > (mobileView ? 260 : 290))
+            setHeaderColapsed(window.pageYOffset > (mobileView ? 260 : 170))
             onPageBottomReached(setPageBottomReached)
         })
     }, [])
@@ -120,7 +120,7 @@ function UserPage(): JSX.Element {
                         canEdit={isOwnAccount}
                         className={styles.flagImageLarge}
                     />
-                    <Row centerY style={{ height: 50 }}>
+                    <Row centerY>
                         <Column className={styles.userName}>
                             <h1>{userData.name}</h1>
                             <p className='grey'>u/{userData.handle}</p>

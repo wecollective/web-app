@@ -11,11 +11,11 @@
         box-shadow: 0 -5px 15px 0 rgba(black, 0.2);
         z-index: 50;
         position: sticky;
-        top: -245px;
+        top: -$coverImageHeight - 5px;
 
         &.collapsed {
             .tabRow {
-                height: 45px;
+                height: 40px;
                 .userDataSmall {
                     opacity: 1;
                 }
@@ -24,12 +24,12 @@
 
         .userData {
             position: relative;
-            padding: 12px 0 10px 15px;
+            padding: 5px 0 5px 15px;
             margin-left: 120px;
 
             .flagImageLarge {
                 position: absolute;
-                top: -45px;
+                top: -55px;
                 left: -120px;
             }
 
@@ -39,7 +39,7 @@
 
                 > h1 {
                     margin-bottom: 3px;
-                    line-height: 26px;
+                    line-height: 30px;
                 }
             }
         }
@@ -53,7 +53,7 @@
             transition: height 0.2s;
 
             @include for-tablet-landscape-up {
-                height: 45px;
+                height: 40px;
             }
 
             .userDataSmall {
@@ -67,7 +67,7 @@
                 @include for-tablet-landscape-up {
                     position: absolute;
                     left: 10px;
-                    top: 8px;
+                    top: 4px;
                     margin-bottom: 0;
                 }
 
