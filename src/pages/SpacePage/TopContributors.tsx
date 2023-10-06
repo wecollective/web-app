@@ -1,11 +1,10 @@
 import Column from '@components/Column'
-import ImageTitle from '@components/ImageTitle'
 import LoadingWheel from '@components/LoadingWheel'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
+import UserButton from '@components/UserButton'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
-import { trimText } from '@src/Helpers'
 import styles from '@styles/pages/SpacePage/TopContributors.module.scss'
 import { LikeIcon, RankingIcon, TrophyIcon } from '@svgs/all'
 import axios from 'axios'
@@ -54,16 +53,7 @@ function TopContributors(): JSX.Element {
                     </Row>
                     {users.map((user, index) => (
                         <Row key={user.id} centerY style={{ marginTop: 10 }}>
-                            <ImageTitle
-                                type='space'
-                                imagePath={user.flagImagePath}
-                                title={trimText(user.name, 18)}
-                                link={`/u/${user.handle}/posts`}
-                                fontSize={14}
-                                imageSize={35}
-                                wrapText
-                                style={{ marginRight: 10 }}
-                            />
+                            <UserButton user={user} imageSize={35} style={{ marginRight: 10 }} />
                             <Row centerY className={styles.stats}>
                                 <LikeIcon />
                                 <p>{user.totalPostLikes}</p>
