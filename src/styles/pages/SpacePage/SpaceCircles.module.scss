@@ -24,24 +24,28 @@
             transform: rotate(45deg);
         }
 
-        .title {
-            > svg {
-                width: 18px;
-                height: 18px;
-                margin-right: 5px;
+        .header {
+            margin-bottom: 5px;
+
+            .title {
+                svg {
+                    width: 18px;
+                    height: 18px;
+                    margin-right: 5px;
+                }
+                h1 {
+                    font-size: 18px;
+                    line-height: 18px;
+                    margin: 0;
+                }
             }
-            > h1 {
-                font-size: 18px;
-                line-height: 18px;
+            h2 {
+                font-size: 16px;
                 margin: 0;
+                color: rgb(160, 160, 160);
             }
         }
 
-        > h2 {
-            font-size: 16px;
-            margin: 0;
-            color: rgb(160, 160, 160);
-        }
         > p {
             font-size: 12px;
         }

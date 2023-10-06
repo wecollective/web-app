@@ -9,6 +9,7 @@ import DraftText from '@components/draft-js/DraftText'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import { trimText } from '@src/Helpers'
+import FlagImage from '@src/components/FlagImage'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/pages/SpacePage/SpaceCircles.module.scss'
 import { CommentIcon, LockIcon, PostIcon, UsersIcon } from '@svgs/all'
@@ -60,7 +61,7 @@ function SpaceCircles(props: { spaceCircleData: any; params: any }): JSX.Element
             // update mouse coordinates after drag events
             const { pageX, pageY } = event
             const { y } = d3.select('#sc-svg').node().getBoundingClientRect()
-            setMouseCoordinates({ x: pageX + 20, y: pageY + y - 456 })
+            setMouseCoordinates({ x: pageX + 20, y: pageY + y - 332 })
             setMouseDown(false)
         })
 
@@ -158,26 +159,23 @@ function SpaceCircles(props: { spaceCircleData: any; params: any }): JSX.Element
     function circleMouseOver(event, circle) {
         event.stopPropagation()
         if (!transitioning.current) {
-            currentCircle.current = circle.data.uuid
-            setTimeout(() => {
-                if (currentCircle.current === circle.data.uuid) {
-                    const zoomScale = d3.zoomTransform(d3.select('#sc-master-group').node()).k
-                    d3.selectAll(
-                        `.sc-parent-circle-${circle.data.id},.sc-circle-${circle.data.id},.sc-circle-background-${circle.data.id},.sc-circle-image-${circle.data.id}`
-                    )
-                        .transition('circles-mouse-over')
-                        .duration(transitionDuration / 3)
-                        .attr(
-                            'stroke',
-                            (d) => colors[isHoveredCircle(circle, d) ? 'cpBlue' : 'cpPurple']
-                        )
-                        .attr('stroke-width', 5 / zoomScale)
-                        .attr('opacity', 1)
-                    // display space info
-                    getHighlightedSpaceData(circle.data)
-                    setShowSpaceModal(true)
-                }
-            }, 500)
+            // currentCircle.current = circle.data.uuid
+            // setTimeout(() => {
+            //     if (currentCircle.current === circle.data.uuid) {
+            const zoomScale = d3.zoomTransform(d3.select('#sc-master-group').node()).k
+            d3.selectAll(
+                `.sc-parent-circle-${circle.data.id},.sc-circle-${circle.data.id},.sc-circle-background-${circle.data.id},.sc-circle-image-${circle.data.id}`
+            )
+                .transition('circles-mouse-over')
+                .duration(transitionDuration / 3)
+                .attr('stroke', (d) => colors[isHoveredCircle(circle, d) ? 'cpBlue' : 'cpPurple'])
+                .attr('stroke-width', 5 / zoomScale)
+                .attr('opacity', 1)
+            // display space info
+            getHighlightedSpaceData(circle.data)
+            setShowSpaceModal(true)
+            //     }
+            // }, 500)
         }
     }
 
@@ -292,31 +290,31 @@ function SpaceCircles(props: { spaceCircleData: any; params: any }): JSX.Element
                                 .duration(transitionDuration)
                                 .attr('opacity', 1)
                         )
-                    // add background for transparent images
-                    group
-                        .append('circle')
-                        .attr('id', (d) => `sc-circle-background-${d.data.uuid}`)
-                        .attr(
-                            'class',
-                            (d) => `sc-circle-background sc-circle-background-${d.data.id}`
-                        )
-                        .attr('r', (d) => d.r)
-                        .attr('fill', 'white')
-                        .attr('stroke', colors.cpGrey)
-                        .attr('stroke-width', 1)
-                        .attr('pointer-events', 'none')
-                        .attr('opacity', 0)
-                    // add image
-                    group
-                        .append('circle')
-                        .attr('id', (d) => `sc-circle-image-${d.data.uuid}`)
-                        .attr('class', (d) => `sc-circle-image sc-circle-image-${d.data.id}`)
-                        .attr('r', (d) => d.r)
-                        .attr('stroke', colors.cpGrey)
-                        .attr('stroke-width', 1)
-                        .attr('pointer-events', 'none')
-                        .attr('opacity', 0)
-                        .attr('fill', (d) => findFill(d, d.r))
+                    // // add background for transparent images
+                    // group
+                    //     .append('circle')
+                    //     .attr('id', (d) => `sc-circle-background-${d.data.uuid}`)
+                    //     .attr(
+                    //         'class',
+                    //         (d) => `sc-circle-background sc-circle-background-${d.data.id}`
+                    //     )
+                    //     .attr('r', (d) => d.r)
+                    //     .attr('fill', 'white')
+                    //     .attr('stroke', colors.cpGrey)
+                    //     .attr('stroke-width', 1)
+                    //     .attr('pointer-events', 'none')
+                    //     .attr('opacity', 0)
+                    // // add image
+                    // group
+                    //     .append('circle')
+                    //     .attr('id', (d) => `sc-circle-image-${d.data.uuid}`)
+                    //     .attr('class', (d) => `sc-circle-image sc-circle-image-${d.data.id}`)
+                    //     .attr('r', (d) => d.r)
+                    //     .attr('stroke', colors.cpGrey)
+                    //     .attr('stroke-width', 1)
+                    //     .attr('pointer-events', 'none')
+                    //     .attr('opacity', 0)
+                    //     .attr('fill', (d) => findFill(d, d.r))
                     return group
                 },
                 (update) => {
@@ -335,19 +333,19 @@ function SpaceCircles(props: { spaceCircleData: any; params: any }): JSX.Element
                         .duration(transitionDuration)
                         .attr('r', (d) => d.r)
                         .attr('fill', (d) => colorScale(d.depth + 1))
-                    // update backgrounds
-                    update
-                        .select('.sc-circle-background')
-                        .transition('circle-background-update')
-                        .duration(transitionDuration)
-                        .attr('r', (d) => d.r)
-                    // update images
-                    update
-                        .select('.sc-circle-image')
-                        .transition('circle-image-update')
-                        .duration(transitionDuration)
-                        .attr('r', (d) => d.r)
-                        .attr('fill', (d) => findFill(d, d.r))
+                    // // update backgrounds
+                    // update
+                    //     .select('.sc-circle-background')
+                    //     .transition('circle-background-update')
+                    //     .duration(transitionDuration)
+                    //     .attr('r', (d) => d.r)
+                    // // update images
+                    // update
+                    //     .select('.sc-circle-image')
+                    //     .transition('circle-image-update')
+                    //     .duration(transitionDuration)
+                    //     .attr('r', (d) => d.r)
+                    //     .attr('fill', (d) => findFill(d, d.r))
                     return update
                 },
                 (exit) => {
@@ -447,7 +445,7 @@ function SpaceCircles(props: { spaceCircleData: any; params: any }): JSX.Element
                 // keep track of mouse coordinates for space info modal
                 const { pageX, pageY } = event
                 const { y } = d3.select('#sc-svg').node().getBoundingClientRect()
-                setMouseCoordinates({ x: pageX + 20, y: pageY + y - 456 })
+                setMouseCoordinates({ x: pageX + 20, y: pageY + y - 332 })
             })
         // create defs
         svg.append('defs').attr('id', 'sc-imgdefs')
@@ -557,15 +555,25 @@ function SpaceCircles(props: { spaceCircleData: any; params: any }): JSX.Element
                     style={{ top: mouseCoordinates.y, left: mouseCoordinates.x }}
                 >
                     <div className={styles.pointer} />
-                    <Row centerY className={styles.title}>
-                        {highlightedSpace.privacy === 'private' && <LockIcon />}
-                        <h1>{highlightedSpace.name}</h1>
+                    <Row className={styles.header}>
+                        <FlagImage
+                            type='space'
+                            imagePath={highlightedSpace.flagImagePath}
+                            size={38}
+                            style={{ marginRight: 8 }}
+                        />
+                        <Column>
+                            <Row centerY className={styles.title}>
+                                {highlightedSpace.privacy === 'private' && <LockIcon />}
+                                <h1>{highlightedSpace.name}</h1>
+                            </Row>
+                            <h2>s/{highlightedSpace.handle}</h2>
+                        </Column>
                     </Row>
                     {highlightedSpace.expander ? (
                         <h2 style={{ marginTop: 5 }}>Click to expand</h2>
                     ) : (
                         <>
-                            <h2>s/{highlightedSpace.handle}</h2>
                             <DraftText
                                 stringifiedDraft={highlightedSpace.description}
                                 className={styles.draft}
