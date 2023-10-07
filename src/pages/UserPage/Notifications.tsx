@@ -57,8 +57,10 @@ function Notifications(): JSX.Element {
     // get first notifications
     useEffect(() => {
         if (userData.id) {
-            if (userHandle === accountData.handle) getNotifications(0, showSeenItems)
-            else history(`/u/${userHandle}/posts`)
+            if (userHandle === accountData.handle) {
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+                getNotifications(0, showSeenItems)
+            } else history(`/u/${userHandle}/posts`)
         }
     }, [userData.id, loggedIn])
 

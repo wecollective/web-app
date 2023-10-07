@@ -159,6 +159,7 @@ function Streams(): JSX.Element {
 
     useEffect(() => {
         if (!streamsLoading) {
+            window.scrollTo({ top: 0, behavior: 'smooth' })
             setStreamNotFound(false)
             getSources()
             getPosts(0)

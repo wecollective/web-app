@@ -59,10 +59,12 @@ function SpaceButtonModal(props: { space: any; transparent: boolean }): JSX.Elem
                         <LikeIcon />
                         <p>{totalPostLikes}</p>
                     </Row>
-                    <Row className={styles.stat}>
-                        <UsersIcon />
-                        <p>{totalFollowers}</p>
-                    </Row>
+                    {totalFollowers > 0 && (
+                        <Row className={styles.stat}>
+                            <UsersIcon />
+                            <p>{totalFollowers}</p>
+                        </Row>
+                    )}
                 </Row>
             </Column>
         </Column>

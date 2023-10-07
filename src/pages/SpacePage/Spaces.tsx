@@ -42,17 +42,19 @@ function Spaces(): JSX.Element {
     })
 
     useEffect(() => {
-        if (params.lens !== 'List') window.scrollTo({ top: 320, behavior: 'smooth' })
         if (spaceData.handle !== spaceHandle) setSpaceSpacesLoading(true)
-        else if (params.lens === 'List')
+        else if (params.lens === 'List') {
+            window.scrollTo({ top: 0, behavior: 'smooth' })
             getSpaceListData(spaceData.id, 0, spaceSpacesPaginationLimit, params)
-        else
+        } else {
+            window.scrollTo({ top: 320, behavior: 'smooth' })
             getSpaceMapData('full-tree', spaceData.id, params, 0)
                 .then((res) => {
                     if (params.lens === 'Tree') setSpaceTreeData(res.data)
                     if (params.lens === 'Circles') setSpaceCircleData(res.data)
                 })
                 .catch((error) => console.log(error))
+        }
     }, [spaceData.handle, location, loggedIn])
 
     useEffect(() => {

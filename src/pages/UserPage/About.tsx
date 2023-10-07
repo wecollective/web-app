@@ -59,6 +59,7 @@ function About(): JSX.Element {
 
     function linkGreenCheckAccount() {
         setGreenCheckLinkLoading(true)
+        // https://api.publicapis.org/entries
         axios
             .get(`https://greencheck.world/api/greencheck/weco.username/${accountData.handle}`)
             .then((res) => {

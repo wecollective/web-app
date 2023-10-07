@@ -35,12 +35,12 @@ function Posts(): JSX.Element {
 
     useEffect(() => {
         if (userData.handle !== userHandle) setUserPostsLoading(true)
-        else {
-            if (params.lens === 'List')
-                getUserPosts(userData.id, 0, userPostsPaginationLimit, params)
-            if (params.lens === 'Map') {
-                // getPostMapData(spaceData.id, params)
-            }
+        else if (params.lens === 'List') {
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+            getUserPosts(userData.id, 0, userPostsPaginationLimit, params)
+        } else if (params.lens === 'Map') {
+            window.scrollTo({ top: 320, behavior: 'smooth' })
+            // getPostMapData(spaceData.id, params)
         }
     }, [userData.handle, location, loggedIn])
 

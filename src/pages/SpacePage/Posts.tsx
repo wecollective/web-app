@@ -43,13 +43,13 @@ function Posts(): JSX.Element {
     })
 
     useEffect(() => {
-        if (params.lens === 'List') window.scrollTo({ top: 0, behavior: 'smooth' })
-        else window.scrollTo({ top: 310, behavior: 'smooth' })
         if (spaceData.handle !== spaceHandle) setSpacePostsLoading(true)
-        else {
-            if (params.lens === 'List')
-                getSpacePosts(spaceData.id, 0, spacePostsPaginationLimit, params)
-            if (params.lens === 'Map') getPostMapData(spaceData.id, params, 50)
+        else if (params.lens === 'List') {
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+            getSpacePosts(spaceData.id, 0, spacePostsPaginationLimit, params)
+        } else if (params.lens === 'Map') {
+            window.scrollTo({ top: 310, behavior: 'smooth' })
+            getPostMapData(spaceData.id, params, 50)
         }
     }, [spaceData.handle, location, loggedIn])
 

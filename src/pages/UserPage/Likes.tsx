@@ -48,13 +48,18 @@ function Likes(): JSX.Element {
 
     useEffect(() => {
         if (userData.id) {
-            if (userHandle === accountData.handle) getItems(0)
-            else history(`/u/${userHandle}/posts`)
+            if (userHandle === accountData.handle) {
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+                getItems(0)
+            } else history(`/u/${userHandle}/posts`)
         }
     }, [userData.id, loggedIn])
 
     useEffect(() => {
-        if (!itemsLoading) getItems(0)
+        if (!itemsLoading) {
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+            getItems(0)
+        }
     }, [location])
 
     useEffect(() => {
