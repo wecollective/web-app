@@ -1,9 +1,7 @@
-import Column from '@components/Column'
 import FlagImage from '@components/FlagImage'
-import Row from '@components/Row'
+import UserButtonModal from '@components/modals/UserButtonModal'
 import config from '@src/Config'
 import styles from '@styles/components/UserButton.module.scss'
-import { CommentIcon, PostIcon } from '@svgs/all'
 import axios from 'axios'
 import React, { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -20,18 +18,15 @@ function UserButton(props: {
     const [showModal, setShowModal] = useState(false)
     const [transparent, setTransparent] = useState(true)
     const [modalData, setModalData] = useState({
+        bio: '',
         coverImagePath: '',
         totalPosts: 0,
         totalComments: 0,
     })
-    const { coverImagePath, totalPosts, totalComments } = modalData
     const mouseOver = useRef(false)
     const hoverDelay = 500
     const text = state === 'deleted' ? `[user deleted]` : name
     const color = state === 'deleted' ? '#acacae' : ''
-    const backgroundImage = coverImagePath
-        ? `url(${coverImagePath})`
-        : 'linear-gradient(141deg, #9fb8ad 0%, #1fc8db 51%, #2cb5e8 75%'
 
     function onMouseEnter() {
         // start hover delay
@@ -70,29 +65,7 @@ function UserButton(props: {
             <FlagImage type='user' size={imageSize!} imagePath={flagImagePath} />
             <p style={{ fontSize, color }}>{text}</p>
             {showModal && (
-                <Column centerX className={`${styles.modal} ${transparent && styles.transparent}`}>
-                    <div className={styles.coverImage} style={{ backgroundImage }} />
-                    <FlagImage
-                        className={styles.flagImage}
-                        size={80}
-                        type='user'
-                        imagePath={user.flagImagePath}
-                        outline
-                        shadow
-                    />
-                    <h1>{name}</h1>
-                    <h2>u/{handle}</h2>
-                    <Row centerY centerX style={{ marginBottom: 15 }}>
-                        <Row className={styles.stat}>
-                            <PostIcon />
-                            <p>{totalPosts}</p>
-                        </Row>
-                        <Row className={styles.stat}>
-                            <CommentIcon />
-                            <p>{totalComments}</p>
-                        </Row>
-                    </Row>
-                </Column>
+                <UserButtonModal user={{ ...user, ...modalData }} transparent={transparent} />
             )}
         </Link>
     )

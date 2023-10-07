@@ -1,7 +1,5 @@
 @import '@styles/Variables';
 
-$borderRadius: 10px;
-
 .wrapper {
     position: relative;
     display: flex;
@@ -13,63 +11,5 @@ $borderRadius: 10px;
         margin: 0 0 0 5px !important;
         font-size: 14px;
         white-space: nowrap;
-    }
-
-    .modal {
-        position: absolute;
-        pointer-events: none;
-        top: 50px;
-        width: 250px;
-        background-color: white;
-        box-shadow: 0 0 10px 0 rgba(10, 8, 72, 0.1);
-        border-radius: $borderRadius;
-        z-index: 5;
-        opacity: 1;
-        transition: opacity 0.5s;
-
-        &.transparent {
-            opacity: 0;
-        }
-
-        .coverImage {
-            width: 100%;
-            height: 60px;
-            background-size: cover;
-            background-position: center;
-            border-top-left-radius: $borderRadius;
-            border-top-right-radius: $borderRadius;
-            flex-shrink: 0;
-        }
-
-        .flagImage {
-            margin: -40px 0 5px 0;
-        }
-
-        h1 {
-            font-size: 20px;
-            line-height: 22px;
-            margin-bottom: 3px;
-            text-align: center;
-        }
-
-        h2 {
-            font-size: 16px;
-            color: $grey4;
-            margin-bottom: 10px;
-        }
-
-        .stat {
-            color: $grey4;
-
-            &:not(:last-child) {
-                margin-right: 12px;
-            }
-
-            svg {
-                width: 20px;
-                height: 20px;
-                margin-right: 5px;
-            }
-        }
     }
 }
