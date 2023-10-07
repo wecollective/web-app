@@ -9,6 +9,7 @@ import DraftText from '@components/draft-js/DraftText'
 import DeleteCommentModal from '@components/modals/DeleteCommentModal'
 import LikeModal from '@components/modals/LikeModal'
 import RatingModal from '@components/modals/RatingModal'
+import UserButtonModal from '@components/modals/UserButtonModal'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
@@ -25,7 +26,7 @@ import {
     ZapIcon,
 } from '@svgs/all'
 import axios from 'axios'
-import React, { useContext, useState } from 'react'
+import React, { useContext, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
@@ -74,6 +75,16 @@ function CommentCard(props: {
     const [likeModalOpen, setLikeModalOpen] = useState(false)
     const [ratingModalOpen, setRatingModalOpen] = useState(false)
     const [showMutedComment, setShowMutedComment] = useState(false)
+    const [showModal, setShowModal] = useState(false)
+    const [transparent, setTransparent] = useState(true)
+    const [modalData, setModalData] = useState({
+        bio: '',
+        coverImagePath: '',
+        totalPosts: 0,
+        totalComments: 0,
+    })
+    const mouseOver = useRef(false)
+    const hoverDelay = 500
     const isOwnComment = Creator.id === accountData.id
     const muted = accountData.id && accountData.mutedUsers.includes(Creator.id)
     const history = useNavigate()
@@ -104,6 +115,32 @@ function CommentCard(props: {
         }
     }
 
+    function onMouseEnter() {
+        // start hover delay
+        mouseOver.current = true
+        setTimeout(() => {
+            if (mouseOver.current) {
+                setShowModal(true)
+                setTimeout(() => {
+                    if (mouseOver.current) setTransparent(false)
+                }, 200)
+            }
+        }, hoverDelay)
+        // get modal data
+        axios
+            .get(`${config.apiURL}/user-modal-data?userId=${id}`)
+            .then((res) => setModalData(res.data))
+            .catch((error) => console.log(error))
+    }
+
+    function onMouseLeave() {
+        mouseOver.current = false
+        setTransparent(true)
+        setTimeout(() => {
+            if (!mouseOver.current) setShowModal(false)
+        }, hoverDelay)
+    }
+
     if (muted && !showMutedComment)
         return (
             <button
@@ -126,6 +163,8 @@ function CommentCard(props: {
             <Row>
                 <Link
                     to={`/u/${Creator.handle}`}
+                    onMouseEnter={onMouseEnter}
+                    onMouseLeave={onMouseLeave}
                     style={{ pointerEvents: Creator.handle ? 'auto' : 'none' }}
                 >
                     <FlagImage type='user' size={30} imagePath={Creator.flagImagePath} />
@@ -138,7 +177,12 @@ function CommentCard(props: {
                                     [Account deleted]
                                 </p>
                             ) : (
-                                <Link to={`/u/${Creator.handle}`} style={{ marginRight: 5 }}>
+                                <Link
+                                    to={`/u/${Creator.handle}`}
+                                    onMouseEnter={onMouseEnter}
+                                    onMouseLeave={onMouseLeave}
+                                    style={{ marginRight: 5 }}
+                                >
                                     <p style={{ fontWeight: 600 }}>{Creator.name}</p>
                                 </Link>
                             )}
@@ -291,6 +335,9 @@ function CommentCard(props: {
                     removeComment={removeComment}
                     close={() => setDeleteCommentModalOpen(false)}
                 />
+            )}
+            {showModal && (
+                <UserButtonModal user={{ ...Creator, ...modalData }} transparent={transparent} />
             )}
         </Column>
     )
