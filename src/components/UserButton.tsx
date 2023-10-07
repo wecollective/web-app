@@ -5,7 +5,7 @@ import config from '@src/Config'
 import styles from '@styles/components/UserButton.module.scss'
 import { CommentIcon, PostIcon } from '@svgs/all'
 import axios from 'axios'
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 function UserButton(props: {
@@ -18,13 +18,15 @@ function UserButton(props: {
     const { user, imageSize, fontSize, style, className } = props
     const { id, handle, name, flagImagePath, state } = user
     const [showModal, setShowModal] = useState(false)
+    const [transparent, setTransparent] = useState(true)
     const [modalData, setModalData] = useState({
-        bio: '',
         coverImagePath: '',
         totalPosts: 0,
         totalComments: 0,
     })
-    const { bio, coverImagePath, totalPosts, totalComments } = modalData
+    const { coverImagePath, totalPosts, totalComments } = modalData
+    const mouseOver = useRef(false)
+    const hoverDelay = 500
     const text = state === 'deleted' ? `[user deleted]` : name
     const color = state === 'deleted' ? '#acacae' : ''
     const backgroundImage = coverImagePath
@@ -32,7 +34,17 @@ function UserButton(props: {
         : 'linear-gradient(141deg, #9fb8ad 0%, #1fc8db 51%, #2cb5e8 75%'
 
     function onMouseEnter() {
-        setShowModal(true)
+        // start hover delay
+        mouseOver.current = true
+        setTimeout(() => {
+            if (mouseOver.current) {
+                setShowModal(true)
+                setTimeout(() => {
+                    if (mouseOver.current) setTransparent(false)
+                }, 200)
+            }
+        }, hoverDelay)
+        // get modal data
         axios
             .get(`${config.apiURL}/user-modal-data?userId=${id}`)
             .then((res) => setModalData(res.data))
@@ -40,13 +52,17 @@ function UserButton(props: {
     }
 
     function onMouseLeave() {
-        setShowModal(false)
+        mouseOver.current = false
+        setTransparent(true)
+        setTimeout(() => {
+            if (!mouseOver.current) setShowModal(false)
+        }, hoverDelay)
     }
 
     return (
         <Link
             to={`/u/${handle}`}
-            className={`${styles.container} ${className}`}
+            className={`${styles.wrapper} ${className}`}
             style={style}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
@@ -54,7 +70,7 @@ function UserButton(props: {
             <FlagImage type='user' size={imageSize!} imagePath={flagImagePath} />
             <p style={{ fontSize, color }}>{text}</p>
             {showModal && (
-                <Column centerX className={styles.modal}>
+                <Column centerX className={`${styles.modal} ${transparent && styles.transparent}`}>
                     <div className={styles.coverImage} style={{ backgroundImage }} />
                     <FlagImage
                         className={styles.flagImage}

@@ -2,30 +2,34 @@
 
 $borderRadius: 10px;
 
-.container {
+.wrapper {
     position: relative;
     display: flex;
     flex-direction: row;
     align-items: center;
-    border: none;
-    background-color: transparent;
     cursor: pointer;
 
     > p {
         margin: 0 0 0 5px !important;
         font-size: 14px;
         white-space: nowrap;
-        pointer-events: none;
     }
 
     .modal {
         position: absolute;
+        pointer-events: none;
         top: 50px;
         width: 250px;
         background-color: white;
-        box-shadow: 0 7px 10px 0 rgba(10, 8, 72, 0.04);
+        box-shadow: 0 0 10px 0 rgba(10, 8, 72, 0.1);
         border-radius: $borderRadius;
         z-index: 5;
+        opacity: 1;
+        transition: opacity 0.5s;
+
+        &.transparent {
+            opacity: 0;
+        }
 
         .coverImage {
             width: 100%;
@@ -38,25 +42,27 @@ $borderRadius: 10px;
         }
 
         .flagImage {
-            margin-top: -40px;
+            margin: -40px 0 5px 0;
         }
 
         h1 {
             font-size: 20px;
-            margin-bottom: 0;
+            line-height: 22px;
+            margin-bottom: 3px;
+            text-align: center;
         }
 
         h2 {
             font-size: 16px;
             color: $grey4;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .stat {
             color: $grey4;
 
             &:not(:last-child) {
-                margin-right: 10px;
+                margin-right: 12px;
             }
 
             svg {
