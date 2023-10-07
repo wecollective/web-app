@@ -1,11 +1,10 @@
 import Column from '@components/Column'
-import ImageTitle from '@components/ImageTitle'
 import LoadingWheel from '@components/LoadingWheel'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
+import SpaceButton from '@components/SpaceButton'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
-import { trimText } from '@src/Helpers'
 import styles from '@styles/pages/SpacePage/NavigationList.module.scss'
 import { ArrowDownIcon, ArrowUpIcon, MinusIcon, PlusIcon } from '@svgs/all'
 import axios from 'axios'
@@ -24,9 +23,6 @@ function Space(props: {
     const { space, type, expand, getNextChildren, onLocationChange } = props
     const {
         id,
-        handle,
-        name,
-        flagImagePath,
         privacy,
         spaceAccess,
         children,
@@ -41,15 +37,10 @@ function Space(props: {
     return (
         <Column>
             <Row centerY style={{ marginBottom: 10 }}>
-                <ImageTitle
-                    type='space'
-                    imagePath={flagImagePath}
-                    title={trimText(name, 24)}
-                    link={`/s/${handle}/${subpage}`}
-                    fontSize={14}
+                <SpaceButton
+                    space={space}
                     imageSize={35}
                     onClick={() => onLocationChange && onLocationChange()}
-                    wrapText
                 />
                 {showExpander && (
                     <button

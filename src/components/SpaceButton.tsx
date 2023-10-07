@@ -10,11 +10,12 @@ function SpaceButton(props: {
     space: any
     imageSize?: number
     fontSize?: number
+    shadow?: boolean
     style?: any
     className?: any
-    onClick: () => void
+    onClick?: () => void
 }): JSX.Element {
-    const { space, imageSize, fontSize, style, className, onClick } = props
+    const { space, imageSize, fontSize, shadow, style, className, onClick } = props
     const { id, handle, name, flagImagePath, state } = space
     const [showModal, setShowModal] = useState(false)
     const [transparent, setTransparent] = useState(true)
@@ -66,7 +67,7 @@ function SpaceButton(props: {
             onMouseLeave={onMouseLeave}
             onClick={onClick}
         >
-            <FlagImage type='space' size={imageSize!} imagePath={flagImagePath} />
+            <FlagImage type='space' size={imageSize!} imagePath={flagImagePath} shadow={shadow} />
             <p style={{ fontSize, color }}>{text}</p>
             {showModal && (
                 <SpaceButtonModal space={{ ...space, ...modalData }} transparent={transparent} />
@@ -78,8 +79,10 @@ function SpaceButton(props: {
 SpaceButton.defaultProps = {
     imageSize: 30,
     fontSize: 14,
+    shadow: false,
     style: null,
     className: null,
+    onClick: null,
 }
 
 export default SpaceButton

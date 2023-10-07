@@ -21,6 +21,7 @@
         left: 0;
         max-height: calc(100vh - 140px);
         min-width: 240px;
+        z-index: 5;
     }
 
     .topContributorsWrapper {
@@ -31,6 +32,7 @@
         max-height: calc(100vh - 140px);
         min-width: 260px;
         margin-left: 20px;
+        z-index: 5;
     }
 
     .postMapView {
