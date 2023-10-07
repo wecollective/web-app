@@ -1,9 +1,9 @@
 import CloseOnClickOutside from '@components/CloseOnClickOutside'
 import Column from '@components/Column'
-import ImageTitle from '@components/ImageTitle'
 import LoadingWheel from '@components/LoadingWheel'
 import Row from '@components/Row'
 import ShowMoreLess from '@components/ShowMoreLess'
+import UserButton from '@components/UserButton'
 import Comments from '@components/cards/Comments/Comments'
 import AudioCard from '@components/cards/PostCard/AudioCard'
 import CardCard from '@components/cards/PostCard/CardCard'
@@ -179,15 +179,11 @@ function PostCard(props: {
         >
             <Row spaceBetween className={styles.header}>
                 <Row centerY>
-                    <ImageTitle
-                        type='user'
-                        imagePath={Creator.flagImagePath}
+                    <UserButton
+                        user={Creator}
                         imageSize={32}
-                        title={Creator.name}
                         fontSize={15}
-                        link={`/u/${Creator.handle}/posts`}
                         style={{ marginRight: 5 }}
-                        shadow
                     />
                     <PostSpaces spaces={DirectSpaces} />
                     <Row style={{ marginLeft: 2 }}>
