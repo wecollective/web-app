@@ -53,7 +53,12 @@ function TopContributors(): JSX.Element {
                     </Row>
                     {users.map((user, index) => (
                         <Row key={user.id} centerY style={{ marginTop: 10 }}>
-                            <UserButton user={user} imageSize={35} style={{ marginRight: 10 }} />
+                            <UserButton
+                                user={user}
+                                imageSize={35}
+                                maxChars={18}
+                                style={{ marginRight: 10 }}
+                            />
                             <Row centerY className={styles.stats}>
                                 <LikeIcon />
                                 <p>{user.totalPostLikes}</p>

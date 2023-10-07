@@ -1,6 +1,7 @@
 import FlagImage from '@components/FlagImage'
 import SpaceButtonModal from '@components/modals/SpaceButtonModal'
 import config from '@src/Config'
+import { trimText } from '@src/Helpers'
 import styles from '@styles/components/UserButton.module.scss'
 import axios from 'axios'
 import React, { useRef, useState } from 'react'
@@ -11,11 +12,12 @@ function SpaceButton(props: {
     imageSize?: number
     fontSize?: number
     shadow?: boolean
+    maxChars?: number
     style?: any
     className?: any
     onClick?: () => void
 }): JSX.Element {
-    const { space, imageSize, fontSize, shadow, style, className, onClick } = props
+    const { space, imageSize, fontSize, shadow, maxChars, style, className, onClick } = props
     const { id, handle, name, flagImagePath, state } = space
     const [showModal, setShowModal] = useState(false)
     const [transparent, setTransparent] = useState(true)
@@ -68,7 +70,7 @@ function SpaceButton(props: {
             onClick={onClick}
         >
             <FlagImage type='space' size={imageSize!} imagePath={flagImagePath} shadow={shadow} />
-            <p style={{ fontSize, color }}>{text}</p>
+            <p style={{ fontSize, color }}>{maxChars ? trimText(text, maxChars) : text}</p>
             {showModal && (
                 <SpaceButtonModal space={{ ...space, ...modalData }} transparent={transparent} />
             )}
@@ -80,6 +82,7 @@ SpaceButton.defaultProps = {
     imageSize: 30,
     fontSize: 14,
     shadow: false,
+    maxChars: null,
     style: null,
     className: null,
     onClick: null,

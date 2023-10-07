@@ -9,6 +9,7 @@ function PostSpaces(props: { spaces: any[]; size?: number; preview?: boolean }):
     const [modalOpen, setModalOpen] = useState(false)
     // filter out root space 'all' and deleted spaces if included
     const filteredSpaces = spaces.filter((s) => s.id > 1 && (preview || s.state === 'active'))
+    const mobileView = document.documentElement.clientWidth < 900
 
     function otherSpacesTitle() {
         if (!filteredSpaces.length) return ''
@@ -27,6 +28,7 @@ function PostSpaces(props: { spaces: any[]; size?: number; preview?: boolean }):
                     space={filteredSpaces[0]}
                     imageSize={size}
                     fontSize={15}
+                    maxChars={mobileView ? 20 : 36}
                     style={{ margin: '0 5px' }}
                     shadow
                 />

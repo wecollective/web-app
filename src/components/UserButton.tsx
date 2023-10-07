@@ -1,6 +1,7 @@
 import FlagImage from '@components/FlagImage'
 import UserButtonModal from '@components/modals/UserButtonModal'
 import config from '@src/Config'
+import { trimText } from '@src/Helpers'
 import styles from '@styles/components/UserButton.module.scss'
 import axios from 'axios'
 import React, { useRef, useState } from 'react'
@@ -10,10 +11,11 @@ function UserButton(props: {
     user: any
     imageSize?: number
     fontSize?: number
+    maxChars?: number
     style?: any
     className?: any
 }): JSX.Element {
-    const { user, imageSize, fontSize, style, className } = props
+    const { user, imageSize, fontSize, maxChars, style, className } = props
     const { id, handle, name, flagImagePath, state } = user
     const [showModal, setShowModal] = useState(false)
     const [transparent, setTransparent] = useState(true)
@@ -63,7 +65,7 @@ function UserButton(props: {
             onMouseLeave={onMouseLeave}
         >
             <FlagImage type='user' size={imageSize!} imagePath={flagImagePath} />
-            <p style={{ fontSize, color }}>{text}</p>
+            <p style={{ fontSize, color }}>{maxChars ? trimText(text, maxChars) : text}</p>
             {showModal && (
                 <UserButtonModal user={{ ...user, ...modalData }} transparent={transparent} />
             )}
@@ -74,6 +76,7 @@ function UserButton(props: {
 UserButton.defaultProps = {
     imageSize: 30,
     fontSize: 14,
+    maxChars: null,
     style: null,
     className: null,
 }

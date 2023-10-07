@@ -1,4 +1,4 @@
-import Button from '@components/Button'
+// import Button from '@components/Button'
 import Column from '@components/Column'
 import Row from '@components/Row'
 import DraftText from '@components/draft-js/DraftText'
@@ -6,11 +6,10 @@ import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
 import UserNotFound from '@pages/UserPage/UserNotFound'
 import { dateCreated, timeSinceCreated } from '@src/Helpers'
-import LoadingWheel from '@src/components/LoadingWheel'
+// import LoadingWheel from '@src/components/LoadingWheel'
 import styles from '@styles/pages/UserPage/About.module.scss'
-import { CheckIcon, ShieldIcon } from '@svgs/all'
-import axios from 'axios'
-import React, { useContext, useEffect, useState } from 'react'
+// import { CheckIcon, ShieldIcon } from '@svgs/all'
+import React, { useContext, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
 function About(): JSX.Element {
@@ -57,32 +56,32 @@ function About(): JSX.Element {
     // }
     // const { score, linkedAccounts } = data
 
-    function linkGreenCheckAccount() {
-        setGreenCheckLinkLoading(true)
-        // https://api.publicapis.org/entries
-        axios
-            .get(`https://greencheck.world/api/greencheck/weco.username/${accountData.handle}`)
-            .then((res) => {
-                console.log(res.data)
-                setGreenCheckLinkLoading(false)
-            })
-            .catch((error) => console.log(error))
-    }
+    // function linkGreenCheckAccount() {
+    //     setGreenCheckLinkLoading(true)
+    //     // https://api.publicapis.org/entries
+    //     axios
+    //         .get(`https://greencheck.world/api/greencheck/weco.username/${accountData.handle}`)
+    //         .then((res) => {
+    //             console.log(res.data)
+    //             setGreenCheckLinkLoading(false)
+    //         })
+    //         .catch((error) => console.log(error))
+    // }
 
-    function getGreenCheckData() {
-        setGreenCheckDataLoading(true)
-        axios
-            .get(`https://greencheck.world/api/greencheck/_id/${gcId}`)
-            .then((res) => {
-                console.log(res.data)
-                setGreenCheckDataLoading(false)
-            })
-            .catch((error) => console.log(error))
-    }
+    // function getGreenCheckData() {
+    //     setGreenCheckDataLoading(true)
+    //     axios
+    //         .get(`https://greencheck.world/api/greencheck/_id/${gcId}`)
+    //         .then((res) => {
+    //             console.log(res.data)
+    //             setGreenCheckDataLoading(false)
+    //         })
+    //         .catch((error) => console.log(error))
+    // }
 
-    useEffect(() => {
-        if (userData.id && gcId) getGreenCheckData()
-    }, [userData.id])
+    // useEffect(() => {
+    //     if (userData.id && gcId) getGreenCheckData()
+    // }, [userData.id])
 
     if (userNotFound) return <UserNotFound />
     return (
@@ -95,7 +94,7 @@ function About(): JSX.Element {
                         <p>Joined</p>
                         <p title={dateCreated(createdAt)}>{timeSinceCreated(createdAt)}</p>
                     </Row>
-                    {!gcId && userHandle === accountData.handle && (
+                    {/* {!gcId && userHandle === accountData.handle && (
                         <Button
                             text='Link GreenCheck account'
                             color='aqua'
@@ -126,21 +125,21 @@ function About(): JSX.Element {
                                     )}
                                 </Column>
                             </Row>
-                            {/* <p className='grey' style={{ marginBottom: 10 }}>
-                            Claimed accounts:
-                        </p>
-                        {linkedAccounts.map((account) => (
-                            <Row key={account.site} centerY className={styles.linkedAccount}>
-                                <p>{account.site}</p>
-                                {account.image && <img src={account.image} alt='' />}
-                                <p>{account.name}</p>
-                                <a href={account.url} target='_blank' rel='noopener noreferrer'>
-                                    {account.handle}
-                                </a>
-                            </Row> */}
-                            {/* ))} */}
+                            <p className='grey' style={{ marginBottom: 10 }}>
+                                Claimed accounts:
+                            </p>
+                            {linkedAccounts.map((account) => (
+                                <Row key={account.site} centerY className={styles.linkedAccount}>
+                                    <p>{account.site}</p>
+                                    {account.image && <img src={account.image} alt='' />}
+                                    <p>{account.name}</p>
+                                    <a href={account.url} target='_blank' rel='noopener noreferrer'>
+                                        {account.handle}
+                                    </a>
+                                </Row>
+                            ))}
                         </Column>
-                    )}
+                    )} */}
                     {bio && (
                         <Column centerX style={{ marginTop: 30 }}>
                             <p className='grey' style={{ marginBottom: 10 }}>

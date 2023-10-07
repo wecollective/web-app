@@ -186,7 +186,7 @@ function Homepage(): JSX.Element {
                     color='blue'
                     onClick={() => history('/s/all')}
                 />
-                <CollapsibleCards data={cardData} style={{ marginTop: 40, marginBottom: 40 }} />
+                <CollapsibleCards data={cardData} style={{ marginTop: 40 }} />
                 {highlights && (
                     <div className={styles.highlights}>
                         <FlagImageHighlights

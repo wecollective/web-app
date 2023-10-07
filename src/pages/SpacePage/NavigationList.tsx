@@ -40,6 +40,7 @@ function Space(props: {
                 <SpaceButton
                     space={space}
                     imageSize={35}
+                    maxChars={24}
                     onClick={() => onLocationChange && onLocationChange()}
                 />
                 {showExpander && (
