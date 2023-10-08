@@ -128,7 +128,7 @@ function CommentCard(props: {
         }, hoverDelay)
         // get modal data
         axios
-            .get(`${config.apiURL}/user-modal-data?userId=${id}`)
+            .get(`${config.apiURL}/user-modal-data?userId=${Creator.id}`)
             .then((res) => setModalData(res.data))
             .catch((error) => console.log(error))
     }
