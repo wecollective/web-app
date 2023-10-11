@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-nested-ternary */
 import Button from '@components/Button'
@@ -38,6 +39,7 @@ import {
     findEventDuration,
     findEventTimes,
     formatTimeMMSS,
+    getDraftPlainText,
     imageMBLimit,
     megaByte,
     postTypeIcons,
@@ -708,6 +710,22 @@ function CreatePostModal(): JSX.Element {
         return false
     }
 
+    function findSearchableText(p) {
+        const fields = [] as any
+        if (p.title) fields.push(p.title)
+        if (p.text) fields.push(getDraftPlainText(p.text))
+        const urlData = p.urls.map((u) => {
+            const urlFields = [] as any
+            if (u.url) urlFields.push(u.url)
+            if (u.title) urlFields.push(u.title)
+            if (u.description) urlFields.push(u.description)
+            if (u.domain) urlFields.push(u.domain)
+            return urlFields.length ? urlFields.join(' ') : null
+        })
+        if (urlData.length) fields.push(...urlData)
+        return fields.length ? fields.join(' ') : null
+    }
+
     function createPost() {
         if (postValid()) {
             setLoading(true)
@@ -740,6 +758,7 @@ function CreatePostModal(): JSX.Element {
                 cardFrontWatermark,
                 cardBackWatermark,
             } as any
+            postData.searchableText = findSearchableText(postData)
             if (createPostModalSettings) {
                 postData.sourceType = createPostModalSettings.sourceType
                 postData.sourceId = createPostModalSettings.sourceId
@@ -764,6 +783,12 @@ function CreatePostModal(): JSX.Element {
                 fileData.append('postData', JSON.stringify(postData))
             }
             if (postType === 'card') {
+                postData.cardFrontSearchableText = postData.cardFrontText
+                    ? getDraftPlainText(postData.cardFrontText)
+                    : null
+                postData.cardBackSearchableText = postData.cardBackText
+                    ? getDraftPlainText(postData.cardBackText)
+                    : null
                 uploadType = 'image-file'
                 fileData = new FormData()
                 if (cardFrontImage) fileData.append('file', cardFrontImage, 'front')
@@ -777,6 +802,20 @@ function CreatePostModal(): JSX.Element {
                 if (topicImageFile) fileData.append('topicImage', topicImageFile)
                 // add beads to fileData
                 postData.beads.forEach((bead, index) => {
+                    // add searchable text
+                    if (bead.type === 'url') {
+                        const u = bead.Urls[0]
+                        const urlFields = [] as any
+                        if (u.url) urlFields.push(u.url)
+                        if (u.title) urlFields.push(u.title)
+                        if (u.description) urlFields.push(u.description)
+                        if (u.domain) urlFields.push(u.domain)
+                        bead.searchableText = urlFields.length ? urlFields.join(' ') : null
+                    } else {
+                        bead.searchableText =
+                            bead.type === 'text' ? getDraftPlainText(bead.text) : null
+                    }
+                    // add files
                     if (bead.type === 'audio') {
                         const { type, file, blob } = bead.Audios[0]
                         if (type === 'file') fileData.append('audioFile', file, index)

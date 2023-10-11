@@ -294,12 +294,14 @@ function PostCard(props: {
                 )}
                 {Urls.length > 0 && (
                     <Column style={{ marginBottom: 10 }}>
-                        {Urls.map((urlData) => (
+                        {Urls.map((urlData, i) => (
                             <UrlCard
                                 key={urlData.url}
                                 type='post'
                                 urlData={urlData}
-                                style={{ marginTop: text || type === 'glass-bead-game' ? 10 : 0 }}
+                                style={{
+                                    marginTop: text || type === 'glass-bead-game' || i > 0 ? 10 : 0,
+                                }}
                             />
                         ))}
                     </Column>

@@ -17,6 +17,7 @@ import {
     defaultPostData,
     findDraftLength,
     formatTimeMMSS,
+    getDraftPlainText,
     imageMBLimit,
     postTypeIcons,
 } from '@src/Helpers'
@@ -234,6 +235,19 @@ function NextBeadModal(props: {
             postId,
             mentions: bead.type === 'text' ? bead.mentions.map((m) => m.link) : [],
         }
+        // add searchable text
+        const fields = [] as any
+        if (bead.type === 'text') fields.push(getDraftPlainText(beadData.text))
+        if (bead.type === 'url') {
+            const urlFields = [] as any
+            const u = bead.Urls[0]
+            if (u.url) urlFields.push(u.url)
+            if (u.title) urlFields.push(u.title)
+            if (u.description) urlFields.push(u.description)
+            if (u.domain) urlFields.push(u.domain)
+            if (urlFields.length) fields.push(urlFields.join(' '))
+        }
+        beadData.searchableText = fields.length ? fields.join(' ') : null
         let fileData
         let uploadType
         if (bead.type === 'audio') {
@@ -255,7 +269,6 @@ function NextBeadModal(props: {
                 options
             )
             .then((res) => {
-                console.log('create-next-bead res: ', res.data)
                 setSaved(true)
                 setLoading(false)
                 addBead({

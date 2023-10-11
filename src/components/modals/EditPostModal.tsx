@@ -10,7 +10,13 @@ import DraftTextEditor from '@components/draft-js/DraftTextEditor'
 import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
-import { dateCreated, findDraftLength, timeSinceCreated, timeSinceCreatedShort } from '@src/Helpers'
+import {
+    dateCreated,
+    findDraftLength,
+    getDraftPlainText,
+    timeSinceCreated,
+    timeSinceCreatedShort,
+} from '@src/Helpers'
 import styles from '@styles/components/modals/EditPostModal.module.scss'
 import axios from 'axios'
 import React, { useContext, useEffect, useRef, useState } from 'react'
@@ -99,7 +105,23 @@ function EditPostModal(props: {
                 text: text && findDraftLength(text) ? text : null,
                 mentions: mentions.map((m) => m.link),
                 urls: urlsWithMetaData,
-            }
+            } as any
+            // create searchable text
+            const fields = [] as any
+            if (data.title) fields.push(data.title)
+            if (data.text) fields.push(getDraftPlainText(data.text))
+            const urlData = data.urls
+                .filter((u) => !u.removed)
+                .map((u) => {
+                    const urlFields = [] as any
+                    if (u.url) urlFields.push(u.url)
+                    if (u.title) urlFields.push(u.title)
+                    if (u.description) urlFields.push(u.description)
+                    if (u.domain) urlFields.push(u.domain)
+                    return urlFields.length ? urlFields.join(' ') : null
+                })
+            if (urlData.length) fields.push(...urlData)
+            data.searchableText = fields.length ? fields.join(' ') : null
             axios
                 .post(`${config.apiURL}/update-post`, data, options)
                 .then(() => {
