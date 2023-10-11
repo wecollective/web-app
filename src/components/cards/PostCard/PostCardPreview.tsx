@@ -88,13 +88,13 @@ function PostCardPreview(props: {
                     </Column>
                 </Column>
                 <Column style={{ width: '100%' }}>
-                    {title && <h1 className={styles.title}>{trimText(title, 50)}</h1>}
+                    {type !== 'glass-bead-game' && title && (
+                        <h1 className={styles.title}>{trimText(title, 50)}</h1>
+                    )}
                     {type === 'glass-bead-game' && (
                         <Row centerY className={styles.gbg}>
                             {GBG.topicImage && <img src={GBG.topicImage} alt='topic' />}
-                            {GBG.topic && (
-                                <h1 className={styles.title}>{trimText(GBG.topic, 30)}</h1>
-                            )}
+                            {title && <h1 className={styles.title}>{trimText(title, 30)}</h1>}
                         </Row>
                     )}
                     {text && <p className={styles.text}>{trimText(getDraftPlainText(text), 80)}</p>}

@@ -148,22 +148,6 @@ function PostCard(props: {
         }
     }
 
-    function renderTitle() {
-        if (type === 'glass-bead-game' && title) {
-            const { topicImage } = GlassBeadGame
-            return (
-                <Row centerY className={styles.topic}>
-                    {topicImage && <img src={topicImage} alt='' />}
-                    <h1>{title}</h1>
-                </Row>
-            )
-        }
-        if (title) {
-            return <h1 className={styles.title}>{title}</h1>
-        }
-        return null
-    }
-
     function linkNewPost() {
         if (loggedIn) {
             setCreatePostModalSettings({ sourceType: 'post', sourceId: id })
@@ -271,7 +255,13 @@ function PostCard(props: {
                         </Link>
                     </Row>
                 )}
-                {renderTitle()}
+                {type !== 'glass-bead-game' && title && <h1 className={styles.title}>{title}</h1>}
+                {type === 'glass-bead-game' && title && (
+                    <Row centerY className={styles.topic}>
+                        {GlassBeadGame.topicImage && <img src={GlassBeadGame.topicImage} alt='' />}
+                        <h1>{title}</h1>
+                    </Row>
+                )}
                 {text && collapse && (
                     <ShowMoreLess height={700} gradientColor='white'>
                         <DraftText stringifiedDraft={text} style={{ marginBottom: 10 }} />
