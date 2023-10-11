@@ -148,14 +148,20 @@ function PostCard(props: {
         }
     }
 
-    function renderTopic() {
-        const { topic, topicImage } = GlassBeadGame
-        return (
-            <Row centerY className={styles.topic}>
-                {topicImage && <img src={topicImage} alt='' />}
-                <h1>{topic}</h1>
-            </Row>
-        )
+    function renderTitle() {
+        if (type === 'glass-bead-game' && title) {
+            const { topicImage } = GlassBeadGame
+            return (
+                <Row centerY className={styles.topic}>
+                    {topicImage && <img src={topicImage} alt='' />}
+                    <h1>{title}</h1>
+                </Row>
+            )
+        }
+        if (title) {
+            return <h1 className={styles.title}>{title}</h1>
+        }
+        return null
     }
 
     function linkNewPost() {
@@ -265,8 +271,7 @@ function PostCard(props: {
                         </Link>
                     </Row>
                 )}
-                {title && <h1 className={styles.title}>{title}</h1>}
-                {GlassBeadGame && GlassBeadGame.topic && renderTopic()}
+                {renderTitle()}
                 {text && collapse && (
                     <ShowMoreLess height={700} gradientColor='white'>
                         <DraftText stringifiedDraft={text} style={{ marginBottom: 10 }} />

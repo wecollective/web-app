@@ -101,7 +101,6 @@ interface GameData {
     moveDuration: number | null
     movesPerPlayer: number | null
     outroDuration: number | null
-    topic: string
     topicGroup: string | null
     topicImage: string | null
     backgroundImage: string | null
@@ -123,15 +122,14 @@ const backendShim = {
     //     }),
     // saveGame: (gameId: number, beads: Bead[]): Promise<void> =>
     //     axios.post(`${config.apiURL}/save-glass-bead-game`, { gameId, beads }),
-    updateTopic: (gameId: number, newTopic: string): Promise<void> =>
-        axios.post(`${config.apiURL}/save-gbg-topic`, { gameId, newTopic }),
+    updateTopic: (postId: number, gameId: number, newTopic: string): Promise<void> =>
+        axios.post(`${config.apiURL}/save-gbg-topic`, { postId, gameId, newTopic }),
     // getGameData: (postId: number): Promise<{ data: GameData }> =>
     //     axios.get(`${config.apiURL}/glass-bead-game-data?postId=${postId}`),
 }
 
 const gameDefaults = {
     id: null,
-    topic: null,
     locked: true,
     introDuration: 0,
     movesPerPlayer: 5,
@@ -420,7 +418,7 @@ function GameSettingsModal(props) {
 function GlassBeadGame(): JSX.Element {
     const { loggedIn, accountData, accountDataLoading, setAlertModalOpen, setAlertMessage } =
         useContext(AccountContext)
-    const { postData, postDataLoading } = useContext(PostContext)
+    const { postData, setPostData, postDataLoading } = useContext(PostContext)
     const [gameData, setGameData] = useState<any>(postData.GlassBeadGame)
     const [gameInProgress, setGameInProgress] = useState(false)
     const [userIsStreaming, setUserIsStreaming] = useState(false)
@@ -1074,7 +1072,7 @@ function GlassBeadGame(): JSX.Element {
     function saveNewTopic(e) {
         e.preventDefault()
         backendShim
-            .updateTopic(gameData.id, newTopic)
+            .updateTopic(postData.id, gameData.id, newTopic)
             .then(() => {
                 const data = {
                     roomId: roomIdRef.current,
@@ -1537,7 +1535,8 @@ function GlassBeadGame(): JSX.Element {
                 // new topic text
                 socketRef.current.on('incoming-new-topic-text', (data) => {
                     const { userSignaling, newTopicText } = data
-                    setGameData({ ...data.gameData, topic: newTopicText, topicGroup: null })
+                    setGameData({ ...data.gameData, topicGroup: null })
+                    setPostData({ ...postData, title: newTopicText })
                     pushComment(`${userSignaling.name} updated the topic`)
                 })
                 // new topic image
@@ -1755,7 +1754,7 @@ function GlassBeadGame(): JSX.Element {
             {topicTextModalOpen && (
                 <Modal centerX close={() => setTopicTextModalOpen(false)}>
                     <h1>Change the topic</h1>
-                    <p>Current topic: {gameData.topic}</p>
+                    <p>Current topic: {postData.title}</p>
                     <form onSubmit={saveNewTopic}>
                         <Input
                             type='text'
@@ -1958,7 +1957,7 @@ function GlassBeadGame(): JSX.Element {
                             className={`${styles.curvedDNA} ${beads.length && styles.withBeads}`}
                         />
                         <Row centerY className={styles.topicText}>
-                            <h1>{gameData.topic}</h1>
+                            <h1>{postData.title}</h1>
                             <button
                                 type='button'
                                 onClick={() =>

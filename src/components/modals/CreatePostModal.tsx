@@ -721,7 +721,7 @@ function CreatePostModal(): JSX.Element {
                     spaces.length > 1
                         ? spaces.filter((s) => s.id !== 1).map((s) => s.id)
                         : spaces.map((s) => s.id),
-                title: postType === 'glass-bead-game' ? null : title,
+                title: postType === 'glass-bead-game' ? topic : title,
                 text: findDraftLength(text) ? text : null,
                 mentions: mentions.map((m) => m.link),
                 urls: urlsWithMetaData,
@@ -731,7 +731,6 @@ function CreatePostModal(): JSX.Element {
                 pollType: pollType.toLowerCase().replace(/[^a-z0-9]/g, '-'),
                 pollAnswersLocked,
                 pollAnswers,
-                topic,
                 topicGroup: findTopicGroup(),
                 topicImageUrl: topicImageFile ? null : topicImageURL,
                 gbgSettings: GBGSettings,
