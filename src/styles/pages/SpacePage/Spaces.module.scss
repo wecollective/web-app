@@ -10,6 +10,16 @@
 
         .spaceListView {
             width: 100%;
+
+            .spaceNavWrapper {
+                flex-shrink: 0;
+                position: sticky !important;
+                top: 116px;
+                left: 0;
+                max-height: calc(100vh - 140px);
+                min-width: 240px;
+                z-index: 5;
+            }
         }
 
         .spaceMapView {

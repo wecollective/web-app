@@ -4,10 +4,11 @@ import SpaceList from '@components/SpaceList'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import SpaceNotFound from '@pages/SpaceNotFound'
+import NavigationList from '@src/pages/SpacePage/NavigationList'
 import SpaceCircles from '@src/pages/SpacePage/SpaceCircles'
 import SpaceTree from '@src/pages/SpacePage/SpaceTree'
 import styles from '@styles/pages/SpacePage/Spaces.module.scss'
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
 function Spaces(): JSX.Element {
@@ -30,6 +31,7 @@ function Spaces(): JSX.Element {
         spaceSpacesPaginationHasMore,
         spaceSpacesPaginationLimit,
     } = useContext(SpaceContext)
+    const [largeScreen, setLargeScreen] = useState(false)
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]
     const mobileView = document.documentElement.clientWidth < 900
@@ -67,6 +69,13 @@ function Spaces(): JSX.Element {
             )
     }, [pageBottomReached])
 
+    useEffect(() => {
+        setLargeScreen(document.documentElement.clientWidth >= 1200)
+        window.addEventListener('resize', () =>
+            setLargeScreen(document.documentElement.clientWidth >= 1200)
+        )
+    }, [])
+
     if (spaceNotFound) return <SpaceNotFound />
     return (
         <Column centerX className={styles.wrapper}>
@@ -82,7 +91,12 @@ function Spaces(): JSX.Element {
                     </Column>
                 )}
                 {params.lens === 'List' && (
-                    <Column centerX className={styles.spaceListView}>
+                    <Row centerX className={styles.spaceListView}>
+                        {largeScreen && (
+                            <Column className={styles.spaceNavWrapper}>
+                                <NavigationList excludeChildren />
+                            </Column>
+                        )}
                         <SpaceList
                             location='space-spaces'
                             spaces={spaceListData}
@@ -90,7 +104,8 @@ function Spaces(): JSX.Element {
                             loading={spaceSpacesLoading}
                             nextSpacesLoading={nextSpaceSpacesLoading}
                         />
-                    </Column>
+                        {largeScreen && <Column className={styles.spaceNavWrapper} />}
+                    </Row>
                 )}
             </Row>
         </Column>

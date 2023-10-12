@@ -31,8 +31,6 @@ function Space(props: {
         loading,
         nextChildrenLoading,
     } = space
-    const location = useLocation()
-    const subpage = location.pathname.split('/')[3]
     const showExpander = totalChildren > 0 && (privacy === 'public' || spaceAccess === 'active')
     return (
         <Column>
@@ -91,8 +89,12 @@ function Space(props: {
     )
 }
 
-function NavigationList(props: { onLocationChange?: () => void; style?: any }): JSX.Element {
-    const { onLocationChange, style } = props
+function NavigationList(props: {
+    excludeChildren?: boolean
+    onLocationChange?: () => void
+    style?: any
+}): JSX.Element {
+    const { excludeChildren, onLocationChange, style } = props
     const { spaceData } = useContext(SpaceContext)
     const [parents, setParents] = useState<any[]>([])
     const [children, setChildren] = useState<any[]>([])
@@ -106,10 +108,10 @@ function NavigationList(props: { onLocationChange?: () => void; style?: any }): 
     const spaceHandle = location.pathname.split('/')[2]
     const spaceHandleRef = useRef('')
 
-    async function getSpaces(spaceId, offset, includeParents) {
+    async function getSpaces(spaceId, offset, includeParents, includeChildren) {
         if (!offset) spaceHandleRef.current = spaceHandle
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-        const data = { spaceId, offset, includeParents }
+        const data = { spaceId, offset, includeParents, includeChildren }
         return axios.post(`${config.apiURL}/nav-list-spaces`, data, options)
     }
 
@@ -143,7 +145,7 @@ function NavigationList(props: { onLocationChange?: () => void; style?: any }): 
             newSpace.loading = true
             newSpace.offset = 0
             setSpaces(type, newSpaces)
-            getSpaces(id, 0, false)
+            getSpaces(id, 0, false, true)
                 .then((res) => {
                     newSpace.children = res.data.children
                     newSpace.totalChildren = res.data.totalChildren
@@ -162,7 +164,7 @@ function NavigationList(props: { onLocationChange?: () => void; style?: any }): 
         const newSpace = findSpace(newSpaces, id)
         newSpace.nextChildrenLoading = true
         setSpaces(type, newSpaces)
-        getSpaces(id, newSpace.offset || 10, false)
+        getSpaces(id, newSpace.offset || 10, false, true)
             .then((res) => {
                 newSpace.children = [...newSpace.children, ...res.data.children]
                 newSpace.nextChildrenLoading = false
@@ -175,7 +177,7 @@ function NavigationList(props: { onLocationChange?: () => void; style?: any }): 
 
     function expandRootChildren() {
         setNextSpacesLoading(true)
-        getSpaces(spaceData.id, childrenOffset, false)
+        getSpaces(spaceData.id, childrenOffset, false, true)
             .then((res) => {
                 setChildren([...children, ...res.data.children])
                 setChildrenOffset(childrenOffset + 10)
@@ -187,7 +189,7 @@ function NavigationList(props: { onLocationChange?: () => void; style?: any }): 
     useEffect(() => {
         if (spaceData.handle !== spaceHandle) setLoading(true)
         else {
-            getSpaces(spaceData.id, 0, true)
+            getSpaces(spaceData.id, 0, true, !excludeChildren)
                 .then((res) => {
                     if (spaceHandleRef.current === spaceHandle) {
                         setParents(res.data.parents)
@@ -267,6 +269,7 @@ function NavigationList(props: { onLocationChange?: () => void; style?: any }): 
 }
 
 NavigationList.defaultProps = {
+    excludeChildren: false,
     onLocationChange: null,
     style: null,
 }

@@ -5,7 +5,7 @@ import { trimText } from '@src/Helpers'
 import styles from '@styles/components/UserButton.module.scss'
 import axios from 'axios'
 import React, { useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 
 function SpaceButton(props: {
     space: any
@@ -33,6 +33,11 @@ function SpaceButton(props: {
     const hoverDelay = 500
     const text = state === 'deleted' ? `[space deleted]` : name
     const color = state === 'deleted' ? '#acacae' : ''
+    const location = useLocation()
+    const subPage = location.pathname.split('/')[3]
+    const urlParams = Object.fromEntries(new URLSearchParams(location.search))
+    const { lens } = urlParams
+    const params = subPage === 'spaces' && lens && lens === 'List' ? '?lens=List' : ''
 
     function onMouseEnter() {
         // start hover delay
@@ -62,7 +67,7 @@ function SpaceButton(props: {
 
     return (
         <Link
-            to={`/s/${handle}`}
+            to={`/s/${handle}/${subPage}${params}`}
             className={`${styles.wrapper} ${className}`}
             style={style}
             onMouseEnter={onMouseEnter}
