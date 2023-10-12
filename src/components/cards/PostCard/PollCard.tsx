@@ -35,12 +35,14 @@ function PollCard(props: { postData: any; location: string }): JSX.Element {
     const [voteLoading, setVoteLoading] = useState(false)
     const [visualisationAnswers, setVisualisationAnswers] = useState<any[]>([])
     const [listAnswers, setListAnswers] = useState<any[]>([])
+    const [showAllAnswers, setShowAllAnswers] = useState(false)
     const [removeAnswerModalOpen, setRemoveAnswerModalOpen] = useState(false)
     const [removeAnswerId, setRemoveAnswerId] = useState(0)
     const [removeAnswerLoading, setRemoveAnswerLoading] = useState(false)
     const [totalUsedPoints, setTotalUsedPoints] = useState(0)
     const cookies = new Cookies()
     const colorScale = useRef<any>(null)
+    const answers = showAllAnswers ? listAnswers : listAnswers.slice(0, 3)
 
     function getPollData() {
         axios
@@ -255,9 +257,9 @@ function PollCard(props: { postData: any; location: string }): JSX.Element {
                     onClick={() => vote()}
                 />
             </Row>
-            {listAnswers.length > 0 && (
+            {answers.length > 0 && (
                 <Column className={styles.answers}>
-                    {listAnswers.map((answer, i) => (
+                    {answers.map((answer, i) => (
                         <PollAnswer
                             key={answer.id}
                             index={i}
@@ -273,6 +275,15 @@ function PollCard(props: { postData: any; location: string }): JSX.Element {
                             }}
                         />
                     ))}
+                    {!showAllAnswers && listAnswers.length > 3 && (
+                        <button
+                            className={styles.showMore}
+                            type='button'
+                            onClick={() => setShowAllAnswers(true)}
+                        >
+                            Show more answers ({listAnswers.length - 3})
+                        </button>
+                    )}
                 </Column>
             )}
             {!pollData.answersLocked && (

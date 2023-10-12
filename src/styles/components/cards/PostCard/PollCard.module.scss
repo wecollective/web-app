@@ -26,3 +26,12 @@
 .newAnswers {
     margin: 0 -8px 10px -8px;
 }
+
+.showMore {
+    all: unset;
+    cursor: pointer;
+    color: $blue1;
+    font-size: 14;
+    width: 100%;
+    margin-bottom: 10px;
+}
