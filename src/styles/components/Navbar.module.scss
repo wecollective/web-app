@@ -287,6 +287,9 @@
         top: 10px;
         left: calc(50% - 250px);
         display: none;
+        @include for-desktop-small-up {
+            left: calc(50% - 350px);
+        }
         @include for-tablet-landscape-up {
             display: flex;
         }

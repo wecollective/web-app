@@ -12,7 +12,7 @@ function Tab(props: { baseRoute: string; tab: any }): JSX.Element {
             className={`${styles.tab} ${subpage === tab.text.toLowerCase() && styles.selected}`}
             to={`${baseRoute}/${tab.text.toLowerCase()}`}
         >
-            <Row style={{ margin: '0 5px' }}>
+            <Row centerY style={{ margin: '0 5px' }}>
                 {tab.icon}
                 <p>{tab.text}</p>
             </Row>

@@ -2,7 +2,7 @@
 
 .searchBar {
     position: relative;
-    background-color: $grey2;
+    background-color: #434348; //$grey2;
     height: 40px;
     width: 500px;
     border-radius: 20px;
@@ -13,6 +13,10 @@
     box-shadow: 0 1px 10px 0 rgba(10, 8, 72, 0.04);
     transition-property: box-shadow;
     transition-duration: 0.3s;
+
+    @include for-desktop-small-up {
+        width: 700px;
+    }
 
     &:hover {
         box-shadow: 0 1px 10px 0 rgba(10, 8, 72, 0.1);
@@ -44,6 +48,11 @@
         border: none;
         padding: 0;
         margin-left: 7px;
+        color: white;
+    }
+
+    > input::placeholder {
+        color: $grey5;
     }
 
     > button {

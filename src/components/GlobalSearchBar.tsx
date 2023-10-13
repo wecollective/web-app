@@ -171,6 +171,7 @@ function GlobalSearchBar(props: { onLocationChange?: () => void; style?: any }):
                     if (page === 'u' && value !== 'Posts') setShowConstraint(false)
                     setSearchType(value)
                 }}
+                color='dark'
             />
         </form>
     )

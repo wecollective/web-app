@@ -254,12 +254,12 @@ function SpacePage(): JSX.Element {
             <Column centerX className={`${styles.header} ${headerCollapsed && styles.collapsed}`}>
                 <CoverImage type='space' image={spaceData.coverImagePath} canEdit={isModerator} />
                 {awaitingSpaceData ? (
-                    <Row centerY style={{ height: 65 }} />
+                    <Row centerY style={{ height: 53 }} />
                 ) : (
                     <Row centerY className={styles.spaceData}>
                         <EditableFlagImage
                             type='space'
-                            size={120}
+                            size={100}
                             imagePath={spaceData.flagImagePath}
                             canEdit={isModerator}
                             className={styles.flagImageLarge}
@@ -279,7 +279,7 @@ function SpacePage(): JSX.Element {
                         <FlagImage
                             type='space'
                             imagePath={spaceData.flagImagePath}
-                            size={32}
+                            size={30}
                             shadow
                         />
                         {!tabletView && (

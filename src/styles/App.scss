@@ -42,6 +42,11 @@ body {
 .scrollbar-theme {
     $scrollBarThickness: 8px;
 
+    // .os-viewport,
+    // .os-padding {
+    //     z-index: unset;
+    // }
+
     .os-viewport {
         z-index: unset;
     }

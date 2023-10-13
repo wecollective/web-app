@@ -21,7 +21,7 @@
         box-shadow: 0 -5px 15px 0 rgba(black, 0.2);
         z-index: 50;
         position: sticky;
-        top: -$coverImageHeight - 5px;
+        top: -$coverImageHeight + 4px;
 
         &.collapsed {
             .tabRow {
@@ -34,23 +34,28 @@
 
         .spaceData {
             position: relative;
-            padding: 5px 0 5px 15px;
-            margin-left: 120px;
+            padding: 7px 0 0 15px;
+            margin-left: 100px;
 
             .flagImageLarge {
                 position: absolute;
-                top: -55px;
-                left: -120px;
+                top: -45px;
+                left: -100px;
             }
 
             .spaceName {
-                min-height: 50px;
+                min-height: 46px;
                 margin: 0 20px 0 0;
                 word-break: break-word;
 
                 > h1 {
-                    margin-bottom: 3px;
-                    line-height: 30px;
+                    font-size: 24px;
+                    margin-bottom: 2px;
+                    line-height: 24px;
+                }
+
+                > p {
+                    font-size: 14px;
                 }
             }
         }
@@ -78,7 +83,7 @@
                 @include for-tablet-landscape-up {
                     position: absolute;
                     left: 10px;
-                    top: 4px;
+                    top: 6px;
                     margin-bottom: 0;
                 }
 
@@ -98,7 +103,7 @@
     .content {
         width: 100%;
         min-height: calc(100vh - 100px);
-        padding-top: 15px;
+        padding-top: 10px;
 
         .lockIcon {
             width: 60px;

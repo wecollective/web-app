@@ -2,7 +2,7 @@
 
 .wrapper {
     width: 100%;
-    z-index: 90;
+    z-index: $toybarZIndex;
     position: fixed;
     bottom: 15px;
     pointer-events: none;
