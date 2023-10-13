@@ -10,6 +10,9 @@
     .postList {
         width: 100%;
         @include for-desktop-small-up {
+            width: 750px;
+        }
+        @include for-desktop-medium-up {
             width: 800px;
         }
     }
@@ -17,17 +20,87 @@
     .spaceNavWrapper {
         flex-shrink: 0;
         position: sticky !important;
-        top: 116px;
+        top: $coverImageHeight - 12px;
         left: 0;
         max-height: calc(100vh - 140px);
         min-width: 240px;
         z-index: 5;
     }
 
+    .filters {
+        margin-bottom: 10px;
+        padding: 0 10px;
+
+        .button {
+            all: unset;
+            position: relative;
+            cursor: pointer;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            height: 30px;
+            padding: 0 10px;
+            border-radius: 15px;
+            box-shadow: 0 0 10px 0 rgba(black, 0.04);
+            font-size: 12px;
+            font-weight: 800;
+            color: $grey5;
+
+            > svg {
+                width: 16px;
+                height: 16px;
+                // margin-right: 5px;
+            }
+
+            &.selected {
+                color: $blue5;
+            }
+        }
+
+        .dropDown {
+            position: absolute;
+            top: 35px;
+            left: 0;
+            z-index: 5;
+            box-shadow: 0 0 10px 0 rgba(black, 0.1);
+            background-color: white;
+            border-radius: 8px;
+            padding: 5px 7px;
+
+            > button {
+                all: unset;
+                cursor: pointer;
+                display: flex;
+                padding: 3px;
+                font-size: 12px;
+                font-weight: 800;
+                color: $grey5;
+
+                > svg {
+                    width: 16px;
+                    height: 16px;
+                    margin-right: 5px;
+                }
+
+                &.selected {
+                    color: $blue5;
+                }
+            }
+        }
+
+        .divider {
+            height: 30px;
+            width: 2px;
+            background-color: $grey2;
+            border-radius: 1px;
+            margin-right: 10px;
+        }
+    }
+
     .topContributorsWrapper {
         flex-shrink: 0;
         position: sticky !important;
-        top: 116px;
+        top: $coverImageHeight - 12px;
         left: 0;
         max-height: calc(100vh - 140px);
         min-width: 260px;

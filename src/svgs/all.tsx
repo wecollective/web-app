@@ -13,6 +13,7 @@ import { ReactComponent as CalendarIcon } from '@svgs/calendar-days-solid.svg'
 import { ReactComponent as CardIcon } from '@svgs/card-icon.svg'
 import { ReactComponent as CaretDownIcon } from '@svgs/caret-down-solid.svg'
 import { ReactComponent as CastaliaIcon } from '@svgs/castalia-logo.svg'
+import { ReactComponent as NewIcon } from '@svgs/certificate-solid.svg'
 import { ReactComponent as SuccessIcon } from '@svgs/check-circle-solid.svg'
 import { ReactComponent as CheckIcon } from '@svgs/check-solid.svg'
 import { ReactComponent as ChevronDownIcon } from '@svgs/chevron-down-solid.svg'
@@ -131,6 +132,7 @@ export {
     LockIcon,
     MinusIcon,
     NeuronIcon,
+    NewIcon,
     OSIcon,
     PauseIcon,
     PlayIcon,
