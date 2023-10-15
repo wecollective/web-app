@@ -42,14 +42,7 @@ function SpacePeopleFilters(props: { close: () => void }): JSX.Element {
             />
             <DropDown
                 title='Time Range'
-                options={[
-                    'All Time',
-                    'Last Year',
-                    'Last Month',
-                    'Last Week',
-                    'Last 24 Hours',
-                    'Last Hour',
-                ]}
+                options={['All Time', 'Last Year', 'Last Month', 'Last Week', 'Today', 'Last Hour']}
                 selectedOption={params.timeRange}
                 setSelectedOption={(value) => setParams({ ...params, timeRange: value })}
                 style={{ marginBottom: 40 }}

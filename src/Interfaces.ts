@@ -179,7 +179,7 @@ export interface ISpaceContext {
     spacePosts: any[]
     setSpacePosts: (payload: any[]) => void
     totalMatchingPosts: number
-    spacePostsFilters: any
+    postFilters: any
     spacePostsPaginationLimit: number
     spacePostsPaginationOffset: number
     spacePostsPaginationHasMore: boolean

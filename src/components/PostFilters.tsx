@@ -1,7 +1,6 @@
 import Column from '@components/Column'
 import Row from '@components/Row'
-import { SpaceContext } from '@contexts/SpaceContext'
-import { postTypeIcons } from '@src/Helpers'
+import { getParamString, postTypeIcons } from '@src/Helpers'
 import styles from '@styles/components/PostFilters.module.scss'
 import {
     ArrowDownIcon,
@@ -18,31 +17,18 @@ import {
     RepostIcon,
     ZapIcon,
 } from '@svgs/all'
-import React, { useContext, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 
-function PostFilters(): JSX.Element {
-    const { spacePostsFilters } = useContext(SpaceContext)
-    const [filter, setFilter] = useState('Active')
-    const [sortBy, setSortBy] = useState('Likes')
-    const [timeRange, setTimeRange] = useState('All Time')
-    const [type, setType] = useState('All Types')
-    const [depth, setDepth] = useState('Deep')
-    const [lens, setLens] = useState('List')
+function PostFilters(props: { pageType: 'space' | 'user'; urlParams: any }): JSX.Element {
+    const { pageType, urlParams } = props
+    const [params, setParams] = useState({ ...urlParams })
+    const { filter, type, sortBy, timeRange, depth, searchQuery, lens } = params
+    const [typeModalOpen, setTypeModalOpen] = useState(false)
     const [sortByModalOpen, setSortByModalOpen] = useState(false)
     const [timeRangeModalOpen, setTimeRangeModalOpen] = useState(false)
-    const [typeModalOpen, setTypeModalOpen] = useState(false)
     const [depthModalOpen, setDepthModalOpen] = useState(false)
     const [lensModalOpen, setLensModalOpen] = useState(false)
-    const sortByOptions = ['Likes', 'Comments', 'Links', 'Signal', 'Reposts']
-    const timeRangeOptions = [
-        'All Time',
-        'Last Year',
-        'Last Month',
-        'Last Week',
-        'Today',
-        'Last Hour',
-    ]
     const typeOptions = [
         'All Types',
         'Text',
@@ -54,18 +40,20 @@ function PostFilters(): JSX.Element {
         'Glass Bead Game',
         'Card',
     ]
+    const sortByOptions = ['Likes', 'Comments', 'Links', 'Signal', 'Reposts']
+    const timeRangeOptions = [
+        'All Time',
+        'Last Year',
+        'Last Month',
+        'Last Week',
+        'Today',
+        'Last Hour',
+    ]
     const depthOptions = ['Deep', 'Shallow']
     const lensOptions = ['List', 'Map']
     const location = useLocation()
+    const history = useNavigate()
     const spaceHandle = location.pathname.split('/')[2]
-
-    // calculate params
-    // todo: move into context and update space post filters there?
-    const urlParams = Object.fromEntries(new URLSearchParams(location.search))
-    const params = { ...spacePostsFilters }
-    Object.keys(urlParams).forEach((param) => {
-        params[param] = urlParams[param]
-    })
 
     function findSortByIcon(option) {
         if (option === 'Likes') return <LikeIcon />
@@ -82,35 +70,44 @@ function PostFilters(): JSX.Element {
         return postTypeIcons[option.toLowerCase()]
     }
 
+    function updateParams(newParams) {
+        history({
+            pathname: location.pathname,
+            search: getParamString(newParams),
+        })
+    }
+
+    useEffect(() => setParams({ ...urlParams }), [urlParams])
+
     return (
         <Row spaceBetween className={styles.filters}>
             <Row>
                 <button
                     type='button'
                     className={`${styles.button} ${filter === 'Active' && styles.selected}`}
-                    onClick={() => setFilter('Active')}
+                    onClick={() => updateParams({ ...params, filter: 'Active' })}
                     style={{ marginRight: 10 }}
                 >
                     <ReactionIcon />
-                    <p style={{ marginLeft: 5 }}>Active</p>
+                    <p>Active</p>
                 </button>
                 <button
                     type='button'
                     className={`${styles.button} ${filter === 'New' && styles.selected}`}
-                    onClick={() => setFilter('New')}
+                    onClick={() => updateParams({ ...params, filter: 'New' })}
                     style={{ marginRight: 10 }}
                 >
                     <NewIcon />
-                    <p style={{ marginLeft: 5 }}>New</p>
+                    <p>New</p>
                 </button>
                 <button
                     type='button'
                     className={`${styles.button} ${filter === 'Top' && styles.selected}`}
-                    onClick={() => setFilter('Top')}
+                    onClick={() => updateParams({ ...params, filter: 'Top' })}
                     style={{ marginRight: 10 }}
                 >
                     <RankingIcon />
-                    <p style={{ marginLeft: 5 }}>Top</p>
+                    <p>Top</p>
                 </button>
                 <div className={styles.divider} />
                 {filter === 'Top' && (
@@ -123,7 +120,7 @@ function PostFilters(): JSX.Element {
                             style={{ marginRight: 10 }}
                         >
                             {findSortByIcon(sortBy)}
-                            <p style={{ marginLeft: 5 }}>{sortBy}</p>
+                            <p>{sortBy}</p>
                         </button>
                         {sortByModalOpen && (
                             <Column className={styles.dropDown}>
@@ -133,7 +130,7 @@ function PostFilters(): JSX.Element {
                                         type='button'
                                         className={sortBy === option ? styles.selected : ''}
                                         onClick={() => {
-                                            setSortBy(option)
+                                            updateParams({ ...params, sortBy: option })
                                             setSortByModalOpen(false)
                                         }}
                                     >
@@ -155,7 +152,7 @@ function PostFilters(): JSX.Element {
                             style={{ marginRight: 10 }}
                         >
                             <ClockIcon />
-                            <p style={{ marginLeft: 5 }}>{timeRange}</p>
+                            <p>{timeRange}</p>
                         </button>
                         {timeRangeModalOpen && (
                             <Column className={styles.dropDown}>
@@ -165,7 +162,7 @@ function PostFilters(): JSX.Element {
                                         type='button'
                                         className={timeRange === option ? styles.selected : ''}
                                         onClick={() => {
-                                            setTimeRange(option)
+                                            updateParams({ ...params, timeRange: option })
                                             setTimeRangeModalOpen(false)
                                         }}
                                     >
@@ -185,7 +182,7 @@ function PostFilters(): JSX.Element {
                         style={{ marginRight: 10 }}
                     >
                         {findTypeIcon(type)}
-                        <p style={{ marginLeft: 5 }}>{type}</p>
+                        <p>{type}</p>
                     </button>
                     {typeModalOpen && (
                         <Column className={styles.dropDown}>
@@ -195,7 +192,7 @@ function PostFilters(): JSX.Element {
                                     type='button'
                                     className={type === option ? styles.selected : ''}
                                     onClick={() => {
-                                        setType(option)
+                                        updateParams({ ...params, type: option })
                                         setTypeModalOpen(false)
                                     }}
                                 >
@@ -214,7 +211,7 @@ function PostFilters(): JSX.Element {
                         onBlur={() => setTimeout(() => setDepthModalOpen(false), 200)}
                     >
                         <ArrowDownIcon />
-                        <p style={{ marginLeft: 5 }}>{depth}</p>
+                        <p>{depth}</p>
                     </button>
                     {depthModalOpen && (
                         <Column className={styles.dropDown}>
@@ -222,9 +219,9 @@ function PostFilters(): JSX.Element {
                                 <button
                                     key={option}
                                     type='button'
-                                    className={type === option ? styles.selected : ''}
+                                    className={depth === option ? styles.selected : ''}
                                     onClick={() => {
-                                        setDepth(option)
+                                        updateParams({ ...params, depth: option })
                                         setDepthModalOpen(false)
                                     }}
                                 >
@@ -243,7 +240,7 @@ function PostFilters(): JSX.Element {
                     onBlur={() => setTimeout(() => setLensModalOpen(false), 200)}
                 >
                     <EyeIcon />
-                    <p style={{ marginLeft: 5 }}>{lens}</p>
+                    <p>{lens}</p>
                 </button>
                 {lensModalOpen && (
                     <Column className={styles.dropDown}>
@@ -251,9 +248,9 @@ function PostFilters(): JSX.Element {
                             <button
                                 key={option}
                                 type='button'
-                                className={type === option ? styles.selected : ''}
+                                className={lens === option ? styles.selected : ''}
                                 onClick={() => {
-                                    setLens(option)
+                                    updateParams({ ...params, lens: option })
                                     setLensModalOpen(false)
                                 }}
                             >

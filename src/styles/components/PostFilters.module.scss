@@ -3,6 +3,7 @@
 .filters {
     margin-bottom: 10px;
     padding: 0 10px;
+    width: 100%;
 
     .button {
         all: unset;
@@ -27,7 +28,7 @@
         > svg {
             width: 16px;
             height: 16px;
-            // margin-right: 5px;
+            margin-right: 5px;
         }
 
         &.selected {

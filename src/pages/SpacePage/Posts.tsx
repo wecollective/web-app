@@ -24,7 +24,7 @@ function Posts(): JSX.Element {
         nextSpacePostsLoading,
         postMapData,
         getPostMapData,
-        spacePostsFilters,
+        postFilters,
         spacePostsPaginationOffset,
         spacePostsPaginationLimit,
         spacePostsPaginationHasMore,
@@ -39,7 +39,7 @@ function Posts(): JSX.Element {
     // calculate params
     // todo: move into context and update space post filters there?
     const urlParams = Object.fromEntries(new URLSearchParams(location.search))
-    const params = { ...spacePostsFilters }
+    const params = { ...postFilters }
     Object.keys(urlParams).forEach((param) => {
         params[param] = urlParams[param]
     })
@@ -92,7 +92,7 @@ function Posts(): JSX.Element {
                         </Column>
                     )}
                     <Column style={{ width: '100%' }}>
-                        <PostFilters />
+                        <PostFilters pageType='space' urlParams={params} />
                         <PostList
                             location='space-posts'
                             posts={spacePosts}
@@ -111,7 +111,10 @@ function Posts(): JSX.Element {
                 </Row>
             )}
             {params.lens === 'Map' && (
-                <Column className={styles.postMapView}>
+                <Column centerX className={styles.postMapView}>
+                    <Row style={{ width: 770 }}>
+                        <PostFilters pageType='space' urlParams={params} />
+                    </Row>
                     <PostMap postMapData={postMapData} params={params} />
                 </Column>
             )}

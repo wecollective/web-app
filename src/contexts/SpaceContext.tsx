@@ -37,11 +37,12 @@ const defaults = {
         UsersWithAccess: [],
     },
     postFilters: {
+        filter: 'Active',
         type: 'All Types',
-        sortBy: 'Recent Activity',
-        sortOrder: 'Descending',
+        sortBy: 'Likes',
         timeRange: 'All Time',
-        depth: 'All Contained Posts',
+        depth: 'Deep',
+        searchQuery: '',
         lens: 'List',
     },
     spaceFilters: {
@@ -77,7 +78,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     // space posts
     const [spacePosts, setSpacePosts] = useState<any[]>([])
     const [totalMatchingPosts, setTotalMatchingPosts] = useState(0)
-    const [spacePostsFilters, setSpacePostsFilters] = useState(defaults.postFilters)
+    const [postFilters, setPostFilters] = useState(defaults.postFilters)
     const [spacePostsPaginationLimit, setSpacePostsPaginationLimit] = useState(10)
     const [spacePostsPaginationOffset, setSpacePostsPaginationOffset] = useState(0)
     const [spacePostsPaginationHasMore, setSpacePostsPaginationHasMore] = useState(true)
@@ -124,7 +125,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
             .then((res) => {
                 // console.log('space-data: ', res.data)
                 // todo: apply default people filters when set up
-                // setSpacePostsFilters()
+                // setPostFilters()
                 // setDefaultPeopleFilters()
                 updateSpaceUserStatus(res.data)
                 setSpaceData(res.data)
@@ -139,7 +140,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
 
     function getSpacePosts(spaceId, offset, limit, params) {
         console.log(`SpaceContext: getSpacePosts (${offset + 1} to ${offset + limit})`)
-        setSpacePostsFilters(params)
+        setPostFilters(params)
         const firstLoad = offset === 0
         if (firstLoad) setSpacePostsLoading(true)
         else setNextSpacePostsLoading(true)
@@ -162,7 +163,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
 
     function getPostMapData(spaceId, params, limit) {
         console.log(`SpaceContext: getPostMapData`, spaceId, params, limit)
-        setSpacePostsFilters(params)
+        setPostFilters(params)
         const data = {
             ...params,
             spaceId,
@@ -256,7 +257,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         setSpacePostsPaginationLimit(10)
         setSpacePostsPaginationOffset(0)
         setSpacePostsPaginationHasMore(true)
-        setSpacePostsFilters(defaults.postFilters)
+        setPostFilters(defaults.postFilters)
     }
 
     function resetSpaceList() {
@@ -308,7 +309,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 spacePosts,
                 setSpacePosts,
                 totalMatchingPosts,
-                spacePostsFilters,
+                postFilters,
                 spacePostsPaginationLimit,
                 spacePostsPaginationOffset,
                 spacePostsPaginationHasMore,

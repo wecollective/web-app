@@ -18,7 +18,7 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
     const { postMapData, params } = props
     const { accountData } = useContext(AccountContext)
     const { spaceData, setPostMapData, getPostMapData } = useContext(SpaceContext)
-    const { sortBy, sortOrder } = params
+    const { filter, sortBy } = params
     const [selectedPost, setSelectedPost] = useState<any>(null)
     const [postModalOpen, setPostModalOpen] = useState(false)
     const defaultGravity = 30
@@ -28,7 +28,7 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
     const [firstRun, setFirstRun] = useState(true)
     const [showNoPostsMessage, setShowNoPostsMessage] = useState(false)
     const width = '100%'
-    const height = window.innerHeight - 150
+    const height = window.innerHeight - 165
     const arrowPoints = 'M 0 0 6 3 0 6 1.5 3'
     const gravitySlider = useRef<HTMLInputElement>(null)
     const gravityInput = useRef<HTMLInputElement>(null)
@@ -48,14 +48,16 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
     function findDomain() {
         let dMin = 0
         let dMax
-        if (sortBy === 'Date Created') {
+        if (filter === 'New') {
             dMin = d3.min(postMapData.posts.map((post) => Date.parse(post.createdAt)))
             dMax = d3.max(postMapData.posts.map((post) => Date.parse(post.createdAt)))
-        } else if (sortBy === 'Recent Activity') {
+        } else if (filter === 'Active') {
             dMin = d3.min(postMapData.posts.map((post) => Date.parse(post.lastActivity)))
             dMax = d3.max(postMapData.posts.map((post) => Date.parse(post.lastActivity)))
-        } else dMax = d3.max(postMapData.posts.map((child) => child[`total${sortBy}`]))
-        return sortOrder === 'Descending' ? [dMin, dMax] : [dMax, dMin]
+        } else if (sortBy === 'Signal')
+            dMax = d3.max(postMapData.posts.map((child) => child.totalRatings))
+        else dMax = d3.max(postMapData.posts.map((child) => child[`total${sortBy}`]))
+        return [dMin, dMax]
     }
 
     function findRadius(d) {
@@ -64,8 +66,9 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
             .domain(findDomain()) // data values spread
             .range([20, 60]) // radius size spread
         let radius
-        if (sortBy === 'Date Created') radius = Date.parse(d.createdAt)
-        else if (sortBy === 'Recent Activity') radius = Date.parse(d.lastActivity)
+        if (filter === 'New') radius = Date.parse(d.createdAt)
+        else if (filter === 'Active') radius = Date.parse(d.lastActivity)
+        else if (sortBy === 'Signal') radius = d.totalRatings
         else radius = d[`total${sortBy}`]
         return radiusScale(radius)
     }

@@ -64,7 +64,7 @@ function PostCard(props: {
         setCreatePostModalSettings,
         setCreatePostModalOpen,
     } = useContext(AccountContext)
-    const { spaceData, spacePostsFilters } = useContext(SpaceContext)
+    const { spaceData, postFilters } = useContext(SpaceContext)
     const [postData, setPostData] = useState(post)
     const {
         id,
@@ -113,7 +113,7 @@ function PostCard(props: {
 
     const history = useNavigate()
     const urlParams = Object.fromEntries(new URLSearchParams(useLocation().search))
-    const params = { ...spacePostsFilters }
+    const params = { ...postFilters }
     Object.keys(urlParams).forEach((param) => {
         params[param] = urlParams[param]
     })

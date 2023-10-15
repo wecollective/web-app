@@ -7,15 +7,15 @@ import { useLocation, useNavigate } from 'react-router-dom'
 
 function SpacePostLenses(props: { close: () => void }): JSX.Element {
     const { close } = props
-    const { spacePostsFilters } = useContext(SpaceContext)
-    const [params, setParams] = useState({ ...spacePostsFilters })
+    const { postFilters } = useContext(SpaceContext)
+    const [params, setParams] = useState({ ...postFilters })
     const location = useLocation()
     const history = useNavigate()
 
     useEffect(() => {
-        // map url params onto spacePostsFilters in space context
+        // map url params onto postFilters in space context
         const urlParams = Object.fromEntries(new URLSearchParams(location.search))
-        const newParams = { ...spacePostsFilters }
+        const newParams = { ...postFilters }
         Object.keys(urlParams).forEach((param) => {
             newParams[param] = urlParams[param]
         })

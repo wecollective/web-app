@@ -8,15 +8,15 @@ import { useLocation, useNavigate } from 'react-router-dom'
 
 function SpacePostFilters(props: { close: () => void }): JSX.Element {
     const { close } = props
-    const { spacePostsFilters } = useContext(SpaceContext)
-    const [params, setParams] = useState({ ...spacePostsFilters })
+    const { postFilters } = useContext(SpaceContext)
+    const [params, setParams] = useState({ ...postFilters })
     const location = useLocation()
     const history = useNavigate()
 
     useEffect(() => {
         // map url params onto spacePostsFilters in space context
         const urlParams = Object.fromEntries(new URLSearchParams(location.search))
-        const newParams = { ...spacePostsFilters }
+        const newParams = { ...postFilters }
         Object.keys(urlParams).forEach((param) => {
             newParams[param] = urlParams[param]
         })
@@ -68,14 +68,7 @@ function SpacePostFilters(props: { close: () => void }): JSX.Element {
             />
             <DropDown
                 title='Time Range'
-                options={[
-                    'All Time',
-                    'Last Year',
-                    'Last Month',
-                    'Last Week',
-                    'Last 24 Hours',
-                    'Last Hour',
-                ]}
+                options={['All Time', 'Last Year', 'Last Month', 'Last Week', 'Today', 'Last Hour']}
                 selectedOption={params.timeRange}
                 setSelectedOption={(option) => setParams({ ...params, timeRange: option })}
                 style={{ marginBottom: 20 }}
