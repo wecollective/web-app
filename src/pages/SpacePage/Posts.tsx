@@ -112,7 +112,7 @@ function Posts(): JSX.Element {
             )}
             {params.lens === 'Map' && (
                 <Column centerX className={styles.postMapView}>
-                    <Row style={{ width: 770 }}>
+                    <Row style={{ width: '100%', maxWidth: 770 }}>
                         <PostFilters pageType='space' urlParams={params} />
                     </Row>
                     <PostMap postMapData={postMapData} params={params} />

@@ -696,7 +696,11 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
             </div>
             <div id='canvas' />
             {postModalOpen && (
-                <Modal centerX close={() => setPostModalOpen(false)} style={{ width: 900 }}>
+                <Modal
+                    centerX
+                    close={() => setPostModalOpen(false)}
+                    style={{ width: '100%', maxWidth: 900 }}
+                >
                     {selectedPost ? (
                         <PostCard location='space-post-map' post={selectedPost} />
                     ) : (

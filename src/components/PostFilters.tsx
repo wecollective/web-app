@@ -81,7 +81,7 @@ function PostFilters(props: { pageType: 'space' | 'user'; urlParams: any }): JSX
 
     return (
         <Row spaceBetween className={styles.filters}>
-            <Row>
+            <Row wrap>
                 <button
                     type='button'
                     className={`${styles.button} ${filter === 'Active' && styles.selected}`}
