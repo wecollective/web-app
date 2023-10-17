@@ -43,11 +43,11 @@ function PostFilters(props: { pageType: 'space' | 'user'; urlParams: any }): JSX
     const sortByOptions = ['Likes', 'Comments', 'Links', 'Signal', 'Reposts']
     const timeRangeOptions = [
         'All Time',
-        'Last Year',
-        'Last Month',
-        'Last Week',
+        'This Year',
+        'This Month',
+        'This Week',
         'Today',
-        'Last Hour',
+        'This Hour',
     ]
     const depthOptions = ['Deep', 'Shallow']
     const lensOptions = ['List', 'Map']

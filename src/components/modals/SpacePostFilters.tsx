@@ -68,7 +68,7 @@ function SpacePostFilters(props: { close: () => void }): JSX.Element {
             />
             <DropDown
                 title='Time Range'
-                options={['All Time', 'Last Year', 'Last Month', 'Last Week', 'Today', 'Last Hour']}
+                options={['All Time', 'This Year', 'This Month', 'This Week', 'Today', 'This Hour']}
                 selectedOption={params.timeRange}
                 setSelectedOption={(option) => setParams({ ...params, timeRange: option })}
                 style={{ marginBottom: 20 }}
