@@ -36,6 +36,11 @@ function ToyBar(): JSX.Element {
     const {
         accountData,
         loggedIn,
+        dragItem,
+        dragItemRef,
+        toyBoxItems,
+        toyBoxItemsRef,
+        setToyBoxItems,
         setAlertModalOpen,
         setAlertMessage,
         setCreatePostModalOpen,
@@ -51,6 +56,7 @@ function ToyBar(): JSX.Element {
     const [spacePeopleFiltersOpen, setSpacePeopleFiltersOpen] = useState(false)
     const [userPostFiltersOpen, setUserPostFiltersOpen] = useState(false)
     const [helpModalOpen, setHelpModalOpen] = useState(false)
+    const [showDragItem, setShowDragItem] = useState(false)
     const cookies = new Cookies()
     const location = useLocation()
     const path = location.pathname.split('/')
@@ -99,7 +105,6 @@ function ToyBar(): JSX.Element {
     function renderFilters() {
         let openModal
         if (page === 's') {
-            if (subpage === 'posts') openModal = setSpacePostFiltersOpen
             if (subpage === 'spaces') openModal = setSpaceSpaceFiltersOpen
             if (subpage === 'people') openModal = setSpacePeopleFiltersOpen
         }
@@ -120,7 +125,6 @@ function ToyBar(): JSX.Element {
     function renderLenses() {
         let openModal
         if (page === 's') {
-            if (subpage === 'posts') openModal = setSpacePostLensesOpen
             if (subpage === 'spaces') openModal = setSpaceSpaceLensesOpen
         }
         if (openModal) {
@@ -139,6 +143,23 @@ function ToyBar(): JSX.Element {
     useEffect(() => {
         if (accountData.id) getToyBarData()
     }, [accountData.id])
+
+    useEffect(() => {
+        const dropBox = document.getElementById('drop-box')
+        if (dropBox) {
+            dropBox.addEventListener('dragover', (e) => {
+                e.preventDefault()
+                setShowDragItem(true)
+            })
+            dropBox.addEventListener('drop', () => {
+                setShowDragItem(false)
+                const newItems = [...toyBoxItemsRef.current, dragItemRef.current]
+                setToyBoxItems(newItems)
+                toyBoxItemsRef.current = newItems
+            })
+            dropBox.addEventListener('dragleave', () => setShowDragItem(false))
+        }
+    }, [])
 
     return (
         <Row centerY centerX className={styles.wrapper}>
@@ -265,6 +286,19 @@ function ToyBar(): JSX.Element {
                     icon={<HelpIcon />}
                     onClick={() => setHelpModalOpen(true)}
                 />
+                <Row id='drop-box' className={styles.toyBox}>
+                    {toyBoxItems.map((item) => (
+                        <Column centerY centerX className={styles.dragItem}>
+                            <p>{item.type}</p>
+                            <p>{item.data.id}</p>
+                        </Column>
+                    ))}
+                    {(showDragItem || toyBoxItems.length < 1) && (
+                        <Column centerY centerX className={styles.dragItem}>
+                            {showDragItem ? <p>{dragItem.data.id}</p> : <p>Drop!</p>}
+                        </Column>
+                    )}
+                </Row>
                 {spacePostFiltersOpen && (
                     <SpacePostFilters close={() => setSpacePostFiltersOpen(false)} />
                 )}

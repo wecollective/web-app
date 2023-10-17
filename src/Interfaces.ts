@@ -109,6 +109,12 @@ export interface IAccountContext {
     setAccountData: (payload: any) => void
     accountDataLoading: boolean
     setAccountDataLoading: (payload: boolean) => void
+    toyBoxItems: any[]
+    setToyBoxItems: (payload: any[]) => void
+    toyBoxItemsRef: any
+    dragItem: any
+    setDragItem: (payload: any) => void
+    dragItemRef: any
     // modals (todo: most to be removed...)
     alertModalOpen: boolean
     setAlertModalOpen: (payload: boolean) => void

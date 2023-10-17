@@ -43,7 +43,7 @@ function BeadCard(props: {
         removeBead,
         style,
     } = props
-    const { accountData } = useContext(AccountContext)
+    const { accountData, dragItemRef, setDragItem } = useContext(AccountContext)
     const [bead, setBead] = useState(beadProp)
     const [isSource, setIsSource] = useState(false)
     const {
@@ -120,6 +120,21 @@ function BeadCard(props: {
         setIsSource(beadProp.Link.relationship === 'source')
     }, [beadProp])
 
+    useEffect(() => {
+        const beadCard = document.getElementById(`bead-${id}`)
+        if (beadCard) {
+            beadCard.addEventListener('dragstart', (e) => {
+                e.stopPropagation()
+                beadCard.classList.add(styles.dragging)
+                setDragItem({ type: 'bead', data: bead })
+                dragItemRef.current = { type: 'bead', data: bead }
+            })
+            beadCard.addEventListener('dragend', () => {
+                beadCard.classList.remove(styles.dragging)
+            })
+        }
+    }, [])
+
     return (
         <Column
             spaceBetween
@@ -127,6 +142,8 @@ function BeadCard(props: {
                 isSource && styles.source
             } ${location === 'gbg-room' && styles.gbgRoom}`}
             style={{ ...style, backgroundColor: bead.color }}
+            draggable
+            id={`bead-${id}`}
         >
             <div className={styles.watermark} />
             <Row spaceBetween centerY className={styles.header}>

@@ -2,7 +2,7 @@ import config from '@src/Config'
 import { getDraftPlainText } from '@src/Helpers'
 import { IAccountContext } from '@src/Interfaces'
 import axios from 'axios'
-import React, { createContext, useEffect, useState } from 'react'
+import React, { createContext, useEffect, useRef, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 export const AccountContext = createContext<IAccountContext>({} as IAccountContext)
@@ -25,6 +25,10 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
     const [accountData, setAccountData] = useState(defaults.accountData)
     const [accountDataLoading, setAccountDataLoading] = useState(true)
     const [pageBottomReached, setPageBottomReached] = useState(false)
+    const [toyBoxItems, setToyBoxItems] = useState<any[]>([])
+    const toyBoxItemsRef = useRef<any[]>([])
+    const [dragItem, setDragItem] = useState({ type: '', data: null })
+    const dragItemRef = useRef<any>(null)
     // modals
     const [alertModalOpen, setAlertModalOpen] = useState(false)
     const [alertMessage, setAlertMessage] = useState('')
@@ -101,6 +105,12 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                 setAccountData,
                 accountDataLoading,
                 setAccountDataLoading,
+                toyBoxItems,
+                setToyBoxItems,
+                toyBoxItemsRef,
+                dragItem,
+                setDragItem,
+                dragItemRef,
                 alertModalOpen,
                 setAlertModalOpen,
                 alertMessage,

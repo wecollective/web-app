@@ -11,8 +11,20 @@ function Column(props: {
     centerY?: boolean
     spaceBetween?: boolean
     scroll?: boolean
+    draggable?: boolean
 }): JSX.Element {
-    const { children, style, className, id, title, centerX, centerY, spaceBetween, scroll } = props
+    const {
+        children,
+        style,
+        className,
+        id,
+        title,
+        centerX,
+        centerY,
+        spaceBetween,
+        scroll,
+        draggable,
+    } = props
 
     const classes = [styles.wrapper]
     if (className) classes.unshift(className)
@@ -22,7 +34,13 @@ function Column(props: {
     if (scroll) classes.push(styles.scroll)
 
     return (
-        <div className={classes.join(' ')} style={style} id={id} title={title}>
+        <div
+            className={classes.join(' ')}
+            style={style}
+            id={id}
+            title={title}
+            draggable={draggable}
+        >
             {children}
         </div>
     )
@@ -38,6 +56,7 @@ Column.defaultProps = {
     centerY: false,
     spaceBetween: false,
     scroll: false,
+    draggable: false,
 }
 
 export default Column

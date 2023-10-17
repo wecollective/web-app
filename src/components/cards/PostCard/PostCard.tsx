@@ -59,6 +59,8 @@ function PostCard(props: {
     const {
         accountData,
         loggedIn,
+        dragItemRef,
+        setDragItem,
         setAlertModalOpen,
         setAlertMessage,
         setCreatePostModalSettings,
@@ -161,11 +163,27 @@ function PostCard(props: {
     // remove this useEffect alltogether if everything handled from props...?
     useEffect(() => setPostData(post), [post])
 
+    useEffect(() => {
+        const postCard = document.getElementById(`post-${id}`)
+        if (postCard) {
+            postCard.addEventListener('dragstart', (e) => {
+                postCard.classList.add(styles.dragging)
+                setDragItem({ type: 'post', data: postData })
+                dragItemRef.current = { type: 'post', data: postData }
+            })
+            postCard.addEventListener('dragend', () => {
+                postCard.classList.remove(styles.dragging)
+            })
+        }
+    }, [])
+
     return (
         <Column
-            className={`${styles.post} ${styles[location]} ${styling && styles.styling}`}
             key={id}
+            id={`post-${id}`}
+            className={`${styles.post} ${styles[location]} ${styling && styles.styling}`}
             style={style}
+            draggable
         >
             <Row spaceBetween className={styles.header}>
                 <Row centerY>
@@ -310,7 +328,7 @@ function PostCard(props: {
             {showFooter && (
                 <Column className={styles.footer}>
                     <Row spaceBetween centerY>
-                        <Row centerY className={styles.reactions}>
+                        <Row centerY wrap className={styles.reactions}>
                             <Row
                                 centerY
                                 className={`${styles.like} ${
