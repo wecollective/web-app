@@ -2,56 +2,17 @@
 
 .wrapper {
     border-radius: 50%;
-    box-shadow: none;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative;
+    background-color: $white;
     flex-shrink: 0;
-    overflow: hidden;
-
-    &.outline {
-        background-color: $white;
-
-        > div,
-        > img {
-            border-radius: 50%;
-            overflow: hidden;
-            width: calc(100% - 8px);
-            height: calc(100% - 8px);
-        }
-
-        &.small {
-            > div,
-            > img {
-                width: calc(100% - 4px);
-                height: calc(100% - 4px);
-            }
-        }
-    }
-
-    &.shadow {
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
-        &.small {
-            box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
-        }
-    }
 
     .flagImage {
         width: 100%;
         height: 100%;
+        border-radius: 50%;
         background-size: cover;
         background-position: center;
         object-fit: cover;
-        position: absolute;
         flex-shrink: 0;
-    }
-
-    .background {
-        width: calc(100% - 2px);
-        height: calc(100% - 2px);
-        border-radius: inherit;
-        background-color: white;
     }
 }

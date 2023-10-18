@@ -143,7 +143,7 @@ function UserPage(): JSX.Element {
                             type='space'
                             imagePath={userData.flagImagePath}
                             size={32}
-                            shadow
+                            style={{ boxShadow: `0 0 20px rgba(0, 0, 0, 0.2)` }}
                         />
                         {!tabletView && (
                             <Row centerY>

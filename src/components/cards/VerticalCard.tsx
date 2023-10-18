@@ -33,8 +33,8 @@ function VerticalCard(props: {
                             size={130}
                             type={type}
                             imagePath={flagImagePath}
-                            outline
-                            shadow
+                            outline={8}
+                            style={{ boxShadow: `0 0 20px rgba(0, 0, 0, 0.2)` }}
                         />
                     </div>
                 </Link>

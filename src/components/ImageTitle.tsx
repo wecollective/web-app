@@ -33,6 +33,7 @@ function ImageTitle(props: {
     } = props
     const text = state === 'active' ? title : `[${type} deleted]`
     const color = state === 'active' ? '' : '#acacae'
+    const boxShadow = shadow ? { boxShadow: `0 0 20px rgba(0, 0, 0, 0.2)` } : null
 
     if (link) {
         return (
@@ -42,7 +43,7 @@ function ImageTitle(props: {
                 className={`${styles.container} ${styles.container} ${styles.clickable} ${className}`}
                 style={style}
             >
-                <FlagImage type={type} size={imageSize!} imagePath={imagePath} shadow={shadow} />
+                <FlagImage type={type} size={imageSize!} imagePath={imagePath} style={boxShadow} />
                 <p style={{ fontSize, color }} className={wrapText ? styles.wrapText : ''}>
                     {text}
                 </p>
@@ -57,7 +58,7 @@ function ImageTitle(props: {
                 className={`${styles.container} ${styles.clickable} ${className}`}
                 style={style}
             >
-                <FlagImage type={type} size={imageSize!} imagePath={imagePath} shadow={shadow} />
+                <FlagImage type={type} size={imageSize!} imagePath={imagePath} style={boxShadow} />
                 <p style={{ fontSize, color }} className={wrapText ? styles.wrapText : ''}>
                     {text}
                 </p>
@@ -66,7 +67,7 @@ function ImageTitle(props: {
     }
     return (
         <div className={`${styles.container} ${className}`} style={style}>
-            <FlagImage type={type} size={imageSize!} imagePath={imagePath} shadow={shadow} />
+            <FlagImage type={type} size={imageSize!} imagePath={imagePath} style={boxShadow} />
             <p style={{ fontSize, color }} className={wrapText ? styles.wrapText : ''}>
                 {text}
             </p>

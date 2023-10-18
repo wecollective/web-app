@@ -8,37 +8,27 @@ function FlagImage(props: {
     type: 'space' | 'user' | 'post' | 'stream'
     imagePath: string | null
     size?: number
-    outline?: boolean
-    shadow?: boolean
+    outline?: number
     link?: string | null
     className?: string
     style?: any
 }): JSX.Element {
-    const { type, imagePath, size, outline, shadow, link, className, style } = props
-
-    const classes = [styles.wrapper]
-    if (className) classes.unshift(className)
-    if (outline) classes.push(styles.outline)
-    if (shadow) classes.push(styles.shadow)
-    if (!size || size < 50) classes.push(styles.small)
+    const { type, imagePath, size, outline, link, className, style } = props
 
     if (link) {
         return (
             <Link
                 to={link}
-                className={classes.join(' ')}
-                style={{ width: size, height: size, ...style }}
+                className={`${styles.wrapper} ${className}`}
+                style={{ width: size, height: size, border: `${outline}px solid white`, ...style }}
             >
                 {imagePath ? (
-                    <>
-                        <div className={styles.background} />
-                        <img
-                            className={styles.flagImage}
-                            src={imagePath}
-                            onError={(e) => handleImageError(e, imagePath)}
-                            alt=''
-                        />
-                    </>
+                    <img
+                        className={styles.flagImage}
+                        src={imagePath}
+                        onError={(e) => handleImageError(e, imagePath)}
+                        alt=''
+                    />
                 ) : (
                     <FlagImagePlaceholder type={type} />
                 )}
@@ -47,17 +37,17 @@ function FlagImage(props: {
     }
 
     return (
-        <div className={classes.join(' ')} style={{ width: size, height: size, ...style }}>
+        <div
+            className={`${styles.wrapper} ${className}`}
+            style={{ width: size, height: size, border: `${outline}px solid white`, ...style }}
+        >
             {imagePath ? (
-                <>
-                    <div className={styles.background} />
-                    <img
-                        className={styles.flagImage}
-                        src={imagePath}
-                        onError={(e) => handleImageError(e, imagePath)}
-                        alt=''
-                    />
-                </>
+                <img
+                    className={styles.flagImage}
+                    src={imagePath}
+                    onError={(e) => handleImageError(e, imagePath)}
+                    alt=''
+                />
             ) : (
                 <FlagImagePlaceholder type={type} />
             )}
@@ -67,10 +57,9 @@ function FlagImage(props: {
 
 FlagImage.defaultProps = {
     size: 30,
-    outline: false,
-    shadow: false,
+    outline: 0,
     link: null,
-    className: null,
+    className: '',
     style: null,
 }
 

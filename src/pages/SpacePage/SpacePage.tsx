@@ -280,7 +280,7 @@ function SpacePage(): JSX.Element {
                             type='space'
                             imagePath={spaceData.flagImagePath}
                             size={30}
-                            shadow
+                            style={{ boxShadow: `0 0 20px rgba(0, 0, 0, 0.2)` }}
                         />
                         {!tabletView && (
                             <Row centerY>

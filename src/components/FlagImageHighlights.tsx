@@ -8,11 +8,10 @@ function FlagImageHighlights(props: {
     imageSize?: number
     text?: string
     style?: any
-    outline?: boolean
-    shadow?: boolean
+    outline?: number
     onClick?: () => void
 }): JSX.Element {
-    const { type, imagePaths, imageSize, text, style, outline, shadow, onClick } = props
+    const { type, imagePaths, imageSize, text, style, outline, onClick } = props
     return (
         <button
             className={`${styles.wrapper} ${onClick && styles.clickable}`}
@@ -26,7 +25,6 @@ function FlagImageHighlights(props: {
                         type={type}
                         imagePath={imagePaths[0]}
                         size={imageSize!}
-                        shadow={shadow}
                         outline={outline}
                     />
                 </div>
@@ -37,7 +35,6 @@ function FlagImageHighlights(props: {
                         type={type}
                         imagePath={imagePaths[1]}
                         size={imageSize!}
-                        shadow={shadow}
                         outline={outline}
                     />
                 </div>
@@ -48,7 +45,6 @@ function FlagImageHighlights(props: {
                         type={type}
                         imagePath={imagePaths[2]}
                         size={imageSize!}
-                        shadow={shadow}
                         outline={outline}
                     />
                 </div>
@@ -62,8 +58,7 @@ FlagImageHighlights.defaultProps = {
     imageSize: 35,
     text: null,
     style: null,
-    outline: false,
-    shadow: false,
+    outline: 0,
     onClick: null,
 }
 
