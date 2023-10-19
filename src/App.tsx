@@ -1,3 +1,4 @@
+import DragItem from '@components/DragItem'
 import Navbar from '@components/Navbar'
 import ToyBar from '@components/ToyBar'
 import Modals from '@components/modals/Modals'
@@ -19,6 +20,7 @@ function App(): JSX.Element {
                 <Modals />
                 <Navbar />
                 <ToyBar />
+                <DragItem />
                 <Routes>
                     <Route path='/' element={<HomePage />} />
                     <Route path='/s/:spaceHandle/*' element={<SpacePage />} />

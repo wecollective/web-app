@@ -1,0 +1,70 @@
+@import '@styles/Variables';
+
+.wrapper {
+    width: 100px;
+    height: 100px;
+    border: 1px solid $grey5;
+    border-radius: 10px;
+    background-color: $grey1;
+    margin-right: 10px;
+    overflow: hidden;
+    cursor: move;
+    position: relative;
+    transition: transform 0.3s;
+
+    .item {
+        padding: 4px;
+        width: 100%;
+        height: 100%;
+
+        .center {
+            height: 100%;
+
+            p {
+                font-size: 12px;
+            }
+
+            img {
+                width: 100%;
+                height: 48px;
+                border-radius: 4px;
+                object-fit: cover;
+            }
+        }
+
+        > div > svg {
+            width: 18px;
+            height: 18px;
+            color: $grey5;
+        }
+    }
+
+    .agent {
+        .coverImage {
+            width: 100%;
+            height: 74px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .flagImage {
+            top: 7px;
+            position: absolute;
+        }
+
+        .footer {
+            height: 24px;
+            font-size: 12px;
+            color: $grey7;
+            max-width: 100%;
+            overflow: hidden;
+
+            > svg {
+                width: 15px;
+                height: 15px;
+                color: $grey5;
+                margin-right: 5px;
+            }
+        }
+    }
+}

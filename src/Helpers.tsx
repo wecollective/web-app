@@ -139,9 +139,13 @@ export const defaultGBGSettings = {
 
 export const postTypeIcons = {
     text: <TextIcon />,
+    'gbg-text': <TextIcon />,
     url: <LinkIcon />,
+    'gbg-url': <LinkIcon />,
     image: <ImageIcon />,
+    'gbg-image': <ImageIcon />,
     audio: <AudioIcon />,
+    'gbg-audio': <AudioIcon />,
     event: <CalendarIcon />,
     poll: <PollIcon />,
     card: <CardIcon />,
