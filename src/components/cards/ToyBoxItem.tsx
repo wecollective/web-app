@@ -8,14 +8,14 @@ import { CommentIcon, PostIcon, SpacesIcon, UserIcon } from '@svgs/all'
 import React, { useContext, useEffect } from 'react'
 
 function ToyBoxItem(props: {
-    index: number
     type: 'space' | 'user' | 'post' | 'bead' | 'comment'
     data: any
     style?: any
+    className?: string
 }): JSX.Element {
-    const { index, type, data, style } = props
+    const { type, data, style, className } = props
     const { dragItemRef, setDragItem } = useContext(AccountContext)
-    const itemId = `toy-box-item-${index}`
+    const itemId = `${type}-${data.id}`
     let text = ''
     if (data.title) text = trimText(data.title, 20)
     else if (data.text) text = trimText(getDraftPlainText(data.text), 20)
@@ -50,7 +50,7 @@ function ToyBoxItem(props: {
     }, [])
 
     return (
-        <Column id={itemId} className={styles.wrapper} style={style} draggable>
+        <Column id={itemId} className={`${styles.wrapper} ${className}`} style={style} draggable>
             {['post', 'bead', 'comment'].includes(type) ? (
                 <Column className={styles.item}>
                     <Row spaceBetween centerY>
@@ -94,6 +94,7 @@ function ToyBoxItem(props: {
 
 ToyBoxItem.defaultProps = {
     style: null,
+    className: '',
 }
 
 export default ToyBoxItem

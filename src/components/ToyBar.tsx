@@ -1,9 +1,8 @@
+/* eslint-disable no-param-reassign */
 import CircleButton from '@components/CircleButton'
-import Column from '@components/Column'
-import ImageTitle from '@components/ImageTitle'
 import Row from '@components/Row'
-import TextLink from '@components/TextLink'
 import Tooltip from '@components/Tooltip'
+import ToyBoxItem from '@components/cards/ToyBoxItem'
 import GlobalHelpModal from '@components/modals/GlobalHelpModal'
 import SpacePeopleFilters from '@components/modals/SpacePeopleFilters'
 import SpacePostFilters from '@components/modals/SpacePostFilters'
@@ -13,23 +12,21 @@ import SpaceSpaceLenses from '@components/modals/SpaceSpaceLenses'
 import UserPostFilters from '@components/modals/UserPostFilters'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
-import { capitalise, trimText } from '@src/Helpers'
 import styles from '@styles/components/ToyBar.module.scss'
 import {
+    DeleteIcon,
     EyeIcon,
-    HelpIcon,
+    InboxIcon,
     InfinityIcon,
     PlusIcon,
     PostIcon,
     SlidersIcon,
     SpacesIcon,
-    StreamIcon,
-    UserIcon,
     UsersIcon,
 } from '@svgs/all'
 import axios from 'axios'
-import React, { useContext, useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import React, { useContext, useEffect, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
 function ToyBar(): JSX.Element {
@@ -38,6 +35,7 @@ function ToyBar(): JSX.Element {
         loggedIn,
         dragItem,
         dragItemRef,
+        setDragItem,
         toyBoxItems,
         toyBoxItemsRef,
         setToyBoxItems,
@@ -57,6 +55,7 @@ function ToyBar(): JSX.Element {
     const [userPostFiltersOpen, setUserPostFiltersOpen] = useState(false)
     const [helpModalOpen, setHelpModalOpen] = useState(false)
     const [showDragItem, setShowDragItem] = useState(false)
+    const droppingRef = useRef(false)
     const cookies = new Cookies()
     const location = useLocation()
     const path = location.pathname.split('/')
@@ -146,18 +145,53 @@ function ToyBar(): JSX.Element {
 
     useEffect(() => {
         const dropBox = document.getElementById('drop-box')
+        let counter = 0
+        let hoverIndex = 0
+        let dropIndex = 0
         if (dropBox) {
             dropBox.addEventListener('dragover', (e) => {
                 e.preventDefault()
-                setShowDragItem(true)
+                const { x } = dropBox.getBoundingClientRect()
+                const difference = e.clientX - x
+                const hIndex = Math.floor((difference - 45) / 110)
+                const dIndex = Math.floor(difference / 110)
+                if (dIndex !== dropIndex) dropIndex = dIndex
+                // if (hIndex !== hoverIndex) {
+                if (hIndex !== hoverIndex) hoverIndex = hIndex
+                const items = document.querySelectorAll(`.${styles.toyBoxItem}`)
+                items.forEach((item, i) => {
+                    if (i > hIndex) item.classList.add(styles.moveRight)
+                    if (i < hIndex) item.classList.remove(styles.moveRight)
+                })
+                // }
+            })
+            dropBox.addEventListener('dragenter', () => {
+                counter += 1
+                dropBox.style.width = `${(toyBoxItemsRef.current.length + 1) * 110}px`
+                const items = document.querySelectorAll(`.${styles.toyBoxItem}`)
+                items.forEach((item) => item.classList.remove(styles.noTransform))
+            })
+            dropBox.addEventListener('dragleave', () => {
+                counter -= 1
+                if (counter === 0) {
+                    console.log('dragleave')
+                    dropBox.style.width = `${toyBoxItemsRef.current.length * 110}px`
+                    const items = document.querySelectorAll(`.${styles.toyBoxItem}`)
+                    items.forEach((item) => item.classList.remove(styles.moveRight))
+                }
             })
             dropBox.addEventListener('drop', () => {
-                setShowDragItem(false)
-                const newItems = [...toyBoxItemsRef.current, dragItemRef.current]
+                const items = document.querySelectorAll(`.${styles.toyBoxItem}`)
+                items.forEach((item) => {
+                    item.classList.add(styles.noTransform)
+                    item.classList.remove(styles.moveRight)
+                })
+                counter = 0
+                const newItems = [...toyBoxItemsRef.current]
+                newItems.splice(dropIndex, 0, dragItemRef.current)
                 setToyBoxItems(newItems)
                 toyBoxItemsRef.current = newItems
             })
-            dropBox.addEventListener('dragleave', () => setShowDragItem(false))
         }
     }, [])
 
@@ -176,7 +210,7 @@ function ToyBar(): JSX.Element {
                         </button>
                     </Tooltip>
                 </CircleButton>
-                {loggedIn && (
+                {/* {loggedIn && (
                     <CircleButton
                         size={buttonSize}
                         icon={<StreamIcon />}
@@ -278,27 +312,31 @@ function ToyBar(): JSX.Element {
                             )}
                         </Tooltip>
                     </CircleButton>
-                )}
+                )} */}
                 {renderFilters()}
                 {renderLenses()}
-                <CircleButton
+                {/* <CircleButton
                     size={buttonSize}
                     icon={<HelpIcon />}
                     onClick={() => setHelpModalOpen(true)}
-                />
+                /> */}
                 <Row id='drop-box' className={styles.toyBox}>
-                    {toyBoxItems.map((item) => (
-                        <Column centerY centerX className={styles.dragItem}>
-                            <p>{item.type}</p>
-                            <p>{item.data.id}</p>
-                        </Column>
-                    ))}
-                    {(showDragItem || toyBoxItems.length < 1) && (
-                        <Column centerY centerX className={styles.dragItem}>
-                            {showDragItem ? <p>{dragItem.data.id}</p> : <p>Drop!</p>}
-                        </Column>
+                    {toyBoxItems.length < 1 && (
+                        <div className={styles.button} style={{ marginRight: 10 }}>
+                            <InboxIcon />
+                        </div>
                     )}
+                    {toyBoxItems.map((item) => (
+                        <ToyBoxItem
+                            className={styles.toyBoxItem}
+                            type={item.type}
+                            data={item.data}
+                        />
+                    ))}
                 </Row>
+                <div className={styles.button}>
+                    <DeleteIcon />
+                </div>
                 {spacePostFiltersOpen && (
                     <SpacePostFilters close={() => setSpacePostFiltersOpen(false)} />
                 )}
