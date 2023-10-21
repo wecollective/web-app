@@ -145,25 +145,29 @@ function ToyBar(): JSX.Element {
 
     useEffect(() => {
         const dropBox = document.getElementById('drop-box')
-        let counter = 0
-        let hoverIndex = 0
-        let dropIndex = 0
+        let counter = 0 // used to avoid dragleave firing when hovering child elements
+        let hoverIndex = toyBoxItemsRef.current.length // used to animate cards
+        let dropIndex = toyBoxItemsRef.current.length // determines drop location
         if (dropBox) {
             dropBox.addEventListener('dragover', (e) => {
                 e.preventDefault()
                 const { x } = dropBox.getBoundingClientRect()
                 const difference = e.clientX - x
-                const hIndex = Math.floor((difference - 45) / 110)
-                const dIndex = Math.floor(difference / 110)
-                if (dIndex !== dropIndex) dropIndex = dIndex
-                // if (hIndex !== hoverIndex) {
-                if (hIndex !== hoverIndex) hoverIndex = hIndex
-                const items = document.querySelectorAll(`.${styles.toyBoxItem}`)
-                items.forEach((item, i) => {
-                    if (i > hIndex) item.classList.add(styles.moveRight)
-                    if (i < hIndex) item.classList.remove(styles.moveRight)
-                })
-                // }
+                const hIndex = Math.floor((difference - 55) / 110)
+                if (hoverIndex !== hIndex) {
+                    hoverIndex = hIndex
+                    const items = document.querySelectorAll(`.${styles.toyBoxItem}`)
+                    // handle edges
+                    if (hIndex < 0) dropIndex = 0
+                    if (hIndex === toyBoxItemsRef.current.length) dropIndex = hIndex
+                    // update animation classes and drop index
+                    items.forEach((item, i) => {
+                        if (i < hIndex) item.classList.remove(styles.moveRight)
+                        if (i === hIndex)
+                            dropIndex = item.classList.contains(styles.moveRight) ? i : i + 1
+                        if (i > hIndex) item.classList.add(styles.moveRight)
+                    })
+                }
             })
             dropBox.addEventListener('dragenter', () => {
                 counter += 1
@@ -174,23 +178,26 @@ function ToyBar(): JSX.Element {
             dropBox.addEventListener('dragleave', () => {
                 counter -= 1
                 if (counter === 0) {
-                    console.log('dragleave')
+                    hoverIndex = toyBoxItemsRef.current.length
+                    dropIndex = toyBoxItemsRef.current.length
                     dropBox.style.width = `${toyBoxItemsRef.current.length * 110}px`
                     const items = document.querySelectorAll(`.${styles.toyBoxItem}`)
                     items.forEach((item) => item.classList.remove(styles.moveRight))
                 }
             })
             dropBox.addEventListener('drop', () => {
+                counter = 0
                 const items = document.querySelectorAll(`.${styles.toyBoxItem}`)
                 items.forEach((item) => {
                     item.classList.add(styles.noTransform)
                     item.classList.remove(styles.moveRight)
                 })
-                counter = 0
                 const newItems = [...toyBoxItemsRef.current]
                 newItems.splice(dropIndex, 0, dragItemRef.current)
                 setToyBoxItems(newItems)
                 toyBoxItemsRef.current = newItems
+                hoverIndex = toyBoxItemsRef.current.length
+                dropIndex = toyBoxItemsRef.current.length
             })
         }
     }, [])
