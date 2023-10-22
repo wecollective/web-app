@@ -91,16 +91,29 @@
             margin-left: 10px;
             height: 100px;
             min-width: 100px;
-            transition: width 0.3s;
+            transition: all 0.3s;
 
             .toyBoxItem {
-                transition: transform 0.3s;
-                &.noTransform {
+                transition: all 0.3s;
+
+                &.noTransition {
                     transition: none;
                 }
                 &.moveRight {
                     transform: translateX(110px);
                 }
+                &.opacity {
+                    opacity: 0.3;
+                }
+                &.removing {
+                    opacity: 0;
+                    width: 0;
+                    margin-right: 0;
+                }
+            }
+
+            .spacer {
+                width: 100px;
             }
         }
     }

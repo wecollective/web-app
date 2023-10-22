@@ -10,6 +10,7 @@
     overflow: hidden;
     cursor: move;
     position: relative;
+    opacity: 1;
 
     .item {
         padding: 4px;
@@ -65,5 +66,9 @@
                 margin-right: 5px;
             }
         }
+    }
+
+    &.dragging {
+        opacity: 0.3;
     }
 }

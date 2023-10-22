@@ -156,48 +156,83 @@ function ToyBar(): JSX.Element {
                 const hIndex = Math.floor((difference - 55) / 110)
                 if (hoverIndex !== hIndex) {
                     hoverIndex = hIndex
+                    // update item positions and drop index
                     const items = document.querySelectorAll(`.${styles.toyBoxItem}`)
-                    // handle edges
-                    if (hIndex < 0) dropIndex = 0
-                    if (hIndex === toyBoxItemsRef.current.length) dropIndex = hIndex
-                    // update animation classes and drop index
                     items.forEach((item, i) => {
                         if (i < hIndex) item.classList.remove(styles.moveRight)
                         if (i === hIndex)
                             dropIndex = item.classList.contains(styles.moveRight) ? i : i + 1
                         if (i > hIndex) item.classList.add(styles.moveRight)
                     })
+                    // handle edges
+                    if (hIndex < 0) dropIndex = 0
+                    if (hIndex === toyBoxItemsRef.current.length) dropIndex = hIndex
                 }
             })
             dropBox.addEventListener('dragenter', () => {
                 counter += 1
+                // expand toybox
                 dropBox.style.width = `${(toyBoxItemsRef.current.length + 1) * 110}px`
+                // remove noTransform class from items
                 const items = document.querySelectorAll(`.${styles.toyBoxItem}`)
-                items.forEach((item) => item.classList.remove(styles.noTransform))
+                items.forEach((item) => item.classList.remove(styles.noTransition))
             })
             dropBox.addEventListener('dragleave', () => {
                 counter -= 1
                 if (counter === 0) {
-                    hoverIndex = toyBoxItemsRef.current.length
-                    dropIndex = toyBoxItemsRef.current.length
+                    // shrink toybox
                     dropBox.style.width = `${toyBoxItemsRef.current.length * 110}px`
+                    // reset item positions
                     const items = document.querySelectorAll(`.${styles.toyBoxItem}`)
                     items.forEach((item) => item.classList.remove(styles.moveRight))
+                    // reset indexes
+                    hoverIndex = toyBoxItemsRef.current.length
+                    dropIndex = toyBoxItemsRef.current.length
                 }
             })
             dropBox.addEventListener('drop', () => {
+                console.log('dropIndex: ', dropIndex)
                 counter = 0
+                // remove animation and reposition items
                 const items = document.querySelectorAll(`.${styles.toyBoxItem}`)
                 items.forEach((item) => {
-                    item.classList.add(styles.noTransform)
+                    item.classList.add(styles.noTransition)
                     item.classList.remove(styles.moveRight)
                 })
-                const newItems = [...toyBoxItemsRef.current]
+                // add new item
+                let newItems = [...toyBoxItemsRef.current]
+                const { type, data, fromToyBox } = dragItemRef.current
+                if (fromToyBox) {
+                    const oldItem = newItems.find((i) => i.type === type && i.data.id === data.id)
+                    oldItem.type = 'removed'
+                }
                 newItems.splice(dropIndex, 0, dragItemRef.current)
                 setToyBoxItems(newItems)
                 toyBoxItemsRef.current = newItems
+                if (fromToyBox) {
+                    setTimeout(() => {
+                        const oldItem = document.getElementById(`removed-${data.id}`)
+                        if (oldItem) {
+                            oldItem.classList.add(styles.opacity)
+                            oldItem.classList.remove(styles.noTransition)
+                            oldItem.classList.add(styles.removing)
+                            dropBox.style.width = `${(newItems.length - 1) * 110}px`
+                        }
+                        setTimeout(() => {
+                            newItems = newItems.filter((i) => i.type !== 'removed')
+                            setToyBoxItems(newItems)
+                            toyBoxItemsRef.current = newItems
+                        }, 300)
+                    }, 100)
+                }
+                // reset indexes
                 hoverIndex = toyBoxItemsRef.current.length
                 dropIndex = toyBoxItemsRef.current.length
+                // re-add animation
+                setTimeout(
+                    () => items.forEach((item) => item.classList.remove(styles.noTransition)),
+                    300
+                )
             })
         }
     }, [])
@@ -335,6 +370,8 @@ function ToyBar(): JSX.Element {
                     )}
                     {toyBoxItems.map((item) => (
                         <ToyBoxItem
+                            key={`${item.type}-${item.data.id}`}
+                            // key={uuidv4()}
                             className={styles.toyBoxItem}
                             type={item.type}
                             data={item.data}
