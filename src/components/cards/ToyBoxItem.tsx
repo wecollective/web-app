@@ -33,18 +33,18 @@ function ToyBoxItem(props: {
     }
 
     useEffect(() => {
-        const beadCard = document.getElementById(itemId)
-        if (beadCard) {
-            beadCard.addEventListener('dragover', (e) => e.preventDefault())
-            beadCard.addEventListener('dragstart', (e) => {
-                beadCard.classList.add(styles.dragging)
-                setDragItem({ type, data })
-                dragItemRef.current = { type, data }
+        const toyBoxItem = document.getElementById(itemId)
+        if (toyBoxItem) {
+            toyBoxItem.addEventListener('dragover', (e) => e.preventDefault())
+            toyBoxItem.addEventListener('dragstart', (e) => {
+                toyBoxItem.classList.add(styles.dragging)
+                setDragItem({ type, data, fromToyBox: true })
+                dragItemRef.current = { type, data, fromToyBox: true }
                 const dragItem = document.getElementById('drag-item')
                 e.dataTransfer?.setDragImage(dragItem!, 50, 50)
             })
-            beadCard.addEventListener('dragend', () => {
-                beadCard.classList.remove(styles.dragging)
+            toyBoxItem.addEventListener('dragend', () => {
+                toyBoxItem.classList.remove(styles.dragging)
             })
         }
     }, [])

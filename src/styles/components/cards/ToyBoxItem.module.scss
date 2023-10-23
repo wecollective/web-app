@@ -10,7 +10,7 @@
     overflow: hidden;
     cursor: move;
     position: relative;
-    opacity: 1;
+    transition: all 0.3s;
 
     .item {
         padding: 4px;
@@ -70,5 +70,19 @@
 
     &.dragging {
         opacity: 0.3;
+    }
+
+    &.noTransition {
+        transition: none;
+    }
+
+    &.moveRight {
+        transform: translateX(110px);
+    }
+
+    &.removing {
+        opacity: 0;
+        width: 0;
+        margin-right: 0;
     }
 }
