@@ -3,7 +3,7 @@
 .wrapper {
     width: 100px;
     height: 100px;
-    border: 1px solid $grey5;
+    outline: 1px solid $grey4;
     border-radius: 10px;
     background-color: $grey1;
     margin-right: 10px;
@@ -90,8 +90,30 @@
         opacity: 0;
     }
 
+    .overlay {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        opacity: 0;
+        background-color: $red;
+        z-index: 5;
+    }
+
     &.highlighted {
-        box-shadow: 0 0 5px rgba($red, 0.8);
-        border: 1px solid $red;
+        .overlay {
+            animation: fade-highlight 1s infinite;
+        }
+    }
+
+    @keyframes fade-highlight {
+        0% {
+            opacity: 0;
+        }
+        50% {
+            opacity: 0.5;
+        }
+        100% {
+            opacity: 0;
+        }
     }
 }

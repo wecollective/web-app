@@ -206,11 +206,13 @@ function ToyBar(): JSX.Element {
             dropBox.addEventListener('drop', () => {
                 dragLeaveCounter = 0
                 const { type, data, fromToyBox } = dragItemRef.current
-                const duplicate = toyBoxItemsRef.current.find(
-                    (item) => item.type === type && item.data.id === data.id
-                )
+                const duplicate =
+                    !fromToyBox &&
+                    toyBoxItemsRef.current.find(
+                        (item) => item.type === type && item.data.id === data.id
+                    )
                 const items = document.querySelectorAll(`.${TBIstyles.wrapper}`)
-                if (!fromToyBox && duplicate) {
+                if (duplicate) {
                     // reset item positions
                     items.forEach((item) => item.classList.remove(TBIstyles.moveRight))
                     dropBox.style.width = `${toyBoxItemsRef.current.length * 110}px`
@@ -218,11 +220,6 @@ function ToyBar(): JSX.Element {
                     const match = document.getElementById(`${type}-${data.id}`)
                     if (match) match.classList.remove(TBIstyles.highlighted)
                 } else {
-                    // remove animation and reposition items
-                    items.forEach((item) => {
-                        item.classList.add(TBIstyles.noTransition)
-                        item.classList.remove(TBIstyles.moveRight)
-                    })
                     // update items array
                     let newItems = JSON.parse(JSON.stringify(toyBoxItemsRef.current))
                     if (fromToyBox) {
@@ -233,12 +230,17 @@ function ToyBar(): JSX.Element {
                         oldItem.data.id = 'removed'
                     }
                     newItems.splice(dropIndex, 0, dragItemRef.current)
-                    // reset indexes
-                    hoverIndex = newItems.length
-                    dropIndex = newItems.length
                     // add new item
                     toyBoxItemsRef.current = newItems
                     Promise.all([setToyBoxItems(newItems)]).then(() => {
+                        // reset indexes
+                        hoverIndex = newItems.length
+                        dropIndex = newItems.length
+                        // remove animation and reposition items
+                        items.forEach((item) => {
+                            item.classList.add(TBIstyles.noTransition)
+                            item.classList.remove(TBIstyles.moveRight)
+                        })
                         if (fromToyBox) {
                             // transition out old item
                             const oldItem = document.getElementById(`${type}-removed`)

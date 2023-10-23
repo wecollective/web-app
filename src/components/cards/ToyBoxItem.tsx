@@ -52,6 +52,7 @@ function ToyBoxItem(props: {
 
     return (
         <Column id={itemId} className={`${styles.wrapper} ${className}`} style={style} draggable>
+            <div className={styles.overlay} />
             {['post', 'bead', 'comment'].includes(type) ? (
                 <Column className={styles.item}>
                     <Row spaceBetween centerY>
