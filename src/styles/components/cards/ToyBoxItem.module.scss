@@ -85,4 +85,8 @@
         width: 0;
         margin-right: 0;
     }
+
+    &.fade {
+        opacity: 0;
+    }
 }
