@@ -89,4 +89,9 @@
     &.fade {
         opacity: 0;
     }
+
+    &.highlighted {
+        box-shadow: 0 0 5px rgba($red, 0.8);
+        border: 1px solid $red;
+    }
 }

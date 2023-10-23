@@ -7,7 +7,7 @@ function DragItem(): JSX.Element {
     const { type, data } = dragItem
     return (
         <div id='drag-item' style={{ position: 'fixed', left: -200 }}>
-            {data && <ToyBoxItem index={0} type={type} data={data} />}
+            {data && <ToyBoxItem type={type} data={data} dragImage />}
         </div>
     )
 }

@@ -10,12 +10,13 @@ import React, { useContext, useEffect } from 'react'
 function ToyBoxItem(props: {
     type: 'space' | 'user' | 'post' | 'bead' | 'comment'
     data: any
+    dragImage?: boolean
     style?: any
     className?: string
 }): JSX.Element {
-    const { type, data, style, className } = props
+    const { type, data, dragImage, style, className } = props
     const { dragItemRef, setDragItem } = useContext(AccountContext)
-    const itemId = `${type}-${data.id}`
+    const itemId = dragImage ? 'drag-image' : `${type}-${data.id}`
     let text = ''
     if (data.title) text = trimText(data.title, 20)
     else if (data.text) text = trimText(getDraftPlainText(data.text), 20)
@@ -93,6 +94,7 @@ function ToyBoxItem(props: {
 }
 
 ToyBoxItem.defaultProps = {
+    dragImage: false,
     style: null,
     className: '',
 }
