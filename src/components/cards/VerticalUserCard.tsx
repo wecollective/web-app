@@ -28,7 +28,7 @@ function VerticalUserCard(props: { user: any; style?: any }): JSX.Element {
                         size={110}
                         type='user'
                         imagePath={flagImagePath}
-                        outline={8}
+                        outline={4}
                         style={{ boxShadow: `0 0 20px rgba(0, 0, 0, 0.2)` }}
                     />
                 </Link>

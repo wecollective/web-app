@@ -37,7 +37,7 @@ function HorizontalSpaceCard(props: { space: any; style?: any }): JSX.Element {
                     size={120}
                     type='space'
                     imagePath={flagImagePath}
-                    outline={8}
+                    outline={4}
                     style={{ boxShadow: `0 0 20px rgba(0, 0, 0, 0.2)` }}
                 />
             </Link>
