@@ -95,6 +95,11 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
         setLoggedIn(false)
     }
 
+    function updateDragItem(data) {
+        dragItemRef.current = data
+        setDragItem(data)
+    }
+
     useEffect(() => getAccountData(), [])
 
     return (
@@ -109,8 +114,8 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                 setToyBoxItems,
                 toyBoxItemsRef,
                 dragItem,
-                setDragItem,
                 dragItemRef,
+                updateDragItem,
                 alertModalOpen,
                 setAlertModalOpen,
                 alertMessage,

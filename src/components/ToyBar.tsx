@@ -34,9 +34,7 @@ function ToyBar(): JSX.Element {
     const {
         accountData,
         loggedIn,
-        dragItem,
         dragItemRef,
-        setDragItem,
         toyBoxItems,
         toyBoxItemsRef,
         setToyBoxItems,

@@ -21,7 +21,7 @@ function SpaceButton(props: {
 }): JSX.Element {
     const { space, imageSize, fontSize, shadow, maxChars, style, className, onClick } = props
     const { id, handle, name, flagImagePath, coverImagePath, state } = space
-    const { dragItemRef, setDragItem } = useContext(AccountContext)
+    const { updateDragItem } = useContext(AccountContext)
     const [showModal, setShowModal] = useState(false)
     const [transparent, setTransparent] = useState(true)
     const [modalData, setModalData] = useState({
@@ -48,9 +48,7 @@ function SpaceButton(props: {
     }
 
     function onMouseEnter() {
-        // set drag item
-        dragItemRef.current = { type: 'space', data: space }
-        setDragItem({ type: 'space', data: space })
+        updateDragItem({ type: 'space', data: space })
         // start hover delay
         mouseOver.current = true
         setTimeout(() => {

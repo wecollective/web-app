@@ -19,7 +19,7 @@ function UserButton(props: {
 }): JSX.Element {
     const { user, imageSize, fontSize, maxChars, style, className } = props
     const { id, handle, name, flagImagePath, coverImagePath, state } = user
-    const { dragItemRef, setDragItem } = useContext(AccountContext)
+    const { updateDragItem } = useContext(AccountContext)
     const [showModal, setShowModal] = useState(false)
     const [transparent, setTransparent] = useState(true)
     const [modalData, setModalData] = useState({
@@ -34,9 +34,7 @@ function UserButton(props: {
     const color = state === 'deleted' ? '#acacae' : ''
 
     function onMouseEnter() {
-        // set drag item
-        dragItemRef.current = { type: 'user', data: user }
-        setDragItem({ type: 'user', data: user })
+        updateDragItem({ type: 'user', data: user })
         // start hover delay
         mouseOver.current = true
         setTimeout(() => {

@@ -43,7 +43,7 @@ function BeadCard(props: {
         removeBead,
         style,
     } = props
-    const { accountData, dragItemRef, setDragItem } = useContext(AccountContext)
+    const { accountData, updateDragItem } = useContext(AccountContext)
     const [bead, setBead] = useState(beadProp)
     const [isSource, setIsSource] = useState(false)
     const {
@@ -120,10 +120,9 @@ function BeadCard(props: {
     useEffect(() => {
         const beadCard = document.getElementById(`bead-${id}`)
         if (beadCard) {
-            beadCard.addEventListener('mouseenter', () => {
-                dragItemRef.current = { type: 'bead', data: bead }
-                setDragItem({ type: 'bead', data: bead })
-            })
+            beadCard.addEventListener('mouseenter', () =>
+                updateDragItem({ type: 'bead', data: bead })
+            )
             beadCard.addEventListener('dragstart', (e) => {
                 e.stopPropagation()
                 const dragItem = document.getElementById('drag-item')

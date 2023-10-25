@@ -139,7 +139,7 @@ function AudioCard(props: {
                 audioElementId={audioElementId}
                 audioURL={url}
                 audioPlaying={audioPlaying}
-                staticBars={1200}
+                staticBars={200}
                 staticColor={colors.audioVisualiserStatic}
                 dynamicBars={160}
                 dynamicColor={colors.audioVisualiserDynamic}

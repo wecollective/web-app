@@ -66,7 +66,7 @@ function CommentCard(props: {
         Creator,
     } = comment
 
-    const { loggedIn, accountData, dragItemRef, setDragItem, setAlertMessage, setAlertModalOpen } =
+    const { loggedIn, accountData, updateDragItem, setAlertMessage, setAlertModalOpen } =
         useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
     const [menuOpen, setMenuOpen] = useState(false)
@@ -148,8 +148,7 @@ function CommentCard(props: {
             commentCard.addEventListener('dragstart', (e) => {
                 e.stopPropagation()
                 commentCard.classList.add(styles.dragging)
-                setDragItem({ type: 'comment', data: comment })
-                dragItemRef.current = { type: 'comment', data: comment }
+                updateDragItem({ type: 'comment', data: comment })
                 const dragItem = document.getElementById('drag-item')
                 e.dataTransfer?.setDragImage(dragItem!, 50, 50)
             })

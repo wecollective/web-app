@@ -15,7 +15,7 @@ function ToyBoxItem(props: {
     className?: string
 }): JSX.Element {
     const { type, data, dragImage, style, className } = props
-    const { dragItemRef, setDragItem } = useContext(AccountContext)
+    const { updateDragItem } = useContext(AccountContext)
     const id = `${type}-${data.id}`
     const itemId = `${dragImage ? 'drag-image' : 'tbi'}-${id}`
     let text = ''
@@ -41,8 +41,7 @@ function ToyBoxItem(props: {
             toyBoxItem.addEventListener('dragover', (e) => e.preventDefault())
             toyBoxItem.addEventListener('dragstart', (e) => {
                 toyBoxItem.classList.add(styles.dragging)
-                setDragItem({ type, data, fromToyBox: true })
-                dragItemRef.current = { type, data, fromToyBox: true }
+                updateDragItem({ type, data, fromToyBox: true })
                 const dragItem = document.getElementById('drag-item')
                 e.dataTransfer?.setDragImage(dragItem!, 50, 50)
             })

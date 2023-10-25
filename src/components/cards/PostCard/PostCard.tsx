@@ -59,8 +59,7 @@ function PostCard(props: {
     const {
         accountData,
         loggedIn,
-        dragItemRef,
-        setDragItem,
+        updateDragItem,
         setAlertModalOpen,
         setAlertMessage,
         setCreatePostModalSettings,
@@ -168,8 +167,7 @@ function PostCard(props: {
         if (postCard) {
             postCard.addEventListener('dragstart', (e) => {
                 postCard.classList.add(styles.dragging)
-                setDragItem({ type: 'post', data: postData })
-                dragItemRef.current = { type: 'post', data: postData }
+                updateDragItem({ type: 'post', data: postData })
                 const dragItem = document.getElementById('drag-item')
                 e.dataTransfer?.setDragImage(dragItem!, 50, 50)
             })
