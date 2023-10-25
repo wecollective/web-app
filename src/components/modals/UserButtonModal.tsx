@@ -31,8 +31,8 @@ function UserButtonModal(props: { user: any; transparent: boolean }): JSX.Elemen
                     size={80}
                     type='user'
                     imagePath={flagImagePath}
-                    outline
-                    shadow
+                    outline={4}
+                    style={{ boxShadow: `0 0 20px rgba(0, 0, 0, 0.2)` }}
                 />
                 <h1>{name}</h1>
                 <h2>u/{handle}</h2>

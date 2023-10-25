@@ -17,6 +17,7 @@ function App(): JSX.Element {
     return (
         <div className={styles.wrapper}>
             <ContextProviders>
+                <div id='preloaded-images' style={{ position: 'fixed', opacity: 0 }} />
                 <Modals />
                 <Navbar />
                 <ToyBar />

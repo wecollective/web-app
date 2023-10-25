@@ -1,5 +1,4 @@
 import FlagImagePlaceholder from '@components/FlagImagePlaceholder'
-import { handleImageError } from '@src/Helpers'
 import styles from '@styles/components/FlagImage.module.scss'
 import React from 'react'
 import { Link } from 'react-router-dom'
@@ -23,11 +22,9 @@ function FlagImage(props: {
                 style={{ width: size, height: size, border: `${outline}px solid white`, ...style }}
             >
                 {imagePath ? (
-                    <img
+                    <div
                         className={styles.flagImage}
-                        src={imagePath}
-                        onError={(e) => handleImageError(e, imagePath)}
-                        alt=''
+                        style={{ backgroundImage: `url(${imagePath}` }}
                     />
                 ) : (
                     <FlagImagePlaceholder type={type} />
@@ -42,12 +39,7 @@ function FlagImage(props: {
             style={{ width: size, height: size, border: `${outline}px solid white`, ...style }}
         >
             {imagePath ? (
-                <img
-                    className={styles.flagImage}
-                    src={imagePath}
-                    onError={(e) => handleImageError(e, imagePath)}
-                    alt=''
-                />
+                <div className={styles.flagImage} style={{ backgroundImage: `url(${imagePath}` }} />
             ) : (
                 <FlagImagePlaceholder type={type} />
             )}

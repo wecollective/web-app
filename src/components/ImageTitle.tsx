@@ -33,7 +33,7 @@ function ImageTitle(props: {
     } = props
     const text = state === 'active' ? title : `[${type} deleted]`
     const color = state === 'active' ? '' : '#acacae'
-    const boxShadow = shadow ? { boxShadow: `0 0 20px rgba(0, 0, 0, 0.2)` } : null
+    const boxShadow = shadow ? { boxShadow: `0 0 10px rgba(0, 0, 0, 0.1)` } : null
 
     if (link) {
         return (

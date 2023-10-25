@@ -37,6 +37,7 @@ import { ReactComponent as ReactionIcon } from '@svgs/fire-alt-solid.svg'
 import { ReactComponent as TextIcon } from '@svgs/font-solid.svg'
 import { ReactComponent as HandshakeIcon } from '@svgs/handshake-solid.svg'
 import { ReactComponent as ImageIcon } from '@svgs/image-solid.svg'
+import { ReactComponent as InboxIcon } from '@svgs/inbox-solid.svg'
 import { ReactComponent as InfinityIcon } from '@svgs/infinity-solid.svg'
 import { ReactComponent as LikeIcon } from '@svgs/like.svg'
 import { ReactComponent as LinkIcon } from '@svgs/link-solid.svg'
@@ -125,6 +126,7 @@ export {
     HandshakeIcon,
     HelpIcon,
     ImageIcon,
+    InboxIcon,
     InfinityIcon,
     LikeIcon,
     LinkIcon,

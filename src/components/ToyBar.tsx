@@ -145,6 +145,7 @@ function ToyBar(): JSX.Element {
     }, [accountData.id])
 
     useEffect(() => {
+        const animationSpeed = 500
         const dropBox = document.getElementById('drop-box')
         const trash = document.getElementById('trash')
         let dragLeaveCounter = 0 // used to avoid dragleave firing when hovering child elements
@@ -253,7 +254,7 @@ function ToyBar(): JSX.Element {
                                 newItems = newItems.filter((i) => i.data.id !== 'removed')
                                 setToyBoxItems(newItems)
                                 toyBoxItemsRef.current = newItems
-                            }, 300)
+                            }, animationSpeed)
                         }
                     })
                 }
@@ -281,7 +282,7 @@ function ToyBar(): JSX.Element {
                         setTimeout(() => {
                             setToyBoxItems(newItems)
                             toyBoxItemsRef.current = newItems
-                        }, 300)
+                        }, animationSpeed)
                     } else {
                         setToyBoxItems(newItems)
                         toyBoxItemsRef.current = newItems

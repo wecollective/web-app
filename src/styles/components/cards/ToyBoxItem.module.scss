@@ -3,14 +3,14 @@
 .wrapper {
     width: 100px;
     height: 100px;
-    outline: 1px solid $grey4;
+    outline: 1px solid rgba(black, 0.2);
     border-radius: 10px;
     background-color: $grey1;
     margin-right: 10px;
     overflow: hidden;
     cursor: move;
     position: relative;
-    transition: all 0.3s;
+    transition: all 0.5s;
 
     .item {
         padding: 4px;
@@ -24,11 +24,12 @@
                 font-size: 12px;
             }
 
-            img {
+            div {
                 width: 100%;
                 height: 48px;
                 border-radius: 4px;
-                object-fit: cover;
+                background-size: cover;
+                background-position: center;
             }
         }
 

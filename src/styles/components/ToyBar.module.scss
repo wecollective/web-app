@@ -8,7 +8,7 @@
     pointer-events: none;
 
     .container {
-        background-color: rgba(white, 0.8);
+        background-color: rgba(white, 0.9);
         padding: 10px;
         border-radius: 15px;
         box-shadow: 0 0px 20px 0 rgba(10, 8, 72, 0.14);
@@ -99,7 +99,7 @@
             margin-left: 10px;
             height: 100px;
             min-width: 100px;
-            transition: all 0.3s;
+            transition: all 0.5s;
         }
     }
 }

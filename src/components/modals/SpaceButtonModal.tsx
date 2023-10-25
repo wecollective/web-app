@@ -41,8 +41,8 @@ function SpaceButtonModal(props: { space: any; transparent: boolean }): JSX.Elem
                     size={80}
                     type='space'
                     imagePath={flagImagePath}
-                    outline
-                    shadow
+                    outline={4}
+                    style={{ boxShadow: `0 0 20px rgba(0, 0, 0, 0.2)` }}
                 />
                 <h1>{name}</h1>
                 <h2>s/{handle}</h2>

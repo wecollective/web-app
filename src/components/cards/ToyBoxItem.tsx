@@ -16,7 +16,8 @@ function ToyBoxItem(props: {
 }): JSX.Element {
     const { type, data, dragImage, style, className } = props
     const { dragItemRef, setDragItem } = useContext(AccountContext)
-    const itemId = dragImage ? 'drag-image' : `${type}-${data.id}`
+    const id = `${type}-${data.id}`
+    const itemId = `${dragImage ? 'drag-image-' : ''}${id}`
     let text = ''
     if (data.title) text = trimText(data.title, 20)
     else if (data.text) text = trimText(getDraftPlainText(data.text), 20)
@@ -29,6 +30,7 @@ function ToyBoxItem(props: {
     const backgroundImage = data.coverImagePath
         ? `url(${data.coverImagePath})`
         : 'linear-gradient(141deg, #9fb8ad 0%, #1fc8db 51%, #2cb5e8 75%'
+
     function findTypeIcon(option) {
         return postTypeIcons[option] || null
     }
@@ -66,7 +68,7 @@ function ToyBoxItem(props: {
                     </Row>
                     <Column centerX centerY className={styles.center}>
                         {text && <p>{text}</p>}
-                        {image && <img src={image} alt='' />}
+                        {image && <div style={{ backgroundImage: `url(${image})` }} />}
                     </Column>
                     <Row spaceBetween>
                         {findTypeIcon(data.type)}

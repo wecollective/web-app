@@ -115,7 +115,6 @@ export interface IAccountContext {
     dragItem: any
     setDragItem: (payload: any) => void
     dragItemRef: any
-    // modals (todo: most to be removed...)
     alertModalOpen: boolean
     setAlertModalOpen: (payload: boolean) => void
     alertMessage: string
