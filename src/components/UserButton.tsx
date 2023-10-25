@@ -1,11 +1,13 @@
 import FlagImage from '@components/FlagImage'
 import UserButtonModal from '@components/modals/UserButtonModal'
+import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
 import { trimText } from '@src/Helpers'
 import styles from '@styles/components/UserButton.module.scss'
 import axios from 'axios'
-import React, { useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { v4 as uuidv4 } from 'uuid'
 
 function UserButton(props: {
     user: any
@@ -16,21 +18,25 @@ function UserButton(props: {
     className?: any
 }): JSX.Element {
     const { user, imageSize, fontSize, maxChars, style, className } = props
-    const { id, handle, name, flagImagePath, state } = user
+    const { id, handle, name, flagImagePath, coverImagePath, state } = user
+    const { dragItemRef, setDragItem } = useContext(AccountContext)
     const [showModal, setShowModal] = useState(false)
     const [transparent, setTransparent] = useState(true)
     const [modalData, setModalData] = useState({
         bio: '',
-        coverImagePath: '',
         totalPosts: 0,
         totalComments: 0,
     })
     const mouseOver = useRef(false)
+    const buttonId = uuidv4()
     const hoverDelay = 500
     const text = state === 'deleted' ? `[user deleted]` : name
     const color = state === 'deleted' ? '#acacae' : ''
 
     function onMouseEnter() {
+        // set drag item
+        dragItemRef.current = { type: 'user', data: user }
+        setDragItem({ type: 'user', data: user })
         // start hover delay
         mouseOver.current = true
         setTimeout(() => {
@@ -56,13 +62,41 @@ function UserButton(props: {
         }, hoverDelay)
     }
 
+    useEffect(() => {
+        // attach dragstart listener
+        const button = document.getElementById(buttonId)
+        if (button) {
+            button.addEventListener('dragstart', (e) => {
+                e.stopPropagation()
+                const dragItem = document.getElementById('drag-item')
+                e.dataTransfer?.setDragImage(dragItem!, 50, 50)
+                onMouseLeave()
+            })
+        }
+        // preload cover image
+        if (coverImagePath) {
+            const imageId = `preload-cover-user-${id}`
+            if (!document.getElementById(imageId)) {
+                const div = document.createElement('div')
+                div.id = imageId
+                div.style.background = `url(${coverImagePath})`
+                div.style.width = '20px'
+                div.style.height = '20px'
+                const container = document.getElementById('preloaded-images')
+                container?.appendChild(div)
+            }
+        }
+    }, [])
+
     return (
         <Link
             to={`/u/${handle}`}
+            id={buttonId}
             className={`${styles.wrapper} ${className}`}
             style={style}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
+            draggable
         >
             <FlagImage type='user' size={imageSize!} imagePath={flagImagePath} />
             <p style={{ fontSize, color }}>{maxChars ? trimText(text, maxChars) : text}</p>
