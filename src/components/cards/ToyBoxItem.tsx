@@ -17,7 +17,7 @@ function ToyBoxItem(props: {
     const { type, data, dragImage, style, className } = props
     const { dragItemRef, setDragItem } = useContext(AccountContext)
     const id = `${type}-${data.id}`
-    const itemId = `${dragImage ? 'drag-image-' : ''}${id}`
+    const itemId = `${dragImage ? 'drag-image' : 'tbi'}-${id}`
     let text = ''
     if (data.title) text = trimText(data.title, 20)
     else if (data.text) text = trimText(getDraftPlainText(data.text), 20)

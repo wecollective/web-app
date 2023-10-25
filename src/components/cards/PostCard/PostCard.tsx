@@ -170,6 +170,8 @@ function PostCard(props: {
                 postCard.classList.add(styles.dragging)
                 setDragItem({ type: 'post', data: postData })
                 dragItemRef.current = { type: 'post', data: postData }
+                const dragItem = document.getElementById('drag-item')
+                e.dataTransfer?.setDragImage(dragItem!, 50, 50)
             })
             postCard.addEventListener('dragend', () => {
                 postCard.classList.remove(styles.dragging)

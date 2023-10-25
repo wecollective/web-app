@@ -182,7 +182,7 @@ function ToyBar(): JSX.Element {
                     const items = document.querySelectorAll(`.${TBIstyles.wrapper}`)
                     items.forEach((item) => item.classList.remove(TBIstyles.noTransition))
                     // highlight match if present
-                    const match = !fromToyBox && document.getElementById(`${type}-${data.id}`)
+                    const match = !fromToyBox && document.getElementById(`tbi-${type}-${data.id}`)
                     if (match) match.classList.add(TBIstyles.highlighted)
                 }
             })
@@ -197,7 +197,7 @@ function ToyBar(): JSX.Element {
                     items.forEach((item) => item.classList.remove(TBIstyles.moveRight))
                     // remove highlighted match if present
                     const { type, data, fromToyBox } = dragItemRef.current
-                    const match = !fromToyBox && document.getElementById(`${type}-${data.id}`)
+                    const match = !fromToyBox && document.getElementById(`tbi-${type}-${data.id}`)
                     if (match) match.classList.remove(TBIstyles.highlighted)
                     // reset indexes
                     hoverIndex = toyBoxItemsRef.current.length
@@ -218,7 +218,7 @@ function ToyBar(): JSX.Element {
                     items.forEach((item) => item.classList.remove(TBIstyles.moveRight))
                     dropBox.style.width = `${toyBoxItemsRef.current.length * 110}px`
                     // fade out match
-                    const match = document.getElementById(`${type}-${data.id}`)
+                    const match = document.getElementById(`tbi-${type}-${data.id}`)
                     if (match) match.classList.remove(TBIstyles.highlighted)
                 } else {
                     // update items array
@@ -244,7 +244,7 @@ function ToyBar(): JSX.Element {
                         })
                         if (fromToyBox) {
                             // transition out old item
-                            const oldItem = document.getElementById(`${type}-removed`)
+                            const oldItem = document.getElementById(`tbi-${type}-removed`)
                             if (oldItem) {
                                 oldItem.classList.add(TBIstyles.removing)
                                 dropBox.style.width = `${(newItems.length - 1) * 110}px`
@@ -272,7 +272,7 @@ function ToyBar(): JSX.Element {
                 trash.classList.remove(styles.hover)
                 const { type, data, fromToyBox } = dragItemRef.current
                 if (fromToyBox) {
-                    const oldItem = document.getElementById(`${type}-${data.id}`)
+                    const oldItem = document.getElementById(`tbi-${type}-${data.id}`)
                     const newItems = toyBoxItemsRef.current.filter(
                         (i) => !(i.type === type && i.data.id === data.id)
                     )

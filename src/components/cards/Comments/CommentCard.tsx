@@ -26,7 +26,7 @@ import {
     ZapIcon,
 } from '@svgs/all'
 import axios from 'axios'
-import React, { useContext, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
@@ -66,7 +66,8 @@ function CommentCard(props: {
         Creator,
     } = comment
 
-    const { loggedIn, accountData, setAlertMessage, setAlertModalOpen } = useContext(AccountContext)
+    const { loggedIn, accountData, dragItemRef, setDragItem, setAlertMessage, setAlertModalOpen } =
+        useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
     const [menuOpen, setMenuOpen] = useState(false)
     const [editCommentModalOpen, setEditCommentModalOpen] = useState(false)
@@ -141,6 +142,23 @@ function CommentCard(props: {
         }, hoverDelay)
     }
 
+    useEffect(() => {
+        const commentCard = document.getElementById(`comment-${id}`)
+        if (commentCard) {
+            commentCard.addEventListener('dragstart', (e) => {
+                e.stopPropagation()
+                commentCard.classList.add(styles.dragging)
+                setDragItem({ type: 'comment', data: comment })
+                dragItemRef.current = { type: 'comment', data: comment }
+                const dragItem = document.getElementById('drag-item')
+                e.dataTransfer?.setDragImage(dragItem!, 50, 50)
+            })
+            commentCard.addEventListener('dragend', () => {
+                commentCard.classList.remove(styles.dragging)
+            })
+        }
+    }, [])
+
     if (muted && !showMutedComment)
         return (
             <button
@@ -159,6 +177,7 @@ function CommentCard(props: {
             className={`${styles.wrapper} ${highlighted && styles.highlighted} ${
                 location === 'link-map' && styles.linkMap
             }`}
+            draggable
         >
             <Row>
                 <Link

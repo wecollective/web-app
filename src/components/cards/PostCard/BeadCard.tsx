@@ -112,10 +112,7 @@ function BeadCard(props: {
         setImageModalOpen(true)
     }
 
-    // if (type === 'url') console.log('sourceBead: ', sourceBead)
-
     useEffect(() => {
-        // console.log('bead: ', beadProp)
         setBead(beadProp)
         setIsSource(beadProp.Link.relationship === 'source')
     }, [beadProp])
@@ -123,14 +120,14 @@ function BeadCard(props: {
     useEffect(() => {
         const beadCard = document.getElementById(`bead-${id}`)
         if (beadCard) {
+            beadCard.addEventListener('mouseenter', () => {
+                dragItemRef.current = { type: 'bead', data: bead }
+                setDragItem({ type: 'bead', data: bead })
+            })
             beadCard.addEventListener('dragstart', (e) => {
                 e.stopPropagation()
-                beadCard.classList.add(styles.dragging)
-                setDragItem({ type: 'bead', data: bead })
-                dragItemRef.current = { type: 'bead', data: bead }
-            })
-            beadCard.addEventListener('dragend', () => {
-                beadCard.classList.remove(styles.dragging)
+                const dragItem = document.getElementById('drag-item')
+                e.dataTransfer?.setDragImage(dragItem!, 50, 50)
             })
         }
     }, [])
