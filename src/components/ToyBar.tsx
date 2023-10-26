@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 import CircleButton from '@components/CircleButton'
+import Column from '@components/Column'
 import Row from '@components/Row'
 import Tooltip from '@components/Tooltip'
 import ToyBoxItem from '@components/cards/ToyBoxItem'
@@ -15,6 +16,8 @@ import config from '@src/Config'
 import styles from '@styles/components/ToyBar.module.scss'
 import TBIstyles from '@styles/components/cards/ToyBoxItem.module.scss'
 import {
+    ChevronDownIcon,
+    ChevronUpIcon,
     DeleteIcon,
     EyeIcon,
     InboxIcon,
@@ -35,9 +38,11 @@ function ToyBar(): JSX.Element {
         accountData,
         loggedIn,
         dragItemRef,
+        toyBoxRow,
+        setToyBoxRow,
         toyBoxItems,
-        toyBoxItemsRef,
         setToyBoxItems,
+        toyBoxItemsRef,
         setAlertModalOpen,
         setAlertMessage,
         setCreatePostModalOpen,
@@ -138,6 +143,34 @@ function ToyBar(): JSX.Element {
         return null
     }
 
+    function isMatch(item) {
+        // checks if toybox item matches drag item
+        const { type, data } = dragItemRef.current
+        return item.type === type && item.data.id === data.id
+    }
+
+    function addToyBoxItem(index) {
+        const { type, data: item } = dragItemRef.current
+        const data = { row: toyBoxRow, index, itemType: type, itemId: item.id }
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .post(`${config.apiURL}/add-toybox-item`, data, options)
+            .then((res) => {
+                console.log(res.data)
+            })
+            .catch((error) => console.log(error))
+    }
+
+    function moveToyBoxItem(newItems) {
+        // if repositioning an item, used original position and new position to figure out which other items to increment:
+        // if new position before old position: increment all after and including new position
+        // 0,1,2,3,(4),5 --> 0,1,(4),2,3,5
+        // if new position after old position: decrement all between old position and new position, increment all after
+        // 0,1,(2),3,4,5 --> 0,1,3,4,(2),5
+    }
+
+    function deleteToyBoxItem(newItems) {}
+
     useEffect(() => {
         if (accountData.id) getToyBarData()
     }, [accountData.id])
@@ -206,10 +239,7 @@ function ToyBar(): JSX.Element {
                 dragLeaveCounter = 0
                 const { type, data, fromToyBox } = dragItemRef.current
                 const duplicate =
-                    !fromToyBox &&
-                    toyBoxItemsRef.current.find(
-                        (item) => item.type === type && item.data.id === data.id
-                    )
+                    !fromToyBox && toyBoxItemsRef.current.find((item) => isMatch(item))
                 const items = document.querySelectorAll(`.${TBIstyles.wrapper}`)
                 if (duplicate) {
                     // reset item positions
@@ -223,12 +253,13 @@ function ToyBar(): JSX.Element {
                     let newItems = JSON.parse(JSON.stringify(toyBoxItemsRef.current))
                     if (fromToyBox) {
                         // mark old item for removal after transition
-                        const oldItem = newItems.find(
-                            (i) => i.type === type && i.data.id === data.id
-                        )
+                        const oldItem = newItems.find((item) => isMatch(item))
                         oldItem.data.id = 'removed'
+                    } else {
+                        addToyBoxItem(dropIndex)
                     }
                     newItems.splice(dropIndex, 0, dragItemRef.current)
+
                     // add new item
                     toyBoxItemsRef.current = newItems
                     Promise.all([setToyBoxItems(newItems)]).then(() => {
@@ -271,9 +302,7 @@ function ToyBar(): JSX.Element {
                 const { type, data, fromToyBox } = dragItemRef.current
                 if (fromToyBox) {
                     const oldItem = document.getElementById(`tbi-${type}-${data.id}`)
-                    const newItems = toyBoxItemsRef.current.filter(
-                        (i) => !(i.type === type && i.data.id === data.id)
-                    )
+                    const newItems = toyBoxItemsRef.current.filter((item) => !isMatch(item))
                     if (newItems.length) {
                         oldItem?.classList.add(TBIstyles.removing)
                         dropBox.style.width = `${(toyBoxItemsRef.current.length - 1) * 110}px`
@@ -428,6 +457,14 @@ function ToyBar(): JSX.Element {
                     icon={<HelpIcon />}
                     onClick={() => setHelpModalOpen(true)}
                 /> */}
+                <Column className={styles.toyBoxRows}>
+                    <button type='button' onClick={() => setToyBoxRow(toyBoxRow - 1)}>
+                        <ChevronUpIcon />
+                    </button>
+                    <button type='button' onClick={() => setToyBoxRow(toyBoxRow + 1)}>
+                        <ChevronDownIcon />
+                    </button>
+                </Column>
                 <Row id='drop-box' className={styles.toyBox}>
                     {toyBoxItems.length < 1 && (
                         <div id='inbox' className={styles.button} style={{ marginRight: 10 }}>
