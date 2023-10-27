@@ -157,9 +157,6 @@ function ToyBar(): JSX.Element {
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
             .post(`${config.apiURL}/add-toybox-item`, data, options)
-            .then((res) => {
-                console.log(res.data)
-            })
             .catch((error) => console.log(error))
     }
 
@@ -168,14 +165,15 @@ function ToyBar(): JSX.Element {
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
             .post(`${config.apiURL}/move-toybox-item`, data, options)
-            .then((res) => {
-                console.log(res.data)
-            })
             .catch((error) => console.log(error))
     }
 
-    function deleteToyBoxItem(newItems) {
-        //
+    function deleteToyBoxItem(index) {
+        const data = { row: toyBoxRow, index }
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .post(`${config.apiURL}/delete-toybox-item`, data, options)
+            .catch((error) => console.log(error))
     }
 
     useEffect(() => {
@@ -312,6 +310,10 @@ function ToyBar(): JSX.Element {
                 trash.classList.remove(styles.hover)
                 const { type, data, fromToyBox } = dragItemRef.current
                 if (fromToyBox) {
+                    // save deleted item
+                    const itemIndex = toyBoxItemsRef.current.findIndex((item) => isMatch(item))
+                    deleteToyBoxItem(itemIndex)
+                    // update UI
                     const oldItem = document.getElementById(`tbi-${type}-${data.id}`)
                     const newItems = toyBoxItemsRef.current.filter((item) => !isMatch(item))
                     if (newItems.length) {
