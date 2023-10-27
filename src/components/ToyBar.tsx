@@ -73,9 +73,11 @@ function ToyBar(): JSX.Element {
         axios
             .get(`${config.apiURL}/toybar-data`, options)
             .then((res) => {
-                setStreams(res.data.streams)
-                setFollowedSpaces(res.data.spaces)
-                setFollowedUsers(res.data.users)
+                toyBoxItemsRef.current = res.data
+                setToyBoxItems(res.data)
+                // setStreams(res.data.streams)
+                // setFollowedSpaces(res.data.spaces)
+                // setFollowedUsers(res.data.users)
             })
             .catch((error) => console.log(error))
     }
@@ -161,15 +163,20 @@ function ToyBar(): JSX.Element {
             .catch((error) => console.log(error))
     }
 
-    function moveToyBoxItem(newItems) {
-        // if repositioning an item, used original position and new position to figure out which other items to increment:
-        // if new position before old position: increment all after and including new position
-        // 0,1,2,3,(4),5 --> 0,1,(4),2,3,5
-        // if new position after old position: decrement all between old position and new position, increment all after
-        // 0,1,(2),3,4,5 --> 0,1,3,4,(2),5
+    function moveToyBoxItem(oldIndex, newIndex) {
+        const data = { row: toyBoxRow, oldIndex, newIndex }
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .post(`${config.apiURL}/move-toybox-item`, data, options)
+            .then((res) => {
+                console.log(res.data)
+            })
+            .catch((error) => console.log(error))
     }
 
-    function deleteToyBoxItem(newItems) {}
+    function deleteToyBoxItem(newItems) {
+        //
+    }
 
     useEffect(() => {
         if (accountData.id) getToyBarData()
@@ -252,14 +259,18 @@ function ToyBar(): JSX.Element {
                     // update items array
                     let newItems = JSON.parse(JSON.stringify(toyBoxItemsRef.current))
                     if (fromToyBox) {
+                        // save new item positions
+                        const oldIndex = newItems.findIndex((item) => isMatch(item))
+                        const newIndex = dropIndex > oldIndex ? dropIndex - 1 : dropIndex
+                        if (newIndex !== oldIndex) moveToyBoxItem(oldIndex, newIndex)
                         // mark old item for removal after transition
                         const oldItem = newItems.find((item) => isMatch(item))
                         oldItem.data.id = 'removed'
                     } else {
+                        // save new item
                         addToyBoxItem(dropIndex)
                     }
                     newItems.splice(dropIndex, 0, dragItemRef.current)
-
                     // add new item
                     toyBoxItemsRef.current = newItems
                     Promise.all([setToyBoxItems(newItems)]).then(() => {
