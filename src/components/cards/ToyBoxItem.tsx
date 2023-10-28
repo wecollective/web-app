@@ -1,11 +1,13 @@
 import Column from '@components/Column'
 import FlagImage from '@components/FlagImage'
 import Row from '@components/Row'
+import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
 import { getDraftPlainText, postTypeIcons, trimText } from '@src/Helpers'
 import styles from '@styles/components/cards/ToyBoxItem.module.scss'
 import { CommentIcon, PostIcon, SpacesIcon, UserIcon } from '@svgs/all'
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
+import PostCard from './PostCard/PostCard'
 
 function ToyBoxItem(props: {
     type: 'space' | 'user' | 'post' | 'bead' | 'comment'
@@ -16,6 +18,7 @@ function ToyBoxItem(props: {
 }): JSX.Element {
     const { type, data, dragImage, style, className } = props
     const { updateDragItem } = useContext(AccountContext)
+    const [modalOpen, setModalOpen] = useState(false)
     const id = `${type}-${data.id}`
     const itemId = `${dragImage ? 'drag-image' : 'tbi'}-${id}`
     let text = ''
@@ -36,17 +39,18 @@ function ToyBoxItem(props: {
     }
 
     useEffect(() => {
-        const toyBoxItem = document.getElementById(itemId)
-        if (toyBoxItem) {
-            toyBoxItem.addEventListener('dragover', (e) => e.preventDefault())
-            toyBoxItem.addEventListener('dragstart', (e) => {
-                toyBoxItem.classList.add(styles.dragging)
+        const toyboxItem = document.getElementById(itemId)
+        if (toyboxItem) {
+            toyboxItem.addEventListener('click', () => setModalOpen(true))
+            toyboxItem.addEventListener('dragover', (e) => e.preventDefault())
+            toyboxItem.addEventListener('dragstart', (e) => {
+                toyboxItem.classList.add(styles.dragging)
                 updateDragItem({ type, data, fromToyBox: true })
                 const dragItem = document.getElementById('drag-item')
                 e.dataTransfer?.setDragImage(dragItem!, 50, 50)
             })
-            toyBoxItem.addEventListener('dragend', () => {
-                toyBoxItem.classList.remove(styles.dragging)
+            toyboxItem.addEventListener('dragend', () => {
+                toyboxItem.classList.remove(styles.dragging)
             })
         }
     }, [])
@@ -90,6 +94,17 @@ function ToyBoxItem(props: {
                         <p>{trimText(data.handle, 8)}</p>
                     </Row>
                 </Column>
+            )}
+            {modalOpen && (
+                <Modal close={() => setModalOpen(false)}>
+                    {['post', 'bead'].includes(type) && (
+                        <PostCard
+                            post={data}
+                            location='link-modal'
+                            style={{ width: '100vw', maxWidth: 900 }}
+                        />
+                    )}
+                </Modal>
             )}
         </Column>
     )
