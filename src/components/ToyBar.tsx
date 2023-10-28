@@ -38,11 +38,11 @@ function ToyBar(): JSX.Element {
         accountData,
         loggedIn,
         dragItemRef,
-        toyBoxRow,
+        toyboxRow,
         setToyBoxRow,
-        toyBoxItems,
+        toyboxItems,
         setToyBoxItems,
-        toyBoxItemsRef,
+        toyboxItemsRef,
         setAlertModalOpen,
         setAlertMessage,
         setCreatePostModalOpen,
@@ -59,6 +59,7 @@ function ToyBar(): JSX.Element {
     const [userPostFiltersOpen, setUserPostFiltersOpen] = useState(false)
     const [helpModalOpen, setHelpModalOpen] = useState(false)
     const [showDragItem, setShowDragItem] = useState(false)
+    const toyboxRowRef = useRef(0)
     const droppingRef = useRef(false)
     const cookies = new Cookies()
     const location = useLocation()
@@ -67,19 +68,49 @@ function ToyBar(): JSX.Element {
     const subpage = path[3]
     const mobileView = document.documentElement.clientWidth < 900
     const buttonSize = mobileView ? 36 : 46
+    const animationSpeed = 500
 
-    function getToyBarData() {
-        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-        axios
-            .get(`${config.apiURL}/toybar-data`, options)
-            .then((res) => {
-                toyBoxItemsRef.current = res.data
-                setToyBoxItems(res.data)
-                // setStreams(res.data.streams)
-                // setFollowedSpaces(res.data.spaces)
-                // setFollowedUsers(res.data.users)
-            })
-            .catch((error) => console.log(error))
+    // function getToyBarData() {
+    //     const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+    //     axios
+    //         .get(`${config.apiURL}/toybar-data`, options)
+    //         .then((res) => {
+    //             setStreams(res.data.streams)
+    //             setFollowedSpaces(res.data.spaces)
+    //             setFollowedUsers(res.data.users)
+    //         })
+    //         .catch((error) => console.log(error))
+    // }
+
+    function getToyBoxItems() {
+        // fade out old items
+        const items = document.querySelectorAll(`.${TBIstyles.wrapper}`)
+        items.forEach((item) => item.classList.add(TBIstyles.fadeUp))
+        setTimeout(() => {
+            // get new items
+            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+            axios
+                .get(`${config.apiURL}/toybox-items?row=${toyboxRow}`, options)
+                .then((res) => {
+                    // update toybox width
+                    const toybox = document.getElementById('toybox')
+                    toybox!.style.width = `${res.data.length ? res.data.length * 110 : 110}px`
+                    setTimeout(() => {
+                        toyboxItemsRef.current = res.data
+                        Promise.all([setToyBoxItems(res.data)]).then(() => {
+                            items.forEach((item) => {
+                                item.classList.add(TBIstyles.noTransition)
+                                item.classList.add(TBIstyles.fade)
+                            })
+                            items.forEach((item) => {
+                                item.classList.remove(TBIstyles.noTransition)
+                                item.classList.remove(TBIstyles.fade)
+                            })
+                        })
+                    }, animationSpeed)
+                })
+                .catch((error) => console.log(error))
+        }, animationSpeed)
     }
 
     function findStreamIcon(type: string) {
@@ -153,7 +184,7 @@ function ToyBar(): JSX.Element {
 
     function addToyBoxItem(index) {
         const { type, data: item } = dragItemRef.current
-        const data = { row: toyBoxRow, index, itemType: type, itemId: item.id }
+        const data = { row: toyboxRowRef.current, index, itemType: type, itemId: item.id }
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
             .post(`${config.apiURL}/add-toybox-item`, data, options)
@@ -161,7 +192,7 @@ function ToyBar(): JSX.Element {
     }
 
     function moveToyBoxItem(oldIndex, newIndex) {
-        const data = { row: toyBoxRow, oldIndex, newIndex }
+        const data = { row: toyboxRowRef.current, oldIndex, newIndex }
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
             .post(`${config.apiURL}/move-toybox-item`, data, options)
@@ -169,7 +200,7 @@ function ToyBar(): JSX.Element {
     }
 
     function deleteToyBoxItem(index) {
-        const data = { row: toyBoxRow, index }
+        const data = { row: toyboxRowRef.current, index }
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
             .post(`${config.apiURL}/delete-toybox-item`, data, options)
@@ -177,27 +208,27 @@ function ToyBar(): JSX.Element {
     }
 
     useEffect(() => {
-        if (accountData.id) getToyBarData()
-    }, [accountData.id])
+        toyboxRowRef.current = toyboxRow
+        if (accountData.id) getToyBoxItems()
+    }, [accountData.id, toyboxRow])
 
     useEffect(() => {
-        const animationSpeed = 500
-        const dropBox = document.getElementById('drop-box')
+        const toybox = document.getElementById('toybox')
         const trash = document.getElementById('trash')
         let dragLeaveCounter = 0 // used to avoid dragleave firing when hovering child elements
-        let hoverIndex = toyBoxItemsRef.current.length // used to animate cards
-        let dropIndex = toyBoxItemsRef.current.length // determines drop location
-        if (dropBox && trash) {
-            dropBox.addEventListener('dragover', (e) => {
+        let hoverIndex = toyboxItemsRef.current.length // used to animate cards
+        let dropIndex = toyboxItemsRef.current.length // determines drop location
+        if (toybox && trash) {
+            toybox.addEventListener('dragover', (e) => {
                 e.preventDefault()
-                const { x } = dropBox.getBoundingClientRect()
+                const { x } = toybox.getBoundingClientRect()
                 const difference = e.clientX - x
                 const hIndex = Math.floor((difference - 55) / 110)
                 // if new hover index, reposition cards and update drop index
                 if (hoverIndex !== hIndex) {
                     hoverIndex = hIndex
                     // expand toybox
-                    dropBox.style.width = `${(toyBoxItemsRef.current.length + 1) * 110}px`
+                    toybox.style.width = `${(toyboxItemsRef.current.length + 1) * 110}px`
                     // update item positions and drop index
                     const items = document.querySelectorAll(`.${TBIstyles.wrapper}`)
                     items.forEach((item, i) => {
@@ -208,10 +239,10 @@ function ToyBar(): JSX.Element {
                     })
                     // handle edges
                     if (hIndex < 0) dropIndex = 0
-                    if (hIndex === toyBoxItemsRef.current.length) dropIndex = hIndex
+                    if (hIndex === toyboxItemsRef.current.length) dropIndex = hIndex
                 }
             })
-            dropBox.addEventListener('dragenter', () => {
+            toybox.addEventListener('dragenter', () => {
                 dragLeaveCounter += 1
                 if (dragLeaveCounter === 1) {
                     const { type, data, fromToyBox } = dragItemRef.current
@@ -222,12 +253,12 @@ function ToyBar(): JSX.Element {
                     if (match) match.classList.add(TBIstyles.highlighted)
                 }
             })
-            dropBox.addEventListener('dragleave', () => {
+            toybox.addEventListener('dragleave', () => {
                 dragLeaveCounter -= 1
                 if (dragLeaveCounter === 0) {
                     // shrink toybox
-                    const totalItems = toyBoxItemsRef.current.length
-                    dropBox.style.width = totalItems ? `${totalItems * 110}px` : '110px'
+                    const totalItems = toyboxItemsRef.current.length
+                    toybox.style.width = totalItems ? `${totalItems * 110}px` : '110px'
                     // reset item positions
                     const items = document.querySelectorAll(`.${TBIstyles.wrapper}`)
                     items.forEach((item) => item.classList.remove(TBIstyles.moveRight))
@@ -236,26 +267,26 @@ function ToyBar(): JSX.Element {
                     const match = !fromToyBox && document.getElementById(`tbi-${type}-${data.id}`)
                     if (match) match.classList.remove(TBIstyles.highlighted)
                     // reset indexes
-                    hoverIndex = toyBoxItemsRef.current.length
-                    dropIndex = toyBoxItemsRef.current.length
+                    hoverIndex = toyboxItemsRef.current.length
+                    dropIndex = toyboxItemsRef.current.length
                 }
             })
-            dropBox.addEventListener('drop', () => {
+            toybox.addEventListener('drop', () => {
                 dragLeaveCounter = 0
                 const { type, data, fromToyBox } = dragItemRef.current
                 const duplicate =
-                    !fromToyBox && toyBoxItemsRef.current.find((item) => isMatch(item))
+                    !fromToyBox && toyboxItemsRef.current.find((item) => isMatch(item))
                 const items = document.querySelectorAll(`.${TBIstyles.wrapper}`)
                 if (duplicate) {
                     // reset item positions
                     items.forEach((item) => item.classList.remove(TBIstyles.moveRight))
-                    dropBox.style.width = `${toyBoxItemsRef.current.length * 110}px`
+                    toybox.style.width = `${toyboxItemsRef.current.length * 110}px`
                     // fade out match
                     const match = document.getElementById(`tbi-${type}-${data.id}`)
                     if (match) match.classList.remove(TBIstyles.highlighted)
                 } else {
                     // update items array
-                    let newItems = JSON.parse(JSON.stringify(toyBoxItemsRef.current))
+                    let newItems = JSON.parse(JSON.stringify(toyboxItemsRef.current))
                     if (fromToyBox) {
                         // save new item positions
                         const oldIndex = newItems.findIndex((item) => isMatch(item))
@@ -270,7 +301,7 @@ function ToyBar(): JSX.Element {
                     }
                     newItems.splice(dropIndex, 0, dragItemRef.current)
                     // add new item
-                    toyBoxItemsRef.current = newItems
+                    toyboxItemsRef.current = newItems
                     Promise.all([setToyBoxItems(newItems)]).then(() => {
                         // reset indexes
                         hoverIndex = newItems.length
@@ -285,13 +316,13 @@ function ToyBar(): JSX.Element {
                             const oldItem = document.getElementById(`tbi-${type}-removed`)
                             if (oldItem) {
                                 oldItem.classList.add(TBIstyles.removing)
-                                dropBox.style.width = `${(newItems.length - 1) * 110}px`
+                                toybox.style.width = `${(newItems.length - 1) * 110}px`
                             }
                             // remove old item
                             setTimeout(() => {
                                 newItems = newItems.filter((i) => i.data.id !== 'removed')
                                 setToyBoxItems(newItems)
-                                toyBoxItemsRef.current = newItems
+                                toyboxItemsRef.current = newItems
                             }, animationSpeed)
                         }
                     })
@@ -311,21 +342,21 @@ function ToyBar(): JSX.Element {
                 const { type, data, fromToyBox } = dragItemRef.current
                 if (fromToyBox) {
                     // save deleted item
-                    const itemIndex = toyBoxItemsRef.current.findIndex((item) => isMatch(item))
+                    const itemIndex = toyboxItemsRef.current.findIndex((item) => isMatch(item))
                     deleteToyBoxItem(itemIndex)
                     // update UI
                     const oldItem = document.getElementById(`tbi-${type}-${data.id}`)
-                    const newItems = toyBoxItemsRef.current.filter((item) => !isMatch(item))
+                    const newItems = toyboxItemsRef.current.filter((item) => !isMatch(item))
                     if (newItems.length) {
                         oldItem?.classList.add(TBIstyles.removing)
-                        dropBox.style.width = `${(toyBoxItemsRef.current.length - 1) * 110}px`
+                        toybox.style.width = `${(toyboxItemsRef.current.length - 1) * 110}px`
                         setTimeout(() => {
                             setToyBoxItems(newItems)
-                            toyBoxItemsRef.current = newItems
+                            toyboxItemsRef.current = newItems
                         }, animationSpeed)
                     } else {
                         setToyBoxItems(newItems)
-                        toyBoxItemsRef.current = newItems
+                        toyboxItemsRef.current = newItems
                     }
                 }
             })
@@ -333,7 +364,8 @@ function ToyBar(): JSX.Element {
     }, [])
 
     useEffect(() => {
-        if (!toyBoxItems.length) {
+        if (!toyboxItems.length) {
+            // set up inbox event listeners
             const inbox = document.getElementById('inbox')
             inbox?.addEventListener('dragover', (e) => e.preventDefault())
             inbox?.addEventListener('dragenter', () => {
@@ -343,7 +375,7 @@ function ToyBar(): JSX.Element {
                 inbox?.classList.remove(styles.hover)
             })
         }
-    }, [toyBoxItems])
+    }, [toyboxItems])
 
     return (
         <Row centerY centerX className={styles.wrapper}>
@@ -470,23 +502,29 @@ function ToyBar(): JSX.Element {
                     icon={<HelpIcon />}
                     onClick={() => setHelpModalOpen(true)}
                 /> */}
-                <Column className={styles.toyBoxRows}>
-                    <button type='button' onClick={() => setToyBoxRow(toyBoxRow - 1)}>
+                <Column centerX className={styles.toyboxRows}>
+                    <button
+                        type='button'
+                        onClick={() => setToyBoxRow(toyboxRow - 1)}
+                        disabled={toyboxRow === 0}
+                    >
                         <ChevronUpIcon />
                     </button>
-                    <button type='button' onClick={() => setToyBoxRow(toyBoxRow + 1)}>
+                    {toyboxRow + 1}
+                    <button type='button' onClick={() => setToyBoxRow(toyboxRow + 1)}>
                         <ChevronDownIcon />
                     </button>
                 </Column>
-                <Row id='drop-box' className={styles.toyBox}>
-                    {toyBoxItems.length < 1 && (
+                <Row id='toybox' className={styles.toybox}>
+                    {toyboxItems.length < 1 && (
                         <div id='inbox' className={styles.button} style={{ marginRight: 10 }}>
                             <InboxIcon />
                         </div>
                     )}
-                    {toyBoxItems.map((item) => (
+                    {toyboxItems.map((item) => (
                         <ToyBoxItem
                             key={`${item.type}-${item.data.id}`}
+                            // key={uuidv4()}
                             className={`${TBIstyles.wrapper} ${
                                 item.data.id === 'removed' && TBIstyles.dragging
                             }`}

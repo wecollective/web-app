@@ -95,20 +95,26 @@
             }
         }
 
-        .toyBoxRows {
+        .toyboxRows {
             button {
                 all: unset;
                 cursor: pointer;
+                width: 20px;
+                height: 20px;
+                color: $grey4;
 
                 svg {
-                    width: 20px;
-                    height: 20px;
-                    color: $grey4;
+                    width: inherit;
+                    height: inherit;
                 }
+            }
+            button:disabled {
+                color: $grey2;
+                cursor: auto;
             }
         }
 
-        .toyBox {
+        .toybox {
             margin-left: 10px;
             height: 100px;
             min-width: 100px;
