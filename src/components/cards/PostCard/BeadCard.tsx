@@ -24,12 +24,13 @@ function BeadCard(props: {
     bead: any
     // todo: remove post type?
     postType?: string
-    beadIndex: number
+    beadIndex?: number
     postId?: number
     location: string
     selected?: boolean
     toggleBeadComments?: () => void
     removeBead?: (beadIndex: number) => void
+    className?: string
     style?: any
 }): JSX.Element {
     const {
@@ -41,6 +42,7 @@ function BeadCard(props: {
         selected,
         toggleBeadComments,
         removeBead,
+        className,
         style,
     } = props
     const { accountData, updateDragItem } = useContext(AccountContext)
@@ -114,7 +116,7 @@ function BeadCard(props: {
 
     useEffect(() => {
         setBead(beadProp)
-        setIsSource(beadProp.Link.relationship === 'source')
+        setIsSource(beadProp.Link && beadProp.Link.relationship === 'source')
     }, [beadProp])
 
     useEffect(() => {
@@ -134,7 +136,7 @@ function BeadCard(props: {
     return (
         <Column
             spaceBetween
-            className={`${styles.wrapper} ${selected && styles.selected} ${
+            className={`${styles.wrapper} ${className} ${selected && styles.selected} ${
                 isSource && styles.source
             } ${location === 'gbg-room' && styles.gbgRoom}`}
             style={{ ...style, backgroundColor: bead.color }}
@@ -158,7 +160,7 @@ function BeadCard(props: {
                 </Row> */}
                 <Row centerY>
                     {removeBead && !isSource && (
-                        <CloseButton size={20} onClick={() => removeBead(beadIndex)} />
+                        <CloseButton size={20} onClick={() => removeBead(beadIndex || 0)} />
                     )}
                     {!!id && location !== 'preview' && (
                         <Link to={`/p/${id}`} className={styles.id} title='Open post page'>
@@ -318,10 +320,12 @@ function BeadCard(props: {
 
 BeadCard.defaultProps = {
     postId: null,
+    beadIndex: 0,
     postType: null,
     selected: false,
     toggleBeadComments: null,
     removeBead: null,
+    className: null,
     style: null,
 }
 

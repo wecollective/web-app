@@ -7,7 +7,6 @@
     border-radius: 10px;
     background-color: $grey1;
     margin-right: 10px;
-    overflow: hidden;
     cursor: move;
     position: relative;
     transition: all 0.5s;
@@ -41,11 +40,15 @@
     }
 
     .agent {
+        height: 100%;
+
         .coverImage {
             width: 100%;
             height: 74px;
             background-size: cover;
             background-position: center;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
         }
 
         .flagImage {
@@ -115,6 +118,16 @@
         }
         100% {
             opacity: 0;
+        }
+    }
+
+    .modal {
+        position: absolute;
+        top: -320px;
+        left: -100px;
+
+        .bead {
+            box-shadow: 0 0px 15px 0 rgba(black, 0.2);
         }
     }
 }
