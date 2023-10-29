@@ -4,103 +4,52 @@
     width: 100%;
     z-index: $toybarZIndex;
     position: fixed;
-    bottom: 15px;
-    pointer-events: none;
+    bottom: 0;
+    background-color: rgba(white, 0.9);
+    box-shadow: 0 0px 20px 0 rgba(10, 8, 72, 0.14);
+    transition: opacity 0.3s;
 
-    .container {
-        background-color: rgba(white, 0.9);
+    .left {
+        background-color: white;
         padding: 10px;
-        border-radius: 15px;
-        box-shadow: 0 0px 20px 0 rgba(10, 8, 72, 0.14);
-        pointer-events: all;
 
         .newButtons {
-            button {
-                all: unset;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                color: $grey7;
-                transition: color 0.3s;
-
-                svg {
-                    width: 25px;
-                    height: 25px;
-                    margin-right: 8px;
-                }
-
-                &:not(:last-child) {
-                    margin-bottom: 8px;
-                }
-
-                &:hover {
-                    color: $blue5;
-                }
-            }
-        }
-
-        .streamButton {
-            display: flex;
-            align-items: center;
-            margin-bottom: 8px;
-
-            > div {
-                width: 32px;
-                height: 32px;
-                background-image: linear-gradient(141deg, #9fb8ad 0%, #1fc8db 51%, #2cb5e8 75%);
-                border-radius: 50%;
-                color: white;
-                margin-right: 5px;
-
-                svg {
-                    width: 20px;
-                    height: 20px;
-                }
-            }
-        }
-
-        .divider {
-            height: 30px;
-            width: 2px;
-            background-color: $grey3;
-            border-radius: 2px;
-            margin-right: 10px;
-            flex-shrink: 0;
-        }
-
-        .button {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100px;
-            height: 100px;
-            border: 1px solid $grey5;
+            position: absolute;
+            left: 0;
+            bottom: -230px;
+            background-color: white;
             border-radius: 10px;
-            background-color: $grey1;
-            opacity: 0.5;
-            color: $grey5;
-            transition: all 0.3s;
+            box-shadow: 0 0px 15px 0 rgba(black, 0.05);
+            transition: all 0.4s;
+            pointer-events: none;
+            padding: 10px;
+            z-index: -5;
+            opacity: 0;
 
-            > svg {
-                width: 40px;
-                height: 40px;
-                pointer-events: none;
+            > button {
+                margin-bottom: 10px;
+
+                > svg {
+                    width: 36px;
+                    height: 36px;
+                }
             }
 
-            &.hover {
+            &.visible {
+                pointer-events: all;
+                bottom: 102px;
                 opacity: 1;
-                background-color: $blue8;
-                border: 1px solid $blue5;
-                color: $blue5;
             }
         }
 
-        .toyboxRows {
+        .rowCounter {
+            padding: 0 20px 0 30px;
+
             button {
                 all: unset;
                 cursor: pointer;
-                width: 20px;
-                height: 20px;
+                width: 25px;
+                height: 25px;
                 color: $grey4;
 
                 svg {
@@ -108,17 +57,144 @@
                     height: inherit;
                 }
             }
+
             button:disabled {
                 color: $grey2;
                 cursor: auto;
             }
+
+            p {
+                margin: 15px 0;
+            }
+        }
+    }
+
+    .right {
+        background-color: white;
+        padding: 10px;
+    }
+
+    .button {
+        all: unset;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100px;
+        height: 100px;
+        border: 1px solid $grey5;
+        border-radius: 10px;
+        background-color: $grey1;
+        color: $grey6;
+        transition: all 0.3s;
+        cursor: pointer;
+        flex-shrink: 0;
+        font-size: 14px;
+
+        &:hover {
+            background-color: $blue7;
+            border: 1px solid $blue5;
+            color: $blue5;
         }
 
-        .toybox {
-            margin-left: 10px;
-            height: 100px;
-            min-width: 100px;
-            transition: all 0.5s;
+        > svg {
+            width: 40px;
+            height: 40px;
+            pointer-events: none;
+        }
+
+        > p {
+            margin-top: 5px;
+        }
+
+        &.hover {
+            opacity: 1;
+            background-color: $blue8;
+            border: 1px solid $blue5;
+            color: $blue5;
+        }
+    }
+
+    .toybox {
+        height: 100px;
+        width: 100%;
+        transition: opacity 0.3s;
+
+        .inbox {
+            opacity: 0.3;
+            transition: all 0.3s;
+            cursor: default;
+
+            &:hover {
+                border: 1px solid $grey5;
+                background-color: $grey1;
+                color: $grey6;
+            }
+
+            &.highlighted {
+                opacity: 1;
+                background-color: $blue7;
+                border: 1px solid $blue5;
+                color: $blue5;
+            }
+        }
+
+        &.loading {
+            opacity: 0;
         }
     }
 }
+
+// .newButtons {
+//     button {
+//         all: unset;
+//         cursor: pointer;
+//         display: flex;
+//         align-items: center;
+//         color: $grey7;
+//         transition: color 0.3s;
+
+//         svg {
+//             width: 25px;
+//             height: 25px;
+//             margin-right: 8px;
+//         }
+
+//         &:not(:last-child) {
+//             margin-bottom: 8px;
+//         }
+
+//         &:hover {
+//             color: $blue5;
+//         }
+//     }
+// }
+
+// .streamButton {
+//     display: flex;
+//     align-items: center;
+//     margin-bottom: 8px;
+
+//     > div {
+//         width: 32px;
+//         height: 32px;
+//         background-image: linear-gradient(141deg, #9fb8ad 0%, #1fc8db 51%, #2cb5e8 75%);
+//         border-radius: 50%;
+//         color: white;
+//         margin-right: 5px;
+
+//         svg {
+//             width: 20px;
+//             height: 20px;
+//         }
+//     }
+// }
+
+// .divider {
+//     height: 30px;
+//     width: 2px;
+//     background-color: $grey3;
+//     border-radius: 2px;
+//     margin-right: 10px;
+//     flex-shrink: 0;
+// }
