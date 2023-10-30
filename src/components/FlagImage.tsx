@@ -24,7 +24,7 @@ function FlagImage(props: {
                 {imagePath ? (
                     <div
                         className={styles.flagImage}
-                        style={{ backgroundImage: `url(${imagePath}` }}
+                        style={{ backgroundImage: `url('${imagePath}'` }}
                     />
                 ) : (
                     <FlagImagePlaceholder type={type} />
@@ -39,7 +39,10 @@ function FlagImage(props: {
             style={{ width: size, height: size, border: `${outline}px solid white`, ...style }}
         >
             {imagePath ? (
-                <div className={styles.flagImage} style={{ backgroundImage: `url(${imagePath}` }} />
+                <div
+                    className={styles.flagImage}
+                    style={{ backgroundImage: `url('${imagePath}'` }}
+                />
             ) : (
                 <FlagImagePlaceholder type={type} />
             )}
