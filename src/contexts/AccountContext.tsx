@@ -25,9 +25,9 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
     const [accountData, setAccountData] = useState(defaults.accountData)
     const [accountDataLoading, setAccountDataLoading] = useState(true)
     const [pageBottomReached, setPageBottomReached] = useState(false)
-    const [toyboxRow, setToyBoxRow] = useState(0)
-    const [toyboxItems, setToyBoxItems] = useState<any[]>([])
-    const toyboxItemsRef = useRef<any[]>([])
+    const [toyBoxRow, setToyBoxRow] = useState({ id: null, index: 0, name: '', image: '' })
+    const [toyBoxItems, setToyBoxItems] = useState<any[]>([])
+    const toyBoxItemsRef = useRef<any[]>([])
     const [dragItem, setDragItem] = useState({ type: '', data: null })
     const dragItemRef = useRef<any>(null)
     // modals
@@ -111,11 +111,11 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                 setAccountData,
                 accountDataLoading,
                 setAccountDataLoading,
-                toyboxRow,
+                toyBoxRow,
                 setToyBoxRow,
-                toyboxItems,
+                toyBoxItems,
                 setToyBoxItems,
-                toyboxItemsRef,
+                toyBoxItemsRef,
                 dragItem,
                 dragItemRef,
                 updateDragItem,
