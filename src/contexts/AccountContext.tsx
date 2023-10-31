@@ -26,6 +26,7 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
     const [accountDataLoading, setAccountDataLoading] = useState(true)
     const [pageBottomReached, setPageBottomReached] = useState(false)
     const [toyBoxRow, setToyBoxRow] = useState({ id: null, index: 0, name: '', image: '' })
+    const toyBoxRowRef = useRef({ id: null, index: 0, name: '', image: '' })
     const [toyBoxItems, setToyBoxItems] = useState<any[]>([])
     const toyBoxItemsRef = useRef<any[]>([])
     const [dragItem, setDragItem] = useState({ type: '', data: null })
@@ -113,6 +114,7 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                 setAccountDataLoading,
                 toyBoxRow,
                 setToyBoxRow,
+                toyBoxRowRef,
                 toyBoxItems,
                 setToyBoxItems,
                 toyBoxItemsRef,

@@ -43,13 +43,15 @@
         }
 
         .rowCounter {
-            padding: 0 20px 0 30px;
+            width: 100px;
+            height: 100px;
+            margin-left: 10px;
 
-            button {
+            > button {
                 all: unset;
                 cursor: pointer;
-                width: 25px;
-                height: 25px;
+                width: 22px;
+                height: 22px;
                 color: $grey4;
 
                 svg {
@@ -58,13 +60,40 @@
                 }
             }
 
-            button:disabled {
+            > button:disabled {
                 color: $grey2;
                 cursor: auto;
             }
 
-            p {
-                margin: 15px 0;
+            .rowInfo {
+                height: 100%;
+                width: 100px;
+
+                button {
+                    all: unset;
+                    position: relative;
+                    cursor: pointer;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100%;
+                    width: 100%;
+
+                    img {
+                        width: 50px;
+                        height: 50px;
+                        border-radius: 50%;
+                    }
+
+                    p {
+                        position: absolute;
+                        font-size: 14px;
+                        width: 100%;
+                        text-align: center;
+                        background-color: rgba(white, 0.8);
+                    }
+                }
             }
         }
     }

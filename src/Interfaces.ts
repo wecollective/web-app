@@ -111,6 +111,7 @@ export interface IAccountContext {
     setAccountDataLoading: (payload: boolean) => void
     toyBoxRow: any
     setToyBoxRow: (payload: any) => void
+    toyBoxRowRef: any
     toyBoxItems: any[]
     setToyBoxItems: (payload: any[]) => void
     toyBoxItemsRef: any

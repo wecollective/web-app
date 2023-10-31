@@ -5,6 +5,7 @@ import LoadingWheel from '@components/LoadingWheel'
 import Row from '@components/Row'
 import ToyBoxItem from '@components/cards/ToyBoxItem'
 import GlobalHelpModal from '@components/modals/GlobalHelpModal'
+import ToyBoxRowModal from '@components/modals/ToyBoxRowModal'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
 import styles from '@styles/components/ToyBar.module.scss'
@@ -20,7 +21,7 @@ import {
     SpacesIcon,
 } from '@svgs/all'
 import axios from 'axios'
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
@@ -31,6 +32,7 @@ function ToyBar(): JSX.Element {
         dragItemRef,
         toyBoxRow,
         setToyBoxRow,
+        toyBoxRowRef,
         toyBoxItems,
         setToyBoxItems,
         toyBoxItemsRef,
@@ -41,9 +43,8 @@ function ToyBar(): JSX.Element {
     } = useContext(AccountContext)
     const [showNewButtons, setShowNewButtons] = useState(false)
     const [toyboxLoading, setToyboxLoading] = useState(true)
-
+    const [toyBoxRowModalOpen, setToyBoxRowModalOpen] = useState(false)
     const [helpModalOpen, setHelpModalOpen] = useState(false)
-    const toyBoxRowRef = useRef({ id: null, index: 0, name: '', image: '' })
     const cookies = new Cookies()
     const location = useLocation()
     const path = location.pathname.split('/')
@@ -53,9 +54,7 @@ function ToyBar(): JSX.Element {
     const buttonSize = mobileView ? 36 : 46
     const animationSpeed = 500
 
-    // todo: store row number seperately to row data (to prevent hook refiring when updated)
     function getToyBoxItems() {
-        setToyboxLoading(true)
         // transitioning boolean used to ensure re-render waits until opacity transition completes but loads ASAP after
         let transitioning = true
         // if API responds before transition finished: wait for transition to complete
@@ -71,7 +70,6 @@ function ToyBar(): JSX.Element {
         // start animation timer
         setTimeout(() => handleData(toyBoxRowRef.current, toyBoxItemsRef.current), animationSpeed)
         // get toybox items
-        console.log('get toybox items: ', toyBoxRow.index)
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
             .get(`${config.apiURL}/toybox-data?rowIndex=${toyBoxRow.index}`, options)
@@ -122,7 +120,10 @@ function ToyBar(): JSX.Element {
             .post(`${config.apiURL}/add-toybox-item`, data, options)
             .then((res) => {
                 const { newRow } = res.data
-                if (newRow) setToyBoxRow(newRow)
+                if (newRow) {
+                    toyBoxRowRef.current = newRow
+                    setToyBoxRow(newRow)
+                }
             })
             .catch((error) => console.log(error))
     }
@@ -143,8 +144,12 @@ function ToyBar(): JSX.Element {
             .catch((error) => console.log(error))
     }
 
+    function incrementToyBoxRow(increment) {
+        setToyboxLoading(true)
+        setToyBoxRow({ index: toyBoxRow.index + increment })
+    }
+
     useEffect(() => {
-        // update row ref and get new toybox items
         toyBoxRowRef.current = toyBoxRow
         if (accountData.id) getToyBoxItems()
     }, [accountData.id, toyBoxRow.index])
@@ -336,18 +341,28 @@ function ToyBar(): JSX.Element {
                 <Column centerX className={styles.rowCounter}>
                     <button
                         type='button'
-                        onClick={() => setToyBoxRow({ index: toyBoxRow.index - 1 })}
+                        onClick={() => incrementToyBoxRow(-1)}
                         disabled={toyBoxRow.index === 0}
                     >
                         <ChevronUpIcon />
                     </button>
-                    <Column centerY centerX style={{ height: 30, width: 30 }}>
-                        {toyboxLoading ? <LoadingWheel size={22} /> : <p>{toyBoxRow.index + 1}</p>}
+                    <Column centerY centerX className={styles.rowInfo}>
+                        {toyboxLoading ? (
+                            <LoadingWheel size={22} />
+                        ) : (
+                            <button type='button' onClick={() => setToyBoxRowModalOpen(true)}>
+                                {toyBoxRow.image ? (
+                                    <>
+                                        <img src={toyBoxRow.image} alt='' />
+                                        {toyBoxRow.name && <p>{toyBoxRow.name}</p>}
+                                    </>
+                                ) : (
+                                    <p>{toyBoxRow.name || toyBoxRow.index + 1}</p>
+                                )}
+                            </button>
+                        )}
                     </Column>
-                    <button
-                        type='button'
-                        onClick={() => setToyBoxRow({ index: toyBoxRow.index + 1 })}
-                    >
+                    <button type='button' onClick={() => incrementToyBoxRow(1)}>
                         <ChevronDownIcon />
                     </button>
                 </Column>
@@ -375,6 +390,7 @@ function ToyBar(): JSX.Element {
                     <DeleteIcon />
                 </div>
             </Row>
+            {toyBoxRowModalOpen && <ToyBoxRowModal close={() => setToyBoxRowModalOpen(false)} />}
             {helpModalOpen && <GlobalHelpModal close={() => setHelpModalOpen(false)} />}
         </Row>
     )
