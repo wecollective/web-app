@@ -6,14 +6,17 @@ import styles from '@styles/components/cards/MediumSquareCard.module.scss'
 import { CommentIcon, LikeIcon, PostIcon, UsersIcon } from '@svgs/all'
 import React from 'react'
 
+// todo: handle new add to box without full data
 // todo: set up to replace BeadCard
 function MediumSquareCard(props: {
     type: 'space' | 'user' | 'post' | 'bead' | 'comment'
     data: any
+    draggable?: boolean
     style?: any
     className?: string
+    onClick?: () => void
 }): JSX.Element {
-    const { type, data, style, className } = props
+    const { type, data, draggable, style, className, onClick } = props
     const {
         handle,
         name,
@@ -34,7 +37,20 @@ function MediumSquareCard(props: {
     const text = trimText(getDraftPlainText(bio || description), 80)
 
     return (
-        <Column id={itemId} className={`${styles.wrapper} ${className}`} style={style} draggable>
+        <Column
+            id={itemId}
+            className={`${styles.wrapper} ${className}`}
+            style={style}
+            draggable={draggable}
+        >
+            {onClick && (
+                <button
+                    type='button'
+                    className={styles.button}
+                    onClick={onClick}
+                    aria-label={`Navigate to ${type}`}
+                />
+            )}
             <Column centerX className={styles.agent}>
                 <div className={styles.coverImage} style={{ backgroundImage }} />
                 <FlagImage
@@ -80,8 +96,10 @@ function MediumSquareCard(props: {
 }
 
 MediumSquareCard.defaultProps = {
+    draggable: false,
     style: null,
     className: '',
+    onClick: null,
 }
 
 export default MediumSquareCard

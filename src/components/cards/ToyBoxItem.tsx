@@ -8,7 +8,8 @@ import { AccountContext } from '@contexts/AccountContext'
 import { getDraftPlainText, postTypeIcons, trimText } from '@src/Helpers'
 import styles from '@styles/components/cards/ToyBoxItem.module.scss'
 import { CommentIcon, PostIcon, SpacesIcon, UserIcon } from '@svgs/all'
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 function ToyBoxItem(props: {
     type: 'space' | 'user' | 'post' | 'bead' | 'comment'
@@ -20,7 +21,7 @@ function ToyBoxItem(props: {
     const { type, data, dragImage, style, className } = props
     const { updateDragItem } = useContext(AccountContext)
     const [modalOpen, setModalOpen] = useState(false)
-    const modalOpenRef = useRef(false)
+    const history = useNavigate()
     const id = `${type}-${data.id}`
     const itemId = `${dragImage ? 'drag-image' : 'tbi'}-${id}`
     let text = ''
@@ -43,10 +44,6 @@ function ToyBoxItem(props: {
     useEffect(() => {
         const toyboxItem = document.getElementById(itemId)
         if (toyboxItem) {
-            toyboxItem.addEventListener('click', () => {
-                modalOpenRef.current = !modalOpenRef.current
-                setModalOpen(modalOpenRef.current)
-            })
             toyboxItem.addEventListener('dragover', (e) => e.preventDefault())
             toyboxItem.addEventListener('dragstart', (e) => {
                 toyboxItem.classList.add(styles.dragging)
@@ -61,12 +58,7 @@ function ToyBoxItem(props: {
     }, [])
 
     return (
-        <CloseOnClickOutside
-            onClick={() => {
-                modalOpenRef.current = false
-                setModalOpen(false)
-            }}
-        >
+        <CloseOnClickOutside onClick={() => setModalOpen(false)}>
             <Column
                 id={itemId}
                 className={`${styles.wrapper} ${className}`}
@@ -74,6 +66,12 @@ function ToyBoxItem(props: {
                 draggable
             >
                 <div className={styles.overlay} />
+                <button
+                    type='button'
+                    className={styles.button}
+                    onClick={() => setModalOpen(!modalOpen)}
+                    aria-label={`Navigate to ${type}`}
+                />
                 {['post', 'bead', 'comment'].includes(type) ? (
                     <Column className={styles.item}>
                         <Row spaceBetween centerY>
@@ -117,7 +115,14 @@ function ToyBoxItem(props: {
                             <BeadCard bead={data} location='link-modal' className={styles.bead} />
                         )}
                         {['user', 'space'].includes(type) && (
-                            <MediumSquareCard type={type} data={data} />
+                            <MediumSquareCard
+                                type={type}
+                                data={data}
+                                onClick={() => {
+                                    history(`/${type[0]}/${data.handle}`)
+                                    setModalOpen(false)
+                                }}
+                            />
                         )}
                     </Column>
                 )}
