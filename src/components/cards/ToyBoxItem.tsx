@@ -21,6 +21,7 @@ function ToyBoxItem(props: {
     const { type, data, dragImage, style, className } = props
     const { updateDragItem } = useContext(AccountContext)
     const [modalOpen, setModalOpen] = useState(false)
+    const [modalPosition, setModalPosition] = useState<any>(null)
     const history = useNavigate()
     const id = `${type}-${data.id}`
     const itemId = `${dragImage ? 'drag-image' : 'tbi'}-${id}`
@@ -56,6 +57,17 @@ function ToyBoxItem(props: {
             })
         }
     }, [])
+
+    useEffect(() => {
+        if (modalOpen) {
+            // find fixed position for modal to avoid overflow hidden
+            const element = document.getElementById(itemId)
+            if (element) {
+                const position = element.getBoundingClientRect()
+                setModalPosition({ top: position.top - 320, left: position.left - 100 })
+            }
+        } else setModalPosition(null)
+    }, [modalOpen])
 
     return (
         <CloseOnClickOutside onClick={() => setModalOpen(false)}>
@@ -109,8 +121,11 @@ function ToyBoxItem(props: {
                         </Row>
                     </Column>
                 )}
-                {modalOpen && (
-                    <Column className={styles.modal}>
+                {modalPosition && (
+                    <Column
+                        className={styles.modal}
+                        style={{ top: modalPosition.top, left: modalPosition.left }}
+                    >
                         {['post', 'bead'].includes(type) && (
                             <BeadCard bead={data} location='link-modal' className={styles.bead} />
                         )}

@@ -58,7 +58,7 @@ function ToyBoxRowModal(props: { close: () => void }): JSX.Element {
 
     return (
         <Modal centerX close={close} className={styles.wrapper}>
-            <Column centerX style={{ width: 350 }}>
+            <Column centerX style={{ width: 260 }}>
                 <h1>Edit row</h1>
                 <Column centerX centerY className={styles.image}>
                     {imageURL && <img src={imageURL} alt='' />}

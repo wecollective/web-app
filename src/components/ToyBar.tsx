@@ -3,6 +3,7 @@ import CloseOnClickOutside from '@components/CloseOnClickOutside'
 import Column from '@components/Column'
 import LoadingWheel from '@components/LoadingWheel'
 import Row from '@components/Row'
+import Scrollbars from '@components/Scrollbars'
 import ToyBoxItem from '@components/cards/ToyBoxItem'
 import GlobalHelpModal from '@components/modals/GlobalHelpModal'
 import ToyBoxRowModal from '@components/modals/ToyBoxRowModal'
@@ -357,7 +358,9 @@ function ToyBar(): JSX.Element {
                                         {toyBoxRow.name && <p>{toyBoxRow.name}</p>}
                                     </>
                                 ) : (
-                                    <p>{toyBoxRow.name || toyBoxRow.index + 1}</p>
+                                    <p className={!toyBoxRow.name ? styles.large : ''}>
+                                        {toyBoxRow.name || toyBoxRow.index + 1}
+                                    </p>
                                 )}
                             </button>
                         )}
@@ -367,24 +370,26 @@ function ToyBar(): JSX.Element {
                     </button>
                 </Column>
             </Row>
-            <Row id='toybox' className={`${styles.toybox} ${toyboxLoading && styles.loading}`}>
-                {toyBoxItems.length < 1 && (
-                    <div id='inbox' className={`${styles.button} ${styles.inbox}`}>
-                        <InboxIcon />
-                        <p>Drop here!</p>
-                    </div>
-                )}
-                {toyBoxItems.map((item) => (
-                    <ToyBoxItem
-                        key={`${item.type}-${item.data.id}`}
-                        className={`${TBIstyles.wrapper} ${
-                            item.data.id === 'removed' && TBIstyles.dragging
-                        }`}
-                        type={item.type}
-                        data={item.data}
-                    />
-                ))}
-            </Row>
+            <Scrollbars className={styles.scroll}>
+                <Row id='toybox' className={`${styles.toybox} ${toyboxLoading && styles.loading}`}>
+                    {toyBoxItems.length < 1 && (
+                        <div id='inbox' className={`${styles.button} ${styles.inbox}`}>
+                            <InboxIcon />
+                            <p>Drop here!</p>
+                        </div>
+                    )}
+                    {toyBoxItems.map((item) => (
+                        <ToyBoxItem
+                            key={`${item.type}-${item.data.id}`}
+                            className={`${TBIstyles.wrapper} ${
+                                item.data.id === 'removed' && TBIstyles.dragging
+                            }`}
+                            type={item.type}
+                            data={item.data}
+                        />
+                    ))}
+                </Row>
+            </Scrollbars>
             <Row centerY centerX className={styles.right}>
                 <div id='trash' className={styles.button}>
                     <DeleteIcon />
