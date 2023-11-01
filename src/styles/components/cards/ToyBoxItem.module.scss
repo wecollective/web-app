@@ -11,6 +11,16 @@
     position: relative;
     transition: all 0.5s;
 
+    .overlay {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        opacity: 0;
+        background-color: $red;
+        border-radius: 10px;
+        z-index: 5;
+    }
+
     .item {
         padding: 4px;
         width: 100%;
@@ -94,15 +104,6 @@
 
     &.fade {
         opacity: 0;
-    }
-
-    .overlay {
-        position: absolute;
-        width: 100px;
-        height: 100px;
-        opacity: 0;
-        background-color: $red;
-        z-index: 5;
     }
 
     &.highlighted {

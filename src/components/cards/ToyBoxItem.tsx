@@ -2,6 +2,7 @@ import CloseOnClickOutside from '@components/CloseOnClickOutside'
 import Column from '@components/Column'
 import FlagImage from '@components/FlagImage'
 import Row from '@components/Row'
+import MediumSquareCard from '@components/cards/MediumSquareCard'
 import BeadCard from '@components/cards/PostCard/BeadCard'
 import { AccountContext } from '@contexts/AccountContext'
 import { getDraftPlainText, postTypeIcons, trimText } from '@src/Helpers'
@@ -114,6 +115,9 @@ function ToyBoxItem(props: {
                     <Column className={styles.modal}>
                         {['post', 'bead'].includes(type) && (
                             <BeadCard bead={data} location='link-modal' className={styles.bead} />
+                        )}
+                        {['user', 'space'].includes(type) && (
+                            <MediumSquareCard type={type} data={data} />
                         )}
                     </Column>
                 )}
