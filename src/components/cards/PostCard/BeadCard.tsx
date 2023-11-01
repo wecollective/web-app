@@ -13,9 +13,23 @@ import EditPostModal from '@components/modals/EditPostModal'
 import ImageModal from '@components/modals/ImageModal'
 import LikeModal from '@components/modals/LikeModal'
 import { AccountContext } from '@contexts/AccountContext'
-import { statTitle } from '@src/Helpers'
+import {
+    findEventDuration,
+    findEventTimes,
+    getDraftPlainText,
+    statTitle,
+    trimText,
+} from '@src/Helpers'
 import styles from '@styles/components/cards/PostCard/BeadCard.module.scss'
-import { CommentIcon, EditIcon, LikeIcon, LinkIcon, VerticalEllipsisIcon } from '@svgs/all'
+import {
+    CalendarIcon,
+    CommentIcon,
+    EditIcon,
+    LikeIcon,
+    LinkIcon,
+    PollIcon,
+    VerticalEllipsisIcon,
+} from '@svgs/all'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -50,6 +64,7 @@ function BeadCard(props: {
     const [isSource, setIsSource] = useState(false)
     const {
         id,
+        title,
         // type,
         totalLikes,
         totalComments,
@@ -62,6 +77,7 @@ function BeadCard(props: {
         Urls,
         Audios,
         Images,
+        Event,
     } = bead
     const [menuOpen, setMenuOpen] = useState(false)
     const [editPostModalOpen, setEditPostModalOpen] = useState(false)
@@ -145,7 +161,6 @@ function BeadCard(props: {
         >
             <div className={styles.watermark} />
             <Row spaceBetween centerY className={styles.header}>
-                {/* {postType && ['glass-bead-game', 'weave'].includes(postType) && ( */}
                 <ImageTitle
                     type='user'
                     imagePath={bead.Creator.flagImagePath}
@@ -154,10 +169,6 @@ function BeadCard(props: {
                     imageSize={20}
                     style={{ marginRight: 10 }}
                 />
-                {/* )} */}
-                {/* <Row centerX centerY className={styles.beadType}>
-                    {postTypeIcons[type]}
-                </Row> */}
                 <Row centerY>
                     {removeBead && !isSource && (
                         <CloseButton size={20} onClick={() => removeBead(beadIndex || 0)} />
@@ -168,10 +179,6 @@ function BeadCard(props: {
                             <p style={{ marginLeft: 5 }}>{id}</p>
                         </Link>
                     )}
-                    {/* <a hr className={styles.id}>
-                        <p className='grey'>ID:</p>
-                        <p style={{ marginLeft: 5 }}>{id}</p>
-                    </button> */}
                     {/* {isSource && (
                         <button
                             type='button'
@@ -228,15 +235,6 @@ function BeadCard(props: {
                         </Scrollbars>
                     )}
                     {type === 'url' && <UrlPreview type='bead' urlData={Urls[0]} />}
-                    {type === 'audio' && Audios && (
-                        <AudioCard
-                            id={postId}
-                            index={beadIndex}
-                            url={Audios[0].url || URL.createObjectURL(Audios[0].file)}
-                            location={location}
-                            style={{ width: '100%', height: '100%' }}
-                        />
-                    )}
                     {type === 'image' && Images && (
                         <button
                             className={styles.image}
@@ -249,6 +247,32 @@ function BeadCard(props: {
                                 alt=''
                             />
                         </button>
+                    )}
+                    {type === 'audio' && Audios && (
+                        <AudioCard
+                            id={postId}
+                            index={beadIndex}
+                            url={Audios[0].url || URL.createObjectURL(Audios[0].file)}
+                            location={location}
+                            style={{ width: '100%', height: '100%' }}
+                        />
+                    )}
+                    {type === 'event' && (
+                        <Column centerX>
+                            <h1>{title}</h1>
+                            <Row wrap centerY className={styles.eventTimes}>
+                                <CalendarIcon />
+                                <p>{findEventTimes(Event.startTime, Event.endTime)}</p>
+                                <p>{findEventDuration(Event.startTime, Event.endTime)}</p>
+                            </Row>
+                        </Column>
+                    )}
+                    {type === 'poll' && (
+                        <Column centerX className={styles.poll}>
+                            <PollIcon />
+                            <h1>{trimText(title, 30)}</h1>
+                            {bead.text && <p>{trimText(getDraftPlainText(bead.text), 50)}</p>}
+                        </Column>
                     )}
                 </Column>
             )}
