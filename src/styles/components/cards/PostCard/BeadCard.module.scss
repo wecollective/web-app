@@ -183,6 +183,21 @@
                 text-align: center;
             }
         }
+
+        .card {
+            img {
+                width: 90px;
+                height: 126px;
+                border-radius: 7px;
+                box-shadow: 0 0 6px 0 rgba(black, 0.18);
+                overflow: hidden;
+                object-fit: cover;
+
+                &:not(:last-child) {
+                    margin-right: 10px;
+                }
+            }
+        }
     }
 
     .footer {

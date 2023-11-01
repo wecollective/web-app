@@ -23,6 +23,7 @@ import {
 import styles from '@styles/components/cards/PostCard/BeadCard.module.scss'
 import {
     CalendarIcon,
+    CastaliaIcon,
     CommentIcon,
     EditIcon,
     LikeIcon,
@@ -78,6 +79,7 @@ function BeadCard(props: {
         Audios,
         Images,
         Event,
+        CardSides,
     } = bead
     const [menuOpen, setMenuOpen] = useState(false)
     const [editPostModalOpen, setEditPostModalOpen] = useState(false)
@@ -272,6 +274,27 @@ function BeadCard(props: {
                             <PollIcon />
                             <h1>{trimText(title, 30)}</h1>
                             {bead.text && <p>{trimText(getDraftPlainText(bead.text), 50)}</p>}
+                        </Column>
+                    )}
+                    {type === 'glass-bead-game' && (
+                        <Column centerX className={styles.poll}>
+                            <CastaliaIcon />
+                            <h1>{trimText(title, 30)}</h1>
+                            {bead.text && <p>{trimText(getDraftPlainText(bead.text), 50)}</p>}
+                        </Column>
+                    )}
+                    {type === 'card' && (
+                        <Column centerX className={styles.card}>
+                            {title && <h1>{trimText(title, 30)}</h1>}
+                            {bead.text && <p>{trimText(getDraftPlainText(bead.text), 50)}</p>}
+                            <Row>
+                                {CardSides[0].Images[0] && (
+                                    <img src={CardSides[0].Images[0].url} alt='card front' />
+                                )}
+                                {CardSides[1].Images[0] && (
+                                    <img src={CardSides[1].Images[0].url} alt='card back' />
+                                )}
+                            </Row>
                         </Column>
                     )}
                 </Column>
