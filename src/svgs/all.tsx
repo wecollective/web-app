@@ -4,6 +4,7 @@ import { ReactComponent as ArrowDownIcon } from '@svgs/arrow-down-solid.svg'
 import { ReactComponent as UploadIcon } from '@svgs/arrow-up-from-bracket-solid.svg' // '@svgs/file-arrow-up-solid.svg'
 import { ReactComponent as ArrowUpIcon } from '@svgs/arrow-up-solid.svg'
 import { ReactComponent as AtIcon } from '@svgs/at-solid.svg'
+import { ReactComponent as AudioWaveIcon } from '@svgs/audio-wave.svg'
 import { ReactComponent as BabyIcon } from '@svgs/baby-solid.svg'
 import { ReactComponent as BellIcon } from '@svgs/bell-solid.svg'
 import { ReactComponent as ZapIcon } from '@svgs/bolt-solid.svg'
@@ -97,6 +98,7 @@ export {
     AtIcon,
     AudioIcon,
     AudioSlashIcon,
+    AudioWaveIcon,
     BabyIcon,
     BellIcon,
     CalendarIcon,

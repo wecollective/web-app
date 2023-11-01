@@ -7,7 +7,7 @@ import BeadCard from '@components/cards/PostCard/BeadCard'
 import { AccountContext } from '@contexts/AccountContext'
 import { getDraftPlainText, postTypeIcons, trimText } from '@src/Helpers'
 import styles from '@styles/components/cards/ToyBoxItem.module.scss'
-import { CommentIcon, PostIcon, SpacesIcon, UserIcon } from '@svgs/all'
+import { AudioWaveIcon, CommentIcon, PostIcon, SpacesIcon, UserIcon } from '@svgs/all'
 import React, { useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -37,6 +37,8 @@ function ToyBoxItem(props: {
     const backgroundImage = data.coverImagePath
         ? `url(${data.coverImagePath})`
         : 'linear-gradient(141deg, #9fb8ad 0%, #1fc8db 51%, #2cb5e8 75%'
+
+    const cardImage = data.type === 'card' && data.CardSides[0].Images[0]
 
     function findTypeIcon(option) {
         return postTypeIcons[option] || null
@@ -86,7 +88,7 @@ function ToyBoxItem(props: {
                 />
                 {['post', 'bead', 'comment'].includes(type) ? (
                     <Column className={styles.item}>
-                        <Row spaceBetween centerY>
+                        <Row spaceBetween centerY className={styles.header}>
                             {type === 'comment' ? <CommentIcon /> : <PostIcon />}
                             <FlagImage
                                 type='user'
@@ -98,8 +100,12 @@ function ToyBoxItem(props: {
                         <Column centerX centerY className={styles.center}>
                             {text && <p>{text}</p>}
                             {image && <div style={{ backgroundImage: `url(${image})` }} />}
+                            {data.type === 'audio' && !text && <AudioWaveIcon />}
+                            {data.type === 'card' && !text && cardImage && (
+                                <img src={cardImage.url} alt='card front' />
+                            )}
                         </Column>
-                        <Row spaceBetween>
+                        <Row spaceBetween className={styles.footer}>
                             {findTypeIcon(data.type)}
                             <div />
                         </Row>
