@@ -3,29 +3,38 @@
 .wrapper {
     margin-bottom: 10px;
     width: 100%;
+    @include for-desktop-small-up {
+        width: auto;
+    }
 
-    .content {
-        position: relative;
+    .spaceList {
         width: 100%;
-
-        .spaceListView {
-            width: 100%;
-
-            .spaceNavWrapper {
-                flex-shrink: 0;
-                position: sticky !important;
-                top: 116px;
-                left: 0;
-                max-height: calc(100vh - 140px);
-                min-width: 240px;
-                z-index: 5;
-            }
+        @include for-desktop-small-up {
+            width: 750px;
         }
+        @include for-desktop-medium-up {
+            width: 800px;
+        }
+    }
 
-        .spaceMapView {
-            padding: 0 10px;
-            width: 100%;
-            height: calc(100vh - 200px);
+    .spaceNavWrapper {
+        flex-shrink: 0;
+        position: sticky !important;
+        top: 116px;
+        left: 0;
+        max-height: calc(100vh - 140px);
+        min-width: 240px;
+        z-index: 5;
+    }
+
+    .spaceMapView {
+        width: 100%;
+        min-width: calc(100vw - 20px);
+        height: calc(100vh - 240px);
+        padding: 0 10px;
+
+        @include for-desktop-small-up {
+            width: calc(100vw - 40px);
         }
     }
 }

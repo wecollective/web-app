@@ -39,19 +39,18 @@ const defaults = {
     postFilters: {
         filter: 'Active',
         type: 'All Types',
-        sortBy: 'Likes',
-        timeRange: 'All Time',
+        sortBy: '',
+        timeRange: '',
         depth: 'Deep',
         searchQuery: '',
         lens: 'List',
     },
     spaceFilters: {
-        type: 'All Types',
+        filter: 'Top',
         sortBy: 'Likes',
-        sortOrder: 'Descending',
         timeRange: 'All Time',
-        depth: 'Only Direct Descendants',
-        lens: 'List',
+        depth: 'Shallow',
+        lens: 'Tree',
     },
     peopleFilters: {
         sortBy: 'Date Created',
@@ -185,28 +184,15 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         const firstLoad = offset === 0
         if (firstLoad) setSpaceSpacesLoading(true)
         else setNextSpaceSpacesLoading(true)
-        const accessToken = cookies.get('accessToken')
-        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
-        axios
-            .get(
-                /* prettier-ignore */
-                `${config.apiURL}/space-spaces?spaceId=${spaceId
-                }&timeRange=${params.timeRange
-                }&sortBy=${params.sortBy
-                }&sortOrder=${params.sortOrder
-                }&depth=${params.depth
-                }&searchQuery=${params.searchQuery || ''
-                }&limit=${limit
-                }&offset=${offset}`,
-                options
-            )
-            .then((res) => {
-                setSpaceListData(firstLoad ? res.data : [...spaceListData, ...res.data])
-                setSpaceSpacesPaginationHasMore(res.data.length === spaceSpacesPaginationLimit)
-                setSpaceSpacesPaginationOffset(offset + spaceSpacesPaginationLimit)
-                if (firstLoad) setSpaceSpacesLoading(false)
-                else setNextSpaceSpacesLoading(false)
-            })
+        const data = { spaceId, offset, limit, params }
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios.post(`${config.apiURL}/space-spaces`, data, options).then((res) => {
+            setSpaceListData(firstLoad ? res.data : [...spaceListData, ...res.data])
+            setSpaceSpacesPaginationHasMore(res.data.length === spaceSpacesPaginationLimit)
+            setSpaceSpacesPaginationOffset(offset + spaceSpacesPaginationLimit)
+            if (firstLoad) setSpaceSpacesLoading(false)
+            else setNextSpaceSpacesLoading(false)
+        })
     }
 
     function getSpaceMapData(scenario, spaceId, params, offset) {

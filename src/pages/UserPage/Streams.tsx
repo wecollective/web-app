@@ -110,7 +110,7 @@ function Streams(): JSX.Element {
             postType: 'All Types',
             sortBy: 'Date Created',
             sortOrder: 'Descending',
-            depth: 'All Contained Posts', // 'Only Direct Descendents'
+            depth: 'Deep',
             searchQuery: '',
             offset,
             mutedUsers: accountData.mutedUsers,

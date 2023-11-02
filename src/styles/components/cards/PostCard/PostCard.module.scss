@@ -8,7 +8,10 @@
     position: relative;
     opacity: 1;
     padding: 25px 15px;
-    cursor: move;
+    cursor: move; /* fallback if grab cursor is unsupported */
+    // cursor: grab;
+    // cursor: -moz-grab;
+    // cursor: -webkit-grab;
 
     &.dragging {
         background-color: rgb(237, 246, 251);

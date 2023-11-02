@@ -72,8 +72,7 @@ function GlobalSearchBar(props: { onLocationChange?: () => void; style?: any }):
         e.preventDefault()
         setSuggestions([])
         // update depth is searchQuery used
-        if (searchType === 'Spaces')
-            params.depth = searchQuery ? 'All Contained Spaces' : 'Only Direct Descendents'
+        if (searchType === 'Spaces') params.depth = searchQuery ? 'Deep' : 'Shallow'
         // reset to global path values if constraint removed
         const pathPage = showConstraint ? page : 's'
         const pathHandle = showConstraint ? handle : 'all'

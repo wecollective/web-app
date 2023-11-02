@@ -1,46 +1,34 @@
 import Column from '@components/Column'
 import Row from '@components/Row'
-import { getParamString, postTypeIcons } from '@src/Helpers'
+import { getParamString } from '@src/Helpers'
 import styles from '@styles/components/PostFilters.module.scss'
 import {
     ArrowDownIcon,
-    CastaliaIcon,
     ClockIcon,
     CommentIcon,
     EyeIcon,
     LikeIcon,
-    NeuronIcon,
     NewIcon,
     PostIcon,
     RankingIcon,
-    ReactionIcon,
-    RepostIcon,
-    ZapIcon,
+    UsersIcon,
 } from '@svgs/all'
 import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
-function PostFilters(props: { pageType: 'space' | 'user'; urlParams: any }): JSX.Element {
-    const { pageType, urlParams } = props
+function SpaceFilters(props: {
+    pageType: 'space' | 'user'
+    urlParams: any
+    style?: any
+}): JSX.Element {
+    const { pageType, urlParams, style } = props
     const [params, setParams] = useState({ ...urlParams })
-    const { filter, type, sortBy, timeRange, depth, lens } = params
-    const [typeModalOpen, setTypeModalOpen] = useState(false)
+    const { filter, sortBy, timeRange, depth, lens } = params
     const [sortByModalOpen, setSortByModalOpen] = useState(false)
     const [timeRangeModalOpen, setTimeRangeModalOpen] = useState(false)
     const [depthModalOpen, setDepthModalOpen] = useState(false)
     const [lensModalOpen, setLensModalOpen] = useState(false)
-    const typeOptions = [
-        'All Types',
-        'Text',
-        'Image',
-        'Url',
-        'Audio',
-        'Event',
-        'Poll',
-        'Glass Bead Game',
-        'Card',
-    ]
-    const sortByOptions = ['Likes', 'Comments', 'Links', 'Signal', 'Reposts']
+    const sortByOptions = ['Likes', 'Posts', 'Comments', 'Followers']
     const timeRangeOptions = [
         'All Time',
         'This Year',
@@ -50,23 +38,16 @@ function PostFilters(props: { pageType: 'space' | 'user'; urlParams: any }): JSX
         'This Hour',
     ]
     const depthOptions = ['Deep', 'Shallow']
-    const lensOptions = ['List', 'Map']
+    const lensOptions = ['List', 'Tree', 'Circles']
     const location = useLocation()
     const history = useNavigate()
 
     function findSortByIcon(option) {
         if (option === 'Likes') return <LikeIcon />
         if (option === 'Comments') return <CommentIcon />
-        if (option === 'Links') return <NeuronIcon />
-        if (option === 'Signal') return <ZapIcon />
-        if (option === 'Reposts') return <RepostIcon />
+        if (option === 'Posts') return <PostIcon />
+        if (option === 'Followers') return <UsersIcon />
         return null
-    }
-
-    function findTypeIcon(option) {
-        if (option === 'All Types') return <PostIcon />
-        if (option === 'Glass Bead Game') return <CastaliaIcon />
-        return postTypeIcons[option.toLowerCase()]
     }
 
     function updateParams(newParams) {
@@ -85,17 +66,8 @@ function PostFilters(props: { pageType: 'space' | 'user'; urlParams: any }): JSX
     useEffect(() => setParams({ ...urlParams }), [urlParams])
 
     return (
-        <Row spaceBetween className={styles.filters}>
+        <Row spaceBetween className={styles.filters} style={style}>
             <Row wrap>
-                <button
-                    type='button'
-                    className={`${styles.button} ${filter === 'Active' && styles.selected}`}
-                    onClick={() => updateParams({ ...params, filter: 'Active' })}
-                    style={{ marginRight: 10 }}
-                >
-                    <ReactionIcon />
-                    <p>Active</p>
-                </button>
                 <button
                     type='button'
                     className={`${styles.button} ${filter === 'New' && styles.selected}`}
@@ -189,36 +161,6 @@ function PostFilters(props: { pageType: 'space' | 'user'; urlParams: any }): JSX
                     <button
                         type='button'
                         className={styles.button}
-                        onClick={() => setTypeModalOpen(!typeModalOpen)}
-                        onBlur={() => setTimeout(() => setTypeModalOpen(false), 200)}
-                        style={{ marginRight: 10 }}
-                    >
-                        {findTypeIcon(type)}
-                        <p>{type}</p>
-                    </button>
-                    {typeModalOpen && (
-                        <Column className={styles.dropDown}>
-                            {typeOptions.map((option) => (
-                                <button
-                                    key={option}
-                                    type='button'
-                                    className={type === option ? styles.selected : ''}
-                                    onClick={() => {
-                                        updateParams({ ...params, type: option })
-                                        setTypeModalOpen(false)
-                                    }}
-                                >
-                                    {findTypeIcon(option)}
-                                    <p>{option}</p>
-                                </button>
-                            ))}
-                        </Column>
-                    )}
-                </Column>
-                <Column style={{ position: 'relative' }}>
-                    <button
-                        type='button'
-                        className={styles.button}
                         onClick={() => setDepthModalOpen(!depthModalOpen)}
                         onBlur={() => setTimeout(() => setDepthModalOpen(false), 200)}
                     >
@@ -276,4 +218,8 @@ function PostFilters(props: { pageType: 'space' | 'user'; urlParams: any }): JSX
     )
 }
 
-export default PostFilters
+SpaceFilters.defaultProps = {
+    style: null,
+}
+
+export default SpaceFilters

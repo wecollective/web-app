@@ -1,5 +1,6 @@
 import Column from '@components/Column'
 import Row from '@components/Row'
+import SpaceFilters from '@components/SpaceFilters'
 import SpaceList from '@components/SpaceList'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
@@ -79,35 +80,51 @@ function Spaces(): JSX.Element {
     if (spaceNotFound) return <SpaceNotFound />
     return (
         <Column centerX className={styles.wrapper}>
-            <Row centerX className={styles.content}>
-                {params.lens === 'Tree' && (
-                    <Column className={styles.spaceMapView}>
-                        <SpaceTree spaceTreeData={spaceTreeData} params={params} />
-                    </Column>
-                )}
-                {params.lens === 'Circles' && (
-                    <Column className={styles.spaceMapView}>
-                        <SpaceCircles spaceCircleData={spaceCircleData} params={params} />
-                    </Column>
-                )}
-                {params.lens === 'List' && (
-                    <Row centerX className={styles.spaceListView}>
-                        {largeScreen && (
-                            <Column className={styles.spaceNavWrapper}>
-                                <NavigationList excludeChildren />
-                            </Column>
-                        )}
+            {params.lens === 'List' && (
+                <Row centerX style={{ width: '100%' }}>
+                    {largeScreen && (
+                        <Column className={styles.spaceNavWrapper}>
+                            <NavigationList excludeChildren />
+                        </Column>
+                    )}
+                    <Column style={{ width: '100%' }}>
+                        <SpaceFilters pageType='space' urlParams={params} />
                         <SpaceList
                             location='space-spaces'
                             spaces={spaceListData}
                             totalSpaces={spaceData.totalSpaces}
                             loading={spaceSpacesLoading}
                             nextSpacesLoading={nextSpaceSpacesLoading}
+                            className={styles.spaceList}
                         />
-                        {largeScreen && <Column className={styles.spaceNavWrapper} />}
+                    </Column>
+                    {largeScreen && <Column className={styles.spaceNavWrapper} />}
+                </Row>
+            )}
+            {params.lens === 'Tree' && (
+                <Column className={styles.spaceMapView}>
+                    <Row centerX style={{ width: '100%' }}>
+                        <SpaceFilters
+                            pageType='space'
+                            urlParams={params}
+                            style={{ maxWidth: 770 }}
+                        />
                     </Row>
-                )}
-            </Row>
+                    <SpaceTree spaceTreeData={spaceTreeData} params={params} />
+                </Column>
+            )}
+            {params.lens === 'Circles' && (
+                <Column className={styles.spaceMapView}>
+                    <Row centerX style={{ width: '100%' }}>
+                        <SpaceFilters
+                            pageType='space'
+                            urlParams={params}
+                            style={{ maxWidth: 770 }}
+                        />
+                    </Row>
+                    <SpaceCircles spaceCircleData={spaceCircleData} params={params} />
+                </Column>
+            )}
         </Column>
     )
 }

@@ -1,4 +1,5 @@
 import Column from '@components/Column'
+import PeopleFilters from '@components/PeopleFilters'
 import PeopleList from '@components/PeopleList'
 import Row from '@components/Row'
 import { AccountContext } from '@contexts/AccountContext'
@@ -60,13 +61,14 @@ function People(): JSX.Element {
     if (spaceNotFound) return <SpaceNotFound />
     return (
         <Column centerX className={styles.wrapper}>
-            <Row className={styles.content}>
-                <PeopleList
-                    people={spacePeople}
-                    firstPeopleloading={spacePeopleLoading}
-                    nextPeopleLoading={nextSpacePeopleLoading}
-                />
+            <Row centerX>
+                <PeopleFilters pageType='space' urlParams={params} style={{ maxWidth: 770 }} />
             </Row>
+            <PeopleList
+                people={spacePeople}
+                firstPeopleloading={spacePeopleLoading}
+                nextPeopleLoading={nextSpacePeopleLoading}
+            />
         </Column>
     )
 }
