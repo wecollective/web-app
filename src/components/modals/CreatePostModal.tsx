@@ -103,11 +103,12 @@ function CreatePostModal(): JSX.Element {
         createPostModalSettings,
         setCreatePostModalSettings,
     } = useContext(AccountContext)
+    const { sourceType, sourceId, game } = createPostModalSettings
     const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
     const { userPosts, setUserPosts } = useContext(UserContext)
     const [loading, setLoading] = useState(false)
     const [linkDescription, setLinkDescription] = useState('')
-    const [postType, setPostType] = useState('text')
+    const [postType, setPostType] = useState(game ? 'glass-bead-game' : 'text')
     const [spaces, setSpaces] = useState<any[]>([spaceData.id ? spaceData : defaultSelectedSpace])
     const [showTitle, setShowTitle] = useState(true)
     const [title, setTitle] = useState('')
@@ -127,7 +128,9 @@ function CreatePostModal(): JSX.Element {
     const cookies = new Cookies()
     const maxUrls = 5
     const urlRequestIndex = useRef(0)
-    const contentButtonTypes = ['image', 'audio', 'event', 'poll', 'glass-bead-game', 'card']
+    const contentButtonTypes = game
+        ? ['glass-bead-game', 'card']
+        : ['image', 'audio', 'event', 'poll']
     const location = useLocation()
     const path = location.pathname.split('/')
     const page = path[1]
@@ -136,7 +139,7 @@ function CreatePostModal(): JSX.Element {
 
     function closeModal() {
         setCreatePostModalOpen(false)
-        setCreatePostModalSettings(null)
+        setCreatePostModalSettings({})
     }
 
     function findModalHeader() {
@@ -759,9 +762,9 @@ function CreatePostModal(): JSX.Element {
                 cardBackWatermark,
             } as any
             postData.searchableText = findSearchableText(postData)
-            if (createPostModalSettings) {
-                postData.sourceType = createPostModalSettings.sourceType
-                postData.sourceId = createPostModalSettings.sourceId
+            if (sourceId) {
+                postData.sourceType = sourceType
+                postData.sourceId = sourceId
                 postData.linkDescription = linkDescription || null
             }
             // set up file uploads if required
@@ -861,7 +864,7 @@ function CreatePostModal(): JSX.Element {
                                   }
                                 : null,
                         }
-                        if (createPostModalSettings) newPost.accountLink = true
+                        if (sourceId) newPost.accountLink = true
                         if (postType === 'audio') newPost.Audios = [{ url: res.data.audio.url }]
                         if (postType === 'image') newPost.Images = images
                         if (postType === 'poll')
@@ -1013,11 +1016,9 @@ function CreatePostModal(): JSX.Element {
                             </button>
                         )}
                     </Row>
-                    {createPostModalSettings && (
+                    {sourceId && (
                         <Column centerX style={{ width: '100%', maxWidth: 350, marginBottom: 20 }}>
-                            <p style={{ marginBottom: 10 }}>
-                                linked from post ID: {createPostModalSettings.sourceId}
-                            </p>
+                            <p style={{ marginBottom: 10 }}>linked from post ID: {sourceId}</p>
                             <Input
                                 type='text'
                                 placeholder='Link description...'
