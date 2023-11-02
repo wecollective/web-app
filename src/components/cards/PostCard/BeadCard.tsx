@@ -141,7 +141,7 @@ function BeadCard(props: {
         const beadCard = document.getElementById(`bead-${id}`)
         if (beadCard) {
             beadCard.addEventListener('mouseenter', () =>
-                updateDragItem({ type: 'bead', data: bead })
+                updateDragItem({ type: 'post', data: bead })
             )
             beadCard.addEventListener('dragstart', (e) => {
                 e.stopPropagation()

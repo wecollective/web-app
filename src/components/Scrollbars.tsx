@@ -5,10 +5,11 @@ function Scrollbars(props: {
     id?: string
     className?: string
     autoScrollToBottom?: boolean
+    initialized?: () => void
     style?: any
     children?: any
 }): JSX.Element {
-    const { id, className, autoScrollToBottom, style, children } = props
+    const { id, className, autoScrollToBottom, initialized, style, children } = props
     const ref = useRef<any>(null)
 
     // https://kingsora.github.io/OverlayScrollbars/
@@ -29,6 +30,7 @@ function Scrollbars(props: {
             options={{ scrollbars: { theme: null, autoHide: 'leave', autoHideDelay: 0 } }}
             ref={ref}
             style={style}
+            events={{ initialized }}
         >
             {children}
         </OverlayScrollbarsComponent>
@@ -39,6 +41,7 @@ Scrollbars.defaultProps = {
     id: null,
     className: null,
     autoScrollToBottom: false,
+    initialized: null,
     style: null,
     children: null,
 }

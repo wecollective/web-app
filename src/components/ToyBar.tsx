@@ -159,12 +159,7 @@ function ToyBar(): JSX.Element {
         setToyBoxRow({ index: toyBoxRow.index + increment })
     }
 
-    useEffect(() => {
-        toyBoxRowRef.current = toyBoxRow
-        if (accountData.id) getToyBoxItems()
-    }, [accountData.id, toyBoxRow.index])
-
-    useEffect(() => {
+    function initializeToyBox() {
         const toybox = document.getElementById('toybox')
         const trash = document.getElementById('trash')
         let dragLeaveCounter = 0 // used to avoid dragleave firing when hovering child elements
@@ -312,7 +307,12 @@ function ToyBar(): JSX.Element {
                 }
             })
         }
-    }, [])
+    }
+
+    useEffect(() => {
+        toyBoxRowRef.current = toyBoxRow
+        if (accountData.id) getToyBoxItems()
+    }, [accountData.id, toyBoxRow.index])
 
     if (!loggedIn) return <div />
     return (
@@ -379,7 +379,7 @@ function ToyBar(): JSX.Element {
                 )}
             </Row>
             {!mobileView && (
-                <Scrollbars className={styles.scroll}>
+                <Scrollbars className={styles.scroll} initialized={initializeToyBox}>
                     <Row
                         id='toybox'
                         className={`${styles.toybox} ${toyboxLoading && styles.loading}`}

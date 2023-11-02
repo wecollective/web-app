@@ -197,7 +197,7 @@ function Homepage(): JSX.Element {
                                 highlights.posts.length
                             )}`}
                             onClick={() => history('/s/all/posts')}
-                            outline={4}
+                            outline={2}
                         />
                         <FlagImageHighlights
                             type='space'
@@ -207,7 +207,7 @@ function Homepage(): JSX.Element {
                                 highlights.totals.totalSpaces
                             )}`}
                             onClick={() => history('/s/all/spaces')}
-                            outline={4}
+                            outline={2}
                         />
                         <FlagImageHighlights
                             type='user'
@@ -217,7 +217,7 @@ function Homepage(): JSX.Element {
                                 isPlural(highlights.totals.totalUsers) ? 'People' : 'Person'
                             }`}
                             onClick={() => history('/s/all/people')}
-                            outline={4}
+                            outline={2}
                         />
                     </div>
                 )}

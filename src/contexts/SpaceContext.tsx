@@ -53,9 +53,9 @@ const defaults = {
         lens: 'Tree',
     },
     peopleFilters: {
-        sortBy: 'Date Created',
-        sortOrder: 'Descending',
-        timeRange: 'All Time',
+        filter: 'New',
+        sortBy: '',
+        timeRange: '',
     },
 }
 
@@ -209,22 +209,10 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         if (firstLoad) setSpacePeopleLoading(true)
         else setNextSpacePeopleLoading(true)
         const isRootSpace = spaceId === 1
-        const accessToken = cookies.get('accessToken')
-        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+        const data = { spaceId, offset, limit, params }
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
-            .get(
-                /* prettier-ignore */
-                `${config.apiURL}/${isRootSpace ? 'all-users' : 'space-people'
-                }?accountId=${accountData.id
-                }&spaceId=${spaceId
-                }&sortBy=${params.sortBy
-                }&sortOrder=${params.sortOrder
-                }&timeRange=${params.timeRange
-                }&searchQuery=${params.searchQuery || ''
-                }&limit=${limit
-                }&offset=${offset}`,
-                options
-            )
+            .post(`${config.apiURL}/${isRootSpace ? 'all-users' : 'space-people'}`, data, options)
             .then((res) => {
                 setSpacePeople(firstLoad ? res.data : [...spacePeople, ...res.data])
                 setSpacePeoplePaginationHasMore(res.data.length === spacePeoplePaginationLimit)

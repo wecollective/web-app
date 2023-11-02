@@ -281,7 +281,7 @@ function NextBeadModal(props: {
             })
             .catch((error) => {
                 console.log('error: ', error)
-                if (error.response.status === 401) {
+                if (error.response && error.response.status === 401) {
                     setAlertMessage('Your session has run out. Please log in again.')
                     setAlertModalOpen(true)
                 }

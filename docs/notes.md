@@ -1,6 +1,23 @@
-### convert SVG to JSX
+### Convert SVG to JSX
 
 https://svg2jsx.com/
+
+### Draggable arrows between react components
+
+https://www.npmjs.com/package/react-xarrows
+https://codesandbox.io/s/drag-anim-with-draggable-t2sht?fontsize=14&hidenavigation=1&theme=dark
+
+### Animate list transitions
+
+https://stackoverflow.com/questions/75935047/how-to-add-sliding-animation-on-elements-reordered-using-element-insertbefore
+
+### Animate css grid
+
+https://www.youtube.com/watch?v=L80_E6G18II
+
+### No space left on server (usual cause: access.log file)
+
+https://serverfault.com/questions/330532/xvda1-is-100-full-what-is-it-how-to-fix
 
 ### Build source map
 

@@ -12,7 +12,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 function ToyBoxItem(props: {
-    type: 'space' | 'user' | 'post' | 'bead' | 'comment'
+    type: 'space' | 'user' | 'post' | 'comment'
     data: any
     dragImage?: boolean
     style?: any
@@ -29,7 +29,7 @@ function ToyBoxItem(props: {
     if (data.title) text = trimText(data.title, 20)
     else if (data.text) text = trimText(getDraftPlainText(data.text), 20)
     let image = ''
-    if (!text && ['post', 'bead'].includes(type)) {
+    if (!text && type === 'post') {
         if (data.type.includes('image')) image = data.Images[0].url
         if (data.type.includes('url')) image = data.Urls[0].image
     }
@@ -86,7 +86,7 @@ function ToyBoxItem(props: {
                     onClick={() => setModalOpen(!modalOpen)}
                     aria-label={`Navigate to ${type}`}
                 />
-                {['post', 'bead', 'comment'].includes(type) ? (
+                {['post', 'comment'].includes(type) ? (
                     <Column className={styles.item}>
                         <Row spaceBetween centerY className={styles.header}>
                             {type === 'comment' ? <CommentIcon /> : <PostIcon />}
@@ -132,7 +132,7 @@ function ToyBoxItem(props: {
                         className={styles.modal}
                         style={{ top: modalPosition.top, left: modalPosition.left }}
                     >
-                        {['post', 'bead'].includes(type) && (
+                        {['post'].includes(type) && (
                             <BeadCard bead={data} location='link-modal' className={styles.bead} />
                         )}
                         {['user', 'space'].includes(type) && (

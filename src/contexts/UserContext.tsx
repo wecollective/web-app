@@ -22,10 +22,10 @@ const defaults = {
         moderatedSpaces: [],
     },
     postFilters: {
+        filter: 'New',
         type: 'All Types',
-        sortBy: 'Date Created',
-        sortOrder: 'Descending',
-        timeRange: 'All Time',
+        sortBy: '',
+        timeRange: '',
         searchQuery: '',
         lens: 'List',
     },
@@ -70,19 +70,9 @@ function UserContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
         if (firstLoad) setUserPostsLoading(true)
         else setNextUserPostsLoading(true)
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        const data = { userId, offset, limit, params }
         axios
-            .get(
-                // prettier-ignore
-                `${config.apiURL}/user-posts?userId=${userId
-                }&postType=${params.type
-                }&sortBy=${params.sortBy
-                }&sortOrder=${params.sortOrder
-                }&timeRange=${params.timeRange
-                }&searchQuery=${params.searchQuery || ''
-                }&limit=${limit
-                }&offset=${offset}`,
-                options
-            )
+            .post(`${config.apiURL}/user-posts`, data, options)
             .then((res) => {
                 console.log('user-posts: ', res.data)
                 if (currentUserHandle.current === userData.handle) {

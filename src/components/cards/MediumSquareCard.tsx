@@ -34,7 +34,7 @@ function MediumSquareCard(props: {
     const backgroundImage = coverImagePath
         ? `url(${coverImagePath})`
         : 'linear-gradient(141deg, #9fb8ad 0%, #1fc8db 51%, #2cb5e8 75%'
-    const text = trimText(getDraftPlainText(bio || description), 80)
+    const text = bio || description ? trimText(getDraftPlainText(bio || description), 80) : ''
 
     return (
         <Column
