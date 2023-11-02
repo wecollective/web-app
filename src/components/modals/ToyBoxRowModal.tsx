@@ -36,7 +36,7 @@ function ToyBoxRowModal(props: { close: () => void }): JSX.Element {
     function saveRow() {
         setLoading(true)
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-        const data = { rowId: toyBoxRow.id, indexId: toyBoxRow.index, name }
+        const data = { rowId: toyBoxRow.id, rowIndex: toyBoxRow.index, name }
         const formData = new FormData()
         if (imageFile) formData.append('file', imageFile)
         formData.append('data', JSON.stringify(data))
