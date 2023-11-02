@@ -22,7 +22,7 @@
         position: sticky !important;
         top: $coverImageHeight - 12px;
         left: 0;
-        max-height: calc(100vh - 140px);
+        max-height: calc(100vh - 240px);
         min-width: 240px;
         z-index: 5;
     }
@@ -32,7 +32,7 @@
         position: sticky !important;
         top: $coverImageHeight - 12px;
         left: 0;
-        max-height: calc(100vh - 140px);
+        max-height: calc(100vh - 240px);
         min-width: 260px;
         margin-left: 20px;
         z-index: 5;

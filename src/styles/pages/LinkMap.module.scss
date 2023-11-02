@@ -31,7 +31,7 @@
         }
 
         .info {
-            padding: 5px 5px 80px 5px;
+            padding: 5px 5px 130px 5px;
 
             @include for-tablet-landscape-up {
                 width: 100%;
@@ -166,7 +166,7 @@
         }
 
         .visualisation {
-            padding: 5px;
+            padding: 5px 5px 100px 5px;
             width: 100%;
 
             @include for-tablet-landscape-up {
