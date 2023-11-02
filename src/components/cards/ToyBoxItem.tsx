@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/interactive-supports-focus */
 import CloseOnClickOutside from '@components/CloseOnClickOutside'
 import Column from '@components/Column'
 import FlagImage from '@components/FlagImage'
@@ -80,8 +82,8 @@ function ToyBoxItem(props: {
                 draggable
             >
                 <div className={styles.overlay} />
-                <button
-                    type='button'
+                <div
+                    role='button'
                     className={styles.button}
                     onClick={() => setModalOpen(!modalOpen)}
                     aria-label={`Navigate to ${type}`}
