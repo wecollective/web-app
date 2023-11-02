@@ -13,6 +13,15 @@
         background-color: white;
         padding: 10px;
 
+        &.mobile {
+            width: 100%;
+            justify-content: center;
+
+            .newButtons {
+                left: calc(50% - 60px);
+            }
+        }
+
         .newButtons {
             position: absolute;
             left: 0;

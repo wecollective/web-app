@@ -40,6 +40,7 @@ function ToyBar(): JSX.Element {
         setAlertModalOpen,
         setAlertMessage,
         setCreatePostModalOpen,
+        setCreatePostModalSettings,
         setCreateSpaceModalOpen,
     } = useContext(AccountContext)
     const [showNewButtons, setShowNewButtons] = useState(false)
@@ -83,8 +84,7 @@ function ToyBar(): JSX.Element {
             .catch((error) => console.log(error))
     }
 
-    function newPost(e) {
-        e.stopPropagation()
+    function newPost() {
         if (loggedIn) setCreatePostModalOpen(true)
         else {
             setAlertModalOpen(true)
@@ -92,12 +92,21 @@ function ToyBar(): JSX.Element {
         }
     }
 
-    function newSpace(e) {
-        e.stopPropagation()
+    function newSpace() {
         if (loggedIn) setCreateSpaceModalOpen(true)
         else {
             setAlertModalOpen(true)
             setAlertMessage('Log in to create a space')
+        }
+    }
+
+    function newGame() {
+        if (loggedIn) {
+            setCreatePostModalSettings({ game: true })
+            setCreatePostModalOpen(true)
+        } else {
+            setAlertModalOpen(true)
+            setAlertMessage('Log in to create a game')
         }
     }
 
@@ -305,9 +314,10 @@ function ToyBar(): JSX.Element {
         }
     }, [])
 
+    if (!loggedIn) return <div />
     return (
         <Row centerY className={styles.wrapper}>
-            <Row centerY className={styles.left}>
+            <Row centerY className={`${styles.left} ${mobileView && styles.mobile}`}>
                 <CloseOnClickOutside onClick={() => setShowNewButtons(false)}>
                     <>
                         <button
@@ -328,73 +338,78 @@ function ToyBar(): JSX.Element {
                                 <SpacesIcon />
                                 <p>New space</p>
                             </button>
-                            <button
-                                className={styles.button}
-                                type='button'
-                                onClick={() => setShowNewButtons(true)}
-                            >
+                            <button className={styles.button} type='button' onClick={newGame}>
                                 <CastaliaIcon />
                                 <p>New game</p>
                             </button>
                         </Column>
                     </>
                 </CloseOnClickOutside>
-                <Column centerX className={styles.rowCounter}>
-                    <button
-                        type='button'
-                        onClick={() => incrementToyBoxRow(-1)}
-                        disabled={toyBoxRow.index === 0}
-                    >
-                        <ChevronUpIcon />
-                    </button>
-                    <Column centerY centerX className={styles.rowInfo}>
-                        {toyboxLoading ? (
-                            <LoadingWheel size={22} />
-                        ) : (
-                            <button type='button' onClick={() => setToyBoxRowModalOpen(true)}>
-                                {toyBoxRow.image ? (
-                                    <>
-                                        <img src={toyBoxRow.image} alt='' />
-                                        {toyBoxRow.name && <p>{toyBoxRow.name}</p>}
-                                    </>
-                                ) : (
-                                    <p className={!toyBoxRow.name ? styles.large : ''}>
-                                        {toyBoxRow.name || toyBoxRow.index + 1}
-                                    </p>
-                                )}
-                            </button>
-                        )}
+                {!mobileView && (
+                    <Column centerX className={styles.rowCounter}>
+                        <button
+                            type='button'
+                            onClick={() => incrementToyBoxRow(-1)}
+                            disabled={toyBoxRow.index === 0}
+                        >
+                            <ChevronUpIcon />
+                        </button>
+                        <Column centerY centerX className={styles.rowInfo}>
+                            {toyboxLoading ? (
+                                <LoadingWheel size={22} />
+                            ) : (
+                                <button type='button' onClick={() => setToyBoxRowModalOpen(true)}>
+                                    {toyBoxRow.image ? (
+                                        <>
+                                            <img src={toyBoxRow.image} alt='' />
+                                            {toyBoxRow.name && <p>{toyBoxRow.name}</p>}
+                                        </>
+                                    ) : (
+                                        <p className={!toyBoxRow.name ? styles.large : ''}>
+                                            {toyBoxRow.name || toyBoxRow.index + 1}
+                                        </p>
+                                    )}
+                                </button>
+                            )}
+                        </Column>
+                        <button type='button' onClick={() => incrementToyBoxRow(1)}>
+                            <ChevronDownIcon />
+                        </button>
                     </Column>
-                    <button type='button' onClick={() => incrementToyBoxRow(1)}>
-                        <ChevronDownIcon />
-                    </button>
-                </Column>
+                )}
             </Row>
-            <Scrollbars className={styles.scroll}>
-                <Row id='toybox' className={`${styles.toybox} ${toyboxLoading && styles.loading}`}>
-                    {toyBoxItems.length < 1 && (
-                        <div id='inbox' className={`${styles.button} ${styles.inbox}`}>
-                            <InboxIcon />
-                            <p>Drop here!</p>
-                        </div>
-                    )}
-                    {toyBoxItems.map((item) => (
-                        <ToyBoxItem
-                            key={`${item.type}-${item.data.id}`}
-                            className={`${TBIstyles.wrapper} ${
-                                item.data.id === 'removed' && TBIstyles.dragging
-                            }`}
-                            type={item.type}
-                            data={item.data}
-                        />
-                    ))}
+            {!mobileView && (
+                <Scrollbars className={styles.scroll}>
+                    <Row
+                        id='toybox'
+                        className={`${styles.toybox} ${toyboxLoading && styles.loading}`}
+                    >
+                        {toyBoxItems.length < 1 && (
+                            <div id='inbox' className={`${styles.button} ${styles.inbox}`}>
+                                <InboxIcon />
+                                <p>Drop here!</p>
+                            </div>
+                        )}
+                        {toyBoxItems.map((item) => (
+                            <ToyBoxItem
+                                key={`${item.type}-${item.data.id}`}
+                                className={`${TBIstyles.wrapper} ${
+                                    item.data.id === 'removed' && TBIstyles.dragging
+                                }`}
+                                type={item.type}
+                                data={item.data}
+                            />
+                        ))}
+                    </Row>
+                </Scrollbars>
+            )}
+            {!mobileView && (
+                <Row centerY centerX className={styles.right}>
+                    <div id='trash' className={styles.button}>
+                        <DeleteIcon />
+                    </div>
                 </Row>
-            </Scrollbars>
-            <Row centerY centerX className={styles.right}>
-                <div id='trash' className={styles.button}>
-                    <DeleteIcon />
-                </div>
-            </Row>
+            )}
             {toyBoxRowModalOpen && <ToyBoxRowModal close={() => setToyBoxRowModalOpen(false)} />}
             {helpModalOpen && <GlobalHelpModal close={() => setHelpModalOpen(false)} />}
         </Row>
