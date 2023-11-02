@@ -156,6 +156,10 @@ export interface IAccountContext {
     setPageBottomReached: (payload: boolean) => void
     claimAccountModalOpen: boolean
     setClaimAccountModalOpen: (payload: boolean) => void
+    dropModalOpen: boolean
+    setDropModalOpen: (payload: boolean) => void
+    dropLocation: any
+    setDropLocation: (payload: any) => void
     // functions
     getAccountData: () => void
     updateAccountData: (key: string, payload: any) => void

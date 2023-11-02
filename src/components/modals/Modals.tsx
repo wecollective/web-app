@@ -3,6 +3,7 @@ import ClaimAccountModal from '@components/modals/ClaimAccountModal'
 import CreatePostModal from '@components/modals/CreatePostModal'
 import CreateSpaceModal from '@components/modals/CreateSpaceModal'
 import DonateModal from '@components/modals/DonateModal'
+import DropModal from '@components/modals/DropModal'
 import ForgotPasswordModal from '@components/modals/ForgotPasswordModal'
 import GlobalImageUploadModal from '@components/modals/GlobalImageUploadModal'
 import LogInModal from '@components/modals/LogInModal'
@@ -11,6 +12,7 @@ import ResetPasswordModal from '@components/modals/ResetPasswordModal'
 import { AccountContext } from '@contexts/AccountContext'
 import React, { useContext } from 'react'
 
+// todo: remove close props and use account context in modals
 function Modals(): JSX.Element {
     const {
         alertModalOpen,
@@ -28,6 +30,7 @@ function Modals(): JSX.Element {
         imageUploadModalOpen,
         createPostModalOpen,
         createSpaceModalOpen,
+        dropModalOpen,
     } = useContext(AccountContext)
 
     return (
@@ -46,6 +49,7 @@ function Modals(): JSX.Element {
             {imageUploadModalOpen && <GlobalImageUploadModal />}
             {createPostModalOpen && <CreatePostModal />}
             {createSpaceModalOpen && <CreateSpaceModal />}
+            {dropModalOpen && <DropModal />}
         </>
     )
 }

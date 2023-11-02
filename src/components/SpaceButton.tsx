@@ -21,7 +21,8 @@ function SpaceButton(props: {
 }): JSX.Element {
     const { space, imageSize, fontSize, shadow, maxChars, style, className, onClick } = props
     const { id, handle, name, flagImagePath, coverImagePath, state } = space
-    const { updateDragItem } = useContext(AccountContext)
+    const { updateDragItem, setDropModalOpen, setDropLocation, dragItemRef } =
+        useContext(AccountContext)
     const [showModal, setShowModal] = useState(false)
     const [transparent, setTransparent] = useState(true)
     const [modalData, setModalData] = useState({
@@ -83,6 +84,14 @@ function SpaceButton(props: {
                 const dragItem = document.getElementById('drag-item')
                 e.dataTransfer?.setDragImage(dragItem!, 50, 50)
                 onMouseLeave()
+            })
+            button.addEventListener('dragover', (e) => e.preventDefault())
+            button.addEventListener('drop', () => {
+                const { type } = dragItemRef.current
+                if (type === 'post') {
+                    setDropLocation({ type: 'space', data: space })
+                    setDropModalOpen(true)
+                }
             })
         }
         // preload cover image
