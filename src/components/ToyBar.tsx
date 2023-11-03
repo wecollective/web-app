@@ -330,17 +330,17 @@ function ToyBar(): JSX.Element {
                         <Column
                             className={`${styles.newButtons} ${showNewButtons && styles.visible}`}
                         >
-                            <button className={styles.button} type='button' onClick={newPost}>
-                                <PostIcon />
-                                <p>New post</p>
+                            <button className={styles.button} type='button' onClick={newGame}>
+                                <CastaliaIcon />
+                                <p>New game</p>
                             </button>
                             <button className={styles.button} type='button' onClick={newSpace}>
                                 <SpacesIcon />
                                 <p>New space</p>
                             </button>
-                            <button className={styles.button} type='button' onClick={newGame}>
-                                <CastaliaIcon />
-                                <p>New game</p>
+                            <button className={styles.button} type='button' onClick={newPost}>
+                                <PostIcon />
+                                <p>New post</p>
                             </button>
                         </Column>
                     </>
