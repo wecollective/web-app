@@ -11,6 +11,13 @@
     position: relative;
     transition: all 0.5s;
 
+    &.deleted {
+        p {
+            font-size: 12px;
+            text-align: center;
+        }
+    }
+
     .overlay {
         position: absolute;
         width: 100%;

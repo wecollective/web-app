@@ -73,6 +73,19 @@ function ToyBoxItem(props: {
         } else setModalPosition(null)
     }, [modalOpen])
 
+    if (data.state === 'deleted' || data.state === 'removed-by-mod')
+        return (
+            <Column
+                id={itemId}
+                className={`${styles.wrapper} ${styles.deleted}`}
+                style={style}
+                centerX
+                centerY
+                draggable
+            >
+                <p>[{type} deleted]</p>
+            </Column>
+        )
     return (
         <CloseOnClickOutside onClick={() => setModalOpen(false)}>
             <Column
