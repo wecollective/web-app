@@ -35,8 +35,8 @@ function PostList(props: {
             const postList = document.getElementById('space-posts')
             postList?.addEventListener('dragover', (e) => e.preventDefault())
             postList?.addEventListener('drop', () => {
-                const { type, data } = dragItemRef.current
-                if (type === 'post' && data.state === 'visible') {
+                const { type, data, fromToyBox } = dragItemRef.current
+                if (type === 'post' && data.state === 'visible' && fromToyBox) {
                     setDropLocation({ type: 'space', data: spaceData })
                     setDropModalOpen(true)
                 }
