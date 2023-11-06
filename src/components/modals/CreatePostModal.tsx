@@ -103,12 +103,12 @@ function CreatePostModal(): JSX.Element {
         createPostModalSettings,
         setCreatePostModalSettings,
     } = useContext(AccountContext)
-    const { sourceType, sourceId, game } = createPostModalSettings
+    const { sourceType, sourceId, game, governance } = createPostModalSettings
     const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
     const { userPosts, setUserPosts } = useContext(UserContext)
     const [loading, setLoading] = useState(false)
     const [linkDescription, setLinkDescription] = useState('')
-    const [postType, setPostType] = useState(game ? 'glass-bead-game' : 'text')
+    const [postType, setPostType] = useState('text')
     const [spaces, setSpaces] = useState<any[]>([spaceData.id ? spaceData : defaultSelectedSpace])
     const [showTitle, setShowTitle] = useState(true)
     const [title, setTitle] = useState('')
@@ -128,14 +128,14 @@ function CreatePostModal(): JSX.Element {
     const cookies = new Cookies()
     const maxUrls = 5
     const urlRequestIndex = useRef(0)
-    const contentButtonTypes = game
-        ? ['glass-bead-game', 'card']
-        : ['image', 'audio', 'event', 'poll']
     const location = useLocation()
     const path = location.pathname.split('/')
     const page = path[1]
     const handle = path[2]
     const subPage = path[3]
+    let contentTypes = ['image', 'audio', 'event', 'poll']
+    if (game) contentTypes = ['glass-bead-game', 'card']
+    if (governance) contentTypes = []
 
     function closeModal() {
         setCreatePostModalOpen(false)
@@ -143,6 +143,7 @@ function CreatePostModal(): JSX.Element {
     }
 
     function findModalHeader() {
+        if (governance) return 'New governance poll'
         if (postType === 'text') return 'New post'
         if (postType === 'image') return 'New image post'
         if (postType === 'audio') return 'New audio post'
@@ -338,11 +339,14 @@ function CreatePostModal(): JSX.Element {
 
     // poll
     const [pollType, setPollType] = useState('Single choice')
-    const [pollAnswersLocked, setPollAnswersLocked] = useState(true)
+    const [pollAnswersLocked, setPollAnswersLocked] = useState(false)
     const [newPollAnswer, setNewPollAnswer] = useState('')
     const [pollAnswers, setPollAnswers] = useState<any[]>([])
+    const [pollAnswersLoading, setPollAnswersLoading] = useState(false)
     const [pollTextError, setPollTextError] = useState(false)
     const [pollAnswersError, setPollAnswersError] = useState(false)
+    const [pollAction, setPollAction] = useState('None')
+    const [pollThreshold, setPollThreshold] = useState(5)
     const pollColorScale = d3
         .scaleSequential()
         .domain([0, pollAnswers.length])
@@ -668,7 +672,7 @@ function CreatePostModal(): JSX.Element {
                 setPollTextError(true)
                 valid = false
             }
-            if (pollAnswers.length < 2) {
+            if (pollAnswersLocked && pollAnswers.length < 2) {
                 setPollAnswersError(true)
                 valid = false
             }
@@ -766,6 +770,11 @@ function CreatePostModal(): JSX.Element {
                 postData.sourceType = sourceType
                 postData.sourceId = sourceId
                 postData.linkDescription = linkDescription || null
+            }
+            if (governance) {
+                postData.governance = true
+                postData.pollAction = pollAction
+                postData.pollThreshold = pollThreshold
             }
             // set up file uploads if required
             let fileData
@@ -921,6 +930,11 @@ function CreatePostModal(): JSX.Element {
         }
     }
 
+    useEffect(() => {
+        if (game) setPostType('glass-bead-game')
+        if (governance) setPostType('poll')
+    }, [])
+
     // remove errors and initialise date picker if post type is event
     useEffect(() => {
         // remove errors
@@ -993,6 +1007,23 @@ function CreatePostModal(): JSX.Element {
         }
     }, [urls])
 
+    // update poll answers when action changed
+    useEffect(() => {
+        if (pollAction === 'CreateSpaces') {
+            setPollAnswersLoading(true)
+            axios
+                .get(`${config.apiURL}/space-children?spaceId=${spaceData.id}`)
+                .then((res) => {
+                    console.log('res.data: ', res.data)
+                    // setPolls(res.data)
+                    setPollAnswersLoading(false)
+                })
+                .catch((error) => console.log(error))
+        } else {
+            setPollAnswers(pollAnswers.filter((a) => !a.state))
+        }
+    }, [pollAction])
+
     return (
         <Modal
             className={`${styles.wrapper} ${styles[postType]}`}
@@ -1040,14 +1071,16 @@ function CreatePostModal(): JSX.Element {
                             />
                             <PostSpaces spaces={spaces} preview />
                             <p className='grey'>now</p>
-                            <button
-                                className={styles.addSpacesButton}
-                                type='button'
-                                title='Click to add spaces'
-                                onClick={() => setSpacesModalOpen(true)}
-                            >
-                                + Spaces
-                            </button>
+                            {!governance && (
+                                <button
+                                    className={styles.addSpacesButton}
+                                    type='button'
+                                    title='Click to add spaces'
+                                    onClick={() => setSpacesModalOpen(true)}
+                                >
+                                    + Spaces
+                                </button>
+                            )}
                         </Row>
                         <Column className={styles.content}>
                             {showTitle && postType !== 'glass-bead-game' && (
@@ -1346,15 +1379,10 @@ function CreatePostModal(): JSX.Element {
                             ))}
                         </Column>
                     </Column>
-                    <Column
-                        centerY
-                        className={`${styles.contentOptions} ${
-                            ['text', 'card'].includes(postType) && styles.hidden
-                        }`}
-                    >
-                        {postType === 'image' && (
-                            <Column>
-                                <Row centerY>
+                    {!['text', 'card'].includes(postType) && (
+                        <Row wrap centerY centerX className={styles.contentOptions}>
+                            {postType === 'image' && (
+                                <>
                                     <Row className={styles.fileUploadInput}>
                                         <label htmlFor='post-images-file-input'>
                                             Upload images
@@ -1368,26 +1396,24 @@ function CreatePostModal(): JSX.Element {
                                             />
                                         </label>
                                     </Row>
-                                    <p style={{ margin: '0 10px' }}>or</p>
+                                    <p style={{ margin: '0 10px 10px 10px' }}>or</p>
                                     <Input
                                         type='text'
-                                        placeholder='add image url...'
+                                        placeholder='paste image URL...'
                                         value={imageURL}
                                         onChange={(v) => setImageURL(v)}
-                                        style={{ width: 200, marginRight: 10 }}
+                                        style={{ width: 180, marginRight: 10 }}
                                     />
                                     <Button
-                                        text='Add'
+                                        text='Add URL'
                                         color='aqua'
                                         disabled={!imageURL}
                                         onClick={addImageURL}
                                     />
-                                </Row>
-                            </Column>
-                        )}
-                        {postType === 'audio' && (
-                            <Column>
-                                <Row centerY>
+                                </>
+                            )}
+                            {postType === 'audio' && (
+                                <>
                                     <Row
                                         className={styles.fileUploadInput}
                                         style={{ marginRight: 10 }}
@@ -1413,72 +1439,98 @@ function CreatePostModal(): JSX.Element {
                                             {formatTimeMMSS(recordingTime)}
                                         </h2>
                                     )}
-                                </Row>
-                            </Column>
-                        )}
-                        {postType === 'event' && (
-                            <Row centerY className={styles.dateTimePicker}>
-                                <div id='date-time-start-wrapper'>
-                                    <Input
-                                        id='date-time-start'
-                                        type='text'
-                                        placeholder='Start time...'
+                                </>
+                            )}
+                            {postType === 'event' && (
+                                <>
+                                    <div id='date-time-start-wrapper'>
+                                        <Input
+                                            id='date-time-start'
+                                            type='text'
+                                            placeholder='Start time...'
+                                        />
+                                    </div>
+                                    <p style={{ margin: '0 10px 10px 10px' }}>→</p>
+                                    <div id='date-time-end-wrapper'>
+                                        <Input
+                                            id='date-time-end'
+                                            type='text'
+                                            placeholder='End time... (optional)'
+                                        />
+                                    </div>
+                                    {endTime && <CloseButton size={20} onClick={removeEndDate} />}
+                                </>
+                            )}
+                            {postType === 'poll' && (
+                                <>
+                                    <Toggle
+                                        leftText='Lock answers'
+                                        positionLeft={!pollAnswersLocked}
+                                        rightColor='blue'
+                                        onClick={() => {
+                                            setPollAnswersError(false)
+                                            setPollAnswersLocked(!pollAnswersLocked)
+                                        }}
+                                        onOffText
+                                        style={{ marginRight: 20 }}
                                     />
-                                </div>
-                                <p>→</p>
-                                <div id='date-time-end-wrapper'>
-                                    <Input
-                                        id='date-time-end'
-                                        type='text'
-                                        placeholder='End time... (optional)'
+                                    {governance && (
+                                        <DropDown
+                                            title='Action'
+                                            options={['None', 'Create spaces', 'Assign Moderators']}
+                                            selectedOption={pollAction}
+                                            setSelectedOption={(option) => setPollAction(option)}
+                                            style={{ marginRight: 20 }}
+                                        />
+                                    )}
+                                    {governance && pollAction === 'Create spaces' && (
+                                        <Row centerY style={{ marginRight: 20 }}>
+                                            <p>Threshold</p>
+                                            <Input
+                                                type='number'
+                                                min={1}
+                                                max={1000}
+                                                value={pollThreshold}
+                                                onChange={(v) => setPollThreshold(v)}
+                                                style={{ width: 70, marginLeft: 10 }}
+                                            />
+                                        </Row>
+                                    )}
+                                    <DropDown
+                                        title='Vote type'
+                                        options={[
+                                            'Single choice',
+                                            'Multiple choice',
+                                            'Weighted choice',
+                                        ]}
+                                        selectedOption={pollType}
+                                        setSelectedOption={(option) => setPollType(option)}
+                                        style={{ marginRight: 20 }}
                                     />
-                                </div>
-                                {endTime && <CloseButton size={20} onClick={removeEndDate} />}
-                            </Row>
-                        )}
-                        {postType === 'poll' && (
-                            <Row centerY>
-                                <DropDown
-                                    title='Vote type'
-                                    options={[
-                                        'Single choice',
-                                        'Multiple choice',
-                                        'Weighted choice',
-                                    ]}
-                                    selectedOption={pollType}
-                                    setSelectedOption={(option) => setPollType(option)}
-                                    style={{ marginRight: 20 }}
-                                />
-                                <Toggle
-                                    leftText='Lock answers'
-                                    positionLeft={!pollAnswersLocked}
-                                    rightColor='blue'
-                                    onClick={() => setPollAnswersLocked(!pollAnswersLocked)}
-                                    onOffText
-                                />
-                            </Row>
-                        )}
-                        {postType === 'glass-bead-game' && (
-                            <Row>
+                                </>
+                            )}
+                            {postType === 'glass-bead-game' && (
                                 <Button
                                     text='Game settings'
                                     color='aqua'
                                     icon={<SettingsIcon />}
                                     onClick={() => setGBGSettingsModalOpen(true)}
                                 />
-                            </Row>
-                        )}
-                    </Column>
-                    <Row style={{ marginBottom: 20 }}>
-                        {contentButtonTypes.map((type) => (
-                            <ContentButton
-                                key={type}
-                                type={type}
-                                postType={postType}
-                                setPostType={setPostType}
-                            />
-                        ))}
-                    </Row>
+                            )}
+                        </Row>
+                    )}
+                    {!!contentTypes.length && (
+                        <Row style={{ marginBottom: 20 }}>
+                            {contentTypes.map((type) => (
+                                <ContentButton
+                                    key={type}
+                                    type={type}
+                                    postType={postType}
+                                    setPostType={setPostType}
+                                />
+                            ))}
+                        </Row>
+                    )}
                     <Column centerX className={styles.errors}>
                         {noTextError && <p>No content added</p>}
                         {maxCharsErrors && <p>Text must be less than {maxChars} characters</p>}
@@ -1495,7 +1547,7 @@ function CreatePostModal(): JSX.Element {
                         {eventTextError && <p>Title or text required for events</p>}
                         {noEventTimesError && <p>Start time required for events</p>}
                         {pollTextError && <p>Title or text required for polls</p>}
-                        {pollAnswersError && <p>At least 2 answers required for polls</p>}
+                        {pollAnswersError && <p>At least 2 answers required for locked polls</p>}
                         {topicError && <p>Topic required</p>}
                         {noBeadsError && <p>At least 1 bead required for single player games</p>}
                         {cardFrontError && <p>No content added to front of card</p>}

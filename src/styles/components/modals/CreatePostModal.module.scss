@@ -424,15 +424,13 @@ $transitionSpeed: 0.5s;
     }
 
     .contentOptions {
-        height: 42px;
         margin-bottom: 20px;
-        opacity: 1;
-        transition: all $transitionSpeed;
+        position: relative;
 
-        &.hidden {
-            height: 0;
-            margin-bottom: 0;
-            opacity: 0;
+        > div,
+        > input,
+        > button {
+            margin-bottom: 10px;
         }
 
         h2 {
@@ -444,27 +442,6 @@ $transitionSpeed: 0.5s;
             > p {
                 font-size: 14px;
                 color: $red;
-            }
-        }
-
-        .dateTimePicker {
-            position: relative;
-
-            > div {
-                position: relative;
-                width: 220px;
-
-                input {
-                    cursor: pointer;
-                }
-            }
-
-            > p {
-                margin: 0 10px;
-            }
-
-            > button {
-                margin-left: 5px;
             }
         }
     }
@@ -513,9 +490,9 @@ $transitionSpeed: 0.5s;
 
     .fileUploadInput {
         label {
-            height: 40px;
-            border-radius: 20px;
-            padding: 0px 20px;
+            height: 36px;
+            border-radius: 18px;
+            padding: 0px 14px;
             font-size: 14px;
             border: none;
             outline: none;
