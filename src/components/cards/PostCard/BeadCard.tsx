@@ -231,11 +231,12 @@ function BeadCard(props: {
                 </Column>
             ) : (
                 <Column centerY className={styles.content}>
-                    {type === 'text' && (
+                    {type === 'text' && bead.text && (
                         <Scrollbars style={{ paddingRight: 10, marginBottom: showFooter ? 0 : 10 }}>
                             <DraftText stringifiedDraft={bead.text} />
                         </Scrollbars>
                     )}
+                    {type === 'text' && !bead.text && <h1>{bead.title}</h1>}
                     {type === 'url' && <UrlPreview type='bead' urlData={Urls[0]} />}
                     {type === 'image' && Images && (
                         <button
