@@ -299,6 +299,7 @@ function PostCard(props: {
                     <AudioCard
                         id={postData.id}
                         url={Audios[0].url}
+                        staticBars={400}
                         location={location}
                         style={{ height: 200, margin: '10px 0' }}
                     />

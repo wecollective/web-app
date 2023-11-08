@@ -22,7 +22,7 @@ function AudioVisualiser(props: {
         dynamicColor,
         style,
     } = props
-
+    const spacing = 1.5
     // const rendering = useRef(false)
     // const renderIndex = useRef(0)
     const offlineAudioContext = useRef<OfflineAudioContext | null>(null)
@@ -33,10 +33,10 @@ function AudioVisualiser(props: {
         const visualiser = d3.select(`#${audioElementId}-visualiser`)
         if (visualiser.node()) {
             const { height, width } = visualiser.node().getBoundingClientRect()
-            const maxBars = 8000
+            const maxBars = 2000
             const totalBars = Math.min(staticBars, maxBars)
             const leftChannel = buffer.getChannelData(0)
-            const barGap = Math.floor(leftChannel.length / totalBars)
+            const barGap = Math.floor((leftChannel.length / totalBars) * spacing)
             const barWidth = width / totalBars
 
             const oldSVG = d3.select(`#${audioElementId}-static-visualiser`).select('svg')
@@ -63,13 +63,14 @@ function AudioVisualiser(props: {
                 const initialValue = leftChannel[barIndex] || 0
                 const usedValue = initialValue > 0 ? initialValue : -initialValue
                 const barHeight = usedValue * (height / maxValue)
-                const x = i * barWidth
+                const x = i * barWidth * spacing
                 const y = height / 2 - barHeight / 2
                 staticVisualiser
                     .append('rect')
                     .attr('id', `bar-${i}`)
                     .attr('x', x)
                     .attr('y', y)
+                    // .attr('rx', 2)
                     .attr('width', barWidth)
                     .attr('height', barHeight)
                     .attr('fill', staticColor)

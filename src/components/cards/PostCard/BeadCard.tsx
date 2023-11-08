@@ -256,6 +256,7 @@ function BeadCard(props: {
                             id={postId}
                             index={beadIndex}
                             url={Audios[0].url || URL.createObjectURL(Audios[0].file)}
+                            staticBars={200}
                             location={location}
                             style={{ width: '100%', height: '100%' }}
                         />

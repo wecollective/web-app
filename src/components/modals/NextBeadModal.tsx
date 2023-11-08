@@ -410,6 +410,7 @@ function NextBeadModal(props: {
                                             <AudioCard
                                                 key={audioFile.lastModified}
                                                 url={URL.createObjectURL(audioFile)}
+                                                staticBars={200}
                                                 location='create-bead-audio'
                                                 remove={() => setAudioFile(undefined)}
                                                 style={{ width: '100%', height: '100%' }}

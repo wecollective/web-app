@@ -14,11 +14,12 @@ function AudioCard(props: {
     id?: number
     index?: number
     url: string
+    staticBars: number
     location: string
     style?: any
     remove?: () => void
 }): JSX.Element {
-    const { id, index, url, location, style, remove } = props
+    const { id, index, url, staticBars, location, style, remove } = props
     const [audioPlaying, setAudioPlaying] = useState(false)
     // const [audioLoaded, setAudioLoaded] = useState(false)
     const [duration, setDuration] = useState(0)
@@ -139,7 +140,7 @@ function AudioCard(props: {
                 audioElementId={audioElementId}
                 audioURL={url}
                 audioPlaying={audioPlaying}
-                staticBars={200}
+                staticBars={staticBars}
                 staticColor={colors.audioVisualiserStatic}
                 dynamicBars={160}
                 dynamicColor={colors.audioVisualiserDynamic}

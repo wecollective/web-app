@@ -1176,6 +1176,7 @@ function CreatePostModal(): JSX.Element {
                                 <AudioCard
                                     key={audioFile.lastModified}
                                     url={URL.createObjectURL(audioFile)}
+                                    staticBars={400}
                                     location='create-post-audio'
                                     style={{ height: 200 }}
                                 />
