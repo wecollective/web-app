@@ -1009,13 +1009,21 @@ function CreatePostModal(): JSX.Element {
 
     // update poll answers when action changed
     useEffect(() => {
-        if (pollAction === 'CreateSpaces') {
+        if (pollAction === 'Create spaces') {
             setPollAnswersLoading(true)
             axios
                 .get(`${config.apiURL}/space-children?spaceId=${spaceData.id}`)
                 .then((res) => {
-                    console.log('res.data: ', res.data)
-                    // setPolls(res.data)
+                    const newPollAnswers = res.data.map((space) => {
+                        return {
+                            id: uuidv4(),
+                            text: space.name,
+                            state: 'done',
+                            Reactions: [],
+                            Creator: space.Creator,
+                        }
+                    })
+                    setPollAnswers([...newPollAnswers, ...pollAnswers])
                     setPollAnswersLoading(false)
                 })
                 .catch((error) => console.log(error))
