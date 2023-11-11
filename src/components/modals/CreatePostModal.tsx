@@ -1200,7 +1200,7 @@ function CreatePostModal(): JSX.Element {
                                             percentage={0}
                                             color={pollColorScale(index)}
                                             remove={() => removePollAnswer(answer.id)}
-                                            removable
+                                            removable={answer.state !== 'done'}
                                             preview
                                         />
                                     ))}

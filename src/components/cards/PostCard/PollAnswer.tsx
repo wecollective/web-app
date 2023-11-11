@@ -8,6 +8,7 @@ import Input from '@components/Input'
 import Row from '@components/Row'
 import Modal from '@components/modals/Modal'
 import { dateCreated, timeSinceCreated } from '@src/Helpers'
+import { CheckIcon } from '@src/svgs/all'
 import styles from '@styles/components/cards/PostCard/PollAnswer.module.scss'
 import React, { useState } from 'react'
 
@@ -23,13 +24,14 @@ function PollAnswer(props: {
     onChange?: (value: boolean | number) => void
 }): JSX.Element {
     const { index, type, answer, percentage, color, preview, removable, remove, onChange } = props
+    const { text, accountPoints, accountVote, state, Creator, Reactions } = answer
     const [statModalOpen, setStatModalOpen] = useState(false)
     const weighted = type === 'weighted-choice'
-    const votes = answer.Reactions.filter((r) => r.state === 'active')
+    const votes = Reactions.filter((r) => r.state === 'active')
     const mobileView = document.documentElement.clientWidth < 900
 
     return (
-        <Column centerY className={styles.wrapper}>
+        <Column centerY className={`${styles.wrapper} ${state === 'done' && styles.done}`}>
             <Row spaceBetween>
                 <Row centerY style={{ width: '100%', marginRight: 10 }}>
                     <Column
@@ -42,11 +44,13 @@ function PollAnswer(props: {
                     </Column>
                     <FlagImage
                         type='user'
-                        imagePath={answer.Creator.flagImagePath}
-                        link={`/u/${answer.Creator.handle}`}
+                        imagePath={Creator.flagImagePath}
+                        link={`/u/${Creator.handle}`}
                         style={{ marginRight: 10 }}
                     />
-                    {!mobileView && <p>{answer.text}</p>}
+
+                    {!mobileView && <p>{text}</p>}
+                    {state === 'done' && <CheckIcon className={styles.check} />}
                 </Row>
                 <Row centerY style={{ flexShrink: 0 }}>
                     {!preview && (
@@ -70,7 +74,7 @@ function PollAnswer(props: {
                         {weighted && !preview && (
                             <Input
                                 type='text'
-                                value={answer.accountPoints}
+                                value={accountPoints}
                                 disabled={preview}
                                 onChange={(v) => onChange && onChange(+v.replace(/\D/g, ''))}
                                 style={{ width: 60 }}
@@ -78,7 +82,7 @@ function PollAnswer(props: {
                         )}
                         {!weighted && !preview && (
                             <CheckBox
-                                checked={answer.accountVote}
+                                checked={accountVote}
                                 disabled={preview}
                                 onChange={(v) => onChange && onChange(v)}
                             />
@@ -89,7 +93,7 @@ function PollAnswer(props: {
                     </Row>
                 </Row>
             </Row>
-            {mobileView && <p style={{ marginTop: 10 }}>{answer.text}</p>}
+            {mobileView && <p style={{ marginTop: 10 }}>{text}</p>}
             {statModalOpen && (
                 <Modal centerX close={() => setStatModalOpen(false)}>
                     <h1>Votes</h1>

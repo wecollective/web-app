@@ -9,6 +9,10 @@
     min-height: 60px;
     word-break: break-word;
 
+    &.done {
+        background-color: $blue8;
+    }
+
     .index {
         width: 40px;
         height: 40px;
@@ -19,6 +23,13 @@
         > p {
             color: white;
         }
+    }
+
+    .check {
+        width: 20px;
+        height: 20px;
+        color: $blue5;
+        margin-left: 10px;
     }
 
     .statsButton {
