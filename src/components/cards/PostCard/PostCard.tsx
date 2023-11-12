@@ -91,8 +91,8 @@ function PostCard(props: {
         Audios,
         GlassBeadGame,
     } = postData
-
-    // modals
+    const [likeLoading, setLikeLoading] = useState(false)
+    const [draggable, setDraggable] = useState(true)
     const [menuOpen, setMenuOpen] = useState(false)
     const [likeModalOpen, setLikeModalOpen] = useState(false)
     const [repostModalOpen, setRepostModalOpen] = useState(false)
@@ -101,8 +101,6 @@ function PostCard(props: {
     const [deletePostModalOpen, setDeletePostModalOpen] = useState(false)
     const [editPostModalOpen, setEditPostModalOpen] = useState(false)
     const [removePostModalOpen, setRemovePostModalOpen] = useState(false)
-
-    const [likeLoading, setLikeLoading] = useState(false)
     const mobileView = document.documentElement.clientWidth < 900
     const cookies = new Cookies()
     const isOwnPost = accountData && Creator && accountData.id === Creator.id
@@ -183,7 +181,7 @@ function PostCard(props: {
             id={`post-${id}`}
             className={`${styles.post} ${styles[location]} ${styling && styles.styling}`}
             style={style}
-            draggable
+            draggable={draggable}
         >
             <Row spaceBetween className={styles.header}>
                 <Row centerY>
@@ -273,21 +271,31 @@ function PostCard(props: {
                         </Link>
                     </Row>
                 )}
-                {type !== 'glass-bead-game' && title && <h1 className={styles.title}>{title}</h1>}
-                {type === 'glass-bead-game' && title && (
-                    <Row centerY className={styles.topic}>
-                        {GlassBeadGame.topicImage && <img src={GlassBeadGame.topicImage} alt='' />}
-                        <h1>{title}</h1>
-                    </Row>
-                )}
-                {text && collapse && (
-                    <ShowMoreLess height={700} gradientColor='white'>
+                <div
+                    onMouseEnter={() => setDraggable(false)}
+                    onMouseLeave={() => setDraggable(true)}
+                    style={{ cursor: 'text' }}
+                >
+                    {type !== 'glass-bead-game' && title && (
+                        <h1 className={styles.title}>{title}</h1>
+                    )}
+                    {type === 'glass-bead-game' && title && (
+                        <Row centerY className={styles.topic}>
+                            {GlassBeadGame.topicImage && (
+                                <img src={GlassBeadGame.topicImage} alt='' />
+                            )}
+                            <h1>{title}</h1>
+                        </Row>
+                    )}
+                    {text && collapse && (
+                        <ShowMoreLess height={700} gradientColor='white'>
+                            <DraftText stringifiedDraft={text} style={{ marginBottom: 10 }} />
+                        </ShowMoreLess>
+                    )}
+                    {text && !collapse && (
                         <DraftText stringifiedDraft={text} style={{ marginBottom: 10 }} />
-                    </ShowMoreLess>
-                )}
-                {text && !collapse && (
-                    <DraftText stringifiedDraft={text} style={{ marginBottom: 10 }} />
-                )}
+                    )}
+                </div>
                 {/* {todo: startTime && } */}
                 {postData.Event && (
                     <EventCard postData={postData} setPostData={setPostData} location={location} />
