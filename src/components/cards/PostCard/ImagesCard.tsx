@@ -1,7 +1,8 @@
 import Column from '@components/Column'
-import ImageModal from '@components/modals/ImageModal'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
+import ImageModal from '@components/modals/ImageModal'
+import { handleImageError } from '@src/Helpers'
 import styles from '@styles/components/cards/PostCard/ImagesCard.module.scss'
 import React, { useState } from 'react'
 
@@ -36,6 +37,12 @@ function ImagesCard(props: { images: any }): JSX.Element {
                                     <button type='button' onClick={() => openImageModal(image.id)}>
                                         <img
                                             src={image.url || URL.createObjectURL(image.file)}
+                                            onError={(e) =>
+                                                handleImageError(
+                                                    e,
+                                                    image.url || URL.createObjectURL(image.file)
+                                                )
+                                            }
                                             alt=''
                                         />
                                     </button>
