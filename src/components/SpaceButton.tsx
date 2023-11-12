@@ -86,7 +86,8 @@ function SpaceButton(props: {
                 onMouseLeave()
             })
             button.addEventListener('dragover', (e) => e.preventDefault())
-            button.addEventListener('drop', () => {
+            button.addEventListener('drop', (e) => {
+                e.stopPropagation()
                 const { type, data, fromToyBox } = dragItemRef.current
                 if (type === 'post' && data.state === 'visible' && fromToyBox) {
                     setDropLocation({ type: 'space', data: space })
