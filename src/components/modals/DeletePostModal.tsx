@@ -16,13 +16,15 @@ function DeletePostModal(props: {
         | 'post-page'
         | 'space-posts'
         | 'space-post-map'
+        | 'space-governance'
         | 'user-posts'
         | 'link-modal'
         | 'preview'
     close: () => void
 }): JSX.Element {
     const { postId, location, close } = props
-    const { spacePosts, setSpacePosts } = useContext(SpaceContext)
+    const { spacePosts, setSpacePosts, governancePolls, setGovernancePolls } =
+        useContext(SpaceContext)
     const { userPosts, setUserPosts } = useContext(UserContext)
     const [loading, setLoading] = useState(false)
     const [success, setSuccess] = useState(false)
@@ -40,9 +42,11 @@ function DeletePostModal(props: {
                     setLoading(false)
                     setSuccess(true)
                     if (location === 'space-posts')
-                        setSpacePosts([...spacePosts.filter((p) => p.id !== postId)])
+                        setSpacePosts(spacePosts.filter((p) => p.id !== postId))
                     if (location === 'user-posts')
-                        setUserPosts([...userPosts.filter((p) => p.id !== postId)])
+                        setUserPosts(userPosts.filter((p) => p.id !== postId))
+                    if (location === 'space-governance')
+                        setGovernancePolls(governancePolls.filter((p) => p.id !== postId))
                     setTimeout(() => close(), 1000)
                 })
                 .catch((error) => console.log(error))

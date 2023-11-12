@@ -74,7 +74,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     const [nextSpaceSpacesLoading, setNextSpaceSpacesLoading] = useState(false)
     const [spacePeopleLoading, setSpacePeopleLoading] = useState(true)
     const [nextSpacePeopleLoading, setNextSpacePeopleLoading] = useState(false)
-    // space posts
+    // posts
     const [spacePosts, setSpacePosts] = useState<any[]>([])
     const [totalMatchingPosts, setTotalMatchingPosts] = useState(0)
     const [postFilters, setPostFilters] = useState(defaults.postFilters)
@@ -82,7 +82,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     const [spacePostsPaginationOffset, setSpacePostsPaginationOffset] = useState(0)
     const [spacePostsPaginationHasMore, setSpacePostsPaginationHasMore] = useState(true)
     const [postMapData, setPostMapData] = useState<any>({})
-    // space spaces
+    // spaces
     const [spaceCircleData, setSpaceCircleData] = useState<any>({})
     const [spaceTreeData, setSpaceTreeData] = useState<any>({})
     const [spaceListData, setSpaceListData] = useState<any[]>([])
@@ -90,12 +90,14 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     const [spaceSpacesPaginationLimit, setSpaceSpacesPaginationLimit] = useState(10)
     const [spaceSpacesPaginationOffset, setSpaceSpacesPaginationOffset] = useState(0)
     const [spaceSpacesPaginationHasMore, setSpaceSpacesPaginationHasMore] = useState(true)
-    // space people
+    // people
     const [spacePeople, setSpacePeople] = useState<any[]>([])
     const [spacePeopleFilters, setSpacePeopleFilters] = useState(defaults.peopleFilters)
     const [spacePeoplePaginationLimit, setSpacePeoplePaginationLimit] = useState(20)
     const [spacePeoplePaginationOffset, setSpacePeoplePaginationOffset] = useState(0)
     const [spacePeoplePaginationHasMore, setSpacePeoplePaginationHasMore] = useState(true)
+    // governance
+    const [governancePolls, setGovernancePolls] = useState<any[]>([])
 
     const spaceHandleRef = useRef('')
     const cookies = new Cookies()
@@ -306,6 +308,9 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 spacePeoplePaginationLimit,
                 spacePeoplePaginationOffset,
                 spacePeoplePaginationHasMore,
+
+                governancePolls,
+                setGovernancePolls,
 
                 getSpaceData,
                 getSpacePosts,

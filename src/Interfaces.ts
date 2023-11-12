@@ -215,6 +215,9 @@ export interface ISpaceContext {
     spacePeoplePaginationOffset: number
     spacePeoplePaginationHasMore: boolean
 
+    governancePolls: any[]
+    setGovernancePolls: (payload: any[]) => void
+
     getSpaceData: (handle: string, callback?: any) => void
     getSpacePosts: (spaceId: number, offset: number, limit: number, params: any) => void
     getPostMapData: (spaceId: number, params: any, limit: number) => void

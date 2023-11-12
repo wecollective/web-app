@@ -48,6 +48,7 @@ function PostCard(props: {
         | 'post-page'
         | 'space-posts'
         | 'space-post-map'
+        | 'space-governance'
         | 'user-posts'
         | 'link-modal'
         | 'preview'
@@ -106,8 +107,7 @@ function PostCard(props: {
     const isOwnPost = accountData && Creator && accountData.id === Creator.id
     const showFooter = true // location !== 'link-modal'
     const isMod =
-        ['space-posts', 'space-post-map'].includes(location) &&
-        spaceData.Moderators.find((m) => m.id === accountData.id)
+        location.includes('space') && spaceData.Moderators.find((m) => m.id === accountData.id)
     const showDropDown = location !== 'preview' && (isOwnPost || isMod)
 
     const history = useNavigate()
@@ -157,7 +157,7 @@ function PostCard(props: {
         }
     }
 
-    // remove this useEffect alltogether if everything handled from props...?
+    // todo: remove this useEffect all together if everything handled from props...?
     useEffect(() => setPostData(post), [post])
 
     useEffect(() => {

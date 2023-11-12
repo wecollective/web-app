@@ -104,7 +104,8 @@ function CreatePostModal(): JSX.Element {
         setCreatePostModalSettings,
     } = useContext(AccountContext)
     const { sourceType, sourceId, game, governance } = createPostModalSettings
-    const { spaceData, spacePosts, setSpacePosts } = useContext(SpaceContext)
+    const { spaceData, spacePosts, setSpacePosts, governancePolls, setGovernancePolls } =
+        useContext(SpaceContext)
     const { userPosts, setUserPosts } = useContext(UserContext)
     const [loading, setLoading] = useState(false)
     const [linkDescription, setLinkDescription] = useState('')
@@ -856,7 +857,7 @@ function CreatePostModal(): JSX.Element {
                         allPostSpaceIds.includes(spaceData.id)
                     const addPostToUserFeed =
                         page === 'u' && subPage === 'posts' && handle === accountData.handle
-                    if (addPostToSpaceFeed || addPostToUserFeed) {
+                    if (addPostToSpaceFeed || addPostToUserFeed || governance) {
                         const newPost = {
                             ...defaultPostData,
                             ...res.data.post,
@@ -908,6 +909,7 @@ function CreatePostModal(): JSX.Element {
                         // add new post to feed
                         if (addPostToSpaceFeed) setSpacePosts([newPost, ...spacePosts])
                         if (addPostToUserFeed) setUserPosts([newPost, ...userPosts])
+                        if (governance) setGovernancePolls([...governancePolls, newPost])
                     }
                     setLoading(false)
                     setSaved(true)

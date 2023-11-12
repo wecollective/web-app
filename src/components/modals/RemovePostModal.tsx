@@ -13,14 +13,22 @@ function RemovePostModal(props: {
         | 'post-page'
         | 'space-posts'
         | 'space-post-map'
+        | 'space-governance'
         | 'user-posts'
         | 'link-modal'
         | 'preview'
     close: () => void
 }): JSX.Element {
     const { postId, location, close } = props
-    const { spaceData, spacePosts, setSpacePosts, postMapData, setPostMapData } =
-        useContext(SpaceContext)
+    const {
+        spaceData,
+        spacePosts,
+        setSpacePosts,
+        postMapData,
+        setPostMapData,
+        governancePolls,
+        setGovernancePolls,
+    } = useContext(SpaceContext)
     const [loading, setLoading] = useState(false)
     const cookies = new Cookies()
 
@@ -32,12 +40,14 @@ function RemovePostModal(props: {
             .post(`${config.apiURL}/remove-post`, data, options)
             .then(() => {
                 if (location === 'space-posts')
-                    setSpacePosts([...spacePosts.filter((p) => p.id !== postId)])
+                    setSpacePosts(spacePosts.filter((p) => p.id !== postId))
                 if (location === 'space-post-map')
                     setPostMapData({
                         posts: postMapData.posts.filter((p) => p.id !== postId),
                         totalMatchingPosts: postMapData.totalMatchingPosts - 1,
                     })
+                if (location === 'space-governance')
+                    setGovernancePolls(governancePolls.filter((p) => p.id !== postId))
                 setLoading(false)
                 close()
             })

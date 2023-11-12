@@ -15,9 +15,9 @@ import { useLocation } from 'react-router-dom'
 
 function Governance(): JSX.Element {
     const { setCreatePostModalSettings, setCreatePostModalOpen } = useContext(AccountContext)
-    const { spaceData, spaceNotFound, isModerator } = useContext(SpaceContext)
+    const { spaceData, spaceNotFound, isModerator, governancePolls, setGovernancePolls } =
+        useContext(SpaceContext)
     const [loading, setLoading] = useState(true)
-    const [polls, setPolls] = useState<any[]>([])
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]
 
@@ -26,8 +26,7 @@ function Governance(): JSX.Element {
             axios
                 .get(`${config.apiURL}/space-governance-polls?spaceId=${spaceData.id}`)
                 .then((res) => {
-                    console.log('res.data: ', res.data)
-                    setPolls(res.data)
+                    setGovernancePolls(res.data)
                     setLoading(false)
                 })
                 .catch((error) => console.log(error))
@@ -61,12 +60,12 @@ function Governance(): JSX.Element {
                             style={{ marginBottom: 30 }}
                         />
                     )}
-                    {polls.length < 1 ? (
+                    {governancePolls.length < 1 ? (
                         <p>No polls created yet...</p>
                     ) : (
                         <Column style={{ width: 780 }}>
-                            {polls.map((poll) => (
-                                <PostCard key={poll.id} post={poll} location='space-posts' />
+                            {governancePolls.map((poll) => (
+                                <PostCard key={poll.id} post={poll} location='space-governance' />
                             ))}
                         </Column>
                     )}
