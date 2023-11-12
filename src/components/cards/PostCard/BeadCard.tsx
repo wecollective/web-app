@@ -31,7 +31,6 @@ import {
     PollIcon,
     VerticalEllipsisIcon,
 } from '@svgs/all'
-import * as d3 from 'd3'
 import React, { useContext, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
@@ -83,18 +82,12 @@ function BeadCard(props: {
     } = bead
     const [menuOpen, setMenuOpen] = useState(false)
     const [editPostModalOpen, setEditPostModalOpen] = useState(false)
-    const [audioPlaying, setAudioPlaying] = useState(false)
     const [imageModalOpen, setImageModalOpen] = useState(false)
     const [likeModalOpen, setLikeModalOpen] = useState(false)
-    const [linkModalOpen, setLinkModalOpen] = useState(false)
     const [selectedImage, setSelectedImage] = useState<any>(null)
     const history = useNavigate()
-
     const images = bead.Images ? bead.Images.sort((a, b) => a.index - b.index) : []
     const type = bead.type.replace('gbg-', '')
-    // const isSource = bead.Link && bead.Link.relationship === 'source'
-    // const sourceBead = bead.index === 0
-
     const isOwnPost = accountData && bead.Creator && accountData.id === bead.Creator.id
     const showDropDown =
         isOwnPost &&
@@ -103,28 +96,10 @@ function BeadCard(props: {
         !['create-string-modal', 'next-bead-modal', 'preview'].includes(location)
 
     const showFooter = location !== 'preview' && bead.state !== 'account-deleted'
-    // postType !== 'glass-bead-game' &&
-    // !['create-string-modal', 'next-bead-modal'].includes(location)
 
     function findUserTitle() {
         if (bead.state === 'account-deleted') return '[Account deleted]'
         return isOwnPost ? 'You' : bead.Creator.name
-    }
-
-    function toggleBeadAudio(index: number, reset?: boolean): void {
-        const beadAudio = d3.select(`#string-bead-audio-${postId}-${index}-${location}`).node()
-        if (beadAudio) {
-            if (!beadAudio.paused) beadAudio.pause()
-            else {
-                // pause all playing audio
-                d3.selectAll('audio')
-                    .nodes()
-                    .forEach((node) => node.pause())
-                // start selected bead
-                if (reset) beadAudio.currentTime = 0
-                beadAudio.play()
-            }
-        }
     }
 
     function openImageModal(imageId) {

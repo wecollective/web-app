@@ -150,14 +150,18 @@ function ToyBoxItem(props: {
                         {['post'].includes(type) && (
                             <BeadCard bead={data} location='link-modal' className={styles.bead} />
                         )}
-                        {['user', 'space'].includes(type) && (
+                        {['user', 'space', 'comment'].includes(type) && (
                             <MediumSquareCard
                                 type={type}
                                 data={data}
-                                onClick={() => {
-                                    history(`/${type[0]}/${data.handle}`)
-                                    setModalOpen(false)
-                                }}
+                                onClick={
+                                    type === 'comment'
+                                        ? undefined
+                                        : () => {
+                                              history(`/${type[0]}/${data.handle}`)
+                                              setModalOpen(false)
+                                          }
+                                }
                             />
                         )}
                     </Column>

@@ -1,10 +1,14 @@
 import Column from '@components/Column'
 import FlagImage from '@components/FlagImage'
+import ImageTitle from '@components/ImageTitle'
 import Row from '@components/Row'
+import Scrollbars from '@components/Scrollbars'
+import DraftText from '@components/draft-js/DraftText'
 import { getDraftPlainText, trimText } from '@src/Helpers'
 import styles from '@styles/components/cards/MediumSquareCard.module.scss'
 import { CommentIcon, LikeIcon, PostIcon, UsersIcon } from '@svgs/all'
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 // todo: handle new add to box without full data
 // todo: set up to replace BeadCard
@@ -51,46 +55,77 @@ function MediumSquareCard(props: {
                     aria-label={`Navigate to ${type}`}
                 />
             )}
-            <Column centerX className={styles.agent}>
-                <div className={styles.coverImage} style={{ backgroundImage }} />
-                <FlagImage
-                    className={styles.flagImage}
-                    size={100}
-                    type={type === 'space' ? 'space' : 'user'}
-                    imagePath={flagImagePath}
-                    outline={4}
-                    style={{ boxShadow: `0 0 20px rgba(0, 0, 0, 0.2)` }}
-                />
-                <h1>{name}</h1>
-                <h2>
-                    {type[0]}/{handle}
-                </h2>
-                <Column centerX style={{ height: 65, margin: '0 15px 5px 15px' }}>
-                    <p>{text}</p>
+            {['user', 'space'].includes(type) && (
+                <Column centerX className={styles.agent}>
+                    <div className={styles.coverImage} style={{ backgroundImage }} />
+                    <FlagImage
+                        className={styles.flagImage}
+                        size={100}
+                        type={type === 'space' ? 'space' : 'user'}
+                        imagePath={flagImagePath}
+                        outline={4}
+                        style={{ boxShadow: `0 0 20px rgba(0, 0, 0, 0.2)` }}
+                    />
+                    <h1>{name}</h1>
+                    <h2>
+                        {type[0]}/{handle}
+                    </h2>
+                    <Column centerX style={{ height: 65, margin: '0 15px 5px 15px' }}>
+                        <p>{text}</p>
+                    </Column>
+                    <Row centerY centerX>
+                        <Row className={styles.stat}>
+                            <PostIcon />
+                            <p>{totalPosts}</p>
+                        </Row>
+                        <Row className={styles.stat}>
+                            <CommentIcon />
+                            <p>{totalComments}</p>
+                        </Row>
+                        {totalPostLikes > 0 && (
+                            <Row className={styles.stat}>
+                                <LikeIcon />
+                                <p>{totalPostLikes}</p>
+                            </Row>
+                        )}
+                        {totalFollowers > 0 && (
+                            <Row className={styles.stat}>
+                                <UsersIcon />
+                                <p>{totalFollowers}</p>
+                            </Row>
+                        )}
+                    </Row>
                 </Column>
-                <Row centerY centerX>
-                    <Row className={styles.stat}>
-                        <PostIcon />
-                        <p>{totalPosts}</p>
+            )}
+            {type === 'comment' && (
+                <Column className={styles.item}>
+                    <Row spaceBetween centerY className={styles.header}>
+                        <ImageTitle
+                            type='user'
+                            imagePath={data.Creator.flagImagePath}
+                            title={data.Creator.name}
+                            fontSize={12}
+                            imageSize={20}
+                            style={{ marginRight: 10 }}
+                        />
+                        <Link
+                            to={`/p/${data.itemId}?commentId=${data.id}`}
+                            className={styles.id}
+                            title='Open post page'
+                        >
+                            <p className='grey'>ID:</p>
+                            <p style={{ marginLeft: 5 }}>{data.id}</p>
+                        </Link>
                     </Row>
-                    <Row className={styles.stat}>
-                        <CommentIcon />
-                        <p>{totalComments}</p>
-                    </Row>
-                    {totalPostLikes > 0 && (
-                        <Row className={styles.stat}>
-                            <LikeIcon />
-                            <p>{totalPostLikes}</p>
-                        </Row>
-                    )}
-                    {totalFollowers > 0 && (
-                        <Row className={styles.stat}>
-                            <UsersIcon />
-                            <p>{totalFollowers}</p>
-                        </Row>
-                    )}
-                </Row>
-            </Column>
+                    <Column centerX centerY className={styles.center}>
+                        {data.text && (
+                            <Scrollbars style={{ paddingRight: 10, marginBottom: 10 }}>
+                                <DraftText stringifiedDraft={data.text} />
+                            </Scrollbars>
+                        )}
+                    </Column>
+                </Column>
+            )}
         </Column>
     )
 }
