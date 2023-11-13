@@ -1,9 +1,9 @@
 /* eslint-disable no-param-reassign */
-import PostCard from '@components/cards/PostCard/PostCard'
 import Column from '@components/Column'
 import LoadingWheel from '@components/LoadingWheel'
+import Row from '@components/Row'
+import PostCard from '@components/cards/PostCard/PostCard'
 import Modal from '@components/modals/Modal'
-import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import { getDraftPlainText, trimText } from '@src/Helpers'
@@ -16,15 +16,15 @@ import Cookies from 'universal-cookie'
 
 function PostMap(props: { postMapData: any; params: any }): JSX.Element {
     const { postMapData, params } = props
-    const { accountData } = useContext(AccountContext)
-    const { spaceData, setPostMapData, getPostMapData } = useContext(SpaceContext)
+    const { spaceData, setPostMapData, getPostMapData, postMapOffset, setPostMapOffset } =
+        useContext(SpaceContext)
+    const { totalPosts, posts } = postMapData
     const { filter, sortBy } = params
     const [selectedPost, setSelectedPost] = useState<any>(null)
     const [postModalOpen, setPostModalOpen] = useState(false)
     const defaultGravity = 30
     const [gravity, setGravity] = useState(defaultGravity)
-    const [showKey, setShowKey] = useState(false)
-    const [totalMatchingPosts, setTotalMatchingPosts] = useState(0)
+    // const [totalPosts, setTotalPosts] = useState(0)
     const [firstRun, setFirstRun] = useState(true)
     const [showNoPostsMessage, setShowNoPostsMessage] = useState(false)
     const width = '100%'
@@ -49,14 +49,13 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
         let dMin = 0
         let dMax
         if (filter === 'New') {
-            dMin = d3.min(postMapData.posts.map((post) => Date.parse(post.createdAt)))
-            dMax = d3.max(postMapData.posts.map((post) => Date.parse(post.createdAt)))
+            dMin = d3.min(posts.map((post) => Date.parse(post.createdAt)))
+            dMax = d3.max(posts.map((post) => Date.parse(post.createdAt)))
         } else if (filter === 'Active') {
-            dMin = d3.min(postMapData.posts.map((post) => Date.parse(post.lastActivity)))
-            dMax = d3.max(postMapData.posts.map((post) => Date.parse(post.lastActivity)))
-        } else if (sortBy === 'Signal')
-            dMax = d3.max(postMapData.posts.map((child) => child.totalRatings))
-        else dMax = d3.max(postMapData.posts.map((child) => child[`total${sortBy}`]))
+            dMin = d3.min(posts.map((post) => Date.parse(post.lastActivity)))
+            dMax = d3.max(posts.map((post) => Date.parse(post.lastActivity)))
+        } else if (sortBy === 'Signal') dMax = d3.max(posts.map((child) => child.totalRatings))
+        else dMax = d3.max(posts.map((child) => child[`total${sortBy}`]))
         return [dMin, dMax]
     }
 
@@ -131,16 +130,16 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
         return 'rgb(140 140 140)'
     }
 
-    function createLinkData(posts, linkType) {
+    function createLinkData(nodes, linkType) {
         interface ILinkData {
             source: number
             target: number
         }
         const linkData = [] as ILinkData[]
-        posts.forEach((post, postIndex) => {
+        nodes.forEach((post, postIndex) => {
             post.OutgoingPostLinks.forEach((link) => {
                 let targetIndex = null
-                posts.forEach((p, i) => {
+                nodes.forEach((p, i) => {
                     if (p.id === link.OutgoingPost.id) targetIndex = i
                 })
                 if (targetIndex !== null) {
@@ -516,12 +515,18 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
             )
     }
 
-    useEffect(() => createCanvas(), [])
+    useEffect(() => {
+        createCanvas()
+        return () => {
+            setPostMapOffset(0)
+            setPostMapData({ totalPosts: 0, posts: [] })
+        }
+    }, [])
 
     useEffect(() => {
         if (firstRun) setFirstRun(false)
         else {
-            if (postMapData.posts.length) setShowNoPostsMessage(false)
+            if (posts.length) setShowNoPostsMessage(false)
             else setShowNoPostsMessage(true)
             // store previous node positions
             interface INodePosition {
@@ -542,7 +547,7 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
                 })
             })
             // add previous positions to matching new nodes
-            postMapData.posts.forEach((post) => {
+            posts.forEach((post) => {
                 const match = previousNodePositions.find((node) => node.id === post.id)
                 if (match) {
                     post.x = match.x
@@ -557,143 +562,51 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
                     post.y = randomY > 0 ? randomY + 200 : randomY - 200
                 }
             })
-            setTotalMatchingPosts(postMapData.totalMatchingPosts)
-            updateMap(postMapData.posts)
+            updateMap(posts)
         }
     }, [postMapData])
 
-    useEffect(() => () => setPostMapData({}), [])
-
     return (
-        <div className={styles.postMapWrapper}>
-            <div className={styles.controlsWrapper}>
-                <div className={styles.controls}>
-                    <div className={styles.item}>
-                        Showing {postMapData.posts ? postMapData.posts.length : 0} of{' '}
-                        {totalMatchingPosts} posts
-                        <div
-                            className='blueText ml-10'
-                            role='button'
-                            tabIndex={0}
-                            onClick={() => getPostMapData(spaceData.id, params, totalMatchingPosts)}
-                            onKeyDown={() =>
-                                getPostMapData(spaceData.id, params, totalMatchingPosts)
-                            }
+        <Column centerX className={styles.wrapper}>
+            <Column className={styles.controls}>
+                <Row style={{ marginBottom: 10 }}>
+                    <p>
+                        Showing {posts.length} of {totalPosts} posts
+                    </p>
+                    {totalPosts > posts.length && (
+                        <button
+                            type='button'
+                            className={styles.loadMore}
+                            onClick={() => getPostMapData(spaceData.id, postMapOffset, params)}
                         >
-                            load all
-                        </div>
-                    </div>
-                    <div className={styles.item}>
-                        <span className={styles.gravityText}>Gravity:</span>
-                        {/* todo: add regex to gavity input */}
-                        <input
-                            ref={gravitySlider}
-                            id='gravity-slider'
-                            className={styles.gravitySlider}
-                            type='range'
-                            value={gravity}
-                            min='-50'
-                            max='150'
-                            onChange={() => {
-                                const { current } = gravitySlider
-                                if (current) {
-                                    setGravity(+current.value)
-                                }
-                            }}
-                        />
-                        <input
-                            ref={gravityInput}
-                            id='gravity-input'
-                            className={styles.gravityInput}
-                            value={gravity}
-                            type='number'
-                            onChange={(e) => setGravity(+e.target.value)}
-                        />
-                    </div>
-                </div>
-                {/* <div className={styles.key}>
-                    <div
-                        role='button'
-                        tabIndex={0}
-                        onClick={() => setShowKey(!showKey)}
-                        onKeyDown={() => setShowKey(!showKey)}
-                    >
-                        <img
-                            className={styles.keyButton}
-                            src={`${config.publicAssets}/icons/key-solid.svg`}
-                            aria-label='key'
-                        />
-                    </div>
-                    {showKey && (
-                        <div className={styles.keyItems}>
-                            <div className={styles.postMapKeyItem}>
-                                <span className={styles.text}>No Account Reaction</span>
-                                <div
-                                    className={styles.colorBox}
-                                    style={{ border: '2px solid rgb(140 140 140)' }}
-                                />
-                            </div>
-                            <div className={styles.postMapKeyItem}>
-                                <span className={styles.text}>Account Reaction</span>
-                                <div
-                                    className={styles.colorBox}
-                                    style={{ border: '2px solid #83b0ff' }}
-                                />
-                            </div>
-                            <div className={styles.postMapKeyItem}>
-                                <span className={styles.text}>Text Link</span>
-                                <div className={styles.textLink} />
-                            </div>
-                            <div className={styles.postMapKeyItem}>
-                                <span className={styles.text}>Turn Link</span>
-                                <div className={styles.turnLink} />
-                            </div>
-                            <div className={styles.postMapKeyItem}>
-                                <span className={styles.text}>Text</span>
-                                <div
-                                    className={styles.colorBox}
-                                    style={{ backgroundColor: colors.green }}
-                                />
-                            </div>
-                            <div className={styles.postMapKeyItem}>
-                                <span className={styles.text}>Url</span>
-                                <div
-                                    className={styles.colorBox}
-                                    style={{ backgroundColor: colors.yellow }}
-                                />
-                            </div>
-                            <div className={styles.postMapKeyItem}>
-                                <span className={styles.text}>Poll</span>
-                                <div
-                                    className={styles.colorBox}
-                                    style={{ backgroundColor: colors.red }}
-                                />
-                            </div>
-                            <div className={styles.postMapKeyItem}>
-                                <span className={styles.text}>Glass Bead</span>
-                                <div
-                                    className={styles.colorBox}
-                                    style={{ backgroundColor: colors.blue }}
-                                />
-                            </div>
-                            <div className={styles.postMapKeyItem}>
-                                <span className={styles.text}>Prism</span>
-                                <div
-                                    className={styles.colorBox}
-                                    style={{ backgroundColor: colors.purple }}
-                                />
-                            </div>
-                            <div className={styles.postMapKeyItem}>
-                                <span className={styles.text}>Plot Graph</span>
-                                <div
-                                    className={styles.colorBox}
-                                    style={{ backgroundColor: colors.orange }}
-                                />
-                            </div>
-                        </div>
+                            load more
+                        </button>
                     )}
-                </div> */}
-            </div>
+                </Row>
+                <Row centerY>
+                    <p>Gravity:</p>
+                    <input
+                        ref={gravitySlider}
+                        id='gravity-slider'
+                        className={styles.gravitySlider}
+                        type='range'
+                        value={gravity}
+                        min='-50'
+                        max='150'
+                        onChange={() => {
+                            if (gravitySlider.current) setGravity(+gravitySlider.current.value)
+                        }}
+                    />
+                    <input
+                        ref={gravityInput}
+                        id='gravity-input'
+                        className={styles.gravityInput}
+                        value={gravity}
+                        type='number'
+                        onChange={(e) => setGravity(+e.target.value)}
+                    />
+                </Row>
+            </Column>
             <div id='canvas' />
             {postModalOpen && (
                 <Modal
@@ -709,11 +622,11 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
                 </Modal>
             )}
             {showNoPostsMessage && (
-                <Column className={styles.noPostsMessage}>
+                <Column className={styles.noPosts}>
                     <p>No posts yet that match those setting...</p>
                 </Column>
             )}
-        </div>
+        </Column>
     )
 }
 

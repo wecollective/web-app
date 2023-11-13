@@ -81,7 +81,8 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     const [spacePostsPaginationLimit, setSpacePostsPaginationLimit] = useState(10)
     const [spacePostsPaginationOffset, setSpacePostsPaginationOffset] = useState(0)
     const [spacePostsPaginationHasMore, setSpacePostsPaginationHasMore] = useState(true)
-    const [postMapData, setPostMapData] = useState<any>({})
+    const [postMapData, setPostMapData] = useState<any>({ totalPosts: 0, posts: [] })
+    const [postMapOffset, setPostMapOffset] = useState(0)
     // spaces
     const [spaceCircleData, setSpaceCircleData] = useState<any>({})
     const [spaceTreeData, setSpaceTreeData] = useState<any>({})
@@ -162,21 +163,28 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
             .catch((error) => console.log(error))
     }
 
-    function getPostMapData(spaceId, params, limit) {
-        console.log(`SpaceContext: getPostMapData`, spaceId, params, limit)
+    function getPostMapData(spaceId, offset, params) {
+        console.log(`SpaceContext: getPostMapData`, spaceId, offset, params)
         setPostFilters(params)
         const data = {
             ...params,
             spaceId,
-            limit,
-            offset: 0,
+            offset,
+            limit: 50,
             searchQuery: params.searchQuery || '',
             mutedUsers: accountData.mutedUsers || [],
         }
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
             .post(`${config.apiURL}/post-map-data`, data, options)
-            .then((res) => setPostMapData(res.data))
+            .then((res) => {
+                const { totalPosts, posts } = res.data
+                setPostMapData({
+                    totalPosts,
+                    posts: offset === 0 ? posts : [...postMapData.posts, ...posts],
+                })
+                setPostMapOffset(offset + 50)
+            })
             .catch((error) => console.log(error))
     }
 
@@ -291,6 +299,8 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
                 spacePostsPaginationHasMore,
                 postMapData,
                 setPostMapData,
+                postMapOffset,
+                setPostMapOffset,
 
                 spaceCircleData,
                 setSpaceCircleData,

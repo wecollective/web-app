@@ -24,6 +24,7 @@ function Posts(): JSX.Element {
         nextSpacePostsLoading,
         postMapData,
         getPostMapData,
+        setPostMapOffset,
         postFilters,
         spacePostsPaginationOffset,
         spacePostsPaginationLimit,
@@ -51,7 +52,8 @@ function Posts(): JSX.Element {
             getSpacePosts(spaceData.id, 0, spacePostsPaginationLimit, params)
         } else if (params.lens === 'Map') {
             window.scrollTo({ top: 310, behavior: 'smooth' })
-            getPostMapData(spaceData.id, params, 50)
+            setPostMapOffset(0)
+            getPostMapData(spaceData.id, 0, params)
         }
     }, [spaceData.handle, location, loggedIn])
 

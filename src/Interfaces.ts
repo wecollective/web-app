@@ -196,7 +196,9 @@ export interface ISpaceContext {
     spacePostsPaginationOffset: number
     spacePostsPaginationHasMore: boolean
     postMapData: any
-    setPostMapData: (paylod: any) => void
+    setPostMapData: (payload: any) => void
+    postMapOffset: number
+    setPostMapOffset: (payload: number) => void
 
     spaceCircleData: any
     setSpaceCircleData: (paylod: any) => void
@@ -220,7 +222,7 @@ export interface ISpaceContext {
 
     getSpaceData: (handle: string, callback?: any) => void
     getSpacePosts: (spaceId: number, offset: number, limit: number, params: any) => void
-    getPostMapData: (spaceId: number, params: any, limit: number) => void
+    getPostMapData: (spaceId: number, offset: number, params: any) => void
     getSpaceListData: (spaceId: number, offset: number, limit: number, params: any) => void
     getSpaceMapData: (
         scenario: 'full-tree' | 'children-of-root' | 'children-of-child',
