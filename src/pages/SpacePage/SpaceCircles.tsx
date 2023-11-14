@@ -473,7 +473,7 @@ function SpaceCircles(props: { spaceCircleData: any; params: any }): JSX.Element
         } else {
             dMax = d3.max(children.map((child) => child[`total${sortBy}`]))
         }
-        return sortOrder === 'Descending' ? [dMin, dMax] : [dMax, dMin]
+        return [dMin, dMax] // sortOrder === 'Descending' ? [dMin, dMax] : [dMax, dMin]
     }
 
     function findSum(d) {
