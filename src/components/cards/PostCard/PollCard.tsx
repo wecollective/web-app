@@ -89,16 +89,8 @@ function PollCard(props: { postData: any; location: string }): JSX.Element {
                 totalPoints: points,
             })
         })
-        if (weighted)
-            answersWithData.sort((a, b) => {
-                if (a.state === 'done') return -1
-                return b.totalPoints - a.totalPoints
-            })
-        else
-            answersWithData.sort((a, b) => {
-                if (a.state === 'done') return -1
-                return b.totalVotes - a.totalVotes
-            })
+        if (weighted) answersWithData.sort((a, b) => b.totalPoints - a.totalPoints)
+        else answersWithData.sort((a, b) => b.totalVotes - a.totalVotes)
         setTotalVotes(totalPollVotes)
         setTotalPoints(totalPollPoints)
         setTotalUsers(pollUsers.length)

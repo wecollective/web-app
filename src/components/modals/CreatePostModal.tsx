@@ -1488,7 +1488,7 @@ function CreatePostModal(): JSX.Element {
                                     {governance && (
                                         <DropDown
                                             title='Action'
-                                            options={['None', 'Create spaces', 'Assign Moderators']}
+                                            options={['None', 'Create spaces']} // 'Assign Moderators'
                                             selectedOption={pollAction}
                                             setSelectedOption={(option) => setPollAction(option)}
                                             style={{ marginRight: 20 }}
