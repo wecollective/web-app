@@ -6,9 +6,10 @@
     padding: 0;
     margin: 0;
     cursor: pointer;
-    color: #d6d8db; //$grey4;
-    transition: color 1s;
+    color: $grey3;
+    transition: color 0.5s;
+
     &:hover {
-        color: #c0c4c9;
+        color: $grey4;
     }
 }

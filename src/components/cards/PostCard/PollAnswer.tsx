@@ -21,9 +21,21 @@ function PollAnswer(props: {
     preview?: boolean
     removable: boolean
     remove: () => void
+    toggleDone?: () => void
     onChange?: (value: boolean | number) => void
 }): JSX.Element {
-    const { index, type, answer, percentage, color, preview, removable, remove, onChange } = props
+    const {
+        index,
+        type,
+        answer,
+        percentage,
+        color,
+        preview,
+        removable,
+        remove,
+        toggleDone,
+        onChange,
+    } = props
     const { text, accountPoints, accountVote, state, Creator, Reactions } = answer
     const [statModalOpen, setStatModalOpen] = useState(false)
     const weighted = type === 'weighted-choice'
@@ -88,6 +100,15 @@ function PollAnswer(props: {
                                 onChange={(v) => onChange && onChange(v)}
                             />
                         )}
+                        {removable && toggleDone && (
+                            <button
+                                type='button'
+                                onClick={toggleDone}
+                                className={styles.toggleDoneButton}
+                            >
+                                <CheckIcon />
+                            </button>
+                        )}
                         {removable && (
                             <CloseButton size={20} onClick={remove} style={{ marginLeft: 5 }} />
                         )}
@@ -125,6 +146,7 @@ function PollAnswer(props: {
 
 PollAnswer.defaultProps = {
     preview: false,
+    toggleDone: null,
     onChange: null,
 }
 

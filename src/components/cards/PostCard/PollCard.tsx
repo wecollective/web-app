@@ -44,6 +44,27 @@ function PollCard(props: { postData: any; location: string }): JSX.Element {
     const colorScale = useRef<any>(null)
     const answers = showAllAnswers ? listAnswers : listAnswers.slice(0, 3)
 
+    function findPercentage(answer) {
+        const weighted = pollData && pollData.type === 'weighted-choice'
+        let percent = 0
+        if (weighted && totalPoints) percent = (answer.totalPoints / totalPoints) * 100
+        if (!weighted && totalVotes) percent = (100 / totalVotes) * answer.totalVotes
+        return +percent.toFixed(1)
+    }
+
+    function voteDisabled() {
+        const weighted = pollData.type === 'weighted-choice'
+        if (location === 'preview') return true
+        if (loggedIn) {
+            if (weighted) {
+                if (!voteChanged || totalUsedPoints !== 100) return true
+            } else if (!voteChanged || !listAnswers.find((a) => a.accountVote)) {
+                return true
+            }
+        }
+        return false
+    }
+
     function getPollData() {
         axios
             .get(`${config.apiURL}/poll-data?postId=${id}`)
@@ -149,19 +170,6 @@ function PollCard(props: { postData: any; location: string }): JSX.Element {
         setVoteChanged(true)
     }
 
-    function voteDisabled() {
-        const weighted = pollData.type === 'weighted-choice'
-        if (location === 'preview') return true
-        if (loggedIn) {
-            if (weighted) {
-                if (!voteChanged || totalUsedPoints !== 100) return true
-            } else if (!voteChanged || !listAnswers.find((a) => a.accountVote)) {
-                return true
-            }
-        }
-        return false
-    }
-
     function addNewAnswer() {
         if (!loggedIn) {
             setAlertMessage('Log in to add poll answers')
@@ -200,12 +208,18 @@ function PollCard(props: { postData: any; location: string }): JSX.Element {
             .catch((error) => console.log(error))
     }
 
-    function findPercentage(answer) {
-        const weighted = pollData && pollData.type === 'weighted-choice'
-        let percent = 0
-        if (weighted && totalPoints) percent = (answer.totalPoints / totalPoints) * 100
-        if (!weighted && totalVotes) percent = (100 / totalVotes) * answer.totalVotes
-        return +percent.toFixed(1)
+    function toggleAnswerDone(answerId) {
+        const newAnswers = [...listAnswers]
+        const answer = newAnswers.find((a) => a.id === answerId)
+        const newState = answer.state === 'done' ? 'active' : 'done'
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .post(`${config.apiURL}/toggle-poll-answer-done`, { answerId, newState }, options)
+            .then(() => {
+                answer.state = newState
+                setListAnswers(newAnswers)
+            })
+            .catch((error) => console.log(error))
     }
 
     useEffect(() => getPollData(), [])
@@ -273,6 +287,7 @@ function PollCard(props: { postData: any; location: string }): JSX.Element {
                                 setRemoveAnswerId(answer.id)
                                 setRemoveAnswerModalOpen(true)
                             }}
+                            toggleDone={() => toggleAnswerDone(answer.id)}
                         />
                     ))}
                     {!showAllAnswers && listAnswers.length > 3 && (

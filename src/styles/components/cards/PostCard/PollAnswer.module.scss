@@ -61,6 +61,17 @@
         }
     }
 
-    .input {
+    .toggleDoneButton {
+        all: unset;
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+        margin-left: 5px;
+        color: $grey3;
+        transition: color 0.5s;
+
+        &:hover {
+            color: $grey4;
+        }
     }
 }
