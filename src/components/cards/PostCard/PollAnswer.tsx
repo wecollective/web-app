@@ -48,17 +48,18 @@ function PollAnswer(props: {
                         link={`/u/${Creator.handle}`}
                         style={{ marginRight: 10 }}
                     />
-
                     {!mobileView && <p>{text}</p>}
                     {state === 'done' && <CheckIcon className={styles.check} />}
                 </Row>
                 <Row centerY style={{ flexShrink: 0 }}>
                     {!preview && (
-                        <button
-                            className={styles.statsButton}
-                            type='button'
-                            onClick={() => setStatModalOpen(true)}
-                        >
+                        <Row className={styles.stats}>
+                            <button
+                                type='button'
+                                className={styles.statButton}
+                                onClick={() => setStatModalOpen(true)}
+                                aria-label='Open stats'
+                            />
                             {votes.length > 0 && (
                                 <FlagImageHighlights
                                     type='user'
@@ -68,7 +69,7 @@ function PollAnswer(props: {
                                 />
                             )}
                             <p>{percentage}%</p>
-                        </button>
+                        </Row>
                     )}
                     <Row centerY className={styles.input}>
                         {weighted && !preview && (
