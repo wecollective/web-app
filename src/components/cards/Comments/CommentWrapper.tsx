@@ -13,6 +13,7 @@ function CommentWrapper(props: {
     removeComment: (comment: any) => void
     editComment: (comment: any, newText: string) => void
     updateCommentReactions: (commentId: number, reactionType: string, increment: boolean) => void
+    setPostDraggable?: (payload: boolean) => void
 }): JSX.Element {
     const {
         comment,
@@ -23,6 +24,7 @@ function CommentWrapper(props: {
         removeComment,
         editComment,
         updateCommentReactions,
+        setPostDraggable,
     } = props
     const [replyId, setReplyId] = useState(0)
     const [replyInputOpen, setReplyInputOpen] = useState(false)
@@ -44,6 +46,7 @@ function CommentWrapper(props: {
                 removeComment={removeComment}
                 editComment={editComment}
                 updateCommentReactions={updateCommentReactions}
+                setPostDraggable={setPostDraggable}
                 location={location}
             />
             <Column style={{ marginLeft: 36 }}>
@@ -56,6 +59,7 @@ function CommentWrapper(props: {
                         removeComment={removeComment}
                         editComment={editComment}
                         updateCommentReactions={updateCommentReactions}
+                        setPostDraggable={setPostDraggable}
                         location={location}
                     />
                 ))}
@@ -72,6 +76,10 @@ function CommentWrapper(props: {
             </Column>
         </Column>
     )
+}
+
+CommentWrapper.defaultProps = {
+    setPostDraggable: null,
 }
 
 export default CommentWrapper

@@ -427,6 +427,7 @@ function PostCard(props: {
                             incrementTotalComments={(value) =>
                                 setPostData({ ...postData, totalComments: totalComments + value })
                             }
+                            setPostDraggable={setDraggable}
                             style={{ marginTop: 10 }}
                         />
                     )}

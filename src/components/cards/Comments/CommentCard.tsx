@@ -38,6 +38,7 @@ function CommentCard(props: {
     removeComment: (comment: any) => void
     editComment: (comment: any, newText: string) => void
     updateCommentReactions: (commentId: number, reactionType: string, increment: boolean) => void
+    setPostDraggable?: (payload: boolean) => void
 }): JSX.Element {
     const {
         comment,
@@ -47,6 +48,7 @@ function CommentCard(props: {
         removeComment,
         editComment,
         updateCommentReactions,
+        setPostDraggable,
     } = props
     const {
         id,
@@ -69,6 +71,7 @@ function CommentCard(props: {
     const { loggedIn, accountData, updateDragItem, setAlertMessage, setAlertModalOpen } =
         useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
+    const [draggable, setDraggable] = useState(true)
     const [menuOpen, setMenuOpen] = useState(false)
     const [editCommentModalOpen, setEditCommentModalOpen] = useState(false)
     const [deleteCommentModalOpen, setDeleteCommentModalOpen] = useState(false)
@@ -176,7 +179,7 @@ function CommentCard(props: {
             className={`${styles.wrapper} ${highlighted && styles.highlighted} ${
                 location === 'link-map' && styles.linkMap
             }`}
-            draggable
+            draggable={draggable}
         >
             <Row>
                 <Link
@@ -270,14 +273,31 @@ function CommentCard(props: {
                         </Row>
                     </Row>
                     {state !== 'account-deleted' && (
-                        <ShowMoreLess height={250} gradientColor={highlighted ? 'blue' : 'grey'}>
-                            <DraftText
-                                stringifiedDraft={state === 'deleted' ? '[comment deleted]' : text}
-                                markdownStyles={`${styles.markdown} ${
-                                    state === 'deleted' && styles.deleted
-                                }`}
-                            />
-                        </ShowMoreLess>
+                        <div
+                            onMouseEnter={() => {
+                                setDraggable(false)
+                                if (setPostDraggable) setPostDraggable(false)
+                            }}
+                            onMouseLeave={() => {
+                                setDraggable(true)
+                                if (setPostDraggable) setPostDraggable(true)
+                            }}
+                            style={{ cursor: 'text' }}
+                        >
+                            <ShowMoreLess
+                                height={250}
+                                gradientColor={highlighted ? 'blue' : 'grey'}
+                            >
+                                <DraftText
+                                    stringifiedDraft={
+                                        state === 'deleted' ? '[comment deleted]' : text
+                                    }
+                                    markdownStyles={`${styles.markdown} ${
+                                        state === 'deleted' && styles.deleted
+                                    }`}
+                                />
+                            </ShowMoreLess>
+                        </div>
                     )}
                 </Column>
             </Row>
@@ -359,6 +379,10 @@ function CommentCard(props: {
             )}
         </Column>
     )
+}
+
+CommentCard.defaultProps = {
+    setPostDraggable: null,
 }
 
 export default CommentCard

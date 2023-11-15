@@ -17,9 +17,18 @@ function Comments(props: {
     location: string
     totalComments: number
     incrementTotalComments: (value: number) => void
+    setPostDraggable?: (payload: boolean) => void
     style?: any
 }): JSX.Element {
-    const { postId, type, location, totalComments, incrementTotalComments, style } = props
+    const {
+        postId,
+        type,
+        location,
+        totalComments,
+        incrementTotalComments,
+        setPostDraggable,
+        style,
+    } = props
     const { accountData, loggedIn } = useContext(AccountContext)
     const [comments, setComments] = useState<any[]>([])
     const [loading, setLoading] = useState(false)
@@ -142,6 +151,7 @@ function Comments(props: {
                         removeComment={removeComment}
                         editComment={editComment}
                         updateCommentReactions={updateCommentReactions}
+                        setPostDraggable={setPostDraggable}
                         location={location}
                     />
                 ))
@@ -153,6 +163,7 @@ function Comments(props: {
 Comments.defaultProps = {
     type: null,
     style: null,
+    setPostDraggable: null,
 }
 
 export default Comments
