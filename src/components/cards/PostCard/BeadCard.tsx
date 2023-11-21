@@ -65,7 +65,7 @@ function BeadCard(props: {
     const {
         id,
         title,
-        // type,
+        mediaTypes,
         totalLikes,
         totalComments,
         totalLinks,
@@ -87,11 +87,10 @@ function BeadCard(props: {
     const [selectedImage, setSelectedImage] = useState<any>(null)
     const history = useNavigate()
     const images = bead.Images ? bead.Images.sort((a, b) => a.index - b.index) : []
-    const type = bead.type.replace('gbg-', '')
     const isOwnPost = accountData && bead.Creator && accountData.id === bead.Creator.id
     const showDropDown =
         isOwnPost &&
-        type === 'text' &&
+        mediaTypes.includes('text') &&
         beadIndex !== 0 &&
         !['create-string-modal', 'next-bead-modal', 'preview'].includes(location)
 
@@ -206,14 +205,14 @@ function BeadCard(props: {
                 </Column>
             ) : (
                 <Column centerY className={styles.content}>
-                    {type === 'text' && bead.text && (
+                    {mediaTypes.includes('text') && bead.text && (
                         <Scrollbars style={{ paddingRight: 10, marginBottom: showFooter ? 0 : 10 }}>
                             <DraftText stringifiedDraft={bead.text} />
                         </Scrollbars>
                     )}
-                    {type === 'text' && !bead.text && <h1>{bead.title}</h1>}
-                    {type === 'url' && <UrlPreview type='bead' urlData={Urls[0]} />}
-                    {type === 'image' && Images && (
+                    {mediaTypes.includes('text') && !bead.text && <h1>{bead.title}</h1>}
+                    {mediaTypes.includes('url') && <UrlPreview type='bead' urlData={Urls[0]} />}
+                    {mediaTypes.includes('image') && Images && (
                         <button
                             className={styles.image}
                             type='button'
@@ -226,7 +225,7 @@ function BeadCard(props: {
                             />
                         </button>
                     )}
-                    {type === 'audio' && Audios && (
+                    {mediaTypes.includes('audio') && Audios && (
                         <AudioCard
                             id={postId}
                             index={beadIndex}
@@ -236,7 +235,7 @@ function BeadCard(props: {
                             style={{ width: '100%', height: '100%' }}
                         />
                     )}
-                    {type === 'event' && (
+                    {mediaTypes.includes('event') && (
                         <Column centerX>
                             <h1>{title}</h1>
                             <Row wrap centerY className={styles.eventTimes}>
@@ -246,21 +245,21 @@ function BeadCard(props: {
                             </Row>
                         </Column>
                     )}
-                    {type === 'poll' && (
+                    {mediaTypes.includes('poll') && (
                         <Column centerX className={styles.poll}>
                             <PollIcon />
                             <h1>{trimText(title, 30)}</h1>
                             {bead.text && <p>{trimText(getDraftPlainText(bead.text), 50)}</p>}
                         </Column>
                     )}
-                    {type === 'glass-bead-game' && (
+                    {mediaTypes.includes('glass-bead-game') && (
                         <Column centerX className={styles.poll}>
                             <CastaliaIcon />
                             <h1>{trimText(title, 30)}</h1>
                             {bead.text && <p>{trimText(getDraftPlainText(bead.text), 50)}</p>}
                         </Column>
                     )}
-                    {type === 'card' && (
+                    {mediaTypes.includes('card') && (
                         <Column centerX className={styles.card}>
                             {title && <h1>{trimText(title, 30)}</h1>}
                             {bead.text && <p>{trimText(getDraftPlainText(bead.text), 50)}</p>}

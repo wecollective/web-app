@@ -18,8 +18,8 @@ function CardCard(props: {
     const [cardFlipped, setCardFlipped] = useState(false)
     const [likeModalOpen, setLikeModalOpen] = useState(false)
     const [linkModalOpen, setLinkModalOpen] = useState(false)
-    const cardFront = postData.CardSides.find((s) => s.type === 'card-front')
-    const cardBack = postData.CardSides.find((s) => s.type === 'card-back')
+    const cardFront = postData.CardSides.find((s) => s.Link.index === 0)
+    const cardBack = postData.CardSides.find((s) => s.Link.index === 1)
     const card = cardFlipped ? cardBack : cardFront
     const history = useNavigate()
 

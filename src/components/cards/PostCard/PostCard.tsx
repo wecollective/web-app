@@ -70,7 +70,7 @@ function PostCard(props: {
     const [postData, setPostData] = useState(post)
     const {
         id,
-        type,
+        mediaTypes,
         title,
         text,
         createdAt,
@@ -276,10 +276,10 @@ function PostCard(props: {
                     onMouseLeave={() => setDraggable(true)}
                     style={{ cursor: 'text' }}
                 >
-                    {type !== 'glass-bead-game' && title && (
+                    {!mediaTypes.includes('glass-bead-game') && title && (
                         <h1 className={styles.title}>{title}</h1>
                     )}
-                    {type === 'glass-bead-game' && title && (
+                    {mediaTypes.includes('glass-bead-game') && title && (
                         <Row centerY className={styles.topic}>
                             {GlassBeadGame.topicImage && (
                                 <img src={GlassBeadGame.topicImage} alt='' />
@@ -300,10 +300,10 @@ function PostCard(props: {
                 {postData.Event && (
                     <EventCard postData={postData} setPostData={setPostData} location={location} />
                 )}
-                {['image', 'gbg-image', 'card-front', 'card-back'].includes(type) && (
+                {mediaTypes.includes('image') && (
                     <ImagesCard images={postData.Images.sort((a, b) => a.index - b.index)} />
                 )}
-                {type.includes('audio') && (
+                {mediaTypes.includes('audio') && (
                     <AudioCard
                         id={postData.id}
                         url={Audios[0].url}
@@ -312,11 +312,13 @@ function PostCard(props: {
                         style={{ height: 200, margin: '10px 0' }}
                     />
                 )}
-                {type === 'poll' && <PollCard postData={postData} location={location} />}
-                {type === 'glass-bead-game' && (
+                {mediaTypes.includes('poll') && (
+                    <PollCard postData={postData} location={location} />
+                )}
+                {mediaTypes.includes('glass-bead-game') && (
                     <GlassBeadGameCard postData={postData} location={location} />
                 )}
-                {type === 'card' && (
+                {mediaTypes.includes('card') && (
                     <CardCard postData={postData} setPostData={setPostData} location={location} />
                 )}
                 {Urls.length > 0 && (
@@ -327,7 +329,10 @@ function PostCard(props: {
                                 type='post'
                                 urlData={urlData}
                                 style={{
-                                    marginTop: text || type === 'glass-bead-game' || i > 0 ? 10 : 0,
+                                    marginTop:
+                                        text || mediaTypes.includes('glass-bead-game') || i > 0
+                                            ? 10
+                                            : 0,
                                 }}
                             />
                         ))}

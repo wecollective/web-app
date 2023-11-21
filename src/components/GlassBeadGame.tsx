@@ -1484,6 +1484,7 @@ function GlassBeadGame(): JSX.Element {
                     addPlayButtonToCenterBead()
                     d3.select('#timer-bead-wave-form').transition(1000).style('opacity', 0)
                     setTurn(0)
+                    // todo: store move index as ref so 999 can be avoided
                     if (audioRecorderRef.current && audioRecorderRef.current.state === 'recording')
                         stopAudioRecording(true).then((blob) => uploadAudio(999, blob))
                 })
