@@ -16,13 +16,17 @@ function ImageModal(props: {
     const { images, selectedImage, setSelectedImage, close } = props
 
     function toggleImage(increment) {
-        if (setSelectedImage) setSelectedImage(images[selectedImage.index + increment])
+        if (setSelectedImage) setSelectedImage(images[selectedImage.Link.index + increment])
+    }
+
+    function findUrl(block) {
+        return block.Image.url || URL.createObjectURL(block.file)
     }
 
     return (
         <Modal close={close} className={styles.wrapper}>
             <Row centerY>
-                {images.length > 1 && selectedImage.index !== 0 && (
+                {images.length > 1 && selectedImage.Link.index !== 0 && (
                     <button
                         className={styles.navButton}
                         type='button'
@@ -34,24 +38,19 @@ function ImageModal(props: {
                 <Column centerX>
                     <img
                         className={styles.selectedImage}
-                        src={selectedImage.url || URL.createObjectURL(selectedImage.file)}
-                        onError={(e) =>
-                            handleImageError(
-                                e,
-                                selectedImage.url || URL.createObjectURL(selectedImage.file)
-                            )
-                        }
+                        src={findUrl(selectedImage)}
+                        onError={(e) => handleImageError(e, findUrl(selectedImage))}
                         alt=''
                     />
                     {selectedImage.caption && (
                         <ShowMoreLess height={150} style={{ marginTop: 20 }}>
                             <p style={{ width: '100%', textAlign: 'center' }}>
-                                {selectedImage.caption}
+                                {selectedImage.text}
                             </p>
                         </ShowMoreLess>
                     )}
                 </Column>
-                {images.length > 1 && selectedImage.index !== images.length - 1 && (
+                {images.length > 1 && selectedImage.Link.index !== images.length - 1 && (
                     <button
                         className={styles.navButton}
                         type='button'

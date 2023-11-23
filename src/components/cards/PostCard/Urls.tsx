@@ -8,13 +8,13 @@ import React, { useEffect, useState } from 'react'
 function Urls(props: { postId: number; style?: any }): JSX.Element {
     const { postId, style } = props
     const [loading, setLoading] = useState(true)
-    const [urls, setUrls] = useState<any[]>([])
+    const [blocks, setBlocks] = useState<any[]>([])
 
     function getUrls() {
         axios
             .get(`${config.apiURL}/post-urls?postId=${postId}`)
             .then((res) => {
-                setUrls(res.data)
+                setBlocks(res.data)
                 setLoading(false)
             })
             .catch((error) => console.log(error))
@@ -30,11 +30,11 @@ function Urls(props: { postId: number; style?: any }): JSX.Element {
         )
     return (
         <Column style={style}>
-            {urls.map((data, i) => (
+            {blocks.map((block, i) => (
                 <UrlCard
-                    key={data.id}
+                    key={block.id}
                     type='post'
-                    urlData={data.Url}
+                    urlData={block.Url}
                     style={{ marginTop: i > 0 ? 10 : 0 }}
                 />
             ))}
