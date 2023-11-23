@@ -289,9 +289,7 @@ function CommentCard(props: {
                                 gradientColor={highlighted ? 'blue' : 'grey'}
                             >
                                 <DraftText
-                                    stringifiedDraft={
-                                        state === 'deleted' ? '[comment deleted]' : text
-                                    }
+                                    text={state === 'deleted' ? '[comment deleted]' : text}
                                     markdownStyles={`${styles.markdown} ${
                                         state === 'deleted' && styles.deleted
                                     }`}

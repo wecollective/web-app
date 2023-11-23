@@ -575,7 +575,7 @@ function SpaceCircles(props: { spaceCircleData: any; params: any }): JSX.Element
                     ) : (
                         <>
                             <DraftText
-                                stringifiedDraft={highlightedSpace.description}
+                                text={highlightedSpace.description}
                                 className={styles.draft}
                                 markdownStyles={styles.markdown}
                             />

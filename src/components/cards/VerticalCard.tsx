@@ -44,7 +44,7 @@ function VerticalCard(props: {
                         <p className={styles.subTitle}>{subTitle}</p>
                     </Link>
                     <ShowMoreLess height={75}>
-                        <DraftText stringifiedDraft={text} />
+                        <DraftText text={text} />
                     </ShowMoreLess>
                 </div>
             </div>

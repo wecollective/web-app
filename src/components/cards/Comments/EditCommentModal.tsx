@@ -70,7 +70,7 @@ function EditCommentModal(props: {
                     <h1>Edit comment</h1>
                     <DraftTextEditor
                         type='other'
-                        stringifiedDraft={newText.value}
+                        text={newText.value}
                         maxChars={5000}
                         onChange={onChange}
                         state={newText.state}

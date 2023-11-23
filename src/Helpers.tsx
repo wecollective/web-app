@@ -433,21 +433,21 @@ export function handleImageError(e: any, image: string): void {
     }
 }
 
-export function findDraftLength(stringifiedDraft: string): number {
-    if (!stringifiedDraft.length) return 0
-    const contentState = convertFromRaw(JSON.parse(stringifiedDraft))
+export function findDraftLength(text: string): number {
+    if (!text.length) return 0
+    const contentState = convertFromRaw(JSON.parse(text))
     const editorState = EditorState.createWithContent(contentState)
     return editorState.getCurrentContent().getPlainText().length
 }
 
-export function getDraftPlainText(stringifiedDraft: string): string {
-    const isDraft = stringifiedDraft.slice(0, 10) === `{"blocks":`
+export function getDraftPlainText(text: string): string {
+    const isDraft = text.slice(0, 10) === `{"blocks":`
     if (isDraft) {
-        const contentState = convertFromRaw(JSON.parse(stringifiedDraft))
+        const contentState = convertFromRaw(JSON.parse(text))
         const editorState = EditorState.createWithContent(contentState)
         return editorState.getCurrentContent().getPlainText()
     }
-    return stringifiedDraft
+    return text
 }
 
 export function scrollToElement(element: HTMLElement): void {

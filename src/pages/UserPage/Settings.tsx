@@ -76,7 +76,7 @@ function Settings(): JSX.Element | null {
                     <h2>Bio:</h2>
                     {bio && (
                         <ShowMoreLess height={75}>
-                            <DraftText stringifiedDraft={bio} />
+                            <DraftText text={bio} />
                         </ShowMoreLess>
                     )}
                     <Button

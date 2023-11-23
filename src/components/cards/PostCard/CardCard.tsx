@@ -57,7 +57,7 @@ function CardCard(props: {
                     aria-label='click to focus'
                     onClick={() => setCardFocused(!cardFocused)}
                 />
-                {data.text && <DraftText stringifiedDraft={data.text} />}
+                {data.text && <DraftText text={data.text} />}
             </Column>
         )
     }

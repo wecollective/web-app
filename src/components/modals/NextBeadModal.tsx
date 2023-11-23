@@ -355,7 +355,7 @@ function NextBeadModal(props: {
                         <DraftTextEditor
                             className={styles.textEditor}
                             type='bead'
-                            stringifiedDraft={text}
+                            text={text}
                             maxChars={maxChars}
                             onChange={(value, textMentions) => {
                                 setText(value)

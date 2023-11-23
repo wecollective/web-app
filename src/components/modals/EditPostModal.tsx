@@ -225,7 +225,7 @@ function EditPostModal(props: {
                         )}
                         <DraftTextEditor
                             type='post'
-                            stringifiedDraft={text}
+                            text={text}
                             maxChars={5000}
                             onChange={(value, textMentions, textUrls) => {
                                 setTextError('')

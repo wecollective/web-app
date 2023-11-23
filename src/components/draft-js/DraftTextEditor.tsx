@@ -40,7 +40,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react'
 function DraftTextEditor(props: {
     id?: string
     type: 'post' | 'comment' | 'bead' | 'card' | 'other'
-    stringifiedDraft: string
+    text: string
     onChange: (text: string, mentions: any[], urls: string[]) => void
     onSubmit?: () => void
     submitLoading?: boolean
@@ -53,7 +53,7 @@ function DraftTextEditor(props: {
     const {
         id,
         type,
-        stringifiedDraft,
+        text,
         onChange,
         onSubmit,
         submitLoading,
@@ -197,10 +197,10 @@ function DraftTextEditor(props: {
 
     useEffect(() => {
         // isDraft boolean used as temporary solution until old markdown converted to draft
-        const isDraft = stringifiedDraft && stringifiedDraft.slice(0, 10) === `{"blocks":`
+        const isDraft = text && text.slice(0, 10) === `{"blocks":`
         const contentState = isDraft
-            ? convertFromRaw(JSON.parse(stringifiedDraft))
-            : ContentState.createFromText(stringifiedDraft || '')
+            ? convertFromRaw(JSON.parse(text))
+            : ContentState.createFromText(text || '')
         const newEditorState = EditorState.createWithContent(contentState)
         setEditorState(newEditorState)
         setCharacterLength(newEditorState.getCurrentContent().getPlainText().length)

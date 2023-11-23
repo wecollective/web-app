@@ -145,7 +145,7 @@ function About(): JSX.Element {
                             <p className='grey' style={{ marginBottom: 10 }}>
                                 Bio:
                             </p>
-                            <DraftText stringifiedDraft={bio || ''} />
+                            <DraftText text={bio || ''} />
                         </Column>
                     )}
                 </Column>

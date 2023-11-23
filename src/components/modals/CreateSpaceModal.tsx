@@ -200,7 +200,7 @@ function CreateSpaceModal(): JSX.Element {
                             <p style={{ fontSize: 14, marginBottom: 5 }}>Space description</p>
                             <DraftTextEditor
                                 type='other'
-                                stringifiedDraft={description.value}
+                                text={description.value}
                                 maxChars={5000}
                                 onChange={(v) => updateItem('description', v)}
                                 state={description.state}

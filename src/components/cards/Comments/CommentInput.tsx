@@ -70,7 +70,7 @@ function CommentInput(props: {
             key={editorKey}
             id={id}
             type='comment'
-            stringifiedDraft={newComment.value}
+            text={newComment.value}
             maxChars={5000}
             onChange={onChange}
             onSubmit={submitComment}

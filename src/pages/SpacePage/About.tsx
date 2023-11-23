@@ -37,7 +37,7 @@ function About(): JSX.Element {
                 <p>Space data loading... </p>
             ) : (
                 <Column className={styles.content}>
-                    <DraftText stringifiedDraft={spaceData.description || ''} />
+                    <DraftText text={spaceData.description || ''} />
                     <Row centerY centerX className={styles.creation}>
                         <p>Created</p>
                         <p title={dateCreated(createdAt)}>{timeSinceCreated(createdAt)}</p>

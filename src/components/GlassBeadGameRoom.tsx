@@ -415,7 +415,7 @@ function GameSettingsModal(props) {
     )
 }
 
-function GlassBeadGame(): JSX.Element {
+function GlassBeadGameRoom(): JSX.Element {
     const { loggedIn, accountData, accountDataLoading, setAlertModalOpen, setAlertMessage } =
         useContext(AccountContext)
     const { postData, setPostData, postDataLoading } = useContext(PostContext)
@@ -2127,7 +2127,7 @@ function GlassBeadGame(): JSX.Element {
     )
 }
 
-export default GlassBeadGame
+export default GlassBeadGameRoom
 
 // peer.on('iceStateChange', (iceConnectionState, iceGatheringState) => {
 //     console.log('ice', iceConnectionState, iceGatheringState)

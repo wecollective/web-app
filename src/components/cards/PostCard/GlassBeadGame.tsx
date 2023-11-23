@@ -9,7 +9,7 @@ import Comments from '@components/cards/Comments/Comments'
 import BeadCard from '@components/cards/PostCard/BeadCard'
 import NextBeadModal from '@components/modals/NextBeadModal'
 import config from '@src/Config'
-import { formatTimeHHDDMMSS, pluralise } from '@src/Helpers'
+import { defaultGBGSettings, formatTimeHHDDMMSS, pluralise } from '@src/Helpers'
 import { AccountContext } from '@src/contexts/AccountContext'
 import styles from '@styles/components/cards/PostCard/GlassBeadGameCard.module.scss'
 import { DNAIcon, DoorIcon, PlusIcon, UsersIcon } from '@svgs/all'
@@ -18,9 +18,15 @@ import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
-function GlassBeadGameCard(props: { postData: any; location: string }): JSX.Element {
-    const { postData, location } = props
-    const { id, Creator, GlassBeadGame } = postData
+function GlassBeadGame(props: {
+    postId: number
+    isOwnPost: boolean
+    setTopicImage: (url: string) => void
+}): JSX.Element {
+    const { postId, isOwnPost, setTopicImage } = props
+    const { accountData, setAlertMessage, setAlertModalOpen, loggedIn } = useContext(AccountContext)
+    const [loading, setLoading] = useState(true)
+    const [game, setGame] = useState<any>(defaultGBGSettings)
     const {
         synchronous,
         multiplayer,
@@ -30,9 +36,7 @@ function GlassBeadGameCard(props: { postData: any; location: string }): JSX.Elem
         allowedBeadTypes,
         nextMoveDeadline,
         state,
-    } = GlassBeadGame
-    const { accountData, setAlertMessage, setAlertModalOpen, loggedIn } = useContext(AccountContext)
-    const [loading, setLoading] = useState(true)
+    } = game
     const [beads, setBeads] = useState<any[]>([])
     const [players, setPlayers] = useState<any[]>([])
     const [pendingPlayers, setPendingPlayers] = useState<any[]>([])
@@ -46,16 +50,6 @@ function GlassBeadGameCard(props: { postData: any; location: string }): JSX.Elem
     const [selectedBead, setSelectedBead] = useState<any>(null)
     const history = useNavigate()
     const cookies = new Cookies()
-
-    function hideBeadDraw() {
-        // todo: useState instead of function and only update when required to prevent looping re-renders if time limit present
-        const hide = synchronous
-            ? !beads.length
-            : !allAccepted ||
-              (state === 'cancelled' && !beads.length) ||
-              (nextPlayer && nextPlayer.id !== accountData.id && !beads.length)
-        return hide
-    }
 
     function updateDeadline(deadline) {
         clearInterval(timeLeftInMoveInterval.current)
@@ -77,10 +71,13 @@ function GlassBeadGameCard(props: { postData: any; location: string }): JSX.Elem
     }
 
     function getGBGData() {
+        // todo: get game data as well as beads here
+        // pass down setTopicImage function to render in post
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
-            .get(`${config.apiURL}/gbg-data?postId=${id}`, options)
+            .get(`${config.apiURL}/gbg-data?postId=${postId}`, options)
             .then((res) => {
+                setGame(res.data.game)
                 setBeads(res.data.beads.sort((a, b) => a.Link.index - b.Link.index))
                 const pending = res.data.players.filter((p) => p.UserPost.state === 'pending')
                 const rejected = res.data.players.filter((p) => p.UserPost.state === 'rejected')
@@ -99,6 +96,16 @@ function GlassBeadGameCard(props: { postData: any; location: string }): JSX.Elem
                 setLoading(false)
             })
             .catch((error) => console.log(error))
+    }
+
+    function hideBeadDraw() {
+        // todo: useState instead of function and only update when required to prevent looping re-renders if time limit present
+        const hide = synchronous
+            ? !beads.length
+            : !allAccepted ||
+              (state === 'cancelled' && !beads.length) ||
+              (nextPlayer && nextPlayer.id !== accountData.id && !beads.length)
+        return hide
     }
 
     function toggleBeadComments(bead) {
@@ -256,9 +263,9 @@ function GlassBeadGameCard(props: { postData: any; location: string }): JSX.Elem
     }
 
     function renderNextCard() {
-        // game rooms
+        // synchronous game rooms
         if (synchronous) return beads.length > 2 ? <span style={{ marginRight: 15 }} /> : null
-        // restricted weaves
+        // restricted async games
         if (players.length) {
             if (state === 'active' && nextPlayer) {
                 if (nextPlayer.id === accountData.id) return renderNextBeadButton()
@@ -266,12 +273,12 @@ function GlassBeadGameCard(props: { postData: any; location: string }): JSX.Elem
             }
             return beads.length > 2 ? <span style={{ marginRight: 15 }} /> : null
         }
-        // open weaves
+        // open async games
         const movesLeft = !totalMoves || totalMoves > beads.length
         if (multiplayer && movesLeft) return renderNextBeadButton()
-        // strings
+        // one player async games
         if (!multiplayer && movesLeft) {
-            if (Creator.id === accountData.id) return renderNextBeadButton()
+            if (isOwnPost) return renderNextBeadButton()
             if (beads.length > 2) return <span style={{ marginRight: 15 }} />
         }
         return null
@@ -292,12 +299,12 @@ function GlassBeadGameCard(props: { postData: any; location: string }): JSX.Elem
     return (
         <Column className={styles.wrapper} style={{ marginBottom: beads.length ? 10 : 0 }}>
             {synchronous && (
-                <Row style={{ marginBottom: beads.length || !postData.Urls.length ? 10 : 0 }}>
+                <Row style={{ marginBottom: beads.length ? 10 : 0 }}>
                     <Button
                         text='Open game room'
                         color='gbg-white'
                         icon={<DoorIcon />}
-                        onClick={() => history(`/p/${id}/game-room`)}
+                        onClick={() => history(`/p/${postId}/game-room`)}
                     />
                 </Row>
             )}
@@ -310,10 +317,9 @@ function GlassBeadGameCard(props: { postData: any; location: string }): JSX.Elem
                                 <Row key={bead.id}>
                                     <BeadCard
                                         bead={bead}
-                                        postId={id}
-                                        postType={postData.type}
+                                        postId={postId}
                                         beadIndex={i + 1}
-                                        location={location}
+                                        location='post'
                                         selected={selectedBead && selectedBead.id === bead.id}
                                         toggleBeadComments={() => toggleBeadComments(bead)}
                                     />
@@ -337,7 +343,7 @@ function GlassBeadGameCard(props: { postData: any; location: string }): JSX.Elem
                         ...GlassBeadGame,
                         allowedBeadTypes: [...allowedBeadTypes.split(',')],
                     }}
-                    postId={id}
+                    postId={postId}
                     players={players}
                     addBead={(bead) => {
                         const newBeads = [...beads, { ...bead, type: `gbg-${bead.type}` }]
@@ -352,7 +358,7 @@ function GlassBeadGameCard(props: { postData: any; location: string }): JSX.Elem
                 <Comments
                     postId={selectedBead.id}
                     type='bead'
-                    location={location}
+                    location='post'
                     totalComments={selectedBead.totalComments}
                     incrementTotalComments={(value) => {
                         const newBeads = [...beads]
@@ -368,4 +374,4 @@ function GlassBeadGameCard(props: { postData: any; location: string }): JSX.Elem
     )
 }
 
-export default GlassBeadGameCard
+export default GlassBeadGame

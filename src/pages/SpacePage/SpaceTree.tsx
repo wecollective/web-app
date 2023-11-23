@@ -864,7 +864,7 @@ function SpaceTree(props: { spaceTreeData: any; params: any }): JSX.Element {
                         <>
                             <h2>s/{highlightedSpace.handle}</h2>
                             <DraftText
-                                stringifiedDraft={highlightedSpace.description}
+                                text={highlightedSpace.description}
                                 className={styles.draft}
                                 markdownStyles={styles.markdown}
                             />

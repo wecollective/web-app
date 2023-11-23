@@ -590,7 +590,6 @@ function CreatePostModal(): JSX.Element {
                             <Row key={bead.id}>
                                 <BeadCard
                                     bead={bead}
-                                    postType={bead.type}
                                     beadIndex={i + 1}
                                     location='preview'
                                     removeBead={removeBead}
@@ -1164,7 +1163,7 @@ function CreatePostModal(): JSX.Element {
                             <DraftTextEditor
                                 className={styles.text}
                                 type='post'
-                                stringifiedDraft={text}
+                                text={text}
                                 maxChars={maxChars}
                                 onChange={(value, textMentions, textUrls) => {
                                     setText(value)
@@ -1264,7 +1263,7 @@ function CreatePostModal(): JSX.Element {
                                                         key='card-front'
                                                         className={styles.textEditor}
                                                         type='card'
-                                                        stringifiedDraft={cardFrontText}
+                                                        text={cardFrontText}
                                                         maxChars={maxChars}
                                                         onChange={(value, textMentions) => {
                                                             setCardFrontError(false)
@@ -1290,7 +1289,7 @@ function CreatePostModal(): JSX.Element {
                                                         key='card-back'
                                                         className={styles.textEditor}
                                                         type='card'
-                                                        stringifiedDraft={cardBackText}
+                                                        text={cardBackText}
                                                         maxChars={maxChars}
                                                         onChange={(value, textMentions) => {
                                                             setCardBackError(false)

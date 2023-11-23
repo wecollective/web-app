@@ -45,7 +45,7 @@ function UpdateUserBioModal(props: { close: () => void }): JSX.Element {
             <h1>Edit your account bio</h1>
             <DraftTextEditor
                 type='other'
-                stringifiedDraft={newBio}
+                text={newBio}
                 maxChars={maxChars}
                 onChange={(value, userMentions) => {
                     setNewBio(value)

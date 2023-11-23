@@ -120,7 +120,7 @@ function MediumSquareCard(props: {
                     <Column centerX centerY className={styles.center}>
                         {data.text && (
                             <Scrollbars style={{ paddingRight: 10, marginBottom: 10 }}>
-                                <DraftText stringifiedDraft={data.text} />
+                                <DraftText text={data.text} />
                             </Scrollbars>
                         )}
                     </Column>

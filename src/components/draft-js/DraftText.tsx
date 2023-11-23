@@ -16,12 +16,12 @@ import { ContentState, convertFromRaw, EditorState } from 'draft-js'
 import React, { useEffect, useRef, useState } from 'react'
 
 function DraftText(props: {
-    stringifiedDraft: string
+    text: string
     className?: string
     markdownStyles?: string
     style?: any
 }): JSX.Element {
-    const { stringifiedDraft, className, markdownStyles, style } = props
+    const { text, className, markdownStyles, style } = props
     const [type, setType] = useState('')
     const [editorState, setEditorState] = useState<any>(null)
     const [mentionPlugin] = useState(
@@ -76,14 +76,14 @@ function DraftText(props: {
 
     useEffect(() => {
         // isDraft boolean used as temporary solution until old markdown converted to draft
-        const isDraft = stringifiedDraft && stringifiedDraft.slice(0, 10) === `{"blocks":`
+        const isDraft = text && text.slice(0, 10) === `{"blocks":`
         const contentState = isDraft
-            ? convertFromRaw(JSON.parse(stringifiedDraft))
-            : ContentState.createFromText(stringifiedDraft || '')
+            ? convertFromRaw(JSON.parse(text))
+            : ContentState.createFromText(text || '')
         const newEditorState = EditorState.createWithContent(contentState)
         setEditorState(newEditorState)
         setType(isDraft ? 'draft' : 'markdown')
-    }, [stringifiedDraft])
+    }, [text])
 
     return (
         <div className={`${styles.wrapper} ${className}`} style={style}>
@@ -99,7 +99,7 @@ function DraftText(props: {
                     }}
                 />
             )}
-            {type === 'markdown' && <Markdown text={stringifiedDraft} className={markdownStyles} />}
+            {type === 'markdown' && <Markdown text={text} className={markdownStyles} />}
         </div>
     )
 }

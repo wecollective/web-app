@@ -48,7 +48,7 @@ function HorizontalSpaceCard(props: { space: any; style?: any }): JSX.Element {
                 </Link>
                 <Row style={{ marginBottom: 10 }}>
                     <ShowMoreLess height={75}>
-                        <DraftText stringifiedDraft={description} />
+                        <DraftText text={description} />
                     </ShowMoreLess>
                 </Row>
                 <Row className={styles.stats}>

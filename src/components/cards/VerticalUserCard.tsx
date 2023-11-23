@@ -38,7 +38,7 @@ function VerticalUserCard(props: { user: any; style?: any }): JSX.Element {
                         <h2>{`u/${handle}`}</h2>
                     </Link>
                     <ShowMoreLess height={75}>
-                        <DraftText stringifiedDraft={bio} />
+                        <DraftText text={bio} />
                     </ShowMoreLess>
                 </Column>
             </Column>

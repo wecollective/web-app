@@ -70,7 +70,7 @@ function Settings(): JSX.Element {
                     <Column centerX>
                         <h1>Description:</h1>
                         {/* <ShowMoreLess height={75}> */}
-                        <DraftText stringifiedDraft={spaceData.description || ''} />
+                        <DraftText text={spaceData.description || ''} />
                         {/* </ShowMoreLess> */}
                         <Button
                             text='Edit'

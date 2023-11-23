@@ -72,7 +72,7 @@ function UpdateSpaceDescriptionModal(props: { close: () => void }): JSX.Element 
             <form onSubmit={updateSpaceDescription} style={{ width: '100%', maxWidth: 530 }}>
                 <DraftTextEditor
                     type='other'
-                    stringifiedDraft={inputValue}
+                    text={inputValue}
                     maxChars={10000}
                     onChange={(value, userMentions) => {
                         setInputState('default')
