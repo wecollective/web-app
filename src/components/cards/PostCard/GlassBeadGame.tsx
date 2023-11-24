@@ -80,7 +80,7 @@ function GlassBeadGame(props: {
             .get(`${config.apiURL}/gbg-data?postId=${postId}`, options)
             .then((res) => {
                 setGame(res.data.game)
-                setBeads(res.data.beads.sort((a, b) => a.Link.index - b.Link.index))
+                setBeads(res.data.beads)
                 const pending = res.data.players.filter((p) => p.UserPost.state === 'pending')
                 const rejected = res.data.players.filter((p) => p.UserPost.state === 'rejected')
                 setPendingPlayers(pending)

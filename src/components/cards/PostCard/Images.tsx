@@ -22,12 +22,10 @@ function Images(props: { postId: number; style?: any }): JSX.Element {
         axios
             .get(`${config.apiURL}/post-images?postId=${postId}&offset=${offset}`)
             .then((res) => {
-                const { imageBlocks, total } = res.data
-                const sortedBlocks = imageBlocks.sort((a, b) => a.Link.index - b.Link.index)
-                setBlocks(offset ? [...blocks, ...sortedBlocks] : sortedBlocks)
+                setBlocks(offset ? [...blocks, ...res.data.blocks] : res.data.blocks)
                 if (offset) setNextBlocksLoading(false)
                 else {
-                    setTotalBlocks(total)
+                    setTotalBlocks(res.data.total)
                     setLoading(false)
                 }
             })
