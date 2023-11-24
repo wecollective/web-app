@@ -86,9 +86,9 @@ function GlassBeadGame(props: {
                 setPendingPlayers(pending)
                 setRejectedPlayers(rejected)
                 setAllAccepted(!pending.length && !rejected.length)
-                if (res.data.players.length && playerOrder) {
+                if (res.data.players.length && res.data.game.playerOrder) {
                     const orderedPlayers = [] as any
-                    playerOrder.split(',').forEach((playerId) => {
+                    res.data.game.playerOrder.split(',').forEach((playerId) => {
                         orderedPlayers.push(res.data.players.find((p) => p.id === +playerId))
                     })
                     setPlayers(orderedPlayers)
