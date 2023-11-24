@@ -13,17 +13,32 @@ function Images(props: { postId: number; style?: any }): JSX.Element {
     const { postId, style } = props
     const [loading, setLoading] = useState(true)
     const [blocks, setBlocks] = useState<any[]>([])
+    const [totalBlocks, setTotalBlocks] = useState(0)
+    const [nextBlocksLoading, setNextBlocksLoading] = useState(false)
     const [selectedBlock, setSelectedBlock] = useState<any>(null)
     const [modalOpen, setModalOpen] = useState(false)
 
-    function getImages() {
+    function getImages(offset: number) {
         axios
-            .get(`${config.apiURL}/post-images?postId=${postId}`)
+            .get(`${config.apiURL}/post-images?postId=${postId}&offset=${offset}`)
             .then((res) => {
-                setBlocks(res.data.sort((a, b) => a.Link.index - b.Link.index))
-                setLoading(false)
+                const { imageBlocks, total } = res.data
+                const sortedBlocks = imageBlocks.sort((a, b) => a.Link.index - b.Link.index)
+                setBlocks(offset ? [...blocks, ...sortedBlocks] : sortedBlocks)
+                if (offset) setNextBlocksLoading(false)
+                else {
+                    setTotalBlocks(total)
+                    setLoading(false)
+                }
             })
             .catch((error) => console.log(error))
+    }
+
+    function onScrollRightEnd() {
+        if (!nextBlocksLoading && totalBlocks > blocks.length) {
+            setNextBlocksLoading(true)
+            getImages(blocks.length)
+        }
     }
 
     function openModal(blockId) {
@@ -41,7 +56,7 @@ function Images(props: { postId: number; style?: any }): JSX.Element {
         return block.Image.url || URL.createObjectURL(block.file)
     }
 
-    useEffect(() => getImages(), [])
+    useEffect(() => getImages(0), [])
 
     if (loading)
         return (
@@ -52,7 +67,7 @@ function Images(props: { postId: number; style?: any }): JSX.Element {
     return (
         <Column>
             <Row centerX>
-                <Scrollbars className={styles.images}>
+                <Scrollbars className={styles.images} onScrollRightEnd={onScrollRightEnd}>
                     <Row>
                         {blocks.map((block) => (
                             <Column
