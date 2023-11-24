@@ -35,6 +35,7 @@ function GlassBeadGame(props: {
         playerOrder,
         allowedBeadTypes,
         nextMoveDeadline,
+        totalBeads,
         state,
     } = game
     const [beads, setBeads] = useState<any[]>([])
@@ -48,6 +49,7 @@ function GlassBeadGame(props: {
     const [nextBeadModalOpen, setNextBeadModalOpen] = useState(false)
     const [beadCommentsOpen, setBeadCommentsOpen] = useState(false)
     const [selectedBead, setSelectedBead] = useState<any>(null)
+    const [nextBeadsLoading, setNextBeadsLoading] = useState(false)
     const history = useNavigate()
     const cookies = new Cookies()
 
@@ -98,13 +100,27 @@ function GlassBeadGame(props: {
             .catch((error) => console.log(error))
     }
 
+    function getNextBeads() {
+        if (!nextBeadsLoading && totalBeads > beads.length) {
+            setNextBeadsLoading(true)
+            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+            axios
+                .get(`${config.apiURL}/next-beads?postId=${postId}&offset=${beads.length}`, options)
+                .then((res) => {
+                    setBeads([...beads, ...res.data])
+                    setNextBeadsLoading(false)
+                })
+                .catch((error) => console.log(error))
+        }
+    }
+
     function hideBeadDraw() {
         // todo: useState instead of function and only update when required to prevent looping re-renders if time limit present
         const hide = synchronous
-            ? !beads.length
+            ? !totalBeads
             : !allAccepted ||
-              (state === 'cancelled' && !beads.length) ||
-              (nextPlayer && nextPlayer.id !== accountData.id && !beads.length)
+              (state === 'cancelled' && !totalBeads) ||
+              (nextPlayer && nextPlayer.id !== accountData.id && !totalBeads)
         return hide
     }
 
@@ -119,8 +135,8 @@ function GlassBeadGame(props: {
     }
 
     function renderOpenToAllUsersRow() {
-        const move = `${beads.length + 1} ${totalMoves ? `/ ${totalMoves}` : ''}`
-        const movesLeft = state === 'active' && (!totalMoves || totalMoves > beads.length)
+        const move = `${totalBeads + 1} ${totalMoves ? `/ ${totalMoves}` : ''}`
+        const movesLeft = state === 'active' && (!totalMoves || totalMoves > totalBeads)
         return (
             <Row spaceBetween centerY className={styles.infoRow}>
                 <Row centerY>
@@ -134,11 +150,10 @@ function GlassBeadGame(props: {
 
     function renderRestrictedPlayersRow() {
         const move = movesPerPlayer
-            ? `${beads.length + 1} / ${movesPerPlayer * players.length}`
-            : beads.length + 1
+            ? `${totalBeads + 1} / ${movesPerPlayer * players.length}`
+            : totalBeads + 1
         const movesLeft =
-            state === 'active' &&
-            (!movesPerPlayer || movesPerPlayer * players.length > beads.length)
+            state === 'active' && (!movesPerPlayer || movesPerPlayer * players.length > totalBeads)
         return (
             <Row spaceBetween centerY className={styles.infoRow}>
                 <FlagImageHighlights
@@ -206,7 +221,7 @@ function GlassBeadGame(props: {
     function renderNextBeadButton() {
         return (
             <Row centerY>
-                {beads.length > 0 && (
+                {totalBeads > 0 && (
                     <Row centerY className={styles.beadDivider}>
                         <DNAIcon />
                     </Row>
@@ -223,11 +238,11 @@ function GlassBeadGame(props: {
                     }}
                     // todo: refactor margin with screen width taken into account
                     style={{
-                        marginRight: beads.length > 1 ? 15 : 0,
+                        marginRight: totalBeads > 1 ? 15 : 0,
                     }}
                 >
                     <PlusIcon />
-                    <p>Click to create the {beads.length ? 'next' : 'first'} bead</p>
+                    <p>Click to create the {totalBeads ? 'next' : 'first'} bead</p>
                 </button>
             </Row>
         )
@@ -236,7 +251,7 @@ function GlassBeadGame(props: {
     function renderWaitingForPlayerCard() {
         return (
             <Row centerY>
-                {beads.length > 0 && (
+                {totalBeads > 0 && (
                     <Row centerY className={styles.beadDivider}>
                         <DNAIcon />
                     </Row>
@@ -247,7 +262,7 @@ function GlassBeadGame(props: {
                     className={styles.waitingForPlayerCard}
                     // todo: refactor margin with screen width taken into account
                     style={{
-                        marginRight: beads.length > 1 ? 15 : 0,
+                        marginRight: totalBeads > 1 ? 15 : 0,
                     }}
                 >
                     <p style={{ marginBottom: 10 }}>Waiting for</p>
@@ -263,23 +278,24 @@ function GlassBeadGame(props: {
     }
 
     function renderNextCard() {
+        const allBeadsLoaded = beads.length === totalBeads
         // synchronous game rooms
-        if (synchronous) return beads.length > 2 ? <span style={{ marginRight: 15 }} /> : null
+        if (synchronous) return totalBeads > 2 ? <span style={{ marginRight: 15 }} /> : null
         // restricted async games
         if (players.length) {
-            if (state === 'active' && nextPlayer) {
+            if (state === 'active' && nextPlayer && allBeadsLoaded) {
                 if (nextPlayer.id === accountData.id) return renderNextBeadButton()
                 return renderWaitingForPlayerCard()
             }
-            return beads.length > 2 ? <span style={{ marginRight: 15 }} /> : null
+            return totalBeads > 2 ? <span style={{ marginRight: 15 }} /> : null
         }
         // open async games
-        const movesLeft = !totalMoves || totalMoves > beads.length
+        const movesLeft = allBeadsLoaded && (!totalMoves || totalMoves > totalBeads)
         if (multiplayer && movesLeft) return renderNextBeadButton()
         // one player async games
         if (!multiplayer && movesLeft) {
             if (isOwnPost) return renderNextBeadButton()
-            if (beads.length > 2) return <span style={{ marginRight: 15 }} />
+            if (totalBeads > 2) return <span style={{ marginRight: 15 }} />
         }
         return null
     }
@@ -297,9 +313,9 @@ function GlassBeadGame(props: {
             </Row>
         )
     return (
-        <Column className={styles.wrapper} style={{ marginBottom: beads.length ? 10 : 0 }}>
+        <Column className={styles.wrapper} style={{ marginBottom: totalBeads ? 10 : 0 }}>
             {synchronous && (
-                <Row style={{ marginBottom: beads.length ? 10 : 0 }}>
+                <Row style={{ marginBottom: totalBeads ? 10 : 0 }}>
                     <Button
                         text='Open game room'
                         color='gbg-white'
@@ -311,7 +327,7 @@ function GlassBeadGame(props: {
             {!synchronous && multiplayer && renderInfoRow()}
             {!hideBeadDraw() && (
                 <Row centerX>
-                    <Scrollbars className={styles.beads}>
+                    <Scrollbars className={styles.beads} onScrollRightEnd={getNextBeads}>
                         <Row>
                             {beads.map((bead, i) => (
                                 <Row key={bead.id}>
@@ -323,7 +339,7 @@ function GlassBeadGame(props: {
                                         selected={selectedBead && selectedBead.id === bead.id}
                                         toggleBeadComments={() => toggleBeadComments(bead)}
                                     />
-                                    {i < beads.length - 1 && (
+                                    {i < totalBeads - 1 && (
                                         <Row centerY className={styles.beadDivider}>
                                             <DNAIcon />
                                         </Row>
