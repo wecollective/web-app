@@ -13,6 +13,7 @@ import EditPostModal from '@components/modals/EditPostModal'
 import ImageModal from '@components/modals/ImageModal'
 import LikeModal from '@components/modals/LikeModal'
 import { AccountContext } from '@contexts/AccountContext'
+import config from '@src/Config'
 import {
     findEventDuration,
     findEventTimes,
@@ -20,6 +21,7 @@ import {
     statTitle,
     trimText,
 } from '@src/Helpers'
+import LoadingWheel from '@src/components/LoadingWheel'
 import styles from '@styles/components/cards/PostCard/BeadCard.module.scss'
 import {
     CalendarIcon,
@@ -31,13 +33,12 @@ import {
     PollIcon,
     VerticalEllipsisIcon,
 } from '@svgs/all'
+import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 function BeadCard(props: {
     bead: any
-    // todo: remove post type?
-    postType?: string
     beadIndex?: number
     postId?: number
     location: string
@@ -50,7 +51,6 @@ function BeadCard(props: {
     const {
         bead: beadProp,
         postId,
-        postType,
         beadIndex,
         location,
         selected,
@@ -65,6 +65,7 @@ function BeadCard(props: {
     const {
         id,
         title,
+        text,
         mediaTypes,
         totalLikes,
         totalComments,
@@ -72,37 +73,74 @@ function BeadCard(props: {
         accountLike,
         accountComment,
         accountLink,
+        color,
+        state,
         Creator,
-        Links,
-        Urls,
-        Audios,
-        Images,
         Event,
         CardSides,
     } = bead
+    const [loading, setLoading] = useState(true)
+    const [urlBlocks, setUrlBlocks] = useState<any[]>([])
+    const [imageBlocks, setImageBlocks] = useState<any[]>([])
+    const [audioBlocks, setAudioBlocks] = useState<any[]>([])
     const [menuOpen, setMenuOpen] = useState(false)
     const [editPostModalOpen, setEditPostModalOpen] = useState(false)
     const [imageModalOpen, setImageModalOpen] = useState(false)
     const [likeModalOpen, setLikeModalOpen] = useState(false)
     const [selectedImage, setSelectedImage] = useState<any>(null)
     const history = useNavigate()
-    const images = bead.Images ? bead.Images.sort((a, b) => a.index - b.index) : []
-    const isOwnPost = accountData && bead.Creator && accountData.id === bead.Creator.id
+    const isOwnPost = accountData && Creator && accountData.id === Creator.id
     const showDropDown =
         isOwnPost &&
         mediaTypes.includes('text') &&
         beadIndex !== 0 &&
         !['create-string-modal', 'next-bead-modal', 'preview'].includes(location)
+    const showFooter = location !== 'preview' && state !== 'account-deleted'
 
-    const showFooter = location !== 'preview' && bead.state !== 'account-deleted'
+    function getUrls() {
+        axios
+            .get(`${config.apiURL}/post-urls?postId=${id}`)
+            .then((res) => {
+                setUrlBlocks(res.data)
+                setLoading(false)
+            })
+            .catch((error) => console.log(error))
+    }
+
+    function getImages() {
+        axios
+            .get(`${config.apiURL}/post-images?postId=${id}&offset=0`)
+            .then((res) => {
+                setImageBlocks(res.data.blocks)
+                setLoading(false)
+            })
+            .catch((error) => console.log(error))
+    }
+
+    function getAudio() {
+        axios
+            .get(`${config.apiURL}/post-audio?postId=${id}`)
+            .then((res) => {
+                setAudioBlocks(res.data)
+                setLoading(false)
+            })
+            .catch((error) => console.log(error))
+    }
+
+    function getBeadData() {
+        if (mediaTypes.includes('url')) getUrls()
+        else if (mediaTypes.includes('image')) getImages()
+        else if (mediaTypes.includes('audio')) getAudio()
+        else setLoading(false)
+    }
 
     function findUserTitle() {
-        if (bead.state === 'account-deleted') return '[Account deleted]'
-        return isOwnPost ? 'You' : bead.Creator.name
+        if (state === 'account-deleted') return '[Account deleted]'
+        return isOwnPost ? 'You' : Creator.name
     }
 
     function openImageModal(imageId) {
-        setSelectedImage(images.find((image) => image.id === imageId))
+        setSelectedImage(imageBlocks.find((image) => image.id === imageId))
         setImageModalOpen(true)
     }
 
@@ -112,6 +150,8 @@ function BeadCard(props: {
     }, [beadProp])
 
     useEffect(() => {
+        getBeadData()
+        // add drag event listeners
         const beadCard = document.getElementById(`bead-${id}`)
         if (beadCard) {
             beadCard.addEventListener('mouseenter', () =>
@@ -131,7 +171,7 @@ function BeadCard(props: {
             className={`${styles.wrapper} ${className} ${selected && styles.selected} ${
                 isSource && styles.source
             } ${location === 'gbg-room' && styles.gbgRoom}`}
-            style={{ ...style, backgroundColor: bead.color }}
+            style={{ ...style, backgroundColor: color }}
             draggable
             id={`bead-${id}`}
         >
@@ -139,7 +179,7 @@ function BeadCard(props: {
             <Row spaceBetween centerY className={styles.header}>
                 <ImageTitle
                     type='user'
-                    imagePath={bead.Creator.flagImagePath}
+                    imagePath={Creator.flagImagePath}
                     title={findUserTitle()}
                     fontSize={12}
                     imageSize={20}
@@ -199,79 +239,100 @@ function BeadCard(props: {
                     )}
                 </Row>
             </Row>
-            {bead.state === 'account-deleted' ? (
+            {state === 'account-deleted' ? (
                 <Column centerY centerX style={{ height: '100%' }}>
                     <p className='grey'>[Account deleted]</p>
                 </Column>
             ) : (
                 <Column centerY className={styles.content}>
-                    {mediaTypes.includes('text') && bead.text && (
-                        <Scrollbars style={{ paddingRight: 10, marginBottom: showFooter ? 0 : 10 }}>
-                            <DraftText stringifiedDraft={bead.text} />
-                        </Scrollbars>
-                    )}
-                    {mediaTypes.includes('text') && !bead.text && <h1>{bead.title}</h1>}
-                    {mediaTypes.includes('url') && <UrlPreview type='bead' urlData={Urls[0]} />}
-                    {mediaTypes.includes('image') && Images && (
-                        <button
-                            className={styles.image}
-                            type='button'
-                            onClick={() => openImageModal(Images[0].id)}
-                        >
-                            <img
-                                src={Images[0].url || URL.createObjectURL(Images[0].file)}
-                                // onError={(e) => handleImageError(e, Images[0].url)}
-                                alt=''
-                            />
-                        </button>
-                    )}
-                    {mediaTypes.includes('audio') && Audios && (
-                        <AudioCard
-                            id={postId}
-                            index={beadIndex}
-                            url={Audios[0].url || URL.createObjectURL(Audios[0].file)}
-                            staticBars={200}
-                            location={location}
-                            style={{ width: '100%', height: '100%' }}
-                        />
-                    )}
-                    {mediaTypes.includes('event') && (
+                    {loading ? (
                         <Column centerX>
-                            <h1>{title}</h1>
-                            <Row wrap centerY className={styles.eventTimes}>
-                                <CalendarIcon />
-                                <p>{findEventTimes(Event.startTime, Event.endTime)}</p>
-                                <p>{findEventDuration(Event.startTime, Event.endTime)}</p>
-                            </Row>
+                            <LoadingWheel size={30} />
                         </Column>
-                    )}
-                    {mediaTypes.includes('poll') && (
-                        <Column centerX className={styles.poll}>
-                            <PollIcon />
-                            <h1>{trimText(title, 30)}</h1>
-                            {bead.text && <p>{trimText(getDraftPlainText(bead.text), 50)}</p>}
-                        </Column>
-                    )}
-                    {mediaTypes.includes('glass-bead-game') && (
-                        <Column centerX className={styles.poll}>
-                            <CastaliaIcon />
-                            <h1>{trimText(title, 30)}</h1>
-                            {bead.text && <p>{trimText(getDraftPlainText(bead.text), 50)}</p>}
-                        </Column>
-                    )}
-                    {mediaTypes.includes('card') && (
-                        <Column centerX className={styles.card}>
-                            {title && <h1>{trimText(title, 30)}</h1>}
-                            {bead.text && <p>{trimText(getDraftPlainText(bead.text), 50)}</p>}
-                            <Row>
-                                {CardSides[0].Images[0] && (
-                                    <img src={CardSides[0].Images[0].url} alt='card front' />
-                                )}
-                                {CardSides[1].Images[0] && (
-                                    <img src={CardSides[1].Images[0].url} alt='card back' />
-                                )}
-                            </Row>
-                        </Column>
+                    ) : (
+                        <>
+                            {mediaTypes.includes('text') && text && (
+                                <Scrollbars
+                                    style={{ paddingRight: 10, marginBottom: showFooter ? 0 : 10 }}
+                                >
+                                    <DraftText text={text} />
+                                </Scrollbars>
+                            )}
+                            {mediaTypes.includes('text') && !text && <h1>{title}</h1>}
+                            {mediaTypes.includes('url') && (
+                                <UrlPreview type='bead' urlData={urlBlocks[0]} />
+                            )}
+                            {mediaTypes.includes('image') && (
+                                <button
+                                    className={styles.image}
+                                    type='button'
+                                    onClick={() => openImageModal(imageBlocks[0].id)}
+                                >
+                                    <img
+                                        src={
+                                            imageBlocks[0].Image.url ||
+                                            URL.createObjectURL(imageBlocks[0].file)
+                                        }
+                                        // onError={(e) => handleImageError(e, Images[0].url)}
+                                        alt=''
+                                    />
+                                </button>
+                            )}
+                            {mediaTypes.includes('audio') && (
+                                <AudioCard
+                                    id={postId}
+                                    index={beadIndex}
+                                    url={
+                                        audioBlocks[0].Audio.url ||
+                                        URL.createObjectURL(audioBlocks[0].file)
+                                    }
+                                    staticBars={200}
+                                    location={location}
+                                    style={{ width: '100%', height: '100%' }}
+                                />
+                            )}
+                            {mediaTypes.includes('event') && (
+                                <Column centerX>
+                                    <h1>{title}</h1>
+                                    <Row wrap centerY className={styles.eventTimes}>
+                                        <CalendarIcon />
+                                        <p>{findEventTimes(Event.startTime, Event.endTime)}</p>
+                                        <p>{findEventDuration(Event.startTime, Event.endTime)}</p>
+                                    </Row>
+                                </Column>
+                            )}
+                            {mediaTypes.includes('poll') && (
+                                <Column centerX className={styles.poll}>
+                                    <PollIcon />
+                                    <h1>{trimText(title, 30)}</h1>
+                                    {text && <p>{trimText(getDraftPlainText(text), 50)}</p>}
+                                </Column>
+                            )}
+                            {mediaTypes.includes('glass-bead-game') && (
+                                <Column centerX className={styles.poll}>
+                                    <CastaliaIcon />
+                                    <h1>{trimText(title, 30)}</h1>
+                                    {text && <p>{trimText(getDraftPlainText(text), 50)}</p>}
+                                </Column>
+                            )}
+                            {mediaTypes.includes('card') && (
+                                <Column centerX className={styles.card}>
+                                    {title && <h1>{trimText(title, 30)}</h1>}
+                                    {text && <p>{trimText(getDraftPlainText(text), 50)}</p>}
+                                    <Row>
+                                        {CardSides[0].Images[0] && (
+                                            <img
+                                                src={CardSides[0].Images[0].url}
+                                                alt='card front'
+                                            />
+                                        )}
+                                        {CardSides[1].Images[0] && (
+                                            <img src={CardSides[1].Images[0].url} alt='card back' />
+                                        )}
+                                    </Row>
+                                </Column>
+                            )}
+                        </>
                     )}
                 </Column>
             )}
@@ -310,7 +371,7 @@ function BeadCard(props: {
             )}
             {imageModalOpen && (
                 <ImageModal
-                    images={images}
+                    images={imageBlocks}
                     selectedImage={selectedImage}
                     setSelectedImage={setSelectedImage}
                     close={() => setImageModalOpen(false)}
@@ -323,8 +384,8 @@ function BeadCard(props: {
                     updateItem={() => {
                         setBead({
                             ...bead,
-                            totalLikes: bead.totalLikes + (bead.accountLike ? -1 : 1),
-                            accountLike: !bead.accountLike,
+                            totalLikes: totalLikes + (accountLike ? -1 : 1),
+                            accountLike: !accountLike,
                         })
                     }}
                     close={() => setLikeModalOpen(false)}
@@ -344,7 +405,6 @@ function BeadCard(props: {
 BeadCard.defaultProps = {
     postId: null,
     beadIndex: 0,
-    postType: null,
     selected: false,
     toggleBeadComments: null,
     removeBead: null,
