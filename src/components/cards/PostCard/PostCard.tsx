@@ -5,14 +5,12 @@ import Row from '@components/Row'
 import ShowMoreLess from '@components/ShowMoreLess'
 import UserButton from '@components/UserButton'
 import Comments from '@components/cards/Comments/Comments'
-import AudioCard from '@components/cards/PostCard/AudioCard'
+import Audio from '@components/cards/PostCard/Audio'
 import CardCard from '@components/cards/PostCard/CardCard'
 import EventCard from '@components/cards/PostCard/EventCard'
-import GlassBeadGameCard from '@components/cards/PostCard/GlassBeadGameCard'
-import ImagesCard from '@components/cards/PostCard/ImagesCard'
 import PollCard from '@components/cards/PostCard/PollCard'
 import PostSpaces from '@components/cards/PostCard/PostSpaces'
-import UrlCard from '@components/cards/PostCard/UrlCard'
+import Urls from '@components/cards/PostCard/Urls'
 import DraftText from '@components/draft-js/DraftText'
 import DeletePostModal from '@components/modals/DeletePostModal'
 import EditPostModal from '@components/modals/EditPostModal'
@@ -24,6 +22,8 @@ import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import { dateCreated, timeSinceCreated, timeSinceCreatedShort } from '@src/Helpers'
+import GlassBeadGame from '@src/components/cards/PostCard/GlassBeadGame'
+import Images from '@src/components/cards/PostCard/Images'
 import {
     CommentIcon,
     DeleteIcon,
@@ -88,12 +88,10 @@ function PostCard(props: {
         sourcePostId,
         Creator,
         DirectSpaces,
-        Urls,
-        Audios,
-        GlassBeadGame,
     } = postData
     const [likeLoading, setLikeLoading] = useState(false)
     const [draggable, setDraggable] = useState(true)
+    const [topicImage, setTopicImage] = useState('')
     const [menuOpen, setMenuOpen] = useState(false)
     const [likeModalOpen, setLikeModalOpen] = useState(false)
     const [repostModalOpen, setRepostModalOpen] = useState(false)
@@ -271,73 +269,60 @@ function PostCard(props: {
                         </Link>
                     </Row>
                 )}
-                <div
-                    onMouseEnter={() => setDraggable(false)}
-                    onMouseLeave={() => setDraggable(true)}
-                    style={{ cursor: 'text' }}
-                >
-                    {!mediaTypes.includes('glass-bead-game') && title && (
-                        <h1 className={styles.title}>{title}</h1>
-                    )}
-                    {mediaTypes.includes('glass-bead-game') && title && (
-                        <Row centerY className={styles.topic}>
-                            {GlassBeadGame.topicImage && (
-                                <img src={GlassBeadGame.topicImage} alt='' />
-                            )}
-                            <h1>{title}</h1>
-                        </Row>
-                    )}
-                    {text && collapse && (
-                        <ShowMoreLess height={700} gradientColor='white'>
-                            <DraftText stringifiedDraft={text} style={{ marginBottom: 10 }} />
-                        </ShowMoreLess>
-                    )}
-                    {text && !collapse && (
-                        <DraftText stringifiedDraft={text} style={{ marginBottom: 10 }} />
-                    )}
-                </div>
+                {(title || text) && (
+                    <div
+                        onMouseEnter={() => setDraggable(false)}
+                        onMouseLeave={() => setDraggable(true)}
+                        style={{ cursor: 'text' }}
+                    >
+                        {title && (
+                            <>
+                                {mediaTypes.includes('glass-bead-game') ? (
+                                    <Row centerY className={styles.topic}>
+                                        {topicImage && <img src={topicImage} alt='' />}
+                                        <h1>{title}</h1>
+                                    </Row>
+                                ) : (
+                                    <h1 className={styles.title}>{title}</h1>
+                                )}
+                            </>
+                        )}
+                        {text && (
+                            <>
+                                {collapse ? (
+                                    <ShowMoreLess height={700} gradientColor='white'>
+                                        <DraftText text={text} style={{ marginBottom: 10 }} />
+                                    </ShowMoreLess>
+                                ) : (
+                                    <DraftText text={text} style={{ marginBottom: 10 }} />
+                                )}
+                            </>
+                        )}
+                    </div>
+                )}
+
                 {/* {todo: startTime && } */}
                 {postData.Event && (
                     <EventCard postData={postData} setPostData={setPostData} location={location} />
-                )}
-                {mediaTypes.includes('image') && (
-                    <ImagesCard images={postData.Images.sort((a, b) => a.index - b.index)} />
-                )}
-                {mediaTypes.includes('audio') && (
-                    <AudioCard
-                        id={postData.id}
-                        url={Audios[0].url}
-                        staticBars={400}
-                        location={location}
-                        style={{ height: 200, margin: '10px 0' }}
-                    />
                 )}
                 {mediaTypes.includes('poll') && (
                     <PollCard postData={postData} location={location} />
                 )}
                 {mediaTypes.includes('glass-bead-game') && (
-                    <GlassBeadGameCard postData={postData} location={location} />
+                    <GlassBeadGame
+                        postId={id}
+                        setTopicImage={setTopicImage}
+                        isOwnPost={Creator.id === accountData.id}
+                    />
                 )}
                 {mediaTypes.includes('card') && (
                     <CardCard postData={postData} setPostData={setPostData} location={location} />
                 )}
-                {Urls.length > 0 && (
-                    <Column style={{ marginBottom: 10 }}>
-                        {Urls.map((urlData, i) => (
-                            <UrlCard
-                                key={urlData.url}
-                                type='post'
-                                urlData={urlData}
-                                style={{
-                                    marginTop:
-                                        text || mediaTypes.includes('glass-bead-game') || i > 0
-                                            ? 10
-                                            : 0,
-                                }}
-                            />
-                        ))}
-                    </Column>
+                {mediaTypes.includes('url') && <Urls postId={id} style={{ marginBottom: 10 }} />}
+                {mediaTypes.includes('image') && (
+                    <Images postId={id} style={{ marginBottom: 10 }} />
                 )}
+                {mediaTypes.includes('audio') && <Audio postId={id} style={{ marginBottom: 10 }} />}
             </Column>
             {showFooter && (
                 <Column className={styles.footer}>
