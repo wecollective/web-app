@@ -11,6 +11,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
+// todo: update for fractal nesting (create recursive search function if needed)
 function Comments(props: {
     postId: number
     type?: string
@@ -36,7 +37,7 @@ function Comments(props: {
     const urlParams = Object.fromEntries(new URLSearchParams(useLocation().search))
     const filteredComments = comments.filter((c) => {
         // remove deleted comments with no replies
-        return c.state === 'visible' || c.Replies.length
+        return c.state === 'active' || c.Comments.length
     })
 
     function getComments() {
@@ -45,6 +46,7 @@ function Comments(props: {
         axios
             .get(`${config.apiURL}/post-comments?postId=${postId}`, options)
             .then((res) => {
+                console.log(res.data)
                 setComments(res.data)
                 setLoading(false)
                 // if commentId in params, scroll to comment
@@ -58,19 +60,21 @@ function Comments(props: {
             .catch((error) => console.log(error))
     }
 
+    // todo: update
     function addComment(comment) {
         const { parentCommentId } = comment
-        const newComment = { ...comment, Creator: accountData, Replies: [] }
+        const newComment = { ...comment, Creator: accountData, Comments: [] }
         if (!parentCommentId) setComments([...comments, newComment])
         else {
             const newComments = [...comments]
             const parentComment = newComments.find((c) => c.id === parentCommentId)
-            parentComment.Replies.push(newComment)
+            parentComment.Comments.push(newComment)
             setComments(newComments)
         }
         incrementTotalComments(1)
     }
 
+    // todo: update
     function removeComment(comment) {
         const { id, parentCommentId } = comment
         incrementTotalComments(-1)
@@ -91,6 +95,7 @@ function Comments(props: {
         }
     }
 
+    // todo: update
     function editComment(comment, newText) {
         const { id, parentCommentId } = comment
         const newComments = [...comments]
@@ -106,6 +111,7 @@ function Comments(props: {
         setComments(newComments)
     }
 
+    // todo: update
     function updateCommentReactions(comment, reactionType, increment) {
         const { id, parentCommentId } = comment
         const newComments = [...comments]

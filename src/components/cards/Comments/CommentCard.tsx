@@ -299,7 +299,7 @@ function CommentCard(props: {
                     )}
                 </Column>
             </Row>
-            {state === 'visible' && (
+            {state === 'active' && (
                 <Row className={styles.footer}>
                     <button
                         type='button'

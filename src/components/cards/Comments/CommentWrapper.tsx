@@ -29,6 +29,7 @@ function CommentWrapper(props: {
     const [replyId, setReplyId] = useState(0)
     const [replyInputOpen, setReplyInputOpen] = useState(false)
 
+    // todo: prompt to login if not logged in & only scroll when opening input
     function toggleReplyInput(id?) {
         setReplyId(id || 0)
         Promise.all([setReplyInputOpen(!replyInputOpen)]).then(() => {
@@ -50,7 +51,7 @@ function CommentWrapper(props: {
                 location={location}
             />
             <Column style={{ marginLeft: 36 }}>
-                {comment.Replies.map((reply) => (
+                {comment.Comments.map((reply) => (
                     <CommentCard
                         key={reply.id}
                         comment={reply}
