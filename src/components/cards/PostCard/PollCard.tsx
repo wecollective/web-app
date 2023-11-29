@@ -76,17 +76,17 @@ function PollCard(props: { postData: any; location: string }): JSX.Element {
     }
 
     function buildPollData(data) {
-        const { type, PollAnswers } = data
+        const { type, Answers } = data
         colorScale.current = d3
             .scaleSequential()
-            .domain([0, PollAnswers.length])
+            .domain([0, Answers.length])
             .interpolator(d3.interpolateViridis)
         const weighted = type === 'weighted-choice'
         const answersWithData = [] as any[]
         let totalPollVotes = 0
         let totalPollPoints = 0
         const pollUsers = [] as number[]
-        PollAnswers.forEach((answer) => {
+        Answers.forEach((answer) => {
             const activeReactions = answer.Reactions.filter((r) => r.state === 'active')
             // find all users
             activeReactions.forEach((r) => {
@@ -184,7 +184,7 @@ function PollCard(props: { postData: any; location: string }): JSX.Element {
                     const answer = { ...res.data.pollAnswer, Creator: accountData, Reactions: [] }
                     const newPollData = {
                         ...pollData,
-                        PollAnswers: [...pollData.PollAnswers, answer],
+                        Answers: [...pollData.Answers, answer],
                     }
                     setPollData(newPollData)
                     buildPollData(newPollData)
