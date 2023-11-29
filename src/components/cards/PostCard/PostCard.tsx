@@ -6,7 +6,7 @@ import ShowMoreLess from '@components/ShowMoreLess'
 import UserButton from '@components/UserButton'
 import Comments from '@components/cards/Comments/Comments'
 import Audio from '@components/cards/PostCard/Audio'
-import CardCard from '@components/cards/PostCard/CardCard'
+import Card from '@components/cards/PostCard/Card'
 import EventCard from '@components/cards/PostCard/EventCard'
 import PollCard from '@components/cards/PostCard/PollCard'
 import PostSpaces from '@components/cards/PostCard/PostSpaces'
@@ -315,9 +315,7 @@ function PostCard(props: {
                         isOwnPost={Creator.id === accountData.id}
                     />
                 )}
-                {mediaTypes.includes('card') && (
-                    <CardCard postData={postData} setPostData={setPostData} location={location} />
-                )}
+                {mediaTypes.includes('card') && <Card postId={id} />}
                 {mediaTypes.includes('url') && <Urls postId={id} style={{ marginBottom: 10 }} />}
                 {mediaTypes.includes('image') && (
                     <Images postId={id} style={{ marginBottom: 10 }} />

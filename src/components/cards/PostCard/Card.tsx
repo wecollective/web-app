@@ -1,27 +1,40 @@
 import Column from '@components/Column'
+import LoadingWheel from '@components/LoadingWheel'
 import Row from '@components/Row'
 import DraftText from '@components/draft-js/DraftText'
 import LikeModal from '@components/modals/LikeModal'
-import styles from '@styles/components/cards/PostCard/CardCard.module.scss'
+import config from '@src/Config'
+import styles from '@styles/components/cards/PostCard/Card.module.scss'
 import { LikeIcon, LinkIcon, RepostIcon } from '@svgs/all'
-import React, { useState } from 'react'
+import axios from 'axios'
+import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
-function CardCard(props: {
-    postData: any
-    setPostData: (data: any) => void
-    location: string
-}): JSX.Element {
-    const { postData, setPostData, location } = props
+// todo: handle like updates
+function Card(props: { postId: any; style?: any }): JSX.Element {
+    const { postId, style } = props
+    const [loading, setLoading] = useState(true)
+    const [blocks, setBlocks] = useState<any[]>([])
     const [cardFocused, setCardFocused] = useState(false)
     const [cardRotating, setCardRotating] = useState(false)
     const [cardFlipped, setCardFlipped] = useState(false)
     const [likeModalOpen, setLikeModalOpen] = useState(false)
     const [linkModalOpen, setLinkModalOpen] = useState(false)
-    const cardFront = postData.CardSides.find((s) => s.Link.index === 0)
-    const cardBack = postData.CardSides.find((s) => s.Link.index === 1)
+    const cardFront = blocks.find((b) => b.Link.index === 0)
+    const cardBack = blocks.find((b) => b.Link.index === 1)
     const card = cardFlipped ? cardBack : cardFront
     const history = useNavigate()
+
+    function getCardFaces() {
+        axios
+            .get(`${config.apiURL}/card-faces?postId=${postId}`)
+            .then((res) => {
+                console.log('card-faces: ', res.data)
+                setBlocks(res.data)
+                setLoading(false)
+            })
+            .catch((error) => console.log(error))
+    }
 
     function rotateCard() {
         setCardRotating(true)
@@ -31,23 +44,23 @@ function CardCard(props: {
         }, 500)
     }
 
-    function setCardData(newCardData) {
-        const newPostData = { ...postData }
-        newPostData.CardSides = newPostData.CardSides.filter(
-            (s) => s.type !== `card-${cardFlipped ? 'back' : 'front'}`
-        )
-        newPostData.CardSides.push(newCardData)
-        setPostData(newPostData)
-    }
+    // function setCardData(newCardData) {
+    //     const newPostData = { ...postData }
+    //     newPostData.CardSides = newPostData.CardSides.filter(
+    //         (s) => s.type !== `card-${cardFlipped ? 'back' : 'front'}`
+    //     )
+    //     newPostData.CardSides.push(newCardData)
+    //     setPostData(newPostData)
+    // }
 
     function renderCardFace(side) {
         const data = side === 'front' ? cardFront : cardBack
         const faceUp = side === 'front' ? !cardFlipped : cardFlipped
         return (
             <Column centerY className={`${styles.cardContent} ${faceUp && styles.visible}`}>
-                {data.Images[0] && (
+                {data.Blocks[0] && data.Blocks[0].Image && (
                     <img
-                        src={data.Images[0].url}
+                        src={data.Blocks[0].Image.url}
                         alt='background'
                         style={{ opacity: data.watermark ? 0.3 : 1 }}
                     />
@@ -62,7 +75,14 @@ function CardCard(props: {
         )
     }
 
-    // todo: render card face id and icons in function to avoid HTML duplication
+    useEffect(() => getCardFaces(), [])
+
+    if (loading)
+        return (
+            <Column centerX style={style}>
+                <LoadingWheel size={30} style={{ margin: 20 }} />
+            </Column>
+        )
 
     return (
         <Column centerX className={styles.wrapper}>
@@ -152,11 +172,11 @@ function CardCard(props: {
                     itemType='post'
                     itemData={card}
                     updateItem={() => {
-                        setCardData({
-                            ...card,
-                            totalLikes: card.totalLikes + (card.accountLike ? -1 : 1),
-                            accountLike: !card.accountLike,
-                        })
+                        // setCardData({
+                        //     ...card,
+                        //     totalLikes: card.totalLikes + (card.accountLike ? -1 : 1),
+                        //     accountLike: !card.accountLike,
+                        // })
                     }}
                     close={() => setLikeModalOpen(false)}
                 />
@@ -165,4 +185,8 @@ function CardCard(props: {
     )
 }
 
-export default CardCard
+Card.defaultProps = {
+    style: null,
+}
+
+export default Card
