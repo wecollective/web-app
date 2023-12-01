@@ -4,7 +4,6 @@
 import Button from '@components/Button'
 import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
-import DropDown from '@components/DropDown'
 import FlagImageHighlights from '@components/FlagImageHighlights'
 import ImageTitle from '@components/ImageTitle'
 import Input from '@components/Input'
@@ -38,7 +37,6 @@ import {
     findDraftLength,
     findEventDuration,
     findEventTimes,
-    formatTimeMMSS,
     getDraftPlainText,
     imageMBLimit,
     megaByte,
@@ -56,7 +54,6 @@ import {
     ImageIcon,
     PlusIcon,
     RepostIcon,
-    SettingsIcon,
     UsersIcon,
 } from '@svgs/all'
 import axios from 'axios'
@@ -109,7 +106,8 @@ function CreatePostModal(): JSX.Element {
     const { userPosts, setUserPosts } = useContext(UserContext)
     const [loading, setLoading] = useState(false)
     const [linkDescription, setLinkDescription] = useState('')
-    const [postType, setPostType] = useState('text')
+    // const [postType, setPostType] = useState('text')
+    const [mediaTypes, setMediaTypes] = useState<string[]>([])
     const [spaces, setSpaces] = useState<any[]>([spaceData.id ? spaceData : defaultSelectedSpace])
     const [showTitle, setShowTitle] = useState(true)
     const [title, setTitle] = useState('')
@@ -144,15 +142,16 @@ function CreatePostModal(): JSX.Element {
     }
 
     function findModalHeader() {
-        if (governance) return 'New governance poll'
-        if (postType === 'text') return 'New post'
-        if (postType === 'image') return 'New image post'
-        if (postType === 'audio') return 'New audio post'
-        if (postType === 'event') return 'New event'
-        if (postType === 'poll') return 'New poll'
-        if (postType === 'card') return 'New card'
-        if (postType === 'glass-bead-game') return 'New Glass Bead Game'
-        return ''
+        return 'Header'
+        // if (governance) return 'New governance poll'
+        // if (postType === 'text') return 'New post'
+        // if (postType === 'image') return 'New image post'
+        // if (postType === 'audio') return 'New audio post'
+        // if (postType === 'event') return 'New event'
+        // if (postType === 'poll') return 'New poll'
+        // if (postType === 'card') return 'New card'
+        // if (postType === 'glass-bead-game') return 'New Glass Bead Game'
+        // return ''
     }
 
     function scrapeUrlMetaData(url) {
@@ -522,11 +521,13 @@ function CreatePostModal(): JSX.Element {
     }
 
     function renderEventTimes() {
-        const showEventDates = postType === 'event' && startTime
+        const showEventDates = mediaTypes.includes('event') && startTime
         const showGBGDates =
-            postType === 'glass-bead-game' && GBGSettings.synchronous && GBGSettings.startTime
-        const start = postType === 'event' ? startTime : GBGSettings.startTime
-        const end = postType === 'event' ? endTime : GBGSettings.endTime
+            mediaTypes.includes('glass-bead-game') &&
+            GBGSettings.synchronous &&
+            GBGSettings.startTime
+        const start = mediaTypes.includes('event') ? startTime : GBGSettings.startTime
+        const end = mediaTypes.includes('event') ? endTime : GBGSettings.endTime
         if (!showEventDates && !showGBGDates) return null
         return (
             <Row centerY className={styles.dates}>
@@ -580,8 +581,8 @@ function CreatePostModal(): JSX.Element {
     }
 
     function renderBeads() {
-        let showNextBeadButton = !multiplayer && (!totalMoves || beads.length < totalMoves)
-        if (postType === 'gbg-from-post' && synchronous) showNextBeadButton = false
+        const showNextBeadButton = !multiplayer && (!totalMoves || beads.length < totalMoves)
+        // if (postType === 'gbg-from-post' && synchronous) showNextBeadButton = false
         return (
             <Row centerX>
                 <Scrollbars className={styles.beads}>
@@ -626,10 +627,11 @@ function CreatePostModal(): JSX.Element {
         )
     }
 
+    // todo: update for multiple media types
     function postValid() {
         let valid = true
         const totalChars = findDraftLength(text)
-        if (postType === 'text') {
+        if (mediaTypes.includes('text')) {
             if (totalChars < 1 && !title && !urlsWithMetaData.length) {
                 setNoTextError(true)
                 valid = false
@@ -639,7 +641,7 @@ function CreatePostModal(): JSX.Element {
                 valid = false
             }
         }
-        if (postType === 'image') {
+        if (mediaTypes.includes('image')) {
             if (!images.length) {
                 setNoImagesError(true)
                 valid = false
@@ -650,14 +652,14 @@ function CreatePostModal(): JSX.Element {
                 valid = false
             }
         }
-        if (postType === 'audio') {
+        if (mediaTypes.includes('audio')) {
             if (!audioFile) {
                 setAudioSizeError(false)
                 setNoAudioError(true)
                 valid = false
             }
         }
-        if (postType === 'event') {
+        if (mediaTypes.includes('event')) {
             if (totalChars < 1 && !title) {
                 setEventTextError(true)
                 valid = false
@@ -667,7 +669,7 @@ function CreatePostModal(): JSX.Element {
                 valid = false
             }
         }
-        if (postType === 'poll') {
+        if (mediaTypes.includes('poll')) {
             if (totalChars < 1 && !title) {
                 setPollTextError(true)
                 valid = false
@@ -677,7 +679,7 @@ function CreatePostModal(): JSX.Element {
                 valid = false
             }
         }
-        if (postType === 'glass-bead-game') {
+        if (mediaTypes.includes('glass-bead-game')) {
             if (!topic) {
                 setTopicError(true)
                 valid = false
@@ -687,7 +689,7 @@ function CreatePostModal(): JSX.Element {
                 valid = false
             }
         }
-        if (postType === 'card') {
+        if (mediaTypes.includes('card')) {
             const frontTotalChars = findDraftLength(cardFrontText)
             const backTotalChars = findDraftLength(cardBackText)
             if (!cardFrontImage && frontTotalChars === 0) {
@@ -702,7 +704,7 @@ function CreatePostModal(): JSX.Element {
     }
 
     function findTopicGroup() {
-        if (postType === 'glass-bead-game') {
+        if (mediaTypes.includes('glass-bead-game')) {
             // todo: update when objects merged into array && check for image match
             const arcMatch = GlassBeadGameTopics.archetopics.find((t) => t.name === topic)
             if (arcMatch) return 'archetopics'
@@ -740,17 +742,18 @@ function CreatePostModal(): JSX.Element {
             const postData = {
                 creatorName: accountData.name,
                 creatorHandle: accountData.handle,
-                type: postType === 'text' && urlsWithMetaData.length > 0 ? 'url' : postType,
+                // type: postType === 'text' && urlsWithMetaData.length > 0 ? 'url' : postType,
+                mediaTypes: '',
                 spaceIds:
                     // remove root space if other spaces present
                     spaces.length > 1
                         ? spaces.filter((s) => s.id !== 1).map((s) => s.id)
                         : spaces.map((s) => s.id),
-                title: postType === 'glass-bead-game' ? topic : title,
+                title: mediaTypes.includes('glass-bead-game') ? topic : title,
                 text: findDraftLength(text) ? text : null,
                 mentions: mentions.map((m) => m.link),
                 urls: urlsWithMetaData,
-                images: postType === 'image' ? images : [],
+                images: mediaTypes.includes('image') ? images : [],
                 startTime,
                 endTime,
                 pollType: pollType.toLowerCase().replace(/[^a-z0-9]/g, '-'),
@@ -776,10 +779,11 @@ function CreatePostModal(): JSX.Element {
                 postData.pollAction = pollAction
                 postData.pollThreshold = pollThreshold
             }
+            // todo: update
             // set up file uploads if required
             let fileData
             let uploadType
-            if (postType === 'image') {
+            if (mediaTypes.includes('image')) {
                 uploadType = 'image-file'
                 fileData = new FormData()
                 images.forEach((image, index) => {
@@ -787,14 +791,14 @@ function CreatePostModal(): JSX.Element {
                 })
                 fileData.append('postData', JSON.stringify(postData))
             }
-            if (postType === 'audio') {
+            if (mediaTypes.includes('audio')) {
                 const isBlob = audioFile && !audioFile.name
                 uploadType = isBlob ? 'audio-blob' : 'audio-file'
                 fileData = new FormData()
                 fileData.append('file', isBlob ? audioBlob : audioFile)
                 fileData.append('postData', JSON.stringify(postData))
             }
-            if (postType === 'card') {
+            if (mediaTypes.includes('card')) {
                 postData.cardFrontSearchableText = postData.cardFrontText
                     ? getDraftPlainText(postData.cardFrontText)
                     : null
@@ -807,7 +811,7 @@ function CreatePostModal(): JSX.Element {
                 if (cardBackImage) fileData.append('file', cardBackImage, 'back')
                 fileData.append('postData', JSON.stringify(postData))
             }
-            if (postData.type === 'glass-bead-game') {
+            if (mediaTypes.includes('glass-bead-game')) {
                 uploadType = 'glass-bead-game'
                 fileData = new FormData()
                 // upload topic image if required
@@ -874,9 +878,10 @@ function CreatePostModal(): JSX.Element {
                                 : null,
                         }
                         if (sourceId) newPost.accountLink = true
-                        if (postType === 'audio') newPost.Audios = [{ url: res.data.audio.url }]
-                        if (postType === 'image') newPost.Images = images
-                        if (postType === 'poll')
+                        if (mediaTypes.includes('audio'))
+                            newPost.Audios = [{ url: res.data.audio.url }]
+                        if (mediaTypes.includes('image')) newPost.Images = images
+                        if (mediaTypes.includes('poll'))
                             newPost.Poll = {
                                 ...res.data.pollData.poll,
                                 PollAnswers: res.data.pollData.answers.map((a) => {
@@ -931,10 +936,10 @@ function CreatePostModal(): JSX.Element {
         }
     }
 
-    useEffect(() => {
-        if (game) setPostType('glass-bead-game')
-        if (governance) setPostType('poll')
-    }, [])
+    // useEffect(() => {
+    //     if (game) setPostType('glass-bead-game')
+    //     if (governance) setPostType('poll')
+    // }, [])
 
     // remove errors and initialise date picker if post type is event
     useEffect(() => {
@@ -951,7 +956,7 @@ function CreatePostModal(): JSX.Element {
         setTopicError(false)
         setNoBeadsError(false)
         // initialise date picker
-        if (postType === 'event') {
+        if (mediaTypes.includes('event')) {
             const now = new Date()
             const startTimePast = new Date(startTime) < now
             const endTimePast = new Date(endTime) < now
@@ -980,7 +985,7 @@ function CreatePostModal(): JSX.Element {
             if (startTimePast && defaultStartDate) setStartTime(defaultStartDate.toString())
             if (endTimePast && defaultEndDate) setStartTime(defaultEndDate.toString())
         }
-    }, [postType])
+    }, [mediaTypes])
 
     // todo: pass function into input so hook not necissary (requires use of refs..., maybe update gbg settings instead?)
     // update minimum end date when start date changed
@@ -1035,7 +1040,8 @@ function CreatePostModal(): JSX.Element {
 
     return (
         <Modal
-            className={`${styles.wrapper} ${styles[postType]}`}
+            // className={`${styles.wrapper} ${styles[postType]}`}
+            className={styles.wrapper}
             close={closeModal}
             centerX
             confirmClose={!saved}
@@ -1046,7 +1052,7 @@ function CreatePostModal(): JSX.Element {
                 <Column centerX style={{ width: '100%' }}>
                     <Row centerY style={{ marginBottom: 20 }}>
                         <h1 style={{ margin: 0 }}>{findModalHeader()}</h1>
-                        {postType === 'glass-bead-game' && (
+                        {mediaTypes.includes('glass-bead-game') && (
                             <button
                                 type='button'
                                 className={styles.helpButton}
@@ -1092,7 +1098,7 @@ function CreatePostModal(): JSX.Element {
                             )}
                         </Row>
                         <Column className={styles.content}>
-                            {showTitle && postType !== 'glass-bead-game' && (
+                            {showTitle && !mediaTypes.includes('glass-bead-game') && (
                                 <Row centerY spaceBetween className={styles.title}>
                                     <input
                                         placeholder='Title...'
@@ -1115,7 +1121,7 @@ function CreatePostModal(): JSX.Element {
                                     />
                                 </Row>
                             )}
-                            {postType === 'glass-bead-game' && (
+                            {mediaTypes.includes('glass-bead-game') && (
                                 <Row centerY spaceBetween className={styles.topic}>
                                     <Column centerX centerY className={styles.imageWrapper}>
                                         {topicImageURL && <img src={topicImageURL} alt='' />}
@@ -1176,12 +1182,12 @@ function CreatePostModal(): JSX.Element {
                                 }}
                             />
                             {renderEventTimes()}
-                            {postType === 'image' && (
+                            {mediaTypes.includes('image') && (
                                 <Row centerX style={{ width: '100%' }}>
                                     {images.length > 0 && renderImages()}
                                 </Row>
                             )}
-                            {postType === 'audio' && audioFile && (
+                            {mediaTypes.includes('audio') && audioFile && (
                                 <AudioCard
                                     key={audioFile.lastModified}
                                     url={URL.createObjectURL(audioFile)}
@@ -1190,7 +1196,7 @@ function CreatePostModal(): JSX.Element {
                                     style={{ height: 200 }}
                                 />
                             )}
-                            {postType === 'poll' && (
+                            {mediaTypes.includes('poll') && (
                                 <Column className={styles.poll}>
                                     {pollAnswers.map((answer, index) => (
                                         <PollAnswer
@@ -1222,7 +1228,7 @@ function CreatePostModal(): JSX.Element {
                                     </Row>
                                 </Column>
                             )}
-                            {postType === 'card' && (
+                            {mediaTypes.includes('card') && (
                                 <Column centerX className={styles.cardContainer}>
                                     <span>{cardFlipped ? 'Back' : 'Front'}</span>
                                     <button
@@ -1363,7 +1369,7 @@ function CreatePostModal(): JSX.Element {
                                     </Row> */}
                                 </Column>
                             )}
-                            {['glass-bead-game', 'gbg-from-post'].includes(postType) && (
+                            {mediaTypes.includes('glass-bead-game') && (
                                 <Column className={styles.gbg}>
                                     {!synchronous && (
                                         <Column>
@@ -1372,9 +1378,10 @@ function CreatePostModal(): JSX.Element {
                                                 renderBeads()} */}
                                         </Column>
                                     )}
-                                    {(postType === 'gbg-from-post' ||
+                                    {!synchronous && !multiplayer && renderBeads()}
+                                    {/* {(postType === 'gbg-from-post' ||
                                         (!synchronous && !multiplayer)) &&
-                                        renderBeads()}
+                                        renderBeads()} */}
                                 </Column>
                             )}
                             {urlsWithMetaData.map((u) => (
@@ -1389,7 +1396,7 @@ function CreatePostModal(): JSX.Element {
                             ))}
                         </Column>
                     </Column>
-                    {!['text', 'card'].includes(postType) && (
+                    {/* {!['text', 'card'].includes(postType) && (
                         <Row wrap centerY centerX className={styles.contentOptions}>
                             {postType === 'image' && (
                                 <>
@@ -1528,15 +1535,15 @@ function CreatePostModal(): JSX.Element {
                                 />
                             )}
                         </Row>
-                    )}
+                    )} */}
                     {!!contentTypes.length && (
                         <Row style={{ marginBottom: 20 }}>
                             {contentTypes.map((type) => (
                                 <ContentButton
                                     key={type}
                                     type={type}
-                                    postType={postType}
-                                    setPostType={setPostType}
+                                    postType='text'
+                                    setPostType={() => null}
                                 />
                             ))}
                         </Row>
