@@ -208,8 +208,8 @@ function CreatePostModal(): JSX.Element {
     // images
     const [images, setImages] = useState<any[]>([])
     const [imageURL, setImageURL] = useState('')
+    const [startIndex, setStartIndex] = useState(0)
     const [imageModalOpen, setImageModalOpen] = useState(false)
-    const [selectedImage, setSelectedImage] = useState<any>(null)
     const [imageSizeError, setImageSizeError] = useState(false)
     const [totalImageSizeError, setTotalImageSizeError] = useState(false)
     const [noImagesError, setNoImagesError] = useState(false)
@@ -218,11 +218,6 @@ function CreatePostModal(): JSX.Element {
         if (images.length === 1) return 'large'
         if (images.length === 2) return 'medium'
         return 'small'
-    }
-
-    function openImageModal(imageId) {
-        setSelectedImage(images.find((image) => image.id === imageId))
-        setImageModalOpen(true)
     }
 
     function addImageFiles(drop?) {
@@ -236,16 +231,8 @@ function CreatePostModal(): JSX.Element {
                 if (allowedTypes.includes(fileType)) {
                     if (input.files[i].size > imageMBLimit * 1024 * 1024) setImageSizeError(true)
                     else {
-                        // const newImage = { id: uuidv4(), file: input.files[i] }
-                        setImages((imgs) => [
-                            ...imgs,
-                            {
-                                id: uuidv4(),
-                                // todo: remove index until uploaded?
-                                index: imgs.length,
-                                file: input && input.files && input.files[i],
-                            },
-                        ])
+                        const newImage = { id: uuidv4(), Image: { file: input.files[i] } }
+                        setImages((imgs) => [...imgs, newImage])
                     }
                 }
             }
@@ -254,40 +241,30 @@ function CreatePostModal(): JSX.Element {
     }
 
     function addImageURL() {
-        setImages(() => [...images, { id: uuidv4(), index: images.length, url: imageURL }])
+        setImages([...images, { id: uuidv4(), Image: { url: imageURL } }])
         setImageURL('')
         setImageSizeError(false)
         setNoImagesError(false)
     }
 
-    // todo: use id?
-    function removeImage(index) {
+    function removeImage(id) {
         setTotalImageSizeError(false)
-        setImages([
-            ...images
-                .filter((image, i) => i !== index)
-                .map((img, i) => {
-                    return { ...img, index: i }
-                }),
-        ])
+        setImages(images.filter((image) => image.id !== id))
     }
 
     function moveImage(index, increment) {
-        const newImageArray = [...images]
-        const image = newImageArray[index]
-        newImageArray.splice(index, 1)
-        newImageArray.splice(index + increment, 0, image)
-        setImages(
-            newImageArray.map((img, i) => {
-                return { ...img, index: i }
-            })
-        )
+        const newImages = [...images]
+        const image = newImages[index]
+        newImages.splice(index, 1)
+        newImages.splice(index + increment, 0, image)
+        setImages(newImages)
     }
 
-    function updateCaption(index, value) {
-        const newImageArray = [...images]
-        newImageArray[index].caption = value
-        setImages(newImageArray)
+    function updateCaption(id, caption) {
+        const newImages = [...images]
+        const image = images.find((i) => i.id === id)
+        image.text = caption
+        setImages(newImages)
     }
 
     function findTotalImageMBs() {
@@ -296,6 +273,62 @@ function CreatePostModal(): JSX.Element {
             .map((i) => i.file.size)
             .reduce((a, b) => a + b, 0)
         return +(totalBytes / megaByte).toFixed(2)
+    }
+
+    function renderImages() {
+        // todo: create and use image card
+        return (
+            <Scrollbars className={styles.images}>
+                <Row>
+                    {images.map((image, index) => (
+                        <Column
+                            key={image.id}
+                            centerX
+                            className={`${styles.imageWrapper} ${styles[findImageSize()]}`}
+                        >
+                            <CloseButton
+                                size={20}
+                                onClick={() => removeImage(image.id)}
+                                style={{ position: 'absolute', right: 0 }}
+                            />
+                            <button
+                                className={styles.imageButton}
+                                type='button'
+                                onClick={() => {
+                                    setStartIndex(index)
+                                    setImageModalOpen(true)
+                                }}
+                            >
+                                <img
+                                    src={image.Image.url || URL.createObjectURL(image.Image.file)}
+                                    alt=''
+                                />
+                            </button>
+                            <Row centerY style={{ width: '100%' }}>
+                                <Input
+                                    type='text'
+                                    placeholder='add caption...'
+                                    value={image.text}
+                                    onChange={(value) => updateCaption(image.id, value)}
+                                />
+                            </Row>
+                            <Row centerX className={styles.itemFooter}>
+                                {index > 0 && (
+                                    <button type='button' onClick={() => moveImage(index, -1)}>
+                                        <ChevronLeftIcon />
+                                    </button>
+                                )}
+                                {index < images.length - 1 && (
+                                    <button type='button' onClick={() => moveImage(index, 1)}>
+                                        <ChevronRightIcon />
+                                    </button>
+                                )}
+                            </Row>
+                        </Column>
+                    ))}
+                </Row>
+            </Scrollbars>
+        )
     }
 
     // audio
@@ -540,56 +573,6 @@ function CreatePostModal(): JSX.Element {
         setTopicImageURL(option.imagePath)
         setTopicOptions([])
         setTopicError(false)
-    }
-
-    function renderImages() {
-        // todo: create and use image card
-        return (
-            <Scrollbars className={styles.images}>
-                <Row>
-                    {images.map((image, index) => (
-                        <Column
-                            key={image.id}
-                            centerX
-                            className={`${styles.imageWrapper} ${styles[findImageSize()]}`}
-                        >
-                            <CloseButton
-                                size={20}
-                                onClick={() => removeImage(index)}
-                                style={{ position: 'absolute', right: 0 }}
-                            />
-                            <button
-                                className={styles.imageButton}
-                                type='button'
-                                onClick={() => openImageModal(image.id)}
-                            >
-                                <img src={image.url || URL.createObjectURL(image.file)} alt='' />
-                            </button>
-                            <Row centerY style={{ width: '100%' }}>
-                                <Input
-                                    type='text'
-                                    placeholder='add caption...'
-                                    value={image.caption}
-                                    onChange={(v) => updateCaption(index, v)}
-                                />
-                            </Row>
-                            <Row centerX className={styles.itemFooter}>
-                                {index !== 0 && (
-                                    <button type='button' onClick={() => moveImage(index, -1)}>
-                                        <ChevronLeftIcon />
-                                    </button>
-                                )}
-                                {index < images.length - 1 && (
-                                    <button type='button' onClick={() => moveImage(index, 1)}>
-                                        <ChevronRightIcon />
-                                    </button>
-                                )}
-                            </Row>
-                        </Column>
-                    ))}
-                </Row>
-            </Scrollbars>
-        )
     }
 
     function renderEventTimes() {
@@ -1346,15 +1329,6 @@ function CreatePostModal(): JSX.Element {
                                     </Row>
                                 </Column>
                             )}
-                            {/* {mediaTypes.includes('audio') && audioFile && (
-                                <AudioCard
-                                    key={audioFile.lastModified}
-                                    url={URL.createObjectURL(audioFile)}
-                                    staticBars={400}
-                                    location='create-post-audio'
-                                    style={{ height: 200 }}
-                                />
-                            )} */}
                             {mediaTypes.includes('poll') && (
                                 <Column className={styles.poll}>
                                     {pollAnswers.map((answer, index) => (
@@ -1738,8 +1712,7 @@ function CreatePostModal(): JSX.Element {
             {imageModalOpen && (
                 <ImageModal
                     images={images}
-                    selectedImage={selectedImage}
-                    setSelectedImage={setSelectedImage}
+                    startIndex={startIndex}
                     close={() => setImageModalOpen(false)}
                 />
             )}

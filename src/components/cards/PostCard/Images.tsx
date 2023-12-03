@@ -15,7 +15,7 @@ function Images(props: { postId: number; style?: any }): JSX.Element {
     const [blocks, setBlocks] = useState<any[]>([])
     const [totalBlocks, setTotalBlocks] = useState(0)
     const [nextBlocksLoading, setNextBlocksLoading] = useState(false)
-    const [selectedBlock, setSelectedBlock] = useState<any>(null)
+    const [startIndex, setStartIndex] = useState(0)
     const [modalOpen, setModalOpen] = useState(false)
 
     function getImages(offset: number) {
@@ -37,11 +37,6 @@ function Images(props: { postId: number; style?: any }): JSX.Element {
             setNextBlocksLoading(true)
             getImages(blocks.length)
         }
-    }
-
-    function openModal(blockId) {
-        setSelectedBlock(blocks.find((block) => block.id === blockId))
-        setModalOpen(true)
     }
 
     function findImageSize() {
@@ -67,13 +62,19 @@ function Images(props: { postId: number; style?: any }): JSX.Element {
             <Row centerX>
                 <Scrollbars className={styles.images} onScrollRightEnd={onScrollRightEnd}>
                     <Row>
-                        {blocks.map((block) => (
+                        {blocks.map((block, i) => (
                             <Column
                                 centerX
                                 className={`${styles.image} ${styles[findImageSize()]}`}
                                 key={block.id}
                             >
-                                <button type='button' onClick={() => openModal(block.id)}>
+                                <button
+                                    type='button'
+                                    onClick={() => {
+                                        setStartIndex(i)
+                                        setModalOpen(true)
+                                    }}
+                                >
                                     <img
                                         src={findUrl(block)}
                                         onError={(e) => handleImageError(e, findUrl(block))}
@@ -89,8 +90,7 @@ function Images(props: { postId: number; style?: any }): JSX.Element {
             {modalOpen && (
                 <ImageModal
                     images={blocks}
-                    selectedImage={selectedBlock}
-                    setSelectedImage={setSelectedBlock}
+                    startIndex={startIndex}
                     close={() => setModalOpen(false)}
                 />
             )}

@@ -372,8 +372,7 @@ function BeadCard(props: {
             {imageModalOpen && (
                 <ImageModal
                     images={imageBlocks}
-                    selectedImage={selectedImage}
-                    setSelectedImage={setSelectedImage}
+                    startIndex={0}
                     close={() => setImageModalOpen(false)}
                 />
             )}

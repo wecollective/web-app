@@ -455,7 +455,7 @@ function NextBeadModal(props: {
                                                 {imageModalOpen && (
                                                     <ImageModal
                                                         images={[image]}
-                                                        selectedImage={image}
+                                                        startIndex={0}
                                                         close={() => setImageModalOpen(false)}
                                                     />
                                                 )}

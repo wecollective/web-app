@@ -5,56 +5,48 @@ import ShowMoreLess from '@components/ShowMoreLess'
 import { handleImageError } from '@src/Helpers'
 import styles from '@styles/components/modals/ImageModal.module.scss'
 import { ChevronLeftIcon, ChevronRightIcon } from '@svgs/all'
-import React from 'react'
+import React, { useState } from 'react'
 
-function ImageModal(props: {
-    images: any[]
-    selectedImage: any
-    setSelectedImage?: (image: any) => void
-    close: () => void
-}): JSX.Element {
-    const { images, selectedImage, setSelectedImage, close } = props
+function ImageModal(props: { images: any[]; startIndex: number; close: () => void }): JSX.Element {
+    const { images, startIndex, close } = props
+    const [index, setIndex] = useState(startIndex)
 
-    function toggleImage(increment) {
-        if (setSelectedImage) setSelectedImage(images[selectedImage.Link.index + increment])
-    }
-
-    function findUrl(block) {
-        return block.Image.url || URL.createObjectURL(block.file)
+    function findUrl(image) {
+        return image.url || URL.createObjectURL(image.file)
     }
 
     return (
         <Modal close={close} className={styles.wrapper}>
             <Row centerY>
-                {images.length > 1 && selectedImage.Link.index !== 0 && (
+                {index > 0 && (
                     <button
                         className={styles.navButton}
                         type='button'
-                        onClick={() => toggleImage(-1)}
+                        onClick={() => setIndex(index - 1)}
                     >
                         <ChevronLeftIcon />
                     </button>
                 )}
                 <Column centerX>
                     <img
-                        className={styles.selectedImage}
-                        src={findUrl(selectedImage)}
-                        onError={(e) => handleImageError(e, findUrl(selectedImage))}
+                        className={styles.image}
+                        src={findUrl(images[index].Image)}
+                        onError={(e) => handleImageError(e, findUrl(images[index].Image))}
                         alt=''
                     />
-                    {selectedImage.caption && (
+                    {images[index].text && (
                         <ShowMoreLess height={150} style={{ marginTop: 20 }}>
                             <p style={{ width: '100%', textAlign: 'center' }}>
-                                {selectedImage.text}
+                                {images[index].text}
                             </p>
                         </ShowMoreLess>
                     )}
                 </Column>
-                {images.length > 1 && selectedImage.Link.index !== images.length - 1 && (
+                {index !== images.length - 1 && (
                     <button
                         className={styles.navButton}
                         type='button'
-                        onClick={() => toggleImage(1)}
+                        onClick={() => setIndex(index + 1)}
                     >
                         <ChevronRightIcon />
                     </button>
@@ -62,10 +54,6 @@ function ImageModal(props: {
             </Row>
         </Modal>
     )
-}
-
-ImageModal.defaultProps = {
-    setSelectedImage: null,
 }
 
 export default ImageModal
