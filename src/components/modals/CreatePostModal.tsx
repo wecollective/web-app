@@ -121,6 +121,7 @@ function CreatePostModal(): JSX.Element {
     const [eventTextError, setEventTextError] = useState(false)
     const [saved, setSaved] = useState(false)
     const [spacesModalOpen, setSpacesModalOpen] = useState(false)
+    const [totalUploadSizeError, setTotalUploadSizeError] = useState(false)
     const maxChars = 5000
     const cookies = new Cookies()
     const maxUrls = 5
@@ -205,13 +206,25 @@ function CreatePostModal(): JSX.Element {
         setUrlsWithMetaData((us) => [...us.filter((u) => u.url !== url)])
     }
 
+    function findTotalUploadSize() {
+        const imageSize = images
+            .filter((i) => i.Image.file)
+            .map((i) => i.Image.file.size)
+            .reduce((a, b) => a + b, 0)
+        const audioSize = audioFiles.map((a) => a.file.size).reduce((a, b) => a + b, 0)
+        const cardSize =
+            (cardFrontImage ? cardFrontImage.size : 0) + (cardBackImage ? cardBackImage.size : 0)
+        // todo: count bead uploads
+        const total = imageSize + audioSize + cardSize
+        return +(total / megaByte).toFixed(2)
+    }
+
     // images
     const [images, setImages] = useState<any[]>([])
     const [imageURL, setImageURL] = useState('')
     const [startIndex, setStartIndex] = useState(0)
     const [imageModalOpen, setImageModalOpen] = useState(false)
     const [imageSizeError, setImageSizeError] = useState(false)
-    const [totalImageSizeError, setTotalImageSizeError] = useState(false)
     const [noImagesError, setNoImagesError] = useState(false)
 
     function findImageSize() {
@@ -220,7 +233,6 @@ function CreatePostModal(): JSX.Element {
         return 'small'
     }
 
-    // todo: check total file size upload limit
     function addImageFiles(drop?) {
         const allowedTypes = ['png', 'jpg', 'jpeg', 'gif', 'webp']
         setImageSizeError(false)
@@ -238,7 +250,6 @@ function CreatePostModal(): JSX.Element {
                 }
             }
         }
-        // todo: check total file size upload limit
     }
 
     function addImageURL() {
@@ -249,7 +260,7 @@ function CreatePostModal(): JSX.Element {
     }
 
     function removeImage(id) {
-        setTotalImageSizeError(false)
+        setTotalUploadSizeError(false)
         setImages(images.filter((image) => image.id !== id))
     }
 
@@ -266,15 +277,6 @@ function CreatePostModal(): JSX.Element {
         const image = images.find((i) => i.id === id)
         image.text = caption
         setImages(newImages)
-    }
-
-    // todo: use total file size upload limit
-    function findTotalImageMBs() {
-        const totalBytes = images
-            .filter((i) => i.file)
-            .map((i) => i.file.size)
-            .reduce((a, b) => a + b, 0)
-        return +(totalBytes / megaByte).toFixed(2)
     }
 
     function renderImages() {
@@ -335,11 +337,8 @@ function CreatePostModal(): JSX.Element {
 
     // audio
     const [audioFiles, setAudioFiles] = useState<any[]>([])
-    // todo: use total file upload limit instead of per media type
-    const [totalAudioSizeError, setTotalAudioSizeError] = useState(false)
-
-    const [audioFile, setAudioFile] = useState<File | undefined>()
-    const [audioBlob, setAudioBlob] = useState<any>()
+    // const [audioFile, setAudioFile] = useState<File | undefined>()
+    // const [audioBlob, setAudioBlob] = useState<any>()
     const [recording, setRecording] = useState(false)
     const [recordingTime, setRecordingTime] = useState(0)
     const [audioSizeError, setAudioSizeError] = useState(false)
@@ -348,14 +347,13 @@ function CreatePostModal(): JSX.Element {
     const recordingInterval = useRef<any>(null)
 
     function resetAudioState() {
-        setAudioFile(undefined)
+        // setAudioFile(undefined)
         setNoAudioError(false)
         setRecordingTime(0)
         const input = d3.select('#audio-input').node()
         if (input) input.value = ''
     }
 
-    // todo: check total file size upload limit
     function addAudioFiles(drop?) {
         const allowedTypes = ['mp3', 'mpeg']
         setAudioSizeError(false)
@@ -373,11 +371,9 @@ function CreatePostModal(): JSX.Element {
                 }
             }
         }
-        // todo: check total file size upload limit
     }
 
     function removeAudioFile(id) {
-        setTotalAudioSizeError(false)
         setAudioFiles(audioFiles.filter((audio) => audio.id !== id))
     }
 
@@ -681,6 +677,11 @@ function CreatePostModal(): JSX.Element {
     // todo: update for multiple media types
     function postValid() {
         let valid = true
+        console.log('total size: ', findTotalUploadSize())
+        if (findTotalUploadSize() > 5) {
+            setTotalUploadSizeError(true)
+            valid = false
+        }
         const totalChars = findDraftLength(text)
         if (mediaTypes.includes('text')) {
             if (totalChars < 1 && !title && !urlsWithMetaData.length) {
@@ -697,15 +698,9 @@ function CreatePostModal(): JSX.Element {
                 setNoImagesError(true)
                 valid = false
             }
-            const totalImageSize = findTotalImageMBs()
-            if (totalImageSize > totalMBUploadLimit) {
-                setTotalImageSizeError(true)
-                valid = false
-            }
         }
         if (mediaTypes.includes('audio')) {
-            if (!audioFile) {
-                setAudioSizeError(false)
+            if (!audioFiles.length) {
                 setNoAudioError(true)
                 valid = false
             }
@@ -730,6 +725,7 @@ function CreatePostModal(): JSX.Element {
                 valid = false
             }
         }
+        // todo: check total upload size
         if (mediaTypes.includes('glass-bead-game')) {
             if (!topic) {
                 setTopicError(true)
@@ -751,7 +747,7 @@ function CreatePostModal(): JSX.Element {
                 valid = false
             }
         }
-        return valid
+        return false // valid
     }
 
     function findTopicGroup() {
@@ -843,11 +839,11 @@ function CreatePostModal(): JSX.Element {
                 fileData.append('postData', JSON.stringify(postData))
             }
             if (mediaTypes.includes('audio')) {
-                const isBlob = audioFile && !audioFile.name
-                uploadType = isBlob ? 'audio-blob' : 'audio-file'
-                fileData = new FormData()
-                fileData.append('file', isBlob ? audioBlob : audioFile)
-                fileData.append('postData', JSON.stringify(postData))
+                // const isBlob = audioFile && !audioFile.name
+                // uploadType = isBlob ? 'audio-blob' : 'audio-file'
+                // fileData = new FormData()
+                // fileData.append('file', isBlob ? audioBlob : audioFile)
+                // fileData.append('postData', JSON.stringify(postData))
             }
             if (mediaTypes.includes('card')) {
                 postData.cardFrontSearchableText = postData.cardFrontText
@@ -998,7 +994,7 @@ function CreatePostModal(): JSX.Element {
         setNoTextError(false)
         setMaxCharsErrors(false)
         setNoImagesError(false)
-        setTotalImageSizeError(false)
+        setTotalUploadSizeError(false)
         setNoAudioError(false)
         setEventTextError(false)
         setNoEventTimesError(false)
@@ -1090,13 +1086,7 @@ function CreatePostModal(): JSX.Element {
     }, [pollAction])
 
     return (
-        <Modal
-            // className={`${styles.wrapper} ${styles[postType]}`}
-            className={styles.wrapper}
-            close={closeModal}
-            centerX
-            confirmClose={!saved}
-        >
+        <Modal className={styles.wrapper} close={closeModal} centerX confirmClose={!saved}>
             {saved ? (
                 <SuccessMessage text='Post created!' />
             ) : (
@@ -1283,7 +1273,7 @@ function CreatePostModal(): JSX.Element {
                                 <Column id='audio-drop' className={styles.blockWrapper}>
                                     <Column>
                                         {audioFiles.map((audio, index) => (
-                                            <Column style={{ marginBottom: 15 }}>
+                                            <Column style={{ marginBottom: 20 }}>
                                                 <AudioCard
                                                     key={audio.id}
                                                     id={audio.id}
@@ -1682,10 +1672,10 @@ function CreatePostModal(): JSX.Element {
                         {maxCharsErrors && <p>Text must be less than {maxChars} characters</p>}
                         {noImagesError && <p>No images added</p>}
                         {imageSizeError && <p>Max file size: {imageMBLimit} MBs</p>}
-                        {totalImageSizeError && (
+                        {totalUploadSizeError && (
                             <p>
-                                Total upload size ({findTotalImageMBs()} MBs) is greater than limit
-                                of {totalMBUploadLimit} MBs
+                                Total upload size ({findTotalUploadSize()} MBs) must be less than{' '}
+                                {totalMBUploadLimit} MBs
                             </p>
                         )}
                         {audioSizeError && <p>Max file size: {audioMBLimit} MBs</p>}
