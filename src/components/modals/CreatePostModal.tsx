@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-nested-ternary */
@@ -76,24 +77,14 @@ const defaultSelectedSpace = {
     flagImagePath: 'https://weco-prod-space-flag-images.s3.eu-west-1.amazonaws.com/1614556880362',
 }
 
-function ContentButton(props: {
-    type: string
-    mediaTypes: string[]
-    setMediaTypes: (payload: string[]) => void
-}): JSX.Element {
-    const { type, mediaTypes, setMediaTypes } = props
-    function toggleMediaType() {
-        if (mediaTypes.includes(type)) setMediaTypes(mediaTypes.filter((t) => t !== type))
-        else setMediaTypes([...mediaTypes, type])
-    }
+function MediaButton(props: { type: string; selected: boolean; onClick: () => void }): JSX.Element {
+    const { type, selected, onClick } = props
     return (
         <button
-            className={`${styles.contentButton} ${
-                mediaTypes.includes(type) ? styles.selected : ''
-            }`}
+            className={`${styles.contentButton} ${selected ? styles.selected : ''}`}
             type='button'
             title={capitalise(type)}
-            onClick={toggleMediaType}
+            onClick={onClick}
         >
             {postTypeIcons[type]}
         </button>
@@ -161,6 +152,40 @@ function CreatePostModal(): JSX.Element {
         // return ''
     }
 
+    function initializeMediaDropBox(type) {
+        let dragLeaveCounter = 0 // used to avoid dragleave firing when hovering child elements
+        const dropbox = document.getElementById(`${type}-drop`)
+        if (dropbox) {
+            dropbox.addEventListener('dragover', (e) => e.preventDefault())
+            dropbox.addEventListener('dragenter', () => {
+                dragLeaveCounter += 1
+                if (dragLeaveCounter === 1) dropbox.classList.add(styles.dragOver)
+            })
+            dropbox.addEventListener('dragleave', () => {
+                dragLeaveCounter -= 1
+                if (dragLeaveCounter === 0) dropbox.classList.remove(styles.dragOver)
+            })
+            dropbox.addEventListener('drop', (e) => {
+                e.preventDefault()
+                dragLeaveCounter = 0
+                dropbox.classList.remove(styles.dragOver)
+                if (e.dataTransfer) {
+                    if (type === 'image') addImageFiles(e.dataTransfer)
+                    if (type === 'audio') addAudioFiles(e.dataTransfer)
+                }
+            })
+        }
+    }
+
+    function mediaButtonClick(type) {
+        if (mediaTypes.includes(type)) setMediaTypes(mediaTypes.filter((t) => t !== type))
+        else {
+            Promise.all([setMediaTypes([...mediaTypes, type])]).then(() => {
+                if (['image', 'audio'].includes(type)) initializeMediaDropBox(type)
+            })
+        }
+    }
+
     function scrapeUrlMetaData(url) {
         setUrlsWithMetaData((us) => [...us, { url, loading: true }])
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
@@ -201,7 +226,7 @@ function CreatePostModal(): JSX.Element {
     }
 
     function addImageFiles(drop?) {
-        const allowedTypes = ['png', 'jpg', 'jpeg', 'gif']
+        const allowedTypes = ['png', 'jpg', 'jpeg', 'gif', 'webp']
         setImageSizeError(false)
         setNoImagesError(false)
         const input = drop || (document.getElementById('image-file-input') as HTMLInputElement)
@@ -296,15 +321,19 @@ function CreatePostModal(): JSX.Element {
     }
 
     function addAudioFiles(drop?) {
+        const allowedTypes = ['mp3', 'mpeg']
         setAudioSizeError(false)
         setNoAudioError(false)
         const input = drop || (document.getElementById('audio-file-input') as HTMLInputElement)
         if (input && input.files && input.files.length) {
             for (let i = 0; i < input.files.length; i += 1) {
-                if (input.files[i].size > audioMBLimit * 1024 * 1024) setAudioSizeError(true)
-                else {
-                    const newAudio = { id: uuidv4(), file: input.files[i] }
-                    setAudioFiles((audio) => [...audio, newAudio])
+                const fileType = input.files[i].type.split('/')[1]
+                if (allowedTypes.includes(fileType)) {
+                    if (input.files[i].size > audioMBLimit * 1024 * 1024) setAudioSizeError(true)
+                    else {
+                        const newAudio = { id: uuidv4(), file: input.files[i] }
+                        setAudioFiles((audio) => [...audio, newAudio])
+                    }
                 }
             }
         }
@@ -1081,52 +1110,6 @@ function CreatePostModal(): JSX.Element {
         }
     }, [pollAction])
 
-    // set up media drop boxes
-    useEffect(() => {
-        if (mediaTypes.includes('image')) {
-            let imageDragLeaveCounter = 0 // used to avoid dragleave firing when hovering child elements
-            const imageDrop = document.getElementById('image-drop')
-            if (imageDrop) {
-                imageDrop.addEventListener('dragover', (e) => e.preventDefault())
-                imageDrop.addEventListener('dragenter', () => {
-                    imageDragLeaveCounter += 1
-                    if (imageDragLeaveCounter === 1) imageDrop.classList.add(styles.dragOver)
-                })
-                imageDrop.addEventListener('dragleave', () => {
-                    imageDragLeaveCounter -= 1
-                    if (imageDragLeaveCounter === 0) imageDrop.classList.remove(styles.dragOver)
-                })
-                imageDrop.addEventListener('drop', (e) => {
-                    e.preventDefault()
-                    imageDragLeaveCounter = 0
-                    imageDrop.classList.remove(styles.dragOver)
-                    if (e.dataTransfer) addImageFiles(e.dataTransfer)
-                })
-            }
-        }
-        if (mediaTypes.includes('audio')) {
-            let audioDragLeaveCounter = 0 // used to avoid dragleave firing when hovering child elements
-            const audioDrop = document.getElementById('audio-drop')
-            if (audioDrop) {
-                audioDrop.addEventListener('dragover', (e) => e.preventDefault())
-                audioDrop.addEventListener('dragenter', () => {
-                    audioDragLeaveCounter += 1
-                    if (audioDragLeaveCounter === 1) audioDrop.classList.add(styles.dragOver)
-                })
-                audioDrop.addEventListener('dragleave', () => {
-                    audioDragLeaveCounter -= 1
-                    if (audioDragLeaveCounter === 0) audioDrop.classList.remove(styles.dragOver)
-                })
-                audioDrop.addEventListener('drop', (e) => {
-                    e.preventDefault()
-                    audioDragLeaveCounter = 0
-                    audioDrop.classList.remove(styles.dragOver)
-                    if (e.dataTransfer) addAudioFiles(e.dataTransfer)
-                })
-            }
-        }
-    }, [mediaTypes])
-
     return (
         <Modal
             // className={`${styles.wrapper} ${styles[postType]}`}
@@ -1291,7 +1274,7 @@ function CreatePostModal(): JSX.Element {
                                                 <input
                                                     type='file'
                                                     id='image-file-input'
-                                                    accept='.png, .jpg, .jpeg, .gif'
+                                                    accept='.png, .jpg, .jpeg, .gif, .webp'
                                                     onChange={() => addImageFiles()}
                                                     multiple
                                                     hidden
@@ -1705,11 +1688,11 @@ function CreatePostModal(): JSX.Element {
                     {!!contentTypes.length && (
                         <Row style={{ marginBottom: 20 }}>
                             {contentTypes.map((type) => (
-                                <ContentButton
+                                <MediaButton
                                     key={type}
                                     type={type}
-                                    mediaTypes={mediaTypes}
-                                    setMediaTypes={setMediaTypes}
+                                    selected={mediaTypes.includes(type)}
+                                    onClick={() => mediaButtonClick(type)}
                                 />
                             ))}
                         </Row>
