@@ -37,6 +37,7 @@ import {
     findDraftLength,
     findEventDuration,
     findEventTimes,
+    formatTimeMMSS,
     getDraftPlainText,
     imageMBLimit,
     megaByte,
@@ -77,16 +78,22 @@ const defaultSelectedSpace = {
 
 function ContentButton(props: {
     type: string
-    postType: string
-    setPostType: (type: string) => void
+    mediaTypes: string[]
+    setMediaTypes: (payload: string[]) => void
 }): JSX.Element {
-    const { type, postType, setPostType } = props
+    const { type, mediaTypes, setMediaTypes } = props
+    function toggleMediaType() {
+        if (mediaTypes.includes(type)) setMediaTypes(mediaTypes.filter((t) => t !== type))
+        else setMediaTypes([...mediaTypes, type])
+    }
     return (
         <button
-            className={`${styles.contentButton} ${postType === type ? styles.selected : ''}`}
+            className={`${styles.contentButton} ${
+                mediaTypes.includes(type) ? styles.selected : ''
+            }`}
             type='button'
             title={capitalise(type)}
-            onClick={() => setPostType(postType === type ? 'text' : type)}
+            onClick={toggleMediaType}
         >
             {postTypeIcons[type]}
         </button>
@@ -142,7 +149,7 @@ function CreatePostModal(): JSX.Element {
     }
 
     function findModalHeader() {
-        return 'Header'
+        return 'New post'
         // if (governance) return 'New governance poll'
         // if (postType === 'text') return 'New post'
         // if (postType === 'image') return 'New image post'
@@ -193,25 +200,32 @@ function CreatePostModal(): JSX.Element {
         setImageModalOpen(true)
     }
 
-    function addImageFiles() {
+    function addImageFiles(drop?) {
+        const allowedTypes = ['png', 'jpg', 'jpeg', 'gif']
         setImageSizeError(false)
         setNoImagesError(false)
-        const input = document.getElementById('post-images-file-input') as HTMLInputElement
+        const input = drop || (document.getElementById('image-file-input') as HTMLInputElement)
         if (input && input.files && input.files.length) {
             for (let i = 0; i < input.files.length; i += 1) {
-                if (input.files[i].size > imageMBLimit * 1024 * 1024) setImageSizeError(true)
-                else {
-                    setImages((imgs) => [
-                        ...imgs,
-                        {
-                            id: uuidv4(),
-                            index: imgs.length,
-                            file: input && input.files && input.files[i],
-                        },
-                    ])
+                const fileType = input.files[i].type.split('/')[1]
+                if (allowedTypes.includes(fileType)) {
+                    if (input.files[i].size > imageMBLimit * 1024 * 1024) setImageSizeError(true)
+                    else {
+                        // const newImage = { id: uuidv4(), file: input.files[i] }
+                        setImages((imgs) => [
+                            ...imgs,
+                            {
+                                id: uuidv4(),
+                                // todo: remove index until uploaded?
+                                index: imgs.length,
+                                file: input && input.files && input.files[i],
+                            },
+                        ])
+                    }
                 }
             }
         }
+        // todo: check total file size upload limit
     }
 
     function addImageURL() {
@@ -221,6 +235,7 @@ function CreatePostModal(): JSX.Element {
         setNoImagesError(false)
     }
 
+    // todo: use id?
     function removeImage(index) {
         setTotalImageSizeError(false)
         setImages([
@@ -259,6 +274,10 @@ function CreatePostModal(): JSX.Element {
     }
 
     // audio
+    const [audioFiles, setAudioFiles] = useState<any[]>([])
+    // todo: use total file upload limit instead of per media type
+    const [totalAudioSizeError, setTotalAudioSizeError] = useState(false)
+
     const [audioFile, setAudioFile] = useState<File | undefined>()
     const [audioBlob, setAudioBlob] = useState<any>()
     const [recording, setRecording] = useState(false)
@@ -276,27 +295,50 @@ function CreatePostModal(): JSX.Element {
         if (input) input.value = ''
     }
 
-    function selectAudioFile() {
-        const input = d3.select('#audio-file-input').node()
-        if (input && input.files && input.files[0]) {
-            if (input.files[0].size > audioMBLimit * 1024 * 1024) {
-                setAudioSizeError(true)
-                resetAudioState()
-            } else {
-                setAudioSizeError(false)
-                setNoAudioError(false)
-                setAudioFile(input.files[0])
+    function addAudioFiles(drop?) {
+        setAudioSizeError(false)
+        setNoAudioError(false)
+        const input = drop || (document.getElementById('audio-file-input') as HTMLInputElement)
+        if (input && input.files && input.files.length) {
+            for (let i = 0; i < input.files.length; i += 1) {
+                if (input.files[i].size > audioMBLimit * 1024 * 1024) setAudioSizeError(true)
+                else {
+                    const newAudio = { id: uuidv4(), file: input.files[i] }
+                    setAudioFiles((audio) => [...audio, newAudio])
+                }
             }
         }
+        // todo: check total file size upload limit
     }
+
+    function removeAudioFile(id) {
+        setTotalAudioSizeError(false)
+        setAudioFiles(audioFiles.filter((audio) => audio.id !== id))
+    }
+
+    // function selectAudioFile() {
+    //     const input = d3.select('#audio-file-input').node()
+    //     if (input && input.files && input.files[0]) {
+    //         if (input.files[0].size > audioMBLimit * 1024 * 1024) {
+    //             setAudioSizeError(true)
+    //             resetAudioState()
+    //         } else {
+    //             setAudioSizeError(false)
+    //             setNoAudioError(false)
+    //             setAudioFile(input.files[0])
+    //         }
+    //     }
+    // }
 
     function toggleAudioRecording() {
         if (recording) {
             audioRecorder.current.stopRecording(() => {
                 clearInterval(recordingInterval.current)
                 const blob = audioRecorder.current.getBlob()
-                setAudioBlob(blob)
-                setAudioFile(new File([blob], '', { type: 'audio/wav' }))
+                const newAudio = { id: uuidv4(), file: new File([blob], '', { type: 'audio/wav' }) }
+                setAudioFiles((audio) => [...audio, newAudio])
+                // setAudioBlob(blob)
+                // setAudioFile(new File([blob], '', { type: 'audio/wav' }))
             })
             setRecording(false)
         } else {
@@ -472,6 +514,7 @@ function CreatePostModal(): JSX.Element {
     }
 
     function renderImages() {
+        // todo: create and use image card
         return (
             <Scrollbars className={styles.images}>
                 <Row>
@@ -1038,6 +1081,52 @@ function CreatePostModal(): JSX.Element {
         }
     }, [pollAction])
 
+    // set up media drop boxes
+    useEffect(() => {
+        if (mediaTypes.includes('image')) {
+            let imageDragLeaveCounter = 0 // used to avoid dragleave firing when hovering child elements
+            const imageDrop = document.getElementById('image-drop')
+            if (imageDrop) {
+                imageDrop.addEventListener('dragover', (e) => e.preventDefault())
+                imageDrop.addEventListener('dragenter', () => {
+                    imageDragLeaveCounter += 1
+                    if (imageDragLeaveCounter === 1) imageDrop.classList.add(styles.dragOver)
+                })
+                imageDrop.addEventListener('dragleave', () => {
+                    imageDragLeaveCounter -= 1
+                    if (imageDragLeaveCounter === 0) imageDrop.classList.remove(styles.dragOver)
+                })
+                imageDrop.addEventListener('drop', (e) => {
+                    e.preventDefault()
+                    imageDragLeaveCounter = 0
+                    imageDrop.classList.remove(styles.dragOver)
+                    if (e.dataTransfer) addImageFiles(e.dataTransfer)
+                })
+            }
+        }
+        if (mediaTypes.includes('audio')) {
+            let audioDragLeaveCounter = 0 // used to avoid dragleave firing when hovering child elements
+            const audioDrop = document.getElementById('audio-drop')
+            if (audioDrop) {
+                audioDrop.addEventListener('dragover', (e) => e.preventDefault())
+                audioDrop.addEventListener('dragenter', () => {
+                    audioDragLeaveCounter += 1
+                    if (audioDragLeaveCounter === 1) audioDrop.classList.add(styles.dragOver)
+                })
+                audioDrop.addEventListener('dragleave', () => {
+                    audioDragLeaveCounter -= 1
+                    if (audioDragLeaveCounter === 0) audioDrop.classList.remove(styles.dragOver)
+                })
+                audioDrop.addEventListener('drop', (e) => {
+                    e.preventDefault()
+                    audioDragLeaveCounter = 0
+                    audioDrop.classList.remove(styles.dragOver)
+                    if (e.dataTransfer) addAudioFiles(e.dataTransfer)
+                })
+            }
+        }
+    }, [mediaTypes])
+
     return (
         <Modal
             // className={`${styles.wrapper} ${styles[postType]}`}
@@ -1182,12 +1271,99 @@ function CreatePostModal(): JSX.Element {
                                 }}
                             />
                             {renderEventTimes()}
+                            {urlsWithMetaData.map((u) => (
+                                <UrlPreview
+                                    key={u.url}
+                                    type='post'
+                                    urlData={u}
+                                    loading={u.loading}
+                                    remove={removeUrlMetaData}
+                                    style={{ marginTop: 10 }}
+                                />
+                            ))}
                             {mediaTypes.includes('image') && (
-                                <Row centerX style={{ width: '100%' }}>
-                                    {images.length > 0 && renderImages()}
-                                </Row>
+                                <Column id='image-drop' className={styles.blockWrapper}>
+                                    <Row centerX>{images.length > 0 && renderImages()}</Row>
+                                    <Row centerY centerX wrap>
+                                        <Row className={styles.fileUploadInput}>
+                                            <label htmlFor='image-file-input'>
+                                                Upload images
+                                                <input
+                                                    type='file'
+                                                    id='image-file-input'
+                                                    accept='.png, .jpg, .jpeg, .gif'
+                                                    onChange={() => addImageFiles()}
+                                                    multiple
+                                                    hidden
+                                                />
+                                            </label>
+                                        </Row>
+                                        <p style={{ margin: '0 10px' }}>or</p>
+                                        <Row centerY>
+                                            <Input
+                                                type='text'
+                                                placeholder='paste image URL...'
+                                                value={imageURL}
+                                                onChange={(v) => setImageURL(v)}
+                                                style={{ width: 180, marginRight: 10 }}
+                                            />
+                                            <Button
+                                                text='Add URL'
+                                                color='aqua'
+                                                disabled={!imageURL}
+                                                onClick={addImageURL}
+                                            />
+                                        </Row>
+                                    </Row>
+                                </Column>
                             )}
-                            {mediaTypes.includes('audio') && audioFile && (
+                            {mediaTypes.includes('audio') && (
+                                <Column id='audio-drop' className={styles.blockWrapper}>
+                                    <Column>
+                                        {audioFiles.map((audio, index) => (
+                                            <AudioCard
+                                                key={audio.id}
+                                                id={audio.id}
+                                                index={index}
+                                                url={URL.createObjectURL(audio.file)}
+                                                staticBars={400}
+                                                location='new-post'
+                                                remove={() => removeAudioFile(audio.id)}
+                                                style={{ height: 200, marginBottom: 10 }}
+                                            />
+                                        ))}
+                                    </Column>
+                                    <Row centerY centerX wrap>
+                                        <Row
+                                            className={styles.fileUploadInput}
+                                            style={{ marginRight: 10 }}
+                                        >
+                                            <label htmlFor='audio-file-input'>
+                                                Upload audio
+                                                <input
+                                                    type='file'
+                                                    id='audio-file-input'
+                                                    accept='audio/mpeg'
+                                                    onChange={() => addAudioFiles()}
+                                                    multiple
+                                                    hidden
+                                                />
+                                            </label>
+                                        </Row>
+                                        <Button
+                                            text={recording ? 'Stop recording' : 'Record audio'}
+                                            color='red'
+                                            onClick={toggleAudioRecording}
+                                        />
+                                        {recording && (
+                                            <h2 style={{ margin: '0 0 0 10px' }}>
+                                                {formatTimeMMSS(recordingTime)}
+                                            </h2>
+                                        )}
+                                    </Row>
+                                </Column>
+                            )}
+                            {/* {mediaTypes.includes('audio') && audioFile && (
                                 <AudioCard
                                     key={audioFile.lastModified}
                                     url={URL.createObjectURL(audioFile)}
@@ -1195,7 +1371,7 @@ function CreatePostModal(): JSX.Element {
                                     location='create-post-audio'
                                     style={{ height: 200 }}
                                 />
-                            )}
+                            )} */}
                             {mediaTypes.includes('poll') && (
                                 <Column className={styles.poll}>
                                     {pollAnswers.map((answer, index) => (
@@ -1384,16 +1560,6 @@ function CreatePostModal(): JSX.Element {
                                         renderBeads()} */}
                                 </Column>
                             )}
-                            {urlsWithMetaData.map((u) => (
-                                <UrlPreview
-                                    key={u.url}
-                                    type='post'
-                                    urlData={u}
-                                    loading={u.loading}
-                                    remove={removeUrlMetaData}
-                                    style={{ marginTop: 10 }}
-                                />
-                            ))}
                         </Column>
                     </Column>
                     {/* {!['text', 'card'].includes(postType) && (
@@ -1542,8 +1708,8 @@ function CreatePostModal(): JSX.Element {
                                 <ContentButton
                                     key={type}
                                     type={type}
-                                    postType='text'
-                                    setPostType={() => null}
+                                    mediaTypes={mediaTypes}
+                                    setMediaTypes={setMediaTypes}
                                 />
                             ))}
                         </Row>

@@ -195,8 +195,23 @@ $transitionSpeed: 0.5s;
                 opacity: 1;
             }
 
+            .blockWrapper {
+                margin-top: 10px;
+                padding: 10px;
+                border: 2px dashed $grey3;
+                border-radius: 10px;
+                background-color: $grey1;
+                transition: all 0.3s;
+
+                &.dragOver {
+                    border: 2px dashed $blue3;
+                    background-color: $blue7;
+                }
+            }
+
             .images {
-                padding: 20px 10px 5px 10px;
+                padding: 10px;
+                margin-bottom: 5px;
 
                 .imageWrapper {
                     position: relative;
