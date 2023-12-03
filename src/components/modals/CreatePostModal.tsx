@@ -36,8 +36,6 @@ import {
     defaultGBGSettings,
     defaultPostData,
     findDraftLength,
-    findEventDuration,
-    findEventTimes,
     formatTimeMMSS,
     getDraftPlainText,
     imageMBLimit,
@@ -433,6 +431,26 @@ function CreatePostModal(): JSX.Element {
         setEndTime('')
     }
 
+    // function renderEventTimes() {
+    //     const showEventDates = mediaTypes.includes('event') && startTime
+    //     const showGBGDates =
+    //         mediaTypes.includes('glass-bead-game') &&
+    //         GBGSettings.synchronous &&
+    //         GBGSettings.startTime
+    //     const start = mediaTypes.includes('event') ? startTime : GBGSettings.startTime
+    //     const end = mediaTypes.includes('event') ? endTime : GBGSettings.endTime
+    //     if (!showEventDates && !showGBGDates) return null
+    //     return (
+    //         <Row centerX centerY className={styles.dates}>
+    //             <CalendarIcon />
+    //             <Row>
+    //                 <p>{findEventTimes(start, end)}</p>
+    //                 <p>{findEventDuration(start, end)}</p>
+    //             </Row>
+    //         </Row>
+    //     )
+    // }
+
     // poll
     const [pollType, setPollType] = useState('Single choice')
     const [pollAnswersLocked, setPollAnswersLocked] = useState(false)
@@ -565,26 +583,6 @@ function CreatePostModal(): JSX.Element {
         setTopicImageURL(option.imagePath)
         setTopicOptions([])
         setTopicError(false)
-    }
-
-    function renderEventTimes() {
-        const showEventDates = mediaTypes.includes('event') && startTime
-        const showGBGDates =
-            mediaTypes.includes('glass-bead-game') &&
-            GBGSettings.synchronous &&
-            GBGSettings.startTime
-        const start = mediaTypes.includes('event') ? startTime : GBGSettings.startTime
-        const end = mediaTypes.includes('event') ? endTime : GBGSettings.endTime
-        if (!showEventDates && !showGBGDates) return null
-        return (
-            <Row centerY className={styles.dates}>
-                <CalendarIcon />
-                <Row>
-                    <p>{findEventTimes(start, end)}</p>
-                    <p>{findEventDuration(start, end)}</p>
-                </Row>
-            </Row>
-        )
     }
 
     function renderGBGInfoRow() {
@@ -1222,7 +1220,6 @@ function CreatePostModal(): JSX.Element {
                                     setPollTextError(false)
                                 }}
                             />
-                            {renderEventTimes()}
                             {urlsWithMetaData.map((u) => (
                                 <UrlPreview
                                     key={u.url}
@@ -1234,7 +1231,7 @@ function CreatePostModal(): JSX.Element {
                                 />
                             ))}
                             {mediaTypes.includes('image') && (
-                                <Column id='image-drop' className={styles.blockWrapper}>
+                                <Column id='image-drop' className={styles.dropBlockWrapper}>
                                     <Row centerX>{images.length > 0 && renderImages()}</Row>
                                     <Row centerY centerX wrap>
                                         <Row className={styles.fileUploadInput}>
@@ -1270,7 +1267,7 @@ function CreatePostModal(): JSX.Element {
                                 </Column>
                             )}
                             {mediaTypes.includes('audio') && (
-                                <Column id='audio-drop' className={styles.blockWrapper}>
+                                <Column id='audio-drop' className={styles.dropBlockWrapper}>
                                     <Column>
                                         {audioFiles.map((audio, index) => (
                                             <Column style={{ marginBottom: 20 }}>
@@ -1324,6 +1321,35 @@ function CreatePostModal(): JSX.Element {
                                         )}
                                     </Row>
                                 </Column>
+                            )}
+                            {mediaTypes.includes('event') && (
+                                <Row centerX centerY wrap className={styles.blockWrapper}>
+                                    <CalendarIcon className={styles.calendarIcon} />
+                                    <div id='date-time-start-wrapper'>
+                                        <Input
+                                            id='date-time-start'
+                                            type='text'
+                                            placeholder='Start time...'
+                                            style={{ width: 230 }}
+                                        />
+                                    </div>
+                                    <p style={{ margin: '0 10px', lineHeight: '14px' }}>→</p>
+                                    <div id='date-time-end-wrapper'>
+                                        <Input
+                                            id='date-time-end'
+                                            type='text'
+                                            placeholder='End time... (optional)'
+                                            style={{ width: 230 }}
+                                        />
+                                    </div>
+                                    {endTime && (
+                                        <CloseButton
+                                            size={20}
+                                            onClick={removeEndDate}
+                                            style={{ marginLeft: 5 }}
+                                        />
+                                    )}
+                                </Row>
                             )}
                             {mediaTypes.includes('poll') && (
                                 <Column className={styles.poll}>
