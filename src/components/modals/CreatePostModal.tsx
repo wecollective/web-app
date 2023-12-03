@@ -220,11 +220,12 @@ function CreatePostModal(): JSX.Element {
         return 'small'
     }
 
+    // todo: check total file size upload limit
     function addImageFiles(drop?) {
         const allowedTypes = ['png', 'jpg', 'jpeg', 'gif', 'webp']
         setImageSizeError(false)
         setNoImagesError(false)
-        const input = drop || (document.getElementById('image-file-input') as HTMLInputElement)
+        const input = drop || (document.getElementById('image-input') as HTMLInputElement)
         if (input && input.files && input.files.length) {
             for (let i = 0; i < input.files.length; i += 1) {
                 const fileType = input.files[i].type.split('/')[1]
@@ -260,13 +261,14 @@ function CreatePostModal(): JSX.Element {
         setImages(newImages)
     }
 
-    function updateCaption(id, caption) {
+    function updateImageCaption(id, caption) {
         const newImages = [...images]
         const image = images.find((i) => i.id === id)
         image.text = caption
         setImages(newImages)
     }
 
+    // todo: use total file size upload limit
     function findTotalImageMBs() {
         const totalBytes = images
             .filter((i) => i.file)
@@ -309,7 +311,7 @@ function CreatePostModal(): JSX.Element {
                                     type='text'
                                     placeholder='add caption...'
                                     value={image.text}
-                                    onChange={(value) => updateCaption(image.id, value)}
+                                    onChange={(value) => updateImageCaption(image.id, value)}
                                 />
                             </Row>
                             <Row centerX className={styles.itemFooter}>
@@ -349,15 +351,16 @@ function CreatePostModal(): JSX.Element {
         setAudioFile(undefined)
         setNoAudioError(false)
         setRecordingTime(0)
-        const input = d3.select('#audio-file-input').node()
+        const input = d3.select('#audio-input').node()
         if (input) input.value = ''
     }
 
+    // todo: check total file size upload limit
     function addAudioFiles(drop?) {
         const allowedTypes = ['mp3', 'mpeg']
         setAudioSizeError(false)
         setNoAudioError(false)
-        const input = drop || (document.getElementById('audio-file-input') as HTMLInputElement)
+        const input = drop || (document.getElementById('audio-input') as HTMLInputElement)
         if (input && input.files && input.files.length) {
             for (let i = 0; i < input.files.length; i += 1) {
                 const fileType = input.files[i].type.split('/')[1]
@@ -378,19 +381,12 @@ function CreatePostModal(): JSX.Element {
         setAudioFiles(audioFiles.filter((audio) => audio.id !== id))
     }
 
-    // function selectAudioFile() {
-    //     const input = d3.select('#audio-file-input').node()
-    //     if (input && input.files && input.files[0]) {
-    //         if (input.files[0].size > audioMBLimit * 1024 * 1024) {
-    //             setAudioSizeError(true)
-    //             resetAudioState()
-    //         } else {
-    //             setAudioSizeError(false)
-    //             setNoAudioError(false)
-    //             setAudioFile(input.files[0])
-    //         }
-    //     }
-    // }
+    function updateAudioCaption(id, caption) {
+        const newAudioFiles = [...audioFiles]
+        const audio = newAudioFiles.find((a) => a.id === id)
+        audio.text = caption
+        setAudioFiles(newAudioFiles)
+    }
 
     function toggleAudioRecording() {
         if (recording) {
@@ -1252,11 +1248,11 @@ function CreatePostModal(): JSX.Element {
                                     <Row centerX>{images.length > 0 && renderImages()}</Row>
                                     <Row centerY centerX wrap>
                                         <Row className={styles.fileUploadInput}>
-                                            <label htmlFor='image-file-input'>
+                                            <label htmlFor='image-input'>
                                                 Upload images
                                                 <input
                                                     type='file'
-                                                    id='image-file-input'
+                                                    id='image-input'
                                                     accept='.png, .jpg, .jpeg, .gif, .webp'
                                                     onChange={() => addImageFiles()}
                                                     multiple
@@ -1287,16 +1283,26 @@ function CreatePostModal(): JSX.Element {
                                 <Column id='audio-drop' className={styles.blockWrapper}>
                                     <Column>
                                         {audioFiles.map((audio, index) => (
-                                            <AudioCard
-                                                key={audio.id}
-                                                id={audio.id}
-                                                index={index}
-                                                url={URL.createObjectURL(audio.file)}
-                                                staticBars={400}
-                                                location='new-post'
-                                                remove={() => removeAudioFile(audio.id)}
-                                                style={{ height: 200, marginBottom: 10 }}
-                                            />
+                                            <Column style={{ marginBottom: 15 }}>
+                                                <AudioCard
+                                                    key={audio.id}
+                                                    id={audio.id}
+                                                    index={index}
+                                                    url={URL.createObjectURL(audio.file)}
+                                                    staticBars={400}
+                                                    location='new-post'
+                                                    remove={() => removeAudioFile(audio.id)}
+                                                    style={{ height: 200, marginBottom: 10 }}
+                                                />
+                                                <Input
+                                                    type='text'
+                                                    placeholder='add caption...'
+                                                    value={audio.text}
+                                                    onChange={(value) =>
+                                                        updateAudioCaption(audio.id, value)
+                                                    }
+                                                />
+                                            </Column>
                                         ))}
                                     </Column>
                                     <Row centerY centerX wrap>
@@ -1304,11 +1310,11 @@ function CreatePostModal(): JSX.Element {
                                             className={styles.fileUploadInput}
                                             style={{ marginRight: 10 }}
                                         >
-                                            <label htmlFor='audio-file-input'>
+                                            <label htmlFor='audio-input'>
                                                 Upload audio
                                                 <input
                                                     type='file'
-                                                    id='audio-file-input'
+                                                    id='audio-input'
                                                     accept='audio/mpeg'
                                                     onChange={() => addAudioFiles()}
                                                     multiple
