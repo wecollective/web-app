@@ -5,6 +5,7 @@
 import Button from '@components/Button'
 import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
+import DropDown from '@components/DropDown'
 import FlagImageHighlights from '@components/FlagImageHighlights'
 import ImageTitle from '@components/ImageTitle'
 import Input from '@components/Input'
@@ -46,6 +47,7 @@ import {
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/CreatePostModal.module.scss'
 import {
+    AudioIcon,
     CalendarIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
@@ -53,6 +55,7 @@ import {
     HelpIcon,
     ImageIcon,
     PlusIcon,
+    PollIcon,
     RepostIcon,
     UsersIcon,
 } from '@svgs/all'
@@ -1234,6 +1237,7 @@ function CreatePostModal(): JSX.Element {
                                 <Column id='image-drop' className={styles.dropBlockWrapper}>
                                     <Row centerX>{images.length > 0 && renderImages()}</Row>
                                     <Row centerY centerX wrap>
+                                        <ImageIcon className={styles.icon} />
                                         <Row className={styles.fileUploadInput}>
                                             <label htmlFor='image-input'>
                                                 Upload images
@@ -1293,6 +1297,7 @@ function CreatePostModal(): JSX.Element {
                                         ))}
                                     </Column>
                                     <Row centerY centerX wrap>
+                                        <AudioIcon className={styles.icon} />
                                         <Row
                                             className={styles.fileUploadInput}
                                             style={{ marginRight: 10 }}
@@ -1324,7 +1329,7 @@ function CreatePostModal(): JSX.Element {
                             )}
                             {mediaTypes.includes('event') && (
                                 <Row centerX centerY wrap className={styles.blockWrapper}>
-                                    <CalendarIcon className={styles.calendarIcon} />
+                                    <CalendarIcon className={styles.icon} />
                                     <div id='date-time-start-wrapper'>
                                         <Input
                                             id='date-time-start'
@@ -1352,21 +1357,23 @@ function CreatePostModal(): JSX.Element {
                                 </Row>
                             )}
                             {mediaTypes.includes('poll') && (
-                                <Column className={styles.poll}>
-                                    {pollAnswers.map((answer, index) => (
-                                        <PollAnswer
-                                            key={answer.id}
-                                            index={index}
-                                            type={pollType}
-                                            answer={answer}
-                                            percentage={0}
-                                            color={pollColorScale(index)}
-                                            remove={() => removePollAnswer(answer.id)}
-                                            removable={answer.state !== 'done'}
-                                            preview
-                                        />
-                                    ))}
-                                    <Row style={{ width: '100%' }}>
+                                <Column className={styles.blockWrapper}>
+                                    <Column>
+                                        {pollAnswers.map((answer, index) => (
+                                            <PollAnswer
+                                                key={answer.id}
+                                                index={index}
+                                                type={pollType}
+                                                answer={answer}
+                                                percentage={0}
+                                                color={pollColorScale(index)}
+                                                remove={() => removePollAnswer(answer.id)}
+                                                removable={answer.state !== 'done'}
+                                                preview
+                                            />
+                                        ))}
+                                    </Column>
+                                    <Row centerY style={{ width: '100%', marginBottom: 10 }}>
                                         <Input
                                             type='text'
                                             placeholder='New answer...'
@@ -1379,6 +1386,55 @@ function CreatePostModal(): JSX.Element {
                                             text='Add'
                                             disabled={!newPollAnswer}
                                             onClick={addPollAnswer}
+                                        />
+                                    </Row>
+                                    <Row wrap centerY centerX>
+                                        <PollIcon className={styles.icon} />
+                                        <Toggle
+                                            leftText='Lock answers'
+                                            positionLeft={!pollAnswersLocked}
+                                            rightColor='blue'
+                                            onClick={() => {
+                                                setPollAnswersError(false)
+                                                setPollAnswersLocked(!pollAnswersLocked)
+                                            }}
+                                            onOffText
+                                            style={{ marginRight: 20 }}
+                                        />
+                                        {governance && (
+                                            <DropDown
+                                                title='Action'
+                                                options={['None', 'Create spaces']} // 'Assign Moderators'
+                                                selectedOption={pollAction}
+                                                setSelectedOption={(option) =>
+                                                    setPollAction(option)
+                                                }
+                                                style={{ marginRight: 20 }}
+                                            />
+                                        )}
+                                        {governance && pollAction === 'Create spaces' && (
+                                            <Row centerY style={{ marginRight: 20 }}>
+                                                <p>Threshold</p>
+                                                <Input
+                                                    type='number'
+                                                    min={1}
+                                                    max={1000}
+                                                    value={pollThreshold}
+                                                    onChange={(v) => setPollThreshold(v)}
+                                                    style={{ width: 70, marginLeft: 10 }}
+                                                />
+                                            </Row>
+                                        )}
+                                        <DropDown
+                                            title='Vote type'
+                                            options={[
+                                                'Single choice',
+                                                'Multiple choice',
+                                                'Weighted choice',
+                                            ]}
+                                            selectedOption={pollType}
+                                            setSelectedOption={(option) => setPollType(option)}
+                                            style={{ marginRight: 20 }}
                                         />
                                     </Row>
                                 </Column>
