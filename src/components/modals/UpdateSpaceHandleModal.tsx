@@ -1,10 +1,11 @@
 import Button from '@components/Button'
 import Input from '@components/Input'
 import LoadingWheel from '@components/LoadingWheel'
-import Modal from '@components/modals/Modal'
 import SuccessMessage from '@components/SuccessMessage'
+import Modal from '@components/modals/Modal'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
+import { simplifyText } from '@src/Helpers'
 import styles from '@styles/components/modals/Modal.module.scss'
 import axios from 'axios'
 import React, { useContext, useState } from 'react'
@@ -82,7 +83,7 @@ function UpdateSpaceHandleModal(props: { close: () => void }): JSX.Element {
                     value={inputValue}
                     onChange={(newValue) => {
                         setInputState('default')
-                        setInputValue(newValue.toLowerCase().replace(/[^a-z0-9]/g, '-'))
+                        setInputValue(simplifyText(newValue))
                     }}
                 />
                 <div className={styles.footer}>

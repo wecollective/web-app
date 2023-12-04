@@ -9,6 +9,7 @@ import {
     defaultErrorState,
     invalidateFormItem,
     isValidEmail,
+    simplifyText,
     updateFormItem,
 } from '@src/Helpers'
 import styles from '@styles/components/modals/Modal.module.scss'
@@ -141,9 +142,7 @@ function RegisterModal(props: { close: () => void }): JSX.Element {
                         state={handle.state}
                         errors={handle.errors}
                         value={handle.value}
-                        onChange={(v) =>
-                            updateItem('handle', v.toLowerCase().replace(/[^a-z0-9]/g, '-'))
-                        }
+                        onChange={(v) => updateItem('handle', simplifyText(v))}
                         style={{ marginBottom: 10 }}
                     />
                     <Input

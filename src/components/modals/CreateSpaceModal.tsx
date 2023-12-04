@@ -15,6 +15,7 @@ import {
     defaultErrorState,
     findDraftLength,
     invalidateFormItem,
+    simplifyText,
     updateFormItem,
 } from '@src/Helpers'
 import styles from '@styles/components/modals/CreateSpaceModal.module.scss'
@@ -181,9 +182,7 @@ function CreateSpaceModal(): JSX.Element {
                             value={handle.value}
                             state={handle.state}
                             errors={handle.errors}
-                            onChange={(v) =>
-                                updateItem('handle', v.toLowerCase().replace(/[^a-z0-9]/g, '-'))
-                            }
+                            onChange={(v) => updateItem('handle', simplifyText(v))}
                             style={{ marginBottom: 20 }}
                         />
                         <Input

@@ -502,6 +502,10 @@ export function trimText(text: string, maxChars: number) {
     return text.length > maxChars ? text.substring(0, maxChars).concat('...') : text
 }
 
+export function simplifyText(text: string) {
+    return text.toLowerCase().replace(/[^a-z0-9]/g, '-')
+}
+
 export function findDHMFromMinutes(minutes) {
     // return { days, hours, minutes } object from minutes
     const days = Math.floor(minutes / 60 / 24)
