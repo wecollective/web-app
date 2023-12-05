@@ -45,10 +45,6 @@ function Images(props: { postId: number; style?: any }): JSX.Element {
         return 'small'
     }
 
-    function findUrl(block) {
-        return block.Image.url || URL.createObjectURL(block.file)
-    }
-
     useEffect(() => getImages(0), [])
 
     if (loading)
@@ -76,8 +72,8 @@ function Images(props: { postId: number; style?: any }): JSX.Element {
                                     }}
                                 >
                                     <img
-                                        src={findUrl(block)}
-                                        onError={(e) => handleImageError(e, findUrl(block))}
+                                        src={block.Image.url}
+                                        onError={(e) => handleImageError(e, block.Image.url)}
                                         alt=''
                                     />
                                 </button>

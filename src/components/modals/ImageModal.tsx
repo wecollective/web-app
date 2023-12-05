@@ -11,10 +11,6 @@ function ImageModal(props: { images: any[]; startIndex: number; close: () => voi
     const { images, startIndex, close } = props
     const [index, setIndex] = useState(startIndex)
 
-    function findUrl(image) {
-        return image.url || URL.createObjectURL(image.file)
-    }
-
     return (
         <Modal close={close} className={styles.wrapper}>
             <Row centerY>
@@ -30,8 +26,8 @@ function ImageModal(props: { images: any[]; startIndex: number; close: () => voi
                 <Column centerX>
                     <img
                         className={styles.image}
-                        src={findUrl(images[index].Image)}
-                        onError={(e) => handleImageError(e, findUrl(images[index].Image))}
+                        src={images[index].Image.url}
+                        onError={(e) => handleImageError(e, images[index].Image.url)}
                         alt=''
                     />
                     {images[index].text && (
