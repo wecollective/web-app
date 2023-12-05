@@ -9,18 +9,33 @@ function Audio(props: { postId: number; style?: any }): JSX.Element {
     const { postId, style } = props
     const [loading, setLoading] = useState(true)
     const [blocks, setBlocks] = useState<any[]>([])
+    const [totalBlocks, setTotalBlocks] = useState(0)
+    const [nextBlocksLoading, setNextBlocksLoading] = useState(false)
+    // const [startIndex, setStartIndex] = useState(0)
+    // const [modalOpen, setModalOpen] = useState(false)
 
-    function getAudio() {
+    function getAudio(offset: number) {
         axios
-            .get(`${config.apiURL}/post-audio?postId=${postId}`)
+            .get(`${config.apiURL}/post-audio?postId=${postId}&offset=${offset}`)
             .then((res) => {
-                setBlocks(res.data) // .sort((a, b) => a.Link.index - b.Link.index)
-                setLoading(false)
+                setBlocks(offset ? [...blocks, ...res.data.blocks] : res.data.blocks)
+                if (offset) setNextBlocksLoading(false)
+                else {
+                    setTotalBlocks(res.data.total)
+                    setLoading(false)
+                }
             })
             .catch((error) => console.log(error))
     }
 
-    useEffect(() => getAudio(), [])
+    // function onScrollRightEnd() {
+    //     if (!nextBlocksLoading && totalBlocks > blocks.length) {
+    //         setNextBlocksLoading(true)
+    //         getAudio(blocks.length)
+    //     }
+    // }
+
+    useEffect(() => getAudio(0), [])
 
     if (loading)
         return (
@@ -31,14 +46,25 @@ function Audio(props: { postId: number; style?: any }): JSX.Element {
     return (
         <Column style={style}>
             {blocks.map((block, i) => (
-                <AudioCard
-                    id={block.id}
-                    url={block.Audio.url}
-                    staticBars={400}
-                    location={`${block.id}`}
-                    style={{ height: 200, margin: '10px 0' }}
-                />
+                <Column centerX style={{ margin: '10px 0' }}>
+                    <AudioCard
+                        key={block.id}
+                        id={block.id}
+                        url={block.Audio.url}
+                        staticBars={400}
+                        location='post'
+                        style={{ height: 200, width: '100%' }}
+                    />
+                    {block.text && <p>{block.text}</p>}
+                </Column>
             ))}
+            {/* {modalOpen && (
+                <AudioModal
+                    audios={blocks}
+                    startIndex={startIndex}
+                    close={() => setModalOpen(false)}
+                />
+            )} */}
         </Column>
     )
 }
