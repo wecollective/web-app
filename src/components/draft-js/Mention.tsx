@@ -1,28 +1,42 @@
 import ImageTitle from '@components/ImageTitle'
 import Row from '@components/Row'
+import config from '@src/Config'
 import styles from '@styles/components/draft-js/Mention.module.scss'
-import React, { useState } from 'react'
+import axios from 'axios'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
-function MentionComponent(props: { mention; children }): JSX.Element {
-    const { mention, children } = props
+function Mention(props: { mention }): JSX.Element {
+    const { mention } = props
+    const [userData, setUserData] = useState<any>(null)
     const [modalOpen, setModalOpen] = useState(false)
+
+    function getUserData() {
+        axios
+            .get(`${config.apiURL}/user-mention-data?userId=${mention.id}`)
+            .then((res) => setUserData(res.data))
+            .catch((error) => console.log(error))
+    }
+
+    useEffect(() => getUserData(), [])
+
+    if (!userData) return <span />
     return (
-        <span className={styles.mentionComponent}>
+        <span className={styles.wrapper}>
             <Link
-                to={`/u/${mention.link}`}
+                to={`/u/${userData.handle}`}
                 className={styles.text}
                 onMouseEnter={() => setModalOpen(true)}
                 onMouseLeave={() => setModalOpen(false)}
             >
-                @{children}
+                @{userData.name}
             </Link>
             {modalOpen && (
                 <Row className={styles.modal}>
                     <ImageTitle
                         type='user'
-                        imagePath={mention.avatar}
-                        title={`u/${mention.link}`}
+                        imagePath={userData.flagImagePath}
+                        title={`u/${userData.handle}`}
                         shadow
                     />
                 </Row>
@@ -31,4 +45,4 @@ function MentionComponent(props: { mention; children }): JSX.Element {
     )
 }
 
-export default MentionComponent
+export default Mention

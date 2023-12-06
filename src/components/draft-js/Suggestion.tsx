@@ -9,6 +9,7 @@ function Suggestion(props: {
     onMouseUp: any
 }): JSX.Element {
     const { mention, onMouseDown, onMouseEnter, onMouseUp } = props
+
     return (
         <button
             key={mention.id}
