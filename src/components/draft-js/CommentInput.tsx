@@ -3,9 +3,11 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/jsx-props-no-spreading */
 import Button from '@components/Button'
+import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
 import FlagImage from '@components/FlagImage'
 import Row from '@components/Row'
+import RecordingIcon from '@components/animations/RecordingIcon'
 import AudioCard from '@components/cards/PostCard/AudioCard'
 import Mention from '@components/draft-js/Mention'
 import Suggestion from '@components/draft-js/Suggestion'
@@ -29,13 +31,20 @@ import '@draft-js-plugins/mention/lib/plugin.css'
 import createToolbarPlugin from '@draft-js-plugins/static-toolbar'
 import createTextAlignmentPlugin from '@draft-js-plugins/text-alignment'
 import config from '@src/Config'
-import { allowedAudioTypes, allowedImageTypes, audioMBLimit, imageMBLimit } from '@src/Helpers'
+import {
+    allowedAudioTypes,
+    allowedImageTypes,
+    audioMBLimit,
+    formatTimeMMSS,
+    imageMBLimit,
+} from '@src/Helpers'
 import styles from '@styles/components/draft-js/CommentInput.module.scss'
 import draftStyles from '@styles/components/draft-js/TextStyling.module.scss'
 import { MicrophoneIcon, PaperClipIcon } from '@svgs/all'
 import axios from 'axios'
 import { ContentState, EditorState, convertToRaw } from 'draft-js'
 import React, { useContext, useEffect, useRef, useState } from 'react'
+import RecordRTC from 'recordrtc'
 import { v4 as uuidv4 } from 'uuid'
 
 function CommentInput(props: {
@@ -55,10 +64,15 @@ function CommentInput(props: {
     const [imageSizeError, setImageSizeError] = useState(false)
     const [audios, setAudios] = useState<any[]>([])
     const [audioSizeError, setAudioSizeError] = useState(false)
+    const [recording, setRecording] = useState(false)
+    const [recordingTime, setRecordingTime] = useState(0)
+    const audioRecorder = useRef<any>(null)
+    const recordingInterval = useRef<any>(null)
     const [suggestions, setSuggestions] = useState([])
     const [showSuggestions, setShowSuggestions] = useState(false)
     const [characterLength, setCharacterLength] = useState(0)
     const [focused, setFocused] = useState(false)
+    const [totalUploadSizeError, setTotalUploadSizeError] = useState(false)
     const wrapperRef = useRef<HTMLDivElement>(null)
     const editorRef = useRef<any>(null)
     const inputId = uuidv4()
@@ -171,6 +185,50 @@ function CommentInput(props: {
         }
     }
 
+    function removeImage(id) {
+        setTotalUploadSizeError(false)
+        setImages(images.filter((image) => image.id !== id))
+    }
+
+    function removeAudio(id) {
+        setTotalUploadSizeError(false)
+        setAudios(audios.filter((audio) => audio.id !== id))
+    }
+
+    function toggleAudioRecording() {
+        if (recording) {
+            audioRecorder.current.stopRecording(() => {
+                clearInterval(recordingInterval.current)
+                const file = new File([audioRecorder.current.getBlob()], '', { type: 'audio/wav' })
+                const newAudio = {
+                    id: uuidv4(),
+                    Audio: { file, url: URL.createObjectURL(file) },
+                }
+                setAudios((audio) => [...audio, newAudio])
+            })
+            setRecording(false)
+        } else {
+            setRecordingTime(0)
+            navigator.mediaDevices
+                .getUserMedia({ audio: { sampleRate: 24000 } })
+                .then((audioStream) => {
+                    audioRecorder.current = RecordRTC(audioStream, {
+                        type: 'audio',
+                        mimeType: 'audio/wav',
+                        recorderType: RecordRTC.StereoAudioRecorder,
+                        bufferSize: 16384,
+                        numberOfAudioChannels: 1,
+                        desiredSampRate: 24000,
+                    })
+                    audioRecorder.current.startRecording()
+                    recordingInterval.current = setInterval(() => {
+                        setRecordingTime((t) => t + 1)
+                    }, 1000)
+                    setRecording(true)
+                })
+        }
+    }
+
     function initializeDropBox() {
         let dragLeaveCounter = 0 // used to avoid dragleave firing when hovering child elements
         const dropbox = wrapperRef.current
@@ -238,13 +296,19 @@ function CommentInput(props: {
                                 spellCheck
                             />
                         </Column>
-                        <Row style={{ marginTop: 3 }}>
+                        <Row style={{ marginTop: 3, position: 'relative' }}>
+                            {recording && (
+                                <Row centerY className={styles.recordingTime}>
+                                    <RecordingIcon />
+                                    <p>{formatTimeMMSS(recordingTime)}</p>
+                                </Row>
+                            )}
                             <button
                                 type='button'
                                 className={styles.mediaButton}
-                                onClick={() => console.log('upload')}
+                                onClick={toggleAudioRecording}
                             >
-                                <MicrophoneIcon />
+                                {recording ? <div className={styles.stop} /> : <MicrophoneIcon />}
                             </button>
                             <div className={styles.mediaButton}>
                                 <label htmlFor={`file-input-${inputId}`}>
@@ -298,6 +362,11 @@ function CommentInput(props: {
                 <Row style={{ marginTop: 10 }}>
                     {images.map((image) => (
                         <Column key={image.id} className={styles.image}>
+                            <CloseButton
+                                size={16}
+                                onClick={() => removeImage(image.id)}
+                                style={{ position: 'absolute', top: 2, right: 2 }}
+                            />
                             <img src={image.Image.url} alt='upload' />
                         </Column>
                     ))}
@@ -306,14 +375,23 @@ function CommentInput(props: {
             {audios.length > 0 && (
                 <Column style={{ marginTop: 10 }}>
                     {audios.map((audio) => (
-                        <Column key={audio.id} style={{ marginTop: 10 }}>
+                        <Column key={audio.id} style={{ position: 'relative', margin: '10px 0' }}>
+                            <CloseButton
+                                size={18}
+                                onClick={() => removeAudio(audio.id)}
+                                style={{
+                                    position: 'absolute',
+                                    right: -4,
+                                    top: -8,
+                                    zIndex: 5,
+                                }}
+                            />
                             <AudioCard
                                 id={audio.id}
                                 url={audio.Audio.url}
                                 staticBars={400}
                                 location='new-post'
-                                // remove={() => removeAudioFile(audio.id)}
-                                style={{ height: 100, marginBottom: 10 }}
+                                style={{ height: 100 }}
                             />
                         </Column>
                     ))}

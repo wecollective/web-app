@@ -1,5 +1,5 @@
 import Column from '@components/Column'
-import LoadingWheel from '@components/LoadingWheel'
+import LoadingWheel from '@components/animations/LoadingWheel'
 import AudioCard from '@components/cards/PostCard/AudioCard'
 import config from '@src/Config'
 import axios from 'axios'
@@ -45,10 +45,9 @@ function Audio(props: { postId: number; style?: any }): JSX.Element {
         )
     return (
         <Column style={style}>
-            {blocks.map((block, i) => (
-                <Column centerX style={{ margin: '10px 0' }}>
+            {blocks.map((block) => (
+                <Column centerX key={block.id} style={{ margin: '10px 0' }}>
                     <AudioCard
-                        key={block.id}
                         id={block.id}
                         url={block.Audio.url}
                         staticBars={400}

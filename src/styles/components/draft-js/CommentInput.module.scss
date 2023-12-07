@@ -31,13 +31,11 @@ $transitionSpeed: 0.5s;
             height: 0;
             opacity: 0;
             transition: all $transitionSpeed;
-            // margin-bottom: 5px;
 
             .toolbar {
                 width: 100%;
                 display: none;
                 z-index: 2;
-                // margin-bottom: 5px;
 
                 > div {
                     display: flex;
@@ -103,12 +101,10 @@ $transitionSpeed: 0.5s;
         }
 
         .inputWrapper {
-            // margin-top: 5px;
-
             :global(.DraftEditor-root) {
-                padding: 0px 10px;
-                width: 100%; // calc(100% - 90px);
-                // background-color: white;
+                padding: 0px 8px;
+                width: 100%;
+                max-width: 520px;
             }
 
             :global(.DraftEditor-editorContainer) {
@@ -120,7 +116,6 @@ $transitionSpeed: 0.5s;
             :global(.public-DraftEditorPlaceholder-root) {
                 padding: 10px 12px;
                 color: $grey4;
-                // text-shadow: 0 0 2px rgba(black, 0.2);
                 position: absolute;
                 pointer-events: none;
             }
@@ -141,16 +136,34 @@ $transitionSpeed: 0.5s;
                     width: 20px;
                     height: 20px;
                     color: $grey6;
+                    transition: all 0.3s;
+
+                    &:hover {
+                        color: $grey7;
+                    }
                 }
 
                 label {
                     cursor: pointer;
-                    width: 35px;
-                    height: 35px;
+                    width: inherit;
+                    height: inherit;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                 }
+
+                .stop {
+                    width: 15px;
+                    height: 15px;
+                    border-radius: 2px;
+                    background-color: $likeRed;
+                }
+            }
+
+            .recordingTime {
+                position: absolute;
+                left: -105px;
+                height: 35px;
             }
         }
     }
@@ -181,6 +194,8 @@ $transitionSpeed: 0.5s;
     }
 
     .image {
+        position: relative;
+
         &:not(:last-child) {
             margin-right: 10px;
         }

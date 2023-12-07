@@ -20,6 +20,7 @@ function PollAnswer(props: {
     color: string
     preview?: boolean
     removable: boolean
+    style?: any
     remove: () => void
     toggleDone?: () => void
     onChange?: (value: boolean | number) => void
@@ -32,6 +33,7 @@ function PollAnswer(props: {
         color,
         preview,
         removable,
+        style,
         remove,
         toggleDone,
         onChange,
@@ -43,7 +45,11 @@ function PollAnswer(props: {
     const mobileView = document.documentElement.clientWidth < 900
 
     return (
-        <Column centerY className={`${styles.wrapper} ${state === 'done' && styles.done}`}>
+        <Column
+            centerY
+            className={`${styles.wrapper} ${state === 'done' && styles.done}`}
+            style={style}
+        >
             <Row spaceBetween>
                 <Row centerY style={{ width: '100%', marginRight: 10 }}>
                     <Column
@@ -148,6 +154,7 @@ PollAnswer.defaultProps = {
     preview: false,
     toggleDone: null,
     onChange: null,
+    style: null,
 }
 
 export default PollAnswer
