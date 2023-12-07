@@ -1,0 +1,58 @@
+@import '@styles/Variables';
+
+.editor {
+    position: relative;
+    width: 100%;
+
+    span {
+        font-family: inherit;
+    }
+
+    a {
+        color: $blue1;
+    }
+
+    ol,
+    ul {
+        padding-inline-start: 40px !important;
+    }
+
+    img {
+        max-width: 100%;
+    }
+
+    blockquote {
+        margin-block-start: 10px;
+        margin-block-end: 10px;
+        border-left: 5px solid $grey2;
+        padding-left: 10px;
+        color: $grey6;
+    }
+
+    // code blocks
+    pre {
+        font-family: monospace;
+        overflow-x: hidden;
+
+        > div {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: $grey2;
+            font-family: inherit;
+            line-height: 20px;
+        }
+    }
+}
+
+.draftLeft {
+    text-align: left;
+}
+
+.draftRight {
+    text-align: right;
+}
+
+.draftCenter {
+    text-align: center;
+}
