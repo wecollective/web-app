@@ -1,7 +1,7 @@
 import Column from '@components/Column'
-import LoadingWheel from '@components/LoadingWheel'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
+import LoadingWheel from '@components/animations/LoadingWheel'
 import ImageModal from '@components/modals/ImageModal'
 import config from '@src/Config'
 import { handleImageError } from '@src/Helpers'

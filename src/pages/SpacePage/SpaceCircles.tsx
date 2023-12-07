@@ -3,13 +3,13 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable react/no-this-in-sfc */
 import Column from '@components/Column'
+import FlagImage from '@components/FlagImage'
 import Row from '@components/Row'
 import StatButton from '@components/StatButton'
 import DraftText from '@components/draft-js/DraftText'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import { trimText } from '@src/Helpers'
-import FlagImage from '@src/components/FlagImage'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/pages/SpacePage/SpaceCircles.module.scss'
 import { CommentIcon, LockIcon, PostIcon, UsersIcon } from '@svgs/all'

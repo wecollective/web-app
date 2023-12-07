@@ -1,7 +1,7 @@
 import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
-import LoadingWheel from '@components/LoadingWheel'
 import Row from '@components/Row'
+import LoadingWheel from '@components/animations/LoadingWheel'
 import styles from '@styles/components/cards/PostCard/UrlCard.module.scss'
 import { LinkIcon } from '@svgs/all'
 import React, { useEffect, useState } from 'react'

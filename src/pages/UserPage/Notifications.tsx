@@ -1,7 +1,7 @@
 import Column from '@components/Column'
-import LoadingWheel from '@components/LoadingWheel'
 import Row from '@components/Row'
 import Toggle from '@components/Toggle'
+import LoadingWheel from '@components/animations/LoadingWheel'
 import NotificationCard from '@components/cards/NotificationCard'
 import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'

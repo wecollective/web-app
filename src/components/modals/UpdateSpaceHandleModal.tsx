@@ -1,7 +1,7 @@
 import Button from '@components/Button'
 import Input from '@components/Input'
-import LoadingWheel from '@components/LoadingWheel'
 import SuccessMessage from '@components/SuccessMessage'
+import LoadingWheel from '@components/animations/LoadingWheel'
 import Modal from '@components/modals/Modal'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'

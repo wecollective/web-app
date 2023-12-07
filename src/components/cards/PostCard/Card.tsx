@@ -1,6 +1,6 @@
 import Column from '@components/Column'
-import LoadingWheel from '@components/LoadingWheel'
 import Row from '@components/Row'
+import LoadingWheel from '@components/animations/LoadingWheel'
 import DraftText from '@components/draft-js/DraftText'
 import LikeModal from '@components/modals/LikeModal'
 import config from '@src/Config'

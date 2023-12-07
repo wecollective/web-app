@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import Column from '@components/Column'
-import LoadingWheel from '@components/LoadingWheel'
 import Row from '@components/Row'
+import LoadingWheel from '@components/animations/LoadingWheel'
 import PostCard from '@components/cards/PostCard/PostCard'
 import Modal from '@components/modals/Modal'
 import { SpaceContext } from '@contexts/SpaceContext'

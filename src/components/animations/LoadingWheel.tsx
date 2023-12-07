@@ -1,4 +1,4 @@
-import styles from '@styles/components/LoadingWheel.module.scss'
+import styles from '@styles/components/animations/LoadingWheel.module.scss'
 import { LoadingWheelIcon } from '@svgs/all'
 import React from 'react'
 

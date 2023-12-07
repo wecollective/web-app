@@ -1,9 +1,9 @@
 /* eslint-disable no-nested-ternary */
-import HorizontalSpaceCard from '@components/cards/HorizontalSpaceCard'
 import Column from '@components/Column'
-import LoadingWheel from '@components/LoadingWheel'
 import Row from '@components/Row'
 import SpaceListPlaceholder from '@components/SpaceListPlaceholder'
+import LoadingWheel from '@components/animations/LoadingWheel'
+import HorizontalSpaceCard from '@components/cards/HorizontalSpaceCard'
 import { SpaceContext } from '@contexts/SpaceContext'
 import styles from '@styles/components/PostList.module.scss'
 import React, { useContext, useEffect } from 'react'

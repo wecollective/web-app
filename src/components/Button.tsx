@@ -1,4 +1,4 @@
-import LoadingWheel from '@components/LoadingWheel'
+import LoadingWheel from '@components/animations/LoadingWheel'
 import styles from '@styles/components/Button.module.scss'
 import React from 'react'
 

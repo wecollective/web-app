@@ -1,5 +1,5 @@
 import Column from '@components/Column'
-import LoadingWheel from '@components/LoadingWheel'
+import LoadingWheel from '@components/animations/LoadingWheel'
 import UrlCard from '@components/cards/PostCard/UrlCard'
 import config from '@src/Config'
 import axios from 'axios'

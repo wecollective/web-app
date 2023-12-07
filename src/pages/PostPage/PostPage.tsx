@@ -1,11 +1,11 @@
 /* eslint-disable no-nested-ternary */
 import Column from '@components/Column'
-import LoadingWheel from '@components/LoadingWheel'
+import GlassBeadGameRoom from '@components/GlassBeadGameRoom'
 import Prism from '@components/Prism'
+import LoadingWheel from '@components/animations/LoadingWheel'
 import PostCard from '@components/cards/PostCard/PostCard'
 import { AccountContext } from '@contexts/AccountContext'
 import { PostContext } from '@contexts/PostContext'
-import GlassBeadGameRoom from '@src/components/GlassBeadGameRoom'
 import styles from '@styles/pages/PostPage/PostPage.module.scss'
 import React, { useContext, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'

@@ -1,4 +1,4 @@
-import LoadingWheel from '@components/LoadingWheel'
+import LoadingWheel from '@components/animations/LoadingWheel'
 import { resizeTextArea } from '@src/Helpers'
 import styles from '@styles/components/Input.module.scss'
 import { DangerIcon, SuccessIcon } from '@svgs/all'

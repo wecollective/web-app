@@ -1,9 +1,9 @@
 /* eslint-disable no-nested-ternary */
-import PostCard from '@components/cards/PostCard/PostCard'
 import Column from '@components/Column'
-import LoadingWheel from '@components/LoadingWheel'
 import PostListPlaceholder from '@components/PostListPlaceholder'
 import Row from '@components/Row'
+import LoadingWheel from '@components/animations/LoadingWheel'
+import PostCard from '@components/cards/PostCard/PostCard'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import { UserContext } from '@contexts/UserContext'

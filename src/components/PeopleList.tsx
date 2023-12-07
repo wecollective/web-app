@@ -1,9 +1,9 @@
 /* eslint-disable no-nested-ternary */
-import VerticalUserCard from '@components/cards/VerticalUserCard'
 import Column from '@components/Column'
-import LoadingWheel from '@components/LoadingWheel'
 import PeopleListPlaceholder from '@components/PeopleListPlaceholder'
 import Row from '@components/Row'
+import LoadingWheel from '@components/animations/LoadingWheel'
+import VerticalUserCard from '@components/cards/VerticalUserCard'
 import styles from '@styles/components/PeopleList.module.scss'
 import React from 'react'
 
