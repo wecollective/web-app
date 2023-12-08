@@ -35,7 +35,6 @@
 
 .wrapper {
     position: relative;
-    margin-bottom: 10px;
 
     &.linkMap {
         background-color: white;
@@ -45,17 +44,35 @@
         margin: 0;
     }
 
+    .padding {
+        position: absolute;
+        width: 60px;
+        height: 5px;
+        top: -5px;
+        left: 0;
+        background-color: white;
+        z-index: 2;
+    }
+
+    .line {
+        height: calc(100% - 25px);
+        width: 10px;
+        border-left: 2px dotted $grey2;
+        margin-left: 14px;
+        margin-top: 5px;
+        flex-shrink: 0;
+    }
+
     .content {
         position: relative;
-        margin-left: 6px;
-        border-radius: 15px;
-        padding: 6px 12px;
+        margin-left: 8px;
+        border-radius: 10px;
+        padding: 5px 0 0 0;
         font-size: 14px;
-        background-color: $grey1;
         width: calc(100% - 36px);
 
         .header {
-            margin-bottom: 2px;
+            margin-bottom: 5px;
 
             .id {
                 display: flex;
@@ -121,10 +138,11 @@
 
     &.highlighted .content {
         background-color: $blue7;
+        padding: 5px 12px 8px 12px;
     }
 
     .footer {
-        margin: 5px 0 0 36px;
+        margin-top: 5px;
 
         .stat {
             all: unset;

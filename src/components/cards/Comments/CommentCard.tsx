@@ -5,6 +5,7 @@ import Row from '@components/Row'
 import ShowMoreLess from '@components/ShowMoreLess'
 import LoadingWheel from '@components/animations/LoadingWheel'
 import EditCommentModal from '@components/cards/Comments/EditCommentModal'
+import CommentInput from '@components/draft-js/CommentInput'
 import DraftText from '@components/draft-js/DraftText'
 import DeleteCommentModal from '@components/modals/DeleteCommentModal'
 import LikeModal from '@components/modals/LikeModal'
@@ -13,7 +14,7 @@ import UserButtonModal from '@components/modals/UserButtonModal'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
-import { dateCreated, timeSinceCreated } from '@src/Helpers'
+import { dateCreated, getTextSelection, timeSinceCreated } from '@src/Helpers'
 import styles from '@styles/components/cards/Comments/CommentCard.module.scss'
 import {
     DeleteIcon,
@@ -21,7 +22,6 @@ import {
     EyeClosedIcon,
     LikeIcon,
     LinkIcon,
-    ReplyIcon,
     VerticalEllipsisIcon,
     ZapIcon,
 } from '@svgs/all'
@@ -34,7 +34,6 @@ function CommentCard(props: {
     comment: any
     highlighted: boolean
     location: string
-    toggleReplyInput: () => void
     removeComment: (comment: any) => void
     editComment: (comment: any, newText: string) => void
     updateCommentReactions: (commentId: number, reactionType: string, increment: boolean) => void
@@ -44,7 +43,6 @@ function CommentCard(props: {
         comment,
         highlighted,
         location,
-        toggleReplyInput,
         removeComment,
         editComment,
         updateCommentReactions,
@@ -87,12 +85,20 @@ function CommentCard(props: {
         totalPosts: 0,
         totalComments: 0,
     })
+    const [selected, setSelected] = useState(false)
+    const selectedRef = useRef(false)
     const mouseOver = useRef(false)
     const hoverDelay = 500
     const isOwnComment = Creator.id === accountData.id
     const muted = accountData.id && accountData.mutedUsers.includes(Creator.id)
+    const edited = createdAt !== updatedAt
     const history = useNavigate()
     const cookies = new Cookies()
+
+    function toggleSelected() {
+        setSelected(!selectedRef.current)
+        selectedRef.current = !selectedRef.current
+    }
 
     function toggleLike() {
         setLikeLoading(true)
@@ -147,6 +153,7 @@ function CommentCard(props: {
 
     useEffect(() => {
         const commentCard = document.getElementById(`comment-${id}`)
+        const commentText = document.getElementById(`comment-text-${comment.id}`)
         if (commentCard) {
             commentCard.addEventListener('dragstart', (e) => {
                 e.stopPropagation()
@@ -157,6 +164,21 @@ function CommentCard(props: {
             })
             commentCard.addEventListener('dragend', () => {
                 commentCard.classList.remove(styles.dragging)
+            })
+        }
+        if (commentText) {
+            commentText.addEventListener('click', () => {
+                // if no text selected & reply input empty: toogle reply input
+                // todo: check if reply input empty
+                if (!getTextSelection()) toggleSelected()
+            })
+            commentText.addEventListener('mouseenter', () => {
+                setDraggable(false)
+                if (setPostDraggable) setPostDraggable(false)
+            })
+            commentText.addEventListener('mouseleave', () => {
+                setDraggable(true)
+                if (setPostDraggable) setPostDraggable(true)
             })
         }
     }, [])
@@ -181,15 +203,19 @@ function CommentCard(props: {
             }`}
             draggable={draggable}
         >
-            <Row>
-                <Link
-                    to={`/u/${Creator.handle}`}
-                    onMouseEnter={onMouseEnter}
-                    onMouseLeave={onMouseLeave}
-                    style={{ pointerEvents: Creator.handle ? 'auto' : 'none' }}
-                >
-                    <FlagImage type='user' size={30} imagePath={Creator.flagImagePath} />
-                </Link>
+            <Row style={{ marginBottom: 10 }}>
+                <Column className={styles.left}>
+                    <Link
+                        to={`/u/${Creator.handle}`}
+                        onMouseEnter={onMouseEnter}
+                        onMouseLeave={onMouseLeave}
+                        style={{ pointerEvents: Creator.handle ? 'auto' : 'none' }}
+                    >
+                        <div className={styles.padding} />
+                        <FlagImage type='user' size={30} imagePath={Creator.flagImagePath} />
+                    </Link>
+                    <div className={styles.line} />
+                </Column>
                 <Column className={styles.content}>
                     <Row spaceBetween className={styles.header}>
                         <Row>
@@ -207,18 +233,15 @@ function CommentCard(props: {
                                     <p style={{ fontWeight: 600 }}>{Creator.name}</p>
                                 </Link>
                             )}
-                            <p className='grey' title={dateCreated(createdAt)}>
-                                {`• ${timeSinceCreated(createdAt)}`}
+                            <p
+                                className='grey'
+                                title={`${dateCreated(createdAt)} ${
+                                    edited ? `(edited: ${dateCreated(updatedAt)})` : ''
+                                }`}
+                            >
+                                {timeSinceCreated(createdAt)}
                             </p>
-                            {createdAt !== updatedAt && (
-                                <p
-                                    className='grey'
-                                    title={`Edited at ${dateCreated(updatedAt)}`}
-                                    style={{ paddingLeft: 5 }}
-                                >
-                                    *
-                                </p>
-                            )}
+                            {edited && <p className='grey'>*</p>}
                             {muted && (
                                 <button
                                     type='button'
@@ -231,14 +254,16 @@ function CommentCard(props: {
                             )}
                         </Row>
                         <Row>
-                            <Link
-                                to={`/p/${itemId}?commentId=${id}`}
-                                className={styles.id}
-                                title='Open post page'
-                            >
-                                <p className='grey'>ID:</p>
-                                <p style={{ marginLeft: 5 }}>{id}</p>
-                            </Link>
+                            {selected && (
+                                <Link
+                                    to={`/p/${itemId}?commentId=${id}`}
+                                    className={styles.id}
+                                    title='Open post page'
+                                >
+                                    <p className='grey'>ID:</p>
+                                    <p style={{ marginLeft: 5 }}>{id}</p>
+                                </Link>
+                            )}
                             {isOwnComment && (
                                 <button
                                     type='button'
@@ -273,20 +298,10 @@ function CommentCard(props: {
                         </Row>
                     </Row>
                     {state !== 'account-deleted' && (
-                        <div
-                            onMouseEnter={() => {
-                                setDraggable(false)
-                                if (setPostDraggable) setPostDraggable(false)
-                            }}
-                            onMouseLeave={() => {
-                                setDraggable(true)
-                                if (setPostDraggable) setPostDraggable(true)
-                            }}
-                            style={{ cursor: 'text' }}
-                        >
+                        <div id={`comment-text-${comment.id}`} style={{ cursor: 'text' }}>
                             <ShowMoreLess
                                 height={250}
-                                gradientColor={highlighted ? 'blue' : 'grey'}
+                                gradientColor={highlighted ? 'blue' : 'white'}
                             >
                                 <DraftText
                                     text={state === 'deleted' ? '[comment deleted]' : text}
@@ -297,50 +312,59 @@ function CommentCard(props: {
                             </ShowMoreLess>
                         </div>
                     )}
+                    {selected && state === 'active' && (
+                        <Row className={styles.footer}>
+                            <Row
+                                centerY
+                                className={`${styles.stat} ${accountLike ? styles.blue : ''}`}
+                            >
+                                {likeLoading ? (
+                                    <LoadingWheel size={15} style={{ marginRight: 5 }} />
+                                ) : (
+                                    <button
+                                        type='button'
+                                        onClick={toggleLike}
+                                        disabled={likeLoading}
+                                    >
+                                        <LikeIcon />
+                                    </button>
+                                )}
+                                <button
+                                    type='button'
+                                    onClick={() =>
+                                        totalLikes ? setLikeModalOpen(true) : toggleLike()
+                                    }
+                                    disabled={likeLoading}
+                                >
+                                    <p>{totalLikes}</p>
+                                </button>
+                            </Row>
+                            <button
+                                type='button'
+                                className={`${styles.stat} ${accountLink ? styles.blue : ''}`}
+                                onClick={() => history(`/linkmap?item=comment&id=${id}`)}
+                            >
+                                <LinkIcon />
+                                <p>{totalLinks}</p>
+                            </button>
+                            <button
+                                type='button'
+                                className={`${styles.stat} ${accountRating ? styles.blue : ''}`}
+                                onClick={() => setRatingModalOpen(true)}
+                            >
+                                <ZapIcon />
+                                <p>{totalRatings}</p>
+                            </button>
+                        </Row>
+                    )}
                 </Column>
             </Row>
-            {state === 'active' && (
-                <Row className={styles.footer}>
-                    <button
-                        type='button'
-                        className={`${styles.stat} ${styles.reply}`}
-                        onClick={() => toggleReplyInput()}
-                    >
-                        <ReplyIcon />
-                    </button>
-                    <Row centerY className={`${styles.stat} ${accountLike ? styles.blue : ''}`}>
-                        {likeLoading ? (
-                            <LoadingWheel size={15} style={{ marginRight: 5 }} />
-                        ) : (
-                            <button type='button' onClick={toggleLike} disabled={likeLoading}>
-                                <LikeIcon />
-                            </button>
-                        )}
-                        <button
-                            type='button'
-                            onClick={() => (totalLikes ? setLikeModalOpen(true) : toggleLike())}
-                            disabled={likeLoading}
-                        >
-                            <p>{totalLikes}</p>
-                        </button>
-                    </Row>
-                    <button
-                        type='button'
-                        className={`${styles.stat} ${accountLink ? styles.blue : ''}`}
-                        onClick={() => history(`/linkmap?item=comment&id=${id}`)}
-                    >
-                        <LinkIcon />
-                        <p>{totalLinks}</p>
-                    </button>
-                    <button
-                        type='button'
-                        className={`${styles.stat} ${accountRating ? styles.blue : ''}`}
-                        onClick={() => setRatingModalOpen(true)}
-                    >
-                        <ZapIcon />
-                        <p>{totalRatings}</p>
-                    </button>
-                </Row>
+            {selected && (
+                <CommentInput
+                    placeholder='Reply...'
+                    onSave={(data) => console.log(data)}
+                    style={{ marginBottom: 10, marginLeft: 2 }}
+                />
             )}
             {likeModalOpen && (
                 <LikeModal

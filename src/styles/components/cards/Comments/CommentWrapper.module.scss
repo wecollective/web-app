@@ -1,0 +1,9 @@
+@import '@styles/Variables';
+
+.lines {
+    width: 10px;
+    border-left: 2px dotted $grey2;
+    margin-left: 14px;
+    flex-shrink: 0;
+    z-index: 1;
+}

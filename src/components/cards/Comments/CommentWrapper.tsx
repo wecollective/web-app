@@ -1,12 +1,13 @@
 import CommentCard from '@components/cards/Comments/CommentCard'
-import CommentInput from '@components/cards/Comments/CommentInput'
 import Column from '@components/Column'
-import { scrollToElement } from '@src/Helpers'
-import React, { useState } from 'react'
+import Row from '@components/Row'
+import styles from '@styles/components/cards/Comments/CommentWrapper.module.scss'
+import React from 'react'
 
 function CommentWrapper(props: {
     comment: any
     postId: number
+    depth: number
     highlightedCommentId: any
     location: string
     addComment: (newComment: string) => void
@@ -18,6 +19,7 @@ function CommentWrapper(props: {
     const {
         comment,
         postId,
+        depth,
         highlightedCommentId,
         location,
         addComment,
@@ -26,37 +28,30 @@ function CommentWrapper(props: {
         updateCommentReactions,
         setPostDraggable,
     } = props
-    const [replyId, setReplyId] = useState(0)
-    const [replyInputOpen, setReplyInputOpen] = useState(false)
-
-    // todo: prompt to login if not logged in & only scroll when opening input
-    function toggleReplyInput(id?) {
-        setReplyId(id || 0)
-        Promise.all([setReplyInputOpen(!replyInputOpen)]).then(() => {
-            const replyInput = document.getElementById(`reply-input-${comment.id}`)
-            if (replyInput) scrollToElement(replyInput)
-        })
-    }
 
     return (
-        <Column>
-            <CommentCard
-                comment={comment}
-                highlighted={highlightedCommentId === comment.id}
-                toggleReplyInput={() => toggleReplyInput()}
-                removeComment={removeComment}
-                editComment={editComment}
-                updateCommentReactions={updateCommentReactions}
-                setPostDraggable={setPostDraggable}
-                location={location}
-            />
-            <Column style={{ marginLeft: 36 }}>
+        <Row>
+            {Array.from({ length: depth }, () => (
+                <div className={styles.lines} />
+            ))}
+            <Column style={{ width: '100%' }}>
+                <CommentCard
+                    comment={comment}
+                    highlighted={highlightedCommentId === comment.id}
+                    removeComment={removeComment}
+                    editComment={editComment}
+                    updateCommentReactions={updateCommentReactions}
+                    setPostDraggable={setPostDraggable}
+                    location={location}
+                />
                 {comment.Comments.map((reply) => (
-                    <CommentCard
+                    <CommentWrapper
                         key={reply.id}
                         comment={reply}
-                        highlighted={highlightedCommentId === reply.id}
-                        toggleReplyInput={() => toggleReplyInput(reply.id)}
+                        postId={postId}
+                        depth={depth + 1}
+                        highlightedCommentId={highlightedCommentId}
+                        addComment={addComment}
                         removeComment={removeComment}
                         editComment={editComment}
                         updateCommentReactions={updateCommentReactions}
@@ -64,18 +59,8 @@ function CommentWrapper(props: {
                         location={location}
                     />
                 ))}
-                {replyInputOpen && (
-                    <CommentInput
-                        id={`reply-input-${comment.id}`}
-                        postId={postId}
-                        commentId={comment.id}
-                        replyId={replyId}
-                        addComment={addComment}
-                        close={() => setReplyInputOpen(false)}
-                    />
-                )}
             </Column>
-        </Column>
+        </Row>
     )
 }
 

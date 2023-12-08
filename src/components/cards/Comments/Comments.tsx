@@ -1,8 +1,8 @@
 import Column from '@components/Column'
 import Row from '@components/Row'
 import LoadingWheel from '@components/animations/LoadingWheel'
-import CommentInput from '@components/cards/Comments/CommentInput'
 import CommentWrapper from '@components/cards/Comments/CommentWrapper'
+import CommentInput from '@components/draft-js/CommentInput'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
 import { scrollToElement } from '@src/Helpers'
@@ -137,9 +137,9 @@ function Comments(props: {
         <Column style={style}>
             {loggedIn && (
                 <CommentInput
-                    id={`comment-input-${postId}`}
-                    postId={postId}
-                    addComment={addComment}
+                    placeholder='Comment...'
+                    onSave={(data) => console.log(data)}
+                    style={{ marginBottom: 15 }}
                 />
             )}
             {loading ? (
@@ -152,6 +152,7 @@ function Comments(props: {
                         key={comment.id}
                         postId={postId}
                         comment={comment}
+                        depth={0}
                         highlightedCommentId={+urlParams.commentId}
                         addComment={addComment}
                         removeComment={removeComment}
