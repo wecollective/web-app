@@ -11,8 +11,10 @@ import {
     PollIcon,
     TextIcon,
 } from '@svgs/all'
+import axios from 'axios'
 import { EditorState, convertFromRaw } from 'draft-js'
 import React from 'react'
+import Cookies from 'universal-cookie'
 import { v4 as uuidv4 } from 'uuid'
 
 // constants
@@ -20,6 +22,11 @@ export const megaByte = 1048576
 export const imageMBLimit = 10
 export const audioMBLimit = 30
 export const totalMBUploadLimit = 50
+export const allowedImageTypes = ['.png', '.jpg', '.jpeg', '.gif', '.webp']
+export const allowedAudioTypes = ['.mp3', '.mpeg']
+export const maxPostChars = 5000
+export const maxUrls = 5
+const cookies = new Cookies()
 
 export const weekDays = [
     'Monday',
@@ -175,7 +182,7 @@ export function dateCreated(createdAt: string | undefined): string | undefined {
     if (createdAt === undefined) return undefined
     const sourceDate = new Date(createdAt)
     const d = sourceDate.toString().split(/[ :]/)
-    const date = `${d[4]}:${d[5]} on ${d[2]} ${d[1]} ${d[3]}`
+    const date = `${d[2]}-${d[1]}-${d[3]} @ ${d[4]}:${d[5]}`
     return date
 }
 
@@ -451,7 +458,7 @@ export function getDraftPlainText(text: string): string {
 }
 
 export function scrollToElement(element: HTMLElement): void {
-    const yOffset = window.screen.height / 2.3
+    const yOffset = window.screen.height / 3
     const top = element.getBoundingClientRect().top + window.pageYOffset - yOffset
     window.scrollTo({ top, behavior: 'smooth' })
 }
@@ -517,4 +524,123 @@ export function findDHMFromMinutes(minutes) {
 export function findMinutesFromDHM(values) {
     // find minutes from { days, hours, minutes } object
     return values.days * 24 * 60 + values.hours * 60 + values.minutes
+}
+
+function findUrlSearchableText(urlData) {
+    const { url, title, description, domain } = urlData
+    const fields = [] as any
+    if (url) fields.push(url)
+    if (title) fields.push(title)
+    if (description) fields.push(description)
+    if (domain) fields.push(domain)
+    return fields.length ? fields.join(' ') : null
+}
+
+export function findPostSearchableText(post) {
+    const { title, text, urls, images, audios } = post
+    let fields = [] as any
+    if (title) fields.push(title)
+    if (text) fields.push(getDraftPlainText(text))
+    urls.forEach((url) => fields.push(findUrlSearchableText(url) || ''))
+    images.forEach((image) => fields.push(image.text || ''))
+    audios.forEach((audio) => fields.push(audio.text || ''))
+    fields = fields.filter((field) => field)
+    return fields.length ? fields.join(' ') : null
+}
+
+export function getTextSelection() {
+    let text = ''
+    let selection
+    if (window.getSelection) {
+        selection = window.getSelection()
+        if (selection.rangeCount) {
+            const fragment = selection.getRangeAt(0).cloneContents()
+            const element = document.createElement('div')
+            element.appendChild(fragment)
+            text = element.innerHTML
+        }
+    }
+    return text
+}
+
+export function scrapeUrl(url) {
+    const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+    return axios.get(`${config.apiURL}/scrape-url?url=${url}`, options)
+}
+
+export function findCreatorDetails(creator) {
+    const { id, handle, name, flagImage } = creator
+    return { id, handle, name, flagImage }
+}
+
+// todo: count poll answers, card sides, and beads (do this when added?)
+function findTotalUploadSize(post) {
+    const { images, audios } = post
+    const imageSize = images
+        .filter((i) => i.Image.file)
+        .map((i) => i.Image.file.size)
+        .reduce((a, b) => a + b, 0)
+    const audioSize = audios.map((a) => a.file.size).reduce((a, b) => a + b, 0)
+    // const cardSize =
+    //     (cardFrontImage ? cardFrontImage.size : 0) + (cardBackImage ? cardBackImage.size : 0)
+    // todo: count bead uploads
+    const total = imageSize + audioSize // + cardSize
+    return +(total / megaByte).toFixed(2)
+}
+
+export function validatePost(post, constraints?) {
+    const { mediaTypes, title, text, images, audios, event, poll, card, glassBeadGame } = post
+    const errors = [] as string[]
+    // upload size
+    const totalSize = findTotalUploadSize(post)
+    if (totalSize > totalMBUploadLimit) {
+        errors.push(
+            `Total upload size (${totalSize} MBs) must be less than ${totalMBUploadLimit} MBs`
+        )
+    }
+    // text
+    if (mediaTypes.includes('text')) {
+        const totalChars = findDraftLength(text)
+        const maxChars = (constraints && constraints.maxChars) || maxPostChars
+        if (totalChars > maxChars) errors.push(`Text must be less than ${maxChars} characters`)
+    }
+    // image
+    if (mediaTypes.includes('image') && !images.length) errors.push('No images added')
+    // audio
+    if (mediaTypes.includes('audio') && !audios.length) errors.push('No audio added')
+    // event
+    if (mediaTypes.includes('event')) {
+        const { startTime } = event
+        if (!startTime) errors.push('Start time required for events')
+        if (!title && !text) errors.push('Title or text required for events')
+    }
+    // poll
+    if (mediaTypes.includes('poll')) {
+        const { answers, answersLocked } = poll
+        if (answersLocked && answers.length < 2) {
+            errors.push('At least 2 answers required for locked polls')
+        }
+        if (!title && !text) errors.push('Title or text required for polls')
+    }
+    // glass bead game
+    if (mediaTypes.includes('glass-bead-game')) {
+        const { topic, synchronous, multiplayer, beads } = glassBeadGame
+        // todo: use title?
+        if (!topic) errors.push('Topic required')
+        if (!synchronous && !multiplayer && !beads.length) {
+            errors.push('At least 1 bead required for single player games')
+        }
+    }
+    // card
+    if (mediaTypes.includes('card')) {
+        const { front, back } = card
+        if (!front.image && !findDraftLength(front.text)) {
+            errors.push('No content added to front of card')
+        }
+        if (!back.image && !findDraftLength(back.text)) {
+            errors.push('No content added to back of card')
+        }
+    }
+
+    return { errors, totalSize }
 }
