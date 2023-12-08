@@ -1,8 +1,10 @@
 @import '@styles/Variables';
 
+$borderRadius: 10px;
+
 .loading {
     width: 100%;
-    border-radius: 5px;
+    border-radius: $borderRadius;
     background-color: $grey1;
     padding: 10px;
 }
@@ -19,7 +21,8 @@
     @include for-tablet-portrait-up {
         width: 100%;
         margin: 0;
-        border-radius: 5px;
+        border-radius: $borderRadius;
+        border: 1px solid $grey2;
     }
 
     &:hover {
@@ -96,10 +99,10 @@
             img {
                 width: 240px;
                 height: 140px;
-                border-top-left-radius: 5px;
-                border-top-right-radius: 0px;
-                border-bottom-left-radius: 5px;
-                border-bottom-right-radius: 0px;
+                border-top-left-radius: $borderRadius;
+                border-top-right-radius: 0;
+                border-bottom-left-radius: $borderRadius;
+                border-bottom-right-radius: 0;
             }
 
             .urlIcon {

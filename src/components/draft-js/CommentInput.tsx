@@ -9,6 +9,7 @@ import FlagImage from '@components/FlagImage'
 import Row from '@components/Row'
 import RecordingIcon from '@components/animations/RecordingIcon'
 import AudioCard from '@components/cards/PostCard/AudioCard'
+import UrlCard from '@components/cards/PostCard/UrlCard'
 import Mention from '@components/draft-js/Mention'
 import Suggestion from '@components/draft-js/Suggestion'
 import { AccountContext } from '@contexts/AccountContext'
@@ -35,8 +36,12 @@ import {
     allowedAudioTypes,
     allowedImageTypes,
     audioMBLimit,
+    findDraftLength,
+    findUrlSearchableText,
     formatTimeMMSS,
     imageMBLimit,
+    maxUrls,
+    scrapeUrl,
 } from '@src/Helpers'
 import styles from '@styles/components/draft-js/CommentInput.module.scss'
 import draftStyles from '@styles/components/draft-js/TextStyling.module.scss'
@@ -58,7 +63,8 @@ function CommentInput(props: {
     const { placeholder, onSave, saveLoading, maxChars, className, style } = props
     const { accountData } = useContext(AccountContext)
     const [editorState, setEditorState] = useState<any>(null)
-    const [urls, setUrls] = useState<string[]>([])
+    const [rawUrls, setRawUrls] = useState<any[]>([])
+    const [urls, setUrls] = useState<any[]>([])
     const [mentions, setMentions] = useState([])
     const [images, setImages] = useState<any[]>([])
     const [imageSizeError, setImageSizeError] = useState(false)
@@ -119,22 +125,22 @@ function CommentInput(props: {
         if (!wrapperRef.current!.contains(e.target)) setFocused(false)
     }
 
-    function onEditorStateChange(newEditorState) {
-        setEditorState(newEditorState)
-        const contentState = newEditorState.getCurrentContent()
-        setCharacterLength(contentState.getPlainText().length)
+    function onEditorStateChange(newState) {
+        setEditorState(newState)
+        const content = newState.getCurrentContent()
+        const plainText = content.getPlainText()
+        const rawDraft = convertToRaw(content)
+        setCharacterLength(plainText.length)
         // extract urls
-        const extractedLinks = extractLinks(contentState.getPlainText())
-        if (extractedLinks) setUrls(extractedLinks.map((link) => link.url))
+        const extractedLinks = extractLinks(plainText)
+        if (extractedLinks) setRawUrls(extractedLinks.map((link) => link.url))
         // extract mentions
         const newMentions = [] as any
-        const rawDraft = convertToRaw(contentState)
         const entities = rawDraft.entityMap
         Object.keys(entities).forEach((key) => {
             if (entities[key].type === 'mention') newMentions.push(entities[key].data.mention)
         })
         setMentions(newMentions)
-        // onChange(JSON.stringify(rawDraft), mentions, urls)
     }
 
     function findSuggestions({ value }) {
@@ -183,6 +189,10 @@ function CommentInput(props: {
                 }
             }
         }
+    }
+
+    function removeUrl(url) {
+        setUrls(urls.filter((urlData) => urlData.url !== url))
     }
 
     function removeImage(id) {
@@ -251,6 +261,52 @@ function CommentInput(props: {
         }
     }
 
+    // general purpose post creation (cases: post, comment, poll-answer, bead)
+    // + structure data (unique)
+    // + validate data (general: return true or errors array)
+    // + if valid: upload or return validated data? (return for poll-answer & bead on new posts)
+    // else: return errors (where to: )
+
+    // comment: structure, validate, upload (from comment card?)
+    // poll answer: structure, validate, pass back to post, upload (from post modal)
+    // if 'onSave' pass back, otherwise upload
+    // general purpose upload function
+
+    // add total upload size value during validation
+    // add has data check function
+
+    function save() {
+        // structure data
+        const contentState = editorState.getCurrentContent()
+        const rawDraft = convertToRaw(contentState)
+        const text = JSON.stringify(rawDraft)
+        const data = {
+            id: inputId,
+            // todo: mediaTypes
+            text: findDraftLength(text) ? text : null,
+            Creator: {
+                id: accountData.id,
+                handle: accountData.handle,
+                name: accountData.name,
+                flagImagePath: accountData.flagImagePath,
+            },
+            Reactions: [],
+            // not present in live structure:
+            images,
+            audios,
+            // todo: add urls w/metadata & mentions
+        }
+        // todo: run validation
+        onSave(data)
+        // reset data
+        const newContentState = ContentState.createFromText('')
+        const newEditorState = EditorState.createWithContent(newContentState)
+        setEditorState(newEditorState)
+        setCharacterLength(newEditorState.getCurrentContent().getPlainText().length)
+        setImages([])
+        setAudios([])
+    }
+
     useEffect(() => {
         initializeDropBox()
         // set up editor
@@ -264,6 +320,37 @@ function CommentInput(props: {
         document.addEventListener('mousedown', handleClickOutside)
         return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [])
+
+    // grab metadata for new urls added to text field
+    const requestIndex = useRef(0)
+    useEffect(() => {
+        if (urls.length <= maxUrls) {
+            // requestIndex & setTimeout used to block requests until user has finished typing
+            requestIndex.current += 1
+            const index = requestIndex.current
+            setTimeout(() => {
+                if (requestIndex.current === index) {
+                    rawUrls.forEach(async (url) => {
+                        // if no match in urls array
+                        if (!urls.find((u) => u.url === url)) {
+                            // add url loading state
+                            setUrls((us) => [...us, { url, loading: true }])
+                            // scrape url data
+                            const { data } = await scrapeUrl(url)
+                            // update urls array
+                            setUrls((us) => {
+                                const newUrls = [...us.filter((u) => u.url !== url)]
+                                const newUrl = { url, loading: false, ...data }
+                                newUrl.searchableText = findUrlSearchableText(newUrl)
+                                newUrls.push(newUrl)
+                                return newUrls
+                            })
+                        }
+                    })
+                }
+            }, 500)
+        }
+    }, [rawUrls])
 
     return (
         <div ref={wrapperRef} className={`${styles.wrapper} ${className}`} style={style}>
@@ -327,8 +414,9 @@ function CommentInput(props: {
                                 color='blue'
                                 size='medium-large'
                                 text='Add'
+                                // disabled={!findDraftLength(text)}
                                 loading={saveLoading}
-                                onClick={() => onSave('')}
+                                onClick={save}
                             />
                         </Row>
                     </Row>
@@ -358,6 +446,22 @@ function CommentInput(props: {
                     {maxChars ? `/${maxChars}` : ''} Chars
                 </p>
             </Row>
+            {/* todo: eventually replaces with media sections like on PostCard */}
+            {urls.map((urlData) => (
+                <Column key={urlData.url} style={{ marginTop: 10, position: 'relative' }}>
+                    <CloseButton
+                        size={18}
+                        onClick={() => removeUrl(urlData.url)}
+                        style={{ position: 'absolute', top: 5, right: 5, zIndex: 5 }}
+                    />
+                    <UrlCard
+                        type='post'
+                        urlData={urlData}
+                        loading={urlData.loading}
+                        style={{ backgroundColor: 'white' }}
+                    />
+                </Column>
+            ))}
             {images.length > 0 && (
                 <Row style={{ marginTop: 10 }}>
                     {images.map((image) => (
@@ -375,16 +479,11 @@ function CommentInput(props: {
             {audios.length > 0 && (
                 <Column style={{ marginTop: 10 }}>
                     {audios.map((audio) => (
-                        <Column key={audio.id} style={{ position: 'relative', margin: '10px 0' }}>
+                        <Column key={audio.id} className={styles.audio}>
                             <CloseButton
                                 size={18}
                                 onClick={() => removeAudio(audio.id)}
-                                style={{
-                                    position: 'absolute',
-                                    right: -4,
-                                    top: -8,
-                                    zIndex: 5,
-                                }}
+                                style={{ position: 'absolute', right: 5, top: 5, zIndex: 5 }}
                             />
                             <AudioCard
                                 id={audio.id}
