@@ -46,7 +46,7 @@ function Comments(props: {
         axios
             .get(`${config.apiURL}/post-comments?postId=${postId}`, options)
             .then((res) => {
-                console.log(res.data)
+                // console.log(res.data)
                 setComments(res.data)
                 setLoading(false)
                 // if commentId in params, scroll to comment
@@ -137,8 +137,11 @@ function Comments(props: {
         <Column style={style}>
             {loggedIn && (
                 <CommentInput
+                    type='comment'
+                    preview={false}
                     placeholder='Comment...'
                     onSave={(data) => console.log(data)}
+                    maxChars={5}
                     style={{ marginBottom: 15 }}
                 />
             )}

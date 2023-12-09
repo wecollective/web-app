@@ -113,7 +113,8 @@ function LinkMap(): JSX.Element {
                     comment={item}
                     highlighted={false}
                     location='link-map'
-                    toggleReplyInput={() => null}
+                    // selected={false}
+                    // toggleReplyInput={() => null}
                     removeComment={() => null}
                     editComment={() => null}
                     updateCommentReactions={() => null}

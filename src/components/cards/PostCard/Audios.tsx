@@ -5,7 +5,7 @@ import config from '@src/Config'
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 
-function Audio(props: { postId: number; style?: any }): JSX.Element {
+function Audios(props: { postId: number; style?: any }): JSX.Element {
     const { postId, style } = props
     const [loading, setLoading] = useState(true)
     const [blocks, setBlocks] = useState<any[]>([])
@@ -68,8 +68,8 @@ function Audio(props: { postId: number; style?: any }): JSX.Element {
     )
 }
 
-Audio.defaultProps = {
+Audios.defaultProps = {
     style: null,
 }
 
-export default Audio
+export default Audios

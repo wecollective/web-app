@@ -1,5 +1,7 @@
 @import '@styles/Variables';
 
+$speed: 1.8s;
+
 @keyframes pulse1 {
     0% {
         transform: scale(0.4);
@@ -29,8 +31,6 @@
         opacity: 0;
     }
 }
-
-$speed: 2s;
 
 .wrapper {
     position: relative;

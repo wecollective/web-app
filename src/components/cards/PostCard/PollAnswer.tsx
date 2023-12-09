@@ -6,6 +6,9 @@ import FlagImageHighlights from '@components/FlagImageHighlights'
 import ImageTitle from '@components/ImageTitle'
 import Input from '@components/Input'
 import Row from '@components/Row'
+import ShowMoreLess from '@components/ShowMoreLess'
+import AudioCard from '@components/cards/PostCard/AudioCard'
+import DraftText from '@components/draft-js/DraftText'
 import Modal from '@components/modals/Modal'
 import { dateCreated, timeSinceCreated } from '@src/Helpers'
 import { CheckIcon } from '@src/svgs/all'
@@ -38,7 +41,7 @@ function PollAnswer(props: {
         toggleDone,
         onChange,
     } = props
-    const { text, accountPoints, accountVote, state, Creator, Reactions } = answer
+    const { mediaTypes, text, accountPoints, accountVote, state, Creator, Reactions } = answer
     const [statModalOpen, setStatModalOpen] = useState(false)
     const weighted = type === 'weighted-choice'
     const votes = Reactions.filter((r) => r.state === 'active')
@@ -66,7 +69,38 @@ function PollAnswer(props: {
                         link={`/u/${Creator.handle}`}
                         style={{ marginRight: 10 }}
                     />
-                    {!mobileView && <p>{text}</p>}
+                    <Column style={{ width: '100%' }}>
+                        {text && (
+                            <ShowMoreLess height={250}>
+                                <DraftText text={text} />
+                            </ShowMoreLess>
+                        )}
+                        {answer.images && (
+                            <Row style={{ marginTop: 10 }}>
+                                {answer.images.map((image) => (
+                                    <Column key={image.id} className={styles.image}>
+                                        <img src={image.Image.url} alt='upload' />
+                                    </Column>
+                                ))}
+                            </Row>
+                        )}
+                        {answer.audios && (
+                            <Column style={{ marginTop: 10 }}>
+                                {answer.audios.map((audio) => (
+                                    <Column key={audio.id} style={{ margin: '10px 0' }}>
+                                        <AudioCard
+                                            id={audio.id}
+                                            url={audio.Audio.url}
+                                            staticBars={400}
+                                            location='new-post'
+                                            style={{ height: 100 }}
+                                        />
+                                    </Column>
+                                ))}
+                            </Column>
+                        )}
+                    </Column>
+                    {/* {!mobileView && <p>{text}</p>} */}
                     {state === 'done' && <CheckIcon className={styles.check} />}
                 </Row>
                 <Row centerY style={{ flexShrink: 0 }}>

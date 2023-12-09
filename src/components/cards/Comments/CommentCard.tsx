@@ -361,6 +361,8 @@ function CommentCard(props: {
             </Row>
             {selected && (
                 <CommentInput
+                    type='comment'
+                    preview={false}
                     placeholder='Reply...'
                     onSave={(data) => console.log(data)}
                     style={{ marginBottom: 10, marginLeft: 2 }}

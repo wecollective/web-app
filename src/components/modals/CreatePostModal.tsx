@@ -25,6 +25,7 @@ import SuccessMessage from '@components/SuccessMessage'
 import Toggle from '@components/Toggle'
 import PostSpaces from '@components/cards/PostCard/PostSpaces'
 import UrlPreview from '@components/cards/PostCard/UrlCard'
+import CommentInput from '@components/draft-js/CommentInput'
 import NextBeadModal from '@components/modals/NextBeadModal'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
@@ -32,16 +33,20 @@ import { UserContext } from '@contexts/UserContext'
 import config from '@src/Config'
 import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import {
+    allowedAudioTypes,
+    allowedImageTypes,
     audioMBLimit,
     capitalise,
     defaultGBGSettings,
     defaultPostData,
     findDraftLength,
+    // findUrlSearchableText,
     formatTimeMMSS,
     getDraftPlainText,
     imageMBLimit,
     megaByte,
     postTypeIcons,
+    simplifyText,
     totalMBUploadLimit,
 } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
@@ -57,6 +62,7 @@ import {
     PlusIcon,
     PollIcon,
     RepostIcon,
+    SettingsIcon,
     UsersIcon,
 } from '@svgs/all'
 import axios from 'axios'
@@ -128,10 +134,7 @@ function CreatePostModal(): JSX.Element {
     const maxUrls = 5
     const urlRequestIndex = useRef(0)
     const location = useLocation()
-    const path = location.pathname.split('/')
-    const page = path[1]
-    const handle = path[2]
-    const subPage = path[3]
+    const [page, handle, subPage] = location.pathname.split('/')
     let contentTypes = ['image', 'audio', 'event', 'poll']
     if (game) contentTypes = ['glass-bead-game', 'card']
     if (governance) contentTypes = []
@@ -196,6 +199,8 @@ function CreatePostModal(): JSX.Element {
             .then((res) => {
                 setUrlsWithMetaData((us) => {
                     const newUrlsMetaData = [...us.filter((u) => u.url !== url)]
+                    // const newUrl = { url, loading: false, ...res.data }
+                    // newUrl.searchableText = findUrlSearchableText(newUrl)
                     newUrlsMetaData.push({ url, loading: false, ...res.data })
                     return newUrlsMetaData
                 })
@@ -212,12 +217,20 @@ function CreatePostModal(): JSX.Element {
             .filter((i) => i.Image.file)
             .map((i) => i.Image.file.size)
             .reduce((a, b) => a + b, 0)
-        const audioSize = audioFiles.map((a) => a.file.size).reduce((a, b) => a + b, 0)
+        const audioSize = audios.map((a) => a.file.size).reduce((a, b) => a + b, 0)
         const cardSize =
             (cardFrontImage ? cardFrontImage.size : 0) + (cardBackImage ? cardBackImage.size : 0)
         // todo: count bead uploads
         const total = imageSize + audioSize + cardSize
         return +(total / megaByte).toFixed(2)
+    }
+
+    function findPostUploadSize(post) {
+        const imageSize = post.images
+            .map((i) => (i.Image.file ? i.Image.file.size : 0))
+            .reduce((a, b) => a + b, 0)
+        const audioSize = post.audios.map((a) => a.file.size).reduce((a, b) => a + b, 0)
+        return +((imageSize + audioSize) / megaByte).toFixed(2)
     }
 
     // images
@@ -235,17 +248,22 @@ function CreatePostModal(): JSX.Element {
     }
 
     function addImageFiles(drop?) {
-        const allowedTypes = ['png', 'jpg', 'jpeg', 'gif', 'webp']
         setImageSizeError(false)
         setNoImagesError(false)
         const input = drop || (document.getElementById('image-input') as HTMLInputElement)
         if (input && input.files && input.files.length) {
             for (let i = 0; i < input.files.length; i += 1) {
                 const fileType = input.files[i].type.split('/')[1]
-                if (allowedTypes.includes(fileType)) {
+                if (allowedImageTypes.includes(`.${fileType}`)) {
                     if (input.files[i].size > imageMBLimit * 1024 * 1024) setImageSizeError(true)
                     else {
-                        const newImage = { id: uuidv4(), Image: { file: input.files[i] } }
+                        const newImage = {
+                            id: uuidv4(),
+                            Image: {
+                                file: input.files[i],
+                                url: URL.createObjectURL(input.files[i]),
+                            },
+                        }
                         setImages((imgs) => [...imgs, newImage])
                     }
                 }
@@ -281,7 +299,7 @@ function CreatePostModal(): JSX.Element {
     }
 
     function renderImages() {
-        // todo: create and use image card
+        // todo: create image card component and use main html so this render function can be removed
         return (
             <Scrollbars className={styles.images}>
                 <Row>
@@ -304,10 +322,7 @@ function CreatePostModal(): JSX.Element {
                                     setImageModalOpen(true)
                                 }}
                             >
-                                <img
-                                    src={image.Image.url || URL.createObjectURL(image.Image.file)}
-                                    alt=''
-                                />
+                                <img src={image.Image.url} alt='' />
                             </button>
                             <Row centerY style={{ width: '100%' }}>
                                 <Input
@@ -337,9 +352,7 @@ function CreatePostModal(): JSX.Element {
     }
 
     // audio
-    const [audioFiles, setAudioFiles] = useState<any[]>([])
-    // const [audioFile, setAudioFile] = useState<File | undefined>()
-    // const [audioBlob, setAudioBlob] = useState<any>()
+    const [audios, setAudios] = useState<any[]>([])
     const [recording, setRecording] = useState(false)
     const [recordingTime, setRecordingTime] = useState(0)
     const [audioSizeError, setAudioSizeError] = useState(false)
@@ -356,44 +369,50 @@ function CreatePostModal(): JSX.Element {
     }
 
     function addAudioFiles(drop?) {
-        const allowedTypes = ['mp3', 'mpeg']
         setAudioSizeError(false)
         setNoAudioError(false)
         const input = drop || (document.getElementById('audio-input') as HTMLInputElement)
         if (input && input.files && input.files.length) {
             for (let i = 0; i < input.files.length; i += 1) {
                 const fileType = input.files[i].type.split('/')[1]
-                if (allowedTypes.includes(fileType)) {
+                if (allowedAudioTypes.includes(`.${fileType}`)) {
                     if (input.files[i].size > audioMBLimit * 1024 * 1024) setAudioSizeError(true)
                     else {
-                        const newAudio = { id: uuidv4(), file: input.files[i] }
-                        setAudioFiles((audio) => [...audio, newAudio])
+                        const newAudio = {
+                            id: uuidv4(),
+                            Audio: {
+                                file: input.files[i],
+                                url: URL.createObjectURL(input.files[i]),
+                            },
+                        }
+                        setAudios((audio) => [...audio, newAudio])
                     }
                 }
             }
         }
     }
 
-    function removeAudioFile(id) {
-        setAudioFiles(audioFiles.filter((audio) => audio.id !== id))
+    function removeAudio(id) {
+        setAudios(audios.filter((audio) => audio.id !== id))
     }
 
     function updateAudioCaption(id, caption) {
-        const newAudioFiles = [...audioFiles]
+        const newAudioFiles = [...audios]
         const audio = newAudioFiles.find((a) => a.id === id)
         audio.text = caption
-        setAudioFiles(newAudioFiles)
+        setAudios(newAudioFiles)
     }
 
     function toggleAudioRecording() {
         if (recording) {
             audioRecorder.current.stopRecording(() => {
                 clearInterval(recordingInterval.current)
-                const blob = audioRecorder.current.getBlob()
-                const newAudio = { id: uuidv4(), file: new File([blob], '', { type: 'audio/wav' }) }
-                setAudioFiles((audio) => [...audio, newAudio])
-                // setAudioBlob(blob)
-                // setAudioFile(new File([blob], '', { type: 'audio/wav' }))
+                const file = new File([audioRecorder.current.getBlob()], '', { type: 'audio/wav' })
+                const newAudio = {
+                    id: uuidv4(),
+                    Audio: { file, url: URL.createObjectURL(file) },
+                }
+                setAudios((audio) => [...audio, newAudio])
             })
             setRecording(false)
         } else {
@@ -434,34 +453,14 @@ function CreatePostModal(): JSX.Element {
         setEndTime('')
     }
 
-    // function renderEventTimes() {
-    //     const showEventDates = mediaTypes.includes('event') && startTime
-    //     const showGBGDates =
-    //         mediaTypes.includes('glass-bead-game') &&
-    //         GBGSettings.synchronous &&
-    //         GBGSettings.startTime
-    //     const start = mediaTypes.includes('event') ? startTime : GBGSettings.startTime
-    //     const end = mediaTypes.includes('event') ? endTime : GBGSettings.endTime
-    //     if (!showEventDates && !showGBGDates) return null
-    //     return (
-    //         <Row centerX centerY className={styles.dates}>
-    //             <CalendarIcon />
-    //             <Row>
-    //                 <p>{findEventTimes(start, end)}</p>
-    //                 <p>{findEventDuration(start, end)}</p>
-    //             </Row>
-    //         </Row>
-    //     )
-    // }
-
     // poll
     const [pollType, setPollType] = useState('Single choice')
-    const [pollAnswersLocked, setPollAnswersLocked] = useState(false)
     const [newPollAnswer, setNewPollAnswer] = useState('')
     const [pollAnswers, setPollAnswers] = useState<any[]>([])
+    const [pollAnswersLocked, setPollAnswersLocked] = useState(false)
     const [pollAnswersLoading, setPollAnswersLoading] = useState(false)
-    const [pollTextError, setPollTextError] = useState(false)
     const [pollAnswersError, setPollAnswersError] = useState(false)
+    const [pollTextError, setPollTextError] = useState(false)
     const [pollAction, setPollAction] = useState('None')
     const [pollThreshold, setPollThreshold] = useState(5)
     const pollColorScale = d3
@@ -469,25 +468,34 @@ function CreatePostModal(): JSX.Element {
         .domain([0, pollAnswers.length])
         .interpolator(d3.interpolateViridis)
 
-    function addPollAnswer() {
-        setPollAnswers([
-            ...pollAnswers,
-            {
-                id: uuidv4(),
-                text: newPollAnswer,
-                Reactions: [],
-                Creator: accountData,
-            },
-        ])
+    // todo: handle media
+
+    function addPollAnswer(newAnswer) {
+        setPollAnswers([...pollAnswers, newAnswer])
         setNewPollAnswer('')
         setPollAnswersError(false)
     }
+
+    // function addPollAnswer() {
+    //     setPollAnswers([
+    //         ...pollAnswers,
+    //         {
+    //             id: uuidv4(),
+    //             text: newPollAnswer,
+    //             Reactions: [],
+    //             Creator: accountData,
+    //         },
+    //     ])
+    //     setNewPollAnswer('')
+    //     setPollAnswersError(false)
+    // }
 
     function removePollAnswer(id) {
         setPollAnswers(pollAnswers.filter((a) => a.id !== id))
     }
 
     // card
+    // todo: store cards as post array
     const [cardRotating, setCardRotating] = useState(false)
     const [cardFlipped, setCardFlipped] = useState(false)
     const [cardFrontType, setCardFrontType] = useState('text')
@@ -541,7 +549,7 @@ function CreatePostModal(): JSX.Element {
     }
 
     // gbg
-    const [topic, setTopic] = useState('')
+    const [topic, setTopic] = useState('') // todo: use title?
     const [topicOptions, setTopicOptions] = useState<any[]>([])
     const [topicImageFile, setTopicImageFile] = useState<File | undefined>()
     const [topicImageURL, setTopicImageURL] = useState('')
@@ -678,7 +686,9 @@ function CreatePostModal(): JSX.Element {
     // todo: update for multiple media types
     function postValid() {
         let valid = true
+        console.log('beads: ', beads)
         console.log('total size: ', findTotalUploadSize())
+        console.log('audios: ', audios)
         if (findTotalUploadSize() > 5) {
             setTotalUploadSizeError(true)
             valid = false
@@ -701,7 +711,7 @@ function CreatePostModal(): JSX.Element {
             }
         }
         if (mediaTypes.includes('audio')) {
-            if (!audioFiles.length) {
+            if (!audios.length) {
                 setNoAudioError(true)
                 valid = false
             }
@@ -748,7 +758,11 @@ function CreatePostModal(): JSX.Element {
                 valid = false
             }
         }
-        return false // valid
+        const postMediaTypes = [...mediaTypes]
+        if (urlsWithMetaData.length) postMediaTypes.unshift('url')
+        if (!mediaTypes.length || findDraftLength(text)) postMediaTypes.unshift('text')
+        console.log('media types: ', postMediaTypes, mediaTypes)
+        return valid
     }
 
     function findTopicGroup() {
@@ -771,52 +785,168 @@ function CreatePostModal(): JSX.Element {
         const fields = [] as any
         if (p.title) fields.push(p.title)
         if (p.text) fields.push(getDraftPlainText(p.text))
-        const urlData = p.urls.map((u) => {
-            const urlFields = [] as any
-            if (u.url) urlFields.push(u.url)
-            if (u.title) urlFields.push(u.title)
-            if (u.description) urlFields.push(u.description)
-            if (u.domain) urlFields.push(u.domain)
-            return urlFields.length ? urlFields.join(' ') : null
-        })
-        if (urlData.length) fields.push(...urlData)
+        // const urlData = p.urls.map
+        // const urlData = p.urls.map((u) => {
+        //     const urlFields = [] as any
+        //     if (u.url) urlFields.push(u.url)
+        //     if (u.title) urlFields.push(u.title)
+        //     if (u.description) urlFields.push(u.description)
+        //     if (u.domain) urlFields.push(u.domain)
+        //     return urlFields.length ? urlFields.join(' ') : null
+        // })
+        // if (urlData.length) fields.push(...urlData)
         return fields.length ? fields.join(' ') : null
     }
 
     function createPost() {
         if (postValid()) {
             setLoading(true)
-            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+            // update media types
+            const newMediaTypes = [...mediaTypes]
+            if (urlsWithMetaData.length) newMediaTypes.unshift('url')
+            if (title || findDraftLength(text)) newMediaTypes.unshift('text')
+            // create post data
             const postData = {
-                creatorName: accountData.name,
-                creatorHandle: accountData.handle,
-                // type: postType === 'text' && urlsWithMetaData.length > 0 ? 'url' : postType,
-                mediaTypes: '',
-                spaceIds:
-                    // remove root space if other spaces present
-                    spaces.length > 1
-                        ? spaces.filter((s) => s.id !== 1).map((s) => s.id)
-                        : spaces.map((s) => s.id),
-                title: mediaTypes.includes('glass-bead-game') ? topic : title,
+                // get on server
+                // creatorName: accountData.name,
+                // creatorHandle: accountData.handle,
+                mediaTypes: newMediaTypes.join(','),
+                spaceIds: spaces.map((s) => s.id), // todo: filter out all
+                title: mediaTypes.includes('glass-bead-game') ? topic : title, // todo: just use title?
                 text: findDraftLength(text) ? text : null,
                 mentions: mentions.map((m) => m.link),
-                urls: urlsWithMetaData,
-                images: mediaTypes.includes('image') ? images : [],
-                startTime,
-                endTime,
-                pollType: pollType.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-                pollAnswersLocked,
-                pollAnswers,
-                topicGroup: findTopicGroup(),
-                topicImageUrl: topicImageFile ? null : topicImageURL,
-                gbgSettings: GBGSettings,
-                beads: !synchronous && !multiplayer ? beads : [],
-                cardFrontText: findDraftLength(cardFrontText) ? cardFrontText : null,
-                cardBackText: findDraftLength(cardBackText) ? cardBackText : null,
-                cardFrontWatermark,
-                cardBackWatermark,
+                // urls: urlsWithMetaData,
+                // images: mediaTypes.includes('image') ? images : [],
+                // startTime,
+                // endTime,
+                // pollType: pollType.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                // pollAnswersLocked,
+                // pollAnswers,
+                // topicGroup: findTopicGroup(),
+                // topicImageUrl: topicImageFile ? null : topicImageURL,
+                // gbgSettings: GBGSettings,
+                // beads: !synchronous && !multiplayer ? beads : [],
+                // cardFrontText: findDraftLength(cardFrontText) ? cardFrontText : null,
+                // cardBackText: findDraftLength(cardBackText) ? cardBackText : null,
+                // cardFrontWatermark,
+                // cardBackWatermark,
             } as any
-            postData.searchableText = findSearchableText(postData)
+            // add media data
+            const formData = new FormData()
+            // formData entry values: fieldname (used here for types), file, originalname (used here for ids)
+            // current fieldname types: 'image', 'audio', 'audio-blob'
+            if (mediaTypes.includes('url')) postData.urls = urlsWithMetaData
+            if (mediaTypes.includes('image')) {
+                postData.images = images.map((i) => {
+                    return { id: i.id, text: i.text, url: i.Image.file ? null : i.Image.url }
+                })
+                images.forEach((i) => {
+                    if (i.Image.file) formData.append('image', i.Image.file, i.id)
+                })
+            }
+            if (mediaTypes.includes('audio')) {
+                postData.audios = audios.map((a) => {
+                    return { id: a.id, text: a.text }
+                })
+                audios.forEach((a) =>
+                    formData.append(`audio${a.file.name ? '' : '-blob'}`, a.file, a.id)
+                )
+            }
+            if (mediaTypes.includes('event')) {
+                postData.startTime = startTime
+                postData.endTime = endTime
+            }
+            if (mediaTypes.includes('poll')) {
+                postData.pollType = simplifyText(pollType)
+                postData.pollAnswersLocked = pollAnswersLocked
+                // todo: refactor for answers with media
+                postData.pollAnswers = pollAnswers
+            }
+            if (mediaTypes.includes('card')) {
+                const frontChars = findDraftLength(cardFrontText)
+                const backChars = findDraftLength(cardBackText)
+                postData.cardFront = {
+                    text: frontChars ? cardFrontText : null,
+                    searchableText: frontChars ? getDraftPlainText(cardFrontText) : null,
+                    watermark: cardFrontWatermark,
+                }
+                postData.cardBack = {
+                    text: backChars ? cardBackText : null,
+                    searchableText: backChars ? getDraftPlainText(cardBackText) : null,
+                    watermark: cardBackWatermark,
+                }
+                if (cardFrontImage) formData.append('image', cardFrontImage, 'card-front-image')
+                if (cardBackImage) formData.append('image', cardBackImage, 'card-back-image')
+            }
+            if (mediaTypes.includes('glass-bead-game')) {
+                postData.gbgSettings = GBGSettings
+                postData.topicGroup = findTopicGroup()
+                postData.topicImageUrl = topicImageFile ? null : topicImageURL
+                if (topicImageFile) formData.append('image', topicImageFile, 'topic-image')
+                if (!synchronous && !multiplayer) {
+                    // add beads
+                    // what is the current bead structure?
+                    // { id: uuid,  }
+                    postData.beads = beads.map((bead) => {
+                        let mediaUrl
+                        let mediaText
+                        // todo: update for other media types when ready
+                        if (bead.Image) {
+                            mediaUrl = bead.Image.url
+                            mediaText = bead.Image.text
+                        }
+                        return {
+                            id: bead.id,
+                            text: bead.text || null,
+                            // todo: handle searchable text
+                            searchableText: '',
+                            mediaText,
+                            mediaUrl,
+                            mediaTypes: bead.mediaTypes,
+                            color: bead.color,
+                        }
+                    })
+                    beads.forEach((bead) => {
+                        if (bead.mediaTypes === 'image') {
+                            const { file } = bead.Image
+                            if (file) formData.append('image', file, bead.id)
+                        }
+                        if (bead.mediaTypes === 'audio') {
+                            const { type, file, blob } = bead.Audio
+                            // todo: compress file and blob into file? (check how audio posts work first...)
+                            if (type === 'file') formData.append('audio', file, bead.id)
+                            else formData.append('audio-blob', blob, bead.id)
+                        }
+                    })
+                }
+                // // add beads to fileData
+                // postData.beads.forEach((bead, index) => {
+                //     // add searchable text
+                //     if (bead.type === 'url') {
+                //         const u = bead.Urls[0]
+                //         const urlFields = [] as any
+                //         if (u.url) urlFields.push(u.url)
+                //         if (u.title) urlFields.push(u.title)
+                //         if (u.description) urlFields.push(u.description)
+                //         if (u.domain) urlFields.push(u.domain)
+                //         bead.searchableText = urlFields.length ? urlFields.join(' ') : null
+                //     } else {
+                //         bead.searchableText =
+                //             bead.type === 'text' ? getDraftPlainText(bead.text) : null
+                //     }
+                //     // add files
+                //     if (bead.type === 'audio') {
+                //         // todo: use naming technique instead of type?
+                //         const { type, file, blob } = bead.Audios[0]
+                //         if (type === 'file') formData.append('audio-file', file, index)
+                //         else formData.append('audio-blob', blob, index)
+                //     } else if (bead.type === 'image') {
+                //         const { file } = bead.Images[0]
+                //         if (file) formData.append('image', file, index)
+                //     }
+                // })
+            }
+            // add other contextual data
             if (sourceId) {
                 postData.sourceType = sourceType
                 postData.sourceId = sourceId
@@ -827,77 +957,77 @@ function CreatePostModal(): JSX.Element {
                 postData.pollAction = pollAction
                 postData.pollThreshold = pollThreshold
             }
+            postData.searchableText = findSearchableText(postData)
+            formData.append('post-data', JSON.stringify(postData))
+            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
             // todo: update
             // set up file uploads if required
-            let fileData
-            let uploadType
-            if (mediaTypes.includes('image')) {
-                uploadType = 'image-file'
-                fileData = new FormData()
-                images.forEach((image, index) => {
-                    if (image.file) fileData.append('file', image.file, index)
-                })
-                fileData.append('postData', JSON.stringify(postData))
-            }
-            if (mediaTypes.includes('audio')) {
-                // const isBlob = audioFile && !audioFile.name
-                // uploadType = isBlob ? 'audio-blob' : 'audio-file'
-                // fileData = new FormData()
-                // fileData.append('file', isBlob ? audioBlob : audioFile)
-                // fileData.append('postData', JSON.stringify(postData))
-            }
-            if (mediaTypes.includes('card')) {
-                postData.cardFrontSearchableText = postData.cardFrontText
-                    ? getDraftPlainText(postData.cardFrontText)
-                    : null
-                postData.cardBackSearchableText = postData.cardBackText
-                    ? getDraftPlainText(postData.cardBackText)
-                    : null
-                uploadType = 'image-file'
-                fileData = new FormData()
-                if (cardFrontImage) fileData.append('file', cardFrontImage, 'front')
-                if (cardBackImage) fileData.append('file', cardBackImage, 'back')
-                fileData.append('postData', JSON.stringify(postData))
-            }
-            if (mediaTypes.includes('glass-bead-game')) {
-                uploadType = 'glass-bead-game'
-                fileData = new FormData()
-                // upload topic image if required
-                if (topicImageFile) fileData.append('topicImage', topicImageFile)
-                // add beads to fileData
-                postData.beads.forEach((bead, index) => {
-                    // add searchable text
-                    if (bead.type === 'url') {
-                        const u = bead.Urls[0]
-                        const urlFields = [] as any
-                        if (u.url) urlFields.push(u.url)
-                        if (u.title) urlFields.push(u.title)
-                        if (u.description) urlFields.push(u.description)
-                        if (u.domain) urlFields.push(u.domain)
-                        bead.searchableText = urlFields.length ? urlFields.join(' ') : null
-                    } else {
-                        bead.searchableText =
-                            bead.type === 'text' ? getDraftPlainText(bead.text) : null
-                    }
-                    // add files
-                    if (bead.type === 'audio') {
-                        const { type, file, blob } = bead.Audios[0]
-                        if (type === 'file') fileData.append('audioFile', file, index)
-                        else fileData.append('audioBlob', blob, index)
-                    } else if (bead.type === 'image') {
-                        const { file } = bead.Images[0]
-                        if (file) fileData.append('imageFile', file, index)
-                    }
-                })
-                fileData.append('postData', JSON.stringify(postData))
-            }
+            // let fileData
+            // let uploadType
+            // if (mediaTypes.includes('image')) {
+            //     uploadType = 'image-file'
+            //     fileData = new FormData()
+            //     images.forEach((image, index) => {
+            //         if (image.file) fileData.append('file', image.file, index)
+            //     })
+            //     fileData.append('postData', JSON.stringify(postData))
+            // }
+            // if (mediaTypes.includes('audio')) {
+            //     // const isBlob = audioFile && !audioFile.name
+            //     // uploadType = isBlob ? 'audio-blob' : 'audio-file'
+            //     // fileData = new FormData()
+            //     // fileData.append('file', isBlob ? audioBlob : audioFile)
+            //     // fileData.append('postData', JSON.stringify(postData))
+            // }
+            // if (mediaTypes.includes('card')) {
+            //     postData.cardFrontSearchableText = postData.cardFrontText
+            //         ? getDraftPlainText(postData.cardFrontText)
+            //         : null
+            //     postData.cardBackSearchableText = postData.cardBackText
+            //         ? getDraftPlainText(postData.cardBackText)
+            //         : null
+            //     uploadType = 'image-file'
+            //     fileData = new FormData()
+            //     if (cardFrontImage) fileData.append('file', cardFrontImage, 'front')
+            //     if (cardBackImage) fileData.append('file', cardBackImage, 'back')
+            //     fileData.append('postData', JSON.stringify(postData))
+            // }
+            // if (mediaTypes.includes('glass-bead-game')) {
+            //     uploadType = 'glass-bead-game'
+            //     fileData = new FormData()
+            //     // upload topic image if required
+            //     if (topicImageFile) fileData.append('topicImage', topicImageFile)
+            //     // add beads to fileData
+            //     postData.beads.forEach((bead, index) => {
+            //         // add searchable text
+            //         if (bead.type === 'url') {
+            //             const u = bead.Urls[0]
+            //             const urlFields = [] as any
+            //             if (u.url) urlFields.push(u.url)
+            //             if (u.title) urlFields.push(u.title)
+            //             if (u.description) urlFields.push(u.description)
+            //             if (u.domain) urlFields.push(u.domain)
+            //             bead.searchableText = urlFields.length ? urlFields.join(' ') : null
+            //         } else {
+            //             bead.searchableText =
+            //                 bead.type === 'text' ? getDraftPlainText(bead.text) : null
+            //         }
+            //         // add files
+            //         if (bead.type === 'audio') {
+            //             const { type, file, blob } = bead.Audios[0]
+            //             if (type === 'file') fileData.append('audioFile', file, index)
+            //             else fileData.append('audioBlob', blob, index)
+            //         } else if (bead.type === 'image') {
+            //             const { file } = bead.Images[0]
+            //             if (file) fileData.append('imageFile', file, index)
+            //         }
+            //     })
+            //     fileData.append('postData', JSON.stringify(postData))
+            // }
             axios
-                .post(
-                    `${config.apiURL}/create-post?uploadType=${uploadType}`,
-                    fileData || postData,
-                    options
-                )
+                .post(`${config.apiURL}/create-post`, formData, options)
                 .then((res) => {
+                    console.log('create-post res: ', res.data)
                     const allPostSpaceIds = [
                         ...spaces.map((space) => space.id),
                         ...res.data.indirectSpaces.map((s) => s.spaceId),
@@ -926,38 +1056,38 @@ function CreatePostModal(): JSX.Element {
                                 : null,
                         }
                         if (sourceId) newPost.accountLink = true
-                        if (mediaTypes.includes('audio'))
-                            newPost.Audios = [{ url: res.data.audio.url }]
-                        if (mediaTypes.includes('image')) newPost.Images = images
-                        if (mediaTypes.includes('poll'))
-                            newPost.Poll = {
-                                ...res.data.pollData.poll,
-                                PollAnswers: res.data.pollData.answers.map((a) => {
-                                    return { ...a, Reactions: [] }
-                                }),
-                            }
-                        if (postData.type === 'glass-bead-game') {
-                            newPost.Beads = postData.beads.map((bead, i) => {
-                                return {
-                                    ...bead,
-                                    id: res.data.gbg.beads[i].newBead.id,
-                                    Reactions: [],
-                                    Link: { index: i + 1 },
-                                }
-                            })
-                            newPost.GlassBeadGame = { ...res.data.gbg.game }
-                            newPost.Players =
-                                GBGSettings.players.map((p) => {
-                                    return {
-                                        ...p,
-                                        UserPost: {
-                                            state: p.id === accountData.id ? 'accepted' : 'pending',
-                                        },
-                                    }
-                                }) || []
-                        }
-                        if (postData.type === 'card')
-                            newPost.CardSides = [res.data.card.front, res.data.card.back]
+                        // if (mediaTypes.includes('audio'))
+                        //     newPost.Audios = [{ url: res.data.audio.url }]
+                        // if (mediaTypes.includes('image')) newPost.Images = images
+                        // if (mediaTypes.includes('poll'))
+                        //     newPost.Poll = {
+                        //         ...res.data.pollData.poll,
+                        //         PollAnswers: res.data.pollData.answers.map((a) => {
+                        //             return { ...a, Reactions: [] }
+                        //         }),
+                        //     }
+                        // if (postData.type === 'glass-bead-game') {
+                        //     newPost.Beads = postData.beads.map((bead, i) => {
+                        //         return {
+                        //             ...bead,
+                        //             id: res.data.gbg.beads[i].newBead.id,
+                        //             Reactions: [],
+                        //             Link: { index: i + 1 },
+                        //         }
+                        //     })
+                        //     newPost.GlassBeadGame = { ...res.data.gbg.game }
+                        //     newPost.Players =
+                        //         GBGSettings.players.map((p) => {
+                        //             return {
+                        //                 ...p,
+                        //                 UserPost: {
+                        //                     state: p.id === accountData.id ? 'accepted' : 'pending',
+                        //                 },
+                        //             }
+                        //         }) || []
+                        // }
+                        // if (postData.type === 'card')
+                        //     newPost.CardSides = [res.data.card.front, res.data.card.back]
                         // add new post to feed
                         if (addPostToSpaceFeed) setSpacePosts([newPost, ...spacePosts])
                         if (addPostToUserFeed) setUserPosts([newPost, ...userPosts])
@@ -1044,7 +1174,7 @@ function CreatePostModal(): JSX.Element {
         }
     }, [startTime])
 
-    // grab metadata for new urls when added to text
+    // grab metadata for new urls when added to text field
     useEffect(() => {
         if (urlsWithMetaData.length <= maxUrls) {
             // requestIndex used to pause requests until user has finished updating the url
@@ -1235,7 +1365,6 @@ function CreatePostModal(): JSX.Element {
                             ))}
                             {mediaTypes.includes('image') && (
                                 <Column id='image-drop' className={styles.dropBlockWrapper}>
-                                    <Row centerX>{images.length > 0 && renderImages()}</Row>
                                     <Row centerY centerX wrap>
                                         <ImageIcon className={styles.icon} />
                                         <Row className={styles.fileUploadInput}>
@@ -1244,7 +1373,7 @@ function CreatePostModal(): JSX.Element {
                                                 <input
                                                     type='file'
                                                     id='image-input'
-                                                    accept='.png, .jpg, .jpeg, .gif, .webp'
+                                                    accept={allowedImageTypes.join(',')}
                                                     onChange={() => addImageFiles()}
                                                     multiple
                                                     hidden
@@ -1268,34 +1397,11 @@ function CreatePostModal(): JSX.Element {
                                             />
                                         </Row>
                                     </Row>
+                                    <Row centerX>{images.length > 0 && renderImages()}</Row>
                                 </Column>
                             )}
                             {mediaTypes.includes('audio') && (
                                 <Column id='audio-drop' className={styles.dropBlockWrapper}>
-                                    <Column>
-                                        {audioFiles.map((audio, index) => (
-                                            <Column style={{ marginBottom: 20 }}>
-                                                <AudioCard
-                                                    key={audio.id}
-                                                    id={audio.id}
-                                                    index={index}
-                                                    url={URL.createObjectURL(audio.file)}
-                                                    staticBars={400}
-                                                    location='new-post'
-                                                    remove={() => removeAudioFile(audio.id)}
-                                                    style={{ height: 200, marginBottom: 10 }}
-                                                />
-                                                <Input
-                                                    type='text'
-                                                    placeholder='add caption...'
-                                                    value={audio.text}
-                                                    onChange={(value) =>
-                                                        updateAudioCaption(audio.id, value)
-                                                    }
-                                                />
-                                            </Column>
-                                        ))}
-                                    </Column>
                                     <Row centerY centerX wrap>
                                         <AudioIcon className={styles.icon} />
                                         <Row
@@ -1307,7 +1413,7 @@ function CreatePostModal(): JSX.Element {
                                                 <input
                                                     type='file'
                                                     id='audio-input'
-                                                    accept='audio/mpeg'
+                                                    accept={allowedAudioTypes.join(',')}
                                                     onChange={() => addAudioFiles()}
                                                     multiple
                                                     hidden
@@ -1325,6 +1431,41 @@ function CreatePostModal(): JSX.Element {
                                             </h2>
                                         )}
                                     </Row>
+                                    <Column>
+                                        {audios.map((audio) => (
+                                            <Column
+                                                key={audio.id}
+                                                style={{ position: 'relative', marginTop: 20 }}
+                                            >
+                                                <CloseButton
+                                                    size={18}
+                                                    onClick={() => removeAudio(audio.id)}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        right: 0,
+                                                        top: -5,
+                                                        zIndex: 5,
+                                                    }}
+                                                />
+                                                <AudioCard
+                                                    id={audio.id}
+                                                    url={audio.Audio.url}
+                                                    staticBars={400}
+                                                    location='new-post'
+                                                    remove={() => removeAudio(audio.id)}
+                                                    style={{ height: 150, marginBottom: 10 }}
+                                                />
+                                                <Input
+                                                    type='text'
+                                                    placeholder='add caption...'
+                                                    value={audio.text}
+                                                    onChange={(value) =>
+                                                        updateAudioCaption(audio.id, value)
+                                                    }
+                                                />
+                                            </Column>
+                                        ))}
+                                    </Column>
                                 </Column>
                             )}
                             {mediaTypes.includes('event') && (
@@ -1358,36 +1499,6 @@ function CreatePostModal(): JSX.Element {
                             )}
                             {mediaTypes.includes('poll') && (
                                 <Column className={styles.blockWrapper}>
-                                    <Column>
-                                        {pollAnswers.map((answer, index) => (
-                                            <PollAnswer
-                                                key={answer.id}
-                                                index={index}
-                                                type={pollType}
-                                                answer={answer}
-                                                percentage={0}
-                                                color={pollColorScale(index)}
-                                                remove={() => removePollAnswer(answer.id)}
-                                                removable={answer.state !== 'done'}
-                                                preview
-                                            />
-                                        ))}
-                                    </Column>
-                                    <Row centerY style={{ width: '100%', marginBottom: 10 }}>
-                                        <Input
-                                            type='text'
-                                            placeholder='New answer...'
-                                            value={newPollAnswer}
-                                            onChange={(value) => setNewPollAnswer(value)}
-                                            style={{ width: '100%', marginRight: 10 }}
-                                        />
-                                        <Button
-                                            color='blue'
-                                            text='Add'
-                                            disabled={!newPollAnswer}
-                                            onClick={addPollAnswer}
-                                        />
-                                    </Row>
                                     <Row wrap centerY centerX>
                                         <PollIcon className={styles.icon} />
                                         <Toggle
@@ -1437,6 +1548,29 @@ function CreatePostModal(): JSX.Element {
                                             style={{ marginRight: 20 }}
                                         />
                                     </Row>
+                                    <Column>
+                                        {pollAnswers.map((answer, index) => (
+                                            <PollAnswer
+                                                key={answer.id}
+                                                index={index}
+                                                type={pollType}
+                                                answer={answer}
+                                                percentage={0}
+                                                color={pollColorScale(index)}
+                                                remove={() => removePollAnswer(answer.id)}
+                                                removable={answer.state !== 'done'}
+                                                style={{ marginTop: 10 }}
+                                                preview
+                                            />
+                                        ))}
+                                    </Column>
+                                    <CommentInput
+                                        type='poll-answer'
+                                        preview
+                                        placeholder='New answer...'
+                                        onSave={(data) => addPollAnswer(data)}
+                                        style={{ marginTop: 10 }}
+                                    />
                                 </Column>
                             )}
                             {mediaTypes.includes('card') && (
@@ -1593,150 +1727,16 @@ function CreatePostModal(): JSX.Element {
                                     {/* {(postType === 'gbg-from-post' ||
                                         (!synchronous && !multiplayer)) &&
                                         renderBeads()} */}
+                                    <Button
+                                        text='Game settings'
+                                        color='aqua'
+                                        icon={<SettingsIcon />}
+                                        onClick={() => setGBGSettingsModalOpen(true)}
+                                    />
                                 </Column>
                             )}
                         </Column>
                     </Column>
-                    {/* {!['text', 'card'].includes(postType) && (
-                        <Row wrap centerY centerX className={styles.contentOptions}>
-                            {postType === 'image' && (
-                                <>
-                                    <Row className={styles.fileUploadInput}>
-                                        <label htmlFor='post-images-file-input'>
-                                            Upload images
-                                            <input
-                                                type='file'
-                                                id='post-images-file-input'
-                                                accept='.png, .jpg, .jpeg, .gif'
-                                                onChange={addImageFiles}
-                                                multiple
-                                                hidden
-                                            />
-                                        </label>
-                                    </Row>
-                                    <p style={{ margin: '0 10px 10px 10px' }}>or</p>
-                                    <Input
-                                        type='text'
-                                        placeholder='paste image URL...'
-                                        value={imageURL}
-                                        onChange={(v) => setImageURL(v)}
-                                        style={{ width: 180, marginRight: 10 }}
-                                    />
-                                    <Button
-                                        text='Add URL'
-                                        color='aqua'
-                                        disabled={!imageURL}
-                                        onClick={addImageURL}
-                                    />
-                                </>
-                            )}
-                            {postType === 'audio' && (
-                                <>
-                                    <Row
-                                        className={styles.fileUploadInput}
-                                        style={{ marginRight: 10 }}
-                                    >
-                                        <label htmlFor='audio-file-input'>
-                                            Upload audio
-                                            <input
-                                                type='file'
-                                                id='audio-file-input'
-                                                accept='audio/mpeg'
-                                                onChange={selectAudioFile}
-                                                hidden
-                                            />
-                                        </label>
-                                    </Row>
-                                    <Button
-                                        text={recording ? 'Stop recording' : 'Record audio'}
-                                        color='red'
-                                        onClick={toggleAudioRecording}
-                                    />
-                                    {recording && (
-                                        <h2 style={{ marginLeft: 10 }}>
-                                            {formatTimeMMSS(recordingTime)}
-                                        </h2>
-                                    )}
-                                </>
-                            )}
-                            {postType === 'event' && (
-                                <>
-                                    <div id='date-time-start-wrapper'>
-                                        <Input
-                                            id='date-time-start'
-                                            type='text'
-                                            placeholder='Start time...'
-                                        />
-                                    </div>
-                                    <p style={{ margin: '0 10px 10px 10px' }}>→</p>
-                                    <div id='date-time-end-wrapper'>
-                                        <Input
-                                            id='date-time-end'
-                                            type='text'
-                                            placeholder='End time... (optional)'
-                                        />
-                                    </div>
-                                    {endTime && <CloseButton size={20} onClick={removeEndDate} />}
-                                </>
-                            )}
-                            {postType === 'poll' && (
-                                <>
-                                    <Toggle
-                                        leftText='Lock answers'
-                                        positionLeft={!pollAnswersLocked}
-                                        rightColor='blue'
-                                        onClick={() => {
-                                            setPollAnswersError(false)
-                                            setPollAnswersLocked(!pollAnswersLocked)
-                                        }}
-                                        onOffText
-                                        style={{ marginRight: 20 }}
-                                    />
-                                    {governance && (
-                                        <DropDown
-                                            title='Action'
-                                            options={['None', 'Create spaces']} // 'Assign Moderators'
-                                            selectedOption={pollAction}
-                                            setSelectedOption={(option) => setPollAction(option)}
-                                            style={{ marginRight: 20 }}
-                                        />
-                                    )}
-                                    {governance && pollAction === 'Create spaces' && (
-                                        <Row centerY style={{ marginRight: 20 }}>
-                                            <p>Threshold</p>
-                                            <Input
-                                                type='number'
-                                                min={1}
-                                                max={1000}
-                                                value={pollThreshold}
-                                                onChange={(v) => setPollThreshold(v)}
-                                                style={{ width: 70, marginLeft: 10 }}
-                                            />
-                                        </Row>
-                                    )}
-                                    <DropDown
-                                        title='Vote type'
-                                        options={[
-                                            'Single choice',
-                                            'Multiple choice',
-                                            'Weighted choice',
-                                        ]}
-                                        selectedOption={pollType}
-                                        setSelectedOption={(option) => setPollType(option)}
-                                        style={{ marginRight: 20 }}
-                                    />
-                                </>
-                            )}
-                            {postType === 'glass-bead-game' && (
-                                <Button
-                                    text='Game settings'
-                                    color='aqua'
-                                    icon={<SettingsIcon />}
-                                    onClick={() => setGBGSettingsModalOpen(true)}
-                                />
-                            )}
-                        </Row>
-                    )} */}
                     {!!contentTypes.length && (
                         <Row style={{ marginBottom: 20 }}>
                             {contentTypes.map((type) => (

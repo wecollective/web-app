@@ -171,6 +171,7 @@ function DraftTextEditor(props: {
         axios
             .post(`${config.apiURL}/find-people`, data)
             .then((res) => {
+                // todo: just store id and retreieve other data when displayed (currently showing old flag images etc.)
                 setSuggestions(
                     res.data.map((user) => {
                         return {

@@ -6,6 +6,7 @@ import ImageTitle from '@components/ImageTitle'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
 import StatButton from '@components/StatButton'
+import LoadingWheel from '@components/animations/LoadingWheel'
 import AudioCard from '@components/cards/PostCard/AudioCard'
 import UrlPreview from '@components/cards/PostCard/UrlCard'
 import DraftText from '@components/draft-js/DraftText'
@@ -21,7 +22,6 @@ import {
     statTitle,
     trimText,
 } from '@src/Helpers'
-import LoadingWheel from '@src/components/LoadingWheel'
 import styles from '@styles/components/cards/PostCard/BeadCard.module.scss'
 import {
     CalendarIcon,
@@ -35,7 +35,7 @@ import {
 } from '@svgs/all'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 function BeadCard(props: {
     bead: any
@@ -78,11 +78,15 @@ function BeadCard(props: {
         Creator,
         Event,
         CardSides,
+        Url,
+        Image,
+        Audio,
     } = bead
+    const preview = location === 'preview'
     const [loading, setLoading] = useState(true)
-    const [urlBlocks, setUrlBlocks] = useState<any[]>([])
-    const [imageBlocks, setImageBlocks] = useState<any[]>([])
-    const [audioBlocks, setAudioBlocks] = useState<any[]>([])
+    const [urlBlocks, setUrlBlocks] = useState<any[]>(preview ? [{ id, Url }] : [])
+    const [imageBlocks, setImageBlocks] = useState<any[]>(preview ? [{ id, Image }] : [])
+    const [audioBlocks, setAudioBlocks] = useState<any[]>(preview ? [{ id, Audio }] : [])
     const [menuOpen, setMenuOpen] = useState(false)
     const [editPostModalOpen, setEditPostModalOpen] = useState(false)
     const [imageModalOpen, setImageModalOpen] = useState(false)
@@ -95,8 +99,9 @@ function BeadCard(props: {
         mediaTypes.includes('text') &&
         beadIndex !== 0 &&
         !['create-string-modal', 'next-bead-modal', 'preview'].includes(location)
-    const showFooter = location !== 'preview' && state !== 'account-deleted'
+    const showFooter = false // location !== 'preview' && state !== 'account-deleted'
 
+    // todo: maybe better to get the data when items retreived instead of after per bead...? (harder query due to nesting...)
     function getUrls() {
         axios
             .get(`${config.apiURL}/post-urls?postId=${id}`)
@@ -119,16 +124,17 @@ function BeadCard(props: {
 
     function getAudio() {
         axios
-            .get(`${config.apiURL}/post-audio?postId=${id}`)
+            .get(`${config.apiURL}/post-audio?postId=${id}&offset=0`)
             .then((res) => {
-                setAudioBlocks(res.data)
+                setAudioBlocks(res.data.blocks)
                 setLoading(false)
             })
             .catch((error) => console.log(error))
     }
 
     function getBeadData() {
-        if (mediaTypes.includes('url')) getUrls()
+        if (preview) setLoading(false)
+        else if (mediaTypes.includes('url')) getUrls()
         else if (mediaTypes.includes('image')) getImages()
         else if (mediaTypes.includes('audio')) getAudio()
         else setLoading(false)
@@ -154,14 +160,14 @@ function BeadCard(props: {
         // add drag event listeners
         const beadCard = document.getElementById(`bead-${id}`)
         if (beadCard) {
-            beadCard.addEventListener('mouseenter', () =>
-                updateDragItem({ type: 'post', data: bead })
-            )
-            beadCard.addEventListener('dragstart', (e) => {
-                e.stopPropagation()
-                const dragItem = document.getElementById('drag-item')
-                e.dataTransfer?.setDragImage(dragItem!, 50, 50)
-            })
+            // beadCard.addEventListener('mouseenter', () =>
+            //     updateDragItem({ type: 'post', data: bead })
+            // )
+            // beadCard.addEventListener('dragstart', (e) => {
+            //     e.stopPropagation()
+            //     const dragItem = document.getElementById('drag-item')
+            //     e.dataTransfer?.setDragImage(dragItem!, 50, 50)
+            // })
         }
     }, [])
 
@@ -189,12 +195,12 @@ function BeadCard(props: {
                     {removeBead && !isSource && (
                         <CloseButton size={20} onClick={() => removeBead(beadIndex || 0)} />
                     )}
-                    {!!id && location !== 'preview' && (
+                    {/* {!!id && location !== 'preview' && (
                         <Link to={`/p/${id}`} className={styles.id} title='Open post page'>
                             <p className='grey'>ID:</p>
                             <p style={{ marginLeft: 5 }}>{id}</p>
                         </Link>
-                    )}
+                    )} */}
                     {/* {isSource && (
                         <button
                             type='button'
@@ -271,7 +277,7 @@ function BeadCard(props: {
                                     <img
                                         src={
                                             imageBlocks[0].Image.url ||
-                                            URL.createObjectURL(imageBlocks[0].file)
+                                            URL.createObjectURL(imageBlocks[0].Image.file)
                                         }
                                         // onError={(e) => handleImageError(e, Images[0].url)}
                                         alt=''
@@ -283,8 +289,9 @@ function BeadCard(props: {
                                     id={postId}
                                     index={beadIndex}
                                     url={
+                                        // todo: use same approach as with Image (store url)
                                         audioBlocks[0].Audio.url ||
-                                        URL.createObjectURL(audioBlocks[0].file)
+                                        URL.createObjectURL(audioBlocks[0].Audio.file)
                                     }
                                     staticBars={200}
                                     location={location}

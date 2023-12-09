@@ -1,5 +1,4 @@
 import AudioVisualiser from '@components/AudioVisualiser'
-import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
 import Row from '@components/Row'
 import { formatTimeMMSS } from '@src/Helpers'
@@ -10,6 +9,7 @@ import * as d3 from 'd3'
 import getBlobDuration from 'get-blob-duration'
 import React, { useEffect, useState } from 'react'
 
+// todo: pass in height as a prop?
 function AudioCard(props: {
     id?: number
     index?: number
@@ -129,13 +129,13 @@ function AudioCard(props: {
 
     return (
         <Column style={{ ...style, position: 'relative' }}>
-            {remove && (
+            {/* {remove && (
                 <CloseButton
                     size={20}
                     onClick={remove}
                     style={{ position: 'absolute', top: 0, right: 0, zIndex: 5 }}
                 />
-            )}
+            )} */}
             <AudioVisualiser
                 audioElementId={audioElementId}
                 audioURL={url}
@@ -144,7 +144,10 @@ function AudioCard(props: {
                 staticColor={colors.audioVisualiserStatic}
                 dynamicBars={160}
                 dynamicColor={colors.audioVisualiserDynamic}
-                style={{ height: location === 'gbg-room' ? 80 : '100%', marginBottom: 10 }}
+                style={{
+                    height: location === 'gbg-room' ? 80 : 'calc(100% - 40px)',
+                    marginBottom: 10,
+                }}
             />
             <Row centerY>
                 <button

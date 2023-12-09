@@ -7,12 +7,13 @@ import Row from '@components/Row'
 import MediumSquareCard from '@components/cards/MediumSquareCard'
 import BeadCard from '@components/cards/PostCard/BeadCard'
 import { AccountContext } from '@contexts/AccountContext'
-import { getDraftPlainText, postTypeIcons, trimText } from '@src/Helpers'
+import { getDraftPlainText, trimText } from '@src/Helpers'
 import styles from '@styles/components/cards/ToyBoxItem.module.scss'
-import { AudioWaveIcon, CommentIcon, PostIcon, SpacesIcon, UserIcon } from '@svgs/all'
+import { CommentIcon, PostIcon, SpacesIcon, UserIcon } from '@svgs/all'
 import React, { useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+// needs reconsidering for multimedia / nested content
 function ToyBoxItem(props: {
     type: 'space' | 'user' | 'post' | 'comment'
     data: any
@@ -21,6 +22,7 @@ function ToyBoxItem(props: {
     className?: string
 }): JSX.Element {
     const { type, data, dragImage, style, className } = props
+    // console.log(type, data.mediaTypes, data.Url)
     const { updateDragItem } = useContext(AccountContext)
     const [modalOpen, setModalOpen] = useState(false)
     const [modalPosition, setModalPosition] = useState<any>(null)
@@ -30,20 +32,23 @@ function ToyBoxItem(props: {
     let text = ''
     if (data.title) text = trimText(data.title, 20)
     else if (data.text) text = trimText(getDraftPlainText(data.text), 20)
-    let image = ''
-    if (!text && type === 'post') {
-        if (data.type.includes('image')) image = data.Images[0].url
-        if (data.type.includes('url')) image = data.Urls[0].image
-    }
+    const image = ''
+    // if (!text && type === 'post') {
+    //     if (data.mediaTypes.includes('image')) image = data.Image.url
+    //     if (data.mediaTypes.includes('url')) image = data.Url.image
+    // }
 
     const backgroundImage = data.coverImagePath
         ? `url(${data.coverImagePath})`
         : 'linear-gradient(141deg, #9fb8ad 0%, #1fc8db 51%, #2cb5e8 75%'
 
-    const cardImage = data.type === 'card' && data.CardSides[0].Images[0]
+    // const cardImage = data.mediaTypes.includes('card') && data.CardSides[0].Images[0]
 
-    function findTypeIcon(option) {
-        return postTypeIcons[option] || null
+    function findTypeIcon() {
+        return null
+        // const mediaTypes = data.mediaTypes.split(',')
+        // const mediaType = mediaTypes[mediaTypes.length]
+        // return postTypeIcons[mediaType] || null
     }
 
     useEffect(() => {
@@ -115,13 +120,13 @@ function ToyBoxItem(props: {
                         <Column centerX centerY className={styles.center}>
                             {text && <p>{text}</p>}
                             {image && <div style={{ backgroundImage: `url(${image})` }} />}
-                            {data.type === 'audio' && !text && <AudioWaveIcon />}
-                            {data.type === 'card' && !text && cardImage && (
+                            {/* {data.mediaTypes.includes('audio') && !text && <AudioWaveIcon />}
+                            {data.mediaTypes.includes('card') && !text && cardImage && (
                                 <img src={cardImage.url} alt='card front' />
-                            )}
+                            )} */}
                         </Column>
                         <Row spaceBetween className={styles.footer}>
-                            {findTypeIcon(data.type)}
+                            {findTypeIcon()}
                             <div />
                         </Row>
                     </Column>

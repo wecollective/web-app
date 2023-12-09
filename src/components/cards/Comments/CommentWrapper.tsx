@@ -31,8 +31,8 @@ function CommentWrapper(props: {
 
     return (
         <Row>
-            {Array.from({ length: depth }, () => (
-                <div className={styles.lines} />
+            {Array.from({ length: depth }, (d, i) => (
+                <div key={i} className={styles.lines} />
             ))}
             <Column style={{ width: '100%' }}>
                 <CommentCard

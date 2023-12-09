@@ -42,6 +42,7 @@ import {
     maxPostChars,
     maxUrls,
     scrapeUrl,
+    uploadPost,
     validatePost,
 } from '@src/Helpers'
 import styles from '@styles/components/draft-js/CommentInput.module.scss'
@@ -54,14 +55,15 @@ import RecordRTC from 'recordrtc'
 import { v4 as uuidv4 } from 'uuid'
 
 function CommentInput(props: {
+    type: 'comment' | 'poll-answer' // group thread, gbg room (?)
+    preview: boolean // determines whether onSave function uploads or just passes data back to parent
     placeholder: string
-    onSave: (data: any) => void
-    saveLoading?: boolean
-    maxChars?: number
+    maxChars?: number // todo: does this make sense to pass in here?
     className?: string
     style?: any
+    onSave: (data: any) => void
 }): JSX.Element {
-    const { placeholder, onSave, saveLoading, maxChars, className, style } = props
+    const { type, preview, placeholder, maxChars, className, style, onSave } = props
     const { accountData } = useContext(AccountContext)
     const [editorState, setEditorState] = useState<any>(null)
     const [rawUrls, setRawUrls] = useState<any[]>([])
@@ -78,6 +80,7 @@ function CommentInput(props: {
     const [totalChars, setTotalChars] = useState(0)
     const [focused, setFocused] = useState(false)
     const [errors, setErrors] = useState<string[]>([])
+    const [saveLoading, setSaveLoading] = useState(false)
     const wrapperRef = useRef<HTMLDivElement>(null)
     const editorRef = useRef<any>(null)
     const inputId = uuidv4()
@@ -298,12 +301,13 @@ function CommentInput(props: {
     }
 
     function saveDisabled() {
-        const noContent = !totalChars && !urls.length && !images.length && !audios.length
         const urlsLoading = urls.find((u) => u.loading)
-        return noContent || urlsLoading || overMaxChars
+        const noContent = !totalChars && !urls.length && !images.length && !audios.length
+        return saveLoading || urlsLoading || noContent || overMaxChars
     }
 
     function save() {
+        setSaveLoading(true)
         // structure data
         const { id, handle, name, flagImagePath } = accountData
         const post = {
@@ -317,9 +321,22 @@ function CommentInput(props: {
         } as any
         post.mediaTypes = findMediaTypes(post)
         post.searchableText = findSearchableText(post)
-        const validation = validatePost(post, { maxChars })
-        if (validation.errors.length) setErrors(validation.errors)
-        else {
+        // validate post
+        const validation = validatePost(post)
+        if (validation.errors.length) {
+            setErrors(validation.errors)
+            setSaveLoading(false)
+        } else {
+            // if preview pass back data
+            if (preview) onSave(post)
+            else {
+                // upload data
+                uploadPost(post, type)
+                    .then((res) => {
+                        console.log(res.data)
+                    })
+                    .catch((error) => console.log(error))
+            }
             // return or upload post
             post.totalSize = validation.totalSize
             onSave(post)
@@ -368,7 +385,7 @@ function CommentInput(props: {
                                 // update urls array
                                 setUrls((us) => {
                                     const newUrls = [...us.filter((u) => u.url !== url)]
-                                    newUrls.push({ url, loading: false, ...data })
+                                    newUrls.push({ url, ...data })
                                     return newUrls
                                 })
                             }
@@ -539,8 +556,7 @@ function CommentInput(props: {
 }
 
 CommentInput.defaultProps = {
-    saveLoading: false,
-    maxChars: null,
+    maxChars: 0,
     className: '',
     style: null,
 }

@@ -225,6 +225,7 @@ function NextBeadModal(props: {
         return false
     }
 
+    // todo: revisit
     function uploadBead(bead) {
         setLoading(true)
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
@@ -291,7 +292,7 @@ function NextBeadModal(props: {
     function saveBead() {
         const bead = {
             id: uuidv4(),
-            type,
+            mediaTypes: type,
             color,
             Link: { source: null },
             Creator: accountData,
@@ -304,14 +305,15 @@ function NextBeadModal(props: {
             bead.text = text
             bead.mentions = mentions
         }
-        if (type === 'url') bead.Urls = [urlData]
+        if (type === 'url') bead.Url = urlData
         if (type === 'audio') {
-            bead.Audios = [{ type: audioType, file: audioFile, blob: audioBlob }]
+            bead.Audio = { type: audioType, file: audioFile, blob: audioBlob }
         }
-        if (type === 'image') bead.Images = [image]
+        if (type === 'image') bead.Image = image
         // save
         if (location === 'existing-gbg') uploadBead(bead)
         else {
+            console.log('new bead: ', bead)
             addBead(bead)
             close()
         }
@@ -446,9 +448,9 @@ function NextBeadModal(props: {
                                                     <Input
                                                         type='text'
                                                         placeholder='Caption...'
-                                                        value={image.caption}
+                                                        value={image.text}
                                                         onChange={(v) =>
-                                                            setImage({ ...image, caption: v })
+                                                            setImage({ ...image, text: v })
                                                         }
                                                     />
                                                 </Row>

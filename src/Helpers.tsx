@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable no-control-regex */
 import config from '@src/Config'
@@ -638,4 +639,116 @@ export function validatePost(post, constraints?) {
     }
 
     return { errors, totalSize }
+}
+
+function attachPostFiles(postData, formData) {
+    const { mediaTypes, images, audios, poll } = postData
+    if (mediaTypes.includes('image')) {
+        images.forEach((i) => {
+            if (i.Image.file) formData.append('image', i.Image.file, i.id)
+        })
+        postData.images = images.map((i) => {
+            return { id: i.id, text: i.text, url: i.Image.file ? null : i.Image.url }
+        })
+    }
+    if (mediaTypes.includes('audio')) {
+        audios.forEach((a) => formData.append(`audio${a.file.name ? '' : '-blob'}`, a.file, a.id))
+        postData.audios = audios.map((a) => {
+            return { id: a.id, text: a.text }
+        })
+    }
+    if (mediaTypes.includes('poll')) {
+        // postData.pollType = simplifyText(pollType)
+        // postData.pollAnswersLocked = pollAnswersLocked
+        // todo: refactor for answers with media
+        poll.answers.forEach((answer) => {
+            // loop through and attach media
+            attachPostFiles(answer, formData)
+            // formData.append(`audio${a.file.name ? '' : '-blob'}`, a.file, a.id)
+        })
+        // postData.poll.answers = poll.answers.map((answer) => {
+        //     return { id: answer.id, }
+        // })
+    }
+    // if (mediaTypes.includes('card')) {
+    //     const frontChars = findDraftLength(cardFrontText)
+    //     const backChars = findDraftLength(cardBackText)
+    //     postData.cardFront = {
+    //         text: frontChars ? cardFrontText : null,
+    //         searchableText: frontChars ? getDraftPlainText(cardFrontText) : null,
+    //         watermark: cardFrontWatermark,
+    //     }
+    //     postData.cardBack = {
+    //         text: backChars ? cardBackText : null,
+    //         searchableText: backChars ? getDraftPlainText(cardBackText) : null,
+    //         watermark: cardBackWatermark,
+    //     }
+    //     if (cardFrontImage) formData.append('image', cardFrontImage, 'card-front-image')
+    //     if (cardBackImage) formData.append('image', cardBackImage, 'card-back-image')
+    // }
+    // if (mediaTypes.includes('glass-bead-game')) {
+    //     postData.gbgSettings = GBGSettings
+    //     postData.topicGroup = findTopicGroup()
+    //     postData.topicImageUrl = topicImageFile ? null : topicImageURL
+    //     if (topicImageFile) formData.append('image', topicImageFile, 'topic-image')
+    //     if (!synchronous && !multiplayer) {
+    //         // add beads
+    //         // what is the current bead structure?
+    //         // { id: uuid,  }
+    //         postData.beads = beads.map((bead) => {
+    //             let mediaUrl
+    //             let mediaText
+    //             // todo: update for other media types when ready
+    //             if (bead.Image) {
+    //                 mediaUrl = bead.Image.url
+    //                 mediaText = bead.Image.text
+    //             }
+    //             return {
+    //                 id: bead.id,
+    //                 text: bead.text || null,
+    //                 // todo: handle searchable text
+    //                 searchableText: '',
+    //                 mediaText,
+    //                 mediaUrl,
+    //                 mediaTypes: bead.mediaTypes,
+    //                 color: bead.color,
+    //             }
+    //         })
+    //         beads.forEach((bead) => {
+    //             if (bead.mediaTypes === 'image') {
+    //                 const { file } = bead.Image
+    //                 if (file) formData.append('image', file, bead.id)
+    //             }
+    //             if (bead.mediaTypes === 'audio') {
+    //                 const { type, file, blob } = bead.Audio
+    //                 // todo: compress file and blob into file? (check how audio posts work first...)
+    //                 if (type === 'file') formData.append('audio', file, bead.id)
+    //                 else formData.append('audio-blob', blob, bead.id)
+    //             }
+    //         })
+    //     }
+    // }
+
+    // // add other contextual data
+    // if (sourceId) {
+    //     postData.sourceType = sourceType
+    //     postData.sourceId = sourceId
+    //     postData.linkDescription = linkDescription || null
+    // }
+    // if (governance) {
+    //     postData.governance = true
+    //     postData.pollAction = pollAction
+    //     postData.pollThreshold = pollThreshold
+    // }
+    postData.searchableText = findSearchableText(postData)
+}
+
+export function uploadPost(post, type, parentId?, rootId?) {
+    console.log('uploadPost: ', post, type, parentId, rootId)
+    const postData = { ...post }
+    const formData = new FormData()
+    attachPostFiles(postData, formData)
+    formData.append('post-data', JSON.stringify(postData))
+    const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+    return axios.post(`${config.apiURL}/create-post`, formData, options)
 }

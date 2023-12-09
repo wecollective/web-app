@@ -2,6 +2,9 @@ import Column from '@components/Column'
 import * as d3 from 'd3'
 import React, { useEffect, useRef } from 'react'
 
+// todo: refactor with averaging and normalisation
+// https://css-tricks.com/making-an-audio-waveform-visualizer-with-vanilla-javascript/
+
 function AudioVisualiser(props: {
     audioElementId: string
     audioURL: string
@@ -33,6 +36,7 @@ function AudioVisualiser(props: {
         const visualiser = d3.select(`#${audioElementId}-visualiser`)
         if (visualiser.node()) {
             const { height, width } = visualiser.node().getBoundingClientRect()
+            console.log(999, height, width)
             const maxBars = 2000
             const totalBars = Math.min(staticBars, maxBars)
             const leftChannel = buffer.getChannelData(0)
@@ -79,6 +83,10 @@ function AudioVisualiser(props: {
     }
 
     function loadAudioForStaticVisualisation() {
+        // fetch(audioURL)
+        //     .then((response) => response.arrayBuffer())
+        //     .then((arrayBuffer) => audioContext.decodeAudioData(arrayBuffer))
+        //     .then((audioBuffer) => visualize(audioBuffer))
         const req = new XMLHttpRequest()
         req.open('GET', audioURL, true)
         req.responseType = 'arraybuffer'
@@ -184,8 +192,8 @@ function AudioVisualiser(props: {
                 const svg = d3
                     .select(`#${audioElementId}-visualiser`)
                     .append('svg')
-                    .attr('width', '100%')
-                    .attr('height', '100%')
+                    .attr('width', width)
+                    .attr('height', height)
 
                 for (let i = 0; i < totalBars; i += 1) {
                     svg.append('rect')
@@ -229,9 +237,15 @@ function AudioVisualiser(props: {
     }, [audioPlaying])
 
     return (
-        <Column style={style}>
-            <div id={`${audioElementId}-visualiser`} style={{ width: '100%', height: '100%' }} />
-            <div id={`${audioElementId}-static-visualiser`} style={{ position: 'absolute' }} />
+        <Column style={{ position: 'relative', ...style }}>
+            <div
+                id={`${audioElementId}-visualiser`}
+                style={{ width: '100%', height: '100%', position: 'relative' }}
+            />
+            <div
+                id={`${audioElementId}-static-visualiser`}
+                style={{ height: '100%', position: 'absolute' }}
+            />
         </Column>
     )
 }

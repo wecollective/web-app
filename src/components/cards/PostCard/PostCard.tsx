@@ -5,7 +5,7 @@ import ShowMoreLess from '@components/ShowMoreLess'
 import UserButton from '@components/UserButton'
 import LoadingWheel from '@components/animations/LoadingWheel'
 import Comments from '@components/cards/Comments/Comments'
-import Audio from '@components/cards/PostCard/Audio'
+import Audios from '@components/cards/PostCard/Audios'
 import Card from '@components/cards/PostCard/Card'
 import EventCard from '@components/cards/PostCard/EventCard'
 import GlassBeadGame from '@components/cards/PostCard/GlassBeadGame'
@@ -320,7 +320,9 @@ function PostCard(props: {
                 {mediaTypes.includes('image') && (
                     <Images postId={id} style={{ marginBottom: 10 }} />
                 )}
-                {mediaTypes.includes('audio') && <Audio postId={id} style={{ marginBottom: 10 }} />}
+                {mediaTypes.includes('audio') && (
+                    <Audios postId={id} style={{ marginBottom: 10 }} />
+                )}
             </Column>
             {showFooter && (
                 <Column className={styles.footer}>
