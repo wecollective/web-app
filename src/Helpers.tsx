@@ -536,7 +536,7 @@ function findUrlSearchableText(urlData) {
     return fields.length ? fields.join(' ') : null
 }
 
-export function findPostSearchableText(post) {
+export function findSearchableText(post) {
     const { title, text, urls, images, audios } = post
     let fields = [] as any
     if (title) fields.push(title)
@@ -568,11 +568,6 @@ export function scrapeUrl(url) {
     return axios.get(`${config.apiURL}/scrape-url?url=${url}`, options)
 }
 
-export function findCreatorDetails(creator) {
-    const { id, handle, name, flagImage } = creator
-    return { id, handle, name, flagImage }
-}
-
 // todo: count poll answers, card sides, and beads (do this when added?)
 function findTotalUploadSize(post) {
     const { images, audios } = post
@@ -598,12 +593,12 @@ export function validatePost(post, constraints?) {
             `Total upload size (${totalSize} MBs) must be less than ${totalMBUploadLimit} MBs`
         )
     }
-    // text
-    if (mediaTypes.includes('text')) {
-        const totalChars = findDraftLength(text)
-        const maxChars = (constraints && constraints.maxChars) || maxPostChars
-        if (totalChars > maxChars) errors.push(`Text must be less than ${maxChars} characters`)
-    }
+    // text (not needed as save disabled when over max chars)
+    // if (mediaTypes.includes('text')) {
+    //     const totalChars = findDraftLength(text)
+    //     const maxChars = (constraints && constraints.maxChars) || maxPostChars
+    //     if (totalChars > maxChars) errors.push(`Text must be less than ${maxChars} characters`)
+    // }
     // image
     if (mediaTypes.includes('image') && !images.length) errors.push('No images added')
     // audio

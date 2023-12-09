@@ -36,12 +36,13 @@ import {
     allowedAudioTypes,
     allowedImageTypes,
     audioMBLimit,
-    findDraftLength,
-    findUrlSearchableText,
+    findSearchableText,
     formatTimeMMSS,
     imageMBLimit,
+    maxPostChars,
     maxUrls,
     scrapeUrl,
+    validatePost,
 } from '@src/Helpers'
 import styles from '@styles/components/draft-js/CommentInput.module.scss'
 import draftStyles from '@styles/components/draft-js/TextStyling.module.scss'
@@ -65,20 +66,18 @@ function CommentInput(props: {
     const [editorState, setEditorState] = useState<any>(null)
     const [rawUrls, setRawUrls] = useState<any[]>([])
     const [urls, setUrls] = useState<any[]>([])
-    const [mentions, setMentions] = useState([])
+    const [mentions, setMentions] = useState<any[]>([])
     const [images, setImages] = useState<any[]>([])
-    const [imageSizeError, setImageSizeError] = useState(false)
     const [audios, setAudios] = useState<any[]>([])
-    const [audioSizeError, setAudioSizeError] = useState(false)
     const [recording, setRecording] = useState(false)
     const [recordingTime, setRecordingTime] = useState(0)
     const audioRecorder = useRef<any>(null)
     const recordingInterval = useRef<any>(null)
     const [suggestions, setSuggestions] = useState([])
     const [showSuggestions, setShowSuggestions] = useState(false)
-    const [characterLength, setCharacterLength] = useState(0)
+    const [totalChars, setTotalChars] = useState(0)
     const [focused, setFocused] = useState(false)
-    const [totalUploadSizeError, setTotalUploadSizeError] = useState(false)
+    const [errors, setErrors] = useState<string[]>([])
     const wrapperRef = useRef<HTMLDivElement>(null)
     const editorRef = useRef<any>(null)
     const inputId = uuidv4()
@@ -93,6 +92,8 @@ function CommentInput(props: {
             lineHeight: '30px',
         },
     }
+    const overMaxChars = totalChars > (maxChars || maxPostChars)
+    const totalCharsText = `${totalChars}/${maxChars || maxPostChars}`
 
     // plugins
     const toolbarOptions = { theme: { buttonStyles: styles, toolbarStyles: styles } }
@@ -126,11 +127,12 @@ function CommentInput(props: {
     }
 
     function onEditorStateChange(newState) {
+        setErrors([])
         setEditorState(newState)
         const content = newState.getCurrentContent()
         const plainText = content.getPlainText()
         const rawDraft = convertToRaw(content)
-        setCharacterLength(plainText.length)
+        setTotalChars(plainText.length)
         // extract urls
         const extractedLinks = extractLinks(plainText)
         if (extractedLinks) setRawUrls(extractedLinks.map((link) => link.url))
@@ -161,8 +163,10 @@ function CommentInput(props: {
         if (input && input.files && input.files.length) {
             for (let i = 0; i < input.files.length; i += 1) {
                 const fileType = input.files[i].type.split('/')[1]
+                // images
                 if (allowedImageTypes.includes(`.${fileType}`)) {
-                    if (input.files[i].size > imageMBLimit * 1024 * 1024) setImageSizeError(true)
+                    const tooLarge = input.files[i].size > imageMBLimit * 1024 * 1024
+                    if (tooLarge) setErrors([`Max image size: ${imageMBLimit} MBs`])
                     else {
                         const newImage = {
                             id: uuidv4(),
@@ -174,8 +178,10 @@ function CommentInput(props: {
                         setImages((oldImages) => [...oldImages, newImage])
                     }
                 }
+                // audio
                 if (allowedAudioTypes.includes(`.${fileType}`)) {
-                    if (input.files[i].size > audioMBLimit * 1024 * 1024) setAudioSizeError(true)
+                    const tooLarge = input.files[i].size > audioMBLimit * 1024 * 1024
+                    if (tooLarge) setErrors([`Max audio size: ${audioMBLimit} MBs`])
                     else {
                         const newAudio = {
                             id: uuidv4(),
@@ -196,12 +202,12 @@ function CommentInput(props: {
     }
 
     function removeImage(id) {
-        setTotalUploadSizeError(false)
+        setErrors([])
         setImages(images.filter((image) => image.id !== id))
     }
 
     function removeAudio(id) {
-        setTotalUploadSizeError(false)
+        setErrors([])
         setAudios(audios.filter((audio) => audio.id !== id))
     }
 
@@ -275,36 +281,56 @@ function CommentInput(props: {
     // add total upload size value during validation
     // add has data check function
 
-    function save() {
-        // structure data
+    function findText() {
         const contentState = editorState.getCurrentContent()
         const rawDraft = convertToRaw(contentState)
         const text = JSON.stringify(rawDraft)
-        const data = {
+        return totalChars ? text : null
+    }
+
+    function findMediaTypes(post) {
+        const mediaTypes = [] as string[]
+        if (post.title || post.text) mediaTypes.push('text')
+        if (post.urls.length) mediaTypes.push('url')
+        if (post.images.length) mediaTypes.push('image')
+        if (post.audios.length) mediaTypes.push('audio')
+        return mediaTypes.join(',')
+    }
+
+    function saveDisabled() {
+        const noContent = !totalChars && !urls.length && !images.length && !audios.length
+        const urlsLoading = urls.find((u) => u.loading)
+        return noContent || urlsLoading || overMaxChars
+    }
+
+    function save() {
+        // structure data
+        const { id, handle, name, flagImagePath } = accountData
+        const post = {
+            Creator: { id, handle, name, flagImagePath },
             id: inputId,
-            // todo: mediaTypes
-            text: findDraftLength(text) ? text : null,
-            Creator: {
-                id: accountData.id,
-                handle: accountData.handle,
-                name: accountData.name,
-                flagImagePath: accountData.flagImagePath,
-            },
-            Reactions: [],
-            // not present in live structure:
+            text: findText(),
+            mentions: mentions.map((m) => m.id),
+            urls,
             images,
             audios,
-            // todo: add urls w/metadata & mentions
+        } as any
+        post.mediaTypes = findMediaTypes(post)
+        post.searchableText = findSearchableText(post)
+        const validation = validatePost(post, { maxChars })
+        if (validation.errors.length) setErrors(validation.errors)
+        else {
+            // return or upload post
+            post.totalSize = validation.totalSize
+            onSave(post)
+            // reset data
+            const newContentState = ContentState.createFromText('')
+            const newEditorState = EditorState.createWithContent(newContentState)
+            setEditorState(newEditorState)
+            setTotalChars(newEditorState.getCurrentContent().getPlainText().length)
+            setImages([])
+            setAudios([])
         }
-        // todo: run validation
-        onSave(data)
-        // reset data
-        const newContentState = ContentState.createFromText('')
-        const newEditorState = EditorState.createWithContent(newContentState)
-        setEditorState(newEditorState)
-        setCharacterLength(newEditorState.getCurrentContent().getPlainText().length)
-        setImages([])
-        setAudios([])
     }
 
     useEffect(() => {
@@ -315,7 +341,7 @@ function CommentInput(props: {
         const contentState = ContentState.createFromText('')
         const newEditorState = EditorState.createWithContent(contentState)
         setEditorState(newEditorState)
-        setCharacterLength(newEditorState.getCurrentContent().getPlainText().length)
+        setTotalChars(newEditorState.getCurrentContent().getPlainText().length)
         // set up click outside handler
         document.addEventListener('mousedown', handleClickOutside)
         return () => document.removeEventListener('mousedown', handleClickOutside)
@@ -337,20 +363,26 @@ function CommentInput(props: {
                             setUrls((us) => [...us, { url, loading: true }])
                             // scrape url data
                             const { data } = await scrapeUrl(url)
-                            // update urls array
-                            setUrls((us) => {
-                                const newUrls = [...us.filter((u) => u.url !== url)]
-                                const newUrl = { url, loading: false, ...data }
-                                newUrl.searchableText = findUrlSearchableText(newUrl)
-                                newUrls.push(newUrl)
-                                return newUrls
-                            })
+                            // todo: handle error
+                            if (data) {
+                                // update urls array
+                                setUrls((us) => {
+                                    const newUrls = [...us.filter((u) => u.url !== url)]
+                                    newUrls.push({ url, loading: false, ...data })
+                                    return newUrls
+                                })
+                            }
                         }
                     })
                 }
             }, 500)
         }
     }, [rawUrls])
+
+    // focus on errors
+    useEffect(() => {
+        if (errors.length) setFocused(true)
+    }, [errors])
 
     return (
         <div ref={wrapperRef} className={`${styles.wrapper} ${className}`} style={style}>
@@ -414,7 +446,7 @@ function CommentInput(props: {
                                 color='blue'
                                 size='medium-large'
                                 text='Add'
-                                // disabled={!findDraftLength(text)}
+                                disabled={saveDisabled()}
                                 loading={saveLoading}
                                 onClick={save}
                             />
@@ -440,11 +472,9 @@ function CommentInput(props: {
                     </Toolbar>
                 </Row>
             </Column>
-            <Row className={`${styles.characters} ${focused && styles.visible}`}>
-                <p className={maxChars && characterLength > maxChars ? styles.error : ''}>
-                    {characterLength}
-                    {maxChars ? `/${maxChars}` : ''} Chars
-                </p>
+            <Row spaceBetween className={`${styles.footer} ${focused && styles.visible}`}>
+                {errors.length > 0 ? <p className={styles.error}>{errors[0]}</p> : <p />}
+                <p className={overMaxChars ? styles.error : ''}>{totalCharsText}</p>
             </Row>
             {/* todo: eventually replaces with media sections like on PostCard */}
             {urls.map((urlData) => (
