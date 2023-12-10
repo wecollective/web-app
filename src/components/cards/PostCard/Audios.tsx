@@ -50,7 +50,7 @@ function Audios(props: { postId: number; style?: any }): JSX.Element {
                     <AudioCard
                         id={block.id}
                         url={block.Audio.url}
-                        staticBars={400}
+                        staticBars={250}
                         location='post'
                         style={{ height: 200, width: '100%' }}
                     />

@@ -179,6 +179,7 @@ function CommentInput(props: {
                             },
                         }
                         setImages((oldImages) => [...oldImages, newImage])
+                        setErrors([])
                     }
                 }
                 // audio
@@ -194,6 +195,7 @@ function CommentInput(props: {
                             },
                         }
                         setAudios((oldAudios) => [...oldAudios, newAudio])
+                        setErrors([])
                     }
                 }
             }
@@ -535,7 +537,7 @@ function CommentInput(props: {
                             <AudioCard
                                 id={audio.id}
                                 url={audio.Audio.url}
-                                staticBars={400}
+                                staticBars={250}
                                 location='new-post'
                                 style={{ height: 100 }}
                             />

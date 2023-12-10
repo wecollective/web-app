@@ -27,16 +27,19 @@ function AudioCard(props: {
     const [sliderPercent, setSliderPercent] = useState(0)
     const [bufferPercent, setBufferPercent] = useState(0)
     const [thumbOffset, setThumbOffset] = useState(0)
-    const audioElementId = `post-audio-${location}-${id}-${index}`
+    const audioId = `post-audio-${location}-${id}-${index}`
+    let height = '100%' as any
+    if (location === 'bead-card') height = '70%'
+    if (location === 'gbg-room') height = 80
 
     function toggleAudio() {
         // console.log('toggleAudio')
-        const audio = d3.select(`#${audioElementId}`).node()
+        const audio = d3.select(`#${audioId}`).node()
         if (audio) {
             // // load audio if not loaded
             // if (!audioLoaded) {
             //     console.log('add src and load audio')
-            //     // const source = d3.select(`#${audioElementId}-source`).node()
+            //     // const source = d3.select(`#${audioId}-source`).node()
             //     // source.src = url
             //     audio.load()
             //     // d3.select(audio).on('load')
@@ -63,7 +66,7 @@ function AudioCard(props: {
     }
 
     function updateSlider(e) {
-        const audio = d3.select(`#${audioElementId}`).node()
+        const audio = d3.select(`#${audioId}`).node()
         if (audio) {
             setSliderPercent(e.target.value)
             updateThumbOffset(e.target.value)
@@ -86,11 +89,11 @@ function AudioCard(props: {
     useEffect(() => {
         // console.log('AudioTimeSlider useffect 2')
         // console.log('navigator.userAgent: ', navigator.userAgent)
-        const audio = d3.select(`#${audioElementId}`)
+        const audio = d3.select(`#${audioId}`)
         if (audio.node()) {
             // audio.
-            // document.body.addEventListener(`touchstart.${audioElementId}`, () => {
-            //     console.log(`touchstart.${audioElementId}`)
+            // document.body.addEventListener(`touchstart.${audioId}`, () => {
+            //     console.log(`touchstart.${audioId}`)
             //     // if (!audioLoaded) {
             //     //     console.log('touchstart: audio.load()')
             //     //     setAudioLoaded(true)
@@ -127,35 +130,29 @@ function AudioCard(props: {
         }
     }, [])
 
+    console.log(location)
+
     return (
         <Column style={{ ...style, position: 'relative' }}>
-            {/* {remove && (
-                <CloseButton
-                    size={20}
-                    onClick={remove}
-                    style={{ position: 'absolute', top: 0, right: 0, zIndex: 5 }}
+            <Column centerY style={{ height: 'calc(100% - 30px)', marginBottom: 10 }}>
+                <AudioVisualiser
+                    audioId={audioId}
+                    audioURL={url}
+                    audioPlaying={audioPlaying}
+                    staticBars={staticBars}
+                    staticColor={colors.audioVisualiserStatic}
+                    dynamicBars={160}
+                    dynamicColor={colors.audioVisualiserDynamic}
+                    style={{ height }}
                 />
-            )} */}
-            <AudioVisualiser
-                audioElementId={audioElementId}
-                audioURL={url}
-                audioPlaying={audioPlaying}
-                staticBars={staticBars}
-                staticColor={colors.audioVisualiserStatic}
-                dynamicBars={160}
-                dynamicColor={colors.audioVisualiserDynamic}
-                style={{
-                    height: location === 'gbg-room' ? 80 : 'calc(100% - 40px)',
-                    marginBottom: 10,
-                }}
-            />
-            <Row centerY>
+            </Column>
+            <Row centerY style={{ height: 30 }}>
                 <button
                     className={styles.playButton}
                     type='button'
                     aria-label='toggle-audio'
                     onClick={toggleAudio}
-                    style={{ position: 'absolute' }}
+                    // style={{ position: 'absolute' }}
                 >
                     {audioPlaying ? <PauseIcon /> : <PlayIcon />}
                 </button>
@@ -181,7 +178,7 @@ function AudioCard(props: {
                         <p>{formatTimeMMSS(duration)}</p>
                     </Row>
                     <audio
-                        id={audioElementId}
+                        id={audioId}
                         onLoadedData={onLoadedData}
                         onTimeUpdate={onTimeUpdate}
                         crossOrigin='anonymous'
@@ -192,14 +189,6 @@ function AudioCard(props: {
                         <track kind='captions' />
                     </audio>
                 </Column>
-                {/* <AudioTimeSlider
-                    audioElementId={`post-audio-${location}-${id}-${index}`}
-                    audioURL={url}
-                    location={location}
-                    onPlay={() => setAudioPlaying(true)}
-                    onPause={() => setAudioPlaying(false)}
-                    onEnded={onEnded}
-                /> */}
             </Row>
         </Column>
     )

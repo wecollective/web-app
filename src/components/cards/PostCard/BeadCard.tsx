@@ -293,8 +293,9 @@ function BeadCard(props: {
                                         audioBlocks[0].Audio.url ||
                                         URL.createObjectURL(audioBlocks[0].Audio.file)
                                     }
-                                    staticBars={200}
-                                    location={location}
+                                    staticBars={110}
+                                    // location={location}
+                                    location='bead-card'
                                     style={{ width: '100%', height: '100%' }}
                                 />
                             )}
