@@ -28,47 +28,75 @@ function AudioVisualiser(props: {
     const spacing = 1.5
     // const rendering = useRef(false)
     // const renderIndex = useRef(0)
-    const offlineAudioContext = useRef<OfflineAudioContext | null>(null)
+    // const offlineAudioContext = useRef<OfflineAudioContext | null>(null)
+    const audioContext1 = useRef<AudioContext | null>(null)
     const audioContext = useRef<AudioContext | null>(null)
     const audioSource = useRef<MediaElementAudioSourceNode | null>(null)
 
-    function drawStaticVisualisation(buffer) {
+    function drawStaticVisualisation(audioBuffer) {
         const visualiser = d3.select(`#${audioElementId}-visualiser`)
         if (visualiser.node()) {
-            const { height, width } = visualiser.node().getBoundingClientRect()
-            console.log(999, height, width)
-            const maxBars = 2000
-            const totalBars = Math.min(staticBars, maxBars)
-            const leftChannel = buffer.getChannelData(0)
-            const barGap = Math.floor((leftChannel.length / totalBars) * spacing)
-            const barWidth = width / totalBars
+            // const { height, width } = visualiser.node().getBoundingClientRect()
+            // const maxBars = 2000
+            // const totalBars = Math.min(staticBars, maxBars)
+            // const leftChannel = buffer.getChannelData(0)
+            // const barGap = Math.floor((leftChannel.length / totalBars) * spacing)
+            // const barWidth = width / totalBars
 
+            // // find range
+            // let maxValue = 0
+            // for (let i = 0; i <= totalBars; i += 1) {
+            //     const barIndex = Math.floor(barGap * i)
+            //     const initialValue = leftChannel[barIndex] || 0
+            //     const usedValue = initialValue > 0 ? initialValue : -initialValue
+            //     if (usedValue > maxValue) maxValue = usedValue
+            // }
+
+            const rawData = audioBuffer.getChannelData(0) // We only need to work with one channel of data
+            // const samples = 400 // Number of samples we want to have in our final data set
+            const maxBars = 2000
+            const samples = 350 // Math.min(staticBars, maxBars)
+            const blockSize = Math.floor(rawData.length / samples) // the number of samples in each subdivision
+            const filteredData = [] as number[]
+            for (let i = 0; i < samples; i += 1) {
+                const blockStart = blockSize * i // the location of the first sample in the block
+                let sum = 0
+                for (let j = 0; j < blockSize; j += 1) {
+                    sum += Math.abs(rawData[blockStart + j]) // find the sum of all the samples in the block
+                }
+                filteredData.push(sum / blockSize) // divide the sum by the block size to get the average
+            }
+            console.log('normalizedData: ', filteredData)
+            // normalise data
+            // const multiplier = Math.pow(Math.max(...filteredData), -1);
+            const multiplier = Math.max(...filteredData) ** -1
+            const normalizedData = filteredData.map((n) => n * multiplier)
+
+            console.log('normalizedData: ', normalizedData)
+
+            // set up svg
             const oldSVG = d3.select(`#${audioElementId}-static-visualiser`).select('svg')
             if (oldSVG.node()) oldSVG.remove()
-
+            const { height, width } = visualiser.node().getBoundingClientRect()
             const staticVisualiser = d3
                 .select(`#${audioElementId}-static-visualiser`)
                 .append('svg')
                 .attr('width', width)
                 .attr('height', height)
 
-            // find range
-            let maxValue = 0
-            for (let i = 0; i <= totalBars; i += 1) {
-                const barIndex = Math.floor(barGap * i)
-                const initialValue = leftChannel[barIndex] || 0
-                const usedValue = initialValue > 0 ? initialValue : -initialValue
-                if (usedValue > maxValue) maxValue = usedValue
-            }
-
             // draw lines
-            for (let i = 0; i <= totalBars; i += 1) {
-                const barIndex = Math.floor(barGap * i)
-                const initialValue = leftChannel[barIndex] || 0
-                const usedValue = initialValue > 0 ? initialValue : -initialValue
-                const barHeight = usedValue * (height / maxValue)
-                const x = i * barWidth * spacing
+            const barWidth = width / normalizedData.length
+            for (let i = 0; i < normalizedData.length; i += 1) {
+                const x = barWidth * i
+                let barHeight = normalizedData[i] * height
                 const y = height / 2 - barHeight / 2
+                if (barHeight < 0) {
+                    barHeight = 0
+                }
+                // else if (height2 > height / 2) {
+                //     height2 = height2 > height / 2
+                // }
+                // drawLineSegment(ctx, x, height, width, (i + 1) % 2)
                 staticVisualiser
                     .append('rect')
                     .attr('id', `bar-${i}`)
@@ -79,88 +107,112 @@ function AudioVisualiser(props: {
                     .attr('height', barHeight)
                     .attr('fill', staticColor)
             }
+            // }
+
+            // // draw lines
+            // for (let i = 0; i <= totalBars; i += 1) {
+            //     const barIndex = Math.floor(barGap * i)
+            //     const initialValue = leftChannel[barIndex] || 0
+            //     const usedValue = initialValue > 0 ? initialValue : -initialValue
+            //     const barHeight = usedValue * (height / maxValue)
+            //     const x = i * barWidth * spacing
+            //     const y = height / 2 - barHeight / 2
+            //     staticVisualiser
+            //         .append('rect')
+            //         .attr('id', `bar-${i}`)
+            //         .attr('x', x)
+            //         .attr('y', y)
+            //         // .attr('rx', 2)
+            //         .attr('width', barWidth)
+            //         .attr('height', barHeight)
+            //         .attr('fill', staticColor)
+            // }
         }
     }
 
-    function loadAudioForStaticVisualisation() {
-        // fetch(audioURL)
-        //     .then((response) => response.arrayBuffer())
-        //     .then((arrayBuffer) => audioContext.decodeAudioData(arrayBuffer))
-        //     .then((audioBuffer) => visualize(audioBuffer))
-        const req = new XMLHttpRequest()
-        req.open('GET', audioURL, true)
-        req.responseType = 'arraybuffer'
-        req.onreadystatechange = () => {
-            if (req.readyState === 4) {
-                offlineAudioContext.current = new OfflineAudioContext(1, 1, 8000)
-                offlineAudioContext.current.decodeAudioData(
-                    req.response,
-                    (buffer) => drawStaticVisualisation(buffer),
-                    () => null
-                )
-            }
-        }
-        req.send()
-    }
-
-    useEffect(() => {
-        loadAudioForStaticVisualisation()
-        // const audio = d3.select(`#${audioElementId}`)
-        // if (audio.node()) {
-        //     const { height, width } = d3
-        //         .select(`#${audioElementId}-visualiser`)
-        //         .node()
-        //         .getBoundingClientRect()
-
-        //     audio.on('play.visualiser', () => {
-        //         if (ready.current) {
-        //             console.log('startVisualiser')
-        //             const totalBars = Math.min(dynamicBars, 255)
-        //             audioContext.current = audioContext.current || new AudioContext()
-        //             audioSource.current =
-        //                 audioSource.current ||
-        //                 audioContext.current.createMediaElementSource(audio.node())
-        //             const analyser = audioContext.current.createAnalyser()
-        //             audioSource.current.connect(analyser)
-        //             audioSource.current.connect(audioContext.current.destination)
-        //             const frequencyData = new Uint8Array(analyser.frequencyBinCount)
-        //             analyser.getByteFrequencyData(frequencyData)
-
-        //             const oldSVG = d3.select(`#${audioElementId}-visualiser`).select('svg')
-        //             if (oldSVG.node()) oldSVG.remove()
-
-        //             const svg = d3
-        //                 .select(`#${audioElementId}-visualiser`)
-        //                 .append('svg')
-        //                 .attr('width', '100%')
-        //                 .attr('height', '100%')
-
-        //             for (let i = 0; i < totalBars; i += 1) {
-        //                 svg.append('rect')
-        //                     .attr('id', `bar-${i}`)
-        //                     .attr('x', (width / totalBars) * i)
-        //                     .attr('y', height / 2)
-        //                     .attr('width', width / totalBars)
-        //                     .attr('fill', dynamicColor)
-        //                     .style('opacity', 1)
-        //             }
-
-        //             const renderVisualizer = () => {
-        //                 analyser.getByteFrequencyData(frequencyData)
-        //                 for (let i = 0; i < totalBars; i += 1) {
-        //                     const barIndex = Math.floor((255 / totalBars) * i)
-        //                     const barHeight = (height / 255) * frequencyData[barIndex] // 0 to 255
-        //                     svg.select(`#bar-${i}`)
-        //                         .attr('height', barHeight)
-        //                         .attr('y', height / 2 - barHeight / 2)
-        //                 }
-        //                 window.requestAnimationFrame(renderVisualizer)
-        //             }
-        //             renderVisualizer()
-        //         }
-        //     })
+    function loadAudio() {
+        fetch(audioURL).then(async (response) => {
+            audioContext1.current = new AudioContext()
+            const arrayBuffer = await response.arrayBuffer()
+            const audioBuffer = await audioContext1.current.decodeAudioData(arrayBuffer)
+            drawStaticVisualisation(audioBuffer)
+        })
+        // const req = new XMLHttpRequest()
+        // req.open('GET', audioURL, true)
+        // req.responseType = 'arraybuffer'
+        // req.onreadystatechange = () => {
+        //     if (req.readyState === 4) {
+        //         offlineAudioContext.current = new OfflineAudioContext(1, 1, 8000)
+        //         offlineAudioContext.current.decodeAudioData(
+        //             req.response,
+        //             (buffer) => drawStaticVisualisation(buffer),
+        //             () => null
+        //         )
+        //     }
         // }
-    }, [])
+        // req.send()
+    }
+
+    // useEffect(() => {
+    //     loadAudioForStaticVisualisation()
+    //     // const audio = d3.select(`#${audioElementId}`)
+    //     // if (audio.node()) {
+    //     //     const { height, width } = d3
+    //     //         .select(`#${audioElementId}-visualiser`)
+    //     //         .node()
+    //     //         .getBoundingClientRect()
+
+    //     //     audio.on('play.visualiser', () => {
+    //     //         if (ready.current) {
+    //     //             console.log('startVisualiser')
+    //     //             const totalBars = Math.min(dynamicBars, 255)
+    //     //             audioContext.current = audioContext.current || new AudioContext()
+    //     //             audioSource.current =
+    //     //                 audioSource.current ||
+    //     //                 audioContext.current.createMediaElementSource(audio.node())
+    //     //             const analyser = audioContext.current.createAnalyser()
+    //     //             audioSource.current.connect(analyser)
+    //     //             audioSource.current.connect(audioContext.current.destination)
+    //     //             const frequencyData = new Uint8Array(analyser.frequencyBinCount)
+    //     //             analyser.getByteFrequencyData(frequencyData)
+
+    //     //             const oldSVG = d3.select(`#${audioElementId}-visualiser`).select('svg')
+    //     //             if (oldSVG.node()) oldSVG.remove()
+
+    //     //             const svg = d3
+    //     //                 .select(`#${audioElementId}-visualiser`)
+    //     //                 .append('svg')
+    //     //                 .attr('width', '100%')
+    //     //                 .attr('height', '100%')
+
+    //     //             for (let i = 0; i < totalBars; i += 1) {
+    //     //                 svg.append('rect')
+    //     //                     .attr('id', `bar-${i}`)
+    //     //                     .attr('x', (width / totalBars) * i)
+    //     //                     .attr('y', height / 2)
+    //     //                     .attr('width', width / totalBars)
+    //     //                     .attr('fill', dynamicColor)
+    //     //                     .style('opacity', 1)
+    //     //             }
+
+    //     //             const renderVisualizer = () => {
+    //     //                 analyser.getByteFrequencyData(frequencyData)
+    //     //                 for (let i = 0; i < totalBars; i += 1) {
+    //     //                     const barIndex = Math.floor((255 / totalBars) * i)
+    //     //                     const barHeight = (height / 255) * frequencyData[barIndex] // 0 to 255
+    //     //                     svg.select(`#bar-${i}`)
+    //     //                         .attr('height', barHeight)
+    //     //                         .attr('y', height / 2 - barHeight / 2)
+    //     //                 }
+    //     //                 window.requestAnimationFrame(renderVisualizer)
+    //     //             }
+    //     //             renderVisualizer()
+    //     //         }
+    //     //     })
+    //     // }
+    // }, [])
+
+    useEffect(() => loadAudio(), [])
 
     useEffect(() => {
         if (audioPlaying) {

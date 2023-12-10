@@ -155,6 +155,7 @@ function AudioCard(props: {
                     type='button'
                     aria-label='toggle-audio'
                     onClick={toggleAudio}
+                    style={{ position: 'absolute' }}
                 >
                     {audioPlaying ? <PauseIcon /> : <PlayIcon />}
                 </button>
