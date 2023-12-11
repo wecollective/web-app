@@ -21,17 +21,20 @@ function Space(props: {
 }): JSX.Element {
     // recursive component used to render space trees in the NavigationList component below
     const { space, type, expand, getNextChildren, onLocationChange } = props
-    const {
-        id,
-        privacy,
-        spaceAccess,
-        children,
-        totalChildren,
-        expanded,
-        loading,
-        nextChildrenLoading,
-    } = space
-    const showExpander = totalChildren > 0 && (privacy === 'public' || spaceAccess === 'active')
+    const { id, privacy, children, totalChildren, expanded, loading, nextChildrenLoading } = space
+    const [showExpander, setShowExpander] = useState(totalChildren > 0 && privacy === 'public')
+    // check access
+    // todo: see if there's a way to prevent this from firing when the array is updated
+    useEffect(() => {
+        if (type === 'child' && privacy !== 'public') {
+            const cookies = new Cookies()
+            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+            axios
+                .get(`${config.apiURL}/space-access?spaceId=${id}`, options)
+                .then((res) => setShowExpander(res.data === 'active'))
+                .catch((error) => console.log(error))
+        }
+    }, [])
     return (
         <Column>
             <Row centerY style={{ marginBottom: 10 }}>
