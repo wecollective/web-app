@@ -80,15 +80,14 @@ function PostCard(props: {
         totalRatings,
         totalReposts,
         totalLinks,
-        accountLike,
-        accountComment,
-        accountLink,
-        accountRating,
-        accountRepost,
         sourcePostId,
         Creator,
         DirectSpaces,
+        Event,
     } = postData
+    const [buttonsDisabled, setButtonsDisabled] = useState(true)
+    const [accountReactions, setAccountReactions] = useState<any>({})
+    const { liked, rated, reposted, commented, linked } = accountReactions
     const [likeLoading, setLikeLoading] = useState(false)
     const [draggable, setDraggable] = useState(true)
     const [topicImage, setTopicImage] = useState('')
@@ -103,11 +102,10 @@ function PostCard(props: {
     const mobileView = document.documentElement.clientWidth < 900
     const cookies = new Cookies()
     const isOwnPost = accountData && Creator && accountData.id === Creator.id
-    const showFooter = true // location !== 'link-modal'
+    const showFooter = location !== 'link-modal'
     const isMod =
         location.includes('space') && spaceData.Moderators.find((m) => m.id === accountData.id)
     const showDropDown = location !== 'preview' && (isOwnPost || isMod)
-
     const history = useNavigate()
     const urlParams = Object.fromEntries(new URLSearchParams(useLocation().search))
     const params = { ...postFilters }
@@ -115,26 +113,50 @@ function PostCard(props: {
         params[param] = urlParams[param]
     })
 
+    function getAccountReactions() {
+        // only request values if reactions present
+        const types = [] as string[]
+        if (totalLikes) types.push('like')
+        if (totalRatings) types.push('rating')
+        if (totalReposts) types.push('repost')
+        if (totalComments) types.push('comment')
+        if (totalLinks) types.push('link')
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .get(`${config.apiURL}/account-reactions?postId=${id}&types=${types.join('')}`, options)
+            .then((res) => {
+                setAccountReactions(res.data)
+                setButtonsDisabled(false)
+            })
+            .catch((error) => console.log(error))
+    }
+
+    function addDragEvents() {
+        const postCard = document.getElementById(`post-${id}`)
+        if (postCard) {
+            postCard.addEventListener('dragstart', (e) => {
+                postCard.classList.add(styles.dragging)
+                updateDragItem({ type: 'post', data: postData })
+                const dragItem = document.getElementById('drag-item')
+                e.dataTransfer?.setDragImage(dragItem!, 50, 50)
+            })
+            postCard.addEventListener('dragend', () => {
+                postCard.classList.remove(styles.dragging)
+            })
+        }
+    }
+
     function toggleLike() {
         setLikeLoading(true)
-        const addingLike = !postData.accountLike
-        const accessToken = cookies.get('accessToken')
-        if (loggedIn && accessToken) {
-            const data = { itemType: 'post', itemId: postData.id } as any
-            if (addingLike) {
-                data.accountHandle = accountData.handle
-                data.accountName = accountData.name
-                data.spaceId = window.location.pathname.includes('/s/') ? spaceData.id : null
-            }
-            const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
+        if (loggedIn) {
+            const data = { itemType: 'post', itemId: id } as any
+            if (!liked) data.spaceId = location.includes('space') ? spaceData.id : null
+            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
             axios
-                .post(`${config.apiURL}/${addingLike ? 'add' : 'remove'}-like`, data, authHeader)
+                .post(`${config.apiURL}/${liked ? 'remove' : 'add'}-like`, data, options)
                 .then(() => {
-                    setPostData({
-                        ...postData,
-                        totalLikes: postData.totalLikes + (addingLike ? 1 : -1),
-                        accountLike: addingLike,
-                    })
+                    setPostData({ ...postData, totalLikes: totalLikes + (liked ? -1 : 1) })
+                    setAccountReactions({ ...accountReactions, liked: !liked })
                     setLikeLoading(false)
                 })
                 .catch((error) => console.log(error))
@@ -155,23 +177,13 @@ function PostCard(props: {
         }
     }
 
+    useEffect(() => {
+        getAccountReactions()
+        addDragEvents()
+    }, [])
+
     // todo: remove this useEffect all together if everything handled from props...?
     useEffect(() => setPostData(post), [post])
-
-    useEffect(() => {
-        const postCard = document.getElementById(`post-${id}`)
-        if (postCard) {
-            postCard.addEventListener('dragstart', (e) => {
-                postCard.classList.add(styles.dragging)
-                updateDragItem({ type: 'post', data: postData })
-                const dragItem = document.getElementById('drag-item')
-                e.dataTransfer?.setDragImage(dragItem!, 50, 50)
-            })
-            postCard.addEventListener('dragend', () => {
-                postCard.classList.remove(styles.dragging)
-            })
-        }
-    }, [])
 
     return (
         <Column
@@ -300,9 +312,7 @@ function PostCard(props: {
                         )}
                     </div>
                 )}
-
-                {/* {todo: startTime && } */}
-                {postData.Event && (
+                {Event && (
                     <EventCard postData={postData} setPostData={setPostData} location={location} />
                 )}
                 {mediaTypes.includes('poll') && (
@@ -325,115 +335,105 @@ function PostCard(props: {
                 )}
             </Column>
             {showFooter && (
-                <Column className={styles.footer}>
-                    <Row spaceBetween centerY>
-                        <Row centerY wrap className={styles.reactions}>
-                            <Row
-                                centerY
-                                className={`${styles.like} ${
-                                    accountLike ? styles.highlighted : ''
-                                }`}
-                            >
-                                {likeLoading ? (
-                                    <LoadingWheel size={22} style={{ margin: '0 8px 0 7px' }} />
-                                ) : (
-                                    <button type='button' onClick={toggleLike}>
-                                        <LikeIcon />
-                                    </button>
-                                )}
-                                <button type='button' onClick={() => setLikeModalOpen(true)}>
-                                    <p>{totalLikes}</p>
+                <Row spaceBetween className={styles.footer}>
+                    <Row centerY wrap className={styles.reactions}>
+                        <Row centerY className={`${styles.like} ${liked && styles.highlighted}`}>
+                            {likeLoading ? (
+                                <LoadingWheel size={22} style={{ margin: '0 8px 0 7px' }} />
+                            ) : (
+                                <button
+                                    disabled={buttonsDisabled}
+                                    type='button'
+                                    onClick={toggleLike}
+                                >
+                                    <LikeIcon />
                                 </button>
-                            </Row>
-                            <button
-                                type='button'
-                                className={`${styles.comment} ${
-                                    accountComment ? styles.highlighted : ''
-                                }`}
-                                onClick={() => {
-                                    if (loggedIn || totalComments) setCommentsOpen(!commentsOpen)
-                                    else {
-                                        setAlertMessage('Log in to comment on posts')
-                                        setAlertModalOpen(true)
-                                    }
-                                }}
-                            >
-                                <Column centerX centerY>
-                                    <CommentIcon />
-                                </Column>
-                                <p>{totalComments}</p>
-                            </button>
-                            <button
-                                type='button'
-                                className={`${styles.link} ${
-                                    accountLink ? styles.highlighted : ''
-                                }`}
-                                onClick={() => history(`/linkmap?item=post&id=${id}`)}
-                            >
-                                <Column centerX centerY>
-                                    <NeuronIcon />
-                                </Column>
-                                <p>{totalLinks}</p>
-                            </button>
-                            <button
-                                type='button'
-                                className={`${styles.rating} ${
-                                    accountRating ? styles.highlighted : ''
-                                }`}
-                                onClick={() => setRatingModalOpen(true)}
-                            >
-                                <Column centerX centerY>
-                                    <ZapIcon />
-                                </Column>
-                                <p>{totalRatings}</p>
-                            </button>
-                            <button
-                                type='button'
-                                className={`${styles.repost} ${
-                                    accountRepost ? styles.highlighted : ''
-                                }`}
-                                onClick={() => setRepostModalOpen(true)}
-                            >
-                                <Column centerX centerY>
-                                    <RepostIcon />
-                                </Column>
-                                <p>{totalReposts}</p>
+                            )}
+                            <button type='button' onClick={() => setLikeModalOpen(true)}>
+                                <p>{totalLikes}</p>
                             </button>
                         </Row>
-                        {/* Hide link post button on Pronoia posts */}
-                        {!DirectSpaces.find((s) => s.id === 616) && (
-                            <button type='button' className={styles.linkPost} onClick={linkNewPost}>
-                                <Column centerX centerY>
-                                    <SynapseIcon />
-                                </Column>
-                            </button>
-                        )}
+                        <button
+                            type='button'
+                            className={`${styles.comment} ${commented && styles.highlighted}`}
+                            disabled={buttonsDisabled}
+                            onClick={() => {
+                                if (loggedIn || totalComments) setCommentsOpen(!commentsOpen)
+                                else {
+                                    setAlertMessage('Log in to comment on posts')
+                                    setAlertModalOpen(true)
+                                }
+                            }}
+                        >
+                            <Column centerX centerY>
+                                <CommentIcon />
+                            </Column>
+                            <p>{totalComments}</p>
+                        </button>
+                        <button
+                            type='button'
+                            className={`${styles.link} ${linked ? styles.highlighted : ''}`}
+                            disabled={buttonsDisabled}
+                            onClick={() => history(`/linkmap?item=post&id=${id}`)}
+                        >
+                            <Column centerX centerY>
+                                <NeuronIcon />
+                            </Column>
+                            <p>{totalLinks}</p>
+                        </button>
+                        <button
+                            type='button'
+                            className={`${styles.rating} ${rated && styles.highlighted}`}
+                            disabled={buttonsDisabled}
+                            onClick={() => setRatingModalOpen(true)}
+                        >
+                            <Column centerX centerY>
+                                <ZapIcon />
+                            </Column>
+                            <p>{totalRatings}</p>
+                        </button>
+                        <button
+                            type='button'
+                            className={`${styles.repost} ${reposted && styles.highlighted}`}
+                            disabled={buttonsDisabled}
+                            onClick={() => setRepostModalOpen(true)}
+                        >
+                            <Column centerX centerY>
+                                <RepostIcon />
+                            </Column>
+                            <p>{totalReposts}</p>
+                        </button>
                     </Row>
-                    {commentsOpen && (
-                        <Comments
-                            postId={postData.id}
-                            location={location}
-                            totalComments={totalComments}
-                            incrementTotalComments={(value) =>
-                                setPostData({ ...postData, totalComments: totalComments + value })
-                            }
-                            setPostDraggable={setDraggable}
-                            style={{ marginTop: 10 }}
-                        />
+                    {/* Hide link post button on Pronoia posts */}
+                    {!DirectSpaces.find((s) => s.id === 616) && (
+                        <button type='button' className={styles.linkPost} onClick={linkNewPost}>
+                            <Column centerX centerY>
+                                <SynapseIcon />
+                            </Column>
+                        </button>
                     )}
-                </Column>
+                </Row>
+            )}
+            {commentsOpen && (
+                <Comments
+                    post={post}
+                    location={location}
+                    totalComments={totalComments}
+                    incrementTotalComments={(value) =>
+                        setPostData({ ...postData, totalComments: totalComments + value })
+                    }
+                    setPostDraggable={setDraggable}
+                    style={{ margin: '10px -8px 0 -8px' }}
+                />
             )}
             {likeModalOpen && (
                 <LikeModal
                     itemType='post'
                     itemData={postData}
-                    updateItem={() =>
-                        setPostData({
-                            ...postData,
-                            totalLikes: totalLikes + (accountLike ? -1 : 1),
-                            accountLike: !accountLike,
-                        })
-                    }
+                    updateItem={() => {
+                        setPostData({ ...postData, totalLikes: totalLikes + (liked ? -1 : 1) })
+                        setAccountReactions({ ...accountReactions, liked: !liked })
+                    }}
                     close={() => setLikeModalOpen(false)}
                 />
             )}
@@ -449,11 +449,8 @@ function PostCard(props: {
                     itemType='post'
                     itemData={postData}
                     updateItem={() => {
-                        setPostData({
-                            ...postData,
-                            totalRatings: totalRatings + (accountRating ? -1 : 1),
-                            accountRating: !accountRating,
-                        })
+                        setPostData({ ...postData, totalRatings: totalRatings + (rated ? -1 : 1) })
+                        setAccountReactions({ ...accountReactions, rated: !rated })
                     }}
                     close={() => setRatingModalOpen(false)}
                 />
@@ -467,14 +464,14 @@ function PostCard(props: {
             )}
             {deletePostModalOpen && (
                 <DeletePostModal
-                    postId={postData.id}
+                    postId={id}
                     location={location}
                     close={() => setDeletePostModalOpen(false)}
                 />
             )}
             {removePostModalOpen && (
                 <RemovePostModal
-                    postId={postData.id}
+                    postId={id}
                     location={location}
                     close={() => setRemovePostModalOpen(false)}
                 />
