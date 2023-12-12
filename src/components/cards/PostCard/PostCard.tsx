@@ -131,6 +131,16 @@ function PostCard(props: {
             .catch((error) => console.log(error))
     }
 
+    function getAccountCommented() {
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .get(`${config.apiURL}/account-reactions?postId=${id}&types=comment`, options)
+            .then((res) =>
+                setAccountReactions({ ...accountReactions, commented: res.data.commented })
+            )
+            .catch((error) => console.log(error))
+    }
+
     function addDragEvents() {
         const postCard = document.getElementById(`post-${id}`)
         if (postCard) {
@@ -416,12 +426,13 @@ function PostCard(props: {
             )}
             {commentsOpen && (
                 <Comments
-                    post={post}
+                    postId={id}
                     location={location}
                     totalComments={totalComments}
-                    incrementTotalComments={(value) =>
+                    incrementTotalComments={(value) => {
                         setPostData({ ...postData, totalComments: totalComments + value })
-                    }
+                        getAccountCommented()
+                    }}
                     setPostDraggable={setDraggable}
                     style={{ margin: '10px -8px 0 -8px' }}
                 />
