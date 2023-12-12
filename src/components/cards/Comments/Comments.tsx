@@ -11,25 +11,16 @@ import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
-// todo: update for fractal nesting (create recursive search function if needed)
 function Comments(props: {
     postId: number
-    type?: string
     location: string
     totalComments: number
     incrementTotalComments: (value: number) => void
     setPostDraggable?: (payload: boolean) => void
     style?: any
 }): JSX.Element {
-    const {
-        postId,
-        type,
-        location,
-        totalComments,
-        incrementTotalComments,
-        setPostDraggable,
-        style,
-    } = props
+    const { postId, location, totalComments, incrementTotalComments, setPostDraggable, style } =
+        props
     const { accountData, loggedIn } = useContext(AccountContext)
     const [comments, setComments] = useState<any[]>([])
     const [loading, setLoading] = useState(false)
@@ -46,7 +37,7 @@ function Comments(props: {
         axios
             .get(`${config.apiURL}/post-comments?postId=${postId}`, options)
             .then((res) => {
-                // console.log(res.data)
+                console.log('post-comments: ', res.data)
                 setComments(res.data)
                 setLoading(false)
                 // if commentId in params, scroll to comment
@@ -60,15 +51,22 @@ function Comments(props: {
             .catch((error) => console.log(error))
     }
 
-    // todo: update
+    function findCommentById(children: any[], id: number) {
+        for (let i = 0; i < children.length; i += 1) {
+            if (children[i].id === id) return children[i]
+            const match = findCommentById(children[i].Comments, id)
+            if (match) return match
+        }
+        return null
+    }
+
     function addComment(comment) {
-        const { parentCommentId } = comment
-        const newComment = { ...comment, Creator: accountData, Comments: [] }
-        if (!parentCommentId) setComments([...comments, newComment])
+        const { parent, root } = comment.link
+        if (!root) setComments([...comments, comment])
         else {
             const newComments = [...comments]
-            const parentComment = newComments.find((c) => c.id === parentCommentId)
-            parentComment.Comments.push(newComment)
+            const parentComment = findCommentById(newComments, parent.id)
+            if (parentComment) parentComment.Comments.push(comment)
             setComments(newComments)
         }
         incrementTotalComments(1)
@@ -138,10 +136,10 @@ function Comments(props: {
             {loggedIn && (
                 <CommentInput
                     type='comment'
-                    preview={false}
                     placeholder='Comment...'
-                    onSave={(data) => console.log(data)}
-                    maxChars={5}
+                    parent={{ type: 'post', id: postId }}
+                    onSave={(newComment) => addComment(newComment)}
+                    maxChars={5000}
                     style={{ marginBottom: 15 }}
                 />
             )}
@@ -171,7 +169,6 @@ function Comments(props: {
 }
 
 Comments.defaultProps = {
-    type: null,
     style: null,
     setPostDraggable: null,
 }
