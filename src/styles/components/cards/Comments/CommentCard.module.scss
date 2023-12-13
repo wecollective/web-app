@@ -33,8 +33,17 @@
     }
 }
 
+.indentation {
+    width: 10px;
+    border-left: 2px dotted $grey2;
+    margin-left: 14px;
+    flex-shrink: 0;
+    z-index: 1;
+}
+
 .wrapper {
     position: relative;
+    // margin-top: 5px;
 
     &.linkMap {
         background-color: white;
@@ -44,23 +53,57 @@
         margin: 0;
     }
 
-    .padding {
-        position: absolute;
-        width: 60px;
-        height: 5px;
-        top: -5px;
-        left: 0;
-        background-color: white;
-        z-index: 2;
+    .userImage {
+        all: unset;
+        position: relative;
+        cursor: pointer;
+
+        .collapse {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: rgba($grey5, 0);
+            box-shadow: 0 0 0 2px white;
+            transition: all 0.5s;
+
+            > svg {
+                width: 18px;
+                height: 18px;
+                transform: rotate(90deg);
+                color: white;
+                opacity: 0;
+                transition: all 0.5s;
+                filter: drop-shadow(0 0 2px rgb(black, 0.4));
+            }
+
+            &.collapsed {
+                background-color: rgba($grey5, 0.6);
+                > svg {
+                    opacity: 1;
+                }
+            }
+
+            &:hover {
+                background-color: rgba($grey5, 0.8);
+                > svg {
+                    opacity: 1;
+                }
+            }
+        }
     }
 
     .line {
-        height: calc(100% - 25px);
+        height: calc(100% - 20px);
         width: 10px;
         border-left: 2px dotted $grey2;
         margin-left: 14px;
-        margin-top: 5px;
+        // margin-top: 5px;
         flex-shrink: 0;
+
+        &.blue {
+            border-left: 2px dotted rgba($blue5, 0.5); // $grey4
+        }
     }
 
     .content {

@@ -2,7 +2,6 @@ import CloseOnClickOutside from '@components/CloseOnClickOutside'
 import Column from '@components/Column'
 import FlagImage from '@components/FlagImage'
 import Row from '@components/Row'
-import ShowMoreLess from '@components/ShowMoreLess'
 import LoadingWheel from '@components/animations/LoadingWheel'
 import EditCommentModal from '@components/cards/Comments/EditCommentModal'
 import CommentInput from '@components/draft-js/CommentInput'
@@ -17,8 +16,10 @@ import config from '@src/Config'
 import { dateCreated, getTextSelection, timeSinceCreated } from '@src/Helpers'
 import styles from '@styles/components/cards/Comments/CommentCard.module.scss'
 import {
+    CollapseIcon,
     DeleteIcon,
     EditIcon,
+    ExpandIcon,
     EyeClosedIcon,
     LikeIcon,
     LinkIcon,
@@ -31,55 +32,59 @@ import { Link, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
 function CommentCard(props: {
+    depth: number
     comment: any
+    postId: number
     highlighted: boolean
     location: string
+    addComment: (comment: any) => void
     removeComment: (comment: any) => void
     editComment: (comment: any, newText: string) => void
-    updateCommentReactions: (commentId: number, reactionType: string, increment: boolean) => void
-    setPostDraggable?: (payload: boolean) => void
+    setPostDraggable?: (state: boolean) => void
 }): JSX.Element {
     const {
-        comment,
+        depth,
+        comment: commentData,
+        postId,
         highlighted,
         location,
+        addComment,
         removeComment,
-        editComment,
-        updateCommentReactions,
+        editComment, // todo: remove (done locally)
         setPostDraggable,
     } = props
-    const {
-        id,
-        itemId,
-        text,
-        state,
-        totalLikes,
-        totalReposts,
-        totalRatings,
-        totalLinks,
-        totalGlassBeadGames,
-        accountLike,
-        accountRating,
-        accountLink,
-        createdAt,
-        updatedAt,
-        Creator,
-    } = comment
 
     const { loggedIn, accountData, updateDragItem, setAlertMessage, setAlertModalOpen } =
         useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
+    const [comment, setComment] = useState(commentData)
+    const {
+        id,
+        rootId,
+        text,
+        state,
+        totalLikes,
+        totalRatings,
+        totalLinks,
+        createdAt,
+        updatedAt,
+        Creator,
+    } = comment
+    const [collapsed, setCollapsed] = useState(false)
+    const [buttonsDisabled, setButtonsDisabled] = useState(true)
+    const [accountReactions, setAccountReactions] = useState<any>({})
+    const { liked, rated, linked } = accountReactions
     const [draggable, setDraggable] = useState(true)
     const [menuOpen, setMenuOpen] = useState(false)
-    const [editCommentModalOpen, setEditCommentModalOpen] = useState(false)
-    const [deleteCommentModalOpen, setDeleteCommentModalOpen] = useState(false)
     const [likeLoading, setLikeLoading] = useState(false)
     const [likeModalOpen, setLikeModalOpen] = useState(false)
     const [ratingModalOpen, setRatingModalOpen] = useState(false)
+    const [editModalOpen, setEditModalOpen] = useState(false)
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false)
     const [showMutedComment, setShowMutedComment] = useState(false)
-    const [showModal, setShowModal] = useState(false)
-    const [transparent, setTransparent] = useState(true)
-    const [modalData, setModalData] = useState({
+    const [showUserModal, setShowUserModal] = useState(false)
+    const [userModalTransparent, setUserModalTransparent] = useState(true)
+    const [userModalData, setUserModalData] = useState({
         bio: '',
         coverImagePath: '',
         totalPosts: 0,
@@ -92,8 +97,29 @@ function CommentCard(props: {
     const isOwnComment = Creator.id === accountData.id
     const muted = accountData.id && accountData.mutedUsers.includes(Creator.id)
     const edited = createdAt !== updatedAt
-    const history = useNavigate()
     const cookies = new Cookies()
+    const history = useNavigate()
+
+    function getAccountReactions() {
+        // only request values if reactions present
+        const types = [] as string[]
+        if (totalLikes) types.push('like')
+        if (totalRatings) types.push('rating')
+        if (totalLinks) types.push('link')
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .get(
+                `${
+                    config.apiURL
+                }/account-reactions?postType=comment&postId=${id}&types=${types.join(',')}`,
+                options
+            )
+            .then((res) => {
+                setAccountReactions(res.data)
+                setButtonsDisabled(false)
+            })
+            .catch((error) => console.log(error))
+    }
 
     function toggleSelected() {
         setSelected(!selectedRef.current)
@@ -103,18 +129,17 @@ function CommentCard(props: {
     function toggleLike() {
         setLikeLoading(true)
         if (loggedIn) {
-            const data = { itemType: 'comment', itemId: id } as any
-            if (!accountLike) {
-                data.accountHandle = accountData.handle
-                data.accountName = accountData.name
-                data.parentItemId = itemId
+            const data = { type: 'comment', id } as any
+            if (!liked) {
+                data.rootId = rootId
                 data.spaceId = window.location.pathname.includes('/s/') ? spaceData.id : null
             }
             const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
             axios
-                .post(`${config.apiURL}/${accountLike ? 'remove' : 'add'}-like`, data, options)
+                .post(`${config.apiURL}/${liked ? 'remove' : 'add'}-like`, data, options)
                 .then(() => {
-                    updateCommentReactions(comment, 'Like', !accountLike)
+                    setComment({ ...comment, totalLikes: totalLikes + (liked ? -1 : 1) })
+                    setAccountReactions({ ...accountReactions, liked: !liked })
                     setLikeLoading(false)
                 })
                 .catch((error) => console.log(error))
@@ -125,35 +150,35 @@ function CommentCard(props: {
         }
     }
 
+    // todo: refactor? (used for user hover)
     function onMouseEnter() {
         // start hover delay
         mouseOver.current = true
         setTimeout(() => {
             if (mouseOver.current) {
-                setShowModal(true)
+                setShowUserModal(true)
                 setTimeout(() => {
-                    if (mouseOver.current) setTransparent(false)
+                    if (mouseOver.current) setUserModalTransparent(false)
                 }, 200)
             }
         }, hoverDelay)
         // get modal data
         axios
             .get(`${config.apiURL}/user-modal-data?userId=${Creator.id}`)
-            .then((res) => setModalData(res.data))
+            .then((res) => setUserModalData(res.data))
             .catch((error) => console.log(error))
     }
 
     function onMouseLeave() {
         mouseOver.current = false
-        setTransparent(true)
+        setUserModalTransparent(true)
         setTimeout(() => {
-            if (!mouseOver.current) setShowModal(false)
+            if (!mouseOver.current) setShowUserModal(false)
         }, hoverDelay)
     }
 
-    useEffect(() => {
+    function addDragEvents() {
         const commentCard = document.getElementById(`comment-${id}`)
-        const commentText = document.getElementById(`comment-text-${comment.id}`)
         if (commentCard) {
             commentCard.addEventListener('dragstart', (e) => {
                 e.stopPropagation()
@@ -166,6 +191,10 @@ function CommentCard(props: {
                 commentCard.classList.remove(styles.dragging)
             })
         }
+    }
+
+    function addSelectionEvents() {
+        const commentText = document.getElementById(`comment-text-${comment.id}`)
         if (commentText) {
             commentText.addEventListener('click', () => {
                 // if no text selected & reply input empty: toogle reply input
@@ -181,7 +210,17 @@ function CommentCard(props: {
                 if (setPostDraggable) setPostDraggable(true)
             })
         }
-    }, [])
+    }
+
+    useEffect(() => addDragEvents(), [])
+
+    useEffect(() => {
+        if (!collapsed) addSelectionEvents()
+    }, [collapsed])
+
+    useEffect(() => {
+        if (selected && loggedIn) getAccountReactions()
+    }, [selected])
 
     if (muted && !showMutedComment)
         return (
@@ -196,212 +235,283 @@ function CommentCard(props: {
             </button>
         )
     return (
-        <Column
-            id={`comment-${comment.id}`}
-            className={`${styles.wrapper} ${highlighted && styles.highlighted} ${
-                location === 'link-map' && styles.linkMap
-            }`}
-            draggable={draggable}
-        >
-            <Row style={{ marginBottom: 10 }}>
-                <Column className={styles.left}>
-                    <Link
-                        to={`/u/${Creator.handle}`}
-                        onMouseEnter={onMouseEnter}
-                        onMouseLeave={onMouseLeave}
-                        style={{ pointerEvents: Creator.handle ? 'auto' : 'none' }}
-                    >
-                        <div className={styles.padding} />
-                        <FlagImage type='user' size={30} imagePath={Creator.flagImagePath} />
-                    </Link>
-                    <div className={styles.line} />
-                </Column>
-                <Column className={styles.content}>
-                    <Row spaceBetween className={styles.header}>
-                        <Row>
-                            {state === 'account-deleted' ? (
-                                <p className='grey' style={{ marginRight: 5 }}>
-                                    [Account deleted]
-                                </p>
-                            ) : (
-                                <Link
-                                    to={`/u/${Creator.handle}`}
-                                    onMouseEnter={onMouseEnter}
-                                    onMouseLeave={onMouseLeave}
-                                    style={{ marginRight: 5 }}
-                                >
-                                    <p style={{ fontWeight: 600 }}>{Creator.name}</p>
-                                </Link>
-                            )}
-                            <p
-                                className='grey'
-                                title={`${dateCreated(createdAt)} ${
-                                    edited ? `(edited: ${dateCreated(updatedAt)})` : ''
-                                }`}
+        <Row>
+            {depth > 0 && <div className={styles.indentation} />}
+            <Column style={{ width: '100%' }}>
+                <Column
+                    id={`comment-${comment.id}`}
+                    className={`${styles.wrapper} ${highlighted && styles.highlighted} ${
+                        location === 'link-map' && styles.linkMap
+                    }`}
+                    draggable={draggable}
+                >
+                    <Row style={{ marginBottom: collapsed ? 20 : 10 }}>
+                        <Column>
+                            <button
+                                className={styles.userImage}
+                                type='button'
+                                onClick={() => setCollapsed(!collapsed)}
                             >
-                                {timeSinceCreated(createdAt)}
-                            </p>
-                            {edited && <p className='grey'>*</p>}
-                            {muted && (
-                                <button
-                                    type='button'
-                                    className={styles.muteButton}
-                                    title='Click to hide again'
-                                    onClick={() => setShowMutedComment(false)}
-                                >
-                                    <EyeClosedIcon />
-                                </button>
-                            )}
-                        </Row>
-                        <Row>
-                            {selected && (
-                                <Link
-                                    to={`/p/${itemId}?commentId=${id}`}
-                                    className={styles.id}
-                                    title='Open post page'
-                                >
-                                    <p className='grey'>ID:</p>
-                                    <p style={{ marginLeft: 5 }}>{id}</p>
-                                </Link>
-                            )}
-                            {isOwnComment && (
-                                <button
-                                    type='button'
-                                    className={styles.menuButton}
-                                    onClick={() => setMenuOpen(!menuOpen)}
-                                >
-                                    <VerticalEllipsisIcon />
-                                </button>
-                            )}
-                            {menuOpen && (
-                                <CloseOnClickOutside onClick={() => setMenuOpen(false)}>
-                                    <Column className={styles.menu}>
-                                        <Column>
-                                            <button
-                                                type='button'
-                                                onClick={() => setEditCommentModalOpen(true)}
-                                            >
-                                                <EditIcon />
-                                                Edit comment
-                                            </button>
-                                            <button
-                                                type='button'
-                                                onClick={() => setDeleteCommentModalOpen(true)}
-                                            >
-                                                <DeleteIcon />
-                                                Delete comment
-                                            </button>
-                                        </Column>
-                                    </Column>
-                                </CloseOnClickOutside>
-                            )}
-                        </Row>
-                    </Row>
-                    {state !== 'account-deleted' && (
-                        <div id={`comment-text-${comment.id}`} style={{ cursor: 'text' }}>
-                            <ShowMoreLess
-                                height={250}
-                                gradientColor={highlighted ? 'blue' : 'white'}
-                            >
-                                <DraftText
-                                    text={state === 'deleted' ? '[comment deleted]' : text}
-                                    markdownStyles={`${styles.markdown} ${
-                                        state === 'deleted' && styles.deleted
+                                <Column
+                                    centerY
+                                    centerX
+                                    className={`${styles.collapse} ${
+                                        collapsed && styles.collapsed
                                     }`}
-                                />
-                            </ShowMoreLess>
-                        </div>
-                    )}
-                    {selected && state === 'active' && (
-                        <Row className={styles.footer}>
-                            <Row
-                                centerY
-                                className={`${styles.stat} ${accountLike ? styles.blue : ''}`}
-                            >
-                                {likeLoading ? (
-                                    <LoadingWheel size={15} style={{ marginRight: 5 }} />
-                                ) : (
-                                    <button
-                                        type='button'
-                                        onClick={toggleLike}
-                                        disabled={likeLoading}
-                                    >
-                                        <LikeIcon />
-                                    </button>
-                                )}
-                                <button
-                                    type='button'
-                                    onClick={() =>
-                                        totalLikes ? setLikeModalOpen(true) : toggleLike()
-                                    }
-                                    disabled={likeLoading}
                                 >
-                                    <p>{totalLikes}</p>
-                                </button>
+                                    {collapsed ? <ExpandIcon /> : <CollapseIcon />}
+                                </Column>
+                                <FlagImage
+                                    type='user'
+                                    size={30}
+                                    imagePath={Creator.flagImagePath}
+                                />
+                            </button>
+                            {!collapsed && (
+                                <div className={`${styles.line} ${selected && styles.blue}`} />
+                            )}
+                        </Column>
+                        <Column className={styles.content}>
+                            <Row spaceBetween className={styles.header}>
+                                <Row>
+                                    {state === 'account-deleted' ? (
+                                        <p className='grey' style={{ marginRight: 5 }}>
+                                            [Account deleted]
+                                        </p>
+                                    ) : (
+                                        <Link
+                                            to={`/u/${Creator.handle}`}
+                                            onMouseEnter={onMouseEnter}
+                                            onMouseLeave={onMouseLeave}
+                                            style={{ marginRight: 5 }}
+                                        >
+                                            <p style={{ fontWeight: 600 }}>{Creator.name}</p>
+                                        </Link>
+                                    )}
+                                    <p
+                                        className='grey'
+                                        title={`${dateCreated(createdAt)} ${
+                                            edited ? `(edited: ${dateCreated(updatedAt)})` : ''
+                                        }`}
+                                    >
+                                        {timeSinceCreated(createdAt)}
+                                    </p>
+                                    {edited && <p className='grey'>*</p>}
+                                    {muted && (
+                                        <button
+                                            type='button'
+                                            className={styles.muteButton}
+                                            title='Click to hide again'
+                                            onClick={() => setShowMutedComment(false)}
+                                        >
+                                            <EyeClosedIcon />
+                                        </button>
+                                    )}
+                                </Row>
+                                {selected && (
+                                    <Row>
+                                        <Link
+                                            to={`/p/${rootId}?commentId=${id}`}
+                                            className={styles.id}
+                                            title='Open post page'
+                                        >
+                                            <p className='grey'>ID:</p>
+                                            <p style={{ marginLeft: 5 }}>{id}</p>
+                                        </Link>
+                                        {isOwnComment && (
+                                            <button
+                                                type='button'
+                                                className={styles.menuButton}
+                                                onClick={() => setMenuOpen(!menuOpen)}
+                                            >
+                                                <VerticalEllipsisIcon />
+                                            </button>
+                                        )}
+                                        {menuOpen && (
+                                            <CloseOnClickOutside onClick={() => setMenuOpen(false)}>
+                                                <Column className={styles.menu}>
+                                                    <Column>
+                                                        <button
+                                                            type='button'
+                                                            onClick={() => setEditModalOpen(true)}
+                                                        >
+                                                            <EditIcon />
+                                                            Edit
+                                                        </button>
+                                                        <button
+                                                            type='button'
+                                                            onClick={() => setDeleteModalOpen(true)}
+                                                        >
+                                                            <DeleteIcon />
+                                                            Delete
+                                                        </button>
+                                                    </Column>
+                                                </Column>
+                                            </CloseOnClickOutside>
+                                        )}
+                                    </Row>
+                                )}
                             </Row>
-                            <button
-                                type='button'
-                                className={`${styles.stat} ${accountLink ? styles.blue : ''}`}
-                                onClick={() => history(`/linkmap?item=comment&id=${id}`)}
-                            >
-                                <LinkIcon />
-                                <p>{totalLinks}</p>
-                            </button>
-                            <button
-                                type='button'
-                                className={`${styles.stat} ${accountRating ? styles.blue : ''}`}
-                                onClick={() => setRatingModalOpen(true)}
-                            >
-                                <ZapIcon />
-                                <p>{totalRatings}</p>
-                            </button>
-                        </Row>
+                            {!collapsed && (
+                                <>
+                                    {state !== 'account-deleted' && (
+                                        <div
+                                            id={`comment-text-${comment.id}`}
+                                            style={{ cursor: 'text' }}
+                                        >
+                                            <DraftText
+                                                text={
+                                                    state === 'deleted' ? '[comment deleted]' : text
+                                                }
+                                                markdownStyles={`${styles.markdown} ${
+                                                    state === 'deleted' && styles.deleted
+                                                }`}
+                                            />
+                                        </div>
+                                    )}
+                                    {selected && state === 'active' && (
+                                        <Row className={styles.footer}>
+                                            <Row
+                                                centerY
+                                                className={`${styles.stat} ${liked && styles.blue}`}
+                                            >
+                                                {likeLoading ? (
+                                                    <LoadingWheel
+                                                        size={15}
+                                                        style={{ marginRight: 5 }}
+                                                    />
+                                                ) : (
+                                                    <button
+                                                        type='button'
+                                                        disabled={buttonsDisabled || likeLoading}
+                                                        onClick={toggleLike}
+                                                    >
+                                                        <LikeIcon />
+                                                    </button>
+                                                )}
+                                                <button
+                                                    type='button'
+                                                    onClick={() =>
+                                                        totalLikes
+                                                            ? setLikeModalOpen(true)
+                                                            : toggleLike()
+                                                    }
+                                                    disabled={buttonsDisabled || likeLoading}
+                                                >
+                                                    <p>{totalLikes}</p>
+                                                </button>
+                                            </Row>
+                                            <button
+                                                type='button'
+                                                className={`${styles.stat} ${
+                                                    linked && styles.blue
+                                                }`}
+                                                disabled={buttonsDisabled}
+                                                onClick={() =>
+                                                    history(`/linkmap?item=comment&id=${id}`)
+                                                }
+                                            >
+                                                <LinkIcon />
+                                                <p>{totalLinks}</p>
+                                            </button>
+                                            <button
+                                                type='button'
+                                                className={`${styles.stat} ${rated && styles.blue}`}
+                                                disabled={buttonsDisabled}
+                                                onClick={() => setRatingModalOpen(true)}
+                                            >
+                                                <ZapIcon />
+                                                <p>{totalRatings}</p>
+                                            </button>
+                                        </Row>
+                                    )}
+                                </>
+                            )}
+                        </Column>
+                    </Row>
+                    {selected && !collapsed && (
+                        <CommentInput
+                            type='comment'
+                            placeholder='Reply...'
+                            parent={{ type: 'comment', id }}
+                            root={{ type: 'post', id: postId }}
+                            onSave={(newComment) => {
+                                addComment(newComment)
+                                toggleSelected()
+                            }}
+                            style={{
+                                marginBottom: 10,
+                                // marginLeft: -depth * 24,
+                                // width: `calc(100% + ${depth * 24}px)`,
+                                zIndex: 5,
+                            }}
+                        />
+                    )}
+                    {likeModalOpen && (
+                        <LikeModal
+                            itemType='comment'
+                            itemData={comment}
+                            updateItem={() => {
+                                setComment({
+                                    ...comment,
+                                    totalLikes: totalLikes + (liked ? -1 : 1),
+                                })
+                                setAccountReactions({ ...accountReactions, liked: !liked })
+                            }}
+                            close={() => setLikeModalOpen(false)}
+                        />
+                    )}
+                    {ratingModalOpen && (
+                        <RatingModal
+                            itemType='comment'
+                            itemData={comment}
+                            updateItem={() => {
+                                setComment({
+                                    ...comment,
+                                    totalRatings: totalRatings + (rated ? -1 : 1),
+                                })
+                                setAccountReactions({ ...accountReactions, rated: !rated })
+                            }}
+                            close={() => setRatingModalOpen(false)}
+                        />
+                    )}
+                    {editModalOpen && (
+                        <EditCommentModal
+                            comment={comment}
+                            editComment={editComment}
+                            close={() => setEditModalOpen(false)}
+                        />
+                    )}
+                    {deleteModalOpen && (
+                        <DeleteCommentModal
+                            comment={comment}
+                            removeComment={removeComment}
+                            close={() => setDeleteModalOpen(false)}
+                        />
+                    )}
+                    {showUserModal && (
+                        <UserButtonModal
+                            user={{ ...Creator, ...userModalData }}
+                            transparent={userModalTransparent}
+                        />
                     )}
                 </Column>
-            </Row>
-            {selected && (
-                <CommentInput
-                    type='comment'
-                    preview={false}
-                    placeholder='Reply...'
-                    onSave={(data) => console.log(data)}
-                    style={{ marginBottom: 10, marginLeft: 2 }}
-                />
-            )}
-            {likeModalOpen && (
-                <LikeModal
-                    itemType='comment'
-                    itemData={comment}
-                    updateItem={() => updateCommentReactions(comment, 'Like', !accountLike)}
-                    close={() => setLikeModalOpen(false)}
-                />
-            )}
-            {ratingModalOpen && (
-                <RatingModal
-                    itemType='comment'
-                    itemData={comment}
-                    updateItem={() => updateCommentReactions(comment, 'Rating', !accountRating)}
-                    close={() => setRatingModalOpen(false)}
-                />
-            )}
-            {editCommentModalOpen && (
-                <EditCommentModal
-                    comment={comment}
-                    editComment={editComment}
-                    close={() => setEditCommentModalOpen(false)}
-                />
-            )}
-            {deleteCommentModalOpen && (
-                <DeleteCommentModal
-                    comment={comment}
-                    removeComment={removeComment}
-                    close={() => setDeleteCommentModalOpen(false)}
-                />
-            )}
-            {showModal && (
-                <UserButtonModal user={{ ...Creator, ...modalData }} transparent={transparent} />
-            )}
-        </Column>
+                {!collapsed &&
+                    comment.Comments.map((reply) => (
+                        <CommentCard
+                            depth={depth + 1}
+                            comment={reply}
+                            postId={postId}
+                            highlighted={false} // highlightedCommentId === comment.id
+                            addComment={addComment}
+                            removeComment={removeComment}
+                            editComment={editComment}
+                            setPostDraggable={setPostDraggable}
+                            location={location}
+                        />
+                    ))}
+            </Column>
+        </Row>
     )
 }
 

@@ -1,7 +1,7 @@
 import Column from '@components/Column'
 import Row from '@components/Row'
 import LoadingWheel from '@components/animations/LoadingWheel'
-import CommentWrapper from '@components/cards/Comments/CommentWrapper'
+import CommentCard from '@components/cards/Comments/CommentCard'
 import CommentInput from '@components/draft-js/CommentInput'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
@@ -109,23 +109,6 @@ function Comments(props: {
         setComments(newComments)
     }
 
-    // todo: update
-    function updateCommentReactions(comment, reactionType, increment) {
-        const { id, parentCommentId } = comment
-        const newComments = [...comments]
-        let selectedComment
-        if (parentCommentId) {
-            const parentComment = newComments.find((c) => c.id === parentCommentId)
-            selectedComment = parentComment.Replies.find((c) => c.id === id)
-        } else {
-            selectedComment = comments.find((c) => c.id === id)
-        }
-        if (increment) selectedComment[`total${reactionType}s`] += 1
-        else selectedComment[`total${reactionType}s`] -= 1
-        selectedComment[`account${reactionType}`] = increment
-        setComments(newComments)
-    }
-
     useEffect(() => {
         setComments([])
         if (totalComments) getComments()
@@ -149,16 +132,14 @@ function Comments(props: {
                 </Row>
             ) : (
                 filteredComments.map((comment) => (
-                    <CommentWrapper
-                        key={comment.id}
-                        postId={postId}
-                        comment={comment}
+                    <CommentCard
                         depth={0}
-                        highlightedCommentId={+urlParams.commentId}
+                        comment={comment}
+                        postId={postId}
+                        highlighted={false} // highlightedCommentId === comment.id
                         addComment={addComment}
                         removeComment={removeComment}
                         editComment={editComment}
-                        updateCommentReactions={updateCommentReactions}
                         setPostDraggable={setPostDraggable}
                         location={location}
                     />
