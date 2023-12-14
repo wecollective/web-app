@@ -1,0 +1,20 @@
+@import '@styles/Variables';
+
+.wrapper {
+    padding: 10px;
+    border: 1px solid $grey2;
+    border-radius: 10px;
+    background-color: $grey1;
+
+    > div {
+        &:not(:last-child) {
+            margin-bottom: 20px;
+        }
+
+        > p {
+            font-size: 16px;
+            line-height: 16px;
+            margin-top: 10px;
+        }
+    }
+}

@@ -15,11 +15,12 @@ function AudioCard(props: {
     index?: number
     url: string
     staticBars: number
+    dynamicBars?: number
     location: string
     style?: any
     remove?: () => void
 }): JSX.Element {
-    const { id, index, url, staticBars, location, style, remove } = props
+    const { id, index, url, staticBars, dynamicBars, location, style, remove } = props
     const [audioPlaying, setAudioPlaying] = useState(false)
     // const [audioLoaded, setAudioLoaded] = useState(false)
     const [duration, setDuration] = useState(0)
@@ -130,10 +131,8 @@ function AudioCard(props: {
         }
     }, [])
 
-    console.log(location)
-
     return (
-        <Column style={{ ...style, position: 'relative' }}>
+        <Column className={styles.wrapper} style={{ ...style, position: 'relative' }}>
             <Column centerY style={{ height: 'calc(100% - 30px)', marginBottom: 10 }}>
                 <AudioVisualiser
                     audioId={audioId}
@@ -141,7 +140,7 @@ function AudioCard(props: {
                     audioPlaying={audioPlaying}
                     staticBars={staticBars}
                     staticColor={colors.audioVisualiserStatic}
-                    dynamicBars={160}
+                    dynamicBars={dynamicBars || 160}
                     dynamicColor={colors.audioVisualiserDynamic}
                     style={{ height }}
                 />
@@ -199,6 +198,7 @@ AudioCard.defaultProps = {
     index: 0,
     style: null,
     remove: null,
+    dynamicBars: 160,
 }
 
 export default AudioCard

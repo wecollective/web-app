@@ -54,7 +54,7 @@ function Images(props: { postId: number; style?: any }): JSX.Element {
             </Column>
         )
     return (
-        <Column>
+        <Column className={styles.wrapper} style={style}>
             <Row centerX>
                 <Scrollbars className={styles.images} onScrollRightEnd={onScrollRightEnd}>
                     <Row>

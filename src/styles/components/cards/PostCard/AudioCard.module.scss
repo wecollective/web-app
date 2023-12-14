@@ -1,105 +1,112 @@
 @import '@styles/Variables';
 
-.playButton {
-    all: unset;
-    cursor: pointer;
-    display: flex;
-    width: 20px;
-    height: 20px;
-    color: #82bdff; // $blue5;
-    margin-right: 10px;
-    flex-shrink: 0;
+.wrapper {
+    padding: 15px 10px 10px 10px;
+    border: 1px solid $grey2;
+    border-radius: 10px;
+    background-color: white;
 
-    > svg {
+    .playButton {
+        all: unset;
+        cursor: pointer;
+        display: flex;
         width: 20px;
         height: 20px;
+        color: #82bdff; // $blue5;
+        margin-right: 10px;
+        flex-shrink: 0;
+
+        > svg {
+            width: 20px;
+            height: 20px;
+        }
     }
-}
 
-.timeSlider {
-    width: 100%;
+    .timeSlider {
+        width: 100%;
 
-    .slider {
-        position: relative;
-        height: 20px;
+        .slider {
+            position: relative;
+            height: 20px;
 
-        &.gbg {
+            &.gbg {
+                .progressBar {
+                    background-color: #474747;
+                }
+
+                .progressBarBackground {
+                    background-color: #e1e1e1;
+                }
+
+                .thumb {
+                    background-color: black;
+                }
+            }
+
+            .progressBar,
+            .progressBarBackground,
+            .bufferedAmount {
+                display: flex;
+                position: absolute;
+                top: 8px;
+                height: 4px;
+                border-radius: 2px;
+                pointer-events: none;
+            }
+
             .progressBar {
-                background-color: #474747;
+                background-color: #acd8f8;
             }
 
             .progressBarBackground {
-                background-color: #e1e1e1;
+                width: 100%;
+                background-color: $grey2;
+            }
+
+            .bufferedAmount {
+                background-color: $grey3;
             }
 
             .thumb {
-                background-color: black;
+                position: absolute;
+                top: 2px;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                background-color: #82bdff; // $blue5;
+                pointer-events: none;
+            }
+
+            > input {
+                width: 100%;
+                height: 16px;
+                -webkit-appearance: none;
+                cursor: pointer;
+            }
+
+            > input::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                opacity: 0;
+            }
+
+            > input::-moz-range-thumb {
+                -webkit-appearance: none;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                opacity: 0;
             }
         }
 
-        .progressBar,
-        .progressBarBackground,
-        .bufferedAmount {
-            display: flex;
-            position: absolute;
-            top: 8px;
-            height: 4px;
-            border-radius: 2px;
-            pointer-events: none;
-        }
-
-        .progressBar {
-            background-color: #acd8f8;
-        }
-
-        .progressBarBackground {
-            width: 100%;
-            background-color: $grey2;
-        }
-
-        .bufferedAmount {
-            background-color: $grey3;
-        }
-
-        .thumb {
-            position: absolute;
-            top: 2px;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background-color: #82bdff; // $blue5;
-            pointer-events: none;
-        }
-
-        > input {
-            width: 100%;
-            height: 16px;
-            -webkit-appearance: none;
-            cursor: pointer;
-        }
-
-        > input::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            opacity: 0;
-        }
-
-        > input::-moz-range-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            opacity: 0;
-        }
-    }
-
-    .times {
-        height: 10px;
-        flex-shrink: 0;
-        > p {
-            font-size: 8px;
+        .times {
+            height: 10px;
+            flex-shrink: 0;
+            > p {
+                font-size: 8px;
+            }
         }
     }
 }
