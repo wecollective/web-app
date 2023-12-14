@@ -6,6 +6,7 @@ import { handleImageError } from '@src/Helpers'
 import styles from '@styles/components/modals/ImageModal.module.scss'
 import { ChevronLeftIcon, ChevronRightIcon } from '@svgs/all'
 import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 function ImageModal(props: { images: any[]; startIndex: number; close: () => void }): JSX.Element {
     const { images, startIndex, close } = props
@@ -13,6 +14,10 @@ function ImageModal(props: { images: any[]; startIndex: number; close: () => voi
 
     return (
         <Modal close={close} className={styles.wrapper}>
+            <Link to={`/p/${images[index].id}`} className={styles.id} title='Open post page'>
+                <p className='grey'>ID:</p>
+                <p style={{ marginLeft: 5 }}>{images[index].id}</p>
+            </Link>
             <Row centerY>
                 {index > 0 && (
                     <button

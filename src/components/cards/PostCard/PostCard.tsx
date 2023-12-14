@@ -56,7 +56,7 @@ function PostCard(props: {
     styling?: boolean
     style?: any
 }): JSX.Element {
-    const { post, index, location, collapse, styling, style } = props
+    const { index, post: postData, location, collapse, styling, style } = props
     const {
         accountData,
         loggedIn,
@@ -67,9 +67,10 @@ function PostCard(props: {
         setCreatePostModalOpen,
     } = useContext(AccountContext)
     const { spaceData, postFilters } = useContext(SpaceContext)
-    const [postData, setPostData] = useState(post)
+    const [post, setPost] = useState(postData)
     const {
         id,
+        type,
         mediaTypes,
         title,
         text,
@@ -84,7 +85,8 @@ function PostCard(props: {
         Creator,
         DirectSpaces,
         Event,
-    } = postData
+        Image,
+    } = post
     const [buttonsDisabled, setButtonsDisabled] = useState(true)
     const [accountReactions, setAccountReactions] = useState<any>({})
     const { liked, rated, reposted, commented, linked } = accountReactions
@@ -99,6 +101,7 @@ function PostCard(props: {
     const [deletePostModalOpen, setDeletePostModalOpen] = useState(false)
     const [editPostModalOpen, setEditPostModalOpen] = useState(false)
     const [removePostModalOpen, setRemovePostModalOpen] = useState(false)
+    const isBlock = ['url', 'image', 'audio'].includes(type)
     const mobileView = document.documentElement.clientWidth < 900
     const cookies = new Cookies()
     const isOwnPost = accountData && Creator && accountData.id === Creator.id
@@ -123,7 +126,12 @@ function PostCard(props: {
         if (totalLinks) types.push('link')
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
-            .get(`${config.apiURL}/account-reactions?postId=${id}&types=${types.join('')}`, options)
+            .get(
+                `${config.apiURL}/account-reactions?postType=post&postId=${id}&types=${types.join(
+                    ','
+                )}`,
+                options
+            )
             .then((res) => {
                 setAccountReactions(res.data)
                 setButtonsDisabled(false)
@@ -146,7 +154,7 @@ function PostCard(props: {
         if (postCard) {
             postCard.addEventListener('dragstart', (e) => {
                 postCard.classList.add(styles.dragging)
-                updateDragItem({ type: 'post', data: postData })
+                updateDragItem({ type: 'post', data: post })
                 const dragItem = document.getElementById('drag-item')
                 e.dataTransfer?.setDragImage(dragItem!, 50, 50)
             })
@@ -159,13 +167,13 @@ function PostCard(props: {
     function toggleLike() {
         setLikeLoading(true)
         if (loggedIn) {
-            const data = { itemType: 'post', itemId: id } as any
+            const data = { type: 'post', id } as any
             if (!liked) data.spaceId = location.includes('space') ? spaceData.id : null
             const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
             axios
                 .post(`${config.apiURL}/${liked ? 'remove' : 'add'}-like`, data, options)
                 .then(() => {
-                    setPostData({ ...postData, totalLikes: totalLikes + (liked ? -1 : 1) })
+                    setPost({ ...post, totalLikes: totalLikes + (liked ? -1 : 1) })
                     setAccountReactions({ ...accountReactions, liked: !liked })
                     setLikeLoading(false)
                 })
@@ -188,12 +196,9 @@ function PostCard(props: {
     }
 
     useEffect(() => {
-        getAccountReactions()
+        if (loggedIn) getAccountReactions()
         addDragEvents()
     }, [])
-
-    // todo: remove this useEffect all together if everything handled from props...?
-    useEffect(() => setPostData(post), [post])
 
     return (
         <Column
@@ -322,12 +327,8 @@ function PostCard(props: {
                         )}
                     </div>
                 )}
-                {Event && (
-                    <EventCard postData={postData} setPostData={setPostData} location={location} />
-                )}
-                {mediaTypes.includes('poll') && (
-                    <PollCard postData={postData} location={location} />
-                )}
+                {Event && <EventCard postData={post} setPostData={setPost} location={location} />}
+                {mediaTypes.includes('poll') && <PollCard postData={post} location={location} />}
                 {mediaTypes.includes('glass-bead-game') && (
                     <GlassBeadGame
                         postId={id}
@@ -336,13 +337,17 @@ function PostCard(props: {
                     />
                 )}
                 {mediaTypes.includes('card') && <Card postId={id} />}
-                {mediaTypes.includes('url') && <Urls postId={id} style={{ marginBottom: 10 }} />}
-                {mediaTypes.includes('image') && (
+                {!isBlock && mediaTypes.includes('url') && (
+                    <Urls postId={id} style={{ marginBottom: 10 }} />
+                )}
+                {!isBlock && mediaTypes.includes('image') && (
                     <Images postId={id} style={{ marginBottom: 10 }} />
                 )}
-                {mediaTypes.includes('audio') && (
+                {!isBlock && mediaTypes.includes('audio') && (
                     <Audios postId={id} style={{ marginBottom: 10 }} />
                 )}
+                {/* block posts */}
+                {type === 'image' && <img className={styles.image} src={Image.url} alt='block' />}
             </Column>
             {showFooter && (
                 <Row spaceBetween className={styles.footer}>
@@ -430,7 +435,7 @@ function PostCard(props: {
                     location={location}
                     totalComments={totalComments}
                     incrementTotalComments={(value) => {
-                        setPostData({ ...postData, totalComments: totalComments + value })
+                        setPost({ ...post, totalComments: totalComments + value })
                         getAccountCommented()
                     }}
                     setPostDraggable={setDraggable}
@@ -440,9 +445,9 @@ function PostCard(props: {
             {likeModalOpen && (
                 <LikeModal
                     itemType='post'
-                    itemData={postData}
+                    itemData={post}
                     updateItem={() => {
-                        setPostData({ ...postData, totalLikes: totalLikes + (liked ? -1 : 1) })
+                        setPost({ ...post, totalLikes: totalLikes + (liked ? -1 : 1) })
                         setAccountReactions({ ...accountReactions, liked: !liked })
                     }}
                     close={() => setLikeModalOpen(false)}
@@ -450,17 +455,17 @@ function PostCard(props: {
             )}
             {repostModalOpen && (
                 <RepostModal
-                    postData={postData}
-                    setPostData={setPostData}
+                    postData={post}
+                    setPostData={setPost}
                     close={() => setRepostModalOpen(false)}
                 />
             )}
             {ratingModalOpen && (
                 <RatingModal
                     itemType='post'
-                    itemData={postData}
+                    itemData={post}
                     updateItem={() => {
-                        setPostData({ ...postData, totalRatings: totalRatings + (rated ? -1 : 1) })
+                        setPost({ ...post, totalRatings: totalRatings + (rated ? -1 : 1) })
                         setAccountReactions({ ...accountReactions, rated: !rated })
                     }}
                     close={() => setRatingModalOpen(false)}
@@ -468,8 +473,8 @@ function PostCard(props: {
             )}
             {editPostModalOpen && (
                 <EditPostModal
-                    postData={postData}
-                    setPostData={setPostData}
+                    postData={post}
+                    setPostData={setPost}
                     close={() => setEditPostModalOpen(false)}
                 />
             )}

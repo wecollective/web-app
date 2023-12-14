@@ -3,6 +3,13 @@
 .wrapper {
     height: 100%;
 
+    .id {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+
     > div {
         .navButton {
             all: unset;

@@ -16,10 +16,6 @@
                 margin-right: 10px;
             }
 
-            // &:last-child {
-            //     padding-right: 5px;
-            // }
-
             > button {
                 all: unset;
                 cursor: pointer;
@@ -28,10 +24,8 @@
                     border-radius: 5px;
                     object-fit: cover;
                     border: 1px solid $grey2;
-                    width: inherit;
-                    height: inherit;
-                    max-width: inherit;
-                    max-height: inherit;
+                    width: 100%;
+                    height: 100%;
                 }
             }
 
