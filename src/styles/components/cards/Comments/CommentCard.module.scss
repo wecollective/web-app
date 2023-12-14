@@ -43,7 +43,6 @@
 
 .wrapper {
     position: relative;
-    // margin-top: 5px;
 
     &.linkMap {
         background-color: white;
@@ -236,4 +235,12 @@
             color: $grey4;
         }
     }
+}
+
+.loadMore {
+    all: unset;
+    cursor: pointer;
+    color: $blue1;
+    margin-left: 15px;
+    margin-bottom: 10px;
 }

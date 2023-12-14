@@ -5,7 +5,7 @@ import CommentCard from '@components/cards/Comments/CommentCard'
 import CommentInput from '@components/draft-js/CommentInput'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
-import { scrollToElement } from '@src/Helpers'
+import styles from '@styles/components/cards/Comments/CommentCard.module.scss'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
@@ -23,7 +23,7 @@ function Comments(props: {
         props
     const { accountData, loggedIn } = useContext(AccountContext)
     const [comments, setComments] = useState<any[]>([])
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
     const cookies = new Cookies()
     const urlParams = Object.fromEntries(new URLSearchParams(useLocation().search))
     const filteredComments = comments.filter((c) => {
@@ -31,22 +31,22 @@ function Comments(props: {
         return c.state === 'active' || c.Comments.length
     })
 
-    function getComments() {
-        setLoading(true)
+    function getComments(offset) {
+        // setLoading(true)
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
-            .get(`${config.apiURL}/post-comments?postId=${postId}`, options)
+            .get(`${config.apiURL}/post-comments?postId=${postId}&offset=${offset}`, options)
             .then((res) => {
                 console.log('post-comments: ', res.data)
-                setComments(res.data)
+                setComments(offset ? [...comments, ...res.data] : res.data)
                 setLoading(false)
-                // if commentId in params, scroll to comment
-                if (urlParams.commentId) {
-                    setTimeout(() => {
-                        const comment = document.getElementById(`comment-${urlParams.commentId}`)
-                        if (comment) scrollToElement(comment)
-                    }, 500)
-                }
+                // // if commentId in params, scroll to comment
+                // if (urlParams.commentId) {
+                //     setTimeout(() => {
+                //         const comment = document.getElementById(`comment-${urlParams.commentId}`)
+                //         if (comment) scrollToElement(comment)
+                //     }, 500)
+                // }
             })
             .catch((error) => console.log(error))
     }
@@ -111,7 +111,7 @@ function Comments(props: {
 
     useEffect(() => {
         setComments([])
-        if (totalComments) getComments()
+        if (totalComments) getComments(0)
     }, [postId])
 
     return (
@@ -131,19 +131,30 @@ function Comments(props: {
                     <LoadingWheel size={30} />
                 </Row>
             ) : (
-                filteredComments.map((comment) => (
-                    <CommentCard
-                        depth={0}
-                        comment={comment}
-                        postId={postId}
-                        highlighted={false} // highlightedCommentId === comment.id
-                        addComment={addComment}
-                        removeComment={removeComment}
-                        editComment={editComment}
-                        setPostDraggable={setPostDraggable}
-                        location={location}
-                    />
-                ))
+                <Column>
+                    {filteredComments.map((comment) => (
+                        <CommentCard
+                            depth={0}
+                            comment={comment}
+                            postId={postId}
+                            highlighted={false} // highlightedCommentId === comment.id
+                            addComment={addComment}
+                            removeComment={removeComment}
+                            editComment={editComment}
+                            setPostDraggable={setPostDraggable}
+                            location={location}
+                        />
+                    ))}
+                    {comments.length === 10 && (
+                        <button
+                            className={styles.loadMore}
+                            type='button'
+                            onClick={() => getComments(comments.length)}
+                        >
+                            Load more ↓
+                        </button>
+                    )}
+                </Column>
             )}
         </Column>
     )

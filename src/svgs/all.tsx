@@ -23,6 +23,7 @@ import { ReactComponent as ChevronRightIcon } from '@svgs/chevron-right-solid.sv
 import { ReactComponent as ChevronUpIcon } from '@svgs/chevron-up-solid.svg'
 import { ReactComponent as ClockIcon } from '@svgs/clock-solid.svg'
 import { ReactComponent as SettingsIcon } from '@svgs/cog-solid.svg'
+import { ReactComponent as CollapseIcon } from '@svgs/collapse-solid.svg'
 import { ReactComponent as CommentIcon } from '@svgs/comment-solid.svg'
 import { ReactComponent as CurvedDNAIcon } from '@svgs/curved-dna.svg'
 import { ReactComponent as DNAIcon } from '@svgs/dna.svg'
@@ -31,7 +32,7 @@ import { ReactComponent as DoorIcon } from '@svgs/door-open-solid.svg'
 import { ReactComponent as VerticalEllipsisIcon } from '@svgs/ellipsis-vertical-solid.svg'
 import { ReactComponent as EnvelopeIcon } from '@svgs/envelope-solid.svg'
 import { ReactComponent as DangerIcon } from '@svgs/exclamation-circle-solid.svg'
-import { ReactComponent as ExpandIcon } from '@svgs/expand-icon.svg'
+import { ReactComponent as ExpandIcon } from '@svgs/expand-solid.svg'
 import { ReactComponent as EyeClosedIcon } from '@svgs/eye-slash-solid.svg'
 import { ReactComponent as EyeIcon } from '@svgs/eye-solid.svg'
 import { ReactComponent as ReactionIcon } from '@svgs/fire-alt-solid.svg'
@@ -113,6 +114,7 @@ export {
     ChevronRightIcon,
     ChevronUpIcon,
     ClockIcon,
+    CollapseIcon,
     CommentIcon,
     CurvedDNAIcon,
     DNAIcon,

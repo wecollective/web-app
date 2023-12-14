@@ -4,6 +4,8 @@ import FlagImage from '@components/FlagImage'
 import Row from '@components/Row'
 import LoadingWheel from '@components/animations/LoadingWheel'
 import EditCommentModal from '@components/cards/Comments/EditCommentModal'
+import Audios from '@components/cards/PostCard/Audios'
+import Images from '@components/cards/PostCard/Images'
 import CommentInput from '@components/draft-js/CommentInput'
 import DraftText from '@components/draft-js/DraftText'
 import DeleteCommentModal from '@components/modals/DeleteCommentModal'
@@ -31,6 +33,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
+// todo: set up total children and total descendents stats and handle pagination using these values
 function CommentCard(props: {
     depth: number
     comment: any
@@ -62,14 +65,18 @@ function CommentCard(props: {
         id,
         rootId,
         text,
+        mediaTypes,
         state,
         totalLikes,
         totalRatings,
         totalLinks,
+        totalComments,
         createdAt,
         updatedAt,
         Creator,
+        Comments,
     } = comment
+    const [loading, setLoading] = useState(false)
     const [collapsed, setCollapsed] = useState(false)
     const [buttonsDisabled, setButtonsDisabled] = useState(true)
     const [accountReactions, setAccountReactions] = useState<any>({})
@@ -117,6 +124,22 @@ function CommentCard(props: {
             .then((res) => {
                 setAccountReactions(res.data)
                 setButtonsDisabled(false)
+            })
+            .catch((error) => console.log(error))
+    }
+
+    function getComments(commentId, offset?) {
+        setLoading(true)
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .get(
+                `${config.apiURL}/post-comments?postId=${commentId}&offset=${offset || 0}`,
+                options
+            )
+            .then((res) => {
+                console.log('comment-comments: ', res.data)
+                setComment({ ...comment, Comments: offset ? [...Comments, ...res.data] : res.data })
+                setLoading(false)
             })
             .catch((error) => console.log(error))
     }
@@ -212,7 +235,9 @@ function CommentCard(props: {
         }
     }
 
-    useEffect(() => addDragEvents(), [])
+    useEffect(() => {
+        addDragEvents()
+    }, [])
 
     useEffect(() => {
         if (!collapsed) addSelectionEvents()
@@ -237,7 +262,7 @@ function CommentCard(props: {
     return (
         <Row>
             {depth > 0 && <div className={styles.indentation} />}
-            <Column style={{ width: '100%' }}>
+            <Column style={{ width: depth ? 'calc(100% - 26px)' : '100%' }}>
                 <Column
                     id={`comment-${comment.id}`}
                     className={`${styles.wrapper} ${highlighted && styles.highlighted} ${
@@ -367,6 +392,12 @@ function CommentCard(props: {
                                                     state === 'deleted' && styles.deleted
                                                 }`}
                                             />
+                                            {mediaTypes.includes('image') && (
+                                                <Images postId={id} style={{ marginBottom: 10 }} />
+                                            )}
+                                            {mediaTypes.includes('audio') && (
+                                                <Audios postId={id} style={{ marginBottom: 10 }} />
+                                            )}
                                         </div>
                                     )}
                                     {selected && state === 'active' && (
@@ -496,20 +527,42 @@ function CommentCard(props: {
                         />
                     )}
                 </Column>
-                {!collapsed &&
-                    comment.Comments.map((reply) => (
-                        <CommentCard
-                            depth={depth + 1}
-                            comment={reply}
-                            postId={postId}
-                            highlighted={false} // highlightedCommentId === comment.id
-                            addComment={addComment}
-                            removeComment={removeComment}
-                            editComment={editComment}
-                            setPostDraggable={setPostDraggable}
-                            location={location}
-                        />
-                    ))}
+                {!collapsed && (
+                    <Column>
+                        {Comments.map((reply) => (
+                            <CommentCard
+                                key={reply.id}
+                                depth={depth + 1}
+                                comment={reply}
+                                postId={postId}
+                                highlighted={false} // highlightedCommentId === comment.id
+                                addComment={addComment}
+                                removeComment={removeComment}
+                                editComment={editComment}
+                                setPostDraggable={setPostDraggable}
+                                location={location}
+                            />
+                        ))}
+                        {totalComments > 0 && !Comments.length && (
+                            <button
+                                className={styles.loadMore}
+                                type='button'
+                                onClick={() => getComments(id)}
+                            >
+                                Load more →
+                            </button>
+                        )}
+                        {Comments.length === 10 && (
+                            <button
+                                className={styles.loadMore}
+                                type='button'
+                                onClick={() => getComments(id, Comments.length)}
+                            >
+                                Load more ↓
+                            </button>
+                        )}
+                    </Column>
+                )}
             </Column>
         </Row>
     )
