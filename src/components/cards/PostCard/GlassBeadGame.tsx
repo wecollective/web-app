@@ -373,8 +373,7 @@ function GlassBeadGame(props: {
             {beadCommentsOpen && (
                 <Comments
                     postId={selectedBead.id}
-                    type='bead'
-                    location='post'
+                    location='post' // glass bead game ?
                     totalComments={selectedBead.totalComments}
                     incrementTotalComments={(value) => {
                         const newBeads = [...beads]

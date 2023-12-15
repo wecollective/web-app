@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable react/no-unstable-nested-components */
 /* eslint-disable jsx-a11y/anchor-has-content */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
@@ -56,14 +57,16 @@ import { v4 as uuidv4 } from 'uuid'
 
 function CommentInput(props: {
     type: 'comment' | 'poll-answer' // group thread, gbg room (?)
-    preview: boolean // determines whether onSave function uploads or just passes data back to parent
+    parent?: { type: string; id: number } | null
+    root?: { type: string; id: number } | null
     placeholder: string
+    preview?: boolean // determines whether onSave function uploads or just passes data back to parent
     maxChars?: number // todo: does this make sense to pass in here?
     className?: string
     style?: any
     onSave: (data: any) => void
 }): JSX.Element {
-    const { type, preview, placeholder, maxChars, className, style, onSave } = props
+    const { type, parent, root, preview, placeholder, maxChars, className, style, onSave } = props
     const { accountData } = useContext(AccountContext)
     const [editorState, setEditorState] = useState<any>(null)
     const [rawUrls, setRawUrls] = useState<any[]>([])
@@ -73,14 +76,14 @@ function CommentInput(props: {
     const [audios, setAudios] = useState<any[]>([])
     const [recording, setRecording] = useState(false)
     const [recordingTime, setRecordingTime] = useState(0)
-    const audioRecorder = useRef<any>(null)
-    const recordingInterval = useRef<any>(null)
     const [suggestions, setSuggestions] = useState([])
     const [showSuggestions, setShowSuggestions] = useState(false)
     const [totalChars, setTotalChars] = useState(0)
     const [focused, setFocused] = useState(false)
     const [errors, setErrors] = useState<string[]>([])
     const [saveLoading, setSaveLoading] = useState(false)
+    const audioRecorder = useRef<any>(null)
+    const recordingInterval = useRef<any>(null)
     const wrapperRef = useRef<HTMLDivElement>(null)
     const editorRef = useRef<any>(null)
     const inputId = uuidv4()
@@ -272,20 +275,6 @@ function CommentInput(props: {
         }
     }
 
-    // general purpose post creation (cases: post, comment, poll-answer, bead)
-    // + structure data (unique)
-    // + validate data (general: return true or errors array)
-    // + if valid: upload or return validated data? (return for poll-answer & bead on new posts)
-    // else: return errors (where to: )
-
-    // comment: structure, validate, upload (from comment card?)
-    // poll answer: structure, validate, pass back to post, upload (from post modal)
-    // if 'onSave' pass back, otherwise upload
-    // general purpose upload function
-
-    // add total upload size value during validation
-    // add has data check function
-
     function findText() {
         const contentState = editorState.getCurrentContent()
         const rawDraft = convertToRaw(contentState)
@@ -308,13 +297,34 @@ function CommentInput(props: {
         return saveLoading || urlsLoading || noContent || overMaxChars
     }
 
+    function resetData() {
+        setSaveLoading(false)
+        const newContentState = ContentState.createFromText('')
+        const newEditorState = EditorState.createWithContent(newContentState)
+        setEditorState(newEditorState)
+        setTotalChars(newEditorState.getCurrentContent().getPlainText().length)
+        setImages([])
+        setAudios([])
+    }
+
+    function addPostDefaults(post) {
+        const { id, handle, name, flagImagePath } = accountData
+        post.Creator = { id, handle, name, flagImagePath }
+        post.Comments = []
+        post.totalLikes = 0
+        post.totalComments = 0
+        post.totalReposts = 0
+        post.totalRatings = 0
+        post.totalLinks = 0
+    }
+
     function save() {
         setSaveLoading(true)
         // structure data
-        const { id, handle, name, flagImagePath } = accountData
         const post = {
-            Creator: { id, handle, name, flagImagePath },
+            link: { root, parent },
             id: inputId,
+            type,
             text: findText(),
             mentions: mentions.map((m) => m.id),
             urls,
@@ -326,32 +336,33 @@ function CommentInput(props: {
         // validate post
         const validation = validatePost(post)
         if (validation.errors.length) {
+            // display errors
             setErrors(validation.errors)
             setSaveLoading(false)
-        } else {
-            // if preview pass back data
-            if (preview) onSave(post)
-            else {
-                // upload data
-                uploadPost(post, type)
-                    .then((res) => {
-                        console.log(res.data)
-                    })
-                    .catch((error) => console.log(error))
-            }
-            // return or upload post
+        } else if (preview) {
+            // return post data (remove unused values & restructure media data...)
+            addPostDefaults(post)
             post.totalSize = validation.totalSize
             onSave(post)
-            // reset data
-            const newContentState = ContentState.createFromText('')
-            const newEditorState = EditorState.createWithContent(newContentState)
-            setEditorState(newEditorState)
-            setTotalChars(newEditorState.getCurrentContent().getPlainText().length)
-            setImages([])
-            setAudios([])
+            resetData()
+        } else {
+            // upload post
+            uploadPost(post)
+                .then((res) => {
+                    console.log('uploadPost res:', res.data)
+                    const newPost = res.data.post
+                    const { id, handle, name, flagImagePath } = accountData
+                    newPost.Creator = { id, handle, name, flagImagePath }
+                    newPost.Comments = []
+                    newPost.link = post.link // include link data for comments
+                    onSave(newPost)
+                    resetData()
+                })
+                .catch((error) => console.log(error))
         }
     }
 
+    // initialize component
     useEffect(() => {
         initializeDropBox()
         // set up editor
@@ -539,7 +550,7 @@ function CommentInput(props: {
                                 url={audio.Audio.url}
                                 staticBars={250}
                                 location='new-post'
-                                style={{ height: 100 }}
+                                style={{ height: 140 }}
                             />
                         </Column>
                     ))}
@@ -558,6 +569,9 @@ function CommentInput(props: {
 }
 
 CommentInput.defaultProps = {
+    root: null,
+    parent: null,
+    preview: false,
     maxChars: 0,
     className: '',
     style: null,

@@ -113,9 +113,8 @@ function NavigationList(props: {
 
     async function getSpaces(spaceId, offset, includeParents, includeChildren) {
         if (!offset) spaceHandleRef.current = spaceHandle
-        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         const data = { spaceId, offset, includeParents, includeChildren }
-        return axios.post(`${config.apiURL}/nav-list-spaces`, data, options)
+        return axios.post(`${config.apiURL}/nav-list-spaces`, data)
     }
 
     function findSpace(spaces: any[], id: number) {

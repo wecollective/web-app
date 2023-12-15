@@ -34,6 +34,7 @@ function AudioCard(props: {
     if (location === 'gbg-room') height = 80
 
     function toggleAudio() {
+        // e.stopPropagation()
         // console.log('toggleAudio')
         const audio = d3.select(`#${audioId}`).node()
         if (audio) {
@@ -87,7 +88,18 @@ function AudioCard(props: {
         updateThumbOffset(percent)
     }
 
+    function addClickEvents() {
+        const playButton = document.getElementById(`play-button-${audioId}`)
+        if (playButton) {
+            playButton.addEventListener('click', (e) => {
+                e.stopPropagation()
+                toggleAudio()
+            })
+        }
+    }
+
     useEffect(() => {
+        addClickEvents()
         // console.log('AudioTimeSlider useffect 2')
         // console.log('navigator.userAgent: ', navigator.userAgent)
         const audio = d3.select(`#${audioId}`)
@@ -147,10 +159,11 @@ function AudioCard(props: {
             </Column>
             <Row centerY style={{ height: 30 }}>
                 <button
+                    id={`play-button-${audioId}`}
                     className={styles.playButton}
                     type='button'
                     aria-label='toggle-audio'
-                    onClick={toggleAudio}
+                    // onClick={toggleAudio}
                     // style={{ position: 'absolute' }}
                 >
                     {audioPlaying ? <PauseIcon /> : <PlayIcon />}

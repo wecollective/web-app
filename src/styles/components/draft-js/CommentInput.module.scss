@@ -227,10 +227,6 @@ $transitionSpeed: 0.5s;
 
     .audio {
         position: relative;
-        background-color: white;
-        border: 1px solid $grey2;
-        border-radius: 10px;
-        padding: 15px 10px 10px 10px;
 
         &:not(:first-child) {
             margin-top: 10px;

@@ -199,8 +199,6 @@ function CreatePostModal(): JSX.Element {
             .then((res) => {
                 setUrlsWithMetaData((us) => {
                     const newUrlsMetaData = [...us.filter((u) => u.url !== url)]
-                    // const newUrl = { url, loading: false, ...res.data }
-                    // newUrl.searchableText = findUrlSearchableText(newUrl)
                     newUrlsMetaData.push({ url, loading: false, ...res.data })
                     return newUrlsMetaData
                 })
@@ -1450,7 +1448,7 @@ function CreatePostModal(): JSX.Element {
                                                 <AudioCard
                                                     id={audio.id}
                                                     url={audio.Audio.url}
-                                                    staticBars={400}
+                                                    staticBars={250}
                                                     location='new-post'
                                                     remove={() => removeAudio(audio.id)}
                                                     style={{ height: 150, marginBottom: 10 }}

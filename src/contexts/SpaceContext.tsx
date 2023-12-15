@@ -151,7 +151,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         axios
             .post(`${config.apiURL}/space-posts`, data, options)
             .then((res) => {
-                // console.log('space-posts: ', res.data)
+                console.log('space-posts: ', res.data)
                 if (spaceHandleRef.current === spaceData.handle) {
                     setSpacePosts(firstLoad ? res.data : [...spacePosts, ...res.data])
                     setSpacePostsPaginationHasMore(res.data.length === spacePostsPaginationLimit)

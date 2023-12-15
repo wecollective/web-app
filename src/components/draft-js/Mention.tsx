@@ -20,7 +20,7 @@ function Mention(props: { mention }): JSX.Element {
 
     useEffect(() => getUserData(), [])
 
-    if (!userData) return <span />
+    if (!userData) return <span>@{mention.name}</span>
     return (
         <span className={styles.wrapper}>
             <Link

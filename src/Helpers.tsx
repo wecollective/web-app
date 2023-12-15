@@ -62,26 +62,17 @@ export const defaultErrorState = {
 
 export const defaultPostData = {
     id: uuidv4(),
-    type: 'text',
+    type: 'post',
     text: '',
-    // url: '',
-    // urlImage: null,
-    // urlDomain: null,
-    // urlTitle: null,
-    // urlDescription: null,
     totalLikes: 0,
     totalComments: 0,
     totalReposts: 0,
     totalRatings: 0,
     totalLinks: 0,
-    Creator: {
-        id: 0,
-        handle: '',
-        name: '',
-        flagImagePath: '',
-    },
+    Creator: { id: 0, handle: '', name: '', flagImagePath: '' },
     DirectSpaces: [] as any[],
     IndirectSpaces: [] as any[],
+    Comments: [] as any[],
     Reactions: [] as any[],
     IncomingLinks: [] as any[],
     OutgoingLinks: [] as any[],
@@ -576,7 +567,7 @@ function findTotalUploadSize(post) {
         .filter((i) => i.Image.file)
         .map((i) => i.Image.file.size)
         .reduce((a, b) => a + b, 0)
-    const audioSize = audios.map((a) => a.file.size).reduce((a, b) => a + b, 0)
+    const audioSize = audios.map((a) => a.Audio.file.size).reduce((a, b) => a + b, 0)
     // const cardSize =
     //     (cardFrontImage ? cardFrontImage.size : 0) + (cardBackImage ? cardBackImage.size : 0)
     // todo: count bead uploads
@@ -641,7 +632,8 @@ export function validatePost(post, constraints?) {
     return { errors, totalSize }
 }
 
-function attachPostFiles(postData, formData) {
+function attachPostFiles(formData, postData) {
+    // attaches postData files to formData and removes them from the postData object
     const { mediaTypes, images, audios, poll } = postData
     if (mediaTypes.includes('image')) {
         images.forEach((i) => {
@@ -652,7 +644,9 @@ function attachPostFiles(postData, formData) {
         })
     }
     if (mediaTypes.includes('audio')) {
-        audios.forEach((a) => formData.append(`audio${a.file.name ? '' : '-blob'}`, a.file, a.id))
+        audios.forEach((a) =>
+            formData.append(`audio${a.Audio.file.name ? '' : '-blob'}`, a.Audio.file, a.id)
+        )
         postData.audios = audios.map((a) => {
             return { id: a.id, text: a.text }
         })
@@ -663,7 +657,7 @@ function attachPostFiles(postData, formData) {
         // todo: refactor for answers with media
         poll.answers.forEach((answer) => {
             // loop through and attach media
-            attachPostFiles(answer, formData)
+            attachPostFiles(formData, answer)
             // formData.append(`audio${a.file.name ? '' : '-blob'}`, a.file, a.id)
         })
         // postData.poll.answers = poll.answers.map((answer) => {
@@ -743,11 +737,10 @@ function attachPostFiles(postData, formData) {
     postData.searchableText = findSearchableText(postData)
 }
 
-export function uploadPost(post, type, parentId?, rootId?) {
-    console.log('uploadPost: ', post, type, parentId, rootId)
+export function uploadPost(post) {
     const postData = { ...post }
     const formData = new FormData()
-    attachPostFiles(postData, formData)
+    attachPostFiles(formData, postData)
     formData.append('post-data', JSON.stringify(postData))
     const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
     return axios.post(`${config.apiURL}/create-post`, formData, options)

@@ -19,10 +19,6 @@ https://www.youtube.com/watch?v=L80_E6G18II
 
 https://css-tricks.com/making-an-audio-waveform-visualizer-with-vanilla-javascript/
 
-### No space left on server (usual cause: access.log file)
-
-https://serverfault.com/questions/330532/xvda1-is-100-full-what-is-it-how-to-fix
-
 ### Build source map
 
 cd into `build/static/js`

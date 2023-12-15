@@ -275,10 +275,7 @@ function BeadCard(props: {
                                     onClick={() => openImageModal(imageBlocks[0].id)}
                                 >
                                     <img
-                                        src={
-                                            imageBlocks[0].Image.url ||
-                                            URL.createObjectURL(imageBlocks[0].Image.file)
-                                        }
+                                        src={imageBlocks[0].Image.url}
                                         // onError={(e) => handleImageError(e, Images[0].url)}
                                         alt=''
                                     />
@@ -288,13 +285,9 @@ function BeadCard(props: {
                                 <AudioCard
                                     id={postId}
                                     index={beadIndex}
-                                    url={
-                                        // todo: use same approach as with Image (store url)
-                                        audioBlocks[0].Audio.url ||
-                                        URL.createObjectURL(audioBlocks[0].Audio.file)
-                                    }
+                                    url={audioBlocks[0].Audio.url}
                                     staticBars={110}
-                                    // location={location}
+                                    dynamicBars={80}
                                     location='bead-card'
                                     style={{ width: '100%', height: '100%' }}
                                 />

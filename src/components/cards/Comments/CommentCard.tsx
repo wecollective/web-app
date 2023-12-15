@@ -24,7 +24,7 @@ import {
     ExpandIcon,
     EyeClosedIcon,
     LikeIcon,
-    LinkIcon,
+    NeuronIcon,
     VerticalEllipsisIcon,
     ZapIcon,
 } from '@svgs/all'
@@ -220,7 +220,6 @@ function CommentCard(props: {
         const commentText = document.getElementById(`comment-text-${comment.id}`)
         if (commentText) {
             commentText.addEventListener('click', () => {
-                // if no text selected & reply input empty: toogle reply input
                 // todo: check if reply input empty
                 if (!getTextSelection()) toggleSelected()
             })
@@ -336,7 +335,8 @@ function CommentCard(props: {
                                 {selected && (
                                     <Row>
                                         <Link
-                                            to={`/p/${rootId}?commentId=${id}`}
+                                            // to={`/p/${rootId}?commentId=${id}`}
+                                            to={`/p/${id}`}
                                             className={styles.id}
                                             title='Open post page'
                                         >
@@ -393,10 +393,10 @@ function CommentCard(props: {
                                                 }`}
                                             />
                                             {mediaTypes.includes('image') && (
-                                                <Images postId={id} style={{ marginBottom: 10 }} />
+                                                <Images postId={id} style={{ margin: '10px 0' }} />
                                             )}
                                             {mediaTypes.includes('audio') && (
-                                                <Audios postId={id} style={{ marginBottom: 10 }} />
+                                                <Audios postId={id} style={{ margin: '10px 0' }} />
                                             )}
                                         </div>
                                     )}
@@ -442,7 +442,7 @@ function CommentCard(props: {
                                                     history(`/linkmap?item=comment&id=${id}`)
                                                 }
                                             >
-                                                <LinkIcon />
+                                                <NeuronIcon />
                                                 <p>{totalLinks}</p>
                                             </button>
                                             <button

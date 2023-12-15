@@ -12,7 +12,6 @@ import Input from '@components/Input'
 import Row from '@components/Row'
 import TextLink from '@components/TextLink'
 import LoadingWheel from '@components/animations/LoadingWheel'
-import CommentCard from '@components/cards/Comments/CommentCard'
 import HorizontalSpaceCard from '@components/cards/HorizontalSpaceCard'
 import PostCard from '@components/cards/PostCard/PostCard'
 import VerticalUserCard from '@components/cards/VerticalUserCard'
@@ -105,21 +104,22 @@ function LinkMap(): JSX.Element {
     function renderItem(item, type) {
         if (type === 'post')
             return <PostCard key={item.id} post={item} location='link-modal' collapse />
-        if (type === 'comment')
-            return (
-                // todo: add styles prop to CommentCard, allow commenting on linkmap
-                <CommentCard
-                    key={item.id}
-                    comment={item}
-                    highlighted={false}
-                    location='link-map'
-                    // selected={false}
-                    // toggleReplyInput={() => null}
-                    removeComment={() => null}
-                    editComment={() => null}
-                    updateCommentReactions={() => null}
-                />
-            )
+        // if (type === 'comment')
+        //     return (
+        //         // todo: add styles prop to CommentCard, allow commenting on linkmap
+        //         <CommentCard
+        //             key={item.id}
+        //             comment={item}
+        //             postId={0}
+        //             location='link-map'
+        //             highlighted
+        //             // selected={false}
+        //             // toggleReplyInput={() => null}
+        //             addComment={(a) => null}
+        //             removeComment={() => null}
+        //             editComment={() => null}
+        //         />
+        //     )
         if (type === 'user')
             return <VerticalUserCard key={item.id} user={item} style={{ flexGrow: 0, margin: 0 }} />
         if (type === 'space') return <HorizontalSpaceCard key={item.id} space={item} />

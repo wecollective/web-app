@@ -32,6 +32,7 @@ function Comments(props: {
     })
 
     function getComments(offset) {
+        console.log('get comments', postId)
         // setLoading(true)
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
@@ -112,6 +113,7 @@ function Comments(props: {
     useEffect(() => {
         setComments([])
         if (totalComments) getComments(0)
+        else setLoading(false)
     }, [postId])
 
     return (

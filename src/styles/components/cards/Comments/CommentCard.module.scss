@@ -100,9 +100,9 @@
         // margin-top: 5px;
         flex-shrink: 0;
 
-        &.blue {
-            border-left: 2px dotted rgba($blue5, 0.5); // $grey4
-        }
+        // &.blue {
+        //     border-left: 2px dotted rgba($blue5, 0.5); // $grey4
+        // }
     }
 
     .content {
@@ -191,7 +191,7 @@
             cursor: pointer;
             font-size: 14px;
             color: $grey4;
-            margin-right: 10px;
+            margin-right: 15px;
             display: flex;
             align-items: center;
             transition: all 0.5s;
@@ -204,9 +204,9 @@
             }
 
             svg {
-                width: 16px;
-                height: 16px;
-                margin-right: 3px;
+                width: 18px;
+                height: 18px;
+                margin-right: 5px;
             }
 
             &:hover {
