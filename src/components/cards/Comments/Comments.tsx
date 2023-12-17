@@ -63,11 +63,11 @@ function Comments(props: {
 
     function addComment(comment) {
         const { parent, root } = comment.link
-        if (!root) setComments([...comments, comment])
+        if (!root) setComments([comment, ...comments])
         else {
             const newComments = [...comments]
             const parentComment = findCommentById(newComments, parent.id)
-            if (parentComment) parentComment.Comments.push(comment)
+            if (parentComment) parentComment.Comments.unshift(comment)
             setComments(newComments)
         }
         incrementTotalComments(1)
@@ -136,6 +136,7 @@ function Comments(props: {
                 <Column>
                     {filteredComments.map((comment) => (
                         <CommentCard
+                            key={comment.id}
                             depth={0}
                             comment={comment}
                             postId={postId}

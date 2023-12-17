@@ -6,6 +6,7 @@ import LoadingWheel from '@components/animations/LoadingWheel'
 import EditCommentModal from '@components/cards/Comments/EditCommentModal'
 import Audios from '@components/cards/PostCard/Audios'
 import Images from '@components/cards/PostCard/Images'
+import Urls from '@components/cards/PostCard/Urls'
 import CommentInput from '@components/draft-js/CommentInput'
 import DraftText from '@components/draft-js/DraftText'
 import DeleteCommentModal from '@components/modals/DeleteCommentModal'
@@ -392,6 +393,9 @@ function CommentCard(props: {
                                                     state === 'deleted' && styles.deleted
                                                 }`}
                                             />
+                                            {mediaTypes.includes('url') && (
+                                                <Urls postId={id} style={{ margin: '10px 0' }} />
+                                            )}
                                             {mediaTypes.includes('image') && (
                                                 <Images postId={id} style={{ margin: '10px 0' }} />
                                             )}

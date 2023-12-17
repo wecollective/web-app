@@ -305,6 +305,7 @@ function CommentInput(props: {
         setTotalChars(newEditorState.getCurrentContent().getPlainText().length)
         setImages([])
         setAudios([])
+        setUrls([])
     }
 
     function addPostDefaults(post) {
