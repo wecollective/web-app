@@ -1,3 +1,5 @@
+import { ReactComponent as AngleUpIcon } from '@svgs/angle-up-solid.svg'
+import { ReactComponent as AnglesUpIcon } from '@svgs/angles-up-solid.svg'
 import { ReactComponent as AppsIcon } from '@svgs/apps-grid-icon.svg'
 import { ReactComponent as ArrowRightIcon } from '@svgs/arrow-alt-circle-right-solid.svg'
 import { ReactComponent as ArrowDownIcon } from '@svgs/arrow-down-solid.svg'
@@ -94,6 +96,8 @@ import { ReactComponent as WecoLogo } from '@svgs/weco-logo.svg'
 
 export {
     AboutIcon,
+    AngleUpIcon,
+    AnglesUpIcon,
     AppsIcon,
     ArrowDownIcon,
     ArrowRightIcon,

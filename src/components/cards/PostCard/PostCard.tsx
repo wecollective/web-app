@@ -5,6 +5,7 @@ import ShowMoreLess from '@components/ShowMoreLess'
 import UserButton from '@components/UserButton'
 import LoadingWheel from '@components/animations/LoadingWheel'
 import Comments from '@components/cards/Comments/Comments'
+import AudioCard from '@components/cards/PostCard/AudioCard'
 import Audios from '@components/cards/PostCard/Audios'
 import Card from '@components/cards/PostCard/Card'
 import EventCard from '@components/cards/PostCard/EventCard'
@@ -12,6 +13,7 @@ import GlassBeadGame from '@components/cards/PostCard/GlassBeadGame'
 import Images from '@components/cards/PostCard/Images'
 import PollCard from '@components/cards/PostCard/PollCard'
 import PostSpaces from '@components/cards/PostCard/PostSpaces'
+import UrlCard from '@components/cards/PostCard/UrlCard'
 import Urls from '@components/cards/PostCard/Urls'
 import DraftText from '@components/draft-js/DraftText'
 import DeletePostModal from '@components/modals/DeletePostModal'
@@ -25,7 +27,8 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import { dateCreated, timeSinceCreated, timeSinceCreatedShort } from '@src/Helpers'
 import {
-    ArrowUpIcon,
+    AngleUpIcon,
+    AnglesUpIcon,
     CommentIcon,
     DeleteIcon,
     EditIcon,
@@ -87,6 +90,8 @@ function PostCard(props: {
         DirectSpaces,
         Event,
         Image,
+        Audio,
+        Url,
     } = post
     const [buttonsDisabled, setButtonsDisabled] = useState(true)
     const [accountReactions, setAccountReactions] = useState<any>({})
@@ -224,13 +229,13 @@ function PostCard(props: {
             {commentLinks && (
                 <Row centerX>
                     {commentLinks.rootId && (
-                        <Link to={`/p/${commentLinks.rootId}`} className={styles.commentLink}>
-                            <ArrowUpIcon />
+                        <Link to={`/p/${commentLinks.rootId}`} className={styles.rootLink}>
+                            <AnglesUpIcon />
                             <p style={{ marginLeft: 5 }}>Root</p>
                         </Link>
                     )}
-                    <Link to={`/p/${commentLinks.parentId}`} className={styles.commentLink}>
-                        <ArrowUpIcon />
+                    <Link to={`/p/${commentLinks.parentId}`} className={styles.parentLink}>
+                        <AngleUpIcon />
                         <p style={{ marginLeft: 5 }}>Parent</p>
                     </Link>
                 </Row>
@@ -375,6 +380,16 @@ function PostCard(props: {
                 )}
                 {/* block posts */}
                 {type === 'image' && <img className={styles.image} src={Image.url} alt='block' />}
+                {type === 'audio' && (
+                    <AudioCard
+                        id={Audio.id}
+                        url={Audio.url}
+                        staticBars={250}
+                        location='post'
+                        style={{ height: 160, width: '100%' }}
+                    />
+                )}
+                {type === 'url' && <UrlCard key={Url.id} type='post' urlData={Url} />}
             </Column>
             {showFooter && (
                 <Row spaceBetween className={styles.footer}>

@@ -40,12 +40,12 @@
         border-radius: 10px;
     }
 
-    .commentLink {
+    .rootLink,
+    .parentLink {
         display: flex;
         justify-content: center;
         align-items: center;
         height: 30px;
-        background-color: $blue8;
         border-radius: 15px;
         padding: 0 10px;
 
@@ -58,6 +58,14 @@
             height: 16px;
             color: $grey7;
         }
+    }
+
+    .rootLink {
+        background-color: $purple2;
+    }
+
+    .parentLink {
+        background-color: $blue8;
     }
 
     .header {
