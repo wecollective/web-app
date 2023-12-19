@@ -25,6 +25,7 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import { dateCreated, timeSinceCreated, timeSinceCreatedShort } from '@src/Helpers'
 import {
+    ArrowUpIcon,
     CommentIcon,
     DeleteIcon,
     EditIcon,
@@ -90,6 +91,7 @@ function PostCard(props: {
     const [buttonsDisabled, setButtonsDisabled] = useState(true)
     const [accountReactions, setAccountReactions] = useState<any>({})
     const { liked, rated, reposted, commented, linked } = accountReactions
+    const [commentLinks, setCommentLinks] = useState<any>(null)
     const [likeLoading, setLikeLoading] = useState(false)
     const [draggable, setDraggable] = useState(true)
     const [topicImage, setTopicImage] = useState('')
@@ -149,6 +151,16 @@ function PostCard(props: {
             .catch((error) => console.log(error))
     }
 
+    function getCommentLinks() {
+        axios
+            .get(`${config.apiURL}/comment-links?postId=${id}`)
+            .then((res) => {
+                console.log('comment-links: ', res.data)
+                setCommentLinks(res.data)
+            })
+            .catch((error) => console.log(error))
+    }
+
     function addDragEvents() {
         const postCard = document.getElementById(`post-${id}`)
         if (postCard) {
@@ -197,6 +209,7 @@ function PostCard(props: {
 
     useEffect(() => {
         if (loggedIn) getAccountReactions()
+        if (type === 'comment') getCommentLinks()
         addDragEvents()
     }, [])
 
@@ -208,6 +221,20 @@ function PostCard(props: {
             style={style}
             draggable={draggable}
         >
+            {commentLinks && (
+                <Row centerX>
+                    {commentLinks.rootId && (
+                        <Link to={`/p/${commentLinks.rootId}`} className={styles.commentLink}>
+                            <ArrowUpIcon />
+                            <p style={{ marginLeft: 5 }}>Root</p>
+                        </Link>
+                    )}
+                    <Link to={`/p/${commentLinks.parentId}`} className={styles.commentLink}>
+                        <ArrowUpIcon />
+                        <p style={{ marginLeft: 5 }}>Parent</p>
+                    </Link>
+                </Row>
+            )}
             <Row spaceBetween className={styles.header}>
                 <Row centerY>
                     <UserButton

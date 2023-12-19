@@ -40,6 +40,26 @@
         border-radius: 10px;
     }
 
+    .commentLink {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 30px;
+        background-color: $blue8;
+        border-radius: 15px;
+        padding: 0 10px;
+
+        &:not(:last-child) {
+            margin-right: 20px;
+        }
+
+        > svg {
+            width: 16px;
+            height: 16px;
+            color: $grey7;
+        }
+    }
+
     .header {
         font-size: 15px;
         margin-bottom: 10px;
