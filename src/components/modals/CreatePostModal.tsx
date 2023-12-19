@@ -38,16 +38,16 @@ import {
     audioMBLimit,
     capitalise,
     defaultGBGSettings,
-    defaultPostData,
     findDraftLength,
-    // findUrlSearchableText,
+    findSearchableText,
+    findUrlSearchableText,
     formatTimeMMSS,
-    getDraftPlainText,
     imageMBLimit,
-    megaByte,
     postTypeIcons,
+    scrapeUrl,
     simplifyText,
-    totalMBUploadLimit,
+    uploadPost,
+    validatePost,
 } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/CreatePostModal.module.scss'
@@ -111,30 +111,25 @@ function CreatePostModal(): JSX.Element {
     const { userPosts, setUserPosts } = useContext(UserContext)
     const [loading, setLoading] = useState(false)
     const [linkDescription, setLinkDescription] = useState('')
-    // const [postType, setPostType] = useState('text')
     const [mediaTypes, setMediaTypes] = useState<string[]>([])
     const [spaces, setSpaces] = useState<any[]>([spaceData.id ? spaceData : defaultSelectedSpace])
     const [showTitle, setShowTitle] = useState(true)
     const [title, setTitle] = useState('')
     const [text, setText] = useState('')
-    const [noTextError, setNoTextError] = useState(false)
-    const [maxCharsErrors, setMaxCharsErrors] = useState(false)
     const [mentions, setMentions] = useState<any[]>([])
+    const [rawUrls, setRawUrls] = useState<any[]>([])
     const [urls, setUrls] = useState<any[]>([])
-    const [urlsWithMetaData, setUrlsWithMetaData] = useState<any[]>([])
     const [startTime, setStartTime] = useState('')
     const [endTime, setEndTime] = useState('')
-    const [noEventTimesError, setNoEventTimesError] = useState(false)
-    const [eventTextError, setEventTextError] = useState(false)
+    const [errors, setErrors] = useState<string[]>([])
     const [saved, setSaved] = useState(false)
     const [spacesModalOpen, setSpacesModalOpen] = useState(false)
-    const [totalUploadSizeError, setTotalUploadSizeError] = useState(false)
     const maxChars = 5000
     const cookies = new Cookies()
     const maxUrls = 5
     const urlRequestIndex = useRef(0)
     const location = useLocation()
-    const [page, handle, subPage] = location.pathname.split('/')
+    const [x, page, pageHandle, subPage] = location.pathname.split('/')
     let contentTypes = ['image', 'audio', 'event', 'poll']
     if (game) contentTypes = ['glass-bead-game', 'card']
     if (governance) contentTypes = []
@@ -191,44 +186,8 @@ function CreatePostModal(): JSX.Element {
         }
     }
 
-    function scrapeUrlMetaData(url) {
-        setUrlsWithMetaData((us) => [...us, { url, loading: true }])
-        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-        axios
-            .get(`${config.apiURL}/scrape-url?url=${url}`, options)
-            .then((res) => {
-                setUrlsWithMetaData((us) => {
-                    const newUrlsMetaData = [...us.filter((u) => u.url !== url)]
-                    newUrlsMetaData.push({ url, loading: false, ...res.data })
-                    return newUrlsMetaData
-                })
-            })
-            .catch((error) => console.log(error))
-    }
-
     function removeUrlMetaData(url) {
-        setUrlsWithMetaData((us) => [...us.filter((u) => u.url !== url)])
-    }
-
-    function findTotalUploadSize() {
-        const imageSize = images
-            .filter((i) => i.Image.file)
-            .map((i) => i.Image.file.size)
-            .reduce((a, b) => a + b, 0)
-        const audioSize = audios.map((a) => a.file.size).reduce((a, b) => a + b, 0)
-        const cardSize =
-            (cardFrontImage ? cardFrontImage.size : 0) + (cardBackImage ? cardBackImage.size : 0)
-        // todo: count bead uploads
-        const total = imageSize + audioSize + cardSize
-        return +(total / megaByte).toFixed(2)
-    }
-
-    function findPostUploadSize(post) {
-        const imageSize = post.images
-            .map((i) => (i.Image.file ? i.Image.file.size : 0))
-            .reduce((a, b) => a + b, 0)
-        const audioSize = post.audios.map((a) => a.file.size).reduce((a, b) => a + b, 0)
-        return +((imageSize + audioSize) / megaByte).toFixed(2)
+        setUrls((us) => [...us.filter((u) => u.url !== url)])
     }
 
     // images
@@ -236,8 +195,6 @@ function CreatePostModal(): JSX.Element {
     const [imageURL, setImageURL] = useState('')
     const [startIndex, setStartIndex] = useState(0)
     const [imageModalOpen, setImageModalOpen] = useState(false)
-    const [imageSizeError, setImageSizeError] = useState(false)
-    const [noImagesError, setNoImagesError] = useState(false)
 
     function findImageSize() {
         if (images.length === 1) return 'large'
@@ -246,14 +203,13 @@ function CreatePostModal(): JSX.Element {
     }
 
     function addImageFiles(drop?) {
-        setImageSizeError(false)
-        setNoImagesError(false)
         const input = drop || (document.getElementById('image-input') as HTMLInputElement)
         if (input && input.files && input.files.length) {
             for (let i = 0; i < input.files.length; i += 1) {
                 const fileType = input.files[i].type.split('/')[1]
                 if (allowedImageTypes.includes(`.${fileType}`)) {
-                    if (input.files[i].size > imageMBLimit * 1024 * 1024) setImageSizeError(true)
+                    const tooLarge = input.files[i].size > imageMBLimit * 1024 * 1024
+                    if (tooLarge) setErrors([`Max image size: ${imageMBLimit} MBs`])
                     else {
                         const newImage = {
                             id: uuidv4(),
@@ -262,7 +218,8 @@ function CreatePostModal(): JSX.Element {
                                 url: URL.createObjectURL(input.files[i]),
                             },
                         }
-                        setImages((imgs) => [...imgs, newImage])
+                        setImages((oldImages) => [...oldImages, newImage])
+                        setErrors([])
                     }
                 }
             }
@@ -272,13 +229,12 @@ function CreatePostModal(): JSX.Element {
     function addImageURL() {
         setImages([...images, { id: uuidv4(), Image: { url: imageURL } }])
         setImageURL('')
-        setImageSizeError(false)
-        setNoImagesError(false)
+        setErrors([])
     }
 
     function removeImage(id) {
-        setTotalUploadSizeError(false)
         setImages(images.filter((image) => image.id !== id))
+        setErrors([])
     }
 
     function moveImage(index, increment) {
@@ -353,28 +309,17 @@ function CreatePostModal(): JSX.Element {
     const [audios, setAudios] = useState<any[]>([])
     const [recording, setRecording] = useState(false)
     const [recordingTime, setRecordingTime] = useState(0)
-    const [audioSizeError, setAudioSizeError] = useState(false)
-    const [noAudioError, setNoAudioError] = useState(false)
     const audioRecorder = useRef<any>(null)
     const recordingInterval = useRef<any>(null)
 
-    function resetAudioState() {
-        // setAudioFile(undefined)
-        setNoAudioError(false)
-        setRecordingTime(0)
-        const input = d3.select('#audio-input').node()
-        if (input) input.value = ''
-    }
-
     function addAudioFiles(drop?) {
-        setAudioSizeError(false)
-        setNoAudioError(false)
         const input = drop || (document.getElementById('audio-input') as HTMLInputElement)
         if (input && input.files && input.files.length) {
             for (let i = 0; i < input.files.length; i += 1) {
                 const fileType = input.files[i].type.split('/')[1]
                 if (allowedAudioTypes.includes(`.${fileType}`)) {
-                    if (input.files[i].size > audioMBLimit * 1024 * 1024) setAudioSizeError(true)
+                    const tooLarge = input.files[i].size > audioMBLimit * 1024 * 1024
+                    if (tooLarge) setErrors([`Max audio size: ${audioMBLimit} MBs`])
                     else {
                         const newAudio = {
                             id: uuidv4(),
@@ -383,7 +328,8 @@ function CreatePostModal(): JSX.Element {
                                 url: URL.createObjectURL(input.files[i]),
                             },
                         }
-                        setAudios((audio) => [...audio, newAudio])
+                        setAudios((oldAudios) => [...oldAudios, newAudio])
+                        setErrors([])
                     }
                 }
             }
@@ -414,7 +360,7 @@ function CreatePostModal(): JSX.Element {
             })
             setRecording(false)
         } else {
-            resetAudioState()
+            setRecordingTime(0)
             navigator.mediaDevices
                 .getUserMedia({ audio: { sampleRate: 24000 } })
                 .then((audioStream) => {
@@ -453,12 +399,9 @@ function CreatePostModal(): JSX.Element {
 
     // poll
     const [pollType, setPollType] = useState('Single choice')
-    const [newPollAnswer, setNewPollAnswer] = useState('')
     const [pollAnswers, setPollAnswers] = useState<any[]>([])
     const [pollAnswersLocked, setPollAnswersLocked] = useState(false)
     const [pollAnswersLoading, setPollAnswersLoading] = useState(false)
-    const [pollAnswersError, setPollAnswersError] = useState(false)
-    const [pollTextError, setPollTextError] = useState(false)
     const [pollAction, setPollAction] = useState('None')
     const [pollThreshold, setPollThreshold] = useState(5)
     const pollColorScale = d3
@@ -466,27 +409,10 @@ function CreatePostModal(): JSX.Element {
         .domain([0, pollAnswers.length])
         .interpolator(d3.interpolateViridis)
 
-    // todo: handle media
-
     function addPollAnswer(newAnswer) {
         setPollAnswers([...pollAnswers, newAnswer])
-        setNewPollAnswer('')
-        setPollAnswersError(false)
+        setErrors([])
     }
-
-    // function addPollAnswer() {
-    //     setPollAnswers([
-    //         ...pollAnswers,
-    //         {
-    //             id: uuidv4(),
-    //             text: newPollAnswer,
-    //             Reactions: [],
-    //             Creator: accountData,
-    //         },
-    //     ])
-    //     setNewPollAnswer('')
-    //     setPollAnswersError(false)
-    // }
 
     function removePollAnswer(id) {
         setPollAnswers(pollAnswers.filter((a) => a.id !== id))
@@ -501,14 +427,11 @@ function CreatePostModal(): JSX.Element {
     const [cardFrontMentions, setCardFrontMentions] = useState<any[]>([])
     const [cardFrontImage, setCardFrontImage] = useState<File>()
     const [cardFrontWatermark, setCardFrontWatermark] = useState(false)
-    const [cardFrontError, setCardFrontError] = useState(false)
     const [cardBackType, setCardBackType] = useState('text')
     const [cardBackText, setCardBackText] = useState('')
     const [cardBackMentions, setCardBackMentions] = useState<any[]>([])
     const [cardBackImage, setCardBackImage] = useState<File>()
     const [cardBackWatermark, setCardBackWatermark] = useState(false)
-    const [cardBackError, setCardBackError] = useState(false)
-    const [cardImageSizeError, setCardImageSizeError] = useState(false)
 
     function rotateCard() {
         setCardRotating(true)
@@ -525,18 +448,21 @@ function CreatePostModal(): JSX.Element {
         return cardFrontType === 'text' ? styles.expanded : null
     }
 
+    // todo: handle errors
     function addCardImage() {
         const input = document.getElementById('card-image-file-input') as HTMLInputElement
         if (input && input.files && input.files.length) {
-            if (input.files[0].size > imageMBLimit * 1024 * 1024) setCardImageSizeError(true)
+            // const tooLarge = '
+            if (input.files[0].size > imageMBLimit * 1024 * 1024) setErrors([''])
             else if (cardFlipped) {
                 setCardBackImage(input.files[0])
-                setCardBackError(false)
-                setCardImageSizeError(false)
+                setErrors([])
+                // setCardImageSizeError(false)
             } else {
                 setCardFrontImage(input.files[0])
-                setCardFrontError(false)
-                setCardImageSizeError(false)
+                setErrors([])
+                // setCardFrontError(false)
+                // setCardImageSizeError(false)
             }
         }
     }
@@ -557,8 +483,6 @@ function CreatePostModal(): JSX.Element {
     const { synchronous, multiplayer, players, totalMoves, movesPerPlayer } = GBGSettings
     const [beads, setBeads] = useState<any[]>([])
     const [nextBeadModalOpen, setNextBeadModalOpen] = useState(false)
-    const [topicError, setTopicError] = useState(false)
-    const [noBeadsError, setNoBeadsError] = useState(false)
 
     function uploadTopicImage() {
         const input = document.getElementById('topic-image-file-input') as HTMLInputElement
@@ -584,14 +508,14 @@ function CreatePostModal(): JSX.Element {
         )
         setTopicOptions(topicText ? [...arcMatches, ...limMatches].slice(0, 9) : [])
         setTopic(topicText)
-        setTopicError(false)
+        setErrors([])
     }
 
     function selectTopic(option) {
         setTopic(option.name)
         setTopicImageURL(option.imagePath)
         setTopicOptions([])
-        setTopicError(false)
+        setErrors([])
     }
 
     function renderGBGInfoRow() {
@@ -682,86 +606,86 @@ function CreatePostModal(): JSX.Element {
     }
 
     // todo: update for multiple media types
-    function postValid() {
-        let valid = true
-        console.log('beads: ', beads)
-        console.log('total size: ', findTotalUploadSize())
-        console.log('audios: ', audios)
-        if (findTotalUploadSize() > 5) {
-            setTotalUploadSizeError(true)
-            valid = false
-        }
-        const totalChars = findDraftLength(text)
-        if (mediaTypes.includes('text')) {
-            if (totalChars < 1 && !title && !urlsWithMetaData.length) {
-                setNoTextError(true)
-                valid = false
-            }
-            if (totalChars > maxChars) {
-                setMaxCharsErrors(true)
-                valid = false
-            }
-        }
-        if (mediaTypes.includes('image')) {
-            if (!images.length) {
-                setNoImagesError(true)
-                valid = false
-            }
-        }
-        if (mediaTypes.includes('audio')) {
-            if (!audios.length) {
-                setNoAudioError(true)
-                valid = false
-            }
-        }
-        if (mediaTypes.includes('event')) {
-            if (totalChars < 1 && !title) {
-                setEventTextError(true)
-                valid = false
-            }
-            if (!startTime) {
-                setNoEventTimesError(true)
-                valid = false
-            }
-        }
-        if (mediaTypes.includes('poll')) {
-            if (totalChars < 1 && !title) {
-                setPollTextError(true)
-                valid = false
-            }
-            if (pollAnswersLocked && pollAnswers.length < 2) {
-                setPollAnswersError(true)
-                valid = false
-            }
-        }
-        // todo: check total upload size
-        if (mediaTypes.includes('glass-bead-game')) {
-            if (!topic) {
-                setTopicError(true)
-                valid = false
-            }
-            if (!synchronous && !multiplayer && !beads.length) {
-                setNoBeadsError(true)
-                valid = false
-            }
-        }
-        if (mediaTypes.includes('card')) {
-            const frontTotalChars = findDraftLength(cardFrontText)
-            const backTotalChars = findDraftLength(cardBackText)
-            if (!cardFrontImage && frontTotalChars === 0) {
-                setCardFrontError(true)
-                valid = false
-            } else if (!cardBackImage && backTotalChars === 0) {
-                setCardBackError(true)
-                valid = false
-            }
-        }
-        const postMediaTypes = [...mediaTypes]
-        if (urlsWithMetaData.length) postMediaTypes.unshift('url')
-        if (!mediaTypes.length || findDraftLength(text)) postMediaTypes.unshift('text')
-        console.log('media types: ', postMediaTypes, mediaTypes)
-        return valid
-    }
+    // function postValid() {
+    //     let valid = true
+    //     console.log('beads: ', beads)
+    //     console.log('total size: ', findTotalUploadSize())
+    //     console.log('audios: ', audios)
+    //     if (findTotalUploadSize() > 5) {
+    //         setTotalUploadSizeError(true)
+    //         valid = false
+    //     }
+    //     const totalChars = findDraftLength(text)
+    //     if (mediaTypes.includes('text')) {
+    //         if (totalChars < 1 && !title && !urls.length) {
+    //             setNoTextError(true)
+    //             valid = false
+    //         }
+    //         if (totalChars > maxChars) {
+    //             setMaxCharsErrors(true)
+    //             valid = false
+    //         }
+    //     }
+    //     if (mediaTypes.includes('image')) {
+    //         if (!images.length) {
+    //             setNoImagesError(true)
+    //             valid = false
+    //         }
+    //     }
+    //     if (mediaTypes.includes('audio')) {
+    //         if (!audios.length) {
+    //             setNoAudioError(true)
+    //             valid = false
+    //         }
+    //     }
+    //     if (mediaTypes.includes('event')) {
+    //         if (totalChars < 1 && !title) {
+    //             setEventTextError(true)
+    //             valid = false
+    //         }
+    //         if (!startTime) {
+    //             setNoEventTimesError(true)
+    //             valid = false
+    //         }
+    //     }
+    //     if (mediaTypes.includes('poll')) {
+    //         if (totalChars < 1 && !title) {
+    //             setPollTextError(true)
+    //             valid = false
+    //         }
+    //         if (pollAnswersLocked && pollAnswers.length < 2) {
+    //             setPollAnswersError(true)
+    //             valid = false
+    //         }
+    //     }
+    //     // todo: check total upload size
+    //     if (mediaTypes.includes('glass-bead-game')) {
+    //         if (!topic) {
+    //             setTopicError(true)
+    //             valid = false
+    //         }
+    //         if (!synchronous && !multiplayer && !beads.length) {
+    //             setNoBeadsError(true)
+    //             valid = false
+    //         }
+    //     }
+    //     if (mediaTypes.includes('card')) {
+    //         const frontTotalChars = findDraftLength(cardFrontText)
+    //         const backTotalChars = findDraftLength(cardBackText)
+    //         if (!cardFrontImage && frontTotalChars === 0) {
+    //             setCardFrontError(true)
+    //             valid = false
+    //         } else if (!cardBackImage && backTotalChars === 0) {
+    //             setCardBackError(true)
+    //             valid = false
+    //         }
+    //     }
+    //     const postMediaTypes = [...mediaTypes]
+    //     if (urls.length) postMediaTypes.unshift('url')
+    //     if (!mediaTypes.length || findDraftLength(text)) postMediaTypes.unshift('text')
+    //     console.log('media types: ', postMediaTypes, mediaTypes)
+    //     return valid
+    // }
 
     function findTopicGroup() {
         if (mediaTypes.includes('glass-bead-game')) {
@@ -774,342 +698,394 @@ function CreatePostModal(): JSX.Element {
         return null
     }
 
-    function postButtonDisabled() {
-        if (urlsWithMetaData.find((u) => u.loading)) return true
-        return false
+    function saveDisabled() {
+        const urlsLoading = urls.find((u) => u.loading)
+        const totalChars = findDraftLength(text)
+        const noContent = !totalChars && !title && !urls.length && !images.length && !audios.length
+        return loading || urlsLoading || noContent || totalChars > maxChars
     }
 
-    function findSearchableText(p) {
-        const fields = [] as any
-        if (p.title) fields.push(p.title)
-        if (p.text) fields.push(getDraftPlainText(p.text))
-        // const urlData = p.urls.map
-        // const urlData = p.urls.map((u) => {
-        //     const urlFields = [] as any
-        //     if (u.url) urlFields.push(u.url)
-        //     if (u.title) urlFields.push(u.title)
-        //     if (u.description) urlFields.push(u.description)
-        //     if (u.domain) urlFields.push(u.domain)
-        //     return urlFields.length ? urlFields.join(' ') : null
-        // })
-        // if (urlData.length) fields.push(...urlData)
-        return fields.length ? fields.join(' ') : null
-    }
-
-    function createPost() {
-        if (postValid()) {
-            setLoading(true)
-            // update media types
-            const newMediaTypes = [...mediaTypes]
-            if (urlsWithMetaData.length) newMediaTypes.unshift('url')
-            if (title || findDraftLength(text)) newMediaTypes.unshift('text')
-            // create post data
-            const postData = {
-                // get on server
-                // creatorName: accountData.name,
-                // creatorHandle: accountData.handle,
-                mediaTypes: newMediaTypes.join(','),
-                spaceIds: spaces.map((s) => s.id), // todo: filter out all
-                title: mediaTypes.includes('glass-bead-game') ? topic : title, // todo: just use title?
-                text: findDraftLength(text) ? text : null,
-                mentions: mentions.map((m) => m.link),
-                // urls: urlsWithMetaData,
-                // images: mediaTypes.includes('image') ? images : [],
-                // startTime,
-                // endTime,
-                // pollType: pollType.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-                // pollAnswersLocked,
-                // pollAnswers,
-                // topicGroup: findTopicGroup(),
-                // topicImageUrl: topicImageFile ? null : topicImageURL,
-                // gbgSettings: GBGSettings,
-                // beads: !synchronous && !multiplayer ? beads : [],
-                // cardFrontText: findDraftLength(cardFrontText) ? cardFrontText : null,
-                // cardBackText: findDraftLength(cardBackText) ? cardBackText : null,
-                // cardFrontWatermark,
-                // cardBackWatermark,
-            } as any
-            // add media data
-            const formData = new FormData()
-            // formData entry values: fieldname (used here for types), file, originalname (used here for ids)
-            // current fieldname types: 'image', 'audio', 'audio-blob'
-            if (mediaTypes.includes('url')) postData.urls = urlsWithMetaData
-            if (mediaTypes.includes('image')) {
-                postData.images = images.map((i) => {
-                    return { id: i.id, text: i.text, url: i.Image.file ? null : i.Image.url }
-                })
-                images.forEach((i) => {
-                    if (i.Image.file) formData.append('image', i.Image.file, i.id)
-                })
-            }
-            if (mediaTypes.includes('audio')) {
-                postData.audios = audios.map((a) => {
-                    return { id: a.id, text: a.text }
-                })
-                audios.forEach((a) =>
-                    formData.append(`audio${a.file.name ? '' : '-blob'}`, a.file, a.id)
-                )
-            }
-            if (mediaTypes.includes('event')) {
-                postData.startTime = startTime
-                postData.endTime = endTime
-            }
-            if (mediaTypes.includes('poll')) {
-                postData.pollType = simplifyText(pollType)
-                postData.pollAnswersLocked = pollAnswersLocked
-                // todo: refactor for answers with media
-                postData.pollAnswers = pollAnswers
-            }
-            if (mediaTypes.includes('card')) {
-                const frontChars = findDraftLength(cardFrontText)
-                const backChars = findDraftLength(cardBackText)
-                postData.cardFront = {
-                    text: frontChars ? cardFrontText : null,
-                    searchableText: frontChars ? getDraftPlainText(cardFrontText) : null,
-                    watermark: cardFrontWatermark,
-                }
-                postData.cardBack = {
-                    text: backChars ? cardBackText : null,
-                    searchableText: backChars ? getDraftPlainText(cardBackText) : null,
-                    watermark: cardBackWatermark,
-                }
-                if (cardFrontImage) formData.append('image', cardFrontImage, 'card-front-image')
-                if (cardBackImage) formData.append('image', cardBackImage, 'card-back-image')
-            }
-            if (mediaTypes.includes('glass-bead-game')) {
-                postData.gbgSettings = GBGSettings
-                postData.topicGroup = findTopicGroup()
-                postData.topicImageUrl = topicImageFile ? null : topicImageURL
-                if (topicImageFile) formData.append('image', topicImageFile, 'topic-image')
-                if (!synchronous && !multiplayer) {
-                    // add beads
-                    // what is the current bead structure?
-                    // { id: uuid,  }
-                    postData.beads = beads.map((bead) => {
-                        let mediaUrl
-                        let mediaText
-                        // todo: update for other media types when ready
-                        if (bead.Image) {
-                            mediaUrl = bead.Image.url
-                            mediaText = bead.Image.text
-                        }
-                        return {
-                            id: bead.id,
-                            text: bead.text || null,
-                            // todo: handle searchable text
-                            searchableText: '',
-                            mediaText,
-                            mediaUrl,
-                            mediaTypes: bead.mediaTypes,
-                            color: bead.color,
-                        }
-                    })
-                    beads.forEach((bead) => {
-                        if (bead.mediaTypes === 'image') {
-                            const { file } = bead.Image
-                            if (file) formData.append('image', file, bead.id)
-                        }
-                        if (bead.mediaTypes === 'audio') {
-                            const { type, file, blob } = bead.Audio
-                            // todo: compress file and blob into file? (check how audio posts work first...)
-                            if (type === 'file') formData.append('audio', file, bead.id)
-                            else formData.append('audio-blob', blob, bead.id)
-                        }
-                    })
-                }
-                // // add beads to fileData
-                // postData.beads.forEach((bead, index) => {
-                //     // add searchable text
-                //     if (bead.type === 'url') {
-                //         const u = bead.Urls[0]
-                //         const urlFields = [] as any
-                //         if (u.url) urlFields.push(u.url)
-                //         if (u.title) urlFields.push(u.title)
-                //         if (u.description) urlFields.push(u.description)
-                //         if (u.domain) urlFields.push(u.domain)
-                //         bead.searchableText = urlFields.length ? urlFields.join(' ') : null
-                //     } else {
-                //         bead.searchableText =
-                //             bead.type === 'text' ? getDraftPlainText(bead.text) : null
-                //     }
-                //     // add files
-                //     if (bead.type === 'audio') {
-                //         // todo: use naming technique instead of type?
-                //         const { type, file, blob } = bead.Audios[0]
-                //         if (type === 'file') formData.append('audio-file', file, index)
-                //         else formData.append('audio-blob', blob, index)
-                //     } else if (bead.type === 'image') {
-                //         const { file } = bead.Images[0]
-                //         if (file) formData.append('image', file, index)
-                //     }
-                // })
-            }
-            // add other contextual data
-            if (sourceId) {
-                postData.sourceType = sourceType
-                postData.sourceId = sourceId
-                postData.linkDescription = linkDescription || null
+    // working: text, url, image, audio, event, poll
+    // not working: card, gbg
+    function save() {
+        setLoading(true)
+        // update media types
+        const newMediaTypes = [...mediaTypes]
+        if (urls.length) newMediaTypes.unshift('url')
+        if (title || findDraftLength(text)) newMediaTypes.unshift('text')
+        // structure data
+        const post = {
+            type: 'post',
+            mediaTypes: newMediaTypes.join(','),
+            text: findDraftLength(text) ? text : null,
+            title: mediaTypes.includes('glass-bead-game') ? topic : title, // todo: just use title?
+            mentions: mentions.map((m) => m.id),
+            spaceIds: spaces.map((s) => s.id), // todo: filter out all in add spaces modal?
+            urls,
+            images,
+            audios,
+        } as any
+        post.searchableText = findSearchableText(post)
+        if (mediaTypes.includes('event')) post.event = { startTime, endTime }
+        if (mediaTypes.includes('poll')) {
+            post.poll = {
+                answers: pollAnswers,
+                locked: pollAnswersLocked,
+                type: simplifyText(pollType),
             }
             if (governance) {
-                postData.governance = true
-                postData.pollAction = pollAction
-                postData.pollThreshold = pollThreshold
+                post.poll.governance = true
+                post.poll.action = pollAction === 'None' ? null : pollAction
+                post.poll.threshold = pollAction === 'Create spaces' ? pollThreshold : null
             }
-            postData.searchableText = findSearchableText(postData)
-            formData.append('post-data', JSON.stringify(postData))
-            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-            // todo: update
-            // set up file uploads if required
-            // let fileData
-            // let uploadType
-            // if (mediaTypes.includes('image')) {
-            //     uploadType = 'image-file'
-            //     fileData = new FormData()
-            //     images.forEach((image, index) => {
-            //         if (image.file) fileData.append('file', image.file, index)
-            //     })
-            //     fileData.append('postData', JSON.stringify(postData))
-            // }
-            // if (mediaTypes.includes('audio')) {
-            //     // const isBlob = audioFile && !audioFile.name
-            //     // uploadType = isBlob ? 'audio-blob' : 'audio-file'
-            //     // fileData = new FormData()
-            //     // fileData.append('file', isBlob ? audioBlob : audioFile)
-            //     // fileData.append('postData', JSON.stringify(postData))
-            // }
-            // if (mediaTypes.includes('card')) {
-            //     postData.cardFrontSearchableText = postData.cardFrontText
-            //         ? getDraftPlainText(postData.cardFrontText)
-            //         : null
-            //     postData.cardBackSearchableText = postData.cardBackText
-            //         ? getDraftPlainText(postData.cardBackText)
-            //         : null
-            //     uploadType = 'image-file'
-            //     fileData = new FormData()
-            //     if (cardFrontImage) fileData.append('file', cardFrontImage, 'front')
-            //     if (cardBackImage) fileData.append('file', cardBackImage, 'back')
-            //     fileData.append('postData', JSON.stringify(postData))
-            // }
-            // if (mediaTypes.includes('glass-bead-game')) {
-            //     uploadType = 'glass-bead-game'
-            //     fileData = new FormData()
-            //     // upload topic image if required
-            //     if (topicImageFile) fileData.append('topicImage', topicImageFile)
-            //     // add beads to fileData
-            //     postData.beads.forEach((bead, index) => {
-            //         // add searchable text
-            //         if (bead.type === 'url') {
-            //             const u = bead.Urls[0]
-            //             const urlFields = [] as any
-            //             if (u.url) urlFields.push(u.url)
-            //             if (u.title) urlFields.push(u.title)
-            //             if (u.description) urlFields.push(u.description)
-            //             if (u.domain) urlFields.push(u.domain)
-            //             bead.searchableText = urlFields.length ? urlFields.join(' ') : null
-            //         } else {
-            //             bead.searchableText =
-            //                 bead.type === 'text' ? getDraftPlainText(bead.text) : null
-            //         }
-            //         // add files
-            //         if (bead.type === 'audio') {
-            //             const { type, file, blob } = bead.Audios[0]
-            //             if (type === 'file') fileData.append('audioFile', file, index)
-            //             else fileData.append('audioBlob', blob, index)
-            //         } else if (bead.type === 'image') {
-            //             const { file } = bead.Images[0]
-            //             if (file) fileData.append('imageFile', file, index)
-            //         }
-            //     })
-            //     fileData.append('postData', JSON.stringify(postData))
-            // }
-            axios
-                .post(`${config.apiURL}/create-post`, formData, options)
+        }
+        console.log('new post: ', post)
+        // validate post
+        const validation = validatePost(post)
+        if (validation.errors.length) {
+            // display errors
+            setErrors(validation.errors)
+            setLoading(false)
+        } else {
+            // upload post
+            uploadPost(post)
                 .then((res) => {
-                    console.log('create-post res: ', res.data)
-                    const allPostSpaceIds = [
-                        ...spaces.map((space) => space.id),
-                        ...res.data.indirectSpaces.map((s) => s.spaceId),
-                    ]
+                    console.log('uploadPost res:', res.data)
+                    // build new post
+                    const { post: newPost, allSpaceIds, event } = res.data
+                    const { id, handle, name, flagImagePath } = accountData
+                    newPost.Creator = { id, handle, name, flagImagePath }
+                    newPost.DirectSpaces = spaces.map((s) => {
+                        return { ...s, state: 'active' }
+                    })
+                    if (event) newPost.Event = { ...event, Going: [], Interested: [] }
+                    // add post to feed
                     const addPostToSpaceFeed =
-                        page === 's' &&
-                        subPage === 'posts' &&
-                        allPostSpaceIds.includes(spaceData.id)
+                        page === 's' && subPage === 'posts' && allSpaceIds.includes(spaceData.id)
                     const addPostToUserFeed =
-                        page === 'u' && subPage === 'posts' && handle === accountData.handle
-                    if (addPostToSpaceFeed || addPostToUserFeed || governance) {
-                        const newPost = {
-                            ...defaultPostData,
-                            ...res.data.post,
-                            Creator: accountData,
-                            DirectSpaces: spaces.map((s) => {
-                                return { ...s, state: 'active' }
-                            }),
-                            Urls: urlsWithMetaData,
-                            Event: res.data.event
-                                ? {
-                                      ...res.data.event,
-                                      Going: [],
-                                      Interested: [],
-                                  }
-                                : null,
-                        }
-                        if (sourceId) newPost.accountLink = true
-                        // if (mediaTypes.includes('audio'))
-                        //     newPost.Audios = [{ url: res.data.audio.url }]
-                        // if (mediaTypes.includes('image')) newPost.Images = images
-                        // if (mediaTypes.includes('poll'))
-                        //     newPost.Poll = {
-                        //         ...res.data.pollData.poll,
-                        //         PollAnswers: res.data.pollData.answers.map((a) => {
-                        //             return { ...a, Reactions: [] }
-                        //         }),
-                        //     }
-                        // if (postData.type === 'glass-bead-game') {
-                        //     newPost.Beads = postData.beads.map((bead, i) => {
-                        //         return {
-                        //             ...bead,
-                        //             id: res.data.gbg.beads[i].newBead.id,
-                        //             Reactions: [],
-                        //             Link: { index: i + 1 },
-                        //         }
-                        //     })
-                        //     newPost.GlassBeadGame = { ...res.data.gbg.game }
-                        //     newPost.Players =
-                        //         GBGSettings.players.map((p) => {
-                        //             return {
-                        //                 ...p,
-                        //                 UserPost: {
-                        //                     state: p.id === accountData.id ? 'accepted' : 'pending',
-                        //                 },
-                        //             }
-                        //         }) || []
-                        // }
-                        // if (postData.type === 'card')
-                        //     newPost.CardSides = [res.data.card.front, res.data.card.back]
-                        // add new post to feed
-                        if (addPostToSpaceFeed) setSpacePosts([newPost, ...spacePosts])
-                        if (addPostToUserFeed) setUserPosts([newPost, ...userPosts])
-                        if (governance) setGovernancePolls([...governancePolls, newPost])
-                    }
+                        page === 'u' && subPage === 'posts' && pageHandle === accountData.handle
+                    if (addPostToSpaceFeed) setSpacePosts([newPost, ...spacePosts])
+                    if (addPostToUserFeed) setUserPosts([newPost, ...userPosts])
+                    if (governance) setGovernancePolls([...governancePolls, newPost])
                     setLoading(false)
                     setSaved(true)
                     setTimeout(() => closeModal(), 1000)
                 })
-                .catch((error) => {
-                    if (!error.response) console.log(error)
-                    else {
-                        const { message } = error.response.data
-                        switch (message) {
-                            case 'File size too large':
-                                setAudioSizeError(true)
-                                break
-                            default:
-                                break
-                        }
-                    }
-                    setLoading(false)
-                })
+                .catch((error) => console.log(error))
         }
+        // if (postValid()) {
+        //     setLoading(true)
+        //     // update media types
+        //     const newMediaTypes = [...mediaTypes]
+        //     if (urls.length) newMediaTypes.unshift('url')
+        //     if (title || findDraftLength(text)) newMediaTypes.unshift('text')
+        //     // create post data
+        //     const postData = {
+        //         // get on server
+        //         // creatorName: accountData.name,
+        //         // creatorHandle: accountData.handle,
+        //         mediaTypes: newMediaTypes.join(','),
+        //         spaceIds: spaces.map((s) => s.id), // todo: filter out all
+        //         title: mediaTypes.includes('glass-bead-game') ? topic : title, // todo: just use title?
+        //         text: findDraftLength(text) ? text : null,
+        //         mentions: mentions.map((m) => m.link),
+        //         // urls: urls,
+        //         // images: mediaTypes.includes('image') ? images : [],
+        //         // startTime,
+        //         // endTime,
+        //         // pollType: pollType.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+        //         // pollAnswersLocked,
+        //         // pollAnswers,
+        //         // topicGroup: findTopicGroup(),
+        //         // topicImageUrl: topicImageFile ? null : topicImageURL,
+        //         // gbgSettings: GBGSettings,
+        //         // beads: !synchronous && !multiplayer ? beads : [],
+        //         // cardFrontText: findDraftLength(cardFrontText) ? cardFrontText : null,
+        //         // cardBackText: findDraftLength(cardBackText) ? cardBackText : null,
+        //         // cardFrontWatermark,
+        //         // cardBackWatermark,
+        //     } as any
+        //     // add media data
+        //     const formData = new FormData()
+        //     // formData entry values: fieldname (used here for types), file, originalname (used here for ids)
+        //     // current fieldname types: 'image', 'audio', 'audio-blob'
+        //     if (mediaTypes.includes('url')) postData.urls = urls
+        //     if (mediaTypes.includes('image')) {
+        //         postData.images = images.map((i) => {
+        //             return { id: i.id, text: i.text, url: i.Image.file ? null : i.Image.url }
+        //         })
+        //         images.forEach((i) => {
+        //             if (i.Image.file) formData.append('image', i.Image.file, i.id)
+        //         })
+        //     }
+        //     if (mediaTypes.includes('audio')) {
+        //         postData.audios = audios.map((a) => {
+        //             return { id: a.id, text: a.text }
+        //         })
+        //         audios.forEach((a) =>
+        //             formData.append(`audio${a.Audio.file.name ? '' : '-blob'}`, a.Audio.file, a.id)
+        //         )
+        //     }
+        //     if (mediaTypes.includes('event')) {
+        //         postData.startTime = startTime
+        //         postData.endTime = endTime
+        //     }
+        //     if (mediaTypes.includes('poll')) {
+        //         postData.pollType = simplifyText(pollType)
+        //         postData.pollAnswersLocked = pollAnswersLocked
+        //         // todo: refactor for answers with media
+        //         postData.pollAnswers = pollAnswers
+        //     }
+        //     if (mediaTypes.includes('card')) {
+        //         const frontChars = findDraftLength(cardFrontText)
+        //         const backChars = findDraftLength(cardBackText)
+        //         postData.cardFront = {
+        //             text: frontChars ? cardFrontText : null,
+        //             searchableText: frontChars ? getDraftPlainText(cardFrontText) : null,
+        //             watermark: cardFrontWatermark,
+        //         }
+        //         postData.cardBack = {
+        //             text: backChars ? cardBackText : null,
+        //             searchableText: backChars ? getDraftPlainText(cardBackText) : null,
+        //             watermark: cardBackWatermark,
+        //         }
+        //         if (cardFrontImage) formData.append('image', cardFrontImage, 'card-front-image')
+        //         if (cardBackImage) formData.append('image', cardBackImage, 'card-back-image')
+        //     }
+        //     if (mediaTypes.includes('glass-bead-game')) {
+        //         postData.gbgSettings = GBGSettings
+        //         postData.topicGroup = findTopicGroup()
+        //         postData.topicImageUrl = topicImageFile ? null : topicImageURL
+        //         if (topicImageFile) formData.append('image', topicImageFile, 'topic-image')
+        //         if (!synchronous && !multiplayer) {
+        //             // add beads
+        //             // what is the current bead structure?
+        //             // { id: uuid,  }
+        //             postData.beads = beads.map((bead) => {
+        //                 let mediaUrl
+        //                 let mediaText
+        //                 // todo: update for other media types when ready
+        //                 if (bead.Image) {
+        //                     mediaUrl = bead.Image.url
+        //                     mediaText = bead.Image.text
+        //                 }
+        //                 return {
+        //                     id: bead.id,
+        //                     text: bead.text || null,
+        //                     // todo: handle searchable text
+        //                     searchableText: '',
+        //                     mediaText,
+        //                     mediaUrl,
+        //                     mediaTypes: bead.mediaTypes,
+        //                     color: bead.color,
+        //                 }
+        //             })
+        //             beads.forEach((bead) => {
+        //                 if (bead.mediaTypes === 'image') {
+        //                     const { file } = bead.Image
+        //                     if (file) formData.append('image', file, bead.id)
+        //                 }
+        //                 if (bead.mediaTypes === 'audio') {
+        //                     const { type, file, blob } = bead.Audio
+        //                     // todo: compress file and blob into file? (check how audio posts work first...)
+        //                     if (type === 'file') formData.append('audio', file, bead.id)
+        //                     else formData.append('audio-blob', blob, bead.id)
+        //                 }
+        //             })
+        //         }
+        //         // // add beads to fileData
+        //         // postData.beads.forEach((bead, index) => {
+        //         //     // add searchable text
+        //         //     if (bead.type === 'url') {
+        //         //         const u = bead.Urls[0]
+        //         //         const urlFields = [] as any
+        //         //         if (u.url) urlFields.push(u.url)
+        //         //         if (u.title) urlFields.push(u.title)
+        //         //         if (u.description) urlFields.push(u.description)
+        //         //         if (u.domain) urlFields.push(u.domain)
+        //         //         bead.searchableText = urlFields.length ? urlFields.join(' ') : null
+        //         //     } else {
+        //         //         bead.searchableText =
+        //         //             bead.type === 'text' ? getDraftPlainText(bead.text) : null
+        //         //     }
+        //         //     // add files
+        //         //     if (bead.type === 'audio') {
+        //         //         // todo: use naming technique instead of type?
+        //         //         const { type, file, blob } = bead.Audios[0]
+        //         //         if (type === 'file') formData.append('audio-file', file, index)
+        //         //         else formData.append('audio-blob', blob, index)
+        //         //     } else if (bead.type === 'image') {
+        //         //         const { file } = bead.Images[0]
+        //         //         if (file) formData.append('image', file, index)
+        //         //     }
+        //         // })
+        //     }
+        //     // add other contextual data
+        //     if (sourceId) {
+        //         postData.sourceType = sourceType
+        //         postData.sourceId = sourceId
+        //         postData.linkDescription = linkDescription || null
+        //     }
+        //     if (governance) {
+        //         postData.governance = true
+        //         postData.pollAction = pollAction
+        //         postData.pollThreshold = pollThreshold
+        //     }
+        //     postData.searchableText = findSearchableText(postData)
+        //     formData.append('post-data', JSON.stringify(postData))
+        //     const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        //     // todo: update
+        //     // set up file uploads if required
+        //     // let fileData
+        //     // let uploadType
+        //     // if (mediaTypes.includes('image')) {
+        //     //     uploadType = 'image-file'
+        //     //     fileData = new FormData()
+        //     //     images.forEach((image, index) => {
+        //     //         if (image.file) fileData.append('file', image.file, index)
+        //     //     })
+        //     //     fileData.append('postData', JSON.stringify(postData))
+        //     // }
+        //     // if (mediaTypes.includes('audio')) {
+        //     //     // const isBlob = audioFile && !audioFile.name
+        //     //     // uploadType = isBlob ? 'audio-blob' : 'audio-file'
+        //     //     // fileData = new FormData()
+        //     //     // fileData.append('file', isBlob ? audioBlob : audioFile)
+        //     //     // fileData.append('postData', JSON.stringify(postData))
+        //     // }
+        //     // if (mediaTypes.includes('card')) {
+        //     //     postData.cardFrontSearchableText = postData.cardFrontText
+        //     //         ? getDraftPlainText(postData.cardFrontText)
+        //     //         : null
+        //     //     postData.cardBackSearchableText = postData.cardBackText
+        //     //         ? getDraftPlainText(postData.cardBackText)
+        //     //         : null
+        //     //     uploadType = 'image-file'
+        //     //     fileData = new FormData()
+        //     //     if (cardFrontImage) fileData.append('file', cardFrontImage, 'front')
+        //     //     if (cardBackImage) fileData.append('file', cardBackImage, 'back')
+        //     //     fileData.append('postData', JSON.stringify(postData))
+        //     // }
+        //     // if (mediaTypes.includes('glass-bead-game')) {
+        //     //     uploadType = 'glass-bead-game'
+        //     //     fileData = new FormData()
+        //     //     // upload topic image if required
+        //     //     if (topicImageFile) fileData.append('topicImage', topicImageFile)
+        //     //     // add beads to fileData
+        //     //     postData.beads.forEach((bead, index) => {
+        //     //         // add searchable text
+        //     //         if (bead.type === 'url') {
+        //     //             const u = bead.Urls[0]
+        //     //             const urlFields = [] as any
+        //     //             if (u.url) urlFields.push(u.url)
+        //     //             if (u.title) urlFields.push(u.title)
+        //     //             if (u.description) urlFields.push(u.description)
+        //     //             if (u.domain) urlFields.push(u.domain)
+        //     //             bead.searchableText = urlFields.length ? urlFields.join(' ') : null
+        //     //         } else {
+        //     //             bead.searchableText =
+        //     //                 bead.type === 'text' ? getDraftPlainText(bead.text) : null
+        //     //         }
+        //     //         // add files
+        //     //         if (bead.type === 'audio') {
+        //     //             const { type, file, blob } = bead.Audios[0]
+        //     //             if (type === 'file') fileData.append('audioFile', file, index)
+        //     //             else fileData.append('audioBlob', blob, index)
+        //     //         } else if (bead.type === 'image') {
+        //     //             const { file } = bead.Images[0]
+        //     //             if (file) fileData.append('imageFile', file, index)
+        //     //         }
+        //     //     })
+        //     //     fileData.append('postData', JSON.stringify(postData))
+        //     // }
+        //     axios
+        //         .post(`${config.apiURL}/create-post`, formData, options)
+        //         .then((res) => {
+        //             console.log('create-post res: ', res.data)
+        //             const allPostSpaceIds = [
+        //                 ...spaces.map((space) => space.id),
+        //                 ...res.data.indirectSpaces.map((s) => s.spaceId),
+        //             ]
+        //             const addPostToSpaceFeed =
+        //                 page === 's' &&
+        //                 subPage === 'posts' &&
+        //                 allPostSpaceIds.includes(spaceData.id)
+        //             const addPostToUserFeed =
+        //                 page === 'u' && subPage === 'posts' && handle === accountData.handle
+        //             if (addPostToSpaceFeed || addPostToUserFeed || governance) {
+        //                 const newPost = {
+        //                     ...defaultPostData,
+        //                     ...res.data.post,
+        //                     Creator: accountData,
+        //                     DirectSpaces: spaces.map((s) => {
+        //                         return { ...s, state: 'active' }
+        //                     }),
+        //                     Urls: urls,
+        //                     Event: res.data.event
+        //                         ? {
+        //                               ...res.data.event,
+        //                               Going: [],
+        //                               Interested: [],
+        //                           }
+        //                         : null,
+        //                 }
+        //                 if (sourceId) newPost.accountLink = true
+        //                 // if (mediaTypes.includes('audio'))
+        //                 //     newPost.Audios = [{ url: res.data.audio.url }]
+        //                 // if (mediaTypes.includes('image')) newPost.Images = images
+        //                 // if (mediaTypes.includes('poll'))
+        //                 //     newPost.Poll = {
+        //                 //         ...res.data.pollData.poll,
+        //                 //         PollAnswers: res.data.pollData.answers.map((a) => {
+        //                 //             return { ...a, Reactions: [] }
+        //                 //         }),
+        //                 //     }
+        //                 // if (postData.type === 'glass-bead-game') {
+        //                 //     newPost.Beads = postData.beads.map((bead, i) => {
+        //                 //         return {
+        //                 //             ...bead,
+        //                 //             id: res.data.gbg.beads[i].newBead.id,
+        //                 //             Reactions: [],
+        //                 //             Link: { index: i + 1 },
+        //                 //         }
+        //                 //     })
+        //                 //     newPost.GlassBeadGame = { ...res.data.gbg.game }
+        //                 //     newPost.Players =
+        //                 //         GBGSettings.players.map((p) => {
+        //                 //             return {
+        //                 //                 ...p,
+        //                 //                 UserPost: {
+        //                 //                     state: p.id === accountData.id ? 'accepted' : 'pending',
+        //                 //                 },
+        //                 //             }
+        //                 //         }) || []
+        //                 // }
+        //                 // if (postData.type === 'card')
+        //                 //     newPost.CardSides = [res.data.card.front, res.data.card.back]
+        //                 // add new post to feed
+        //                 if (addPostToSpaceFeed) setSpacePosts([newPost, ...spacePosts])
+        //                 if (addPostToUserFeed) setUserPosts([newPost, ...userPosts])
+        //                 if (governance) setGovernancePolls([...governancePolls, newPost])
+        //             }
+        //             setLoading(false)
+        //             setSaved(true)
+        //             setTimeout(() => closeModal(), 1000)
+        //         })
+        //         .catch((error) => {
+        //             if (!error.response) console.log(error)
+        //             else {
+        //                 const { message } = error.response.data
+        //                 switch (message) {
+        //                     case 'File size too large':
+        //                         setAudioSizeError(true)
+        //                         break
+        //                     default:
+        //                         break
+        //                 }
+        //             }
+        //             setLoading(false)
+        //         })
+        // }
     }
 
     // useEffect(() => {
@@ -1119,18 +1095,7 @@ function CreatePostModal(): JSX.Element {
 
     // remove errors and initialise date picker if post type is event
     useEffect(() => {
-        // remove errors
-        setNoTextError(false)
-        setMaxCharsErrors(false)
-        setNoImagesError(false)
-        setTotalUploadSizeError(false)
-        setNoAudioError(false)
-        setEventTextError(false)
-        setNoEventTimesError(false)
-        setPollTextError(false)
-        setPollAnswersError(false)
-        setTopicError(false)
-        setNoBeadsError(false)
+        setErrors([])
         // initialise date picker
         if (mediaTypes.includes('event')) {
             const now = new Date()
@@ -1147,7 +1112,7 @@ function CreatePostModal(): JSX.Element {
                 defaultDate: defaultStartDate,
                 appendTo: document.getElementById('date-time-start-wrapper') || undefined,
                 onChange: ([value]) => {
-                    setNoEventTimesError(false)
+                    setErrors([])
                     setStartTime(value.toString())
                 },
             })
@@ -1172,22 +1137,39 @@ function CreatePostModal(): JSX.Element {
         }
     }, [startTime])
 
-    // grab metadata for new urls when added to text field
+    // grab metadata for new urls added to text field
+    const requestIndex = useRef(0)
     useEffect(() => {
-        if (urlsWithMetaData.length <= maxUrls) {
-            // requestIndex used to pause requests until user has finished updating the url
-            urlRequestIndex.current += 1
-            const requestIndex = urlRequestIndex.current
+        if (urls.length <= maxUrls) {
+            // requestIndex & setTimeout used to block requests until user has finished typing
+            requestIndex.current += 1
+            const index = requestIndex.current
             setTimeout(() => {
-                if (urlRequestIndex.current === requestIndex) {
-                    urls.forEach(
-                        (url) =>
-                            !urlsWithMetaData.find((u) => u.url === url) && scrapeUrlMetaData(url)
-                    )
+                if (requestIndex.current === index) {
+                    rawUrls.forEach(async (url) => {
+                        // if no match in urls array
+                        if (!urls.find((u) => u.url === url)) {
+                            // add url loading state
+                            setUrls((us) => [...us, { url, loading: true }])
+                            // scrape url data
+                            const { data } = await scrapeUrl(url)
+                            // todo: handle error
+                            if (data) {
+                                data.url = url
+                                data.searchableText = findUrlSearchableText(data)
+                                // update urls array
+                                setUrls((us) => {
+                                    const newUrls = [...us.filter((u) => u.url !== url)]
+                                    newUrls.push(data)
+                                    return newUrls
+                                })
+                            }
+                        }
+                    })
                 }
             }, 500)
         }
-    }, [urls])
+    }, [rawUrls])
 
     // update poll answers when action changed
     useEffect(() => {
@@ -1277,9 +1259,7 @@ function CreatePostModal(): JSX.Element {
                                         maxLength={100}
                                         onChange={(e) => {
                                             setTitle(e.target.value)
-                                            setNoTextError(false)
-                                            setEventTextError(false)
-                                            setPollTextError(false)
+                                            setErrors([])
                                         }}
                                     />
                                     <CloseButton
@@ -1344,14 +1324,11 @@ function CreatePostModal(): JSX.Element {
                                 onChange={(value, textMentions, textUrls) => {
                                     setText(value)
                                     setMentions(textMentions)
-                                    setUrls(textUrls.slice(0, maxUrls))
-                                    setNoTextError(false)
-                                    setMaxCharsErrors(false)
-                                    setEventTextError(false)
-                                    setPollTextError(false)
+                                    setRawUrls(textUrls.slice(0, maxUrls))
+                                    setErrors([])
                                 }}
                             />
-                            {urlsWithMetaData.map((u) => (
+                            {urls.map((u) => (
                                 <UrlPreview
                                     key={u.url}
                                     type='post'
@@ -1504,8 +1481,8 @@ function CreatePostModal(): JSX.Element {
                                             positionLeft={!pollAnswersLocked}
                                             rightColor='blue'
                                             onClick={() => {
-                                                setPollAnswersError(false)
                                                 setPollAnswersLocked(!pollAnswersLocked)
+                                                setErrors([])
                                             }}
                                             onOffText
                                             style={{ marginRight: 20 }}
@@ -1551,9 +1528,9 @@ function CreatePostModal(): JSX.Element {
                                             <PollAnswer
                                                 key={answer.id}
                                                 index={index}
-                                                type={pollType}
                                                 answer={answer}
-                                                percentage={0}
+                                                type={pollType}
+                                                percentage={0} // todo: make optional prop if not used here
                                                 color={pollColorScale(index)}
                                                 remove={() => removePollAnswer(answer.id)}
                                                 removable={answer.state !== 'done'}
@@ -1615,9 +1592,9 @@ function CreatePostModal(): JSX.Element {
                                                         text={cardFrontText}
                                                         maxChars={maxChars}
                                                         onChange={(value, textMentions) => {
-                                                            setCardFrontError(false)
                                                             setCardFrontText(value)
                                                             setCardFrontMentions(textMentions)
+                                                            setErrors([])
                                                         }}
                                                     />
                                                 </Column>
@@ -1641,20 +1618,20 @@ function CreatePostModal(): JSX.Element {
                                                         text={cardBackText}
                                                         maxChars={maxChars}
                                                         onChange={(value, textMentions) => {
-                                                            setCardBackError(false)
                                                             setCardBackText(value)
                                                             setCardBackMentions(textMentions)
+                                                            setErrors([])
                                                         }}
                                                     />
                                                 </Column>
                                             )}
                                         </Column>
                                     </Column>
-                                    {cardImageSizeError && (
+                                    {/* {cardImageSizeError && (
                                         <Row className={styles.errors}>
                                             <p>Max image size: {imageMBLimit}MB</p>
                                         </Row>
-                                    )}
+                                    )} */}
                                     <Row>
                                         {((cardFlipped && !cardBackImage) ||
                                             (!cardFlipped && !cardFrontImage)) && (
@@ -1748,7 +1725,8 @@ function CreatePostModal(): JSX.Element {
                         </Row>
                     )}
                     <Column centerX className={styles.errors}>
-                        {noTextError && <p>No content added</p>}
+                        {errors[0]}
+                        {/* {noTextError && <p>No content added</p>}
                         {maxCharsErrors && <p>Text must be less than {maxChars} characters</p>}
                         {noImagesError && <p>No images added</p>}
                         {imageSizeError && <p>Max file size: {imageMBLimit} MBs</p>}
@@ -1767,14 +1745,14 @@ function CreatePostModal(): JSX.Element {
                         {topicError && <p>Topic required</p>}
                         {noBeadsError && <p>At least 1 bead required for single player games</p>}
                         {cardFrontError && <p>No content added to front of card</p>}
-                        {cardBackError && <p>No content added to back of card</p>}
+                        {cardBackError && <p>No content added to back of card</p>} */}
                     </Column>
                     <Button
                         text='Post'
                         color='blue'
-                        disabled={postButtonDisabled()}
+                        disabled={saveDisabled()}
                         loading={loading}
-                        onClick={createPost}
+                        onClick={save}
                     />
                 </Column>
             )}
@@ -1797,7 +1775,7 @@ function CreatePostModal(): JSX.Element {
                     settings={GBGSettings}
                     setSettings={(newSettings) => {
                         setGBGSettings(newSettings)
-                        setNoBeadsError(false)
+                        setErrors([])
                     }}
                     close={() => setGBGSettingsModalOpen(false)}
                 />
@@ -1809,7 +1787,7 @@ function CreatePostModal(): JSX.Element {
                     players={GBGSettings.players}
                     addBead={(bead) => {
                         setBeads([...beads, bead])
-                        setNoBeadsError(false)
+                        setErrors([])
                     }}
                     close={() => setNextBeadModalOpen(false)}
                 />

@@ -49,6 +49,7 @@ function PostSpaces(props: { spaces: any[]; size?: number; preview?: boolean }):
                     <h2>Posted to</h2>
                     {filteredSpaces.map((space) => (
                         <SpaceButton
+                            key={space.id}
                             space={space}
                             imageSize={size}
                             fontSize={15}

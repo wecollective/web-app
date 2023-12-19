@@ -199,7 +199,7 @@ $transitionSpeed: 0.5s;
                 position: relative;
                 margin-top: 15px;
                 padding: 10px;
-                border: 2px solid $grey2;
+                border: 1px solid $grey2;
                 border-radius: 10px;
                 background-color: $grey1;
             }
@@ -496,10 +496,8 @@ $transitionSpeed: 0.5s;
     }
 
     .errors {
+        margin-bottom: 30px;
         color: $red;
-        > p {
-            margin-bottom: 20px;
-        }
     }
 
     .fileUploadInput {

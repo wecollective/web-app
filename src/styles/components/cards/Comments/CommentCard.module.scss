@@ -33,9 +33,11 @@
     }
 }
 
+$grey: $grey2;
+
 .indentation {
     width: 10px;
-    border-left: 2px dotted $grey2;
+    border-left: 2px dotted $grey;
     margin-left: 14px;
     flex-shrink: 0;
     z-index: 1;
@@ -95,7 +97,7 @@
     .line {
         height: calc(100% - 20px);
         width: 10px;
-        border-left: 2px dotted $grey2;
+        border-left: 2px dotted $grey;
         margin-left: 14px;
         // margin-top: 5px;
         flex-shrink: 0;
