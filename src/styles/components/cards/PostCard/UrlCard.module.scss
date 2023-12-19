@@ -12,7 +12,7 @@ $borderRadius: 10px;
 .wrapper {
     width: calc(100% + 30px);
     border-radius: 0;
-    background-color: $grey1;
+    background-color: white;
     overflow: hidden;
     transition: background-color 0.3s;
     position: relative;
@@ -26,7 +26,7 @@ $borderRadius: 10px;
     }
 
     &:hover {
-        background-color: $grey2;
+        background-color: $blue7;
     }
 
     > a {
@@ -43,6 +43,8 @@ $borderRadius: 10px;
             border-bottom-right-radius: 0px;
             object-fit: cover;
             flex-shrink: 0;
+            border-right: 1px solid $grey2;
+            background-color: $grey2;
         }
 
         .urlIcon {

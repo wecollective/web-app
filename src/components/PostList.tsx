@@ -74,7 +74,7 @@ function PostList(props: {
                                     key={post.id}
                                     location={location}
                                     styling={styling}
-                                    collapse
+                                    // collapse
                                 />
                             ))}
                             {nextPostsLoading && (

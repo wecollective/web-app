@@ -12,19 +12,13 @@
         &:not(:last-child) {
             margin-bottom: 10px;
         }
-
-        > p {
-            font-size: 16px;
-            line-height: 16px;
-            margin-top: 5px;
-        }
     }
 
     .id {
         position: absolute;
         display: flex;
-        right: 8px;
-        top: 5px;
+        right: 15px;
+        bottom: 12px;
         z-index: 5;
         font-size: 14px;
     }

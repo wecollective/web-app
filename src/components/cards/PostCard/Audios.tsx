@@ -5,6 +5,7 @@ import config from '@src/Config'
 import styles from '@styles/components/cards/PostCard/Audios.module.scss'
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 function Audios(props: { postId: number; style?: any }): JSX.Element {
     const { postId, style } = props
@@ -48,6 +49,10 @@ function Audios(props: { postId: number; style?: any }): JSX.Element {
         <Column style={style} className={styles.wrapper}>
             {blocks.map((block) => (
                 <Column centerX key={block.id}>
+                    <Link to={`/p/${block.id}`} className={styles.id} title='Open post page'>
+                        <p className='grey'>ID:</p>
+                        <p style={{ marginLeft: 5 }}>{block.id}</p>
+                    </Link>
                     <AudioCard
                         id={block.id}
                         url={block.Audio.url}
