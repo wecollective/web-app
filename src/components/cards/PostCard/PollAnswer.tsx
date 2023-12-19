@@ -1,12 +1,11 @@
 import CheckBox from '@components/CheckBox'
 import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
-import FlagImage from '@components/FlagImage'
 import FlagImageHighlights from '@components/FlagImageHighlights'
 import ImageTitle from '@components/ImageTitle'
 import Input from '@components/Input'
 import Row from '@components/Row'
-import ShowMoreLess from '@components/ShowMoreLess'
+import UserButton from '@components/UserButton'
 import AudioCard from '@components/cards/PostCard/AudioCard'
 import Audios from '@components/cards/PostCard/Audios'
 import Images from '@components/cards/PostCard/Images'
@@ -53,13 +52,9 @@ function PollAnswer(props: {
     const mobileView = document.documentElement.clientWidth < 900
 
     return (
-        <Column
-            centerY
-            className={`${styles.wrapper} ${state === 'done' && styles.done}`}
-            style={style}
-        >
+        <Column centerY className={`${styles.wrapper} ${state === 'done' && styles.done}`}>
             <Row spaceBetween>
-                <Row centerY style={{ width: '100%', minWidth: 0, marginRight: 10 }}>
+                <Row centerY>
                     {preview ? (
                         <Column className={styles.index} style={{ backgroundColor: color }}>
                             <p>{index + 1}</p>
@@ -73,59 +68,12 @@ function PollAnswer(props: {
                             <p>{index + 1}</p>
                         </Link>
                     )}
-                    <FlagImage
-                        type='user'
-                        imagePath={Creator.flagImagePath}
-                        link={`/u/${Creator.handle}`}
-                        style={{ marginRight: 10 }}
+                    <UserButton
+                        user={Creator}
+                        imageSize={32}
+                        fontSize={15}
+                        style={{ marginRight: 5 }}
                     />
-                    <Column className={styles.blocks}>
-                        {text && (
-                            <ShowMoreLess height={250}>
-                                <DraftText text={text} />
-                            </ShowMoreLess>
-                        )}
-                        {preview ? (
-                            <>
-                                {answer.images.length > 0 && (
-                                    <Row>
-                                        {answer.images.map((image) => (
-                                            <Column key={image.id} className={styles.image}>
-                                                <img src={image.Image.url} alt='upload' />
-                                            </Column>
-                                        ))}
-                                    </Row>
-                                )}
-                                {answer.audios.map((audio) => (
-                                    <Column key={audio.id} className={styles.audio}>
-                                        <AudioCard
-                                            id={audio.id}
-                                            url={audio.Audio.url}
-                                            staticBars={400}
-                                            location='new-post'
-                                            style={{ height: 100 }}
-                                        />
-                                    </Column>
-                                ))}
-                                {answer.urls.map((url) => (
-                                    <UrlCard key={url.id} type='post' urlData={url} />
-                                ))}
-                            </>
-                        ) : (
-                            <>
-                                {mediaTypes.includes('url') && (
-                                    <Urls postId={id} style={{ margin: '10px 0' }} />
-                                )}
-                                {mediaTypes.includes('image') && (
-                                    <Images postId={id} style={{ margin: '10px 0' }} />
-                                )}
-                                {mediaTypes.includes('audio') && (
-                                    <Audios postId={id} style={{ margin: '10px 0' }} />
-                                )}
-                            </>
-                        )}
-                    </Column>
-                    {/* {!mobileView && <p>{text}</p>} */}
                     {state === 'done' && <CheckIcon className={styles.check} />}
                 </Row>
                 <Row centerY style={{ flexShrink: 0 }}>
@@ -180,7 +128,42 @@ function PollAnswer(props: {
                     </Row>
                 </Row>
             </Row>
-            {mobileView && <p style={{ marginTop: 10 }}>{text}</p>}
+            <Column className={styles.blocks}>
+                {text && <DraftText text={text} style={{ marginTop: -5 }} />}
+                {preview ? (
+                    <>
+                        {answer.images.length > 0 && (
+                            <Row>
+                                {answer.images.map((image) => (
+                                    <Column key={image.id} className={styles.image}>
+                                        <img src={image.Image.url} alt='upload' />
+                                    </Column>
+                                ))}
+                            </Row>
+                        )}
+                        {answer.audios.map((audio) => (
+                            <Column key={audio.id} className={styles.audio}>
+                                <AudioCard
+                                    id={audio.id}
+                                    url={audio.Audio.url}
+                                    staticBars={400}
+                                    location='new-post'
+                                    style={{ height: 100 }}
+                                />
+                            </Column>
+                        ))}
+                        {answer.urls.map((url) => (
+                            <UrlCard key={url.id} type='post' urlData={url} />
+                        ))}
+                    </>
+                ) : (
+                    <>
+                        {mediaTypes.includes('url') && <Urls postId={id} />}
+                        {mediaTypes.includes('image') && <Images postId={id} />}
+                        {mediaTypes.includes('audio') && <Audios postId={id} />}
+                    </>
+                )}
+            </Column>
             {statModalOpen && (
                 <Modal centerX close={() => setStatModalOpen(false)}>
                     <h1>Votes</h1>
