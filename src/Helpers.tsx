@@ -518,7 +518,7 @@ export function findMinutesFromDHM(values) {
     return values.days * 24 * 60 + values.hours * 60 + values.minutes
 }
 
-function findUrlSearchableText(urlData) {
+export function findUrlSearchableText(urlData) {
     const { url, title, description, domain } = urlData
     const fields = [] as any
     if (url) fields.push(url)
@@ -533,7 +533,7 @@ export function findSearchableText(post) {
     let fields = [] as any
     if (title) fields.push(title)
     if (text) fields.push(getDraftPlainText(text))
-    urls.forEach((url) => fields.push(findUrlSearchableText(url) || ''))
+    urls.forEach((url) => fields.push(url.searchableText || ''))
     images.forEach((image) => fields.push(image.text || ''))
     audios.forEach((audio) => fields.push(audio.text || ''))
     fields = fields.filter((field) => field)
@@ -562,16 +562,19 @@ export function scrapeUrl(url) {
 
 // todo: count poll answers, card sides, and beads (do this when added?)
 function findTotalUploadSize(post) {
-    const { images, audios } = post
+    const { images, audios, poll } = post
     const imageSize = images
         .filter((i) => i.Image.file)
         .map((i) => i.Image.file.size)
         .reduce((a, b) => a + b, 0)
     const audioSize = audios.map((a) => a.Audio.file.size).reduce((a, b) => a + b, 0)
+    const pollAnswerSize = poll
+        ? poll.answers.map((a) => a.totalSize).reduce((a, b) => a + b, 0)
+        : 0
     // const cardSize =
     //     (cardFrontImage ? cardFrontImage.size : 0) + (cardBackImage ? cardBackImage.size : 0)
     // todo: count bead uploads
-    const total = imageSize + audioSize // + cardSize
+    const total = imageSize + audioSize + pollAnswerSize // + cardSize
     return +(total / megaByte).toFixed(2)
 }
 
@@ -580,17 +583,10 @@ export function validatePost(post, constraints?) {
     const errors = [] as string[]
     // upload size
     const totalSize = findTotalUploadSize(post)
-    if (totalSize > totalMBUploadLimit) {
+    if (totalSize > totalMBUploadLimit)
         errors.push(
             `Total upload size (${totalSize} MBs) must be less than ${totalMBUploadLimit} MBs`
         )
-    }
-    // text (not needed as save disabled when over max chars)
-    // if (mediaTypes.includes('text')) {
-    //     const totalChars = findDraftLength(text)
-    //     const maxChars = (constraints && constraints.maxChars) || maxPostChars
-    //     if (totalChars > maxChars) errors.push(`Text must be less than ${maxChars} characters`)
-    // }
     // image
     if (mediaTypes.includes('image') && !images.length) errors.push('No images added')
     // audio
@@ -603,10 +599,9 @@ export function validatePost(post, constraints?) {
     }
     // poll
     if (mediaTypes.includes('poll')) {
-        const { answers, answersLocked } = poll
-        if (answersLocked && answers.length < 2) {
+        const { answers, locked } = poll
+        if (locked && answers.length < 2)
             errors.push('At least 2 answers required for locked polls')
-        }
         if (!title && !text) errors.push('Title or text required for polls')
     }
     // glass bead game
@@ -633,36 +628,20 @@ export function validatePost(post, constraints?) {
 }
 
 function attachPostFiles(formData, postData) {
-    // attaches postData files to formData and removes them from the postData object
+    // attaches postData files to formData (recursive for poll answers, cards, and gbgs)
     const { mediaTypes, images, audios, poll } = postData
     if (mediaTypes.includes('image')) {
         images.forEach((i) => {
             if (i.Image.file) formData.append('image', i.Image.file, i.id)
-        })
-        postData.images = images.map((i) => {
-            return { id: i.id, text: i.text, url: i.Image.file ? null : i.Image.url }
         })
     }
     if (mediaTypes.includes('audio')) {
         audios.forEach((a) =>
             formData.append(`audio${a.Audio.file.name ? '' : '-blob'}`, a.Audio.file, a.id)
         )
-        postData.audios = audios.map((a) => {
-            return { id: a.id, text: a.text }
-        })
     }
     if (mediaTypes.includes('poll')) {
-        // postData.pollType = simplifyText(pollType)
-        // postData.pollAnswersLocked = pollAnswersLocked
-        // todo: refactor for answers with media
-        poll.answers.forEach((answer) => {
-            // loop through and attach media
-            attachPostFiles(formData, answer)
-            // formData.append(`audio${a.file.name ? '' : '-blob'}`, a.file, a.id)
-        })
-        // postData.poll.answers = poll.answers.map((answer) => {
-        //     return { id: answer.id, }
-        // })
+        poll.answers.forEach((answer) => attachPostFiles(formData, answer))
     }
     // if (mediaTypes.includes('card')) {
     //     const frontChars = findDraftLength(cardFrontText)
@@ -743,5 +722,5 @@ export function uploadPost(post) {
     attachPostFiles(formData, postData)
     formData.append('post-data', JSON.stringify(postData))
     const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-    return axios.post(`${config.apiURL}/create-post`, formData, options)
+    return axios.post(`${config.apiURL}/create-${post.type}`, formData, options)
 }

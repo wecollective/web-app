@@ -2,17 +2,18 @@
 /* eslint-disable no-param-reassign */
 import Button from '@components/Button'
 import Column from '@components/Column'
-import Input from '@components/Input'
 import PieChart from '@components/PieChart'
 import Row from '@components/Row'
 import TimeGraph from '@components/TimeGraph'
 import LoadingWheel from '@components/animations/LoadingWheel'
 import PollAnswer from '@components/cards/PostCard/PollAnswer'
+import CommentInput from '@components/draft-js/CommentInput'
 import Modal from '@components/modals/Modal'
 import config from '@src/Config'
 import { AccountContext } from '@src/contexts/AccountContext'
 import { SpaceContext } from '@src/contexts/SpaceContext'
 import styles from '@styles/components/cards/PostCard/PollCard.module.scss'
+import { PollIcon } from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
@@ -25,8 +26,6 @@ function PollCard(props: { postData: any; location: string }): JSX.Element {
     const { spaceData } = useContext(SpaceContext)
     const [loading, setLoading] = useState(true)
     const [pollData, setPollData] = useState<any>(null)
-    const [newAnswer, setNewAnswer] = useState('')
-    const [newAnswerLoading, setNewAnswerLoading] = useState(false)
     const [totalVotes, setTotalVotes] = useState(0)
     const [totalPoints, setTotalPoints] = useState(0)
     const [totalUsers, setTotalUsers] = useState(0)
@@ -170,31 +169,13 @@ function PollCard(props: { postData: any; location: string }): JSX.Element {
         setVoteChanged(true)
     }
 
-    function addNewAnswer() {
-        if (!loggedIn) {
-            setAlertMessage('Log in to add poll answers')
-            setAlertModalOpen(true)
-        } else {
-            setNewAnswerLoading(true)
-            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-            const data = { pollId: pollData.id, newAnswer }
-            axios
-                .post(`${config.apiURL}/new-poll-answer`, data, options)
-                .then((res) => {
-                    const answer = { ...res.data.pollAnswer, Creator: accountData, Reactions: [] }
-                    const newPollData = {
-                        ...pollData,
-                        Answers: [...pollData.Answers, answer],
-                    }
-                    setPollData(newPollData)
-                    buildPollData(newPollData)
-                    setNewAnswer('')
-                    setNewAnswerLoading(false)
-                })
-                .catch((error) => console.log(error))
-        }
+    function addAnswer(answer) {
+        const newPollData = { ...pollData, Answers: [...pollData.Answers, answer] }
+        setPollData(newPollData)
+        buildPollData(newPollData)
     }
 
+    // todo: update
     function removeAnswer() {
         setRemoveAnswerLoading(true)
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
@@ -208,6 +189,7 @@ function PollCard(props: { postData: any; location: string }): JSX.Element {
             .catch((error) => console.log(error))
     }
 
+    // todo: update
     function toggleAnswerDone(answerId) {
         const newAnswers = [...listAnswers]
         const answer = newAnswers.find((a) => a.id === answerId)
@@ -232,33 +214,31 @@ function PollCard(props: { postData: any; location: string }): JSX.Element {
             </Row>
         )
     return (
-        <Column>
-            <Row centerX className={styles.results}>
-                <PieChart
-                    type={pollData.type}
-                    postId={id}
-                    totalVotes={totalVotes}
-                    totalPoints={totalPoints}
-                    totalUsers={totalUsers}
-                    answers={visualisationAnswers}
-                />
-                {totalVotes > 0 && (
+        <Column className={styles.wrapper}>
+            {totalVotes > 0 && (
+                <Row centerX className={styles.results}>
+                    <PieChart
+                        type={pollData.type}
+                        postId={id}
+                        totalVotes={totalVotes}
+                        totalPoints={totalPoints}
+                        totalUsers={totalUsers}
+                        answers={visualisationAnswers}
+                    />
                     <TimeGraph
                         type={pollData.type}
                         postId={id}
                         answers={visualisationAnswers}
                         startTime={postData.createdAt}
                     />
-                )}
-            </Row>
+                </Row>
+            )}
             <Row centerY spaceBetween style={{ marginBottom: 15 }}>
-                <Row>
-                    <p className='grey'>Vote type: {pollData.type}</p>
+                <Row className={styles.info}>
+                    <PollIcon />
+                    <p>Vote type: {pollData.type}</p>
                     {pollData.type === 'weighted-choice' && (
-                        <p
-                            className={voteChanged && totalUsedPoints !== 100 ? 'danger' : 'grey'}
-                            style={{ marginLeft: 10 }}
-                        >
+                        <p className={voteChanged && totalUsedPoints !== 100 ? styles.red : ''}>
                             ({totalUsedPoints}/100 points used)
                         </p>
                     )}
@@ -290,34 +270,27 @@ function PollCard(props: { postData: any; location: string }): JSX.Element {
                             toggleDone={() => toggleAnswerDone(answer.id)}
                         />
                     ))}
-                    {!showAllAnswers && listAnswers.length > 3 && (
-                        <button
-                            className={styles.showMore}
-                            type='button'
-                            onClick={() => setShowAllAnswers(true)}
-                        >
-                            Show more answers ({listAnswers.length - 3})
-                        </button>
-                    )}
                 </Column>
             )}
-            {!pollData.answersLocked && (
-                <Row className={styles.newAnswers}>
-                    <Input
-                        type='text'
-                        placeholder='New answer...'
-                        value={newAnswer}
-                        onChange={(value) => setNewAnswer(value)}
-                        style={{ width: '100%', marginRight: 10 }}
-                    />
-                    <Button
-                        color='blue'
-                        text='Add'
-                        disabled={!newAnswer}
-                        loading={newAnswerLoading}
-                        onClick={addNewAnswer}
-                    />
+            {!showAllAnswers && listAnswers.length > 3 && (
+                <Row centerX style={{ marginTop: 10 }}>
+                    <button
+                        className={styles.showMore}
+                        type='button'
+                        onClick={() => setShowAllAnswers(true)}
+                    >
+                        Show more answers ({listAnswers.length - 3})
+                    </button>
                 </Row>
+            )}
+            {loggedIn && !pollData.answersLocked && (
+                <CommentInput
+                    type='poll-answer'
+                    placeholder='New answer...'
+                    parent={{ type: 'poll', id: pollData.id }}
+                    onSave={(data) => addAnswer(data)}
+                    style={{ marginTop: 10 }}
+                />
             )}
             {removeAnswerModalOpen && (
                 <Modal centerX close={() => setRemoveAnswerModalOpen(false)}>

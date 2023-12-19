@@ -12,7 +12,7 @@ function TimeGraph(props: {
     const { type, postId, answers, startTime } = props
     const [bezierCurves, setBezierCurves] = useState(false)
     const weighted = type === 'weighted-choice'
-    const width = document.body.clientWidth < 450 ? document.body.clientWidth : 450
+    const width = document.body.clientWidth < 400 ? document.body.clientWidth : 400
     const height = 280
     const margin = { top: 20, right: 20, bottom: 20, left: 35 }
 

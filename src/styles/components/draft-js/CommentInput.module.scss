@@ -232,4 +232,19 @@ $transitionSpeed: 0.5s;
             margin-top: 10px;
         }
     }
+
+    // types
+    &.poll-answer {
+        background-color: white;
+
+        &.dragOver {
+            background-color: $blue7;
+        }
+
+        // .inputWrapper {
+        //     :global(.DraftEditor-editorContainer) {
+        //         background-color: $grey1;
+        //     }
+        // }
+    }
 }

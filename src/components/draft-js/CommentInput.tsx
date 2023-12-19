@@ -38,6 +38,7 @@ import {
     allowedImageTypes,
     audioMBLimit,
     findSearchableText,
+    findUrlSearchableText,
     formatTimeMMSS,
     imageMBLimit,
     maxPostChars,
@@ -308,22 +309,10 @@ function CommentInput(props: {
         setUrls([])
     }
 
-    function addPostDefaults(post) {
-        const { id, handle, name, flagImagePath } = accountData
-        post.Creator = { id, handle, name, flagImagePath }
-        post.Comments = []
-        post.totalLikes = 0
-        post.totalComments = 0
-        post.totalReposts = 0
-        post.totalRatings = 0
-        post.totalLinks = 0
-    }
-
     function save() {
         setSaveLoading(true)
         // structure data
         const post = {
-            link: { root, parent },
             id: inputId,
             type,
             text: findText(),
@@ -341,21 +330,23 @@ function CommentInput(props: {
             setErrors(validation.errors)
             setSaveLoading(false)
         } else if (preview) {
-            // return post data (remove unused values & restructure media data...)
-            addPostDefaults(post)
+            // return post data to parent component
+            const { id, handle, name, flagImagePath } = accountData
+            post.Creator = { id, handle, name, flagImagePath }
             post.totalSize = validation.totalSize
             onSave(post)
             resetData()
         } else {
             // upload post
+            post.link = { root, parent }
             uploadPost(post)
                 .then((res) => {
-                    console.log('uploadPost res:', res.data)
-                    const newPost = res.data.post
+                    const newPost = res.data
                     const { id, handle, name, flagImagePath } = accountData
                     newPost.Creator = { id, handle, name, flagImagePath }
                     newPost.Comments = []
-                    newPost.link = post.link // include link data for comments
+                    newPost.Reactions = []
+                    newPost.link = post.link
                     onSave(newPost)
                     resetData()
                 })
@@ -396,10 +387,12 @@ function CommentInput(props: {
                             const { data } = await scrapeUrl(url)
                             // todo: handle error
                             if (data) {
+                                data.url = url
+                                data.searchableText = findUrlSearchableText(data)
                                 // update urls array
                                 setUrls((us) => {
                                     const newUrls = [...us.filter((u) => u.url !== url)]
-                                    newUrls.push({ url, ...data })
+                                    newUrls.push(data)
                                     return newUrls
                                 })
                             }
@@ -416,7 +409,11 @@ function CommentInput(props: {
     }, [errors])
 
     return (
-        <div ref={wrapperRef} className={`${styles.wrapper} ${className}`} style={style}>
+        <div
+            ref={wrapperRef}
+            className={`${styles.wrapper} ${styles[type]} ${className}`}
+            style={style}
+        >
             <Column className={styles.reverseColumn}>
                 {editorState && (
                     <Row className={styles.inputWrapper}>
