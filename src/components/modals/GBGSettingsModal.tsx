@@ -6,16 +6,17 @@ import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
 import ImageTitle from '@components/ImageTitle'
 import Input from '@components/Input'
-import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
 import SearchSelector from '@components/SearchSelector'
 import Toggle from '@components/Toggle'
+import GBGHelpModal from '@components/modals/GBGHelpModal'
+import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
 import { capitalise, findDHMFromMinutes, findMinutesFromDHM, pluralise } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/GBGSettingsModal.module.scss'
-import { ChevronDownIcon, ChevronUpIcon, SearchIcon } from '@svgs/all'
+import { ChevronDownIcon, ChevronUpIcon, HelpIcon, SearchIcon } from '@svgs/all'
 import axios from 'axios'
 import * as d3 from 'd3'
 import flatpickr from 'flatpickr'
@@ -29,6 +30,7 @@ function GBGSettingsModal(props: {
 }): JSX.Element {
     const { settings, setSettings, close } = props
     const { accountData } = useContext(AccountContext)
+    const [helpModalOpen, setHelpModalOpen] = useState(false)
     const [openToAllUsers, setOpenToAllUsers] = useState(!settings.players.length)
     const [players, setPlayers] = useState(
         settings.players.length ? settings.players : [accountData]
@@ -301,7 +303,16 @@ function GBGSettingsModal(props: {
 
     return (
         <Modal centerX close={close} className={styles.wrapper} confirmClose>
-            <h1>Game Settings</h1>
+            <Row centerY style={{ marginBottom: 20 }}>
+                <h1 style={{ margin: 0 }}>Game Settings</h1>
+                <button
+                    type='button'
+                    className={styles.helpButton}
+                    onClick={() => setHelpModalOpen(true)}
+                >
+                    <HelpIcon />
+                </button>
+            </Row>
             <Column centerX style={{ width: '100%', marginBottom: 20 }}>
                 <Toggle
                     leftText='Synchronous'
@@ -1078,6 +1089,7 @@ function GBGSettingsModal(props: {
                 )}
             </Column>
             <Button text='Save settings' color='blue' onClick={save} />
+            {helpModalOpen && <GBGHelpModal close={() => setHelpModalOpen(false)} />}
         </Modal>
     )
 }

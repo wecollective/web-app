@@ -6,12 +6,14 @@ import Scrollbars from '@components/Scrollbars'
 import LoadingWheel from '@components/animations/LoadingWheel'
 import ToyBoxItem from '@components/cards/ToyBoxItem'
 import GlobalHelpModal from '@components/modals/GlobalHelpModal'
+import Modal from '@components/modals/Modal'
 import ToyBoxRowModal from '@components/modals/ToyBoxRowModal'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
 import styles from '@styles/components/ToyBar.module.scss'
 import TBIstyles from '@styles/components/cards/ToyBoxItem.module.scss'
 import {
+    CardIcon,
     CastaliaIcon,
     ChevronDownIcon,
     ChevronUpIcon,
@@ -47,6 +49,7 @@ function ToyBar(): JSX.Element {
     const [toyboxLoading, setToyboxLoading] = useState(true)
     const [toyBoxRowModalOpen, setToyBoxRowModalOpen] = useState(false)
     const [helpModalOpen, setHelpModalOpen] = useState(false)
+    const [gameModalOpen, setGameModalOpen] = useState(false)
     const cookies = new Cookies()
     const location = useLocation()
     const path = location.pathname.split('/')
@@ -101,10 +104,8 @@ function ToyBar(): JSX.Element {
     }
 
     function newGame() {
-        if (loggedIn) {
-            setCreatePostModalSettings({ game: true })
-            setCreatePostModalOpen(true)
-        } else {
+        if (loggedIn) setGameModalOpen(true)
+        else {
             setAlertModalOpen(true)
             setAlertMessage('Log in to create a game')
         }
@@ -412,6 +413,35 @@ function ToyBar(): JSX.Element {
             )}
             {toyBoxRowModalOpen && <ToyBoxRowModal close={() => setToyBoxRowModalOpen(false)} />}
             {helpModalOpen && <GlobalHelpModal close={() => setHelpModalOpen(false)} />}
+            {gameModalOpen && (
+                <Modal centerX close={() => setGameModalOpen(false)}>
+                    <h1>Pick a game!</h1>
+                    <Row wrap className={styles.gameButtons}>
+                        <button
+                            type='button'
+                            onClick={() => {
+                                setCreatePostModalSettings({ game: 'glass-bead-game' })
+                                setCreatePostModalOpen(true)
+                                setGameModalOpen(false)
+                            }}
+                        >
+                            <CastaliaIcon />
+                            <p>The Glass Bead Game</p>
+                        </button>
+                        <button
+                            type='button'
+                            onClick={() => {
+                                setCreatePostModalSettings({ game: 'card' })
+                                setCreatePostModalOpen(true)
+                                setGameModalOpen(false)
+                            }}
+                        >
+                            <CardIcon />
+                            <p>Create a card</p>
+                        </button>
+                    </Row>
+                </Modal>
+            )}
         </Row>
     )
 }

@@ -190,6 +190,43 @@
             opacity: 0;
         }
     }
+
+    .gameButtons {
+        margin-top: 10px;
+
+        > button {
+            all: unset;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 200px;
+            height: 200px;
+            border: 1px solid $grey2;
+            border-radius: 10px;
+            background-color: white;
+            padding: 20px;
+            color: $grey7;
+            transition: all 0.3s;
+
+            &:not(:last-child) {
+                margin-right: 20px;
+            }
+
+            &:hover {
+                border: 1px solid $grey3;
+                color: $black2;
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            }
+
+            svg {
+                width: 120px;
+                height: 120px;
+                margin-bottom: 20px;
+            }
+        }
+    }
 }
 
 // .newButtons {
