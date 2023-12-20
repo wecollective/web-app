@@ -45,8 +45,9 @@ function PollAnswer(props: {
         toggleDone,
         onChange,
     } = props
-    const { id, mediaTypes, text, accountPoints, accountVote, state, Creator, Reactions } = answer
+    const { id, mediaTypes, text, accountPoints, accountVote, Creator, Reactions } = answer
     const [statModalOpen, setStatModalOpen] = useState(false)
+    const state = preview ? 'preview' : answer.Link.state
     const weighted = type === 'weighted-choice'
     const votes = preview ? [] : Reactions.filter((r) => r.state === 'active')
     const mobileView = document.documentElement.clientWidth < 900

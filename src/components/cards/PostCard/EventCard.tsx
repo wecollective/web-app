@@ -2,12 +2,12 @@
 import Button from '@components/Button'
 import Column from '@components/Column'
 import FlagImageHighlights from '@components/FlagImageHighlights'
-import ImageTitle from '@components/ImageTitle'
-import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
+import UserButton from '@components/UserButton'
+import Modal from '@components/modals/Modal'
 import config from '@src/Config'
-import { AccountContext } from '@src/contexts/AccountContext'
 import { findEventDuration, findEventTimes } from '@src/Helpers'
+import { AccountContext } from '@src/contexts/AccountContext'
 import styles from '@styles/components/cards/PostCard/EventCard.module.scss'
 import { CalendarIcon, SuccessIcon } from '@svgs/all'
 import axios from 'axios'
@@ -27,8 +27,11 @@ function EventCard(props: {
     const [interestedModalOpen, setInterestedModalOpen] = useState(false)
     const [goingLoading, setGoingLoading] = useState(false)
     const [interestedLoading, setInterestedLoading] = useState(false)
+    // todo: paginate responses and get account response seperately
     const going = Going.map((u) => u.id).includes(accountData.id)
     const interested = Interested.map((u) => u.id).includes(accountData.id)
+    const activeUsers = Going.length > 0 || Interested.length > 0
+    const allowResponses = new Date(startTime) > new Date()
     const cookies = new Cookies()
 
     function respondToEvent(response) {
@@ -73,14 +76,14 @@ function EventCard(props: {
     }
 
     return (
-        <Column>
+        <Column className={styles.wrapper}>
             <Row wrap centerY className={styles.eventTimes}>
                 <CalendarIcon />
                 <p>{findEventTimes(startTime, endTime)}</p>
-                <p>{findEventDuration(startTime, endTime)}</p>
+                {endTime && <p>{findEventDuration(startTime, endTime)}</p>}
             </Row>
-            {(Going.length > 0 || Interested.length > 0) && (
-                <Row style={{ marginBottom: 10 }}>
+            {activeUsers && (
+                <Row style={{ marginTop: 10 }}>
                     {Going.length > 0 && (
                         <FlagImageHighlights
                             type='user'
@@ -102,42 +105,8 @@ function EventCard(props: {
                     )}
                 </Row>
             )}
-            {goingModalOpen && (
-                <Modal centerX close={() => setGoingModalOpen(false)}>
-                    <h1>Going to event</h1>
-                    <Column centerX>
-                        {Going.map((user) => (
-                            <ImageTitle
-                                key={user.id}
-                                type='user'
-                                imagePath={user.flagImagePath}
-                                title={user.name}
-                                link={`/u/${user.handle}/posts`}
-                                style={{ marginBottom: 10 }}
-                            />
-                        ))}
-                    </Column>
-                </Modal>
-            )}
-            {interestedModalOpen && (
-                <Modal centerX close={() => setInterestedModalOpen(false)}>
-                    <h1>Interested in event</h1>
-                    <Column centerX>
-                        {Interested.map((user) => (
-                            <ImageTitle
-                                key={user.id}
-                                type='user'
-                                imagePath={user.flagImagePath}
-                                title={user.name}
-                                link={`/u/${user.handle}/posts`}
-                                style={{ marginBottom: 10 }}
-                            />
-                        ))}
-                    </Column>
-                </Modal>
-            )}
-            {new Date(startTime) > new Date() && (
-                <Row style={{ marginBottom: 10 }}>
+            {allowResponses && (
+                <Row style={{ marginTop: 10 }}>
                     <Button
                         text='Going'
                         color='aqua'
@@ -146,7 +115,7 @@ function EventCard(props: {
                         loading={goingLoading}
                         icon={going ? <SuccessIcon /> : undefined}
                         onClick={() => respondToEvent('going')}
-                        style={{ marginRight: 5 }}
+                        style={{ marginRight: 10 }}
                     />
                     <Button
                         text='Interested'
@@ -158,6 +127,38 @@ function EventCard(props: {
                         onClick={() => respondToEvent('interested')}
                     />
                 </Row>
+            )}
+            {goingModalOpen && (
+                <Modal centerX close={() => setGoingModalOpen(false)}>
+                    <h1>Going to event</h1>
+                    <Column centerX>
+                        {Going.map((user) => (
+                            <UserButton
+                                key={user.id}
+                                user={user}
+                                imageSize={32}
+                                fontSize={15}
+                                style={{ marginBottom: 10 }}
+                            />
+                        ))}
+                    </Column>
+                </Modal>
+            )}
+            {interestedModalOpen && (
+                <Modal centerX close={() => setInterestedModalOpen(false)}>
+                    <h1>Interested in event</h1>
+                    <Column centerX>
+                        {Interested.map((user) => (
+                            <UserButton
+                                key={user.id}
+                                user={user}
+                                imageSize={32}
+                                fontSize={15}
+                                style={{ marginBottom: 10 }}
+                            />
+                        ))}
+                    </Column>
+                </Modal>
             )}
         </Column>
     )

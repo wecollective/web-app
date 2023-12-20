@@ -175,12 +175,11 @@ function PollCard(props: { postData: any; location: string }): JSX.Element {
         buildPollData(newPollData)
     }
 
-    // todo: update
     function removeAnswer() {
         setRemoveAnswerLoading(true)
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
-            .post(`${config.apiURL}/remove-poll-answer`, { id: removeAnswerId }, options)
+            .post(`${config.apiURL}/remove-poll-answer`, { answerId: removeAnswerId }, options)
             .then(() => {
                 getPollData()
                 setRemoveAnswerLoading(false)
@@ -189,16 +188,15 @@ function PollCard(props: { postData: any; location: string }): JSX.Element {
             .catch((error) => console.log(error))
     }
 
-    // todo: update
     function toggleAnswerDone(answerId) {
         const newAnswers = [...listAnswers]
         const answer = newAnswers.find((a) => a.id === answerId)
-        const newState = answer.state === 'done' ? 'active' : 'done'
+        const newState = answer.Link.state === 'done' ? 'active' : 'done'
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
             .post(`${config.apiURL}/toggle-poll-answer-done`, { answerId, newState }, options)
             .then(() => {
-                answer.state = newState
+                answer.Link.state = newState
                 setListAnswers(newAnswers)
             })
             .catch((error) => console.log(error))

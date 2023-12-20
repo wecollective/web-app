@@ -359,6 +359,15 @@ function PostCard(props: {
                         )}
                     </div>
                 )}
+                {!isBlock && mediaTypes.includes('url') && (
+                    <Urls postId={id} style={{ marginBottom: 10 }} />
+                )}
+                {!isBlock && mediaTypes.includes('image') && (
+                    <Images postId={id} style={{ marginBottom: 10 }} />
+                )}
+                {!isBlock && mediaTypes.includes('audio') && (
+                    <Audios postId={id} style={{ marginBottom: 10 }} />
+                )}
                 {Event && <EventCard postData={post} setPostData={setPost} location={location} />}
                 {mediaTypes.includes('poll') && <PollCard postData={post} location={location} />}
                 {mediaTypes.includes('glass-bead-game') && (
@@ -369,15 +378,6 @@ function PostCard(props: {
                     />
                 )}
                 {mediaTypes.includes('card') && <Card postId={id} />}
-                {!isBlock && mediaTypes.includes('url') && (
-                    <Urls postId={id} style={{ marginBottom: 10 }} />
-                )}
-                {!isBlock && mediaTypes.includes('image') && (
-                    <Images postId={id} style={{ marginBottom: 10 }} />
-                )}
-                {!isBlock && mediaTypes.includes('audio') && (
-                    <Audios postId={id} style={{ marginBottom: 10 }} />
-                )}
                 {/* block posts */}
                 {type === 'image' && <img className={styles.image} src={Image.url} alt='block' />}
                 {type === 'audio' && (

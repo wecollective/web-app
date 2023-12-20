@@ -1,27 +1,21 @@
 @import '@styles/Variables';
 
-.title {
-    h1 {
-        margin-bottom: 10px;
-        font-size: 24px;
-        line-height: 24px;
-    }
-}
-
-.eventTimes {
+.wrapper {
+    padding: 10px;
+    border: 1px solid $grey2;
+    border-radius: 10px;
+    background-color: $grey1;
     margin-bottom: 10px;
-    svg {
-        width: 20px;
-        height: 20px;
-        color: $grey4;
-    }
 
-    svg,
-    p {
-        margin-right: 5px;
-    }
+    .eventTimes {
+        svg {
+            width: 20px;
+            height: 20px;
+            color: $grey5;
+        }
 
-    p {
-        font-size: 14px;
+        p {
+            margin-left: 10px;
+        }
     }
 }

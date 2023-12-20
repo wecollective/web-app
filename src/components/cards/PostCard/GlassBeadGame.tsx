@@ -315,7 +315,7 @@ function GlassBeadGame(props: {
     return (
         <Column className={styles.wrapper} style={{ marginBottom: totalBeads ? 10 : 0 }}>
             {synchronous && (
-                <Row style={{ marginBottom: totalBeads ? 10 : 0 }}>
+                <Row style={{ marginBottom: 10 }}>
                     <Button
                         text='Open game room'
                         color='gbg-white'
