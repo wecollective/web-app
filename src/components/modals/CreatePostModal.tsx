@@ -11,21 +11,19 @@ import ImageTitle from '@components/ImageTitle'
 import Input from '@components/Input'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
+import SuccessMessage from '@components/SuccessMessage'
+import Toggle from '@components/Toggle'
 import AudioCard from '@components/cards/PostCard/AudioCard'
 import BeadCard from '@components/cards/PostCard/BeadCard'
 import PollAnswer from '@components/cards/PostCard/PollAnswer'
-import DraftTextEditor from '@components/draft-js/DraftTextEditor'
-import AddPostSpacesModal from '@components/modals/AddPostSpacesModal'
-import GBGHelpModal from '@components/modals/GBGHelpModal'
-import GBGSettingsModal from '@components/modals/GBGSettingsModal'
-import ImageModal from '@components/modals/ImageModal'
-import Modal from '@components/modals/Modal'
-// import ShowMoreLess from '@components/ShowMoreLess'
-import SuccessMessage from '@components/SuccessMessage'
-import Toggle from '@components/Toggle'
 import PostSpaces from '@components/cards/PostCard/PostSpaces'
 import UrlPreview from '@components/cards/PostCard/UrlCard'
 import CommentInput from '@components/draft-js/CommentInput'
+import DraftTextEditor from '@components/draft-js/DraftTextEditor'
+import AddPostSpacesModal from '@components/modals/AddPostSpacesModal'
+import GBGSettingsModal from '@components/modals/GBGSettingsModal'
+import ImageModal from '@components/modals/ImageModal'
+import Modal from '@components/modals/Modal'
 import NextBeadModal from '@components/modals/NextBeadModal'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
@@ -42,6 +40,7 @@ import {
     findSearchableText,
     findUrlSearchableText,
     formatTimeMMSS,
+    getDraftPlainText,
     imageMBLimit,
     postTypeIcons,
     scrapeUrl,
@@ -49,7 +48,6 @@ import {
     uploadPost,
     validatePost,
 } from '@src/Helpers'
-import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/CreatePostModal.module.scss'
 import {
     AudioIcon,
@@ -57,7 +55,6 @@ import {
     ChevronLeftIcon,
     ChevronRightIcon,
     DNAIcon,
-    HelpIcon,
     ImageIcon,
     PlusIcon,
     PollIcon,
@@ -72,11 +69,10 @@ import 'flatpickr/dist/themes/material_green.css'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import RecordRTC from 'recordrtc'
-import Cookies from 'universal-cookie'
 import { v4 as uuidv4 } from 'uuid'
 
-const { white, red, orange, yellow, green, blue, purple } = colors
-const beadColors = [white, red, orange, yellow, green, blue, purple]
+// const { white, red, orange, yellow, green, blue, purple } = colors
+// const beadColors = [white, red, orange, yellow, green, blue, purple]
 const defaultSelectedSpace = {
     id: 1,
     handle: 'all',
@@ -125,14 +121,11 @@ function CreatePostModal(): JSX.Element {
     const [saved, setSaved] = useState(false)
     const [spacesModalOpen, setSpacesModalOpen] = useState(false)
     const maxChars = 5000
-    const cookies = new Cookies()
+    // const cookies = new Cookies()
     const maxUrls = 5
-    const urlRequestIndex = useRef(0)
     const location = useLocation()
     const [x, page, pageHandle, subPage] = location.pathname.split('/')
-    let contentTypes = ['image', 'audio', 'event', 'poll']
-    if (game) contentTypes = ['glass-bead-game', 'card']
-    if (governance) contentTypes = []
+    const contentTypes = ['image', 'audio', 'event', 'poll']
 
     function closeModal() {
         setCreatePostModalOpen(false)
@@ -140,16 +133,10 @@ function CreatePostModal(): JSX.Element {
     }
 
     function findModalHeader() {
+        if (game === 'glass-bead-game') return 'New Glass Bead Game'
+        if (game === 'card') return 'New card'
+        if (governance) return 'New governance poll'
         return 'New post'
-        // if (governance) return 'New governance poll'
-        // if (postType === 'text') return 'New post'
-        // if (postType === 'image') return 'New image post'
-        // if (postType === 'audio') return 'New audio post'
-        // if (postType === 'event') return 'New event'
-        // if (postType === 'poll') return 'New poll'
-        // if (postType === 'card') return 'New card'
-        // if (postType === 'glass-bead-game') return 'New Glass Bead Game'
-        // return ''
     }
 
     function initializeMediaDropBox(type) {
@@ -266,7 +253,7 @@ function CreatePostModal(): JSX.Element {
                             <CloseButton
                                 size={20}
                                 onClick={() => removeImage(image.id)}
-                                style={{ position: 'absolute', right: 0 }}
+                                style={{ position: 'absolute', right: 3, top: 3 }}
                             />
                             <button
                                 className={styles.imageButton}
@@ -398,6 +385,7 @@ function CreatePostModal(): JSX.Element {
     }
 
     // poll
+    // todo: handle loading state when fecthing spaces for governance poll
     const [pollType, setPollType] = useState('Single choice')
     const [pollAnswers, setPollAnswers] = useState<any[]>([])
     const [pollAnswersLocked, setPollAnswersLocked] = useState(false)
@@ -419,19 +407,15 @@ function CreatePostModal(): JSX.Element {
     }
 
     // card
-    // todo: store cards as post array
+    // todo: handle mentions
     const [cardRotating, setCardRotating] = useState(false)
     const [cardFlipped, setCardFlipped] = useState(false)
-    const [cardFrontType, setCardFrontType] = useState('text')
-    const [cardFrontText, setCardFrontText] = useState('')
-    const [cardFrontMentions, setCardFrontMentions] = useState<any[]>([])
-    const [cardFrontImage, setCardFrontImage] = useState<File>()
-    const [cardFrontWatermark, setCardFrontWatermark] = useState(false)
-    const [cardBackType, setCardBackType] = useState('text')
-    const [cardBackText, setCardBackText] = useState('')
-    const [cardBackMentions, setCardBackMentions] = useState<any[]>([])
-    const [cardBackImage, setCardBackImage] = useState<File>()
-    const [cardBackWatermark, setCardBackWatermark] = useState(false)
+    const defaults = { type: 'card-face', text: '', mentions: [], images: [], watermark: false }
+    const [card, setCard] = useState<any>({
+        front: { id: uuidv4(), ...defaults },
+        back: { id: uuidv4(), ...defaults },
+    })
+    const cardFace = card[cardFlipped ? 'back' : 'front']
 
     function rotateCard() {
         setCardRotating(true)
@@ -441,44 +425,50 @@ function CreatePostModal(): JSX.Element {
         }, 500)
     }
 
-    function cardContainerExpanded() {
-        if (cardFlipped) {
-            return cardBackType === 'text' ? styles.expanded : null
-        }
-        return cardFrontType === 'text' ? styles.expanded : null
+    function updateCardText(newText, newMentions) {
+        const face = cardFlipped ? 'back' : 'front'
+        setCard({ ...card, [face]: { ...cardFace, text: newText, mentions: newMentions } })
+        setErrors([])
     }
 
-    // todo: handle errors
+    function toggleWatermark() {
+        const face = cardFlipped ? 'back' : 'front'
+        setCard({ ...card, [face]: { ...cardFace, watermark: !cardFace.watermark } })
+    }
+
     function addCardImage() {
-        const input = document.getElementById('card-image-file-input') as HTMLInputElement
+        const input = document.getElementById('card-image-input') as HTMLInputElement
         if (input && input.files && input.files.length) {
-            // const tooLarge = '
-            if (input.files[0].size > imageMBLimit * 1024 * 1024) setErrors([''])
-            else if (cardFlipped) {
-                setCardBackImage(input.files[0])
-                setErrors([])
-                // setCardImageSizeError(false)
-            } else {
-                setCardFrontImage(input.files[0])
-                setErrors([])
-                // setCardFrontError(false)
-                // setCardImageSizeError(false)
+            const fileType = input.files[0].type.split('/')[1]
+            if (allowedImageTypes.includes(`.${fileType}`)) {
+                const tooLarge = input.files[0].size > imageMBLimit * 1024 * 1024
+                if (tooLarge) setErrors([`Max image size: ${imageMBLimit} MBs`])
+                else {
+                    const newImage = {
+                        id: uuidv4(),
+                        Image: {
+                            file: input.files[0],
+                            url: URL.createObjectURL(input.files[0]),
+                        },
+                    }
+                    const face = cardFlipped ? 'back' : 'front'
+                    setCard({ ...card, [face]: { ...cardFace, images: [newImage] } })
+                    setErrors([])
+                }
             }
         }
     }
 
     function removeCardImage() {
-        if (cardFlipped) setCardBackImage(undefined)
-        else setCardFrontImage(undefined)
+        const face = cardFlipped ? 'back' : 'front'
+        setCard({ ...card, [face]: { ...cardFace, images: [] } })
     }
 
     // gbg
-    const [topic, setTopic] = useState('') // todo: use title?
     const [topicOptions, setTopicOptions] = useState<any[]>([])
     const [topicImageFile, setTopicImageFile] = useState<File | undefined>()
     const [topicImageURL, setTopicImageURL] = useState('')
     const [GBGSettingsModalOpen, setGBGSettingsModalOpen] = useState(false)
-    const [GBGHelpModalOpen, setGBGHelpModalOpen] = useState(false)
     const [GBGSettings, setGBGSettings] = useState<any>(defaultGBGSettings)
     const { synchronous, multiplayer, players, totalMoves, movesPerPlayer } = GBGSettings
     const [beads, setBeads] = useState<any[]>([])
@@ -498,8 +488,8 @@ function CreatePostModal(): JSX.Element {
         }
     }
 
-    function updateTopicText(topicText) {
-        // todo: merge groups into single array
+    // todo: merge groups into single array
+    function updateTopic(topicText) {
         const arcMatches = GlassBeadGameTopics.archetopics.filter((t) =>
             t.name.toLowerCase().includes(topicText.toLowerCase())
         )
@@ -507,12 +497,12 @@ function CreatePostModal(): JSX.Element {
             t.name.toLowerCase().includes(topicText.toLowerCase())
         )
         setTopicOptions(topicText ? [...arcMatches, ...limMatches].slice(0, 9) : [])
-        setTopic(topicText)
+        setTitle(topicText)
         setErrors([])
     }
 
     function selectTopic(option) {
-        setTopic(option.name)
+        setTitle(option.name)
         setTopicImageURL(option.imagePath)
         setTopicOptions([])
         setErrors([])
@@ -605,94 +595,12 @@ function CreatePostModal(): JSX.Element {
         )
     }
 
-    // todo: update for multiple media types
-    // function postValid() {
-    //     let valid = true
-    //     console.log('beads: ', beads)
-    //     console.log('total size: ', findTotalUploadSize())
-    //     console.log('audios: ', audios)
-    //     if (findTotalUploadSize() > 5) {
-    //         setTotalUploadSizeError(true)
-    //         valid = false
-    //     }
-    //     const totalChars = findDraftLength(text)
-    //     if (mediaTypes.includes('text')) {
-    //         if (totalChars < 1 && !title && !urls.length) {
-    //             setNoTextError(true)
-    //             valid = false
-    //         }
-    //         if (totalChars > maxChars) {
-    //             setMaxCharsErrors(true)
-    //             valid = false
-    //         }
-    //     }
-    //     if (mediaTypes.includes('image')) {
-    //         if (!images.length) {
-    //             setNoImagesError(true)
-    //             valid = false
-    //         }
-    //     }
-    //     if (mediaTypes.includes('audio')) {
-    //         if (!audios.length) {
-    //             setNoAudioError(true)
-    //             valid = false
-    //         }
-    //     }
-    //     if (mediaTypes.includes('event')) {
-    //         if (totalChars < 1 && !title) {
-    //             setEventTextError(true)
-    //             valid = false
-    //         }
-    //         if (!startTime) {
-    //             setNoEventTimesError(true)
-    //             valid = false
-    //         }
-    //     }
-    //     if (mediaTypes.includes('poll')) {
-    //         if (totalChars < 1 && !title) {
-    //             setPollTextError(true)
-    //             valid = false
-    //         }
-    //         if (pollAnswersLocked && pollAnswers.length < 2) {
-    //             setPollAnswersError(true)
-    //             valid = false
-    //         }
-    //     }
-    //     // todo: check total upload size
-    //     if (mediaTypes.includes('glass-bead-game')) {
-    //         if (!topic) {
-    //             setTopicError(true)
-    //             valid = false
-    //         }
-    //         if (!synchronous && !multiplayer && !beads.length) {
-    //             setNoBeadsError(true)
-    //             valid = false
-    //         }
-    //     }
-    //     if (mediaTypes.includes('card')) {
-    //         const frontTotalChars = findDraftLength(cardFrontText)
-    //         const backTotalChars = findDraftLength(cardBackText)
-    //         if (!cardFrontImage && frontTotalChars === 0) {
-    //             setCardFrontError(true)
-    //             valid = false
-    //         } else if (!cardBackImage && backTotalChars === 0) {
-    //             setCardBackError(true)
-    //             valid = false
-    //         }
-    //     }
-    //     const postMediaTypes = [...mediaTypes]
-    //     if (urls.length) postMediaTypes.unshift('url')
-    //     if (!mediaTypes.length || findDraftLength(text)) postMediaTypes.unshift('text')
-    //     console.log('media types: ', postMediaTypes, mediaTypes)
-    //     return valid
-    // }
-
+    // todo: update when objects merged into array && check for image match
     function findTopicGroup() {
         if (mediaTypes.includes('glass-bead-game')) {
-            // todo: update when objects merged into array && check for image match
-            const arcMatch = GlassBeadGameTopics.archetopics.find((t) => t.name === topic)
+            const arcMatch = GlassBeadGameTopics.archetopics.find((t) => t.name === title)
             if (arcMatch) return 'archetopics'
-            const limMatch = GlassBeadGameTopics.liminal.find((t) => t.name === topic)
+            const limMatch = GlassBeadGameTopics.liminal.find((t) => t.name === title)
             if (limMatch) return 'liminal'
         }
         return null
@@ -701,12 +609,19 @@ function CreatePostModal(): JSX.Element {
     function saveDisabled() {
         const urlsLoading = urls.find((u) => u.loading)
         const totalChars = findDraftLength(text)
-        const noContent = !totalChars && !title && !urls.length && !images.length && !audios.length
+        const allowNoContent = mediaTypes.includes('card')
+        const noContent =
+            !allowNoContent &&
+            !totalChars &&
+            !title &&
+            !urls.length &&
+            !images.length &&
+            !audios.length
         return loading || urlsLoading || noContent || totalChars > maxChars
     }
 
-    // working: text, url, image, audio, event, poll
-    // not working: card, gbg
+    // working: text, url, image, audio, event, poll, card
+    // not working: gbg
     function save() {
         setLoading(true)
         // update media types
@@ -718,14 +633,13 @@ function CreatePostModal(): JSX.Element {
             type: 'post',
             mediaTypes: newMediaTypes.join(','),
             text: findDraftLength(text) ? text : null,
-            title: mediaTypes.includes('glass-bead-game') ? topic : title, // todo: just use title?
+            title,
             mentions: mentions.map((m) => m.id),
             spaceIds: spaces.map((s) => s.id), // todo: filter out all in add spaces modal?
             urls,
             images,
             audios,
         } as any
-        post.searchableText = findSearchableText(post)
         if (mediaTypes.includes('event')) post.event = { startTime, endTime }
         if (mediaTypes.includes('poll')) {
             post.poll = {
@@ -739,6 +653,23 @@ function CreatePostModal(): JSX.Element {
                 post.poll.threshold = pollAction === 'Create spaces' ? pollThreshold : null
             }
         }
+        if (mediaTypes.includes('card')) {
+            post.card = card
+            const { front, back } = post.card
+            // add searchable text and media types to card faces
+            if (findDraftLength(front.text)) front.searchableText = getDraftPlainText(front.text)
+            if (findDraftLength(back.text)) back.searchableText = getDraftPlainText(back.text)
+            const frontMediaTypes = [] as string[]
+            const backMediaTypes = [] as string[]
+            if (front.searchableText) frontMediaTypes.push('text')
+            if (back.searchableText) backMediaTypes.push('text')
+            if (front.images[0]) frontMediaTypes.push('image')
+            if (back.images[0]) backMediaTypes.push('image')
+            front.mediaTypes = frontMediaTypes.join(',')
+            back.mediaTypes = backMediaTypes.join(',')
+        }
+        // todo: gbg
+        post.searchableText = findSearchableText(post)
         console.log('new post: ', post)
         // validate post
         const validation = validatePost(post)
@@ -1088,10 +1019,11 @@ function CreatePostModal(): JSX.Element {
         // }
     }
 
-    // useEffect(() => {
-    //     if (game) setPostType('glass-bead-game')
-    //     if (governance) setPostType('poll')
-    // }, [])
+    // set media types
+    useEffect(() => {
+        if (game) setMediaTypes([game])
+        if (governance) setMediaTypes(['poll'])
+    }, [])
 
     // remove errors and initialise date picker if post type is event
     useEffect(() => {
@@ -1128,7 +1060,6 @@ function CreatePostModal(): JSX.Element {
         }
     }, [mediaTypes])
 
-    // todo: pass function into input so hook not necissary (requires use of refs..., maybe update gbg settings instead?)
     // update minimum end date when start date changed
     useEffect(() => {
         if (startTime) {
@@ -1202,18 +1133,16 @@ function CreatePostModal(): JSX.Element {
                 <SuccessMessage text='Post created!' />
             ) : (
                 <Column centerX style={{ width: '100%' }}>
-                    <Row centerY style={{ marginBottom: 20 }}>
-                        <h1 style={{ margin: 0 }}>{findModalHeader()}</h1>
-                        {mediaTypes.includes('glass-bead-game') && (
-                            <button
-                                type='button'
-                                className={styles.helpButton}
-                                onClick={() => setGBGHelpModalOpen(true)}
-                            >
-                                <HelpIcon />
-                            </button>
-                        )}
-                    </Row>
+                    <h1>{findModalHeader()}</h1>
+                    {mediaTypes.includes('glass-bead-game') && (
+                        <Button
+                            text='Game settings'
+                            color='aqua'
+                            icon={<SettingsIcon />}
+                            onClick={() => setGBGSettingsModalOpen(true)}
+                            style={{ marginBottom: 20 }}
+                        />
+                    )}
                     {sourceId && (
                         <Column centerX style={{ width: '100%', maxWidth: 350, marginBottom: 20 }}>
                             <p style={{ marginBottom: 10 }}>linked from post ID: {sourceId}</p>
@@ -1275,7 +1204,6 @@ function CreatePostModal(): JSX.Element {
                                 <Row centerY spaceBetween className={styles.topic}>
                                     <Column centerX centerY className={styles.imageWrapper}>
                                         {topicImageURL && <img src={topicImageURL} alt='' />}
-                                        {/* <UploadIcon /> */}
                                         <ImageIcon />
                                         <label htmlFor='topic-image-file-input'>
                                             <input
@@ -1292,8 +1220,8 @@ function CreatePostModal(): JSX.Element {
                                             placeholder='Topic...'
                                             type='text'
                                             maxLength={50}
-                                            value={topic}
-                                            onChange={(e) => updateTopicText(e.target.value)}
+                                            value={title}
+                                            onChange={(e) => updateTopic(e.target.value)}
                                             onBlur={() =>
                                                 setTimeout(() => setTopicOptions([]), 200)
                                             }
@@ -1417,8 +1345,8 @@ function CreatePostModal(): JSX.Element {
                                                     onClick={() => removeAudio(audio.id)}
                                                     style={{
                                                         position: 'absolute',
-                                                        right: 0,
-                                                        top: -5,
+                                                        right: 5,
+                                                        top: 5,
                                                         zIndex: 5,
                                                     }}
                                                 />
@@ -1523,22 +1451,24 @@ function CreatePostModal(): JSX.Element {
                                             style={{ marginRight: 20 }}
                                         />
                                     </Row>
-                                    <Column>
-                                        {pollAnswers.map((answer, index) => (
-                                            <PollAnswer
-                                                key={answer.id}
-                                                index={index}
-                                                answer={answer}
-                                                type={pollType}
-                                                percentage={0} // todo: make optional prop if not used here
-                                                color={pollColorScale(index)}
-                                                remove={() => removePollAnswer(answer.id)}
-                                                removable={answer.state !== 'done'}
-                                                style={{ marginTop: 10 }}
-                                                preview
-                                            />
-                                        ))}
-                                    </Column>
+                                    {pollAnswers.length > 0 && (
+                                        <Column className={styles.pollAnswers}>
+                                            {pollAnswers.map((answer, index) => (
+                                                <PollAnswer
+                                                    key={answer.id}
+                                                    index={index}
+                                                    answer={answer}
+                                                    type={pollType}
+                                                    percentage={0} // todo: make optional prop if not used here
+                                                    color={pollColorScale(index)}
+                                                    remove={() => removePollAnswer(answer.id)}
+                                                    removable={answer.state !== 'done'}
+                                                    style={{ marginTop: 10 }}
+                                                    preview
+                                                />
+                                            ))}
+                                        </Column>
+                                    )}
                                     <CommentInput
                                         type='poll-answer'
                                         preview
@@ -1550,106 +1480,46 @@ function CreatePostModal(): JSX.Element {
                             )}
                             {mediaTypes.includes('card') && (
                                 <Column centerX className={styles.cardContainer}>
-                                    <span>{cardFlipped ? 'Back' : 'Front'}</span>
-                                    <button
-                                        type='button'
-                                        title='Click to rotate'
-                                        onClick={rotateCard}
-                                    >
-                                        <RepostIcon />
-                                    </button>
-                                    <Column
-                                        centerX
-                                        className={`${
-                                            styles.cardWrapper
-                                        } ${cardContainerExpanded()}`}
-                                    >
+                                    <Column centerX className={styles.cardFlip}>
+                                        <button
+                                            type='button'
+                                            title='Click to rotate'
+                                            onClick={rotateCard}
+                                        >
+                                            <RepostIcon />
+                                        </button>
+                                        <p>{cardFlipped ? 'Back' : 'Front'}</p>
+                                    </Column>
+                                    <Column centerX className={styles.cardWrapper}>
                                         <Column
                                             centerX
                                             className={`${styles.card} ${
                                                 cardRotating && styles.rotating
                                             }`}
                                         >
-                                            {!cardFlipped ? (
-                                                <Column centerX className={styles.cardContent}>
-                                                    {cardFrontImage && (
-                                                        <img
-                                                            src={URL.createObjectURL(
-                                                                cardFrontImage
-                                                            )}
-                                                            alt='background'
-                                                            style={{
-                                                                opacity: cardFrontWatermark
-                                                                    ? 0.3
-                                                                    : 1,
-                                                            }}
-                                                        />
-                                                    )}
-                                                    <DraftTextEditor
-                                                        key='card-front'
-                                                        className={styles.textEditor}
-                                                        type='card'
-                                                        text={cardFrontText}
-                                                        maxChars={maxChars}
-                                                        onChange={(value, textMentions) => {
-                                                            setCardFrontText(value)
-                                                            setCardFrontMentions(textMentions)
-                                                            setErrors([])
+                                            <Column centerX className={styles.cardContent}>
+                                                {cardFace.images[0] && (
+                                                    <img
+                                                        src={cardFace.images[0].Image.url}
+                                                        alt='background'
+                                                        style={{
+                                                            opacity: cardFace.watermark ? 0.3 : 1,
                                                         }}
                                                     />
-                                                </Column>
-                                            ) : (
-                                                <Column centerX className={styles.cardContent}>
-                                                    {cardBackImage && (
-                                                        <img
-                                                            src={URL.createObjectURL(cardBackImage)}
-                                                            alt='background'
-                                                            style={{
-                                                                opacity: cardBackWatermark
-                                                                    ? 0.3
-                                                                    : 1,
-                                                            }}
-                                                        />
-                                                    )}
-                                                    <DraftTextEditor
-                                                        key='card-back'
-                                                        className={styles.textEditor}
-                                                        type='card'
-                                                        text={cardBackText}
-                                                        maxChars={maxChars}
-                                                        onChange={(value, textMentions) => {
-                                                            setCardBackText(value)
-                                                            setCardBackMentions(textMentions)
-                                                            setErrors([])
-                                                        }}
-                                                    />
-                                                </Column>
-                                            )}
+                                                )}
+                                                <DraftTextEditor
+                                                    key={cardFace.id}
+                                                    className={styles.textEditor}
+                                                    type='card'
+                                                    text={cardFace.text}
+                                                    maxChars={maxChars}
+                                                    onChange={updateCardText}
+                                                />
+                                            </Column>
                                         </Column>
                                     </Column>
-                                    {/* {cardImageSizeError && (
-                                        <Row className={styles.errors}>
-                                            <p>Max image size: {imageMBLimit}MB</p>
-                                        </Row>
-                                    )} */}
                                     <Row>
-                                        {((cardFlipped && !cardBackImage) ||
-                                            (!cardFlipped && !cardFrontImage)) && (
-                                            <Row className={styles.fileUploadInput}>
-                                                <label htmlFor='card-image-file-input'>
-                                                    Add image
-                                                    <input
-                                                        type='file'
-                                                        id='card-image-file-input'
-                                                        accept='.png, .jpg, .jpeg, .gif'
-                                                        onChange={addCardImage}
-                                                        hidden
-                                                    />
-                                                </label>
-                                            </Row>
-                                        )}
-                                        {((cardFlipped && cardBackImage) ||
-                                            (!cardFlipped && cardFrontImage)) && (
+                                        {cardFace.images[0] ? (
                                             <Row>
                                                 <Button
                                                     text='Remove image'
@@ -1658,35 +1528,28 @@ function CreatePostModal(): JSX.Element {
                                                 />
                                                 <Toggle
                                                     leftText='Watermark'
-                                                    positionLeft={
-                                                        cardFlipped
-                                                            ? !cardBackWatermark
-                                                            : !cardFrontWatermark
-                                                    }
+                                                    positionLeft={!cardFace.watermark}
                                                     rightColor='blue'
-                                                    onClick={() => {
-                                                        if (cardFlipped)
-                                                            setCardBackWatermark(!cardBackWatermark)
-                                                        else
-                                                            setCardFrontWatermark(
-                                                                !cardFrontWatermark
-                                                            )
-                                                    }}
+                                                    onClick={toggleWatermark}
                                                     style={{ marginLeft: 10 }}
                                                     onOffText
                                                 />
                                             </Row>
+                                        ) : (
+                                            <Row className={styles.fileUploadInput}>
+                                                <label htmlFor='card-image-input'>
+                                                    Add image
+                                                    <input
+                                                        type='file'
+                                                        id='card-image-input'
+                                                        accept={allowedImageTypes.join(',')}
+                                                        onChange={addCardImage}
+                                                        hidden
+                                                    />
+                                                </label>
+                                            </Row>
                                         )}
                                     </Row>
-                                    {/* <Row style={{ marginTop: 20 }}>
-                                        {['text'].map((type) => (
-                                            <ContentButton
-                                                type={type}
-                                                postType={cardFrontType}
-                                                setPostType={setCardFrontType}
-                                            />
-                                        ))}
-                                    </Row> */}
                                 </Column>
                             )}
                             {mediaTypes.includes('glass-bead-game') && (
@@ -1702,12 +1565,6 @@ function CreatePostModal(): JSX.Element {
                                     {/* {(postType === 'gbg-from-post' ||
                                         (!synchronous && !multiplayer)) &&
                                         renderBeads()} */}
-                                    <Button
-                                        text='Game settings'
-                                        color='aqua'
-                                        icon={<SettingsIcon />}
-                                        onClick={() => setGBGSettingsModalOpen(true)}
-                                    />
                                 </Column>
                             )}
                         </Column>
@@ -1792,7 +1649,6 @@ function CreatePostModal(): JSX.Element {
                     close={() => setNextBeadModalOpen(false)}
                 />
             )}
-            {GBGHelpModalOpen && <GBGHelpModal close={() => setGBGHelpModalOpen(false)} />}
         </Modal>
     )
 }

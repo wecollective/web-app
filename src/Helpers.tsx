@@ -529,13 +529,15 @@ export function findUrlSearchableText(urlData) {
 }
 
 export function findSearchableText(post) {
-    const { title, text, urls, images, audios } = post
+    const { title, text, urls, images, audios, card } = post
     let fields = [] as any
     if (title) fields.push(title)
     if (text) fields.push(getDraftPlainText(text))
-    urls.forEach((url) => fields.push(url.searchableText || ''))
-    images.forEach((image) => fields.push(image.text || ''))
-    audios.forEach((audio) => fields.push(audio.text || ''))
+    if (urls) urls.forEach((url) => url.searchableText && fields.push(url.searchableText))
+    if (images) images.forEach((image) => image.text && fields.push(image.text))
+    if (audios) audios.forEach((audio) => audio.text && fields.push(audio.text))
+    if (card && card.front.searchableText) fields.push(card.front.searchableText)
+    if (card && card.back.searchableText) fields.push(card.back.searchableText)
     fields = fields.filter((field) => field)
     return fields.length ? fields.join(' ') : null
 }
@@ -560,24 +562,25 @@ export function scrapeUrl(url) {
     return axios.get(`${config.apiURL}/scrape-url?url=${url}`, options)
 }
 
-// todo: count poll answers, card sides, and beads (do this when added?)
+// todo: gbg
 function findTotalUploadSize(post) {
-    const { images, audios, poll } = post
+    const { images, audios, poll, card } = post
     const imageSize = images
         .filter((i) => i.Image.file)
         .map((i) => i.Image.file.size)
         .reduce((a, b) => a + b, 0)
     const audioSize = audios.map((a) => a.Audio.file.size).reduce((a, b) => a + b, 0)
-    const pollAnswerSize = poll
-        ? poll.answers.map((a) => a.totalSize).reduce((a, b) => a + b, 0)
-        : 0
-    // const cardSize =
-    //     (cardFrontImage ? cardFrontImage.size : 0) + (cardBackImage ? cardBackImage.size : 0)
-    // todo: count bead uploads
-    const total = imageSize + audioSize + pollAnswerSize // + cardSize
+    let pollSize = 0
+    if (poll) pollSize = poll.answers.map((a) => a.totalSize).reduce((a, b) => a + b, 0)
+    let cardSize = 0
+    if (card && card.front.image) cardSize += card.front.image.file.size
+    if (card && card.back.image) cardSize += card.back.image.file.size
+    // todo: count beads
+    const total = imageSize + audioSize + pollSize + cardSize
     return +(total / megaByte).toFixed(2)
 }
 
+// todo: gbg
 export function validatePost(post, constraints?) {
     const { mediaTypes, title, text, images, audios, event, poll, card, glassBeadGame } = post
     const errors = [] as string[]
@@ -606,30 +609,25 @@ export function validatePost(post, constraints?) {
     }
     // glass bead game
     if (mediaTypes.includes('glass-bead-game')) {
-        const { topic, synchronous, multiplayer, beads } = glassBeadGame
-        // todo: use title?
-        if (!topic) errors.push('Topic required')
-        if (!synchronous && !multiplayer && !beads.length) {
+        const { synchronous, multiplayer, beads } = glassBeadGame
+        if (!title) errors.push('Topic required')
+        if (!synchronous && !multiplayer && !beads.length)
             errors.push('At least 1 bead required for single player games')
-        }
     }
     // card
     if (mediaTypes.includes('card')) {
         const { front, back } = card
-        if (!front.image && !findDraftLength(front.text)) {
+        if (!front.images[0] && !findDraftLength(front.text))
             errors.push('No content added to front of card')
-        }
-        if (!back.image && !findDraftLength(back.text)) {
+        if (!back.images[0] && !findDraftLength(back.text))
             errors.push('No content added to back of card')
-        }
     }
-
     return { errors, totalSize }
 }
 
 function attachPostFiles(formData, postData) {
-    // attaches postData files to formData (recursive for poll answers, cards, and gbgs)
-    const { mediaTypes, images, audios, poll } = postData
+    // attaches postData files to formData (recursive for poll answers, cards, and beads)
+    const { mediaTypes, images, audios, poll, card } = postData
     if (mediaTypes.includes('image')) {
         images.forEach((i) => {
             if (i.Image.file) formData.append('image', i.Image.file, i.id)
@@ -640,25 +638,10 @@ function attachPostFiles(formData, postData) {
             formData.append(`audio${a.Audio.file.name ? '' : '-blob'}`, a.Audio.file, a.id)
         )
     }
-    if (mediaTypes.includes('poll')) {
-        poll.answers.forEach((answer) => attachPostFiles(formData, answer))
-    }
-    // if (mediaTypes.includes('card')) {
-    //     const frontChars = findDraftLength(cardFrontText)
-    //     const backChars = findDraftLength(cardBackText)
-    //     postData.cardFront = {
-    //         text: frontChars ? cardFrontText : null,
-    //         searchableText: frontChars ? getDraftPlainText(cardFrontText) : null,
-    //         watermark: cardFrontWatermark,
-    //     }
-    //     postData.cardBack = {
-    //         text: backChars ? cardBackText : null,
-    //         searchableText: backChars ? getDraftPlainText(cardBackText) : null,
-    //         watermark: cardBackWatermark,
-    //     }
-    //     if (cardFrontImage) formData.append('image', cardFrontImage, 'card-front-image')
-    //     if (cardBackImage) formData.append('image', cardBackImage, 'card-back-image')
-    // }
+    if (poll) poll.answers.forEach((answer) => attachPostFiles(formData, answer))
+    if (card) attachPostFiles(formData, card.front)
+    if (card) attachPostFiles(formData, card.back)
+
     // if (mediaTypes.includes('glass-bead-game')) {
     //     postData.gbgSettings = GBGSettings
     //     postData.topicGroup = findTopicGroup()
