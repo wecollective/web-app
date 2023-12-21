@@ -354,14 +354,13 @@ function GlassBeadGame(props: {
             )}
             {nextBeadModalOpen && (
                 <NextBeadModal
-                    location='existing-gbg'
                     settings={{
                         ...GlassBeadGame,
                         allowedBeadTypes: [...allowedBeadTypes.split(',')],
                     }}
                     postId={postId}
                     players={players}
-                    addBead={(bead) => {
+                    onSave={(bead) => {
                         const newBeads = [...beads, { ...bead, type: `gbg-${bead.type}` }]
                         setBeads(newBeads)
                         updateNextPlayer(newBeads, players)

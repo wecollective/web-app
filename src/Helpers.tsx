@@ -565,11 +565,14 @@ export function scrapeUrl(url) {
 // todo: gbg
 function findTotalUploadSize(post) {
     const { images, audios, poll, card } = post
-    const imageSize = images
-        .filter((i) => i.Image.file)
-        .map((i) => i.Image.file.size)
-        .reduce((a, b) => a + b, 0)
-    const audioSize = audios.map((a) => a.Audio.file.size).reduce((a, b) => a + b, 0)
+    let imageSize = 0
+    if (images)
+        imageSize = images
+            .filter((i) => i.Image.file)
+            .map((i) => i.Image.file.size)
+            .reduce((a, b) => a + b, 0)
+    let audioSize = 0
+    if (audios) audioSize = audios.map((a) => a.Audio.file.size).reduce((a, b) => a + b, 0)
     let pollSize = 0
     if (poll) pollSize = poll.answers.map((a) => a.totalSize).reduce((a, b) => a + b, 0)
     let cardSize = 0

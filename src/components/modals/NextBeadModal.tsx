@@ -1,4 +1,4 @@
-/* eslint-disable react/no-array-index-key */
+/* eslint-saveDisabled react/no-array-index-key */
 import Button from '@components/Button'
 import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
@@ -10,22 +10,23 @@ import UrlPreview from '@components/cards/PostCard/UrlCard'
 import DraftTextEditor from '@components/draft-js/DraftTextEditor'
 import ImageModal from '@components/modals/ImageModal'
 import Modal from '@components/modals/Modal'
-import config from '@src/Config'
 import {
+    allowedAudioTypes,
+    allowedImageTypes,
     audioMBLimit,
     capitalise,
-    defaultPostData,
     findDraftLength,
+    findSearchableText,
+    findUrlSearchableText,
     formatTimeMMSS,
-    getDraftPlainText,
     imageMBLimit,
     postTypeIcons,
+    scrapeUrl,
+    validatePost,
 } from '@src/Helpers'
 import { AccountContext } from '@src/contexts/AccountContext'
 import colors from '@styles/Colors.module.scss'
-import styles from '@styles/components/modals/NextBeadModal2.module.scss'
-import axios from 'axios'
-import * as d3 from 'd3'
+import styles from '@styles/components/modals/NextBeadModal.module.scss'
 import getBlobDuration from 'get-blob-duration'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import RecordRTC from 'recordrtc'
@@ -36,21 +37,23 @@ const { white, red, orange, yellow, green, blue, purple } = colors
 const beadColors = [white, red, orange, yellow, green, blue, purple]
 
 function NextBeadModal(props: {
-    location: 'new-gbg' | 'existing-gbg'
+    preview?: boolean
     postId?: number
     settings: any
     players: any[]
-    addBead: (bead: any) => void
+    onSave: (bead: any) => void
     close: () => void
 }): JSX.Element {
     const { accountData, setAlertMessage, setAlertModalOpen } = useContext(AccountContext)
-    const { location, postId, settings, players, addBead, close } = props
+    const { preview, postId, settings, players, onSave, close } = props
     const { allowedBeadTypes, characterLimit, moveDuration, moveTimeWindow } = settings
     const [type, setType] = useState(allowedBeadTypes[0])
     const [color, setColor] = useState('#fff')
     const [showColors, setShowColors] = useState(true)
     const [text, setText] = useState('')
     const [mentions, setMentions] = useState<any[]>([])
+    const [saveLoading, setSaveLoading] = useState(false)
+    const [errors, setErrors] = useState<string[]>([])
     const [loading, setLoading] = useState(false)
     const [saved, setSaved] = useState(false)
     const maxChars = characterLimit || 5000
@@ -61,54 +64,44 @@ function NextBeadModal(props: {
     const [urlData, setUrlData] = useState<any>(null)
     const [urlLoading, setUrlLoading] = useState(false)
 
-    function scrapeUrl() {
+    async function getUrlData() {
         setUrlLoading(true)
-        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-        axios
-            .get(`${config.apiURL}/scrape-url?url=${url}`, options)
-            .then((res) => {
-                setUrlData({ url, ...res.data })
-                setUrl('')
-                setUrlLoading(false)
-            })
-            .catch((error) => console.log(error))
+        const { data } = await scrapeUrl(url)
+        if (data) {
+            data.url = url
+            data.searchableText = findUrlSearchableText(data)
+            setUrlData(data)
+            setUrlLoading(false)
+        }
     }
 
     // audio
-    const [audioFile, setAudioFile] = useState<File | undefined>()
-    const [audioBlob, setAudioBlob] = useState<any>()
-    const [audioType, setAudioType] = useState('')
+    const [audio, setAudio] = useState<any>()
     const [recording, setRecording] = useState(false)
     const [recordingTime, setRecordingTime] = useState(0)
-    const [audioSizeError, setAudioSizeError] = useState(false)
-    const [audioTimeError, setAudioTimeError] = useState(false)
     const audioRecorder = useRef<any>(null)
     const recordingInterval = useRef<any>(null)
 
-    function resetAudioState() {
-        setAudioFile(undefined)
-        setRecordingTime(0)
-        const input = d3.select('#bead-audio-file-input').node()
-        if (input) input.value = ''
-    }
-
-    async function selectAudioFile() {
-        const input = d3.select('#bead-audio-file-input').node()
+    async function addAudio() {
+        const input = document.getElementById('bead-audio-input') as HTMLInputElement
         if (input && input.files && input.files[0]) {
-            const duration = await getBlobDuration(URL.createObjectURL(input.files[0]))
-            if (input.files[0].size > audioMBLimit * 1024 * 1024) {
-                setAudioSizeError(true)
-                setAudioTimeError(false)
-                resetAudioState()
-            } else if (moveDuration && Math.trunc(duration) > moveDuration) {
-                setAudioTimeError(true)
-                setAudioSizeError(false)
-                resetAudioState()
-            } else {
-                setAudioSizeError(false)
-                setAudioTimeError(false)
-                setAudioFile(input.files[0])
-                setAudioType('file')
+            const fileType = input.files[0].type.split('/')[1]
+            if (allowedAudioTypes.includes(`.${fileType}`)) {
+                const tooLarge = input.files[0].size > audioMBLimit * 1024 * 1024
+                const duration = await getBlobDuration(URL.createObjectURL(input.files[0]))
+                const overTimeLimit = moveDuration && Math.trunc(duration) > moveDuration
+                if (tooLarge) setErrors([`Max audio size: ${audioMBLimit} MBs`])
+                else if (overTimeLimit) setErrors([`Max duration: ${moveDuration} secs`])
+                else {
+                    setAudio({
+                        id: uuidv4(),
+                        Audio: {
+                            file: input.files[0],
+                            url: URL.createObjectURL(input.files[0]),
+                        },
+                    })
+                    setErrors([])
+                }
             }
         }
     }
@@ -116,10 +109,11 @@ function NextBeadModal(props: {
     function stopAudioRecording() {
         audioRecorder.current.stopRecording(() => {
             clearInterval(recordingInterval.current)
-            const blob = audioRecorder.current.getBlob()
-            setAudioBlob(blob)
-            setAudioFile(new File([blob], '', { type: 'audio/wav' }))
-            setAudioType('recording')
+            const file = new File([audioRecorder.current.getBlob()], '', { type: 'audio/wav' })
+            setAudio({
+                id: uuidv4(),
+                Audio: { file, url: URL.createObjectURL(file) },
+            })
         })
         setRecording(false)
     }
@@ -127,9 +121,6 @@ function NextBeadModal(props: {
     function toggleAudioRecording() {
         if (recording) stopAudioRecording()
         else {
-            resetAudioState()
-            setAudioSizeError(false)
-            setAudioTimeError(false)
             navigator.mediaDevices
                 .getUserMedia({ audio: { sampleRate: 24000 } })
                 .then((audioStream) => {
@@ -160,13 +151,13 @@ function NextBeadModal(props: {
         return (
             <Column centerY centerX style={{ height: '100%' }}>
                 <Row className={styles.fileUploadInput}>
-                    <label htmlFor='bead-audio-file-input'>
+                    <label htmlFor='bead-audio-input'>
                         Upload audio
                         <input
                             type='file'
-                            id='bead-audio-file-input'
-                            accept='audio/mpeg'
-                            onChange={selectAudioFile}
+                            id='bead-audio-input'
+                            accept={allowedAudioTypes.join(',')}
+                            onChange={addAudio}
                             hidden
                         />
                     </label>
@@ -179,13 +170,8 @@ function NextBeadModal(props: {
                 {recording && (
                     <p style={{ marginTop: 10, fontSize: 20 }}>{formatTimeMMSS(recordingTime)}</p>
                 )}
-                {audioSizeError && (
-                    <p className='danger' style={{ marginTop: 10 }}>
-                        Max size: {audioMBLimit}MB
-                    </p>
-                )}
                 {!!moveDuration && (
-                    <p className={audioTimeError ? 'danger' : 'grey'} style={{ marginTop: 10 }}>
+                    <p style={{ marginTop: 10 }}>
                         {recording
                             ? `Recording will end in ${moveDuration - recordingTime} secs`
                             : `Max duration: ${moveDuration} secs`}
@@ -198,127 +184,186 @@ function NextBeadModal(props: {
     // images
     const [image, setImage] = useState<any>(null)
     const [imageURL, setImageURL] = useState('')
-    const [imageSizeError, setImageSizeError] = useState(false)
     const [imageModalOpen, setImageModalOpen] = useState(false)
 
-    function addImageFile() {
-        setImageSizeError(false)
-        const input = document.getElementById('bead-image-file-input') as HTMLInputElement
+    function addImage() {
+        const input = document.getElementById('bead-image-input') as HTMLInputElement
         if (input && input.files && input.files[0]) {
-            if (input.files[0].size > imageMBLimit * 1024 * 1024) setImageSizeError(true)
-            else setImage({ file: input.files[0], url: '' }) // id: uuidv4()
+            const fileType = input.files[0].type.split('/')[1]
+            if (allowedImageTypes.includes(`.${fileType}`)) {
+                const tooLarge = input.files[0].size > imageMBLimit * 1024 * 1024
+                if (tooLarge) setErrors([`Max image size: ${imageMBLimit} MBs`])
+                else {
+                    setImage({
+                        id: uuidv4(),
+                        Image: {
+                            file: input.files[0],
+                            url: URL.createObjectURL(input.files[0]),
+                        },
+                    })
+                    setErrors([])
+                }
+            }
         }
     }
 
     function addImageURL() {
-        setImage({ file: null, url: imageURL }) // id: uuidv4()
+        setImage({ id: uuidv4(), Image: { url: imageURL } })
         setImageURL('')
-        setImageSizeError(false)
+        setErrors([])
     }
 
-    function disable() {
+    // todo: maybe leave these for the validation function?
+    function saveDisabled() {
         const chars = findDraftLength(text)
-        if (type === 'text' && (chars < 1 || chars > maxChars)) return true
-        if (type === 'url' && !urlData) return true
-        if (type === 'audio' && !audioFile) return true
-        if (type === 'image' && !image) return true
-        return false
+        const textInvalid = type === 'text' && (!chars || chars > maxChars)
+        const urlInvalid = type === 'url' && !urlData
+        const audioInvalid = type === 'audio' && !audio
+        const imageInvalid = type === 'image' && !image
+        return textInvalid || urlInvalid || audioInvalid || imageInvalid
     }
 
-    // todo: revisit
-    function uploadBead(bead) {
-        setLoading(true)
-        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-        const beadData = {
-            ...bead,
-            creatorName: accountData.name,
-            creatorHandle: accountData.handle,
-            postId,
-            mentions: bead.type === 'text' ? bead.mentions.map((m) => m.link) : [],
-        }
-        // add searchable text
-        const fields = [] as any
-        if (bead.type === 'text') fields.push(getDraftPlainText(beadData.text))
-        if (bead.type === 'url') {
-            const urlFields = [] as any
-            const u = bead.Urls[0]
-            if (u.url) urlFields.push(u.url)
-            if (u.title) urlFields.push(u.title)
-            if (u.description) urlFields.push(u.description)
-            if (u.domain) urlFields.push(u.domain)
-            if (urlFields.length) fields.push(urlFields.join(' '))
-        }
-        beadData.searchableText = fields.length ? fields.join(' ') : null
-        let fileData
-        let uploadType
-        if (bead.type === 'audio') {
-            uploadType = `audio-${audioType === 'recording' ? 'blob' : 'file'}`
-            fileData = new FormData()
-            fileData.append('file', audioType === 'recording' ? audioBlob : audioFile)
-            fileData.append('beadData', JSON.stringify(beadData))
-        }
-        if (bead.type === 'image' && bead.Images[0].file) {
-            uploadType = 'image-file'
-            fileData = new FormData()
-            fileData.append('file', bead.Images[0].file)
-            fileData.append('beadData', JSON.stringify(beadData))
-        }
-        axios
-            .post(
-                `${config.apiURL}/create-next-bead?uploadType=${uploadType}`,
-                fileData || beadData,
-                options
-            )
-            .then((res) => {
-                setSaved(true)
-                setLoading(false)
-                addBead({
-                    ...defaultPostData,
-                    ...bead,
-                    id: res.data.bead.id,
-                    nextMoveDeadline: res.data.newDeadline || null,
-                })
-                setTimeout(() => close(), 1000)
-            })
-            .catch((error) => {
-                console.log('error: ', error)
-                if (error.response && error.response.status === 401) {
-                    setAlertMessage('Your session has run out. Please log in again.')
-                    setAlertModalOpen(true)
-                }
-            })
-    }
+    // // todo: revisit
+    // function uploadBead(bead) {
+    //     setLoading(true)
+    //     const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+    //     const beadData = {
+    //         ...bead,
+    //         creatorName: accountData.name,
+    //         creatorHandle: accountData.handle,
+    //         postId,
+    //         mentions: bead.type === 'text' ? bead.mentions.map((m) => m.link) : [],
+    //     }
+    //     // add searchable text
+    //     const fields = [] as any
+    //     if (bead.type === 'text') fields.push(getDraftPlainText(beadData.text))
+    //     if (bead.type === 'url') {
+    //         const urlFields = [] as any
+    //         const u = bead.Urls[0]
+    //         if (u.url) urlFields.push(u.url)
+    //         if (u.title) urlFields.push(u.title)
+    //         if (u.description) urlFields.push(u.description)
+    //         if (u.domain) urlFields.push(u.domain)
+    //         if (urlFields.length) fields.push(urlFields.join(' '))
+    //     }
+    //     beadData.searchableText = fields.length ? fields.join(' ') : null
+    //     let fileData
+    //     let uploadType
+    //     if (bead.type === 'audio') {
+    //         uploadType = `audio-${audioType === 'recording' ? 'blob' : 'file'}`
+    //         fileData = new FormData()
+    //         fileData.append('file', audioType === 'recording' ? audioBlob : audioFile)
+    //         fileData.append('beadData', JSON.stringify(beadData))
+    //     }
+    //     if (bead.type === 'image' && bead.Images[0].file) {
+    //         uploadType = 'image-file'
+    //         fileData = new FormData()
+    //         fileData.append('file', bead.Images[0].file)
+    //         fileData.append('beadData', JSON.stringify(beadData))
+    //     }
+    //     axios
+    //         .post(
+    //             `${config.apiURL}/create-next-bead?uploadType=${uploadType}`,
+    //             fileData || beadData,
+    //             options
+    //         )
+    //         .then((res) => {
+    //             setSaved(true)
+    //             setLoading(false)
+    //             addBead({
+    //                 ...defaultPostData,
+    //                 ...bead,
+    //                 id: res.data.bead.id,
+    //                 nextMoveDeadline: res.data.newDeadline || null,
+    //             })
+    //             setTimeout(() => close(), 1000)
+    //         })
+    //         .catch((error) => {
+    //             console.log('error: ', error)
+    //             if (error.response && error.response.status === 401) {
+    //                 setAlertMessage('Your session has run out. Please log in again.')
+    //                 setAlertModalOpen(true)
+    //             }
+    //         })
+    // }
 
-    function saveBead() {
+    // function saveBead() {
+    //     const bead = {
+    //         id: uuidv4(),
+    //         mediaTypes: type,
+    //         color,
+    //         Link: { source: null },
+    //         Creator: accountData,
+    //         accountLike: 0,
+    //         accountLink: 0,
+    //         accountRating: 0,
+    //         accountRepost: 0,
+    //     } as any
+    //     if (type === 'text') {
+    //         bead.text = text
+    //         bead.mentions = mentions
+    //     }
+    //     if (type === 'url') bead.Url = urlData
+    //     if (type === 'audio') {
+    //         bead.Audio = { type: audioType, file: audioFile, blob: audioBlob }
+    //     }
+    //     if (type === 'image') bead.Image = image
+    //     // save
+    //     if (preview) uploadBead(bead)
+    //     else {
+    //         console.log('new bead: ', bead)
+    //         onSave(bead)
+    //         close()
+    //     }
+    // }
+
+    function save() {
+        setSaveLoading(true)
+        // structure data
         const bead = {
             id: uuidv4(),
+            type: 'bead',
             mediaTypes: type,
+            text: type === 'text' ? text : null,
+            mentions: mentions.map((m) => m.id),
+            urls: type === 'url' ? [urlData] : [],
+            images: type === 'image' ? [image] : [],
+            audios: type === 'audio' ? [audio] : [],
             color,
-            Link: { source: null },
-            Creator: accountData,
-            accountLike: 0,
-            accountLink: 0,
-            accountRating: 0,
-            accountRepost: 0,
         } as any
-        if (type === 'text') {
-            bead.text = text
-            bead.mentions = mentions
-        }
-        if (type === 'url') bead.Url = urlData
-        if (type === 'audio') {
-            bead.Audio = { type: audioType, file: audioFile, blob: audioBlob }
-        }
-        if (type === 'image') bead.Image = image
-        // save
-        if (location === 'existing-gbg') uploadBead(bead)
-        else {
-            console.log('new bead: ', bead)
-            addBead(bead)
+        bead.searchableText = findSearchableText(bead)
+        // validate post (currently only used here for totalSize value)
+        const validation = validatePost(bead)
+        if (validation.errors.length) {
+            // display errors
+            setErrors(validation.errors)
+            setSaveLoading(false)
+        } else if (preview) {
+            // return post data to parent component
+            const { id, handle, name, flagImagePath } = accountData
+            bead.Creator = { id, handle, name, flagImagePath }
+            bead.totalSize = validation.totalSize
+            onSave(bead)
             close()
+        } else {
+            // upload post
+            // bead.link = { root, parent }
+            // uploadPost(post)
+            //     .then((res) => {
+            //         const newBead = res.data
+            //         const { id, handle, name, flagImagePath } = accountData
+            //         newBead.Creator = { id, handle, name, flagImagePath }
+            //         newBead.Comments = []
+            //         newBead.Reactions = []
+            //         newBead.link = bead.link
+            //         onSave(newPost)
+            //         resetData()
+            //     })
+            //     .catch((error) => console.log(error))
         }
     }
 
+    // set player color
     useEffect(() => {
         if (players.length) {
             const accountPlayer = players.find((p) => p.id === accountData.id)
@@ -368,13 +413,6 @@ function NextBeadModal(props: {
                             <div className={styles.watermark} />
                             <Row centerY spaceBetween className={styles.header}>
                                 {postTypeIcons[type]}
-                                {/* <ImageTitle
-                                    type='user'
-                                    imagePath={accountData.flagImagePath}
-                                    title={accountData.name}
-                                    // fontSize={12}
-                                    // imageSize={20}
-                                /> */}
                             </Row>
                             <Column centerX centerY className={styles.content}>
                                 {type === 'url' && (
@@ -398,7 +436,7 @@ function NextBeadModal(props: {
                                                 <Button
                                                     text='Add'
                                                     color='aqua'
-                                                    onClick={scrapeUrl}
+                                                    onClick={getUrlData}
                                                     disabled={!url}
                                                     loading={urlLoading}
                                                 />
@@ -408,13 +446,13 @@ function NextBeadModal(props: {
                                 )}
                                 {type === 'audio' && (
                                     <Column centerX style={{ width: '100%', height: '100%' }}>
-                                        {audioFile ? (
+                                        {audio ? (
                                             <AudioCard
-                                                key={audioFile.lastModified}
-                                                url={URL.createObjectURL(audioFile)}
+                                                key={audio.id}
+                                                url={audio.Audio.url}
                                                 staticBars={200}
                                                 location='create-bead-audio'
-                                                remove={() => setAudioFile(undefined)}
+                                                remove={() => setAudio(null)}
                                                 style={{ width: '100%', height: '100%' }}
                                             />
                                         ) : (
@@ -436,13 +474,7 @@ function NextBeadModal(props: {
                                                     className={styles.imageButton}
                                                     onClick={() => setImageModalOpen(true)}
                                                 >
-                                                    <img
-                                                        src={
-                                                            image.url ||
-                                                            URL.createObjectURL(image.file)
-                                                        }
-                                                        alt=''
-                                                    />
+                                                    <img src={image.Image.url} alt='' />
                                                 </button>
                                                 <Row centerY className={styles.caption}>
                                                     <Input
@@ -465,13 +497,13 @@ function NextBeadModal(props: {
                                         ) : (
                                             <Column centerX centerY style={{ height: '100%' }}>
                                                 <Row className={styles.fileUploadInput}>
-                                                    <label htmlFor='bead-image-file-input'>
+                                                    <label htmlFor='bead-image-input'>
                                                         Upload image
                                                         <input
                                                             type='file'
-                                                            id='bead-image-file-input'
-                                                            accept='.png, .jpg, .jpeg, .gif'
-                                                            onChange={addImageFile}
+                                                            id='bead-image-input'
+                                                            accept={allowedImageTypes.join(',')}
+                                                            onChange={addImage}
                                                             hidden
                                                         />
                                                     </label>
@@ -492,11 +524,6 @@ function NextBeadModal(props: {
                                                         onClick={addImageURL}
                                                     />
                                                 </Row>
-                                                {imageSizeError && (
-                                                    <p className='danger' style={{ marginTop: 10 }}>
-                                                        Max image size: {imageMBLimit}MB
-                                                    </p>
-                                                )}
                                             </Column>
                                         )}
                                     </Column>
@@ -517,12 +544,15 @@ function NextBeadModal(props: {
                             </button>
                         ))}
                     </Row>
+                    <Column centerX className={styles.errors}>
+                        <p>{errors[0]}</p>
+                    </Column>
                     <Button
                         text='Add bead'
                         color='aqua'
-                        disabled={disable()}
+                        disabled={saveDisabled()}
                         loading={loading}
-                        onClick={saveBead}
+                        onClick={save}
                         style={{ margin: '20px 0' }}
                     />
                 </Column>
@@ -533,6 +563,7 @@ function NextBeadModal(props: {
 
 NextBeadModal.defaultProps = {
     postId: null,
+    preview: false,
 }
 
 export default NextBeadModal

@@ -367,7 +367,8 @@ $transitionSpeed: 0.5s;
                 .beads {
                     padding: 15px;
                     background-color: $grey1;
-                    border-radius: 20px;
+                    border: 1px solid $grey2;
+                    border-radius: 10px;
                     margin-top: 10px;
 
                     .beadDivider {

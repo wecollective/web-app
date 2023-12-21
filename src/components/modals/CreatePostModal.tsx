@@ -71,8 +71,6 @@ import { useLocation } from 'react-router-dom'
 import RecordRTC from 'recordrtc'
 import { v4 as uuidv4 } from 'uuid'
 
-// const { white, red, orange, yellow, green, blue, purple } = colors
-// const beadColors = [white, red, orange, yellow, green, blue, purple]
 const defaultSelectedSpace = {
     id: 1,
     handle: 'all',
@@ -121,7 +119,6 @@ function CreatePostModal(): JSX.Element {
     const [saved, setSaved] = useState(false)
     const [spacesModalOpen, setSpacesModalOpen] = useState(false)
     const maxChars = 5000
-    // const cookies = new Cookies()
     const maxUrls = 5
     const location = useLocation()
     const [x, page, pageHandle, subPage] = location.pathname.split('/')
@@ -466,8 +463,7 @@ function CreatePostModal(): JSX.Element {
 
     // gbg
     const [topicOptions, setTopicOptions] = useState<any[]>([])
-    const [topicImageFile, setTopicImageFile] = useState<File | undefined>()
-    const [topicImageURL, setTopicImageURL] = useState('')
+    const [topicImage, setTopicImage] = useState<any>()
     const [GBGSettingsModalOpen, setGBGSettingsModalOpen] = useState(false)
     const [GBGSettings, setGBGSettings] = useState<any>(defaultGBGSettings)
     const { synchronous, multiplayer, players, totalMoves, movesPerPlayer } = GBGSettings
@@ -475,21 +471,28 @@ function CreatePostModal(): JSX.Element {
     const [nextBeadModalOpen, setNextBeadModalOpen] = useState(false)
 
     function uploadTopicImage() {
-        const input = document.getElementById('topic-image-file-input') as HTMLInputElement
-        if (input && input.files && input.files[0]) {
-            setTopicImageURL('')
-            if (input.files[0].size > imageMBLimit * 1024 * 1024) {
-                setTopicImageFile(undefined)
-                input.value = ''
-            } else {
-                setTopicImageFile(input.files[0])
-                setTopicImageURL(URL.createObjectURL(input.files[0]))
+        const input = document.getElementById('topic-image-input') as HTMLInputElement
+        if (input && input.files && input.files.length) {
+            const fileType = input.files[0].type.split('/')[1]
+            if (allowedImageTypes.includes(`.${fileType}`)) {
+                const tooLarge = input.files[0].size > imageMBLimit * 1024 * 1024
+                if (tooLarge) setErrors([`Max image size: ${imageMBLimit} MBs`])
+                else {
+                    setTopicImage({
+                        id: uuidv4(),
+                        Image: {
+                            file: input.files[0],
+                            url: URL.createObjectURL(input.files[0]),
+                        },
+                    })
+                    setErrors([])
+                }
             }
         }
     }
 
     // todo: merge groups into single array
-    function updateTopic(topicText) {
+    function updateTopicText(topicText) {
         const arcMatches = GlassBeadGameTopics.archetopics.filter((t) =>
             t.name.toLowerCase().includes(topicText.toLowerCase())
         )
@@ -503,7 +506,7 @@ function CreatePostModal(): JSX.Element {
 
     function selectTopic(option) {
         setTitle(option.name)
-        setTopicImageURL(option.imagePath)
+        setTopicImage({ id: uuidv4(), Image: { url: option.imagePath } })
         setTopicOptions([])
         setErrors([])
     }
@@ -667,6 +670,14 @@ function CreatePostModal(): JSX.Element {
             if (back.images[0]) backMediaTypes.push('image')
             front.mediaTypes = frontMediaTypes.join(',')
             back.mediaTypes = backMediaTypes.join(',')
+        }
+        if (mediaTypes.includes('glass-bead-game')) {
+            post.glassBeadGame = {
+                settings: GBGSettings,
+                topicImage,
+                topicGroup: findTopicGroup(),
+                beads,
+            }
         }
         // todo: gbg
         post.searchableText = findSearchableText(post)
@@ -1203,13 +1214,13 @@ function CreatePostModal(): JSX.Element {
                             {mediaTypes.includes('glass-bead-game') && (
                                 <Row centerY spaceBetween className={styles.topic}>
                                     <Column centerX centerY className={styles.imageWrapper}>
-                                        {topicImageURL && <img src={topicImageURL} alt='' />}
+                                        {topicImage && <img src={topicImage.Image.url} alt='' />}
                                         <ImageIcon />
-                                        <label htmlFor='topic-image-file-input'>
+                                        <label htmlFor='topic-image-input'>
                                             <input
                                                 type='file'
-                                                id='topic-image-file-input'
-                                                accept='.png, .jpg, .jpeg, .gif'
+                                                id='topic-image-input'
+                                                accept={allowedImageTypes.join(',')}
                                                 onChange={uploadTopicImage}
                                                 hidden
                                             />
@@ -1221,7 +1232,7 @@ function CreatePostModal(): JSX.Element {
                                             type='text'
                                             maxLength={50}
                                             value={title}
-                                            onChange={(e) => updateTopic(e.target.value)}
+                                            onChange={(e) => updateTopicText(e.target.value)}
                                             onBlur={() =>
                                                 setTimeout(() => setTopicOptions([]), 200)
                                             }
@@ -1582,27 +1593,7 @@ function CreatePostModal(): JSX.Element {
                         </Row>
                     )}
                     <Column centerX className={styles.errors}>
-                        {errors[0]}
-                        {/* {noTextError && <p>No content added</p>}
-                        {maxCharsErrors && <p>Text must be less than {maxChars} characters</p>}
-                        {noImagesError && <p>No images added</p>}
-                        {imageSizeError && <p>Max file size: {imageMBLimit} MBs</p>}
-                        {totalUploadSizeError && (
-                            <p>
-                                Total upload size ({findTotalUploadSize()} MBs) must be less than{' '}
-                                {totalMBUploadLimit} MBs
-                            </p>
-                        )}
-                        {audioSizeError && <p>Max file size: {audioMBLimit} MBs</p>}
-                        {noAudioError && <p>No audio added</p>}
-                        {eventTextError && <p>Title or text required for events</p>}
-                        {noEventTimesError && <p>Start time required for events</p>}
-                        {pollTextError && <p>Title or text required for polls</p>}
-                        {pollAnswersError && <p>At least 2 answers required for locked polls</p>}
-                        {topicError && <p>Topic required</p>}
-                        {noBeadsError && <p>At least 1 bead required for single player games</p>}
-                        {cardFrontError && <p>No content added to front of card</p>}
-                        {cardBackError && <p>No content added to back of card</p>} */}
+                        <p>{errors[0]}</p>
                     </Column>
                     <Button
                         text='Post'
@@ -1639,10 +1630,10 @@ function CreatePostModal(): JSX.Element {
             )}
             {nextBeadModalOpen && (
                 <NextBeadModal
-                    location='new-gbg'
+                    preview
                     settings={GBGSettings}
                     players={GBGSettings.players}
-                    addBead={(bead) => {
+                    onSave={(bead) => {
                         setBeads([...beads, bead])
                         setErrors([])
                     }}

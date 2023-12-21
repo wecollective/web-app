@@ -41,7 +41,7 @@ function BeadCard(props: {
     bead: any
     beadIndex?: number
     postId?: number
-    location: string
+    location: string // gbg-room, link-modal (temp: drop modal & toyboxitem), post, preview
     selected?: boolean
     toggleBeadComments?: () => void
     removeBead?: (beadIndex: number) => void
@@ -78,15 +78,17 @@ function BeadCard(props: {
         Creator,
         Event,
         CardSides,
-        Url,
-        Image,
-        Audio,
+        // preview data
+        urls,
+        images,
+        audios,
     } = bead
+    // todo: add preview prop instead of using location?
     const preview = location === 'preview'
     const [loading, setLoading] = useState(true)
-    const [urlBlocks, setUrlBlocks] = useState<any[]>(preview ? [{ id, Url }] : [])
-    const [imageBlocks, setImageBlocks] = useState<any[]>(preview ? [{ id, Image }] : [])
-    const [audioBlocks, setAudioBlocks] = useState<any[]>(preview ? [{ id, Audio }] : [])
+    const [urlBlocks, setUrlBlocks] = useState<any[]>(preview ? [urls[0]] : [])
+    const [imageBlocks, setImageBlocks] = useState<any[]>(preview ? [images[0]] : [])
+    const [audioBlocks, setAudioBlocks] = useState<any[]>(preview ? [audios[0]] : [])
     const [menuOpen, setMenuOpen] = useState(false)
     const [editPostModalOpen, setEditPostModalOpen] = useState(false)
     const [imageModalOpen, setImageModalOpen] = useState(false)
@@ -178,7 +180,7 @@ function BeadCard(props: {
                 isSource && styles.source
             } ${location === 'gbg-room' && styles.gbgRoom}`}
             style={{ ...style, backgroundColor: color }}
-            draggable
+            draggable={!preview}
             id={`bead-${id}`}
         >
             <div className={styles.watermark} />

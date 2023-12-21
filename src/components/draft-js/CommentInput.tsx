@@ -358,8 +358,7 @@ function CommentInput(props: {
     useEffect(() => {
         initializeDropBox()
         // set up editor
-        // isDraft boolean used as temporary solution until old markdown converted to draft
-        // const isDraft = text && text.slice(0, 10) === `{"blocks":`
+        // todo: create with new state rather than from empty text
         const contentState = ContentState.createFromText('')
         const newEditorState = EditorState.createWithContent(contentState)
         setEditorState(newEditorState)
@@ -504,7 +503,7 @@ function CommentInput(props: {
                 {errors.length > 0 ? <p className={styles.error}>{errors[0]}</p> : <p />}
                 <p className={overMaxChars ? styles.error : ''}>{totalCharsText}</p>
             </Row>
-            {/* todo: eventually replaces with media sections like on PostCard */}
+            {/* todo: eventually replace with media sections like on PostCard? */}
             {urls.map((urlData) => (
                 <Column key={urlData.url} style={{ marginTop: 10, position: 'relative' }}>
                     <CloseButton

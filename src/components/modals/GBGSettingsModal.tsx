@@ -18,10 +18,8 @@ import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/GBGSettingsModal.module.scss'
 import { ChevronDownIcon, ChevronUpIcon, HelpIcon, SearchIcon } from '@svgs/all'
 import axios from 'axios'
-import * as d3 from 'd3'
-import flatpickr from 'flatpickr'
 import 'flatpickr/dist/themes/material_green.css'
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, { useContext, useState } from 'react'
 
 function GBGSettingsModal(props: {
     settings: any
@@ -55,11 +53,6 @@ function GBGSettingsModal(props: {
             : { days: 1, hours: 0, minutes: 0 }
     )
     const [timeWindowError, setTimeWindowError] = useState(false)
-    const [includeDates, setIncludeDates] = useState(!!settings.startTime)
-    const startTime = useRef(settings.startTime)
-    const endTime = useRef(settings.endTime)
-    const [startTimeError, setStartTimeError] = useState(false)
-    const [showRemoveEndDateButton, setShowRemoveEndDateButton] = useState(!!settings.endTime)
     const [beadTypeError, setBeadTypeError] = useState(false)
     const [constraintsCollapsed, setConstraintsCollapsed] = useState(false)
     const [playersCollapsed, setPlayersCollapsed] = useState(false)
@@ -82,14 +75,6 @@ function GBGSettingsModal(props: {
     const allBeadTypes = ['text', 'url', 'audio', 'image']
     const { white, red, orange, yellow, green, blue, purple } = colors
     const beadColors = [white, red, orange, yellow, green, blue, purple]
-    const dateTimeOptions = {
-        enableTime: true,
-        clickOpens: true,
-        disableMobile: true,
-        minDate: new Date(),
-        minuteIncrement: 1,
-        altInput: true,
-    }
 
     function updateSetting(type, value) {
         setNewSettings({ ...newSettings, [type]: value })
@@ -109,9 +94,6 @@ function GBGSettingsModal(props: {
                 intervalDuration: 0,
                 allowedBeadTypes: allBeadTypes,
             })
-            setIncludeDates(false)
-            startTime.current = ''
-            endTime.current = ''
             setIntroOn(false)
             setOutroOn(false)
             setIntervalsOn(false)
@@ -207,24 +189,10 @@ function GBGSettingsModal(props: {
         setSelectedPlayerId(0)
     }
 
-    function removeEndDate() {
-        const endTimeInstance = d3.select('#date-time-end').node()
-        if (endTimeInstance) endTimeInstance._flatpickr.setDate(null)
-        endTime.current = ''
-        setShowRemoveEndDateButton(false)
-    }
-
     function save() {
         // validate settings
         let valid = true
         const validatedSettings = { ...newSettings }
-        // event dates
-        validatedSettings.startTime = includeDates ? startTime.current : ''
-        validatedSettings.endTime = includeDates ? endTime.current : ''
-        if (includeDates && !startTime.current) {
-            setStartTimeError(true)
-            valid = false
-        }
         // allowed bead types
         if (!allowedBeadTypes.length) {
             setBeadTypeError(true)
@@ -255,52 +223,6 @@ function GBGSettingsModal(props: {
         if (valid) close()
     }
 
-    // initialise date picker
-    useEffect(() => {
-        if (includeDates) {
-            const now = new Date()
-            const startTimePast = new Date(startTime.current) < now
-            const endTimePast = new Date(endTime.current) < now
-            const defaultStartDate = startTime.current
-                ? startTimePast
-                    ? now
-                    : new Date(startTime.current)
-                : undefined
-            const defaultEndDate = endTime.current
-                ? endTimePast
-                    ? now
-                    : new Date(endTime.current)
-                : undefined
-            flatpickr('#date-time-start', {
-                ...dateTimeOptions,
-                defaultDate: defaultStartDate,
-                appendTo: document.getElementById('date-time-start-wrapper') || undefined,
-                onChange: ([value]) => {
-                    startTime.current = value.toString()
-                    setStartTimeError(false)
-                    const endTimeInstance = d3.select('#date-time-end').node()
-                    if (endTimeInstance) endTimeInstance._flatpickr.set('minDate', value)
-                    if (new Date(endTime.current) < new Date(startTime.current)) {
-                        endTime.current = ''
-                    }
-                },
-            })
-            flatpickr('#date-time-end', {
-                ...dateTimeOptions,
-                defaultDate: defaultEndDate,
-                minDate: defaultStartDate || now,
-                appendTo: document.getElementById('date-time-end-wrapper') || undefined,
-                onChange: ([value]) => {
-                    endTime.current = value.toString()
-                    setShowRemoveEndDateButton(true)
-                },
-            })
-            // if (startTimePast && defaultStartDate)
-            //     updateSetting('startTime', defaultStartDate.toString())
-            // if (endTimePast && defaultEndDate) updateSetting('startTime', defaultEndDate.toString())
-        }
-    }, [includeDates])
-
     return (
         <Modal centerX close={close} className={styles.wrapper} confirmClose>
             <Row centerY style={{ marginBottom: 20 }}>
@@ -324,45 +246,6 @@ function GBGSettingsModal(props: {
                 />
                 {synchronous ? (
                     <Column centerX>
-                        <Column centerX className={styles.rowWrapper}>
-                            <Toggle
-                                leftText='Schedule as event'
-                                positionLeft={!includeDates}
-                                rightColor='blue'
-                                onClick={() => {
-                                    setIncludeDates(!includeDates)
-                                    setStartTimeError(false)
-                                }}
-                                onOffText
-                            />
-                            <Row
-                                centerY
-                                className={`${styles.dateTimePicker} ${styles.row} ${
-                                    includeDates && styles.visible
-                                }`}
-                            >
-                                <div id='date-time-start-wrapper'>
-                                    <Input
-                                        id='date-time-start'
-                                        type='text'
-                                        placeholder='Start time...'
-                                        state={startTimeError ? 'invalid' : 'default'}
-                                    />
-                                </div>
-                                <p>→</p>
-                                <div id='date-time-end-wrapper'>
-                                    <Input
-                                        id='date-time-end'
-                                        type='text'
-                                        placeholder='End time... (optional)'
-                                    />
-                                </div>
-                                {showRemoveEndDateButton && (
-                                    <CloseButton size={20} onClick={removeEndDate} />
-                                )}
-                            </Row>
-                            {startTimeError && <p className={styles.error}>Start time required</p>}
-                        </Column>
                         <Row centerX className={styles.sectionHeader}>
                             <p>Constraints</p>
                         </Row>
