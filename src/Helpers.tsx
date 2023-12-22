@@ -562,9 +562,8 @@ export function scrapeUrl(url) {
     return axios.get(`${config.apiURL}/scrape-url?url=${url}`, options)
 }
 
-// todo: gbg
 function findTotalUploadSize(post) {
-    const { images, audios, poll, card } = post
+    const { images, audios, poll, glassBeadGame, card } = post
     let imageSize = 0
     if (images)
         imageSize = images
@@ -575,15 +574,19 @@ function findTotalUploadSize(post) {
     if (audios) audioSize = audios.map((a) => a.Audio.file.size).reduce((a, b) => a + b, 0)
     let pollSize = 0
     if (poll) pollSize = poll.answers.map((a) => a.totalSize).reduce((a, b) => a + b, 0)
+    let gbgSize = 0
+    if (glassBeadGame) {
+        const { topicImage, beads } = glassBeadGame
+        if (topicImage.Image.file) gbgSize += topicImage.Image.file.size
+        gbgSize += beads.map((a) => a.totalSize).reduce((a, b) => a + b, 0)
+    }
     let cardSize = 0
     if (card && card.front.image) cardSize += card.front.image.file.size
     if (card && card.back.image) cardSize += card.back.image.file.size
-    // todo: count beads
-    const total = imageSize + audioSize + pollSize + cardSize
+    const total = imageSize + audioSize + pollSize + gbgSize + cardSize
     return +(total / megaByte).toFixed(2)
 }
 
-// todo: gbg
 export function validatePost(post, constraints?) {
     const { mediaTypes, title, text, images, audios, event, poll, card, glassBeadGame } = post
     const errors = [] as string[]
@@ -612,7 +615,8 @@ export function validatePost(post, constraints?) {
     }
     // glass bead game
     if (mediaTypes.includes('glass-bead-game')) {
-        const { synchronous, multiplayer, beads } = glassBeadGame
+        const { settings, beads } = glassBeadGame
+        const { synchronous, multiplayer } = settings
         if (!title) errors.push('Topic required')
         if (!synchronous && !multiplayer && !beads.length)
             errors.push('At least 1 bead required for single player games')
@@ -630,7 +634,7 @@ export function validatePost(post, constraints?) {
 
 function attachPostFiles(formData, postData) {
     // attaches postData files to formData (recursive for poll answers, cards, and beads)
-    const { mediaTypes, images, audios, poll, card } = postData
+    const { mediaTypes, images, audios, poll, card, glassBeadGame } = postData
     if (mediaTypes.includes('image')) {
         images.forEach((i) => {
             if (i.Image.file) formData.append('image', i.Image.file, i.id)
@@ -642,52 +646,13 @@ function attachPostFiles(formData, postData) {
         )
     }
     if (poll) poll.answers.forEach((answer) => attachPostFiles(formData, answer))
+    if (glassBeadGame) {
+        const { topicImage, beads } = glassBeadGame
+        if (topicImage.Image.file) formData.append('image', topicImage.Image.file, topicImage.id)
+        beads.forEach((bead) => attachPostFiles(formData, bead))
+    }
     if (card) attachPostFiles(formData, card.front)
     if (card) attachPostFiles(formData, card.back)
-
-    // if (mediaTypes.includes('glass-bead-game')) {
-    //     postData.gbgSettings = GBGSettings
-    //     postData.topicGroup = findTopicGroup()
-    //     postData.topicImageUrl = topicImageFile ? null : topicImageURL
-    //     if (topicImageFile) formData.append('image', topicImageFile, 'topic-image')
-    //     if (!synchronous && !multiplayer) {
-    //         // add beads
-    //         // what is the current bead structure?
-    //         // { id: uuid,  }
-    //         postData.beads = beads.map((bead) => {
-    //             let mediaUrl
-    //             let mediaText
-    //             // todo: update for other media types when ready
-    //             if (bead.Image) {
-    //                 mediaUrl = bead.Image.url
-    //                 mediaText = bead.Image.text
-    //             }
-    //             return {
-    //                 id: bead.id,
-    //                 text: bead.text || null,
-    //                 // todo: handle searchable text
-    //                 searchableText: '',
-    //                 mediaText,
-    //                 mediaUrl,
-    //                 mediaTypes: bead.mediaTypes,
-    //                 color: bead.color,
-    //             }
-    //         })
-    //         beads.forEach((bead) => {
-    //             if (bead.mediaTypes === 'image') {
-    //                 const { file } = bead.Image
-    //                 if (file) formData.append('image', file, bead.id)
-    //             }
-    //             if (bead.mediaTypes === 'audio') {
-    //                 const { type, file, blob } = bead.Audio
-    //                 // todo: compress file and blob into file? (check how audio posts work first...)
-    //                 if (type === 'file') formData.append('audio', file, bead.id)
-    //                 else formData.append('audio-blob', blob, bead.id)
-    //             }
-    //         })
-    //     }
-    // }
-
     // // add other contextual data
     // if (sourceId) {
     //     postData.sourceType = sourceType

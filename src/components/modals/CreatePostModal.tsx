@@ -382,10 +382,10 @@ function CreatePostModal(): JSX.Element {
     }
 
     // poll
-    // todo: handle loading state when fecthing spaces for governance poll
     const [pollType, setPollType] = useState('Single choice')
     const [pollAnswers, setPollAnswers] = useState<any[]>([])
     const [pollAnswersLocked, setPollAnswersLocked] = useState(false)
+    // todo: handle loading state when fecthing spaces for governance poll
     const [pollAnswersLoading, setPollAnswersLoading] = useState(false)
     const [pollAction, setPollAction] = useState('None')
     const [pollThreshold, setPollThreshold] = useState(5)
@@ -462,11 +462,11 @@ function CreatePostModal(): JSX.Element {
     }
 
     // gbg
-    const [topicOptions, setTopicOptions] = useState<any[]>([])
-    const [topicImage, setTopicImage] = useState<any>()
     const [GBGSettingsModalOpen, setGBGSettingsModalOpen] = useState(false)
     const [GBGSettings, setGBGSettings] = useState<any>(defaultGBGSettings)
     const { synchronous, multiplayer, players, totalMoves, movesPerPlayer } = GBGSettings
+    const [topicOptions, setTopicOptions] = useState<any[]>([])
+    const [topicImage, setTopicImage] = useState<any>()
     const [beads, setBeads] = useState<any[]>([])
     const [nextBeadModalOpen, setNextBeadModalOpen] = useState(false)
 
@@ -623,8 +623,7 @@ function CreatePostModal(): JSX.Element {
         return loading || urlsLoading || noContent || totalChars > maxChars
     }
 
-    // working: text, url, image, audio, event, poll, card
-    // not working: gbg
+    // todo: add other contextual data
     function save() {
         setLoading(true)
         // update media types
@@ -676,193 +675,10 @@ function CreatePostModal(): JSX.Element {
                 settings: GBGSettings,
                 topicImage,
                 topicGroup: findTopicGroup(),
-                beads,
+                beads: !multiplayer && !synchronous ? beads : [],
             }
         }
-        // todo: gbg
-        post.searchableText = findSearchableText(post)
-        console.log('new post: ', post)
-        // validate post
-        const validation = validatePost(post)
-        if (validation.errors.length) {
-            // display errors
-            setErrors(validation.errors)
-            setLoading(false)
-        } else {
-            // upload post
-            uploadPost(post)
-                .then((res) => {
-                    console.log('uploadPost res:', res.data)
-                    // build new post
-                    const { post: newPost, allSpaceIds, event } = res.data
-                    const { id, handle, name, flagImagePath } = accountData
-                    newPost.Creator = { id, handle, name, flagImagePath }
-                    newPost.DirectSpaces = spaces.map((s) => {
-                        return { ...s, state: 'active' }
-                    })
-                    if (event) newPost.Event = { ...event, Going: [], Interested: [] }
-                    // add post to feed
-                    const addPostToSpaceFeed =
-                        page === 's' && subPage === 'posts' && allSpaceIds.includes(spaceData.id)
-                    const addPostToUserFeed =
-                        page === 'u' && subPage === 'posts' && pageHandle === accountData.handle
-                    if (addPostToSpaceFeed) setSpacePosts([newPost, ...spacePosts])
-                    if (addPostToUserFeed) setUserPosts([newPost, ...userPosts])
-                    if (governance) setGovernancePolls([...governancePolls, newPost])
-                    setLoading(false)
-                    setSaved(true)
-                    setTimeout(() => closeModal(), 1000)
-                })
-                .catch((error) => console.log(error))
-        }
-        // if (postValid()) {
-        //     setLoading(true)
-        //     // update media types
-        //     const newMediaTypes = [...mediaTypes]
-        //     if (urls.length) newMediaTypes.unshift('url')
-        //     if (title || findDraftLength(text)) newMediaTypes.unshift('text')
-        //     // create post data
-        //     const postData = {
-        //         // get on server
-        //         // creatorName: accountData.name,
-        //         // creatorHandle: accountData.handle,
-        //         mediaTypes: newMediaTypes.join(','),
-        //         spaceIds: spaces.map((s) => s.id), // todo: filter out all
-        //         title: mediaTypes.includes('glass-bead-game') ? topic : title, // todo: just use title?
-        //         text: findDraftLength(text) ? text : null,
-        //         mentions: mentions.map((m) => m.link),
-        //         // urls: urls,
-        //         // images: mediaTypes.includes('image') ? images : [],
-        //         // startTime,
-        //         // endTime,
-        //         // pollType: pollType.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-        //         // pollAnswersLocked,
-        //         // pollAnswers,
-        //         // topicGroup: findTopicGroup(),
-        //         // topicImageUrl: topicImageFile ? null : topicImageURL,
-        //         // gbgSettings: GBGSettings,
-        //         // beads: !synchronous && !multiplayer ? beads : [],
-        //         // cardFrontText: findDraftLength(cardFrontText) ? cardFrontText : null,
-        //         // cardBackText: findDraftLength(cardBackText) ? cardBackText : null,
-        //         // cardFrontWatermark,
-        //         // cardBackWatermark,
-        //     } as any
-        //     // add media data
-        //     const formData = new FormData()
-        //     // formData entry values: fieldname (used here for types), file, originalname (used here for ids)
-        //     // current fieldname types: 'image', 'audio', 'audio-blob'
-        //     if (mediaTypes.includes('url')) postData.urls = urls
-        //     if (mediaTypes.includes('image')) {
-        //         postData.images = images.map((i) => {
-        //             return { id: i.id, text: i.text, url: i.Image.file ? null : i.Image.url }
-        //         })
-        //         images.forEach((i) => {
-        //             if (i.Image.file) formData.append('image', i.Image.file, i.id)
-        //         })
-        //     }
-        //     if (mediaTypes.includes('audio')) {
-        //         postData.audios = audios.map((a) => {
-        //             return { id: a.id, text: a.text }
-        //         })
-        //         audios.forEach((a) =>
-        //             formData.append(`audio${a.Audio.file.name ? '' : '-blob'}`, a.Audio.file, a.id)
-        //         )
-        //     }
-        //     if (mediaTypes.includes('event')) {
-        //         postData.startTime = startTime
-        //         postData.endTime = endTime
-        //     }
-        //     if (mediaTypes.includes('poll')) {
-        //         postData.pollType = simplifyText(pollType)
-        //         postData.pollAnswersLocked = pollAnswersLocked
-        //         // todo: refactor for answers with media
-        //         postData.pollAnswers = pollAnswers
-        //     }
-        //     if (mediaTypes.includes('card')) {
-        //         const frontChars = findDraftLength(cardFrontText)
-        //         const backChars = findDraftLength(cardBackText)
-        //         postData.cardFront = {
-        //             text: frontChars ? cardFrontText : null,
-        //             searchableText: frontChars ? getDraftPlainText(cardFrontText) : null,
-        //             watermark: cardFrontWatermark,
-        //         }
-        //         postData.cardBack = {
-        //             text: backChars ? cardBackText : null,
-        //             searchableText: backChars ? getDraftPlainText(cardBackText) : null,
-        //             watermark: cardBackWatermark,
-        //         }
-        //         if (cardFrontImage) formData.append('image', cardFrontImage, 'card-front-image')
-        //         if (cardBackImage) formData.append('image', cardBackImage, 'card-back-image')
-        //     }
-        //     if (mediaTypes.includes('glass-bead-game')) {
-        //         postData.gbgSettings = GBGSettings
-        //         postData.topicGroup = findTopicGroup()
-        //         postData.topicImageUrl = topicImageFile ? null : topicImageURL
-        //         if (topicImageFile) formData.append('image', topicImageFile, 'topic-image')
-        //         if (!synchronous && !multiplayer) {
-        //             // add beads
-        //             // what is the current bead structure?
-        //             // { id: uuid,  }
-        //             postData.beads = beads.map((bead) => {
-        //                 let mediaUrl
-        //                 let mediaText
-        //                 // todo: update for other media types when ready
-        //                 if (bead.Image) {
-        //                     mediaUrl = bead.Image.url
-        //                     mediaText = bead.Image.text
-        //                 }
-        //                 return {
-        //                     id: bead.id,
-        //                     text: bead.text || null,
-        //                     // todo: handle searchable text
-        //                     searchableText: '',
-        //                     mediaText,
-        //                     mediaUrl,
-        //                     mediaTypes: bead.mediaTypes,
-        //                     color: bead.color,
-        //                 }
-        //             })
-        //             beads.forEach((bead) => {
-        //                 if (bead.mediaTypes === 'image') {
-        //                     const { file } = bead.Image
-        //                     if (file) formData.append('image', file, bead.id)
-        //                 }
-        //                 if (bead.mediaTypes === 'audio') {
-        //                     const { type, file, blob } = bead.Audio
-        //                     // todo: compress file and blob into file? (check how audio posts work first...)
-        //                     if (type === 'file') formData.append('audio', file, bead.id)
-        //                     else formData.append('audio-blob', blob, bead.id)
-        //                 }
-        //             })
-        //         }
-        //         // // add beads to fileData
-        //         // postData.beads.forEach((bead, index) => {
-        //         //     // add searchable text
-        //         //     if (bead.type === 'url') {
-        //         //         const u = bead.Urls[0]
-        //         //         const urlFields = [] as any
-        //         //         if (u.url) urlFields.push(u.url)
-        //         //         if (u.title) urlFields.push(u.title)
-        //         //         if (u.description) urlFields.push(u.description)
-        //         //         if (u.domain) urlFields.push(u.domain)
-        //         //         bead.searchableText = urlFields.length ? urlFields.join(' ') : null
-        //         //     } else {
-        //         //         bead.searchableText =
-        //         //             bead.type === 'text' ? getDraftPlainText(bead.text) : null
-        //         //     }
-        //         //     // add files
-        //         //     if (bead.type === 'audio') {
-        //         //         // todo: use naming technique instead of type?
-        //         //         const { type, file, blob } = bead.Audios[0]
-        //         //         if (type === 'file') formData.append('audio-file', file, index)
-        //         //         else formData.append('audio-blob', blob, index)
-        //         //     } else if (bead.type === 'image') {
-        //         //         const { file } = bead.Images[0]
-        //         //         if (file) formData.append('image', file, index)
-        //         //     }
-        //         // })
-        //     }
-        //     // add other contextual data
+        // todo: add other contextual data
         //     if (sourceId) {
         //         postData.sourceType = sourceType
         //         postData.sourceId = sourceId
@@ -873,161 +689,39 @@ function CreatePostModal(): JSX.Element {
         //         postData.pollAction = pollAction
         //         postData.pollThreshold = pollThreshold
         //     }
-        //     postData.searchableText = findSearchableText(postData)
-        //     formData.append('post-data', JSON.stringify(postData))
-        //     const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-        //     // todo: update
-        //     // set up file uploads if required
-        //     // let fileData
-        //     // let uploadType
-        //     // if (mediaTypes.includes('image')) {
-        //     //     uploadType = 'image-file'
-        //     //     fileData = new FormData()
-        //     //     images.forEach((image, index) => {
-        //     //         if (image.file) fileData.append('file', image.file, index)
-        //     //     })
-        //     //     fileData.append('postData', JSON.stringify(postData))
-        //     // }
-        //     // if (mediaTypes.includes('audio')) {
-        //     //     // const isBlob = audioFile && !audioFile.name
-        //     //     // uploadType = isBlob ? 'audio-blob' : 'audio-file'
-        //     //     // fileData = new FormData()
-        //     //     // fileData.append('file', isBlob ? audioBlob : audioFile)
-        //     //     // fileData.append('postData', JSON.stringify(postData))
-        //     // }
-        //     // if (mediaTypes.includes('card')) {
-        //     //     postData.cardFrontSearchableText = postData.cardFrontText
-        //     //         ? getDraftPlainText(postData.cardFrontText)
-        //     //         : null
-        //     //     postData.cardBackSearchableText = postData.cardBackText
-        //     //         ? getDraftPlainText(postData.cardBackText)
-        //     //         : null
-        //     //     uploadType = 'image-file'
-        //     //     fileData = new FormData()
-        //     //     if (cardFrontImage) fileData.append('file', cardFrontImage, 'front')
-        //     //     if (cardBackImage) fileData.append('file', cardBackImage, 'back')
-        //     //     fileData.append('postData', JSON.stringify(postData))
-        //     // }
-        //     // if (mediaTypes.includes('glass-bead-game')) {
-        //     //     uploadType = 'glass-bead-game'
-        //     //     fileData = new FormData()
-        //     //     // upload topic image if required
-        //     //     if (topicImageFile) fileData.append('topicImage', topicImageFile)
-        //     //     // add beads to fileData
-        //     //     postData.beads.forEach((bead, index) => {
-        //     //         // add searchable text
-        //     //         if (bead.type === 'url') {
-        //     //             const u = bead.Urls[0]
-        //     //             const urlFields = [] as any
-        //     //             if (u.url) urlFields.push(u.url)
-        //     //             if (u.title) urlFields.push(u.title)
-        //     //             if (u.description) urlFields.push(u.description)
-        //     //             if (u.domain) urlFields.push(u.domain)
-        //     //             bead.searchableText = urlFields.length ? urlFields.join(' ') : null
-        //     //         } else {
-        //     //             bead.searchableText =
-        //     //                 bead.type === 'text' ? getDraftPlainText(bead.text) : null
-        //     //         }
-        //     //         // add files
-        //     //         if (bead.type === 'audio') {
-        //     //             const { type, file, blob } = bead.Audios[0]
-        //     //             if (type === 'file') fileData.append('audioFile', file, index)
-        //     //             else fileData.append('audioBlob', blob, index)
-        //     //         } else if (bead.type === 'image') {
-        //     //             const { file } = bead.Images[0]
-        //     //             if (file) fileData.append('imageFile', file, index)
-        //     //         }
-        //     //     })
-        //     //     fileData.append('postData', JSON.stringify(postData))
-        //     // }
-        //     axios
-        //         .post(`${config.apiURL}/create-post`, formData, options)
-        //         .then((res) => {
-        //             console.log('create-post res: ', res.data)
-        //             const allPostSpaceIds = [
-        //                 ...spaces.map((space) => space.id),
-        //                 ...res.data.indirectSpaces.map((s) => s.spaceId),
-        //             ]
-        //             const addPostToSpaceFeed =
-        //                 page === 's' &&
-        //                 subPage === 'posts' &&
-        //                 allPostSpaceIds.includes(spaceData.id)
-        //             const addPostToUserFeed =
-        //                 page === 'u' && subPage === 'posts' && handle === accountData.handle
-        //             if (addPostToSpaceFeed || addPostToUserFeed || governance) {
-        //                 const newPost = {
-        //                     ...defaultPostData,
-        //                     ...res.data.post,
-        //                     Creator: accountData,
-        //                     DirectSpaces: spaces.map((s) => {
-        //                         return { ...s, state: 'active' }
-        //                     }),
-        //                     Urls: urls,
-        //                     Event: res.data.event
-        //                         ? {
-        //                               ...res.data.event,
-        //                               Going: [],
-        //                               Interested: [],
-        //                           }
-        //                         : null,
-        //                 }
-        //                 if (sourceId) newPost.accountLink = true
-        //                 // if (mediaTypes.includes('audio'))
-        //                 //     newPost.Audios = [{ url: res.data.audio.url }]
-        //                 // if (mediaTypes.includes('image')) newPost.Images = images
-        //                 // if (mediaTypes.includes('poll'))
-        //                 //     newPost.Poll = {
-        //                 //         ...res.data.pollData.poll,
-        //                 //         PollAnswers: res.data.pollData.answers.map((a) => {
-        //                 //             return { ...a, Reactions: [] }
-        //                 //         }),
-        //                 //     }
-        //                 // if (postData.type === 'glass-bead-game') {
-        //                 //     newPost.Beads = postData.beads.map((bead, i) => {
-        //                 //         return {
-        //                 //             ...bead,
-        //                 //             id: res.data.gbg.beads[i].newBead.id,
-        //                 //             Reactions: [],
-        //                 //             Link: { index: i + 1 },
-        //                 //         }
-        //                 //     })
-        //                 //     newPost.GlassBeadGame = { ...res.data.gbg.game }
-        //                 //     newPost.Players =
-        //                 //         GBGSettings.players.map((p) => {
-        //                 //             return {
-        //                 //                 ...p,
-        //                 //                 UserPost: {
-        //                 //                     state: p.id === accountData.id ? 'accepted' : 'pending',
-        //                 //                 },
-        //                 //             }
-        //                 //         }) || []
-        //                 // }
-        //                 // if (postData.type === 'card')
-        //                 //     newPost.CardSides = [res.data.card.front, res.data.card.back]
-        //                 // add new post to feed
-        //                 if (addPostToSpaceFeed) setSpacePosts([newPost, ...spacePosts])
-        //                 if (addPostToUserFeed) setUserPosts([newPost, ...userPosts])
-        //                 if (governance) setGovernancePolls([...governancePolls, newPost])
-        //             }
-        //             setLoading(false)
-        //             setSaved(true)
-        //             setTimeout(() => closeModal(), 1000)
-        //         })
-        //         .catch((error) => {
-        //             if (!error.response) console.log(error)
-        //             else {
-        //                 const { message } = error.response.data
-        //                 switch (message) {
-        //                     case 'File size too large':
-        //                         setAudioSizeError(true)
-        //                         break
-        //                     default:
-        //                         break
-        //                 }
-        //             }
-        //             setLoading(false)
-        //         })
-        // }
+        post.searchableText = findSearchableText(post)
+        // validate post
+        const validation = validatePost(post)
+        if (validation.errors.length) {
+            // display errors
+            setErrors(validation.errors)
+            setLoading(false)
+        } else {
+            // upload post
+            uploadPost(post)
+                .then((res) => {
+                    // build new post
+                    const { post: newPost, allSpaceIds, event } = res.data
+                    const { id, handle, name, flagImagePath } = accountData
+                    newPost.Creator = { id, handle, name, flagImagePath }
+                    newPost.DirectSpaces = spaces.map((s) => {
+                        return { ...s, state: 'active' }
+                    })
+                    if (event) newPost.Event = { ...event, Going: [], Interested: [] }
+                    // add to feed
+                    const addToSpaceFeed =
+                        page === 's' && subPage === 'posts' && allSpaceIds.includes(spaceData.id)
+                    const addToUserFeed =
+                        page === 'u' && subPage === 'posts' && pageHandle === accountData.handle
+                    if (addToSpaceFeed) setSpacePosts([newPost, ...spacePosts])
+                    if (addToUserFeed) setUserPosts([newPost, ...userPosts])
+                    if (governance) setGovernancePolls([...governancePolls, newPost])
+                    setLoading(false)
+                    setSaved(true)
+                    setTimeout(() => closeModal(), 1000)
+                })
+                .catch((error) => console.log(error))
+        }
     }
 
     // set media types
@@ -1566,16 +1260,9 @@ function CreatePostModal(): JSX.Element {
                             {mediaTypes.includes('glass-bead-game') && (
                                 <Column className={styles.gbg}>
                                     {!synchronous && (
-                                        <Column>
-                                            {multiplayer && renderGBGInfoRow()}
-                                            {/* {(!multiplayer || postType === 'gbg-from-post') &&
-                                                renderBeads()} */}
-                                        </Column>
+                                        <Column>{multiplayer && renderGBGInfoRow()}</Column>
                                     )}
                                     {!synchronous && !multiplayer && renderBeads()}
-                                    {/* {(postType === 'gbg-from-post' ||
-                                        (!synchronous && !multiplayer)) &&
-                                        renderBeads()} */}
                                 </Column>
                             )}
                         </Column>

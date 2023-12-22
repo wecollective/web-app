@@ -73,12 +73,11 @@ function GlassBeadGame(props: {
     }
 
     function getGBGData() {
-        // todo: get game data as well as beads here
-        // pass down setTopicImage function to render in post
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
             .get(`${config.apiURL}/gbg-data?postId=${postId}`, options)
             .then((res) => {
+                setTopicImage(res.data.game.topicImage)
                 setGame(res.data.game)
                 setBeads(res.data.beads)
                 const pending = res.data.players.filter((p) => p.UserPost.state === 'pending')
