@@ -359,11 +359,12 @@ function GlassBeadGame(props: {
                     }}
                     postId={postId}
                     players={players}
-                    onSave={(bead) => {
-                        const newBeads = [...beads, { ...bead, type: `gbg-${bead.type}` }]
+                    onSave={({ newBead, newDeadline }) => {
+                        setGame({ ...game, totalBeads: game.totalBeads + 1 })
+                        const newBeads = [...beads, newBead]
                         setBeads(newBeads)
                         updateNextPlayer(newBeads, players)
-                        updateDeadline(bead.nextMoveDeadline)
+                        updateDeadline(newDeadline)
                     }}
                     close={() => setNextBeadModalOpen(false)}
                 />

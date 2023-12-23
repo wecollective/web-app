@@ -4,7 +4,6 @@ import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
 import Input from '@components/Input'
 import Row from '@components/Row'
-import SuccessMessage from '@components/SuccessMessage'
 import AudioCard from '@components/cards/PostCard/AudioCard'
 import UrlPreview from '@components/cards/PostCard/UrlCard'
 import DraftTextEditor from '@components/draft-js/DraftTextEditor'
@@ -22,6 +21,7 @@ import {
     imageMBLimit,
     postTypeIcons,
     scrapeUrl,
+    uploadPost,
     validatePost,
 } from '@src/Helpers'
 import { AccountContext } from '@src/contexts/AccountContext'
@@ -30,7 +30,6 @@ import styles from '@styles/components/modals/NextBeadModal.module.scss'
 import getBlobDuration from 'get-blob-duration'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import RecordRTC from 'recordrtc'
-import Cookies from 'universal-cookie'
 import { v4 as uuidv4 } from 'uuid'
 
 const { white, red, orange, yellow, green, blue, purple } = colors
@@ -44,7 +43,7 @@ function NextBeadModal(props: {
     onSave: (bead: any) => void
     close: () => void
 }): JSX.Element {
-    const { accountData, setAlertMessage, setAlertModalOpen } = useContext(AccountContext)
+    const { accountData } = useContext(AccountContext)
     const { preview, postId, settings, players, onSave, close } = props
     const { allowedBeadTypes, characterLimit, moveDuration, moveTimeWindow } = settings
     const [type, setType] = useState(allowedBeadTypes[0])
@@ -54,10 +53,7 @@ function NextBeadModal(props: {
     const [mentions, setMentions] = useState<any[]>([])
     const [saveLoading, setSaveLoading] = useState(false)
     const [errors, setErrors] = useState<string[]>([])
-    const [loading, setLoading] = useState(false)
-    const [saved, setSaved] = useState(false)
     const maxChars = characterLimit || 5000
-    const cookies = new Cookies()
 
     // url
     const [url, setUrl] = useState('')
@@ -223,100 +219,6 @@ function NextBeadModal(props: {
         return textInvalid || urlInvalid || audioInvalid || imageInvalid
     }
 
-    // // todo: revisit
-    // function uploadBead(bead) {
-    //     setLoading(true)
-    //     const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-    //     const beadData = {
-    //         ...bead,
-    //         creatorName: accountData.name,
-    //         creatorHandle: accountData.handle,
-    //         postId,
-    //         mentions: bead.type === 'text' ? bead.mentions.map((m) => m.link) : [],
-    //     }
-    //     // add searchable text
-    //     const fields = [] as any
-    //     if (bead.type === 'text') fields.push(getDraftPlainText(beadData.text))
-    //     if (bead.type === 'url') {
-    //         const urlFields = [] as any
-    //         const u = bead.Urls[0]
-    //         if (u.url) urlFields.push(u.url)
-    //         if (u.title) urlFields.push(u.title)
-    //         if (u.description) urlFields.push(u.description)
-    //         if (u.domain) urlFields.push(u.domain)
-    //         if (urlFields.length) fields.push(urlFields.join(' '))
-    //     }
-    //     beadData.searchableText = fields.length ? fields.join(' ') : null
-    //     let fileData
-    //     let uploadType
-    //     if (bead.type === 'audio') {
-    //         uploadType = `audio-${audioType === 'recording' ? 'blob' : 'file'}`
-    //         fileData = new FormData()
-    //         fileData.append('file', audioType === 'recording' ? audioBlob : audioFile)
-    //         fileData.append('beadData', JSON.stringify(beadData))
-    //     }
-    //     if (bead.type === 'image' && bead.Images[0].file) {
-    //         uploadType = 'image-file'
-    //         fileData = new FormData()
-    //         fileData.append('file', bead.Images[0].file)
-    //         fileData.append('beadData', JSON.stringify(beadData))
-    //     }
-    //     axios
-    //         .post(
-    //             `${config.apiURL}/create-next-bead?uploadType=${uploadType}`,
-    //             fileData || beadData,
-    //             options
-    //         )
-    //         .then((res) => {
-    //             setSaved(true)
-    //             setLoading(false)
-    //             addBead({
-    //                 ...defaultPostData,
-    //                 ...bead,
-    //                 id: res.data.bead.id,
-    //                 nextMoveDeadline: res.data.newDeadline || null,
-    //             })
-    //             setTimeout(() => close(), 1000)
-    //         })
-    //         .catch((error) => {
-    //             console.log('error: ', error)
-    //             if (error.response && error.response.status === 401) {
-    //                 setAlertMessage('Your session has run out. Please log in again.')
-    //                 setAlertModalOpen(true)
-    //             }
-    //         })
-    // }
-
-    // function saveBead() {
-    //     const bead = {
-    //         id: uuidv4(),
-    //         mediaTypes: type,
-    //         color,
-    //         Link: { source: null },
-    //         Creator: accountData,
-    //         accountLike: 0,
-    //         accountLink: 0,
-    //         accountRating: 0,
-    //         accountRepost: 0,
-    //     } as any
-    //     if (type === 'text') {
-    //         bead.text = text
-    //         bead.mentions = mentions
-    //     }
-    //     if (type === 'url') bead.Url = urlData
-    //     if (type === 'audio') {
-    //         bead.Audio = { type: audioType, file: audioFile, blob: audioBlob }
-    //     }
-    //     if (type === 'image') bead.Image = image
-    //     // save
-    //     if (preview) uploadBead(bead)
-    //     else {
-    //         console.log('new bead: ', bead)
-    //         onSave(bead)
-    //         close()
-    //     }
-    // }
-
     function save() {
         setSaveLoading(true)
         // structure data
@@ -347,19 +249,16 @@ function NextBeadModal(props: {
             close()
         } else {
             // upload post
-            // bead.link = { root, parent }
-            // uploadPost(post)
-            //     .then((res) => {
-            //         const newBead = res.data
-            //         const { id, handle, name, flagImagePath } = accountData
-            //         newBead.Creator = { id, handle, name, flagImagePath }
-            //         newBead.Comments = []
-            //         newBead.Reactions = []
-            //         newBead.link = bead.link
-            //         onSave(newPost)
-            //         resetData()
-            //     })
-            //     .catch((error) => console.log(error))
+            bead.link = { parent: { id: postId, type: 'post' } }
+            uploadPost(bead)
+                .then((res) => {
+                    const { newBead, newDeadline } = res.data
+                    const { id, handle, name, flagImagePath } = accountData
+                    newBead.Creator = { id, handle, name, flagImagePath }
+                    onSave({ newBead, newDeadline })
+                    close()
+                })
+                .catch((error) => console.log(error))
         }
     }
 
@@ -376,187 +275,179 @@ function NextBeadModal(props: {
 
     return (
         <Modal className={styles.wrapper} close={close} centerX confirmClose>
-            {saved ? (
-                <SuccessMessage text='Bead created!' />
-            ) : (
-                <Column centerX style={{ width: '100%' }}>
-                    <h1>Add a new bead</h1>
-                    {showColors && (
-                        <Row centerY className={styles.colorButtons}>
-                            {beadColors.map((c) => (
-                                <button
-                                    key={c}
-                                    type='button'
-                                    aria-label='color'
-                                    onClick={() => setColor(c)}
-                                    style={{ backgroundColor: c }}
-                                />
-                            ))}
-                        </Row>
-                    )}
-                    <Column
-                        centerY
-                        centerX
-                        className={`${styles.beadWrapper} ${type === 'text' && styles.expanded}`}
-                    >
-                        <DraftTextEditor
-                            className={styles.textEditor}
-                            type='bead'
-                            text={text}
-                            maxChars={maxChars}
-                            onChange={(value, textMentions) => {
-                                setText(value)
-                                setMentions(textMentions)
-                            }}
+            <h1>Add a new bead</h1>
+            {showColors && (
+                <Row centerY className={styles.colorButtons}>
+                    {beadColors.map((c) => (
+                        <button
+                            key={c}
+                            type='button'
+                            aria-label='color'
+                            onClick={() => setColor(c)}
+                            style={{ backgroundColor: c }}
                         />
-                        <Column className={styles.bead} style={{ backgroundColor: color }}>
-                            <div className={styles.watermark} />
-                            <Row centerY spaceBetween className={styles.header}>
-                                {postTypeIcons[type]}
-                            </Row>
-                            <Column centerX centerY className={styles.content}>
-                                {type === 'url' && (
-                                    <Column centerX centerY className={styles.urlWrapper}>
-                                        {urlData ? (
-                                            <UrlPreview
-                                                key={urlData.url}
-                                                type='bead'
-                                                urlData={urlData}
-                                                remove={() => setUrlData(null)}
+                    ))}
+                </Row>
+            )}
+            <Column
+                centerY
+                centerX
+                className={`${styles.beadWrapper} ${type === 'text' && styles.expanded}`}
+            >
+                <DraftTextEditor
+                    className={styles.textEditor}
+                    type='bead'
+                    text={text}
+                    maxChars={maxChars}
+                    onChange={(value, textMentions) => {
+                        setText(value)
+                        setMentions(textMentions)
+                    }}
+                />
+                <Column className={styles.bead} style={{ backgroundColor: color }}>
+                    <div className={styles.watermark} />
+                    <Row centerY spaceBetween className={styles.header}>
+                        {postTypeIcons[type]}
+                    </Row>
+                    <Column centerX centerY className={styles.content}>
+                        {type === 'url' && (
+                            <Column centerX centerY className={styles.urlWrapper}>
+                                {urlData ? (
+                                    <UrlPreview
+                                        key={urlData.url}
+                                        type='bead'
+                                        urlData={urlData}
+                                        remove={() => setUrlData(null)}
+                                    />
+                                ) : (
+                                    <>
+                                        <Input
+                                            type='text'
+                                            placeholder='URL...'
+                                            value={url}
+                                            onChange={(value) => setUrl(value)}
+                                            style={{ marginBottom: 10 }}
+                                        />
+                                        <Button
+                                            text='Add'
+                                            color='aqua'
+                                            onClick={getUrlData}
+                                            disabled={!url}
+                                            loading={urlLoading}
+                                        />
+                                    </>
+                                )}
+                            </Column>
+                        )}
+                        {type === 'audio' && (
+                            <Column centerX style={{ width: '100%', height: '100%' }}>
+                                {audio ? (
+                                    <AudioCard
+                                        key={audio.id}
+                                        url={audio.Audio.url}
+                                        staticBars={200}
+                                        location='create-bead-audio'
+                                        remove={() => setAudio(null)}
+                                        style={{ width: '100%', height: '100%' }}
+                                    />
+                                ) : (
+                                    renderAudioControls()
+                                )}
+                            </Column>
+                        )}
+                        {type === 'image' && (
+                            <Column style={{ width: '100%', height: '100%' }}>
+                                {image ? (
+                                    <Column className={styles.imageWrapper}>
+                                        <CloseButton
+                                            size={20}
+                                            onClick={() => setImage(null)}
+                                            style={{ position: 'absolute', right: 5 }}
+                                        />
+                                        <button
+                                            type='button'
+                                            className={styles.imageButton}
+                                            onClick={() => setImageModalOpen(true)}
+                                        >
+                                            <img src={image.Image.url} alt='' />
+                                        </button>
+                                        <Row centerY className={styles.caption}>
+                                            <Input
+                                                type='text'
+                                                placeholder='Caption...'
+                                                value={image.text}
+                                                onChange={(v) => setImage({ ...image, text: v })}
                                             />
-                                        ) : (
-                                            <>
-                                                <Input
-                                                    type='text'
-                                                    placeholder='URL...'
-                                                    value={url}
-                                                    onChange={(value) => setUrl(value)}
-                                                    style={{ marginBottom: 10 }}
-                                                />
-                                                <Button
-                                                    text='Add'
-                                                    color='aqua'
-                                                    onClick={getUrlData}
-                                                    disabled={!url}
-                                                    loading={urlLoading}
-                                                />
-                                            </>
+                                        </Row>
+                                        {imageModalOpen && (
+                                            <ImageModal
+                                                images={[image]}
+                                                startIndex={0}
+                                                close={() => setImageModalOpen(false)}
+                                            />
                                         )}
                                     </Column>
-                                )}
-                                {type === 'audio' && (
-                                    <Column centerX style={{ width: '100%', height: '100%' }}>
-                                        {audio ? (
-                                            <AudioCard
-                                                key={audio.id}
-                                                url={audio.Audio.url}
-                                                staticBars={200}
-                                                location='create-bead-audio'
-                                                remove={() => setAudio(null)}
-                                                style={{ width: '100%', height: '100%' }}
-                                            />
-                                        ) : (
-                                            renderAudioControls()
-                                        )}
-                                    </Column>
-                                )}
-                                {type === 'image' && (
-                                    <Column style={{ width: '100%', height: '100%' }}>
-                                        {image ? (
-                                            <Column className={styles.imageWrapper}>
-                                                <CloseButton
-                                                    size={20}
-                                                    onClick={() => setImage(null)}
-                                                    style={{ position: 'absolute', right: 5 }}
+                                ) : (
+                                    <Column centerX centerY style={{ height: '100%' }}>
+                                        <Row className={styles.fileUploadInput}>
+                                            <label htmlFor='bead-image-input'>
+                                                Upload image
+                                                <input
+                                                    type='file'
+                                                    id='bead-image-input'
+                                                    accept={allowedImageTypes.join(',')}
+                                                    onChange={addImage}
+                                                    hidden
                                                 />
-                                                <button
-                                                    type='button'
-                                                    className={styles.imageButton}
-                                                    onClick={() => setImageModalOpen(true)}
-                                                >
-                                                    <img src={image.Image.url} alt='' />
-                                                </button>
-                                                <Row centerY className={styles.caption}>
-                                                    <Input
-                                                        type='text'
-                                                        placeholder='Caption...'
-                                                        value={image.text}
-                                                        onChange={(v) =>
-                                                            setImage({ ...image, text: v })
-                                                        }
-                                                    />
-                                                </Row>
-                                                {imageModalOpen && (
-                                                    <ImageModal
-                                                        images={[image]}
-                                                        startIndex={0}
-                                                        close={() => setImageModalOpen(false)}
-                                                    />
-                                                )}
-                                            </Column>
-                                        ) : (
-                                            <Column centerX centerY style={{ height: '100%' }}>
-                                                <Row className={styles.fileUploadInput}>
-                                                    <label htmlFor='bead-image-input'>
-                                                        Upload image
-                                                        <input
-                                                            type='file'
-                                                            id='bead-image-input'
-                                                            accept={allowedImageTypes.join(',')}
-                                                            onChange={addImage}
-                                                            hidden
-                                                        />
-                                                    </label>
-                                                </Row>
-                                                <p>or</p>
-                                                <Row style={{ width: '100%', marginTop: 10 }}>
-                                                    <Input
-                                                        type='text'
-                                                        placeholder='Add image URL...'
-                                                        value={imageURL}
-                                                        onChange={(value) => setImageURL(value)}
-                                                        style={{ marginRight: 10 }}
-                                                    />
-                                                    <Button
-                                                        text='Add'
-                                                        color='aqua'
-                                                        disabled={!imageURL}
-                                                        onClick={addImageURL}
-                                                    />
-                                                </Row>
-                                            </Column>
-                                        )}
+                                            </label>
+                                        </Row>
+                                        <p>or</p>
+                                        <Row style={{ width: '100%', marginTop: 10 }}>
+                                            <Input
+                                                type='text'
+                                                placeholder='Add image URL...'
+                                                value={imageURL}
+                                                onChange={(value) => setImageURL(value)}
+                                                style={{ marginRight: 10 }}
+                                            />
+                                            <Button
+                                                text='Add'
+                                                color='aqua'
+                                                disabled={!imageURL}
+                                                onClick={addImageURL}
+                                            />
+                                        </Row>
                                     </Column>
                                 )}
                             </Column>
-                        </Column>
+                        )}
                     </Column>
-                    <Row centerX className={styles.beadTypeButtons}>
-                        {allowedBeadTypes.map((t) => (
-                            <button
-                                key={t}
-                                type='button'
-                                className={`${t === type && styles.selected}`}
-                                title={capitalise(t)}
-                                onClick={() => setType(t)}
-                            >
-                                {postTypeIcons[t]}
-                            </button>
-                        ))}
-                    </Row>
-                    <Column centerX className={styles.errors}>
-                        <p>{errors[0]}</p>
-                    </Column>
-                    <Button
-                        text='Add bead'
-                        color='aqua'
-                        disabled={saveDisabled()}
-                        loading={loading}
-                        onClick={save}
-                        style={{ margin: '20px 0' }}
-                    />
                 </Column>
-            )}
+            </Column>
+            <Row centerX className={styles.beadTypeButtons}>
+                {allowedBeadTypes.map((t) => (
+                    <button
+                        key={t}
+                        type='button'
+                        className={`${t === type && styles.selected}`}
+                        title={capitalise(t)}
+                        onClick={() => setType(t)}
+                    >
+                        {postTypeIcons[t]}
+                    </button>
+                ))}
+            </Row>
+            <Column centerX className={styles.errors}>
+                <p>{errors[0]}</p>
+            </Column>
+            <Button
+                text='Add bead'
+                color='aqua'
+                disabled={saveDisabled()}
+                loading={saveLoading}
+                onClick={save}
+                style={{ margin: '20px 0' }}
+            />
         </Modal>
     )
 }
