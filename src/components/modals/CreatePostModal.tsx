@@ -466,7 +466,7 @@ function CreatePostModal(): JSX.Element {
     const [GBGSettings, setGBGSettings] = useState<any>(defaultGBGSettings)
     const { synchronous, multiplayer, players, totalMoves, movesPerPlayer } = GBGSettings
     const [topicOptions, setTopicOptions] = useState<any[]>([])
-    const [topicImage, setTopicImage] = useState<any>()
+    const [topicImage, setTopicImage] = useState<any>({ id: uuidv4(), Image: { url: '' } })
     const [beads, setBeads] = useState<any[]>([])
     const [nextBeadModalOpen, setNextBeadModalOpen] = useState(false)
 
@@ -908,7 +908,9 @@ function CreatePostModal(): JSX.Element {
                             {mediaTypes.includes('glass-bead-game') && (
                                 <Row centerY spaceBetween className={styles.topic}>
                                     <Column centerX centerY className={styles.imageWrapper}>
-                                        {topicImage && <img src={topicImage.Image.url} alt='' />}
+                                        {topicImage.Image.url && (
+                                            <img src={topicImage.Image.url} alt='' />
+                                        )}
                                         <ImageIcon />
                                         <label htmlFor='topic-image-input'>
                                             <input
