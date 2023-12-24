@@ -73,14 +73,16 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
     }
 
     function findFill(d) {
-        if (d.urlImage || d.type === 'image') {
+        if (d.imageUrl) {
             const existingImage = d3.select(`#image-${d.id}`)
+            const newScale = findRadius(d) * 2
             if (existingImage.node()) {
                 // scale and reposition existing image
                 existingImage
                     .transition()
                     .duration(1000)
-                    .attr('height', findRadius(d) * 2)
+                    .attr('height', newScale)
+                    .attr('width', newScale)
             } else {
                 // create new pattern
                 const pattern = d3
@@ -93,16 +95,15 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
                 pattern
                     .append('image')
                     .attr('id', `image-${d.id}`)
-                    .attr('height', findRadius(d) * 2)
-                    .attr('xlink:href', d.urlImage || d.Images[0].url)
+                    .attr('height', newScale)
+                    .attr('width', newScale)
+                    .attr('preserveAspectRatio', 'xMidYMid slice')
+                    .attr('xlink:href', d.imageUrl)
                     .on('error', () => {
                         const newImage = d3.select(`#image-${d.id}`)
                         // try image proxy
                         if (!newImage.attr('xlink:href').includes('//images.weserv.nl/')) {
-                            newImage.attr(
-                                'xlink:href',
-                                `//images.weserv.nl/?url=${d.urlImage || d.Images[0].url}`
-                            )
+                            newImage.attr('xlink:href', `//images.weserv.nl/?url=${d.imageUrl}`)
                         } else {
                             // fall back on placeholder
                             newImage.attr(
@@ -115,13 +116,15 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
             // return pattern url
             return `url(#pattern-${d.id})`
         }
+        // todo: handle multiple media types
         // return color based on post type
         let color = colors.green
-        if (d.type === 'url') color = colors.aqua
-        if (d.type === 'audio') color = colors.orange
-        if (d.type === 'event') color = colors.red
-        if (d.type === 'poll') color = colors.purple
-        if (d.type === 'glass-bead-game') color = colors.blue
+        if (d.mediaTypes.includes('url')) color = colors.aqua
+        if (d.mediaTypes.includes('audio')) color = colors.orange
+        if (d.mediaTypes.includes('event')) color = colors.red
+        if (d.mediaTypes.includes('poll')) color = colors.purple
+        if (d.mediaTypes.includes('glass-bead-game')) color = colors.blue
+        if (d.mediaTypes.includes('card')) color = colors.yellow
         return color
     }
 
@@ -442,8 +445,7 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
                         .classed('post-map-node-text', true)
                         .text((d) => {
                             if (d.text) return formatText(d.text)
-                            if (d.type === 'url' && !d.urlImage)
-                                return formatText(d.text || d.urlTitle || d.urlDescription || '')
+                            if (d.type === 'url' && !d.imageUrl) return formatText(d.text || '')
                             return null
                         })
                         .attr('opacity', 0)
