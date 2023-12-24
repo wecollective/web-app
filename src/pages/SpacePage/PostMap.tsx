@@ -444,8 +444,8 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
                         .append('text')
                         .classed('post-map-node-text', true)
                         .text((d) => {
+                            if (d.title) return formatText(d.title)
                             if (d.text) return formatText(d.text)
-                            if (d.type === 'url' && !d.imageUrl) return formatText(d.text || '')
                             return null
                         })
                         .attr('opacity', 0)
