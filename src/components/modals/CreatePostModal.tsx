@@ -678,17 +678,8 @@ function CreatePostModal(): JSX.Element {
                 beads: !multiplayer && !synchronous ? beads : [],
             }
         }
-        // todo: add other contextual data
-        //     if (sourceId) {
-        //         postData.sourceType = sourceType
-        //         postData.sourceId = sourceId
-        //         postData.linkDescription = linkDescription || null
-        //     }
-        //     if (governance) {
-        //         postData.governance = true
-        //         postData.pollAction = pollAction
-        //         postData.pollThreshold = pollThreshold
-        //     }
+        if (sourceId) post.source = { type: sourceType, id: sourceId, linkDescription }
+        if (governance) post.governance = { action: pollAction, threshold: pollThreshold }
         post.searchableText = findSearchableText(post)
         // validate post
         const validation = validatePost(post)
