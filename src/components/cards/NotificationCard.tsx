@@ -1,8 +1,9 @@
 import Button from '@components/Button'
 import Column from '@components/Column'
-import ImageNameLink from '@components/ImageNameLink'
 import Row from '@components/Row'
+import SpaceButton from '@components/SpaceButton'
 import TextLink from '@components/TextLink'
+import UserButton from '@components/UserButton'
 import CommentCardPreview from '@components/cards/Comments/CommentCardPreview'
 import PostCardPreview from '@components/cards/PostCard/PostCardPreview'
 import { AccountContext } from '@contexts/AccountContext'
@@ -360,10 +361,12 @@ function NotificationCard(props: {
                         />
                     }
                 >
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>liked your post</p>
                     {triggerSpace && <p>in</p>}
-                    {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
+                    {triggerSpace && (
+                        <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
+                    )}
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
@@ -380,10 +383,12 @@ function NotificationCard(props: {
                         />
                     }
                 >
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>liked your comment</p>
                     {triggerSpace && <p>in</p>}
-                    {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
+                    {triggerSpace && (
+                        <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
+                    )}
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
@@ -408,10 +413,12 @@ function NotificationCard(props: {
                         </Column>
                     }
                 >
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>commented on your post</p>
                     {triggerSpace && <p>in</p>}
-                    {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
+                    {triggerSpace && (
+                        <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
+                    )}
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
@@ -428,10 +435,12 @@ function NotificationCard(props: {
                         />
                     }
                 >
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>reposted your post</p>
                     {triggerSpace && <p>in</p>}
-                    {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
+                    {triggerSpace && (
+                        <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
+                    )}
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
@@ -448,10 +457,12 @@ function NotificationCard(props: {
                         />
                     }
                 >
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>rated your post</p>
                     {triggerSpace && <p>in</p>}
-                    {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
+                    {triggerSpace && (
+                        <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
+                    )}
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
@@ -468,10 +479,12 @@ function NotificationCard(props: {
                         />
                     }
                 >
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>rated your comment</p>
                     {triggerSpace && <p>in</p>}
-                    {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
+                    {triggerSpace && (
+                        <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
+                    )}
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
@@ -488,7 +501,7 @@ function NotificationCard(props: {
                         />
                     }
                 >
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>added a link to your post</p>
                     <CreatedAt date={createdAt} />
                 </Content>
@@ -506,7 +519,7 @@ function NotificationCard(props: {
                         />
                     }
                 >
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>added a link to your comment</p>
                     <CreatedAt date={createdAt} />
                 </Content>
@@ -514,7 +527,7 @@ function NotificationCard(props: {
 
             {['user-link-source', 'user-link-target'].includes(type) && (
                 <Content typeIcon={<LinkIcon />}>
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>added a link to</p>
                     <TextLink text='you' link={`/linkmap?item=user&id=${accountData.id}`} />
                     <CreatedAt date={createdAt} />
@@ -523,7 +536,7 @@ function NotificationCard(props: {
 
             {['space-link-source', 'space-link-target'].includes(type) && (
                 <Content typeIcon={<LinkIcon />}>
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>added a link to your</p>
                     <TextLink text='space' link={`/linkmap?item=space&id=${spaceAId}`} />
                     <CreatedAt date={createdAt} />
@@ -532,7 +545,7 @@ function NotificationCard(props: {
 
             {type === 'link-like' && (
                 <Content typeIcon={<LikeIcon />}>
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>liked your</p>
                     <TextLink text='link' link={linkUrl()} />
                     <CreatedAt date={createdAt} />
@@ -551,7 +564,7 @@ function NotificationCard(props: {
                         />
                     }
                 >
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>mentioned you in a post</p>
                     <CreatedAt date={createdAt} />
                 </Content>
@@ -570,7 +583,7 @@ function NotificationCard(props: {
                     }
                 >
                     <p>Your post was removed from</p>
-                    <ImageNameLink type='space' data={triggerSpace} />
+                    <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
                     <p>by its mods</p>
                     <CreatedAt date={createdAt} />
                 </Content>
@@ -588,7 +601,7 @@ function NotificationCard(props: {
                         />
                     }
                 >
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>mentioned you in a bead</p>
                     <CreatedAt date={createdAt} />
                 </Content>
@@ -607,10 +620,12 @@ function NotificationCard(props: {
                         />
                     }
                 >
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>replied to your comment</p>
                     {triggerSpace && <p>in</p>}
-                    {triggerSpace && <ImageNameLink type='space' data={triggerSpace} />}
+                    {triggerSpace && (
+                        <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
+                    )}
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
@@ -627,7 +642,7 @@ function NotificationCard(props: {
                         />
                     }
                 >
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>mentioned you in a comment</p>
                     <CreatedAt date={createdAt} />
                 </Content>
@@ -635,11 +650,11 @@ function NotificationCard(props: {
 
             {type === 'parent-space-request' && (
                 <Content typeIcon={<SpacesIcon />}>
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>wants to make</p>
-                    <ImageNameLink type='space' data={triggerSpace} />
+                    <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
                     <p>a child space of</p>
-                    <ImageNameLink type='space' data={secondarySpace} />
+                    <SpaceButton space={secondarySpace} imageSize={32} fontSize={15} />
                     <CreatedAt date={createdAt} />
                     <State
                         state={state}
@@ -650,11 +665,11 @@ function NotificationCard(props: {
 
             {type === 'parent-space-request-response' && (
                 <Content typeIcon={<SpacesIcon />}>
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>{state} your request to make</p>
-                    <ImageNameLink type='space' data={triggerSpace} />
+                    <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
                     <p>a child space of</p>
-                    <ImageNameLink type='space' data={secondarySpace} />
+                    <SpaceButton space={secondarySpace} imageSize={32} fontSize={15} />
                     {/* {state === 'accepted' ? <Success /> : <Fail />} */}
                     <CreatedAt date={createdAt} />
                 </Content>
@@ -662,9 +677,9 @@ function NotificationCard(props: {
 
             {type === 'space-invite' && (
                 <Content typeIcon={<SpacesIcon />}>
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>invited you to join</p>
-                    <ImageNameLink type='space' data={triggerSpace} />
+                    <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
                     <CreatedAt date={createdAt} />
                     <State state={state} respond={(response) => respondToSpaceInvite(response)} />
                 </Content>
@@ -672,18 +687,18 @@ function NotificationCard(props: {
 
             {type === 'space-invite-response' && (
                 <Content typeIcon={<SpacesIcon />}>
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>{state} your invitation to join</p>
-                    <ImageNameLink type='space' data={triggerSpace} />
+                    <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
 
             {type === 'space-access-request' && (
                 <Content typeIcon={<SpacesIcon />}>
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>requested access to</p>
-                    <ImageNameLink type='space' data={triggerSpace} />
+                    <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
                     <CreatedAt date={createdAt} />
                     <State
                         state={state}
@@ -694,18 +709,18 @@ function NotificationCard(props: {
 
             {type === 'space-access-response' && (
                 <Content typeIcon={<SpacesIcon />}>
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>{state} your request to access</p>
-                    <ImageNameLink type='space' data={triggerSpace} />
+                    <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
 
             {type === 'mod-invite' && (
                 <Content typeIcon={<SpacesIcon />}>
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>invited you to moderate</p>
-                    <ImageNameLink type='space' data={triggerSpace} />
+                    <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
                     <CreatedAt date={createdAt} />
                     <State state={state} respond={(response) => respondToModInvite(response)} />
                 </Content>
@@ -713,18 +728,18 @@ function NotificationCard(props: {
 
             {type === 'mod-invite-response' && (
                 <Content typeIcon={<SpacesIcon />}>
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>{state} your invitation to moderate</p>
-                    <ImageNameLink type='space' data={triggerSpace} />
+                    <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
 
             {type === 'mod-removed' && (
                 <Content typeIcon={<SpacesIcon />}>
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>removed you from moderating</p>
-                    <ImageNameLink type='space' data={triggerSpace} />
+                    <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
@@ -775,7 +790,7 @@ function NotificationCard(props: {
                         />
                     }
                 >
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>invited you to join a glass bead game</p>
                     <State state={state} respond={(response) => respondToWeaveInvite(response)} />
                     {/* {relatedPost.Weave.state === 'cancelled' && <p>Game cancelled</p>} */}
@@ -795,7 +810,7 @@ function NotificationCard(props: {
                         />
                     }
                 >
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>accepted your glass bead game invite</p>
                     <CreatedAt date={createdAt} />
                 </Content>
@@ -813,7 +828,7 @@ function NotificationCard(props: {
                         />
                     }
                 >
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>has rejected their glass bead game invite so the game has been cancelled</p>
                     <CreatedAt date={createdAt} />
                 </Content>
@@ -848,7 +863,7 @@ function NotificationCard(props: {
                         />
                     }
                 >
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>added a new bead to a glass bead game you have particpated in</p>
                     <CreatedAt date={createdAt} />
                 </Content>
@@ -866,7 +881,7 @@ function NotificationCard(props: {
                         />
                     }
                 >
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>added a new bead to a glass bead game you created</p>
                     <CreatedAt date={createdAt} />
                 </Content>
@@ -904,7 +919,7 @@ function NotificationCard(props: {
                         />
                     }
                 >
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>
                         failed to make their move in time on this glass bead game. The game has now
                         ended!
@@ -942,7 +957,7 @@ function NotificationCard(props: {
                         />
                     }
                 >
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>created a glass bead game from your post</p>
                     <CreatedAt date={createdAt} />
                 </Content>
@@ -960,7 +975,7 @@ function NotificationCard(props: {
                         />
                     }
                 >
-                    <ImageNameLink type='user' data={triggerUser} />
+                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>voted on your poll</p>
                     <CreatedAt date={createdAt} />
                 </Content>
