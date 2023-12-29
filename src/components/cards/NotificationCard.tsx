@@ -377,7 +377,7 @@ function NotificationCard(props: {
                     preview={
                         <CommentCardPreview
                             comment={relatedComment}
-                            link={`/p/${postId}?commentId=${commentId}`}
+                            link={`/p/${commentId}`}
                             onClick={markAsSeen}
                             style={{ marginTop: 10 }}
                         />
@@ -400,13 +400,13 @@ function NotificationCard(props: {
                         <Column>
                             <PostCardPreview
                                 post={relatedPost}
-                                link={`/p/${postId}?commentId=${commentId}`}
+                                link={`/p/${commentId}`}
                                 onClick={markAsSeen}
                                 style={{ marginTop: 10 }}
                             />
                             <CommentCardPreview
                                 comment={relatedComment}
-                                link={`/p/${postId}?commentId=${commentId}`}
+                                link={`/p/${commentId}`}
                                 onClick={markAsSeen}
                                 style={{ marginTop: 10 }}
                             />
@@ -473,7 +473,7 @@ function NotificationCard(props: {
                     preview={
                         <CommentCardPreview
                             comment={relatedComment}
-                            link={`/p/${postId}?commentId=${commentId}`}
+                            link={`/p/${commentId}`}
                             onClick={markAsSeen}
                             style={{ marginTop: 10 }}
                         />
@@ -614,7 +614,7 @@ function NotificationCard(props: {
                     preview={
                         <CommentCardPreview
                             comment={relatedComment}
-                            link={`/p/${postId}?commentId=${commentId}`}
+                            link={`/p/${commentId}`}
                             onClick={markAsSeen}
                             style={{ marginTop: 10 }}
                         />
@@ -636,7 +636,7 @@ function NotificationCard(props: {
                     preview={
                         <CommentCardPreview
                             comment={relatedComment}
-                            link={`/p/${postId}?commentId=${commentId}`}
+                            link={`/p/${commentId}`}
                             onClick={markAsSeen}
                             style={{ marginTop: 10 }}
                         />
@@ -864,7 +864,7 @@ function NotificationCard(props: {
                     }
                 >
                     <UserButton user={triggerUser} imageSize={32} fontSize={15} />
-                    <p>added a new bead to a glass bead game you have particpated in</p>
+                    <p>added a bead to a game you have particpated in</p>
                     <CreatedAt date={createdAt} />
                 </Content>
             )}

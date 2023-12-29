@@ -12,6 +12,11 @@
     padding: 15px;
     color: black;
     background-color: white;
+    transition: background-color 0.3s;
+
+    &:hover {
+        background-color: $blue8;
+    }
 
     .header {
         font-size: 15px;
@@ -33,93 +38,45 @@
         width: 100%;
         overflow: hidden;
 
-        .title {
-            height: 30px;
-            overflow: hidden;
-            font-size: 24px;
-            line-height: 30px;
-            margin-bottom: 0;
-        }
-
-        .typeIcon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: $grey1;
-            margin-right: 10px;
-            margin-top: 5px;
-            flex-shrink: 0;
-
-            svg {
-                width: 22px;
-                height: 22px;
-                color: $grey5;
-            }
-        }
-
-        .gbg {
-            margin-top: 5px;
-
-            > img {
-                width: 30px;
-                height: 30px;
-                margin-right: 5px;
-                border-radius: 15px;
-                object-fit: cover;
-            }
-        }
-
-        .card {
+        .block {
             margin-top: 10px;
-
-            .cardFace {
-                width: 40px;
-                height: 56px;
-                border-radius: 3px;
-                box-shadow: 0 0 6px 0 rgba(10, 8, 72, 0.18);
-                overflow: hidden;
-                margin-right: 15px;
-
-                > img {
-                    width: inherit;
-                    height: inherit;
-                    object-fit: cover;
-                }
-            }
-        }
-
-        .text {
-            font-size: 16px;
-            line-height: 26px;
-            height: 26px;
-            overflow: hidden;
-        }
-
-        .images {
-            margin-top: 10px;
-
-            > img {
-                width: 80px;
-                height: 80px;
-                border-radius: 5px;
-                object-fit: cover;
-                margin-right: 10px;
-            }
-        }
-
-        .url {
-            margin-top: 5px;
             background-color: $grey1;
             padding: 8px;
             border-radius: 5px;
+            border: 1px solid $grey2;
             width: 100%;
+        }
 
+        .title {
+            height: 26px;
+            font-size: 24px;
+            line-height: 24px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .text {
+            height: 18px;
+            font-size: 16px;
+            line-height: 16px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .url {
             > img {
                 width: 80px;
                 height: 50px;
                 margin-right: 10px;
                 border-radius: 5px;
                 object-fit: cover;
+            }
+
+            > svg {
+                width: 22px;
+                height: 22px;
+                color: $grey5;
+                margin-right: 10px;
             }
 
             .urlTitle {
@@ -130,12 +87,71 @@
                 overflow: hidden;
             }
 
-            .urlDescription {
+            .description {
                 font-size: 16px;
                 line-height: 20px;
                 height: 20px;
                 overflow: hidden;
             }
         }
+
+        .image {
+            > img {
+                width: 100%;
+                max-width: 300px;
+                max-height: 200px;
+                border-radius: 5px;
+                object-fit: cover;
+            }
+        }
+
+        .gbg {
+            margin-top: 5px;
+
+            > img {
+                width: 36px;
+                height: 36px;
+                margin-right: 5px;
+                border-radius: 50%;
+                border: 1px solid $grey2;
+                object-fit: cover;
+            }
+        }
+
+        .typeIcon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: $grey1;
+            border: 1px solid $grey2;
+            margin-right: 10px;
+            margin-top: 5px;
+            flex-shrink: 0;
+
+            svg {
+                width: 22px;
+                height: 22px;
+                color: $grey5;
+            }
+        }
     }
 }
+
+// .card {
+//     margin-top: 10px;
+
+//     .cardFace {
+//         width: 40px;
+//         height: 56px;
+//         border-radius: 3px;
+//         box-shadow: 0 0 6px 0 rgba(10, 8, 72, 0.18);
+//         overflow: hidden;
+//         margin-right: 15px;
+
+//         > img {
+//             width: inherit;
+//             height: inherit;
+//             object-fit: cover;
+//         }
+//     }
+// }

@@ -2,17 +2,21 @@
 import Column from '@components/Column'
 import ImageTitle from '@components/ImageTitle'
 import Row from '@components/Row'
+import AudioCard from '@components/cards/PostCard/AudioCard'
 import PostSpaces from '@components/cards/PostCard/PostSpaces'
+import config from '@src/Config'
 import {
     dateCreated,
     getDraftPlainText,
-    postTypeIcons,
     timeSinceCreated,
     timeSinceCreatedShort,
     trimText,
 } from '@src/Helpers'
+import LoadingWheel from '@src/components/animations/LoadingWheel'
 import styles from '@styles/components/cards/PostCard/PostCardPreview.module.scss'
-import React from 'react'
+import { CalendarIcon, CardIcon, LinkIcon, PollIcon } from '@svgs/all'
+import axios from 'axios'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 function PostCardPreview(props: {
@@ -25,26 +29,47 @@ function PostCardPreview(props: {
     const {
         id,
         type,
+        mediaTypes,
         title,
         text,
         createdAt,
         updatedAt,
         Creator,
         DirectSpaces,
-        Urls,
-        Images,
-        GlassBeadGame: GBG,
-        CardSides,
+        GlassBeadGame,
     } = post
+    const [loading, setLoading] = useState(true)
+    const [url, setUrl] = useState<any>(null)
+    const [image, setImage] = useState<any>(null)
+    const [audio, setAudio] = useState<any>(null)
     const mobileView = document.documentElement.clientWidth < 900
     const imageSize = 28
 
-    function findType() {
-        if (type.includes('card')) return 'card'
-        const t = type.split('gbg-')
-        if (t.length > 1) return t[1]
-        return type
+    function getPreviewData() {
+        const isBlock = ['url', 'image', 'audio'].includes(type)
+        if (isBlock) {
+            if (type === 'url') setUrl(post.Url)
+            if (type === 'image') setUrl(post.Image)
+            if (type === 'audio') setUrl(post.Audio)
+            setLoading(false)
+        } else {
+            axios
+                .get(`${config.apiURL}/post-preview-data?postId=${id}`)
+                .then((res) => {
+                    setUrl(res.data.url)
+                    setImage(res.data.image)
+                    setAudio(res.data.audio)
+                    setLoading(false)
+                })
+                .catch((error) => console.log(error))
+        }
     }
+
+    useEffect(() => {
+        const hasMedia = ['url', 'image', 'audio'].some((media) => mediaTypes.includes(media))
+        if (hasMedia) getPreviewData()
+        else setLoading(false)
+    }, [])
 
     return (
         <Link to={link} onClick={onClick} className={styles.post} style={style}>
@@ -82,66 +107,97 @@ function PostCardPreview(props: {
                 </Row>
             </Row>
             <Row className={styles.content}>
-                <Column centerY style={{ height: '100%' }}>
-                    <Column centerX centerY className={styles.typeIcon}>
-                        {postTypeIcons[findType()]}
+                {loading ? (
+                    <Column centerX className={styles.block}>
+                        <LoadingWheel size={24} />
                     </Column>
-                </Column>
-                <Column style={{ width: '100%' }}>
-                    {type !== 'glass-bead-game' && title && (
-                        <h1 className={styles.title}>{trimText(title, 50)}</h1>
-                    )}
-                    {type === 'glass-bead-game' && (
-                        <Row centerY className={styles.gbg}>
-                            {GBG.topicImage && <img src={GBG.topicImage} alt='topic' />}
-                            {title && <h1 className={styles.title}>{trimText(title, 30)}</h1>}
-                        </Row>
-                    )}
-                    {text && <p className={styles.text}>{trimText(getDraftPlainText(text), 80)}</p>}
-                    {type === 'card' && (
-                        <Row centerY className={styles.card}>
-                            <Row className={styles.cardFace}>
-                                {CardSides[0].Images[0] && (
-                                    <img src={CardSides[0].Images[0].url} alt='card front' />
-                                )}
-                            </Row>
-                            <Row className={styles.cardFace}>
-                                {CardSides[1].Images[0] && (
-                                    <img src={CardSides[1].Images[0].url} alt='card back' />
-                                )}
-                            </Row>
-                        </Row>
-                    )}
-                    {['card-front', 'card-back'].includes(type) && (
-                        <Row centerY className={styles.card}>
-                            <Row className={styles.cardFace}>
-                                {Images[0] && <img src={Images[0].url} alt='card front' />}
-                            </Row>
-                        </Row>
-                    )}
-                    {Urls[0] && (
-                        <Row centerY className={styles.url}>
-                            <img src={Urls[0].image} alt='URL' />
-                            <Column>
-                                {Urls[0].title && (
-                                    <p className={styles.urlTitle}>{trimText(Urls[0].title, 60)}</p>
-                                )}
-                                {Urls[0].description && (
-                                    <p className={styles.urlDescription}>
-                                        {trimText(Urls[0].description, 60)}
-                                    </p>
-                                )}
+                ) : (
+                    <Row style={{ width: '100%' }}>
+                        {mediaTypes.includes('poll') && (
+                            <Column centerY centerX className={styles.typeIcon}>
+                                <PollIcon />
                             </Column>
-                        </Row>
-                    )}
-                    {type.includes('image') && (
-                        <Row centerY className={styles.images}>
-                            {Images.map((image) => (
-                                <img key={image.id} src={image.url} alt='' />
-                            ))}
-                        </Row>
-                    )}
-                </Column>
+                        )}
+                        {mediaTypes.includes('event') && (
+                            <Column centerY centerX className={styles.typeIcon}>
+                                <CalendarIcon />
+                            </Column>
+                        )}
+                        {mediaTypes.includes('card') && (
+                            <Column centerY centerX className={styles.typeIcon}>
+                                <CardIcon />
+                            </Column>
+                        )}
+                        <Column style={{ width: '100%' }}>
+                            {!mediaTypes.includes('glass-bead-game') && title && (
+                                <p className={styles.title}>{trimText(title, 50)}</p>
+                            )}
+                            {mediaTypes.includes('glass-bead-game') && (
+                                <Row centerY className={styles.gbg}>
+                                    {GlassBeadGame.topicImage && (
+                                        <img src={GlassBeadGame.topicImage} alt='topic' />
+                                    )}
+                                    {title && (
+                                        <p className={styles.title} style={{ margin: 0 }}>
+                                            {trimText(title, 30)}
+                                        </p>
+                                    )}
+                                </Row>
+                            )}
+                            {text && (
+                                <p className={styles.text}>
+                                    {trimText(getDraftPlainText(text), 80)}
+                                </p>
+                            )}
+                            {mediaTypes.includes('url') && (
+                                <Row centerY className={`${styles.block} ${styles.url}`}>
+                                    {url.image ? (
+                                        <img
+                                            src={url.image}
+                                            alt='URL'
+                                            onError={() => setUrl({ ...url, image: null })}
+                                        />
+                                    ) : (
+                                        <LinkIcon />
+                                    )}
+                                    <Column>
+                                        {url.title && (
+                                            <p className={styles.urlTitle}>
+                                                {trimText(url.title, 60)}
+                                            </p>
+                                        )}
+                                        {url.description && (
+                                            <p className={styles.description}>
+                                                {trimText(url.description, 60)}
+                                            </p>
+                                        )}
+                                        {!url.title && !url.description && (
+                                            <p className={styles.description}>
+                                                {trimText(url.url, 60)}
+                                            </p>
+                                        )}
+                                    </Column>
+                                </Row>
+                            )}
+                            {mediaTypes.includes('image') && (
+                                <Row centerX className={`${styles.block} ${styles.image}`}>
+                                    <img src={image.url} alt='' />
+                                </Row>
+                            )}
+                            {mediaTypes.includes('audio') && (
+                                <Row centerX className={`${styles.block} ${styles.image}`}>
+                                    <AudioCard
+                                        id={audio.id}
+                                        url={audio.url}
+                                        staticBars={250}
+                                        location='post-preview'
+                                        style={{ height: 160, width: '100%' }}
+                                    />
+                                </Row>
+                            )}
+                        </Column>
+                    </Row>
+                )}
             </Row>
         </Link>
     )
@@ -153,3 +209,25 @@ PostCardPreview.defaultProps = {
 }
 
 export default PostCardPreview
+
+/* {mediaTypes.includes('card') && (
+    <Row centerY className={styles.card}>
+        <Row className={styles.cardFace}>
+            {CardSides[0].Images[0] && (
+                <img src={CardSides[0].Images[0].url} alt='card front' />
+            )}
+        </Row>
+        <Row className={styles.cardFace}>
+            {CardSides[1].Images[0] && (
+                <img src={CardSides[1].Images[0].url} alt='card back' />
+            )}
+        </Row>
+    </Row>
+)}
+{mediaTypes.includes('card-face') && (
+    <Row centerY className={styles.card}>
+        <Row className={styles.cardFace}>
+            {Images[0] && <img src={Images[0].url} alt='card front' />}
+        </Row>
+    </Row>
+)} */

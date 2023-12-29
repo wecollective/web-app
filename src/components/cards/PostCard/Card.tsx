@@ -10,6 +10,7 @@ import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
+// todo: bug when creating new card...
 // todo: handle like updates
 function Card(props: { postId: any; style?: any }): JSX.Element {
     const { postId, style } = props
@@ -29,6 +30,7 @@ function Card(props: { postId: any; style?: any }): JSX.Element {
         axios
             .get(`${config.apiURL}/card-faces?postId=${postId}`)
             .then((res) => {
+                console.log('card-faces: ', res.data)
                 setBlocks(res.data)
                 setLoading(false)
             })
