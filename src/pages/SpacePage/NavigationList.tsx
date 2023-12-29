@@ -3,6 +3,7 @@ import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
 import SpaceButton from '@components/SpaceButton'
 import LoadingWheel from '@components/animations/LoadingWheel'
+import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import styles from '@styles/pages/SpacePage/NavigationList.module.scss'
@@ -22,11 +23,12 @@ function Space(props: {
     // recursive component used to render space trees in the NavigationList component below
     const { space, type, expand, getNextChildren, onLocationChange } = props
     const { id, privacy, children, totalChildren, expanded, loading, nextChildrenLoading } = space
+    const { loggedIn } = useContext(AccountContext)
     const [showExpander, setShowExpander] = useState(totalChildren > 0 && privacy === 'public')
     // check access
     // todo: see if there's a way to prevent this from firing when the array is updated
     useEffect(() => {
-        if (type === 'child' && privacy !== 'public') {
+        if (loggedIn && type === 'child' && privacy !== 'public') {
             const cookies = new Cookies()
             const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
             axios
