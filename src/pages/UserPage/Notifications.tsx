@@ -7,6 +7,7 @@ import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
 import UserNotFound from '@pages/UserPage/UserNotFound'
 import config from '@src/Config'
+import Button from '@src/components/Button'
 import styles from '@styles/pages/UserPage/Notifications.module.scss'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
@@ -24,6 +25,7 @@ function Notifications(): JSX.Element {
     const [moreItems, setMoreItems] = useState(false)
     const [itemOffset, setItemOffset] = useState(0)
     const [showSeenItems, setShowSeenItems] = useState(true)
+    const [markAllSeenLoading, setMarkAllSeenLoading] = useState(false)
     const history = useNavigate()
     const cookies = new Cookies()
     const location = useLocation()
@@ -38,6 +40,7 @@ function Notifications(): JSX.Element {
         axios
             .post(`${config.apiURL}/account-notifications`, data, options)
             .then((res) => {
+                console.log('account-notifications: ', res.data)
                 setMoreItems(res.data.length === 10)
                 setItemOffset(offset + res.data.length)
                 setNotifications(offset ? [...notifications, ...res.data] : res.data)
@@ -52,6 +55,23 @@ function Notifications(): JSX.Element {
         const notification = newNotifications.find((n) => n.id === id)
         notification[key] = payload
         setNotifications(newNotifications)
+    }
+
+    function markAllSeen() {
+        setMarkAllSeenLoading(true)
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .post(`${config.apiURL}/mark-all-notifications-seen`, null, options)
+            .then(() => {
+                setAccountData({ ...accountData, unseenNotifications: 0 })
+                setNotifications(
+                    notifications.map((n) => {
+                        return { ...n, seen: true }
+                    })
+                )
+                setMarkAllSeenLoading(false)
+            })
+            .catch((error) => console.log(error))
     }
 
     // get first notifications
@@ -73,17 +93,29 @@ function Notifications(): JSX.Element {
     if (userNotFound) return <UserNotFound />
     return (
         <Column centerX className={styles.wrapper}>
-            <Toggle
-                leftText='Show seen notifications'
-                positionLeft={!showSeenItems}
-                rightColor='blue'
-                onClick={() => {
-                    setShowSeenItems(!showSeenItems)
-                    getNotifications(0, !showSeenItems)
-                }}
-                style={{ marginBottom: 10 }}
-                onOffText
-            />
+            <Row centerY style={{ marginBottom: 10 }}>
+                <Toggle
+                    leftText='Show seen notifications'
+                    positionLeft={!showSeenItems}
+                    rightColor='blue'
+                    onClick={() => {
+                        setShowSeenItems(!showSeenItems)
+                        getNotifications(0, !showSeenItems)
+                    }}
+                    onOffText
+                />
+                {accountData.unseenNotifications > 0 && (
+                    <Button
+                        text='Mark all seen'
+                        color='aqua'
+                        size='medium'
+                        onClick={markAllSeen}
+                        loading={markAllSeenLoading}
+                        disabled={markAllSeenLoading}
+                        style={{ marginLeft: 20 }}
+                    />
+                )}
+            </Row>
             {itemsLoading ? (
                 <Row centerY centerX className={styles.placeholder}>
                     <p>Notifications loading...</p>

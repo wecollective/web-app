@@ -30,7 +30,7 @@ import {
     SuccessIcon,
 } from '@svgs/all'
 import axios from 'axios'
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 function Content(props: {
@@ -319,6 +319,8 @@ function NotificationCard(props: {
         if (spaceAId) return `/linkmap?item=space&id=${spaceAId}`
         return `/linkmap?item=user&id=${accountData.id}`
     }
+
+    useEffect(() => setSeen(notification.seen), [notification])
 
     // todo: use switch case to render different notification types
 
