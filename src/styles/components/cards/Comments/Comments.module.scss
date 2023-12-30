@@ -1,0 +1,41 @@
+@import '@styles/Variables';
+
+.filter {
+    all: unset;
+    position: relative;
+    cursor: pointer;
+    background-color: white;
+    border: 1px solid $grey2;
+    display: flex;
+    align-items: center;
+    height: 24px;
+    margin-bottom: 10px;
+    padding: 0 8px;
+    border-radius: 15px;
+    font-size: 11px;
+    font-weight: 800;
+    color: $grey6;
+    transition: color 0.3s;
+
+    &:hover {
+        color: $grey7;
+    }
+
+    > svg {
+        width: 14px;
+        height: 14px;
+        margin-right: 5px;
+    }
+
+    &.selected {
+        color: $blue5;
+    }
+}
+
+.loadMore {
+    all: unset;
+    cursor: pointer;
+    color: $blue1;
+    margin-left: 15px;
+    margin-bottom: 10px;
+}

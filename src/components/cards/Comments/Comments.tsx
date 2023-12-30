@@ -5,12 +5,12 @@ import CommentCard from '@components/cards/Comments/CommentCard'
 import CommentInput from '@components/draft-js/CommentInput'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
-import styles from '@styles/components/cards/Comments/CommentCard.module.scss'
+import styles from '@styles/components/cards/Comments/Comments.module.scss'
+import { ClockIcon, NewIcon, RankingIcon } from '@svgs/all'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
-import Cookies from 'universal-cookie'
 
+// todo: test deleted and muted comments
 function Comments(props: {
     postId: number
     location: string
@@ -23,31 +23,26 @@ function Comments(props: {
         props
     const { accountData, loggedIn } = useContext(AccountContext)
     const [comments, setComments] = useState<any[]>([])
+    const [remainingComments, setRemainingComments] = useState(0)
     const [loading, setLoading] = useState(true)
-    const cookies = new Cookies()
-    const urlParams = Object.fromEntries(new URLSearchParams(useLocation().search))
+    const [filter, setFilter] = useState('top')
     const filteredComments = comments.filter((c) => {
         // remove deleted comments with no replies
         return c.state === 'active' || c.Comments.length
     })
 
     function getComments(offset) {
-        console.log('get comments', postId)
-        // setLoading(true)
-        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        if (!offset) setLoading(true)
         axios
-            .get(`${config.apiURL}/post-comments?postId=${postId}&offset=${offset}`, options)
+            .get(
+                `${config.apiURL}/post-comments?postId=${postId}&offset=${offset}&filter=${filter}`
+            )
             .then((res) => {
                 console.log('post-comments: ', res.data)
-                setComments(offset ? [...comments, ...res.data] : res.data)
+                const newComments = offset ? [...comments, ...res.data.comments] : res.data.comments
+                setComments(newComments)
+                setRemainingComments(res.data.totalChildren - newComments.length)
                 setLoading(false)
-                // // if commentId in params, scroll to comment
-                // if (urlParams.commentId) {
-                //     setTimeout(() => {
-                //         const comment = document.getElementById(`comment-${urlParams.commentId}`)
-                //         if (comment) scrollToElement(comment)
-                //     }, 500)
-                // }
             })
             .catch((error) => console.log(error))
     }
@@ -114,7 +109,7 @@ function Comments(props: {
         setComments([])
         if (totalComments) getComments(0)
         else setLoading(false)
-    }, [postId])
+    }, [filter])
 
     return (
         <Column style={style}>
@@ -125,8 +120,39 @@ function Comments(props: {
                     parent={{ type: 'post', id: postId }}
                     onSave={(newComment) => addComment(newComment)}
                     maxChars={5000}
-                    style={{ marginBottom: 15 }}
+                    style={{ marginBottom: 10 }}
                 />
+            )}
+            {totalComments > 0 && (
+                <Row>
+                    <button
+                        type='button'
+                        className={`${styles.filter} ${filter === 'top' && styles.selected}`}
+                        onClick={() => setFilter('top')}
+                        style={{ marginRight: 10 }}
+                    >
+                        <RankingIcon />
+                        <p>Top</p>
+                    </button>
+                    <button
+                        type='button'
+                        className={`${styles.filter} ${filter === 'new' && styles.selected}`}
+                        onClick={() => setFilter('new')}
+                        style={{ marginRight: 10 }}
+                    >
+                        <NewIcon />
+                        <p>New</p>
+                    </button>
+                    <button
+                        type='button'
+                        className={`${styles.filter} ${filter === 'old' && styles.selected}`}
+                        onClick={() => setFilter('old')}
+                        style={{ marginRight: 10 }}
+                    >
+                        <ClockIcon />
+                        <p>Old</p>
+                    </button>
+                </Row>
             )}
             {loading ? (
                 <Row centerX style={{ margin: '10px 0' }}>
@@ -140,7 +166,8 @@ function Comments(props: {
                             depth={0}
                             comment={comment}
                             postId={postId}
-                            highlighted={false} // highlightedCommentId === comment.id
+                            filter={filter}
+                            // highlighted={false} // highlightedCommentId === comment.id
                             addComment={addComment}
                             removeComment={removeComment}
                             editComment={editComment}
@@ -148,13 +175,13 @@ function Comments(props: {
                             location={location}
                         />
                     ))}
-                    {comments.length === 10 && (
+                    {remainingComments > 0 && (
                         <button
                             className={styles.loadMore}
                             type='button'
                             onClick={() => getComments(comments.length)}
                         >
-                            Load more ↓
+                            Load more ({remainingComments})
                         </button>
                     )}
                 </Column>

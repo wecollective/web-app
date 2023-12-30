@@ -39,8 +39,9 @@ function CommentCard(props: {
     depth: number
     comment: any
     postId: number
-    highlighted: boolean
+    highlighted?: boolean
     location: string
+    filter: string
     addComment: (comment: any) => void
     removeComment: (comment: any) => void
     editComment: (comment: any, newText: string) => void
@@ -52,6 +53,7 @@ function CommentCard(props: {
         postId,
         highlighted,
         location,
+        filter,
         addComment,
         removeComment,
         editComment, // todo: remove (done locally)
@@ -72,12 +74,14 @@ function CommentCard(props: {
         totalRatings,
         totalLinks,
         totalComments,
+        totalChildComments,
         createdAt,
         updatedAt,
         Creator,
         Comments,
     } = comment
     const [loading, setLoading] = useState(false)
+    const [remainingComments, setRemainingComments] = useState(totalChildComments - Comments.length)
     const [collapsed, setCollapsed] = useState(false)
     const [buttonsDisabled, setButtonsDisabled] = useState(true)
     const [accountReactions, setAccountReactions] = useState<any>({})
@@ -134,12 +138,15 @@ function CommentCard(props: {
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
             .get(
-                `${config.apiURL}/post-comments?postId=${commentId}&offset=${offset || 0}`,
+                `${config.apiURL}/post-comments?postId=${commentId}&offset=${
+                    offset || 0
+                }&filter=${filter}`,
                 options
             )
             .then((res) => {
-                console.log('comment-comments: ', res.data)
-                setComment({ ...comment, Comments: offset ? [...Comments, ...res.data] : res.data })
+                const newComments = offset ? [...Comments, ...res.data.comments] : res.data.comments
+                setComment({ ...comment, Comments: newComments })
+                setRemainingComments(res.data.totalChildren - newComments.length)
                 setLoading(false)
             })
             .catch((error) => console.log(error))
@@ -469,7 +476,6 @@ function CommentCard(props: {
                             type='comment'
                             placeholder='Reply...'
                             parent={{ type: 'comment', id }}
-                            root={{ type: 'post', id: postId }}
                             onSave={(newComment) => {
                                 addComment(newComment)
                                 toggleSelected()
@@ -539,7 +545,8 @@ function CommentCard(props: {
                                 depth={depth + 1}
                                 comment={reply}
                                 postId={postId}
-                                highlighted={false} // highlightedCommentId === comment.id
+                                // highlighted={false} // highlightedCommentId === comment.id
+                                filter={filter}
                                 addComment={addComment}
                                 removeComment={removeComment}
                                 editComment={editComment}
@@ -547,7 +554,7 @@ function CommentCard(props: {
                                 location={location}
                             />
                         ))}
-                        {totalComments > 0 && !Comments.length && (
+                        {/* {totalComments > 0 && !Comments.length && (
                             <button
                                 className={styles.loadMore}
                                 type='button'
@@ -555,14 +562,14 @@ function CommentCard(props: {
                             >
                                 Load more →
                             </button>
-                        )}
-                        {Comments.length === 10 && (
+                        )} */}
+                        {remainingComments > 0 && (
                             <button
                                 className={styles.loadMore}
                                 type='button'
                                 onClick={() => getComments(id, Comments.length)}
                             >
-                                Load more ↓
+                                Load more ({remainingComments})
                             </button>
                         )}
                     </Column>
@@ -574,6 +581,7 @@ function CommentCard(props: {
 
 CommentCard.defaultProps = {
     setPostDraggable: null,
+    highlighted: false,
 }
 
 export default CommentCard
