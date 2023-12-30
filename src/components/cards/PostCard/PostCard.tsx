@@ -23,7 +23,9 @@ import RatingModal from '@components/modals/RatingModal'
 import RemovePostModal from '@components/modals/RemovePostModal'
 import RepostModal from '@components/modals/RepostModal'
 import { AccountContext } from '@contexts/AccountContext'
+import { PostContext } from '@contexts/PostContext'
 import { SpaceContext } from '@contexts/SpaceContext'
+import { UserContext } from '@contexts/UserContext'
 import config from '@src/Config'
 import { dateCreated, timeSinceCreated, timeSinceCreatedShort } from '@src/Helpers'
 import {
@@ -70,7 +72,16 @@ function PostCard(props: {
         setCreatePostModalSettings,
         setCreatePostModalOpen,
     } = useContext(AccountContext)
-    const { spaceData, postFilters } = useContext(SpaceContext)
+    const {
+        spaceData,
+        postFilters,
+        spacePosts,
+        setSpacePosts,
+        governancePolls,
+        setGovernancePolls,
+    } = useContext(SpaceContext)
+    const { userPosts, setUserPosts } = useContext(UserContext)
+    const { setPostState } = useContext(PostContext)
     const [post, setPost] = useState(postData)
     const {
         id,
@@ -214,6 +225,7 @@ function PostCard(props: {
 
     useEffect(() => {
         if (loggedIn) getAccountReactions()
+        else setButtonsDisabled(false)
         if (type === 'comment') getCommentLinks()
         addDragEvents()
     }, [])
@@ -449,17 +461,19 @@ function PostCard(props: {
                             </Column>
                             <p>{totalRatings}</p>
                         </button>
-                        <button
-                            type='button'
-                            className={`${styles.repost} ${reposted && styles.highlighted}`}
-                            disabled={buttonsDisabled}
-                            onClick={() => setRepostModalOpen(true)}
-                        >
-                            <Column centerX centerY>
-                                <RepostIcon />
-                            </Column>
-                            <p>{totalReposts}</p>
-                        </button>
+                        {type === 'post' && (
+                            <button
+                                type='button'
+                                className={`${styles.repost} ${reposted && styles.highlighted}`}
+                                disabled={buttonsDisabled}
+                                onClick={() => setRepostModalOpen(true)}
+                            >
+                                <Column centerX centerY>
+                                    <RepostIcon />
+                                </Column>
+                                <p>{totalReposts}</p>
+                            </button>
+                        )}
                     </Row>
                     {/* Hide link post button on Pronoia posts */}
                     {!DirectSpaces.find((s) => s.id === 616) && (
@@ -522,8 +536,16 @@ function PostCard(props: {
             )}
             {deletePostModalOpen && (
                 <DeletePostModal
-                    postId={id}
-                    location={location}
+                    post={post}
+                    onDelete={() => {
+                        if (location === 'space-posts')
+                            setSpacePosts(spacePosts.filter((p) => p.id !== id))
+                        if (location === 'user-posts')
+                            setUserPosts(userPosts.filter((p) => p.id !== id))
+                        if (location === 'space-governance')
+                            setGovernancePolls(governancePolls.filter((p) => p.id !== id))
+                        if (location === 'post-page') setPostState('deleted')
+                    }}
                     close={() => setDeletePostModalOpen(false)}
                 />
             )}

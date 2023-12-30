@@ -351,6 +351,7 @@ function CommentInput(props: {
                     newPost.Creator = { id, handle, name, flagImagePath }
                     newPost.Comments = []
                     newPost.Reactions = []
+                    newPost.parent = parent
                     if (type === 'poll-answer') newPost.Link = { state: 'active' }
                     onSave(newPost)
                     resetData()

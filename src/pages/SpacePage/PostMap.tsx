@@ -614,7 +614,7 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
                 <Modal
                     centerX
                     close={() => setPostModalOpen(false)}
-                    style={{ width: '100%', maxWidth: 900 }}
+                    style={{ width: '100vw', maxWidth: 900 }}
                 >
                     {selectedPost ? (
                         <PostCard location='space-post-map' post={selectedPost} />

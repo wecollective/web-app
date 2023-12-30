@@ -240,6 +240,7 @@ export interface IPostContext {
     setPostData: (payload: any) => void
     postDataLoading: boolean
     postState: string
+    setPostState: (payload: string) => void
     // functions
     getPostData: (payload: number) => void
     resetPostContext: () => void

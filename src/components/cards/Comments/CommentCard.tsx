@@ -8,7 +8,7 @@ import Images from '@components/cards/PostCard/Images'
 import Urls from '@components/cards/PostCard/Urls'
 import CommentInput from '@components/draft-js/CommentInput'
 import DraftText from '@components/draft-js/DraftText'
-import DeleteCommentModal from '@components/modals/DeleteCommentModal'
+import DeletePostModal from '@components/modals/DeletePostModal'
 import EditPostModal from '@components/modals/EditPostModal'
 import LikeModal from '@components/modals/LikeModal'
 import RatingModal from '@components/modals/RatingModal'
@@ -38,7 +38,6 @@ import Cookies from 'universal-cookie'
 function CommentCard(props: {
     depth: number
     comment: any
-    postId: number
     highlighted?: boolean
     location: string
     filter: string
@@ -49,7 +48,6 @@ function CommentCard(props: {
     const {
         depth,
         comment: commentData,
-        postId,
         highlighted,
         location,
         filter,
@@ -226,7 +224,8 @@ function CommentCard(props: {
         if (commentText) {
             commentText.addEventListener('click', () => {
                 // todo: check if reply input empty
-                if (!getTextSelection()) toggleSelected()
+                const textSelection = getTextSelection()
+                if (state !== 'deleted' && !textSelection) toggleSelected()
             })
             commentText.addEventListener('mouseenter', () => {
                 setDraggable(false)
@@ -249,6 +248,7 @@ function CommentCard(props: {
 
     useEffect(() => {
         if (selected && loggedIn) getAccountReactions()
+        else setButtonsDisabled(false)
     }, [selected])
 
     if (muted && !showMutedComment)
@@ -340,7 +340,6 @@ function CommentCard(props: {
                                 {selected && (
                                     <Row>
                                         <Link
-                                            // to={`/p/${rootId}?commentId=${id}`}
                                             to={`/p/${id}`}
                                             className={styles.id}
                                             title='Open post page'
@@ -472,7 +471,7 @@ function CommentCard(props: {
                             )}
                         </Column>
                     </Row>
-                    {selected && !collapsed && (
+                    {loggedIn && selected && !collapsed && (
                         <CommentInput
                             type='comment'
                             placeholder='Reply...'
@@ -525,9 +524,9 @@ function CommentCard(props: {
                         />
                     )}
                     {deleteModalOpen && (
-                        <DeleteCommentModal
-                            comment={comment}
-                            removeComment={removeComment}
+                        <DeletePostModal
+                            post={comment}
+                            onDelete={() => removeComment(comment)}
                             close={() => setDeleteModalOpen(false)}
                         />
                     )}
@@ -545,7 +544,6 @@ function CommentCard(props: {
                                 key={reply.id}
                                 depth={depth + 1}
                                 comment={reply}
-                                postId={postId}
                                 // highlighted={false} // highlightedCommentId === comment.id
                                 filter={filter}
                                 addComment={addComment}

@@ -57,8 +57,8 @@ function Comments(props: {
     }
 
     function addComment(comment) {
-        const { parent, root } = comment.link
-        if (!root) setComments([comment, ...comments])
+        const { parent } = comment
+        if (parent.id === postId) setComments([comment, ...comments])
         else {
             const newComments = [...comments]
             const parentComment = findCommentById(newComments, parent.id)
@@ -68,25 +68,12 @@ function Comments(props: {
         incrementTotalComments(1)
     }
 
-    // todo: update
     function removeComment(comment) {
-        const { id, parentCommentId } = comment
         incrementTotalComments(-1)
-        if (!parentCommentId) {
-            // if comment to remove has replies, update data instead of removing
-            const newComments = [...comments]
-            const commentToRemove = newComments.find((c) => c.id === id)
-            if (commentToRemove.Replies) {
-                commentToRemove.text = null
-                commentToRemove.state = 'deleted'
-                setComments(newComments)
-            } else setComments([...comments.filter((c) => c.id !== id)])
-        } else {
-            const newComments = [...comments]
-            const parentComment = newComments.find((c) => c.id === parentCommentId)
-            parentComment.Replies = parentComment.Replies.filter((c) => c.id !== id)
-            setComments(newComments)
-        }
+        const newComments = [...comments]
+        const removedComment = findCommentById(newComments, comment.id)
+        removedComment.state = 'deleted'
+        setComments(newComments)
     }
 
     useEffect(() => {
@@ -149,7 +136,6 @@ function Comments(props: {
                             key={comment.id}
                             depth={0}
                             comment={comment}
-                            postId={postId}
                             filter={filter}
                             // highlighted={false} // highlightedCommentId === comment.id
                             addComment={addComment}

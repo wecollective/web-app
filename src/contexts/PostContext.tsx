@@ -86,6 +86,7 @@ function PostContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
                 setPostData,
                 postDataLoading,
                 postState,
+                setPostState,
                 // functions
                 getPostData,
                 resetPostContext,
