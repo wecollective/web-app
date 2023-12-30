@@ -170,7 +170,7 @@ function CreatePostModal(): JSX.Element {
         }
     }
 
-    function removeUrlMetaData(url) {
+    function removeUrl(url) {
         setUrls((us) => [...us.filter((u) => u.url !== url)])
     }
 
@@ -623,7 +623,6 @@ function CreatePostModal(): JSX.Element {
         return loading || urlsLoading || noContent || totalChars > maxChars
     }
 
-    // todo: add other contextual data
     function save() {
         setLoading(true)
         // update media types
@@ -960,7 +959,7 @@ function CreatePostModal(): JSX.Element {
                                     type='post'
                                     urlData={u}
                                     loading={u.loading}
-                                    remove={removeUrlMetaData}
+                                    remove={removeUrl}
                                     style={{ marginTop: 10 }}
                                 />
                             ))}

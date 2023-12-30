@@ -13,7 +13,11 @@ import config from '@src/Config'
 import {
     dateCreated,
     findDraftLength,
-    getDraftPlainText,
+    findSearchableText,
+    findUrlSearchableText,
+    maxPostChars,
+    maxUrls,
+    scrapeUrl,
     timeSinceCreated,
     timeSinceCreatedShort,
 } from '@src/Helpers'
@@ -23,116 +27,92 @@ import React, { useContext, useEffect, useRef, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 function EditPostModal(props: {
-    postData: any
-    setPostData: (data: any) => void
+    post: any
+    setPost: (data: any) => void
     close: () => void
 }): JSX.Element {
-    const { postData, setPostData, close } = props
+    const { post, setPost, close } = props
     const { accountData } = useContext(AccountContext)
-    const [title, setTitle] = useState(postData.title)
+    const [urlsLoading, setUrlsLoading] = useState(true)
+    const [title, setTitle] = useState(post.title)
     const [showTitle, setShowTitle] = useState(true)
-    const [text, setText] = useState(postData.text)
+    const [text, setText] = useState(post.text)
     const [mentions, setMentions] = useState<any[]>([])
+    const [rawUrls, setRawUrls] = useState<any[]>([])
     const [urls, setUrls] = useState<any[]>([])
-    const [urlsWithMetaData, setUrlsWithMetaData] = useState<any[]>(
-        JSON.parse(JSON.stringify(postData.Urls))
-    )
-    const [textError, setTextError] = useState('')
+    const [errors, setErrors] = useState<string[]>([])
     const [loading, setLoading] = useState(false)
-    const [success, setSuccess] = useState(false)
-    const urlRequestIndex = useRef(0)
+    const [saved, setSaved] = useState(false)
     const cookies = new Cookies()
     const mobileView = document.documentElement.clientWidth < 900
-    const maxUrls = 5
 
-    function scrapeUrlMetaData(url) {
-        setUrlsWithMetaData((us) => [...us, { url, loading: true }])
-        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+    function getUrls() {
         axios
-            .get(`${config.apiURL}/scrape-url?url=${url}`, options)
+            .get(`${config.apiURL}/post-urls?postId=${post.id}`)
             .then((res) => {
-                setUrlsWithMetaData((us) => {
-                    const newUrlsMetaData = [...us.filter((u) => u.url !== url)]
-                    newUrlsMetaData.push({ url, loading: false, new: true, ...res.data })
-                    return newUrlsMetaData
-                })
+                setRawUrls(res.data.map((urlBlock) => urlBlock.Url.url))
+                setUrls(
+                    res.data.map((urlBlock) => {
+                        return {
+                            ...urlBlock.Url,
+                            searchableText: findUrlSearchableText(urlBlock.Url),
+                        }
+                    })
+                )
+                setUrlsLoading(false)
             })
             .catch((error) => console.log(error))
     }
 
     function removeUrl(url) {
-        const newUrls = [...urlsWithMetaData]
-        const removedUrl = newUrls.find((u) => u.url === url)
-        removedUrl.removed = true
-        setUrlsWithMetaData(newUrls)
-    }
-
-    function textValid() {
-        const totalChars = findDraftLength(text)
-        if (totalChars > 5000) {
-            setTextError('Text must be less than 5K characters')
-            return false
-        }
-        const noText = !totalChars && !title
-        const textPostWithUrls = postData.type === 'text' && urlsWithMetaData.length
-        const textRequired = ['text', 'event', 'poll'].includes(postData.type) && !textPostWithUrls
-        if (textRequired && noText) {
-            setTextError(`Title or text required for ${postData.type} posts`)
-            return false
-        }
-        return true
+        setUrls((us) => [...us.filter((u) => u.url !== url)])
     }
 
     function saveDisabled() {
+        const totalChars = text ? findDraftLength(text) : 0
+        const overMaxChars = totalChars > maxPostChars
         const unchanged =
-            (postData.text === text || (!postData.text && findDraftLength(text) === 0)) &&
-            (postData.title === title || (!postData.title && title === '')) &&
-            postData.Urls.length === urlsWithMetaData.filter((u) => !u.removed).length
-        return loading || unchanged || urlsWithMetaData.find((u) => u.loading)
+            (post.text === text || (!post.text && !totalChars)) &&
+            (post.title === title || (!post.title && !title))
+        return loading || overMaxChars || unchanged || urls.find((u) => u.loading)
     }
 
-    function saveChanges() {
-        if (textValid()) {
-            console.log('urlsWithMetaData: ', urlsWithMetaData)
-            console.log('mentions: ', mentions)
-            setLoading(true)
-            const options = {
-                headers: { Authorization: `Bearer ${cookies.get('accessToken')}` },
-            }
-            const data = {
-                postId: postData.id,
-                title: title && title.length ? title : null,
-                text: text && findDraftLength(text) ? text : null,
-                mentions: mentions.map((m) => m.link),
-                urls: urlsWithMetaData,
+    function save() {
+        setLoading(true)
+        // update media types
+        const { mediaTypes } = post
+        let newTypes = mediaTypes.split(',')
+        const totalUrls = urls.filter((url) => !url.removed).length
+        if (mediaTypes.includes('url') && !totalUrls) newTypes = newTypes.filter((t) => t !== 'url')
+        const noText = !findDraftLength(text) && !title
+        if (mediaTypes.includes('text') && noText) newTypes = newTypes.filter((t) => t !== 'text')
+        if (!newTypes.length) {
+            setErrors(['text required'])
+            setLoading(false)
+        } else {
+            // structure data
+            const newPost = {
+                id: post.id,
+                mediaTypes: newTypes.join(','),
+                text: findDraftLength(text) ? text : null,
+                title: title || null,
+                mentions: mentions.map((m) => m.id),
+                urls,
             } as any
-            // create searchable text
-            const fields = [] as any
-            if (data.title) fields.push(data.title)
-            if (data.text) fields.push(getDraftPlainText(data.text))
-            const urlData = data.urls
-                .filter((u) => !u.removed)
-                .map((u) => {
-                    const urlFields = [] as any
-                    if (u.url) urlFields.push(u.url)
-                    if (u.title) urlFields.push(u.title)
-                    if (u.description) urlFields.push(u.description)
-                    if (u.domain) urlFields.push(u.domain)
-                    return urlFields.length ? urlFields.join(' ') : null
-                })
-            if (urlData.length) fields.push(...urlData)
-            data.searchableText = fields.length ? fields.join(' ') : null
+            newPost.searchableText = findSearchableText(newPost)
+            // upload post
+            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
             axios
-                .post(`${config.apiURL}/update-post`, data, options)
+                .post(`${config.apiURL}/update-post`, newPost, options)
                 .then(() => {
-                    setPostData({
-                        ...postData,
-                        title,
-                        text,
-                        Urls: urlsWithMetaData.filter((u) => !u.removed),
+                    setPost({
+                        ...post,
+                        title: newPost.title,
+                        text: newPost.text,
+                        mediaTypes: newPost.mediaTypes,
                         updatedAt: new Date().toISOString(),
                     })
-                    setSuccess(true)
+                    setSaved(true)
                     setLoading(false)
                     setTimeout(() => close(), 1000)
                 })
@@ -140,26 +120,49 @@ function EditPostModal(props: {
         }
     }
 
-    // grab metadata for new urls when added to text
     useEffect(() => {
-        if (urlsWithMetaData.length <= maxUrls) {
-            // requestIndex used to pause requests until user has finished updating the url
-            urlRequestIndex.current += 1
-            const requestIndex = urlRequestIndex.current
+        if (post.mediaTypes.includes('url')) getUrls()
+        else setUrlsLoading(false)
+    }, [])
+
+    // grab metadata for new urls added to text field
+    const requestIndex = useRef(0)
+    useEffect(() => {
+        if (!urlsLoading && urls.length <= maxUrls) {
+            // requestIndex & setTimeout used to block requests until user has finished typing
+            requestIndex.current += 1
+            const index = requestIndex.current
             setTimeout(() => {
-                if (urlRequestIndex.current === requestIndex) {
-                    urls.forEach(
-                        (url) =>
-                            !urlsWithMetaData.find((u) => u.url === url) && scrapeUrlMetaData(url)
-                    )
+                if (requestIndex.current === index) {
+                    rawUrls.forEach(async (url) => {
+                        // if no match in urls array
+                        if (!urls.find((u) => u.url === url)) {
+                            // add url loading state
+                            setUrls((us) => [...us, { url, loading: true }])
+                            // scrape url data
+                            const { data } = await scrapeUrl(url)
+                            // todo: handle error
+                            if (data) {
+                                data.url = url
+                                data.searchableText = findUrlSearchableText(data)
+                                data.new = true
+                                // update urls array
+                                setUrls((us) => {
+                                    const newUrls = [...us.filter((u) => u.url !== url)]
+                                    newUrls.push(data)
+                                    return newUrls
+                                })
+                            }
+                        }
+                    })
                 }
             }, 500)
         }
-    }, [urls])
+    }, [rawUrls])
 
     return (
         <Modal className={styles.wrapper} close={close} centerX>
-            {success ? (
+            {saved ? (
                 <SuccessMessage text='Changes saved' />
             ) : (
                 <Column centerX style={{ width: '100%', maxWidth: 800 }}>
@@ -175,20 +178,20 @@ function EditPostModal(props: {
                                     style={{ marginRight: 5 }}
                                     shadow
                                 />
-                                <PostSpaces spaces={postData.DirectSpaces} preview />
+                                <PostSpaces spaces={post.DirectSpaces} preview />
                                 <Row style={{ marginLeft: 2 }}>
                                     <p
                                         className='grey'
-                                        title={`Posted at ${dateCreated(postData.createdAt)}`}
+                                        title={`Posted at ${dateCreated(post.createdAt)}`}
                                     >
                                         {mobileView
-                                            ? timeSinceCreatedShort(postData.createdAt)
-                                            : timeSinceCreated(postData.createdAt)}
+                                            ? timeSinceCreatedShort(post.createdAt)
+                                            : timeSinceCreated(post.createdAt)}
                                     </p>
-                                    {postData.createdAt !== postData.updatedAt && (
+                                    {post.createdAt !== post.updatedAt && (
                                         <p
                                             className='grey'
-                                            title={`Edited at ${dateCreated(postData.updatedAt)}`}
+                                            title={`Edited at ${dateCreated(post.updatedAt)}`}
                                             style={{ paddingLeft: 5 }}
                                         >
                                             *
@@ -198,7 +201,7 @@ function EditPostModal(props: {
                             </Row>
                             <Row>
                                 <p className='grey'>ID:</p>
-                                <p style={{ marginLeft: 5 }}>{postData.id}</p>
+                                <p style={{ marginLeft: 5 }}>{post.id}</p>
                             </Row>
                         </Row>
                         {showTitle && (
@@ -210,7 +213,7 @@ function EditPostModal(props: {
                                     maxLength={100}
                                     onChange={(e) => {
                                         setTitle(e.target.value)
-                                        setTextError('')
+                                        setErrors([])
                                     }}
                                 />
                                 <CloseButton
@@ -218,7 +221,7 @@ function EditPostModal(props: {
                                     onClick={() => {
                                         setTitle('')
                                         setShowTitle(false)
-                                        setTextError('')
+                                        setErrors([])
                                     }}
                                 />
                             </Row>
@@ -226,30 +229,28 @@ function EditPostModal(props: {
                         <DraftTextEditor
                             type='post'
                             text={text}
-                            maxChars={5000}
+                            maxChars={maxPostChars}
                             onChange={(value, textMentions, textUrls) => {
-                                setTextError('')
+                                setErrors([])
                                 setText(value)
                                 setMentions(textMentions)
-                                setUrls(textUrls.slice(0, maxUrls))
+                                setRawUrls(textUrls.slice(0, maxUrls))
                             }}
                         />
-                        {urlsWithMetaData
-                            .filter((u) => !u.removed)
-                            .map((u) => (
-                                <UrlPreview
-                                    key={u.url}
-                                    type='post'
-                                    urlData={u}
-                                    loading={u.loading}
-                                    remove={removeUrl}
-                                    style={{ marginTop: 10 }}
-                                />
-                            ))}
+                        {urls.map((url) => (
+                            <UrlPreview
+                                key={url.url}
+                                type='post'
+                                urlData={url}
+                                loading={url.loading}
+                                remove={removeUrl}
+                                style={{ marginTop: 10 }}
+                            />
+                        ))}
                     </Column>
-                    {textError && (
+                    {errors.length > 0 && (
                         <p className='danger' style={{ marginBottom: 20 }}>
-                            {textError}
+                            {errors[0]}
                         </p>
                     )}
                     <Button
@@ -257,7 +258,7 @@ function EditPostModal(props: {
                         text='Save changes'
                         disabled={saveDisabled()}
                         loading={loading}
-                        onClick={saveChanges}
+                        onClick={save}
                     />
                 </Column>
             )}

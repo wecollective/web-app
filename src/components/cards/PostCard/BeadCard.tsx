@@ -395,8 +395,8 @@ function BeadCard(props: {
             )}
             {editPostModalOpen && (
                 <EditPostModal
-                    postData={bead}
-                    setPostData={setBead}
+                    post={bead}
+                    setPost={setBead}
                     close={() => setEditPostModalOpen(false)}
                 />
             )}

@@ -360,7 +360,7 @@ function PostCard(props: {
                     </div>
                 )}
                 {!isBlock && mediaTypes.includes('url') && (
-                    <Urls postId={id} style={{ marginBottom: 10 }} />
+                    <Urls key={updatedAt} postId={id} style={{ marginBottom: 10 }} />
                 )}
                 {!isBlock && mediaTypes.includes('image') && (
                     <Images postId={id} style={{ marginBottom: 10 }} />
@@ -515,8 +515,8 @@ function PostCard(props: {
             )}
             {editPostModalOpen && (
                 <EditPostModal
-                    postData={post}
-                    setPostData={setPost}
+                    post={post}
+                    setPost={setPost}
                     close={() => setEditPostModalOpen(false)}
                 />
             )}
