@@ -220,22 +220,25 @@ function CommentCard(props: {
     }
 
     function addSelectionEvents() {
+        // toggle selected on header clicks
+        const header = document.getElementById(`comment-header-${comment.id}`)
+        header?.addEventListener('click', () => toggleSelected())
+        // toggle selected on text clicks if no text selection
         const commentText = document.getElementById(`comment-text-${comment.id}`)
-        if (commentText) {
-            commentText.addEventListener('click', () => {
-                // todo: check if reply input empty
-                const textSelection = getTextSelection()
-                if (state !== 'deleted' && !textSelection) toggleSelected()
-            })
-            commentText.addEventListener('mouseenter', () => {
-                setDraggable(false)
-                if (setPostDraggable) setPostDraggable(false)
-            })
-            commentText.addEventListener('mouseleave', () => {
-                setDraggable(true)
-                if (setPostDraggable) setPostDraggable(true)
-            })
-        }
+        commentText?.addEventListener('click', () => {
+            // todo: check if reply input empty
+            const textSelection = getTextSelection()
+            if (state !== 'deleted' && !textSelection) toggleSelected()
+        })
+        // update draggability on text hover
+        commentText?.addEventListener('mouseenter', () => {
+            setDraggable(false)
+            if (setPostDraggable) setPostDraggable(false)
+        })
+        commentText?.addEventListener('mouseleave', () => {
+            setDraggable(true)
+            if (setPostDraggable) setPostDraggable(true)
+        })
     }
 
     useEffect(() => {
@@ -301,7 +304,11 @@ function CommentCard(props: {
                             )}
                         </Column>
                         <Column className={styles.content}>
-                            <Row spaceBetween className={styles.header}>
+                            <Row
+                                id={`comment-header-${comment.id}`}
+                                spaceBetween
+                                className={styles.header}
+                            >
                                 <Row>
                                     {state === 'account-deleted' ? (
                                         <p className='grey' style={{ marginRight: 5 }}>
