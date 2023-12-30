@@ -402,7 +402,7 @@ function NotificationCard(props: {
                         <Column>
                             <PostCardPreview
                                 post={relatedPost}
-                                link={`/p/${commentId}`}
+                                link={`/p/${postId}`}
                                 onClick={markAsSeen}
                                 style={{ marginTop: 10 }}
                             />
@@ -614,12 +614,22 @@ function NotificationCard(props: {
                 <Content
                     typeIcon={<CommentIcon />}
                     preview={
-                        <CommentCardPreview
-                            comment={relatedComment}
-                            link={`/p/${commentId}`}
-                            onClick={markAsSeen}
-                            style={{ marginTop: 10 }}
-                        />
+                        <Column>
+                            {relatedPost.type === 'comment' && (
+                                <CommentCardPreview
+                                    comment={relatedPost}
+                                    link={`/p/${postId}`}
+                                    onClick={markAsSeen}
+                                    style={{ marginTop: 10 }}
+                                />
+                            )}
+                            <CommentCardPreview
+                                comment={relatedComment}
+                                link={`/p/${commentId}`}
+                                onClick={markAsSeen}
+                                style={{ marginTop: 10 }}
+                            />
+                        </Column>
                     }
                 >
                     <UserButton user={triggerUser} imageSize={32} fontSize={15} />

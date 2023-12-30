@@ -14,6 +14,7 @@ import UrlCard from '@components/cards/PostCard/UrlCard'
 import Mention from '@components/draft-js/Mention'
 import Suggestion from '@components/draft-js/Suggestion'
 import { AccountContext } from '@contexts/AccountContext'
+import { SpaceContext } from '@contexts/SpaceContext'
 import createLinkPlugin, { defaultTheme as anchorTheme } from '@draft-js-plugins/anchor'
 import {
     BlockquoteButton,
@@ -53,6 +54,7 @@ import { MicrophoneIcon, PaperClipIcon } from '@svgs/all'
 import axios from 'axios'
 import { ContentState, EditorState, convertToRaw } from 'draft-js'
 import React, { useContext, useEffect, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import RecordRTC from 'recordrtc'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -69,6 +71,7 @@ function CommentInput(props: {
 }): JSX.Element {
     const { type, parent, root, preview, placeholder, maxChars, className, style, onSave } = props
     const { accountData } = useContext(AccountContext)
+    const { spaceData } = useContext(SpaceContext)
     const [editorState, setEditorState] = useState<any>(null)
     const [rawUrls, setRawUrls] = useState<any[]>([])
     const [urls, setUrls] = useState<any[]>([])
@@ -101,6 +104,8 @@ function CommentInput(props: {
     }
     const overMaxChars = totalChars > (maxChars || maxPostChars)
     const totalCharsText = `${totalChars}/${maxChars || maxPostChars}`
+    const location = useLocation()
+    const [x, page] = location.pathname.split('/')
 
     // plugins
     const toolbarOptions = { theme: { buttonStyles: styles, toolbarStyles: styles } }
@@ -323,6 +328,7 @@ function CommentInput(props: {
         } as any
         post.mediaTypes = findMediaTypes(post)
         post.searchableText = findSearchableText(post)
+        if (page === 's') post.originSpaceId = spaceData.id
         // validate post
         const validation = validatePost(post)
         if (validation.errors.length) {
