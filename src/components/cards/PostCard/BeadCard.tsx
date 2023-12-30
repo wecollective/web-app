@@ -1,6 +1,5 @@
 /* eslint-disable react/no-array-index-key */
 import CloseButton from '@components/CloseButton'
-import CloseOnClickOutside from '@components/CloseOnClickOutside'
 import Column from '@components/Column'
 import ImageTitle from '@components/ImageTitle'
 import Row from '@components/Row'
@@ -8,9 +7,8 @@ import Scrollbars from '@components/Scrollbars'
 import StatButton from '@components/StatButton'
 import LoadingWheel from '@components/animations/LoadingWheel'
 import AudioCard from '@components/cards/PostCard/AudioCard'
-import UrlPreview from '@components/cards/PostCard/UrlCard'
+import UrlCard from '@components/cards/PostCard/UrlCard'
 import DraftText from '@components/draft-js/DraftText'
-import EditPostModal from '@components/modals/EditPostModal'
 import ImageModal from '@components/modals/ImageModal'
 import LikeModal from '@components/modals/LikeModal'
 import { AccountContext } from '@contexts/AccountContext'
@@ -23,19 +21,10 @@ import {
     trimText,
 } from '@src/Helpers'
 import styles from '@styles/components/cards/PostCard/BeadCard.module.scss'
-import {
-    CalendarIcon,
-    CastaliaIcon,
-    CommentIcon,
-    EditIcon,
-    LikeIcon,
-    LinkIcon,
-    PollIcon,
-    VerticalEllipsisIcon,
-} from '@svgs/all'
+import { CalendarIcon, CastaliaIcon, CommentIcon, LikeIcon, LinkIcon, PollIcon } from '@svgs/all'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 function BeadCard(props: {
     bead: any
@@ -89,18 +78,11 @@ function BeadCard(props: {
     const [urlBlocks, setUrlBlocks] = useState<any[]>(preview ? [urls[0]] : [])
     const [imageBlocks, setImageBlocks] = useState<any[]>(preview ? [images[0]] : [])
     const [audioBlocks, setAudioBlocks] = useState<any[]>(preview ? [audios[0]] : [])
-    const [menuOpen, setMenuOpen] = useState(false)
-    const [editPostModalOpen, setEditPostModalOpen] = useState(false)
     const [imageModalOpen, setImageModalOpen] = useState(false)
     const [likeModalOpen, setLikeModalOpen] = useState(false)
     const [selectedImage, setSelectedImage] = useState<any>(null)
     const history = useNavigate()
     const isOwnPost = accountData && Creator && accountData.id === Creator.id
-    const showDropDown =
-        isOwnPost &&
-        mediaTypes.includes('text') &&
-        beadIndex !== 0 &&
-        !['create-string-modal', 'next-bead-modal', 'preview'].includes(location)
     const showFooter = false // location !== 'preview' && state !== 'account-deleted'
 
     // todo: maybe better to get the data when items retreived instead of after per bead...? (harder query due to nesting...)
@@ -197,12 +179,12 @@ function BeadCard(props: {
                     {removeBead && !isSource && (
                         <CloseButton size={20} onClick={() => removeBead(beadIndex || 0)} />
                     )}
-                    {/* {!!id && location !== 'preview' && (
+                    {!!id && location !== 'preview' && (
                         <Link to={`/p/${id}`} className={styles.id} title='Open post page'>
                             <p className='grey'>ID:</p>
                             <p style={{ marginLeft: 5 }}>{id}</p>
                         </Link>
-                    )} */}
+                    )}
                     {/* {isSource && (
                         <button
                             type='button'
@@ -217,34 +199,6 @@ function BeadCard(props: {
                             <SourceIcon />
                         </button>
                     )} */}
-                    {showDropDown && (
-                        <Row>
-                            <button
-                                type='button'
-                                className={styles.menuButton}
-                                onClick={() => setMenuOpen(!menuOpen)}
-                            >
-                                <VerticalEllipsisIcon />
-                            </button>
-                            {menuOpen && (
-                                <CloseOnClickOutside onClick={() => setMenuOpen(false)}>
-                                    <Column className={styles.menu}>
-                                        {isOwnPost && (
-                                            <Column>
-                                                <button
-                                                    type='button'
-                                                    onClick={() => setEditPostModalOpen(true)}
-                                                >
-                                                    <EditIcon />
-                                                    Edit text
-                                                </button>
-                                            </Column>
-                                        )}
-                                    </Column>
-                                </CloseOnClickOutside>
-                            )}
-                        </Row>
-                    )}
                 </Row>
             </Row>
             {state === 'account-deleted' ? (
@@ -268,7 +222,7 @@ function BeadCard(props: {
                             )}
                             {mediaTypes.includes('text') && !text && <h1>{title}</h1>}
                             {mediaTypes.includes('url') && (
-                                <UrlPreview type='bead' urlData={urlBlocks[0]} />
+                                <UrlCard type='bead' urlData={urlBlocks[0].Url} />
                             )}
                             {mediaTypes.includes('image') && (
                                 <button
@@ -391,13 +345,6 @@ function BeadCard(props: {
                         })
                     }}
                     close={() => setLikeModalOpen(false)}
-                />
-            )}
-            {editPostModalOpen && (
-                <EditPostModal
-                    post={bead}
-                    setPost={setBead}
-                    close={() => setEditPostModalOpen(false)}
                 />
             )}
         </Column>

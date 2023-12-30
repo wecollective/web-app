@@ -138,7 +138,9 @@ function EditPostModal(props: {
     // grab metadata for new urls added to text field
     const requestIndex = useRef(0)
     useEffect(() => {
-        if (!urlsLoading && urls.length <= maxUrls) {
+        const urlLimit = post.type === 'bead' ? 1 : maxUrls
+        const blockUrlsOnTextBead = post.type === 'bead' && post.mediaTypes !== 'url'
+        if (!blockUrlsOnTextBead && !urlsLoading && urls.length <= urlLimit) {
             // requestIndex & setTimeout used to block requests until user has finished typing
             requestIndex.current += 1
             const index = requestIndex.current

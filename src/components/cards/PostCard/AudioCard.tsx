@@ -144,7 +144,10 @@ function AudioCard(props: {
     }, [])
 
     return (
-        <Column className={styles.wrapper} style={{ ...style, position: 'relative' }}>
+        <Column
+            className={`${styles.wrapper} ${styles[location]}`}
+            style={{ ...style, position: 'relative' }}
+        >
             <Column centerY style={{ height: 'calc(100% - 30px)', marginBottom: 10 }}>
                 <AudioVisualiser
                     audioId={audioId}

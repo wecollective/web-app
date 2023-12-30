@@ -110,4 +110,9 @@
             }
         }
     }
+
+    &.bead-card {
+        border: none;
+        background-color: unset; // rgba(white, 0.5);
+    }
 }
