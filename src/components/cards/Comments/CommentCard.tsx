@@ -3,13 +3,13 @@ import Column from '@components/Column'
 import FlagImage from '@components/FlagImage'
 import Row from '@components/Row'
 import LoadingWheel from '@components/animations/LoadingWheel'
-import EditCommentModal from '@components/cards/Comments/EditCommentModal'
 import Audios from '@components/cards/PostCard/Audios'
 import Images from '@components/cards/PostCard/Images'
 import Urls from '@components/cards/PostCard/Urls'
 import CommentInput from '@components/draft-js/CommentInput'
 import DraftText from '@components/draft-js/DraftText'
 import DeleteCommentModal from '@components/modals/DeleteCommentModal'
+import EditPostModal from '@components/modals/EditPostModal'
 import LikeModal from '@components/modals/LikeModal'
 import RatingModal from '@components/modals/RatingModal'
 import UserButtonModal from '@components/modals/UserButtonModal'
@@ -44,7 +44,6 @@ function CommentCard(props: {
     filter: string
     addComment: (comment: any) => void
     removeComment: (comment: any) => void
-    editComment: (comment: any, newText: string) => void
     setPostDraggable?: (state: boolean) => void
 }): JSX.Element {
     const {
@@ -56,7 +55,6 @@ function CommentCard(props: {
         filter,
         addComment,
         removeComment,
-        editComment, // todo: remove (done locally)
         setPostDraggable,
     } = props
 
@@ -73,7 +71,6 @@ function CommentCard(props: {
         totalLikes,
         totalRatings,
         totalLinks,
-        totalComments,
         totalChildComments,
         createdAt,
         updatedAt,
@@ -401,7 +398,11 @@ function CommentCard(props: {
                                                 }`}
                                             />
                                             {mediaTypes.includes('url') && (
-                                                <Urls postId={id} style={{ margin: '10px 0' }} />
+                                                <Urls
+                                                    key={updatedAt}
+                                                    postId={id}
+                                                    style={{ margin: '10px 0' }}
+                                                />
                                             )}
                                             {mediaTypes.includes('image') && (
                                                 <Images postId={id} style={{ margin: '10px 0' }} />
@@ -517,9 +518,9 @@ function CommentCard(props: {
                         />
                     )}
                     {editModalOpen && (
-                        <EditCommentModal
-                            comment={comment}
-                            editComment={editComment}
+                        <EditPostModal
+                            post={comment}
+                            setPost={(newComment) => setComment(newComment)}
                             close={() => setEditModalOpen(false)}
                         />
                     )}
@@ -549,7 +550,6 @@ function CommentCard(props: {
                                 filter={filter}
                                 addComment={addComment}
                                 removeComment={removeComment}
-                                editComment={editComment}
                                 setPostDraggable={setPostDraggable}
                                 location={location}
                             />

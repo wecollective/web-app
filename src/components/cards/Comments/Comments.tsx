@@ -89,22 +89,6 @@ function Comments(props: {
         }
     }
 
-    // todo: update
-    function editComment(comment, newText) {
-        const { id, parentCommentId } = comment
-        const newComments = [...comments]
-        let editedComment
-        if (parentCommentId) {
-            const parentComment = newComments.find((c) => c.id === parentCommentId)
-            editedComment = parentComment.Replies.find((c) => c.id === id)
-        } else {
-            editedComment = comments.find((c) => c.id === id)
-        }
-        editedComment.text = newText
-        editedComment.updatedAt = new Date().toISOString()
-        setComments(newComments)
-    }
-
     useEffect(() => {
         setComments([])
         if (totalComments) getComments(0)
@@ -170,7 +154,6 @@ function Comments(props: {
                             // highlighted={false} // highlightedCommentId === comment.id
                             addComment={addComment}
                             removeComment={removeComment}
-                            editComment={editComment}
                             setPostDraggable={setPostDraggable}
                             location={location}
                         />

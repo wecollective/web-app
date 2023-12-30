@@ -10,7 +10,6 @@ import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
-// todo: bug when creating new card...
 // todo: handle like updates
 function Card(props: { postId: any; style?: any }): JSX.Element {
     const { postId, style } = props
@@ -21,8 +20,8 @@ function Card(props: { postId: any; style?: any }): JSX.Element {
     const [cardFlipped, setCardFlipped] = useState(false)
     const [likeModalOpen, setLikeModalOpen] = useState(false)
     const [linkModalOpen, setLinkModalOpen] = useState(false)
-    const cardFront = blocks.find((b) => b.Link.index === 0)
-    const cardBack = blocks.find((b) => b.Link.index === 1)
+    const cardFront = blocks.find((b) => b.Link.index === 0) || { id: 0 }
+    const cardBack = blocks.find((b) => b.Link.index === 1) || { id: 0 }
     const card = cardFlipped ? cardBack : cardFront
     const history = useNavigate()
 

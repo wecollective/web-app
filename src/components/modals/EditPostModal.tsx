@@ -35,7 +35,7 @@ function EditPostModal(props: {
     const { accountData } = useContext(AccountContext)
     const [urlsLoading, setUrlsLoading] = useState(true)
     const [title, setTitle] = useState(post.title)
-    const [showTitle, setShowTitle] = useState(true)
+    const [showTitle, setShowTitle] = useState(post.type === 'post')
     const [text, setText] = useState(post.text)
     const [mentions, setMentions] = useState<any[]>([])
     const [rawUrls, setRawUrls] = useState<any[]>([])
@@ -77,15 +77,25 @@ function EditPostModal(props: {
         return loading || overMaxChars || unchanged || urls.find((u) => u.loading)
     }
 
-    function save() {
-        setLoading(true)
-        // update media types
+    function findNewMediaTypes() {
         const { mediaTypes } = post
         let newTypes = mediaTypes.split(',')
-        const totalUrls = urls.filter((url) => !url.removed).length
-        if (mediaTypes.includes('url') && !totalUrls) newTypes = newTypes.filter((t) => t !== 'url')
+        // remove url
+        if (mediaTypes.includes('url') && !urls.length)
+            newTypes = newTypes.filter((t) => t !== 'url')
+        // add url
+        if (!mediaTypes.includes('url') && urls.length) newTypes.push('url')
+        // remove text
         const noText = !findDraftLength(text) && !title
         if (mediaTypes.includes('text') && noText) newTypes = newTypes.filter((t) => t !== 'text')
+        // add text
+        if (!mediaTypes.includes('text') && !noText) newTypes.push('text')
+        return newTypes
+    }
+
+    function save() {
+        setLoading(true)
+        const newTypes = findNewMediaTypes()
         if (!newTypes.length) {
             setErrors(['text required'])
             setLoading(false)
@@ -178,7 +188,9 @@ function EditPostModal(props: {
                                     style={{ marginRight: 5 }}
                                     shadow
                                 />
-                                <PostSpaces spaces={post.DirectSpaces} preview />
+                                {post.type === 'post' && (
+                                    <PostSpaces spaces={post.DirectSpaces} preview />
+                                )}
                                 <Row style={{ marginLeft: 2 }}>
                                     <p
                                         className='grey'

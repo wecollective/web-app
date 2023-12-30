@@ -61,7 +61,6 @@ import { v4 as uuidv4 } from 'uuid'
 function CommentInput(props: {
     type: 'comment' | 'poll-answer' // group thread, gbg room (?)
     parent?: { type: string; id: number } | null
-    root?: { type: string; id: number } | null
     placeholder: string
     preview?: boolean // determines whether onSave function uploads or just passes data back to parent
     maxChars?: number // todo: does this make sense to pass in here?
@@ -69,7 +68,7 @@ function CommentInput(props: {
     style?: any
     onSave: (data: any) => void
 }): JSX.Element {
-    const { type, parent, root, preview, placeholder, maxChars, className, style, onSave } = props
+    const { type, parent, preview, placeholder, maxChars, className, style, onSave } = props
     const { accountData } = useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
     const [editorState, setEditorState] = useState<any>(null)
@@ -344,7 +343,7 @@ function CommentInput(props: {
             resetData()
         } else {
             // upload post
-            post.link = { root, parent }
+            post.link = { parent }
             uploadPost(post)
                 .then((res) => {
                     const newPost = res.data
@@ -352,7 +351,7 @@ function CommentInput(props: {
                     newPost.Creator = { id, handle, name, flagImagePath }
                     newPost.Comments = []
                     newPost.Reactions = []
-                    newPost.link = post.link
+                    if (type === 'poll-answer') newPost.Link = { state: 'active' }
                     onSave(newPost)
                     resetData()
                 })
@@ -572,7 +571,6 @@ function CommentInput(props: {
 }
 
 CommentInput.defaultProps = {
-    root: null,
     parent: null,
     preview: false,
     maxChars: 0,
