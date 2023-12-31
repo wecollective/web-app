@@ -32,11 +32,14 @@ function PostList(props: {
 
     useEffect(() => {
         if (spaceHandle === spaceData.handle && location === 'space-posts') {
+            console.log('add space drop event listeners')
             const postList = document.getElementById('space-posts')
             postList?.addEventListener('dragover', (e) => e.preventDefault())
             postList?.addEventListener('drop', () => {
                 const { type, data, fromToyBox } = dragItemRef.current
-                if (type === 'post' && data.state === 'visible' && fromToyBox) {
+                console.log('dropped item: ', dragItemRef.current)
+                console.log(type, data.state, fromToyBox)
+                if (data.type === 'post' && data.state === 'active' && fromToyBox) {
                     setDropLocation({ type: 'space', data: spaceData })
                     setDropModalOpen(true)
                 }

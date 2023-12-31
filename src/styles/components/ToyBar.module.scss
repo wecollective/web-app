@@ -5,12 +5,12 @@
     z-index: $toybarZIndex;
     position: fixed;
     bottom: 0;
-    background-color: rgba(white, 0.9);
+    background-color: rgba($grey1, 0.9);
     box-shadow: 0 0px 20px 0 rgba(10, 8, 72, 0.14);
     transition: opacity 0.3s;
 
     .left {
-        background-color: white;
+        background-color: $grey1;
         padding: 10px;
 
         &.mobile {
@@ -26,7 +26,7 @@
             position: absolute;
             left: 0;
             bottom: -230px;
-            background-color: white;
+            background-color: $grey1;
             border-radius: 10px;
             box-shadow: 0 0px 15px 0 rgba(black, 0.05);
             transition: all 0.4s;

@@ -88,8 +88,8 @@ function SpaceButton(props: {
             button.addEventListener('dragover', (e) => e.preventDefault())
             button.addEventListener('drop', (e) => {
                 e.stopPropagation()
-                const { type, data, fromToyBox } = dragItemRef.current
-                if (type === 'post' && data.state === 'visible' && fromToyBox) {
+                const { data, fromToyBox } = dragItemRef.current
+                if (data.type === 'post' && data.state === 'active' && fromToyBox) {
                     setDropLocation({ type: 'space', data: space })
                     setDropModalOpen(true)
                 }

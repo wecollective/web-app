@@ -21,16 +21,17 @@ function PostPage(): JSX.Element {
     useEffect(() => {
         if (!accountDataLoading && postId !== postData.id) getPostData(+postId)
     }, [accountDataLoading, postId, loggedIn])
+    // console.log(postData)
 
     useEffect(() => () => resetPostContext(), [])
 
-    if (postData.type === 'prism') {
+    if (postData.mediaTypes.includes('prism')) {
         return <Prism />
     }
     if (
-        postData.type === 'glass-bead-game' &&
-        postData.GlassBeadGame &&
-        postData.GlassBeadGame.synchronous &&
+        postData.mediaTypes.includes('glass-bead-game') &&
+        // postData.GlassBeadGame &&
+        // postData.GlassBeadGame.synchronous &&
         subPage === 'game-room'
     ) {
         return <GlassBeadGameRoom />

@@ -45,18 +45,19 @@ function ToyBoxItem(props: {
 
     useEffect(() => {
         const toyboxItem = document.getElementById(itemId)
-        if (toyboxItem) {
-            toyboxItem.addEventListener('dragover', (e) => e.preventDefault())
-            toyboxItem.addEventListener('dragstart', (e) => {
-                toyboxItem.classList.add(styles.dragging)
-                updateDragItem({ type, data, fromToyBox: true })
-                const dragItem = document.getElementById('drag-item')
-                e.dataTransfer?.setDragImage(dragItem!, 50, 50)
-            })
-            toyboxItem.addEventListener('dragend', () => {
-                toyboxItem.classList.remove(styles.dragging)
-            })
-        }
+        toyboxItem?.addEventListener('dragover', (e) => e.preventDefault())
+        toyboxItem?.addEventListener('mouseenter', () => {
+            updateDragItem({ type: 'post', data, fromToyBox: true })
+        })
+        toyboxItem?.addEventListener('dragstart', (e) => {
+            toyboxItem.classList.add(styles.dragging)
+            // updateDragItem({ type, data, fromToyBox: true })
+            const dragItem = document.getElementById('drag-item')
+            e.dataTransfer?.setDragImage(dragItem!, 50, 50)
+        })
+        toyboxItem?.addEventListener('dragend', () => {
+            toyboxItem.classList.remove(styles.dragging)
+        })
     }, [])
 
     useEffect(() => {
@@ -88,9 +89,10 @@ function ToyBoxItem(props: {
             <Column
                 id={itemId}
                 className={`${styles.wrapper} ${className}`}
-                style={style}
+                style={{ ...style, backgroundColor: data.color }}
                 draggable
             >
+                <div className={styles.watermark} />
                 <div className={styles.overlay} />
                 <div
                     role='button'

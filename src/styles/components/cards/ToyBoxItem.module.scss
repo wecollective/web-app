@@ -3,9 +3,9 @@
 .wrapper {
     width: 100px;
     height: 100px;
-    outline: 1px solid rgba(black, 0.2);
+    outline: 1px solid $grey3; //rgba(black, 0.2);
     border-radius: 10px;
-    background-color: $grey1;
+    background-color: white; // $grey1;
     margin-right: 10px;
     cursor: move;
     position: relative;
@@ -16,6 +16,20 @@
             font-size: 12px;
             text-align: center;
         }
+    }
+
+    .watermark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: inherit;
+        height: inherit;
+        background-color: white;
+        border: 2px solid white;
+        border-radius: inherit;
+        opacity: 0.1;
+        // z-index: 1;
+        pointer-events: none;
     }
 
     .overlay {

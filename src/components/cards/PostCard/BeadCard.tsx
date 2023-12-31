@@ -21,7 +21,15 @@ import {
     trimText,
 } from '@src/Helpers'
 import styles from '@styles/components/cards/PostCard/BeadCard.module.scss'
-import { CalendarIcon, CastaliaIcon, CommentIcon, LikeIcon, LinkIcon, PollIcon } from '@svgs/all'
+import {
+    CalendarIcon,
+    CardIcon,
+    CastaliaIcon,
+    CommentIcon,
+    LikeIcon,
+    LinkIcon,
+    PollIcon,
+} from '@svgs/all'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -109,9 +117,11 @@ function BeadCard(props: {
     }
 
     function getAudio() {
+        console.log('get audio', id)
         axios
             .get(`${config.apiURL}/post-audio?postId=${id}&offset=0`)
             .then((res) => {
+                console.log('audio blocks: ', res.data.blocks)
                 setAudioBlocks(res.data.blocks)
                 setLoading(false)
             })
@@ -279,9 +289,10 @@ function BeadCard(props: {
                             )}
                             {type === 'card' && (
                                 <Column centerX className={styles.card}>
+                                    <CardIcon />
                                     {title && <h1>{trimText(title, 30)}</h1>}
                                     {text && <p>{trimText(getDraftPlainText(text), 50)}</p>}
-                                    <Row>
+                                    {/* <Row>
                                         {CardSides[0].Images[0] && (
                                             <img
                                                 src={CardSides[0].Images[0].url}
@@ -291,7 +302,7 @@ function BeadCard(props: {
                                         {CardSides[1].Images[0] && (
                                             <img src={CardSides[1].Images[0].url} alt='card back' />
                                         )}
-                                    </Row>
+                                    </Row> */}
                                 </Column>
                             )}
                         </>

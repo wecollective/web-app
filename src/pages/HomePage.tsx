@@ -126,11 +126,11 @@ function Homepage(): JSX.Element {
     }
 
     function getHomepageHighlights() {
-        // const accessToken = cookies.get('accessToken')
-        // const options = { headers: { Authorization: `Bearer ${accessToken}` } }
-        // axios.get(`${config.apiURL}/homepage-highlights`, options).then((res) => {
-        //     setHighlights(res.data)
-        // })
+        const accessToken = cookies.get('accessToken')
+        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+        axios.get(`${config.apiURL}/homepage-highlights`, options).then((res) => {
+            setHighlights(res.data)
+        })
     }
 
     function test() {

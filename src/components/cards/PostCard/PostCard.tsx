@@ -96,7 +96,7 @@ function PostCard(props: {
         totalRatings,
         totalReposts,
         totalLinks,
-        sourcePostId,
+        // sourcePostId,
         Creator,
         DirectSpaces,
         Event,
@@ -107,7 +107,7 @@ function PostCard(props: {
     const [buttonsDisabled, setButtonsDisabled] = useState(true)
     const [accountReactions, setAccountReactions] = useState<any>({})
     const { liked, rated, reposted, commented, linked } = accountReactions
-    const [commentLinks, setCommentLinks] = useState<any>(null)
+    const [parentLinks, setParentLinks] = useState<any>(null)
     const [likeLoading, setLikeLoading] = useState(false)
     const [draggable, setDraggable] = useState(true)
     const [topicImage, setTopicImage] = useState('')
@@ -158,6 +158,7 @@ function PostCard(props: {
     }
 
     function getAccountCommented() {
+        // used to check if account comments still present after comment deleted
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
             .get(`${config.apiURL}/account-reactions?postId=${id}&types=comment`, options)
@@ -167,29 +168,35 @@ function PostCard(props: {
             .catch((error) => console.log(error))
     }
 
-    function getCommentLinks() {
+    function getParentLinks() {
         axios
-            .get(`${config.apiURL}/comment-links?postId=${id}`)
+            .get(`${config.apiURL}/parent-links?postId=${id}`)
             .then((res) => {
-                console.log('comment-links: ', res.data)
-                setCommentLinks(res.data)
+                console.log('parent-links: ', res.data)
+                setParentLinks(res.data)
             })
             .catch((error) => console.log(error))
     }
 
     function addDragEvents() {
+        // todo: fix mouseenter not firing when leaving bead back to post
         const postCard = document.getElementById(`post-${id}`)
-        if (postCard) {
-            postCard.addEventListener('dragstart', (e) => {
-                postCard.classList.add(styles.dragging)
-                updateDragItem({ type: 'post', data: post })
-                const dragItem = document.getElementById('drag-item')
-                e.dataTransfer?.setDragImage(dragItem!, 50, 50)
-            })
-            postCard.addEventListener('dragend', () => {
-                postCard.classList.remove(styles.dragging)
-            })
-        }
+        postCard?.addEventListener('mouseenter', () => {
+            // todo: add image
+            // let image = ''
+            // if (type === 'url' && urlBlocks[0]) image = urlBlocks[0].Url.image
+            // if (type === 'image' && imageBlocks[0]) image = imageBlocks[0].Image.url
+            updateDragItem({ type: 'post', data: post })
+        })
+        postCard?.addEventListener('dragstart', (e) => {
+            postCard.classList.add(styles.dragging)
+            // updateDragItem({ type: 'post', data: post })
+            const dragItem = document.getElementById('drag-item')
+            e.dataTransfer?.setDragImage(dragItem!, 50, 50)
+        })
+        postCard?.addEventListener('dragend', () => {
+            postCard.classList.remove(styles.dragging)
+        })
     }
 
     function toggleLike() {
@@ -226,7 +233,7 @@ function PostCard(props: {
     useEffect(() => {
         if (loggedIn) getAccountReactions()
         else setButtonsDisabled(false)
-        if (type === 'comment') getCommentLinks()
+        if (type !== 'post') getParentLinks()
         addDragEvents()
     }, [])
 
@@ -238,15 +245,15 @@ function PostCard(props: {
             style={style}
             draggable={draggable}
         >
-            {commentLinks && (
+            {parentLinks && (
                 <Row centerX>
-                    {commentLinks.rootId && (
-                        <Link to={`/p/${commentLinks.rootId}`} className={styles.rootLink}>
+                    {parentLinks.rootId && (
+                        <Link to={`/p/${parentLinks.rootId}`} className={styles.rootLink}>
                             <AnglesUpIcon />
                             <p style={{ marginLeft: 5 }}>Root</p>
                         </Link>
                     )}
-                    <Link to={`/p/${commentLinks.parentId}`} className={styles.parentLink}>
+                    <Link to={`/p/${parentLinks.parentId}`} className={styles.parentLink}>
                         <AngleUpIcon />
                         <p style={{ marginLeft: 5 }}>Parent</p>
                     </Link>
@@ -332,14 +339,6 @@ function PostCard(props: {
                 </Row>
             </Row>
             <Column className={styles.content}>
-                {sourcePostId && (
-                    <Row centerX className={styles.sourcePostId}>
-                        <Link to={`/p/${sourcePostId}`} title='Click to open source post'>
-                            <span>Source post:</span>
-                            <p>{sourcePostId}</p>
-                        </Link>
-                    </Row>
-                )}
                 {(title || text) && (
                     <div
                         onMouseEnter={() => setDraggable(false)}
@@ -492,7 +491,8 @@ function PostCard(props: {
                     totalComments={totalComments}
                     incrementTotalComments={(value) => {
                         setPost({ ...post, totalComments: totalComments + value })
-                        getAccountCommented()
+                        if (value < 1) getAccountCommented()
+                        else setAccountReactions({ ...accountReactions, commented: true })
                     }}
                     setPostDraggable={setDraggable}
                     style={{ margin: '10px -8px 0 -8px' }}
