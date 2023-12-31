@@ -44,14 +44,13 @@ function LikeModal(props: {
 
     function toggleLike() {
         setResponseLoading(true)
-        const data = { itemType, itemId: id } as any
-        if (itemType === 'comment') data.parentItemId = itemData.itemId
+        const data = { type: itemType, id } as any
         if (itemType === 'link') {
-            const type = itemData.type.split('-')[0]
-            data.sourceType = type
+            data.sourceType = itemData.itemAType
             data.sourceId = itemData.itemAId
         }
         if (!accountLike) {
+            // todo: get user data server side
             data.accountHandle = accountData.handle
             data.accountName = accountData.name
             data.spaceId = window.location.pathname.includes('/s/') ? spaceData.id : null
