@@ -10,7 +10,6 @@ import DropDownMenu from '@components/DropDownMenu'
 import ImageTitle from '@components/ImageTitle'
 import Input from '@components/Input'
 import Row from '@components/Row'
-import TextLink from '@components/TextLink'
 import LoadingWheel from '@components/animations/LoadingWheel'
 import HorizontalSpaceCard from '@components/cards/HorizontalSpaceCard'
 import PostCard from '@components/cards/PostCard/PostCard'
@@ -102,24 +101,8 @@ function LinkMap(): JSX.Element {
     }
 
     function renderItem(item, type) {
-        if (type === 'post')
+        if (['post', 'comment'].includes(type))
             return <PostCard key={item.id} post={item} location='link-modal' collapse />
-        // if (type === 'comment')
-        //     return (
-        //         // todo: add styles prop to CommentCard, allow commenting on linkmap
-        //         <CommentCard
-        //             key={item.id}
-        //             comment={item}
-        //             postId={0}
-        //             location='link-map'
-        //             highlighted
-        //             // selected={false}
-        //             // toggleReplyInput={() => null}
-        //             addComment={(a) => null}
-        //             removeComment={() => null}
-        //             editComment={() => null}
-        //         />
-        //     )
         if (type === 'user')
             return <VerticalUserCard key={item.id} user={item} style={{ flexGrow: 0, margin: 0 }} />
         if (type === 'space') return <HorizontalSpaceCard key={item.id} space={item} />
@@ -142,7 +125,10 @@ function LinkMap(): JSX.Element {
                     headers: { Authorization: `Bearer ${cookies.get('accessToken')}` },
                 }
                 axios
-                    .get(`${config.apiURL}/${type}-data?${type}Id=${id}`, options)
+                    .get(
+                        `${config.apiURL}/post-data?postId=${id}&type=${targetType.toLowerCase()}`,
+                        options
+                    )
                     .then((res) => {
                         if (id === targetIdRef.current) setTarget(res.data)
                     })
@@ -1232,7 +1218,7 @@ function LinkMap(): JSX.Element {
                 ) : (
                     <Column centerX className={`${styles.info} hide-scrollbars`}>
                         {/* Show link to post map on Pronoia posts */}
-                        {urlParams.item === 'post' &&
+                        {/* {urlParams.item === 'post' &&
                             linkTreeData &&
                             linkTreeData.item.DirectSpaces.find((s) => s.id === 616) && (
                                 <Row style={{ marginBottom: 20 }}>
@@ -1241,7 +1227,7 @@ function LinkMap(): JSX.Element {
                                         link='/s/pronoia/posts?lens=Map'
                                     />
                                 </Row>
-                            )}
+                            )} */}
                         {linkTreeData && renderItem(linkTreeData.item, linkTreeData.item.modelType)}
                         {loggedIn ? (
                             <Column centerX style={{ width: '100%', marginTop: 20 }}>

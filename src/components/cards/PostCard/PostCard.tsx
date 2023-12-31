@@ -443,7 +443,7 @@ function PostCard(props: {
                             type='button'
                             className={`${styles.link} ${linked ? styles.highlighted : ''}`}
                             disabled={buttonsDisabled}
-                            onClick={() => history(`/linkmap?item=post&id=${id}`)}
+                            onClick={() => history(`/linkmap?item=${type}&id=${id}`)}
                         >
                             <Column centerX centerY>
                                 <NeuronIcon />
