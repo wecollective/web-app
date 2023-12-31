@@ -1,3 +1,4 @@
+/* eslint-disable no-inner-declarations */
 /* eslint-disable no-return-assign */
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-use-before-define */
@@ -419,7 +420,8 @@ function GlassBeadGameRoom(): JSX.Element {
     const { loggedIn, accountData, accountDataLoading, setAlertModalOpen, setAlertMessage } =
         useContext(AccountContext)
     const { postData, setPostData, postDataLoading } = useContext(PostContext)
-    const [gameData, setGameData] = useState<any>(postData.GlassBeadGame)
+    const [loading, setLoading] = useState(true)
+    const [gameData, setGameData] = useState<any>() // postData.GlassBeadGame
     const [gameInProgress, setGameInProgress] = useState(false)
     const [userIsStreaming, setUserIsStreaming] = useState(false)
     const [players, setPlayers] = useState<any[]>([])
@@ -461,7 +463,7 @@ function GlassBeadGameRoom(): JSX.Element {
     const audioRef = useRef<any>(null)
     const videoRef = useRef<any>(null)
     const showVideoRef = useRef(showVideos)
-    const liveBeadIndexRef = useRef(+urlParams.bead || 1)
+    const liveBeadIndexRef = useRef(+urlParams.bead || 0)
     const gameInProgressRef = useRef(false)
 
     const history = useNavigate()
@@ -815,10 +817,10 @@ function GlassBeadGameRoom(): JSX.Element {
             .then((res) => {
                 const signalData = {
                     roomId: roomIdRef.current,
-                    type: 'audio',
+                    type: 'bead',
+                    mediaTypes: 'audio',
                     id: res.data.id,
                     Creator: userRef.current,
-                    Audios: [{ url: res.data.url }],
                     Link: { index: moveNumber },
                 }
                 socketRef.current.emit('outgoing-audio-bead', signalData)
@@ -982,7 +984,7 @@ function GlassBeadGameRoom(): JSX.Element {
         d3.select(`#move-arc`).remove()
         d3.selectAll(`.${styles.playerState}`).text('')
         pushComment('The game ended')
-        addPlayButtonToCenterBead()
+        // addPlayButtonToCenterBead()
         d3.select('#timer-bead-wave-form').transition(1000).style('opacity', 0)
         if (largeScreen) {
             setShowComments(true)
@@ -1163,9 +1165,10 @@ function GlassBeadGameRoom(): JSX.Element {
                     .on('mousedown', () => {
                         playButton.attr('display', 'none')
                         pauseButton.attr('display', 'flex')
+                        // post-audio-bead-card-7019-1
                         const audio = d3
                             .select(
-                                `#post-audio-gbg-room-${postData.id}-${liveBeadIndexRef.current}`
+                                `#post-audio-bead-card-${postData.id}-${liveBeadIndexRef.current}`
                             )
                             .node()
                         // console.log(audio)
@@ -1192,7 +1195,7 @@ function GlassBeadGameRoom(): JSX.Element {
                         playButton.attr('display', 'flex')
                         const audio = d3
                             .select(
-                                `#post-audio-gbg-room-${postData.id}-${liveBeadIndexRef.current}`
+                                `#post-audio-bead-card-${postData.id}-${liveBeadIndexRef.current}`
                             )
                             .node()
                         if (audio) audio.pause()
@@ -1202,7 +1205,7 @@ function GlassBeadGameRoom(): JSX.Element {
     }
 
     function addEventListenersToBead(index) {
-        d3.select(`#post-audio-gbg-room-${postData.id}-${index}`)
+        d3.select(`#post-audio-bead-card-${postData.id}-${index}`)
             .on('play', () => {
                 liveBeadIndexRef.current = index
                 d3.select('#play-button').attr('display', 'none')
@@ -1214,11 +1217,11 @@ function GlassBeadGameRoom(): JSX.Element {
             })
             .on('ended', () => {
                 const nextBead = d3
-                    .select(`#post-audio-gbg-room-${postData.id}-${index + 1}`)
+                    .select(`#post-audio-bead-card-${postData.id}-${index + 1}`)
                     .node()
                 if (nextBead) nextBead.play()
                 else {
-                    liveBeadIndexRef.current = 1
+                    liveBeadIndexRef.current = 0
                     d3.select('#play-button').attr('display', 'flex')
                     d3.select('#pause-button').attr('display', 'none')
                 }
@@ -1258,24 +1261,192 @@ function GlassBeadGameRoom(): JSX.Element {
     }
 
     async function getGameData() {
-        return axios.get(`${config.apiURL}/gbg-data?postId=${postData.id}`)
+        return axios.get(`${config.apiURL}/gbg-data?postId=${postData.id}&noLimit=true`)
     }
 
     async function getGameComments() {
-        return axios.get(`${config.apiURL}/glass-bead-game-comments?gameId=${gameData.id}`)
+        return axios.get(`${config.apiURL}/glass-bead-game-comments?postId=${postData.id}`)
+    }
+
+    function buildCanvas() {
+        const loadingAnimationDuration = 2000
+        const timerFadeInDuration = 3000
+
+        const width = 500
+        const center = width / 2
+        const circleWidth = 100
+        const circleOffset = circleWidth * (13 / 15)
+
+        const loadingAnimationSVG = d3
+            .select('#loading-animation')
+            .append('svg')
+            .attr('id', 'loading-animation-svg')
+            .attr('viewBox', `0 0 ${width} ${width}`)
+            .attr('perserveAspectRatio', 'xMinYMin')
+            .attr('style', 'max-width: 500px')
+
+        function createCircle(id, cx, cy) {
+            loadingAnimationSVG
+                .append('circle')
+                .attr('id', id)
+                .attr('stroke', 'black')
+                .attr('fill', 'none')
+                .attr('stroke-width', 2)
+                .attr('r', circleWidth)
+                .attr('cx', cx)
+                .attr('cy', cy)
+        }
+
+        createCircle('center', center, center)
+        createCircle('center-top', center, center - circleWidth)
+        createCircle('center-bottom', center, center + circleWidth)
+        createCircle('left-top', center - circleOffset, center - circleWidth / 2)
+        createCircle('left-bottom', center - circleOffset, center + circleWidth / 2)
+        createCircle('right-top', center + circleOffset, center - circleWidth / 2)
+        createCircle('right-bottom', center + circleOffset, center + circleWidth / 2)
+
+        function animateCircle(id, offset) {
+            d3.select(`#${id}`)
+                .transition()
+                .ease(d3.easeCubicInOut)
+                .duration(3000)
+                .attr('cx', center + offset)
+                .on('end', () => {
+                    d3.select(`#${id}`)
+                        .transition()
+                        .ease(d3.easeCubicInOut)
+                        .duration(3000)
+                        .attr('cx', center - offset)
+                        .on('end', () => {
+                            animateCircle(id, offset)
+                        })
+                })
+        }
+
+        roomIntro.volume = 0.2
+        roomIntro.play()
+        animateCircle('left-top', circleOffset)
+        animateCircle('left-bottom', circleOffset)
+        animateCircle('right-top', -circleOffset)
+        animateCircle('right-bottom', -circleOffset)
+
+        // fade out loading animation
+        setTimeout(() => {
+            const loadingAnimation = d3.select('#loading-animation')
+            if (loadingAnimation) loadingAnimation.style('opacity', 0)
+            setTimeout(() => {
+                setShowLoadingAnimation(false)
+                if (largeScreen) setShowComments(false)
+            }, 1000)
+        }, loadingAnimationDuration)
+
+        // set up timer canvas
+        const svg = d3
+            .select('#timer-canvas')
+            .append('svg')
+            .attr('id', 'timer-svg')
+            .attr('viewBox', `0 0 ${gameArcRadius * 2} ${gameArcRadius * 2}`)
+            .attr('perserveAspectRatio', 'xMaxYMax')
+
+        const imageDefs = svg.append('defs').attr('id', 'image-defs')
+
+        function createTimerGroup(id: string) {
+            return svg
+                .append('g')
+                .attr('id', id)
+                .attr('transform', `translate(${gameArcRadius},${gameArcRadius})`)
+        }
+
+        // order is important here to ensure correct layering
+        const timerBackground = createTimerGroup('timer-background')
+        createTimerGroup('timer-arcs')
+        const timerText = createTimerGroup('timer-text')
+        const timerBead = createTimerGroup('timer-bead')
+
+        function createArcBarckground(type: 'game' | 'turn' | 'move', color: string) {
+            timerBackground
+                .append('path')
+                .datum({ startAngle: 0, endAngle: 2 * Math.PI })
+                .attr('id', `${type}-arc-background`)
+                .style('fill', color)
+                .style('opacity', 1)
+                .style('stroke', 'black')
+                .style('stroke-width', 1)
+                .attr('d', arcs[`${type}Arc`])
+        }
+
+        function createArcTitle(text: string, fontSize: number, yOffset: number, id?: string) {
+            timerText
+                .append('text')
+                .text(text)
+                .attr('id', id)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', `${fontSize}px`)
+                .attr('x', 0)
+                .attr('y', yOffset)
+                .style('fill', 'black')
+                .style('text-shadow', '0px 0px 6px white')
+                .style('opacity', 0)
+                .transition()
+                .delay(loadingAnimationDuration)
+                .duration(timerFadeInDuration)
+                .style('opacity', 1)
+        }
+
+        createArcBarckground('game', colors.grey3)
+        // createArcBarckground('turn', colors.grey2)
+        createArcBarckground('move', colors.grey2)
+        createArcTitle('Game', 16, -164)
+        // createArcTitle('Turn', 16, -164)
+        createArcTitle('Move', 16, -134, 'timer-move-state')
+        createArcTitle('', 24, -98, 'timer-seconds')
+
+        timerBead
+            .append('rect')
+            .attr('x', -80)
+            .attr('y', -80)
+            .attr('width', 160)
+            .attr('height', 160)
+            .attr('rx', 10)
+            .attr('ry', 10)
+            .attr('fill', 'white')
+            .style('stroke', 'black')
+            .style('stroke-width', 1)
+
+        imageDefs
+            .append('pattern')
+            .attr('id', 'wave-form-pattern')
+            .attr('height', 1)
+            .attr('width', 1)
+            .append('image')
+            .attr('id', 'wave-form-image')
+            .attr('height', 120)
+            .attr('xlink:href', `${config.publicAssets}/icons/gbg/sound-wave.png`)
+
+        timerBead
+            .append('rect')
+            .attr('id', 'timer-bead-wave-form')
+            .attr('width', 120)
+            .attr('height', 120)
+            .attr('x', -60)
+            .attr('y', -60)
+            .style('opacity', 1)
+            .style('fill', 'url(#wave-form-pattern)')
     }
 
     // todo: flatten out userData into user object with socketId
     useEffect(() => {
         if (!accountDataLoading && !postDataLoading && postData.id) {
             Promise.all([getGameData(), getGameComments()]).then((res) => {
-                const gameBeads = res[0].data.beads.sort((a, b) => a.Link.index - b.Link.index)
+                setGameData(res[0].data.game)
+                const gameBeads = res[0].data.beads // .sort((a, b) => a.Link.index - b.Link.index)
                 setBeads(gameBeads)
                 setPlayers(res[0].data.players)
                 setComments(res[1].data)
+                setLoading(false)
                 if (gameBeads.length) d3.select('#timer-bead-wave-form').style('opacity', 0)
-                gameBeads.forEach((bead, index) => addEventListenersToBead(index + 1))
-                if (gameBeads.length) addPlayButtonToCenterBead()
+                gameBeads.forEach((bead, index) => addEventListenersToBead(index))
+                // if (gameBeads.length) addPlayButtonToCenterBead()
                 // set roomIdRef and userRef
                 roomIdRef.current = postData.id
                 userRef.current = {
@@ -1462,7 +1633,7 @@ function GlassBeadGameRoom(): JSX.Element {
                         .style('opacity', 0)
                         .remove()
                     d3.select('#timer-bead-wave-form').transition(1000).style('opacity', 1)
-                    liveBeadIndexRef.current = 1
+                    liveBeadIndexRef.current = 0
                     pushComment(`${data.userSignaling.name} started the game`)
                     startGame(data.gameData)
                 })
@@ -1481,8 +1652,8 @@ function GlassBeadGameRoom(): JSX.Element {
                     d3.select(`#turn-arc`).remove()
                     d3.select(`#move-arc`).remove()
                     d3.select('#timer-seconds').text('')
-                    addPlayButtonToCenterBead()
-                    d3.select('#timer-bead-wave-form').transition(1000).style('opacity', 0)
+                    // addPlayButtonToCenterBead()
+                    // d3.select('#timer-bead-wave-form').transition(1000).style('opacity', 0)
                     setTurn(0)
                     // todo: store move index as ref so 999 can be avoided
                     if (audioRecorderRef.current && audioRecorderRef.current.state === 'recording')
@@ -1561,171 +1732,10 @@ function GlassBeadGameRoom(): JSX.Element {
     }, [accountDataLoading, postDataLoading, postData.id])
 
     useEffect(() => {
-        const loadingAnimationDuration = 2000
-        const timerFadeInDuration = 3000
+        if (!loading) buildCanvas()
+    }, [loading])
 
-        const width = 500
-        const center = width / 2
-        const circleWidth = 100
-        const circleOffset = circleWidth * (13 / 15)
-
-        const loadingAnimationSVG = d3
-            .select('#loading-animation')
-            .append('svg')
-            .attr('id', 'loading-animation-svg')
-            .attr('viewBox', `0 0 ${width} ${width}`)
-            .attr('perserveAspectRatio', 'xMinYMin')
-            .attr('style', 'max-width: 500px')
-
-        function createCircle(id, cx, cy) {
-            loadingAnimationSVG
-                .append('circle')
-                .attr('id', id)
-                .attr('stroke', 'black')
-                .attr('fill', 'none')
-                .attr('stroke-width', 2)
-                .attr('r', circleWidth)
-                .attr('cx', cx)
-                .attr('cy', cy)
-        }
-
-        createCircle('center', center, center)
-        createCircle('center-top', center, center - circleWidth)
-        createCircle('center-bottom', center, center + circleWidth)
-        createCircle('left-top', center - circleOffset, center - circleWidth / 2)
-        createCircle('left-bottom', center - circleOffset, center + circleWidth / 2)
-        createCircle('right-top', center + circleOffset, center - circleWidth / 2)
-        createCircle('right-bottom', center + circleOffset, center + circleWidth / 2)
-
-        function animateCircle(id, offset) {
-            d3.select(`#${id}`)
-                .transition()
-                .ease(d3.easeCubicInOut)
-                .duration(3000)
-                .attr('cx', center + offset)
-                .on('end', () => {
-                    d3.select(`#${id}`)
-                        .transition()
-                        .ease(d3.easeCubicInOut)
-                        .duration(3000)
-                        .attr('cx', center - offset)
-                        .on('end', () => {
-                            animateCircle(id, offset)
-                        })
-                })
-        }
-
-        roomIntro.volume = 0.2
-        roomIntro.play()
-        animateCircle('left-top', circleOffset)
-        animateCircle('left-bottom', circleOffset)
-        animateCircle('right-top', -circleOffset)
-        animateCircle('right-bottom', -circleOffset)
-
-        // fade out loading animation
-        setTimeout(() => {
-            const loadingAnimation = d3.select('#loading-animation')
-            if (loadingAnimation) loadingAnimation.style('opacity', 0)
-            setTimeout(() => {
-                setShowLoadingAnimation(false)
-                if (largeScreen) setShowComments(false)
-            }, 1000)
-        }, loadingAnimationDuration)
-
-        // set up timer canvas
-        const svg = d3
-            .select('#timer-canvas')
-            .append('svg')
-            .attr('id', 'timer-svg')
-            .attr('viewBox', `0 0 ${gameArcRadius * 2} ${gameArcRadius * 2}`)
-            .attr('perserveAspectRatio', 'xMaxYMax')
-
-        const imageDefs = svg.append('defs').attr('id', 'image-defs')
-
-        function createTimerGroup(id: string) {
-            return svg
-                .append('g')
-                .attr('id', id)
-                .attr('transform', `translate(${gameArcRadius},${gameArcRadius})`)
-        }
-
-        // order is important here to ensure correct layering
-        const timerBackground = createTimerGroup('timer-background')
-        createTimerGroup('timer-arcs')
-        const timerText = createTimerGroup('timer-text')
-        const timerBead = createTimerGroup('timer-bead')
-
-        function createArcBarckground(type: 'game' | 'turn' | 'move', color: string) {
-            timerBackground
-                .append('path')
-                .datum({ startAngle: 0, endAngle: 2 * Math.PI })
-                .attr('id', `${type}-arc-background`)
-                .style('fill', color)
-                .style('opacity', 1)
-                .style('stroke', 'black')
-                .style('stroke-width', 1)
-                .attr('d', arcs[`${type}Arc`])
-        }
-
-        function createArcTitle(text: string, fontSize: number, yOffset: number, id?: string) {
-            timerText
-                .append('text')
-                .text(text)
-                .attr('id', id)
-                .attr('text-anchor', 'middle')
-                .attr('font-size', `${fontSize}px`)
-                .attr('x', 0)
-                .attr('y', yOffset)
-                .style('fill', 'black')
-                .style('text-shadow', '0px 0px 6px white')
-                .style('opacity', 0)
-                .transition()
-                .delay(loadingAnimationDuration)
-                .duration(timerFadeInDuration)
-                .style('opacity', 1)
-        }
-
-        createArcBarckground('game', colors.grey3)
-        // createArcBarckground('turn', colors.grey2)
-        createArcBarckground('move', colors.grey2)
-        createArcTitle('Game', 16, -164)
-        // createArcTitle('Turn', 16, -164)
-        createArcTitle('Move', 16, -134, 'timer-move-state')
-        createArcTitle('', 24, -98, 'timer-seconds')
-
-        timerBead
-            .append('rect')
-            .attr('x', -80)
-            .attr('y', -80)
-            .attr('width', 160)
-            .attr('height', 160)
-            .attr('rx', 10)
-            .attr('ry', 10)
-            .attr('fill', 'white')
-            .style('stroke', 'black')
-            .style('stroke-width', 1)
-
-        imageDefs
-            .append('pattern')
-            .attr('id', 'wave-form-pattern')
-            .attr('height', 1)
-            .attr('width', 1)
-            .append('image')
-            .attr('id', 'wave-form-image')
-            .attr('height', 120)
-            .attr('xlink:href', `${config.publicAssets}/icons/gbg/sound-wave.png`)
-
-        timerBead
-            .append('rect')
-            .attr('id', 'timer-bead-wave-form')
-            .attr('width', 120)
-            .attr('height', 120)
-            .attr('x', -60)
-            .attr('y', -60)
-            .style('opacity', 1)
-            .style('fill', 'url(#wave-form-pattern)')
-    }, [])
-
+    if (loading) return <Column className={styles.wrapper} />
     return (
         <Column className={styles.wrapper}>
             {showLoadingAnimation && (
@@ -2103,14 +2113,14 @@ function GlassBeadGameRoom(): JSX.Element {
                     {beads.map((bead, beadIndex) => (
                         <Row
                             centerY
-                            key={`${beadIndex + 1}`} // bead.Audios[0].url
+                            key={bead.id} // bead.Audios[0].url
                             style={{ paddingRight: beads.length === beadIndex + 1 ? 20 : 0 }}
                         >
                             <BeadCard
                                 postId={postData.id}
                                 location='gbg-room'
                                 bead={bead}
-                                beadIndex={beadIndex + 1}
+                                beadIndex={beadIndex}
                                 // highlight={liveBeadIndexRef.current === beadIndex + 1}
                                 // className={styles.bead}
                             />
