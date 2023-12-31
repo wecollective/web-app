@@ -7,13 +7,12 @@ import Row from '@components/Row'
 import MediumSquareCard from '@components/cards/MediumSquareCard'
 import BeadCard from '@components/cards/PostCard/BeadCard'
 import { AccountContext } from '@contexts/AccountContext'
-import { getDraftPlainText, trimText } from '@src/Helpers'
+import { getDraftPlainText, postTypeIcons, trimText } from '@src/Helpers'
 import styles from '@styles/components/cards/ToyBoxItem.module.scss'
-import { CommentIcon, PostIcon, SpacesIcon, UserIcon } from '@svgs/all'
+import { AudioWaveIcon, CommentIcon, PostIcon, SpacesIcon, UserIcon } from '@svgs/all'
 import React, { useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-// needs reconsidering for multimedia / nested content
 function ToyBoxItem(props: {
     type: 'space' | 'user' | 'post' | 'comment'
     data: any
@@ -22,7 +21,6 @@ function ToyBoxItem(props: {
     className?: string
 }): JSX.Element {
     const { type, data, dragImage, style, className } = props
-    // console.log(type, data.mediaTypes, data.Url)
     const { updateDragItem } = useContext(AccountContext)
     const [modalOpen, setModalOpen] = useState(false)
     const [modalPosition, setModalPosition] = useState<any>(null)
@@ -32,11 +30,8 @@ function ToyBoxItem(props: {
     let text = ''
     if (data.title) text = trimText(data.title, 20)
     else if (data.text) text = trimText(getDraftPlainText(data.text), 20)
-    const image = ''
-    // if (!text && type === 'post') {
-    //     if (data.mediaTypes.includes('image')) image = data.Image.url
-    //     if (data.mediaTypes.includes('url')) image = data.Url.image
-    // }
+    const types = data.mediaTypes ? data.mediaTypes.split(',') : ['']
+    const mediaType = types[types.length - 1]
 
     const backgroundImage = data.coverImagePath
         ? `url(${data.coverImagePath})`
@@ -45,10 +40,7 @@ function ToyBoxItem(props: {
     // const cardImage = data.mediaTypes.includes('card') && data.CardSides[0].Images[0]
 
     function findTypeIcon() {
-        return null
-        // const mediaTypes = data.mediaTypes.split(',')
-        // const mediaType = mediaTypes[mediaTypes.length]
-        // return postTypeIcons[mediaType] || null
+        return postTypeIcons[mediaType] || null
     }
 
     useEffect(() => {
@@ -118,10 +110,13 @@ function ToyBoxItem(props: {
                             />
                         </Row>
                         <Column centerX centerY className={styles.center}>
-                            {text && <p>{text}</p>}
-                            {image && <div style={{ backgroundImage: `url(${image})` }} />}
-                            {/* {data.mediaTypes.includes('audio') && !text && <AudioWaveIcon />}
-                            {data.mediaTypes.includes('card') && !text && cardImage && (
+                            {data.image ? (
+                                <div style={{ backgroundImage: `url(${data.image})` }} />
+                            ) : (
+                                <p>{text}</p>
+                            )}
+                            {mediaType === 'audio' && <AudioWaveIcon />}
+                            {/* {data.mediaTypes.includes('card') && !text && cardImage && (
                                 <img src={cardImage.url} alt='card front' />
                             )} */}
                         </Column>

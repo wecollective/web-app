@@ -84,6 +84,8 @@ function BeadCard(props: {
     const history = useNavigate()
     const isOwnPost = accountData && Creator && accountData.id === Creator.id
     const showFooter = false // location !== 'preview' && state !== 'account-deleted'
+    const types = mediaTypes.split(',')
+    const type = types[types.length - 1]
 
     // todo: maybe better to get the data when items retreived instead of after per bead...? (harder query due to nesting...)
     function getUrls() {
@@ -134,26 +136,31 @@ function BeadCard(props: {
         setImageModalOpen(true)
     }
 
+    function addDragEvents() {
+        const beadCard = document.getElementById(`bead-${id}`)
+        beadCard?.addEventListener('mouseenter', () => {
+            let image = ''
+            if (type === 'url' && urlBlocks[0]) image = urlBlocks[0].Url.image
+            if (type === 'image' && imageBlocks[0]) image = imageBlocks[0].Image.url
+            updateDragItem({ type: 'post', data: { ...bead, image } })
+        })
+        beadCard?.addEventListener('dragstart', (e) => {
+            e.stopPropagation()
+            const dragItem = document.getElementById('drag-item')
+            e.dataTransfer?.setDragImage(dragItem!, 50, 50)
+        })
+    }
+
     useEffect(() => {
         setBead(beadProp)
         setIsSource(beadProp.Link && beadProp.Link.relationship === 'source')
     }, [beadProp])
 
+    useEffect(() => getBeadData(), [])
+
     useEffect(() => {
-        getBeadData()
-        // add drag event listeners
-        const beadCard = document.getElementById(`bead-${id}`)
-        if (beadCard) {
-            // beadCard.addEventListener('mouseenter', () =>
-            //     updateDragItem({ type: 'post', data: bead })
-            // )
-            // beadCard.addEventListener('dragstart', (e) => {
-            //     e.stopPropagation()
-            //     const dragItem = document.getElementById('drag-item')
-            //     e.dataTransfer?.setDragImage(dragItem!, 50, 50)
-            // })
-        }
-    }, [])
+        if (!loading) addDragEvents()
+    }, [loading])
 
     return (
         <Column
@@ -213,18 +220,16 @@ function BeadCard(props: {
                         </Column>
                     ) : (
                         <>
-                            {mediaTypes.includes('text') && text && (
+                            {type === 'text' && text && (
                                 <Scrollbars
                                     style={{ paddingRight: 10, marginBottom: showFooter ? 0 : 10 }}
                                 >
                                     <DraftText text={text} />
                                 </Scrollbars>
                             )}
-                            {mediaTypes.includes('text') && !text && <h1>{title}</h1>}
-                            {mediaTypes.includes('url') && (
-                                <UrlCard type='bead' urlData={urlBlocks[0].Url} />
-                            )}
-                            {mediaTypes.includes('image') && (
+                            {type === 'text' && !text && <h1>{title}</h1>}
+                            {type === 'url' && <UrlCard type='bead' urlData={urlBlocks[0].Url} />}
+                            {type === 'image' && (
                                 <button
                                     className={styles.image}
                                     type='button'
@@ -237,7 +242,7 @@ function BeadCard(props: {
                                     />
                                 </button>
                             )}
-                            {mediaTypes.includes('audio') && (
+                            {type === 'audio' && (
                                 <AudioCard
                                     id={postId}
                                     index={beadIndex}
@@ -248,7 +253,7 @@ function BeadCard(props: {
                                     style={{ width: '100%', height: '100%' }}
                                 />
                             )}
-                            {mediaTypes.includes('event') && (
+                            {type === 'event' && (
                                 <Column centerX>
                                     <h1>{title}</h1>
                                     <Row wrap centerY className={styles.eventTimes}>
@@ -258,21 +263,21 @@ function BeadCard(props: {
                                     </Row>
                                 </Column>
                             )}
-                            {mediaTypes.includes('poll') && (
+                            {type === 'poll' && (
                                 <Column centerX className={styles.poll}>
                                     <PollIcon />
                                     <h1>{trimText(title, 30)}</h1>
                                     {text && <p>{trimText(getDraftPlainText(text), 50)}</p>}
                                 </Column>
                             )}
-                            {mediaTypes.includes('glass-bead-game') && (
+                            {type === 'glass-bead-game' && (
                                 <Column centerX className={styles.poll}>
                                     <CastaliaIcon />
                                     <h1>{trimText(title, 30)}</h1>
                                     {text && <p>{trimText(getDraftPlainText(text), 50)}</p>}
                                 </Column>
                             )}
-                            {mediaTypes.includes('card') && (
+                            {type === 'card' && (
                                 <Column centerX className={styles.card}>
                                     {title && <h1>{trimText(title, 30)}</h1>}
                                     {text && <p>{trimText(getDraftPlainText(text), 50)}</p>}

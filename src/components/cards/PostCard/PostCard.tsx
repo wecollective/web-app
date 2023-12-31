@@ -283,7 +283,7 @@ function PostCard(props: {
                         <p className='grey'>ID:</p>
                         <p style={{ marginLeft: 5 }}>{id}</p>
                     </Link>
-                    {showDropDown && (
+                    {showDropDown && !isBlock && (
                         <Column>
                             <button
                                 type='button'

@@ -122,7 +122,8 @@ function CreatePostModal(): JSX.Element {
     const maxUrls = 5
     const location = useLocation()
     const [x, page, pageHandle, subPage] = location.pathname.split('/')
-    const contentTypes = ['image', 'audio', 'event', 'poll']
+    const contentTypes = ['image', 'audio', 'event']
+    if (!governance) contentTypes.push('poll')
 
     function closeModal() {
         setCreatePostModalOpen(false)
@@ -720,7 +721,7 @@ function CreatePostModal(): JSX.Element {
         if (governance) setMediaTypes(['poll'])
     }, [])
 
-    // remove errors and initialise date picker if post type is event
+    // remove errors and initialise date picker if mediaTypes include event
     useEffect(() => {
         setErrors([])
         // initialise date picker
@@ -808,9 +809,11 @@ function CreatePostModal(): JSX.Element {
                         return {
                             id: uuidv4(),
                             text: space.name,
-                            state: 'done',
-                            Reactions: [],
+                            urls: [],
+                            images: [],
+                            audios: [],
                             Creator: space.Creator,
+                            Link: { state: 'done' },
                         }
                     })
                     setPollAnswers([...newPollAnswers, ...pollAnswers])
@@ -818,7 +821,7 @@ function CreatePostModal(): JSX.Element {
                 })
                 .catch((error) => console.log(error))
         } else {
-            setPollAnswers(pollAnswers.filter((a) => !a.state))
+            setPollAnswers(pollAnswers.filter((a) => !a.Link))
         }
     }, [pollAction])
 
@@ -1110,7 +1113,7 @@ function CreatePostModal(): JSX.Element {
                                                 setErrors([])
                                             }}
                                             onOffText
-                                            style={{ marginRight: 20 }}
+                                            style={{ margin: '5px 10px' }}
                                         />
                                         {governance && (
                                             <DropDown
@@ -1120,11 +1123,11 @@ function CreatePostModal(): JSX.Element {
                                                 setSelectedOption={(option) =>
                                                     setPollAction(option)
                                                 }
-                                                style={{ marginRight: 20 }}
+                                                style={{ margin: '5px 10px' }}
                                             />
                                         )}
                                         {governance && pollAction === 'Create spaces' && (
-                                            <Row centerY style={{ marginRight: 20 }}>
+                                            <Row centerY style={{ margin: '5px 10px' }}>
                                                 <p>Threshold</p>
                                                 <Input
                                                     type='number'
@@ -1145,7 +1148,7 @@ function CreatePostModal(): JSX.Element {
                                             ]}
                                             selectedOption={pollType}
                                             setSelectedOption={(option) => setPollType(option)}
-                                            style={{ marginRight: 20 }}
+                                            style={{ margin: '5px 10px' }}
                                         />
                                     </Row>
                                     {pollAnswers.length > 0 && (
