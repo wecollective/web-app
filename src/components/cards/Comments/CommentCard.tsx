@@ -221,7 +221,7 @@ function CommentCard(props: {
 
     function addSelectionEvents() {
         // toggle selected on header clicks
-        const header = document.getElementById(`comment-header-${comment.id}`)
+        const header = document.getElementById(`clickable-header-${comment.id}`)
         header?.addEventListener('click', () => toggleSelected())
         // toggle selected on text clicks if no text selection
         const commentText = document.getElementById(`comment-text-${comment.id}`)
@@ -304,12 +304,11 @@ function CommentCard(props: {
                             )}
                         </Column>
                         <Column className={styles.content}>
-                            <Row
-                                id={`comment-header-${comment.id}`}
-                                spaceBetween
-                                className={styles.header}
-                            >
-                                <Row>
+                            <Row spaceBetween className={styles.header}>
+                                <Row
+                                    id={`clickable-header-${comment.id}`}
+                                    style={{ width: '100%' }}
+                                >
                                     {state === 'account-deleted' ? (
                                         <p className='grey' style={{ marginRight: 5 }}>
                                             [Account deleted]
@@ -345,7 +344,7 @@ function CommentCard(props: {
                                     )}
                                 </Row>
                                 {selected && (
-                                    <Row>
+                                    <Row style={{ flexShrink: 0 }}>
                                         <Link
                                             to={`/p/${id}`}
                                             className={styles.id}
