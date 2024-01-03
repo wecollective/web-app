@@ -140,13 +140,16 @@ function EditPostModal(props: {
     useEffect(() => {
         const urlLimit = post.type === 'bead' ? 1 : maxUrls
         const blockUrlsOnTextBead = post.type === 'bead' && post.mediaTypes !== 'url'
-        if (!blockUrlsOnTextBead && !urlsLoading && urls.length <= urlLimit) {
+        const filteredUrls = Array.from(new Set(rawUrls)) // remove duplicates
+            .filter((url) => !urls.find((u) => u.url === url)) // remove matches
+            .slice(0, urlLimit - urls.length) // trim to maxUrl limit
+        if (!blockUrlsOnTextBead && !urlsLoading && filteredUrls.length) {
             // requestIndex & setTimeout used to block requests until user has finished typing
             requestIndex.current += 1
             const index = requestIndex.current
             setTimeout(() => {
                 if (requestIndex.current === index) {
-                    rawUrls.forEach(async (url) => {
+                    filteredUrls.forEach(async (url) => {
                         // if no match in urls array
                         if (!urls.find((u) => u.url === url)) {
                             // add url loading state
@@ -248,7 +251,7 @@ function EditPostModal(props: {
                                 setErrors([])
                                 setText(value)
                                 setMentions(textMentions)
-                                setRawUrls(textUrls.slice(0, maxUrls))
+                                setRawUrls(textUrls)
                             }}
                         />
                         {urls.map((url) => (

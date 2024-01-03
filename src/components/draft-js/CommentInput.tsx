@@ -377,13 +377,16 @@ function CommentInput(props: {
     // grab metadata for new urls added to text field
     const requestIndex = useRef(0)
     useEffect(() => {
-        if (urls.length <= maxUrls) {
+        const filteredUrls = Array.from(new Set(rawUrls)) // remove duplicates
+            .filter((url) => !urls.find((u) => u.url === url)) // remove matches
+            .slice(0, maxUrls - urls.length) // trim to maxUrl limit
+        if (filteredUrls.length) {
             // requestIndex & setTimeout used to block requests until user has finished typing
             requestIndex.current += 1
             const index = requestIndex.current
             setTimeout(() => {
                 if (requestIndex.current === index) {
-                    rawUrls.forEach(async (url) => {
+                    filteredUrls.forEach(async (url) => {
                         // if no match in urls array
                         if (!urls.find((u) => u.url === url)) {
                             // add url loading state
