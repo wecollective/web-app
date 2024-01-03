@@ -13,13 +13,13 @@ import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 function LikeModal(props: {
-    itemType: 'post' | 'comment' | 'link'
+    itemType: 'post' | 'link'
     itemData: any
     updateItem: () => void
     close: () => void
 }): JSX.Element {
     const { itemType, itemData, updateItem, close } = props
-    const { id, accountLike } = itemData
+    const { id, liked } = itemData
     const { loggedIn, accountData, setLogInModalOpen, setAlertMessage, setAlertModalOpen } =
         useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
@@ -49,7 +49,7 @@ function LikeModal(props: {
             data.sourceType = itemData.itemAType
             data.sourceId = itemData.itemAId
         }
-        if (!accountLike) {
+        if (!liked) {
             // todo: get user data server side
             data.accountHandle = accountData.handle
             data.accountName = accountData.name
@@ -57,7 +57,7 @@ function LikeModal(props: {
         }
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
-            .post(`${config.apiURL}/${!accountLike ? 'add' : 'remove'}-like`, data, options)
+            .post(`${config.apiURL}/${liked ? 'remove' : 'add'}-like`, data, options)
             .then(() => {
                 updateItem()
                 close()
@@ -90,8 +90,8 @@ function LikeModal(props: {
                     )}
                     {loggedIn ? (
                         <Button
-                            text={`${accountLike ? 'Remove' : 'Add'} like`}
-                            color={accountLike ? 'red' : 'blue'}
+                            text={`${liked ? 'Remove' : 'Add'} like`}
+                            color={liked ? 'red' : 'blue'}
                             style={{ marginTop: likes.length ? 20 : 0 }}
                             loading={responseLoading}
                             onClick={toggleLike}

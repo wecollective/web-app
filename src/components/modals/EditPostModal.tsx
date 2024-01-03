@@ -50,9 +50,9 @@ function EditPostModal(props: {
         axios
             .get(`${config.apiURL}/post-urls?postId=${post.id}`)
             .then((res) => {
-                setRawUrls(res.data.map((urlBlock) => urlBlock.Url.url))
+                setRawUrls(res.data.blocks.map((urlBlock) => urlBlock.Url.url))
                 setUrls(
-                    res.data.map((urlBlock) => {
+                    res.data.blocks.map((urlBlock) => {
                         return {
                             ...urlBlock.Url,
                             searchableText: findUrlSearchableText(urlBlock.Url),

@@ -34,7 +34,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
-// todo: set up total children and total descendents stats and handle pagination using these values
+// todo: fix deleted comments still showing user and media
 function CommentCard(props: {
     depth: number
     comment: any
@@ -116,9 +116,9 @@ function CommentCard(props: {
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
             .get(
-                `${
-                    config.apiURL
-                }/account-reactions?postType=comment&postId=${id}&types=${types.join(',')}`,
+                `${config.apiURL}/account-reactions?postType=post&postId=${id}&types=${types.join(
+                    ','
+                )}`,
                 options
             )
             .then((res) => {
@@ -496,8 +496,8 @@ function CommentCard(props: {
                     )}
                     {likeModalOpen && (
                         <LikeModal
-                            itemType='comment'
-                            itemData={comment}
+                            itemType='post'
+                            itemData={{ ...comment, liked: accountReactions.liked }}
                             updateItem={() => {
                                 setComment({
                                     ...comment,
@@ -510,8 +510,8 @@ function CommentCard(props: {
                     )}
                     {ratingModalOpen && (
                         <RatingModal
-                            itemType='comment'
-                            itemData={comment}
+                            itemType='post'
+                            itemData={{ ...comment, rated: accountReactions.rated }}
                             updateItem={() => {
                                 setComment({
                                     ...comment,
@@ -550,7 +550,6 @@ function CommentCard(props: {
                                 key={reply.id}
                                 depth={depth + 1}
                                 comment={reply}
-                                // highlighted={false} // highlightedCommentId === comment.id
                                 filter={filter}
                                 addComment={addComment}
                                 removeComment={removeComment}
@@ -558,15 +557,6 @@ function CommentCard(props: {
                                 location={location}
                             />
                         ))}
-                        {/* {totalComments > 0 && !Comments.length && (
-                            <button
-                                className={styles.loadMore}
-                                type='button'
-                                onClick={() => getComments(id)}
-                            >
-                                Load more →
-                            </button>
-                        )} */}
                         {remainingComments > 0 && (
                             <button
                                 className={styles.loadMore}

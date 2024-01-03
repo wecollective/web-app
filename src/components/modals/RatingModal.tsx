@@ -15,13 +15,13 @@ import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 function RatingModal(props: {
-    itemType: 'post' | 'comment'
+    itemType: 'post'
     itemData: any
     updateItem: () => void
     close: () => void
 }): JSX.Element {
     const { itemType, itemData, updateItem, close } = props
-    const { id, accountRating } = itemData
+    const { id, rated } = itemData
     const { loggedIn, accountData, setLogInModalOpen, setAlertMessage, setAlertModalOpen } =
         useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
@@ -52,8 +52,8 @@ function RatingModal(props: {
     function toggleRating() {
         setResponseLoading(true)
         const data = { itemType, itemId: id } as any
-        if (itemType === 'comment') data.parentItemId = itemData.itemId
-        if (!accountRating) {
+        if (!rated) {
+            // todo: get user data server side
             data.accountHandle = accountData.handle
             data.accountName = accountData.name
             data.spaceId = window.location.pathname.includes('/s/') ? spaceData.id : null
@@ -61,7 +61,7 @@ function RatingModal(props: {
         }
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
-            .post(`${config.apiURL}/${!accountRating ? 'add' : 'remove'}-rating`, data, options)
+            .post(`${config.apiURL}/${rated ? 'remove' : 'add'}-rating`, data, options)
             .then(() => {
                 updateItem()
                 close()
@@ -122,8 +122,8 @@ function RatingModal(props: {
                                 </Row>
                             )}
                             <Button
-                                text={`${accountRating ? 'Remove' : 'Add'} signal`}
-                                color={accountRating ? 'red' : 'blue'}
+                                text={`${rated ? 'Remove' : 'Add'} signal`}
+                                color={rated ? 'red' : 'blue'}
                                 disabled={newRating > 100}
                                 loading={responseLoading}
                                 onClick={toggleRating}

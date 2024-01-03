@@ -21,15 +21,11 @@ function Comments(props: {
 }): JSX.Element {
     const { postId, location, totalComments, incrementTotalComments, setPostDraggable, style } =
         props
-    const { accountData, loggedIn } = useContext(AccountContext)
+    const { loggedIn } = useContext(AccountContext)
     const [comments, setComments] = useState<any[]>([])
     const [remainingComments, setRemainingComments] = useState(0)
     const [loading, setLoading] = useState(true)
     const [filter, setFilter] = useState('top')
-    const filteredComments = comments.filter((c) => {
-        // remove deleted comments with no replies
-        return c.state === 'active' || c.Comments.length
-    })
 
     function getComments(offset) {
         if (!offset) setLoading(true)
@@ -131,13 +127,12 @@ function Comments(props: {
                 </Row>
             ) : (
                 <Column>
-                    {filteredComments.map((comment) => (
+                    {comments.map((comment) => (
                         <CommentCard
                             key={comment.id}
                             depth={0}
                             comment={comment}
                             filter={filter}
-                            // highlighted={false} // highlightedCommentId === comment.id
                             addComment={addComment}
                             removeComment={removeComment}
                             setPostDraggable={setPostDraggable}
