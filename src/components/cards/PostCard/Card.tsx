@@ -58,9 +58,9 @@ function Card(props: { postId: any; style?: any }): JSX.Element {
         const faceUp = side === 'front' ? !cardFlipped : cardFlipped
         return (
             <Column centerY className={`${styles.cardContent} ${faceUp && styles.visible}`}>
-                {data.Blocks[0] && data.Blocks[0].Image && (
+                {data && data.Image && (
                     <img
-                        src={data.Blocks[0].Image.url}
+                        src={data.Image.url}
                         alt='background'
                         style={{ opacity: data.watermark ? 0.3 : 1 }}
                     />

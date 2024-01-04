@@ -45,7 +45,7 @@ function NextBeadModal(props: {
 }): JSX.Element {
     const { accountData } = useContext(AccountContext)
     const { preview, postId, settings, players, onSave, close } = props
-    const { allowedBeadTypes, characterLimit, moveDuration, moveTimeWindow } = settings
+    const { allowedBeadTypes, characterLimit, moveDuration } = settings
     const [type, setType] = useState(allowedBeadTypes[0])
     const [color, setColor] = useState('#fff')
     const [showColors, setShowColors] = useState(true)

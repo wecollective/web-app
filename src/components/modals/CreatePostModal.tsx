@@ -624,6 +624,7 @@ function CreatePostModal(): JSX.Element {
         return loading || urlsLoading || noContent || totalChars > maxChars
     }
 
+    // todo: update link tally on linked item if present in list?
     function save() {
         setLoading(true)
         // update media types

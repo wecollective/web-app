@@ -31,8 +31,8 @@ function DeletePostModal(props: {
     }
 
     return (
-        <Modal close={close} centerX>
-            <h1>Are you sure you want to delete your post?</h1>
+        <Modal centerX close={close}>
+            <h1 style={{ textAlign: 'center' }}>Are you sure you want to delete your post?</h1>
             <Row>
                 <Button
                     text='Yes, delete'

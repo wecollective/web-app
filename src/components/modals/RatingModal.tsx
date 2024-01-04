@@ -109,7 +109,7 @@ function RatingModal(props: {
                         </Column>
                     )}
                     {loggedIn ? (
-                        <Column>
+                        <Column centerX>
                             {!itemData.accountRating && (
                                 <Row centerY style={{ marginBottom: 20 }}>
                                     <Input

@@ -1,5 +1,5 @@
 import Column from '@components/Column'
-import LoadingWheel from '@components/animations/LoadingWheel'
+// import LoadingWheel from '@components/animations/LoadingWheel'
 import UrlCard from '@components/cards/PostCard/UrlCard'
 import config from '@src/Config'
 import styles from '@styles/components/cards/PostCard/Urls.module.scss'
@@ -16,7 +16,7 @@ function Urls(props: { postId: number; style?: any }): JSX.Element {
         axios
             .get(`${config.apiURL}/post-urls?postId=${postId}`)
             .then((res) => {
-                setBlocks(res.data)
+                setBlocks(res.data.blocks)
                 setLoading(false)
             })
             .catch((error) => console.log(error))
@@ -26,8 +26,8 @@ function Urls(props: { postId: number; style?: any }): JSX.Element {
 
     if (loading)
         return (
-            <Column centerX style={style}>
-                <LoadingWheel size={30} style={{ margin: 20 }} />
+            <Column centerX className={styles.loading} style={style}>
+                {/* <LoadingWheel size={30} style={{ margin: 20 }} /> */}
             </Column>
         )
     return (

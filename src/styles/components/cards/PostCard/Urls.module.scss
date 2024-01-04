@@ -1,5 +1,13 @@
 @import '@styles/Variables';
 
+.loading {
+    width: 100%;
+    border-radius: 10px;
+    background-color: $grey1;
+    padding: 10px;
+    height: 163px;
+}
+
 .wrapper {
     padding: 10px;
     border: 1px solid $grey2;

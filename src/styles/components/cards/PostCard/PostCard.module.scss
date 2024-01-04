@@ -13,6 +13,20 @@
     // cursor: -moz-grab;
     // cursor: -webkit-grab;
 
+    // .watermark {
+    //     position: absolute;
+    //     top: 0;
+    //     left: 0;
+    //     width: inherit;
+    //     height: 100%;
+    //     background-color: white;
+    //     border: 2px solid white;
+    //     border-radius: inherit;
+    //     opacity: 0.5;
+    //     // z-index: 1;
+    //     pointer-events: none;
+    // }
+
     &.dragging {
         background-color: rgb(237, 246, 251);
     }

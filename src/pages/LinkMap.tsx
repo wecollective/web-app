@@ -1155,7 +1155,7 @@ function LinkMap(): JSX.Element {
                                 )}
                                 <button
                                     type='button'
-                                    className={linkData.link.accountLike ? styles.blue : ''}
+                                    className={linkData.link.liked ? styles.blue : ''}
                                     onClick={() => setLikeModalOpen(true)}
                                 >
                                     <LikeIcon />
@@ -1187,14 +1187,14 @@ function LinkMap(): JSX.Element {
                                         itemData={linkData.link}
                                         updateItem={() => {
                                             // update info pannel
-                                            const { id, totalLikes, accountLike } = linkData.link
-                                            const newLikes = totalLikes + (accountLike ? -1 : 1)
+                                            const { id, totalLikes, liked } = linkData.link
+                                            const newLikes = totalLikes + (liked ? -1 : 1)
                                             setLinkData({
                                                 ...linkData,
                                                 link: {
                                                     ...linkData.link,
                                                     totalLikes: newLikes,
-                                                    accountLike: !accountLike,
+                                                    liked: !liked,
                                                 },
                                             })
                                             // update map

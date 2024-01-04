@@ -89,6 +89,7 @@ function PostCard(props: {
         mediaTypes,
         title,
         text,
+        color,
         createdAt,
         updatedAt,
         totalComments,
@@ -119,7 +120,7 @@ function PostCard(props: {
     const [deletePostModalOpen, setDeletePostModalOpen] = useState(false)
     const [editPostModalOpen, setEditPostModalOpen] = useState(false)
     const [removePostModalOpen, setRemovePostModalOpen] = useState(false)
-    const isBlock = ['url', 'image', 'audio'].includes(type)
+    const isBlock = type.includes('block')
     const mobileView = document.documentElement.clientWidth < 900
     const cookies = new Cookies()
     const isOwnPost = accountData && Creator && accountData.id === Creator.id
@@ -243,8 +244,10 @@ function PostCard(props: {
             id={`post-${id}`}
             className={`${styles.post} ${styles[location]} ${styling && styles.styling}`}
             style={style}
+            // style={{ ...style, backgroundColor: color }}
             draggable={draggable}
         >
+            {/* <div className={styles.watermark} /> */}
             {parentLinks && (
                 <Row centerX>
                     {parentLinks.rootId && (
@@ -390,17 +393,26 @@ function PostCard(props: {
                 )}
                 {mediaTypes.includes('card') && <Card postId={id} />}
                 {/* block posts */}
-                {type === 'image' && <img className={styles.image} src={Image.url} alt='block' />}
-                {type === 'audio' && (
+                {type === 'url-block' && (
+                    <UrlCard key={Url.id} type='post' urlData={Url} style={{ marginBottom: 10 }} />
+                )}
+                {type === 'image-block' && (
+                    <img
+                        className={styles.image}
+                        src={Image.url}
+                        alt='block'
+                        style={{ marginBottom: 10 }}
+                    />
+                )}
+                {type === 'audio-block' && (
                     <AudioCard
                         id={Audio.id}
                         url={Audio.url}
                         staticBars={250}
                         location='post'
-                        style={{ height: 160, width: '100%' }}
+                        style={{ height: 160, width: '100%', marginBottom: 10 }}
                     />
                 )}
-                {type === 'url' && <UrlCard key={Url.id} type='post' urlData={Url} />}
             </Column>
             {showFooter && (
                 <Row spaceBetween className={styles.footer}>
@@ -442,7 +454,13 @@ function PostCard(props: {
                             type='button'
                             className={`${styles.link} ${linked ? styles.highlighted : ''}`}
                             disabled={buttonsDisabled}
-                            onClick={() => history(`/linkmap?item=${type}&id=${id}`)}
+                            onClick={() =>
+                                history(
+                                    `/linkmap?item=${
+                                        type === 'comment' ? 'comment' : 'post'
+                                    }&id=${id}`
+                                )
+                            }
                         >
                             <Column centerX centerY>
                                 <NeuronIcon />
@@ -501,7 +519,7 @@ function PostCard(props: {
             {likeModalOpen && (
                 <LikeModal
                     itemType='post'
-                    itemData={post}
+                    itemData={{ ...post, liked: accountReactions.liked }}
                     updateItem={() => {
                         setPost({ ...post, totalLikes: totalLikes + (liked ? -1 : 1) })
                         setAccountReactions({ ...accountReactions, liked: !liked })
@@ -519,7 +537,7 @@ function PostCard(props: {
             {ratingModalOpen && (
                 <RatingModal
                     itemType='post'
-                    itemData={post}
+                    itemData={{ ...post, rated: accountReactions.rated }}
                     updateItem={() => {
                         setPost({ ...post, totalRatings: totalRatings + (rated ? -1 : 1) })
                         setAccountReactions({ ...accountReactions, rated: !rated })

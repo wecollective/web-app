@@ -155,7 +155,7 @@ function CommentCard(props: {
     function toggleLike() {
         setLikeLoading(true)
         if (loggedIn) {
-            const data = { type: 'comment', id } as any
+            const data = { type: 'post', id } as any
             if (!liked) {
                 data.rootId = rootId
                 data.spaceId = window.location.pathname.includes('/s/') ? spaceData.id : null

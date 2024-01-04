@@ -730,6 +730,7 @@ function GlassBeadGameRoom(): JSX.Element {
         e.preventDefault()
         if (allowedTo('comment') && newComment.length) {
             const data = {
+                postId: postData.id,
                 gameId: gameData.id,
                 userId: accountData.id,
                 text: newComment,
@@ -847,6 +848,7 @@ function GlassBeadGameRoom(): JSX.Element {
             roomId: roomIdRef.current,
             userSignaling: userRef.current,
             gameData: data,
+            postId: postData.id,
         }
         socketRef.current.emit('outgoing-start-game', signalData)
     }
@@ -997,6 +999,7 @@ function GlassBeadGameRoom(): JSX.Element {
             roomId: roomIdRef.current,
             userSignaling: userRef.current,
             gameId: gameData.id,
+            postId: postData.id,
         }
         socketRef.current.emit('outgoing-stop-game', data)
     }

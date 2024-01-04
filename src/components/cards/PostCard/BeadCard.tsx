@@ -33,6 +33,7 @@ import {
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { v4 as uuidv4 } from 'uuid'
 
 function BeadCard(props: {
     bead: any
@@ -83,7 +84,9 @@ function BeadCard(props: {
     // todo: add preview prop instead of using location?
     const preview = location === 'preview'
     const [loading, setLoading] = useState(true)
-    const [urlBlocks, setUrlBlocks] = useState<any[]>(preview ? [urls[0]] : [])
+    const [urlBlocks, setUrlBlocks] = useState<any[]>(
+        preview ? [{ id: uuidv4(), Url: urls[0] }] : []
+    )
     const [imageBlocks, setImageBlocks] = useState<any[]>(preview ? [images[0]] : [])
     const [audioBlocks, setAudioBlocks] = useState<any[]>(preview ? [audios[0]] : [])
     const [imageModalOpen, setImageModalOpen] = useState(false)
@@ -100,7 +103,7 @@ function BeadCard(props: {
         axios
             .get(`${config.apiURL}/post-urls?postId=${id}`)
             .then((res) => {
-                setUrlBlocks(res.data)
+                setUrlBlocks(res.data.blocks)
                 setLoading(false)
             })
             .catch((error) => console.log(error))
@@ -117,11 +120,9 @@ function BeadCard(props: {
     }
 
     function getAudio() {
-        console.log('get audio', id)
         axios
             .get(`${config.apiURL}/post-audio?postId=${id}&offset=0`)
             .then((res) => {
-                console.log('audio blocks: ', res.data.blocks)
                 setAudioBlocks(res.data.blocks)
                 setLoading(false)
             })

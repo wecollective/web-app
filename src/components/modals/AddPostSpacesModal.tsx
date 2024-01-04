@@ -51,6 +51,7 @@ function AddPostSpacesModal(props: {
     }
 
     function checkPrivacyAccess(space) {
+        // todo: skip if public...?
         // check privacy access for selected space
         setCheckingPrivacyAccess(true)
         const data = { newSpaceId: space.id, otherSpaceIds: selectedSpaces.map((s) => s.id) }
@@ -65,7 +66,13 @@ function AddPostSpacesModal(props: {
                         otherSpaces,
                         newSpace: space,
                     })
-                } else setSelectedSpaces((s) => [...s, space])
+                } else {
+                    // remove 'all' if present
+                    setSelectedSpaces((oldSpaces) => [
+                        ...oldSpaces.filter((s) => s.id !== 1),
+                        space,
+                    ])
+                }
                 setCheckingPrivacyAccess(false)
             })
             .catch((error) => console.log(error))

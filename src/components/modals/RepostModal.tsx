@@ -16,6 +16,7 @@ import axios from 'axios'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import Cookies from 'universal-cookie'
 
+// todo: pass in updateItem function instead of set post and update account reactions there
 function RepostModal(props: {
     close: () => void
     postData: any

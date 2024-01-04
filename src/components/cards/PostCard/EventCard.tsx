@@ -77,7 +77,7 @@ function EventCard(props: {
 
     return (
         <Column centerX className={styles.wrapper}>
-            <Row wrap centerY className={styles.eventTimes}>
+            <Row wrap centerY centerX className={styles.eventTimes}>
                 <CalendarIcon />
                 <p>{findEventTimes(startTime, endTime)}</p>
                 {endTime && <p>{findEventDuration(startTime, endTime)}</p>}

@@ -92,7 +92,7 @@ function GlassBeadGame(props: {
                     })
                     setPlayers(orderedPlayers)
                     updateNextPlayer(res.data.beads, orderedPlayers)
-                    updateDeadline(nextMoveDeadline)
+                    updateDeadline(res.data.game.nextMoveDeadline)
                 }
                 setLoading(false)
             })
@@ -353,10 +353,7 @@ function GlassBeadGame(props: {
             )}
             {nextBeadModalOpen && (
                 <NextBeadModal
-                    settings={{
-                        ...GlassBeadGame,
-                        allowedBeadTypes: [...allowedBeadTypes.split(',')],
-                    }}
+                    settings={{ ...game, allowedBeadTypes: [...allowedBeadTypes.split(',')] }}
                     postId={postId}
                     players={players}
                     onSave={({ newBead, newDeadline }) => {

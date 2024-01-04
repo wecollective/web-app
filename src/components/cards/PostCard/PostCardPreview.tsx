@@ -28,7 +28,7 @@ function PostCardPreview(props: {
     const { post, link, onClick, style } = props
     const {
         id,
-        type,
+        // type,
         mediaTypes,
         title,
         text,
@@ -39,35 +39,29 @@ function PostCardPreview(props: {
         GlassBeadGame,
     } = post
     const [loading, setLoading] = useState(true)
-    const [url, setUrl] = useState<any>(null)
-    const [image, setImage] = useState<any>(null)
-    const [audio, setAudio] = useState<any>(null)
+    const [mediaType, setMediaType] = useState('text')
+    const [mediaData, setMediaData] = useState<any>({})
     const mobileView = document.documentElement.clientWidth < 900
     const imageSize = 28
 
-    function getPreviewData() {
-        const isBlock = ['url', 'image', 'audio'].includes(type)
-        if (isBlock) {
-            if (type === 'url') setUrl(post.Url)
-            if (type === 'image') setUrl(post.Image)
-            if (type === 'audio') setUrl(post.Audio)
-            setLoading(false)
-        } else {
-            axios
-                .get(`${config.apiURL}/post-preview-data?postId=${id}`)
-                .then((res) => {
-                    setUrl(res.data.url)
-                    setImage(res.data.image)
-                    setAudio(res.data.audio)
-                    setLoading(false)
-                })
-                .catch((error) => console.log(error))
-        }
+    function getPreviewData(type) {
+        axios
+            .get(
+                `${config.apiURL}/post-preview-data?postId=${id}&postType=${post.type}&mediaType=${type}`
+            )
+            .then((res) => {
+                setMediaData(res.data)
+                setLoading(false)
+            })
+            .catch((error) => console.log(error))
+        // }
     }
 
     useEffect(() => {
-        const hasMedia = ['url', 'image', 'audio'].some((media) => mediaTypes.includes(media))
-        if (hasMedia) getPreviewData()
+        const types = mediaTypes.split(',')
+        const type = types[types.length - 1]
+        setMediaType(type)
+        if (['url', 'image', 'audio'].includes(type)) getPreviewData(type)
         else setLoading(false)
     }, [])
 
@@ -149,46 +143,48 @@ function PostCardPreview(props: {
                                     {trimText(getDraftPlainText(text), 80)}
                                 </p>
                             )}
-                            {mediaTypes.includes('url') && (
+                            {mediaType === 'url' && (
                                 <Row centerY className={`${styles.block} ${styles.url}`}>
-                                    {url.image ? (
+                                    {mediaData.image ? (
                                         <img
-                                            src={url.image}
+                                            src={mediaData.image}
                                             alt='URL'
-                                            onError={() => setUrl({ ...url, image: null })}
+                                            onError={() =>
+                                                setMediaData({ ...mediaData, image: null })
+                                            }
                                         />
                                     ) : (
                                         <LinkIcon />
                                     )}
                                     <Column>
-                                        {url.title && (
+                                        {mediaData.title && (
                                             <p className={styles.urlTitle}>
-                                                {trimText(url.title, 60)}
+                                                {trimText(mediaData.title, 60)}
                                             </p>
                                         )}
-                                        {url.description && (
+                                        {mediaData.description && (
                                             <p className={styles.description}>
-                                                {trimText(url.description, 60)}
+                                                {trimText(mediaData.description, 60)}
                                             </p>
                                         )}
-                                        {!url.title && !url.description && (
+                                        {!mediaData.title && !mediaData.description && (
                                             <p className={styles.description}>
-                                                {trimText(url.url, 60)}
+                                                {trimText(mediaData.url, 60)}
                                             </p>
                                         )}
                                     </Column>
                                 </Row>
                             )}
-                            {mediaTypes.includes('image') && (
+                            {mediaType === 'image' && (
                                 <Row centerX className={`${styles.block} ${styles.image}`}>
-                                    <img src={image.url} alt='' />
+                                    <img src={mediaData.url} alt='' />
                                 </Row>
                             )}
-                            {mediaTypes.includes('audio') && (
-                                <Row centerX className={`${styles.block} ${styles.image}`}>
+                            {mediaTypes === 'audio' && (
+                                <Row centerX className={`${styles.block} ${styles.audio}`}>
                                     <AudioCard
-                                        id={audio.id}
-                                        url={audio.url}
+                                        id={mediaData.id}
+                                        url={mediaData.url}
                                         staticBars={250}
                                         location='post-preview'
                                         style={{ height: 160, width: '100%' }}
