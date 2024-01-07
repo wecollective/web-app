@@ -12,13 +12,14 @@ import React, { useContext, useEffect, useState } from 'react'
 
 // todo: test deleted and muted comments
 function Comments(props: {
-    postId: number
+    post: any
     location: string
     totalComments: number
     incrementTotalComments: (value: number) => void
     style?: any
 }): JSX.Element {
-    const { postId, location, totalComments, incrementTotalComments, style } = props
+    const { post, location, totalComments, incrementTotalComments, style } = props
+    const { id, type } = post
     const { loggedIn } = useContext(AccountContext)
     const [comments, setComments] = useState<any[]>([])
     const [remainingComments, setRemainingComments] = useState(0)
@@ -28,9 +29,7 @@ function Comments(props: {
     function getComments(offset) {
         if (!offset) setLoading(true)
         axios
-            .get(
-                `${config.apiURL}/post-comments?postId=${postId}&offset=${offset}&filter=${filter}`
-            )
+            .get(`${config.apiURL}/post-comments?postId=${id}&offset=${offset}&filter=${filter}`)
             .then((res) => {
                 const newComments = offset ? [...comments, ...res.data.comments] : res.data.comments
                 setComments(newComments)
@@ -40,10 +39,10 @@ function Comments(props: {
             .catch((error) => console.log(error))
     }
 
-    function findCommentById(children: any[], id: number) {
+    function findCommentById(children: any[], commentId: number) {
         for (let i = 0; i < children.length; i += 1) {
-            if (children[i].id === id) return children[i]
-            const match = findCommentById(children[i].Comments, id)
+            if (children[i].id === commentId) return children[i]
+            const match = findCommentById(children[i].Comments, commentId)
             if (match) return match
         }
         return null
@@ -51,7 +50,7 @@ function Comments(props: {
 
     function addComment(comment) {
         const { parent } = comment
-        if (parent.id === postId) setComments([comment, ...comments])
+        if (parent.id === post.id) setComments([comment, ...comments])
         else {
             const newComments = [...comments]
             const parentComment = findCommentById(newComments, parent.id)
@@ -81,7 +80,7 @@ function Comments(props: {
                 <CommentInput
                     type='comment'
                     placeholder='Comment...'
-                    parent={{ type: 'post', id: postId }}
+                    parent={{ id, type }}
                     onSave={(newComment) => addComment(newComment)}
                     maxChars={5000}
                     style={{ marginBottom: 10 }}

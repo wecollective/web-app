@@ -5,7 +5,6 @@ import ImageTitle from '@components/ImageTitle'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
 import LoadingWheel from '@components/animations/LoadingWheel'
-import Comments from '@components/cards/Comments/Comments'
 import BeadCard from '@components/cards/PostCard/BeadCard'
 import NextBeadModal from '@components/modals/NextBeadModal'
 import config from '@src/Config'
@@ -366,7 +365,7 @@ function GlassBeadGame(props: {
                     close={() => setNextBeadModalOpen(false)}
                 />
             )}
-            {beadCommentsOpen && (
+            {/* {beadCommentsOpen && (
                 <Comments
                     postId={selectedBead.id}
                     location='post' // glass bead game ?
@@ -380,7 +379,7 @@ function GlassBeadGame(props: {
                     }}
                     style={{ margin: '10px 0' }}
                 />
-            )}
+            )} */}
         </Column>
     )
 }

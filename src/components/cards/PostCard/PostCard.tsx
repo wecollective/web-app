@@ -513,7 +513,7 @@ function PostCard(props: {
             <Column className={`post-${id}-drag-disabled`} style={{ cursor: 'default' }}>
                 {commentsOpen && (
                     <Comments
-                        postId={id}
+                        post={post}
                         location={location}
                         totalComments={totalComments}
                         incrementTotalComments={(value) => {
