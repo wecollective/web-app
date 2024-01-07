@@ -26,14 +26,14 @@ function Space(props: {
     const { loggedIn } = useContext(AccountContext)
     const [showExpander, setShowExpander] = useState(totalChildren > 0 && privacy === 'public')
     // check access
-    // todo: see if there's a way to prevent this from firing when the array is updated
     useEffect(() => {
+        // todo: see if there's a way to prevent this from firing when the array is updated
         if (loggedIn && type === 'child' && privacy !== 'public') {
             const cookies = new Cookies()
             const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
             axios
                 .get(`${config.apiURL}/space-access?spaceId=${id}`, options)
-                .then((res) => setShowExpander(res.data === 'active'))
+                .then((res) => setShowExpander(res.data))
                 .catch((error) => console.log(error))
         }
     }, [])
