@@ -71,10 +71,7 @@ function EditPostModal(props: {
     function saveDisabled() {
         const totalChars = text ? findDraftLength(text) : 0
         const overMaxChars = totalChars > maxPostChars
-        const unchanged =
-            (post.text === text || (!post.text && !totalChars)) &&
-            (post.title === title || (!post.title && !title))
-        return loading || overMaxChars || unchanged || urls.find((u) => u.loading)
+        return loading || overMaxChars || urls.find((u) => u.loading)
     }
 
     function findNewMediaTypes() {
