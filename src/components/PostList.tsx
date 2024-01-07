@@ -32,7 +32,6 @@ function PostList(props: {
 
     useEffect(() => {
         if (spaceHandle === spaceData.handle && location === 'space-posts') {
-            console.log('add space drop event listeners')
             const postList = document.getElementById('space-posts')
             postList?.addEventListener('dragover', (e) => e.preventDefault())
             postList?.addEventListener('drop', () => {

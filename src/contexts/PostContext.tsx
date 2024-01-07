@@ -60,7 +60,7 @@ function PostContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
         axios
             .get(`${config.apiURL}/post-data?postId=${postId}`, options)
             .then((res) => {
-                console.log(res.data)
+                // console.log(res.data)
                 setPostData(res.data)
                 setPostDataLoading(false)
             })

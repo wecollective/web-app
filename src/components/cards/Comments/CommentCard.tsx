@@ -43,7 +43,6 @@ function CommentCard(props: {
     filter: string
     addComment: (comment: any) => void
     removeComment: (comment: any) => void
-    setPostDraggable?: (state: boolean) => void
 }): JSX.Element {
     const {
         depth,
@@ -53,7 +52,6 @@ function CommentCard(props: {
         filter,
         addComment,
         removeComment,
-        setPostDraggable,
     } = props
 
     const { loggedIn, accountData, updateDragItem, setAlertMessage, setAlertModalOpen } =
@@ -205,45 +203,41 @@ function CommentCard(props: {
 
     function addDragEvents() {
         const commentCard = document.getElementById(`comment-${id}`)
-        if (commentCard) {
-            commentCard.addEventListener('dragstart', (e) => {
-                e.stopPropagation()
-                commentCard.classList.add(styles.dragging)
-                updateDragItem({ type: 'comment', data: comment })
-                const dragItem = document.getElementById('drag-item')
-                e.dataTransfer?.setDragImage(dragItem!, 50, 50)
-            })
-            commentCard.addEventListener('dragend', () => {
-                commentCard.classList.remove(styles.dragging)
-            })
-        }
+        commentCard?.addEventListener('dragstart', (e) => {
+            e.stopPropagation()
+            commentCard.classList.add(styles.dragging)
+            updateDragItem({ type: 'comment', data: comment })
+            const dragItem = document.getElementById('drag-item')
+            e.dataTransfer?.setDragImage(dragItem!, 50, 50)
+        })
+        commentCard?.addEventListener('dragend', () => {
+            commentCard.classList.remove(styles.dragging)
+        })
     }
 
+    // todo: check if reply input empty before collapsing
     function addSelectionEvents() {
         // toggle selected on header clicks
-        const header = document.getElementById(`clickable-header-${comment.id}`)
+        const header = document.getElementById(`comment-${id}-header`)
         header?.addEventListener('click', () => toggleSelected())
         // toggle selected on text clicks if no text selection
-        const commentText = document.getElementById(`comment-text-${comment.id}`)
+        const commentText = document.getElementById(`comment-${id}-text`)
         commentText?.addEventListener('click', () => {
             // todo: check if reply input empty
             const textSelection = getTextSelection()
             if (state !== 'deleted' && !textSelection) toggleSelected()
         })
-        // update draggability on text hover
-        commentText?.addEventListener('mouseenter', () => {
-            setDraggable(false)
-            if (setPostDraggable) setPostDraggable(false)
-        })
-        commentText?.addEventListener('mouseleave', () => {
-            setDraggable(true)
-            if (setPostDraggable) setPostDraggable(true)
+        // add drag disabled regions
+        const dragDisabledRegions = Array.from(
+            document.getElementsByClassName(`comment-${id}-drag-disabled`)
+        )
+        dragDisabledRegions.forEach((region) => {
+            region.addEventListener('mouseenter', () => setDraggable(false))
+            region.addEventListener('mouseleave', () => setDraggable(true))
         })
     }
 
-    useEffect(() => {
-        addDragEvents()
-    }, [])
+    useEffect(() => addDragEvents(), [])
 
     useEffect(() => {
         if (!collapsed) addSelectionEvents()
@@ -258,7 +252,7 @@ function CommentCard(props: {
         return (
             <button
                 type='button'
-                id={`comment-${comment.id}`}
+                id={`comment-${id}`}
                 className={styles.mutedComment}
                 onClick={() => setShowMutedComment(true)}
             >
@@ -271,7 +265,7 @@ function CommentCard(props: {
             {depth > 0 && <div className={styles.indentation} />}
             <Column style={{ width: depth ? 'calc(100% - 26px)' : '100%' }}>
                 <Column
-                    id={`comment-${comment.id}`}
+                    id={`comment-${id}`}
                     className={`${styles.wrapper} ${highlighted && styles.highlighted} ${
                         location === 'link-map' && styles.linkMap
                     }`}
@@ -305,10 +299,7 @@ function CommentCard(props: {
                         </Column>
                         <Column className={styles.content}>
                             <Row spaceBetween className={styles.header}>
-                                <Row
-                                    id={`clickable-header-${comment.id}`}
-                                    style={{ width: '100%' }}
-                                >
+                                <Row id={`comment-${id}-header`} style={{ width: '100%' }}>
                                     {state === 'account-deleted' ? (
                                         <p className='grey' style={{ marginRight: 5 }}>
                                             [Account deleted]
@@ -390,8 +381,9 @@ function CommentCard(props: {
                             {!collapsed && (
                                 <>
                                     {state !== 'account-deleted' && (
-                                        <div
-                                            id={`comment-text-${comment.id}`}
+                                        <Column
+                                            id={`comment-${id}-text`}
+                                            className={`comment-${id}-drag-disabled`}
                                             style={{ cursor: 'text' }}
                                         >
                                             <DraftText
@@ -415,7 +407,7 @@ function CommentCard(props: {
                                             {mediaTypes.includes('audio') && (
                                                 <Audios postId={id} style={{ margin: '10px 0' }} />
                                             )}
-                                        </div>
+                                        </Column>
                                     )}
                                     {selected && state === 'active' && (
                                         <Row className={styles.footer}>
@@ -477,71 +469,73 @@ function CommentCard(props: {
                             )}
                         </Column>
                     </Row>
-                    {loggedIn && selected && !collapsed && (
-                        <CommentInput
-                            type='comment'
-                            placeholder='Reply...'
-                            parent={{ type: 'comment', id }}
-                            onSave={(newComment) => {
-                                addComment(newComment)
-                                toggleSelected()
-                            }}
-                            style={{
-                                marginBottom: 10,
-                                // marginLeft: -depth * 24,
-                                // width: `calc(100% + ${depth * 24}px)`,
-                                zIndex: 5,
-                            }}
-                        />
-                    )}
-                    {likeModalOpen && (
-                        <LikeModal
-                            itemType='post'
-                            itemData={{ ...comment, liked: accountReactions.liked }}
-                            updateItem={() => {
-                                setComment({
-                                    ...comment,
-                                    totalLikes: totalLikes + (liked ? -1 : 1),
-                                })
-                                setAccountReactions({ ...accountReactions, liked: !liked })
-                            }}
-                            close={() => setLikeModalOpen(false)}
-                        />
-                    )}
-                    {ratingModalOpen && (
-                        <RatingModal
-                            itemType='post'
-                            itemData={{ ...comment, rated: accountReactions.rated }}
-                            updateItem={() => {
-                                setComment({
-                                    ...comment,
-                                    totalRatings: totalRatings + (rated ? -1 : 1),
-                                })
-                                setAccountReactions({ ...accountReactions, rated: !rated })
-                            }}
-                            close={() => setRatingModalOpen(false)}
-                        />
-                    )}
-                    {editModalOpen && (
-                        <EditPostModal
-                            post={comment}
-                            setPost={(newComment) => setComment(newComment)}
-                            close={() => setEditModalOpen(false)}
-                        />
-                    )}
-                    {deleteModalOpen && (
-                        <DeletePostModal
-                            post={comment}
-                            onDelete={() => removeComment(comment)}
-                            close={() => setDeleteModalOpen(false)}
-                        />
-                    )}
-                    {showUserModal && (
-                        <UserButtonModal
-                            user={{ ...Creator, ...userModalData }}
-                            transparent={userModalTransparent}
-                        />
-                    )}
+                    <Column className={`comment-${id}-drag-disabled`} style={{ cursor: 'default' }}>
+                        {loggedIn && selected && !collapsed && (
+                            <CommentInput
+                                type='comment'
+                                placeholder='Reply...'
+                                parent={{ type: 'comment', id }}
+                                onSave={(newComment) => {
+                                    addComment(newComment)
+                                    toggleSelected()
+                                }}
+                                style={{
+                                    marginBottom: 10,
+                                    // marginLeft: -depth * 24,
+                                    // width: `calc(100% + ${depth * 24}px)`,
+                                    zIndex: 5,
+                                }}
+                            />
+                        )}
+                        {likeModalOpen && (
+                            <LikeModal
+                                itemType='post'
+                                itemData={{ ...comment, liked: accountReactions.liked }}
+                                updateItem={() => {
+                                    setComment({
+                                        ...comment,
+                                        totalLikes: totalLikes + (liked ? -1 : 1),
+                                    })
+                                    setAccountReactions({ ...accountReactions, liked: !liked })
+                                }}
+                                close={() => setLikeModalOpen(false)}
+                            />
+                        )}
+                        {ratingModalOpen && (
+                            <RatingModal
+                                itemType='post'
+                                itemData={{ ...comment, rated: accountReactions.rated }}
+                                updateItem={() => {
+                                    setComment({
+                                        ...comment,
+                                        totalRatings: totalRatings + (rated ? -1 : 1),
+                                    })
+                                    setAccountReactions({ ...accountReactions, rated: !rated })
+                                }}
+                                close={() => setRatingModalOpen(false)}
+                            />
+                        )}
+                        {editModalOpen && (
+                            <EditPostModal
+                                post={comment}
+                                setPost={(newComment) => setComment(newComment)}
+                                close={() => setEditModalOpen(false)}
+                            />
+                        )}
+                        {deleteModalOpen && (
+                            <DeletePostModal
+                                post={comment}
+                                onDelete={() => removeComment(comment)}
+                                close={() => setDeleteModalOpen(false)}
+                            />
+                        )}
+                        {showUserModal && (
+                            <UserButtonModal
+                                user={{ ...Creator, ...userModalData }}
+                                transparent={userModalTransparent}
+                            />
+                        )}
+                    </Column>
                 </Column>
                 {!collapsed && (
                     <Column>
@@ -553,7 +547,6 @@ function CommentCard(props: {
                                 filter={filter}
                                 addComment={addComment}
                                 removeComment={removeComment}
-                                setPostDraggable={setPostDraggable}
                                 location={location}
                             />
                         ))}
@@ -574,7 +567,6 @@ function CommentCard(props: {
 }
 
 CommentCard.defaultProps = {
-    setPostDraggable: null,
     highlighted: false,
 }
 

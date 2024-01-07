@@ -47,6 +47,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
+// todo: try firing off account reactions request before post block reuest for all media here
 function PostCard(props: {
     post: any
     index?: number
@@ -172,10 +173,7 @@ function PostCard(props: {
     function getParentLinks() {
         axios
             .get(`${config.apiURL}/parent-links?postId=${id}`)
-            .then((res) => {
-                console.log('parent-links: ', res.data)
-                setParentLinks(res.data)
-            })
+            .then((res) => setParentLinks(res.data))
             .catch((error) => console.log(error))
     }
 
@@ -197,6 +195,14 @@ function PostCard(props: {
         })
         postCard?.addEventListener('dragend', () => {
             postCard.classList.remove(styles.dragging)
+        })
+        // add drag disabled regions
+        const dragDisabledRegions = Array.from(
+            document.getElementsByClassName(`post-${id}-drag-disabled`)
+        )
+        dragDisabledRegions.forEach((region) => {
+            region.addEventListener('mouseenter', () => setDraggable(false))
+            region.addEventListener('mouseleave', () => setDraggable(true))
         })
     }
 
@@ -343,11 +349,7 @@ function PostCard(props: {
             </Row>
             <Column className={styles.content}>
                 {(title || text) && (
-                    <div
-                        onMouseEnter={() => setDraggable(false)}
-                        onMouseLeave={() => setDraggable(true)}
-                        style={{ cursor: 'text' }}
-                    >
+                    <Column className={`post-${id}-drag-disabled`} style={{ cursor: 'text' }}>
                         {title && (
                             <>
                                 {mediaTypes.includes('glass-bead-game') ? (
@@ -371,13 +373,19 @@ function PostCard(props: {
                                 )}
                             </>
                         )}
-                    </div>
+                    </Column>
                 )}
                 {!isBlock && mediaTypes.includes('url') && (
                     <Urls key={updatedAt} postId={id} style={{ marginBottom: 10 }} />
                 )}
                 {!isBlock && mediaTypes.includes('image') && (
-                    <Images postId={id} style={{ marginBottom: 10 }} />
+                    <Images
+                        postId={id}
+                        imageBlocks={post.ImageBlockLinks.sort((a, b) => a.index - b.index).map(
+                            (link) => link.Post
+                        )}
+                        style={{ marginBottom: 10 }}
+                    />
                 )}
                 {!isBlock && mediaTypes.includes('audio') && (
                     <Audios postId={id} style={{ marginBottom: 10 }} />
@@ -502,78 +510,79 @@ function PostCard(props: {
                     )}
                 </Row>
             )}
-            {commentsOpen && (
-                <Comments
-                    postId={id}
-                    location={location}
-                    totalComments={totalComments}
-                    incrementTotalComments={(value) => {
-                        setPost({ ...post, totalComments: totalComments + value })
-                        if (value < 1) getAccountCommented()
-                        else setAccountReactions({ ...accountReactions, commented: true })
-                    }}
-                    setPostDraggable={setDraggable}
-                    style={{ margin: '10px -8px 0 -8px' }}
-                />
-            )}
-            {likeModalOpen && (
-                <LikeModal
-                    itemType='post'
-                    itemData={{ ...post, liked: accountReactions.liked }}
-                    updateItem={() => {
-                        setPost({ ...post, totalLikes: totalLikes + (liked ? -1 : 1) })
-                        setAccountReactions({ ...accountReactions, liked: !liked })
-                    }}
-                    close={() => setLikeModalOpen(false)}
-                />
-            )}
-            {repostModalOpen && (
-                <RepostModal
-                    postData={post}
-                    setPostData={setPost}
-                    close={() => setRepostModalOpen(false)}
-                />
-            )}
-            {ratingModalOpen && (
-                <RatingModal
-                    itemType='post'
-                    itemData={{ ...post, rated: accountReactions.rated }}
-                    updateItem={() => {
-                        setPost({ ...post, totalRatings: totalRatings + (rated ? -1 : 1) })
-                        setAccountReactions({ ...accountReactions, rated: !rated })
-                    }}
-                    close={() => setRatingModalOpen(false)}
-                />
-            )}
-            {editPostModalOpen && (
-                <EditPostModal
-                    post={post}
-                    setPost={setPost}
-                    close={() => setEditPostModalOpen(false)}
-                />
-            )}
-            {deletePostModalOpen && (
-                <DeletePostModal
-                    post={post}
-                    onDelete={() => {
-                        if (location === 'space-posts')
-                            setSpacePosts(spacePosts.filter((p) => p.id !== id))
-                        if (location === 'user-posts')
-                            setUserPosts(userPosts.filter((p) => p.id !== id))
-                        if (location === 'space-governance')
-                            setGovernancePolls(governancePolls.filter((p) => p.id !== id))
-                        if (location === 'post-page') setPostState('deleted')
-                    }}
-                    close={() => setDeletePostModalOpen(false)}
-                />
-            )}
-            {removePostModalOpen && (
-                <RemovePostModal
-                    postId={id}
-                    location={location}
-                    close={() => setRemovePostModalOpen(false)}
-                />
-            )}
+            <Column className={`post-${id}-drag-disabled`} style={{ cursor: 'default' }}>
+                {commentsOpen && (
+                    <Comments
+                        postId={id}
+                        location={location}
+                        totalComments={totalComments}
+                        incrementTotalComments={(value) => {
+                            setPost({ ...post, totalComments: totalComments + value })
+                            if (value < 1) getAccountCommented()
+                            else setAccountReactions({ ...accountReactions, commented: true })
+                        }}
+                        style={{ margin: '10px -8px 0 -8px' }}
+                    />
+                )}
+                {likeModalOpen && (
+                    <LikeModal
+                        itemType='post'
+                        itemData={{ ...post, liked: accountReactions.liked }}
+                        updateItem={() => {
+                            setPost({ ...post, totalLikes: totalLikes + (liked ? -1 : 1) })
+                            setAccountReactions({ ...accountReactions, liked: !liked })
+                        }}
+                        close={() => setLikeModalOpen(false)}
+                    />
+                )}
+                {repostModalOpen && (
+                    <RepostModal
+                        postData={post}
+                        setPostData={setPost}
+                        close={() => setRepostModalOpen(false)}
+                    />
+                )}
+                {ratingModalOpen && (
+                    <RatingModal
+                        itemType='post'
+                        itemData={{ ...post, rated: accountReactions.rated }}
+                        updateItem={() => {
+                            setPost({ ...post, totalRatings: totalRatings + (rated ? -1 : 1) })
+                            setAccountReactions({ ...accountReactions, rated: !rated })
+                        }}
+                        close={() => setRatingModalOpen(false)}
+                    />
+                )}
+                {editPostModalOpen && (
+                    <EditPostModal
+                        post={post}
+                        setPost={setPost}
+                        close={() => setEditPostModalOpen(false)}
+                    />
+                )}
+                {deletePostModalOpen && (
+                    <DeletePostModal
+                        post={post}
+                        onDelete={() => {
+                            if (location === 'space-posts')
+                                setSpacePosts(spacePosts.filter((p) => p.id !== id))
+                            if (location === 'user-posts')
+                                setUserPosts(userPosts.filter((p) => p.id !== id))
+                            if (location === 'space-governance')
+                                setGovernancePolls(governancePolls.filter((p) => p.id !== id))
+                            if (location === 'post-page') setPostState('deleted')
+                        }}
+                        close={() => setDeletePostModalOpen(false)}
+                    />
+                )}
+                {removePostModalOpen && (
+                    <RemovePostModal
+                        postId={id}
+                        location={location}
+                        close={() => setRemovePostModalOpen(false)}
+                    />
+                )}
+            </Column>
         </Column>
     )
 }

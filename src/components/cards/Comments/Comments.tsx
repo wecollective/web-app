@@ -16,11 +16,9 @@ function Comments(props: {
     location: string
     totalComments: number
     incrementTotalComments: (value: number) => void
-    setPostDraggable?: (payload: boolean) => void
     style?: any
 }): JSX.Element {
-    const { postId, location, totalComments, incrementTotalComments, setPostDraggable, style } =
-        props
+    const { postId, location, totalComments, incrementTotalComments, style } = props
     const { loggedIn } = useContext(AccountContext)
     const [comments, setComments] = useState<any[]>([])
     const [remainingComments, setRemainingComments] = useState(0)
@@ -34,7 +32,6 @@ function Comments(props: {
                 `${config.apiURL}/post-comments?postId=${postId}&offset=${offset}&filter=${filter}`
             )
             .then((res) => {
-                console.log('post-comments: ', res.data)
                 const newComments = offset ? [...comments, ...res.data.comments] : res.data.comments
                 setComments(newComments)
                 setRemainingComments(res.data.totalChildren - newComments.length)
@@ -135,7 +132,6 @@ function Comments(props: {
                             filter={filter}
                             addComment={addComment}
                             removeComment={removeComment}
-                            setPostDraggable={setPostDraggable}
                             location={location}
                         />
                     ))}
@@ -156,7 +152,6 @@ function Comments(props: {
 
 Comments.defaultProps = {
     style: null,
-    setPostDraggable: null,
 }
 
 export default Comments
