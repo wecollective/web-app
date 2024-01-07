@@ -38,8 +38,8 @@ function ToyBoxRowModal(props: { close: () => void }): JSX.Element {
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         const data = { rowId: toyBoxRow.id, rowIndex: toyBoxRow.index, name }
         const formData = new FormData()
-        if (imageFile) formData.append('file', imageFile)
-        formData.append('data', JSON.stringify(data))
+        if (imageFile) formData.append('image', imageFile)
+        formData.append('post-data', JSON.stringify(data))
         axios
             .post(`${config.apiURL}/edit-toybox-row`, formData, options)
             .then((res) => {
