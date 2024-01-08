@@ -4,17 +4,18 @@ import UrlCard from '@components/cards/PostCard/UrlCard'
 import config from '@src/Config'
 import styles from '@styles/components/cards/PostCard/Urls.module.scss'
 import axios from 'axios'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 
-function Urls(props: { postId: number; style?: any }): JSX.Element {
-    const { postId, style } = props
+function Urls(props: { postId: number; urlBlocks?: any[]; style?: any }): JSX.Element {
+    const { postId, urlBlocks, style } = props
     const [loading, setLoading] = useState(true)
-    const [blocks, setBlocks] = useState<any[]>([])
+    const [blocks, setBlocks] = useState<any[]>(urlBlocks || [])
 
-    function getUrls() {
+    function getNextUrls(offset: number) {
+        setLoading(true)
         axios
-            .get(`${config.apiURL}/post-urls?postId=${postId}`)
+            .get(`${config.apiURL}/post-urls?postId=${postId}&offset=${offset}`)
             .then((res) => {
                 setBlocks(res.data.blocks)
                 setLoading(false)
@@ -22,14 +23,6 @@ function Urls(props: { postId: number; style?: any }): JSX.Element {
             .catch((error) => console.log(error))
     }
 
-    useEffect(() => getUrls(), [])
-
-    if (loading)
-        return (
-            <Column centerX className={styles.loading} style={style}>
-                {/* <LoadingWheel size={30} style={{ margin: 20 }} /> */}
-            </Column>
-        )
     return (
         <Column style={style} className={styles.wrapper}>
             {blocks.map((block, i) => (
@@ -46,6 +39,7 @@ function Urls(props: { postId: number; style?: any }): JSX.Element {
 }
 
 Urls.defaultProps = {
+    urlBlocks: [],
     style: null,
 }
 

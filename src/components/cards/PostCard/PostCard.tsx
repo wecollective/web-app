@@ -101,6 +101,9 @@ function PostCard(props: {
         // sourcePostId,
         Creator,
         DirectSpaces,
+        UrlBlocks,
+        ImageBlocks,
+        AudioBlocks,
         Event,
         Image,
         Audio,
@@ -144,19 +147,24 @@ function PostCard(props: {
         if (totalReposts) types.push('repost')
         if (totalComments) types.push('comment')
         if (totalLinks) types.push('link')
-        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-        axios
-            .get(
-                `${config.apiURL}/account-reactions?postType=post&postId=${id}&types=${types.join(
-                    ','
-                )}`,
-                options
-            )
-            .then((res) => {
-                setAccountReactions(res.data)
-                setButtonsDisabled(false)
-            })
-            .catch((error) => console.log(error))
+        if (types.length) {
+            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+            axios
+                .get(
+                    `${
+                        config.apiURL
+                    }/account-reactions?postType=post&postId=${id}&types=${types.join(',')}`,
+                    options
+                )
+                .then((res) => {
+                    setAccountReactions(res.data)
+                    setButtonsDisabled(false)
+                })
+                .catch((error) => console.log(error))
+        } else {
+            setAccountReactions({ liked: 0, rated: 0, reposted: 0, commented: 0, linked: 0 })
+            setButtonsDisabled(false)
+        }
     }
 
     function getAccountCommented() {
@@ -251,7 +259,7 @@ function PostCard(props: {
             className={`${styles.post} ${styles[location]} ${styling && styles.styling}`}
             style={style}
             // style={{ ...style, backgroundColor: color }}
-            draggable={draggable}
+            draggable={['post', 'comment', 'bead'].includes(type) && draggable}
         >
             {/* <div className={styles.watermark} /> */}
             {parentLinks && (
@@ -376,19 +384,32 @@ function PostCard(props: {
                     </Column>
                 )}
                 {!isBlock && mediaTypes.includes('url') && (
-                    <Urls key={updatedAt} postId={id} style={{ marginBottom: 10 }} />
+                    <Urls
+                        key={updatedAt}
+                        postId={id}
+                        urlBlocks={UrlBlocks.map((block) => {
+                            return { ...block.Post, Url: block.Post.MediaLink.Url }
+                        })}
+                        style={{ marginBottom: 10 }}
+                    />
                 )}
                 {!isBlock && mediaTypes.includes('image') && (
                     <Images
                         postId={id}
-                        imageBlocks={post.ImageBlockLinks.sort((a, b) => a.index - b.index).map(
-                            (link) => link.Post
-                        )}
+                        imageBlocks={ImageBlocks.map((block) => {
+                            return { ...block.Post, Image: block.Post.MediaLink.Image }
+                        })}
                         style={{ marginBottom: 10 }}
                     />
                 )}
                 {!isBlock && mediaTypes.includes('audio') && (
-                    <Audios postId={id} style={{ marginBottom: 10 }} />
+                    <Audios
+                        postId={id}
+                        audioBlocks={AudioBlocks.map((block) => {
+                            return { ...block.Post, Audio: block.Post.MediaLink.Audio }
+                        })}
+                        style={{ marginBottom: 10 }}
+                    />
                 )}
                 {Event && <EventCard postData={post} setPostData={setPost} location={location} />}
                 {mediaTypes.includes('poll') && <PollCard postData={post} location={location} />}

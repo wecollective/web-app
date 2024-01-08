@@ -1,42 +1,39 @@
 import Column from '@components/Column'
 import Row from '@components/Row'
 import Scrollbars from '@components/Scrollbars'
-import LoadingWheel from '@components/animations/LoadingWheel'
 import ImageModal from '@components/modals/ImageModal'
 import config from '@src/Config'
 import { handleImageError } from '@src/Helpers'
 import styles from '@styles/components/cards/PostCard/Images.module.scss'
 import axios from 'axios'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 
-function Images(props: { postId: number; style?: any }): JSX.Element {
-    const { postId, style } = props
-    const [loading, setLoading] = useState(true)
-    const [blocks, setBlocks] = useState<any[]>([])
-    const [totalBlocks, setTotalBlocks] = useState(0)
-    const [nextBlocksLoading, setNextBlocksLoading] = useState(false)
+function Images(props: { postId: number; imageBlocks?: any[]; style?: any }): JSX.Element {
+    const { postId, imageBlocks, style } = props
+    const [loading, setLoading] = useState(false)
+    const [blocks, setBlocks] = useState<any[]>(imageBlocks || [])
+    // temporary approach to enable pagination without a total value on initial load:
+    // if 4 items, set total blocks to 5 so it attempts to grab the next blocks on scroll right end
+    const [totalBlocks, setTotalBlocks] = useState(
+        imageBlocks!.length === 4 ? 5 : imageBlocks!.length
+    )
     const [startIndex, setStartIndex] = useState(0)
     const [modalOpen, setModalOpen] = useState(false)
 
-    function getImages(offset: number) {
+    function getNextImages(offset: number) {
+        setLoading(true)
         axios
             .get(`${config.apiURL}/post-images?postId=${postId}&offset=${offset}`)
             .then((res) => {
-                setBlocks(offset ? [...blocks, ...res.data.blocks] : res.data.blocks)
-                if (offset) setNextBlocksLoading(false)
-                else {
-                    setTotalBlocks(res.data.total)
-                    setLoading(false)
-                }
+                setBlocks([...blocks, ...res.data.blocks])
+                setTotalBlocks(res.data.total)
+                setLoading(false)
             })
             .catch((error) => console.log(error))
     }
 
     function onScrollRightEnd() {
-        if (!nextBlocksLoading && totalBlocks > blocks.length) {
-            setNextBlocksLoading(true)
-            getImages(blocks.length)
-        }
+        if (!loading && totalBlocks > blocks.length) getNextImages(blocks.length)
     }
 
     function findImageSize() {
@@ -45,14 +42,6 @@ function Images(props: { postId: number; style?: any }): JSX.Element {
         return 'small'
     }
 
-    useEffect(() => getImages(0), [])
-
-    if (loading)
-        return (
-            <Column centerX style={style}>
-                <LoadingWheel size={30} style={{ margin: 20 }} />
-            </Column>
-        )
     return (
         <Column className={styles.wrapper} style={style}>
             <Row centerX>
@@ -95,6 +84,7 @@ function Images(props: { postId: number; style?: any }): JSX.Element {
 }
 
 Images.defaultProps = {
+    imageBlocks: [],
     style: null,
 }
 

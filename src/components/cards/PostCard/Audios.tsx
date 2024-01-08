@@ -1,31 +1,27 @@
 import Column from '@components/Column'
-import LoadingWheel from '@components/animations/LoadingWheel'
 import AudioCard from '@components/cards/PostCard/AudioCard'
 import config from '@src/Config'
 import styles from '@styles/components/cards/PostCard/Audios.module.scss'
 import axios from 'axios'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 
-function Audios(props: { postId: number; style?: any }): JSX.Element {
-    const { postId, style } = props
+function Audios(props: { postId: number; audioBlocks?: any[]; style?: any }): JSX.Element {
+    const { postId, audioBlocks, style } = props
     const [loading, setLoading] = useState(true)
-    const [blocks, setBlocks] = useState<any[]>([])
+    const [blocks, setBlocks] = useState<any[]>(audioBlocks || [])
     const [totalBlocks, setTotalBlocks] = useState(0)
-    const [nextBlocksLoading, setNextBlocksLoading] = useState(false)
     // const [startIndex, setStartIndex] = useState(0)
     // const [modalOpen, setModalOpen] = useState(false)
 
     function getAudio(offset: number) {
+        setLoading(true)
         axios
             .get(`${config.apiURL}/post-audio?postId=${postId}&offset=${offset}`)
             .then((res) => {
-                setBlocks(offset ? [...blocks, ...res.data.blocks] : res.data.blocks)
-                if (offset) setNextBlocksLoading(false)
-                else {
-                    setTotalBlocks(res.data.total)
-                    setLoading(false)
-                }
+                setBlocks([...blocks, ...res.data.blocks])
+                setTotalBlocks(res.data.total)
+                setLoading(false)
             })
             .catch((error) => console.log(error))
     }
@@ -37,14 +33,6 @@ function Audios(props: { postId: number; style?: any }): JSX.Element {
     //     }
     // }
 
-    useEffect(() => getAudio(0), [])
-
-    if (loading)
-        return (
-            <Column centerX style={style}>
-                <LoadingWheel size={30} style={{ margin: 20 }} />
-            </Column>
-        )
     return (
         <Column style={style} className={styles.wrapper}>
             {blocks.map((block) => (
@@ -75,6 +63,7 @@ function Audios(props: { postId: number; style?: any }): JSX.Element {
 }
 
 Audios.defaultProps = {
+    audioBlocks: [],
     style: null,
 }
 
