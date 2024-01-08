@@ -73,7 +73,7 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
     }
 
     function findFill(d) {
-        if (d.imageUrl) {
+        if (d.image) {
             const existingImage = d3.select(`#image-${d.id}`)
             const newScale = findRadius(d) * 2
             if (existingImage.node()) {
@@ -98,12 +98,12 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
                     .attr('height', newScale)
                     .attr('width', newScale)
                     .attr('preserveAspectRatio', 'xMidYMid slice')
-                    .attr('xlink:href', d.imageUrl)
+                    .attr('xlink:href', d.image)
                     .on('error', () => {
                         const newImage = d3.select(`#image-${d.id}`)
                         // try image proxy
                         if (!newImage.attr('xlink:href').includes('//images.weserv.nl/')) {
-                            newImage.attr('xlink:href', `//images.weserv.nl/?url=${d.imageUrl}`)
+                            newImage.attr('xlink:href', `//images.weserv.nl/?url=${d.image}`)
                         } else {
                             // fall back on placeholder
                             newImage.attr(

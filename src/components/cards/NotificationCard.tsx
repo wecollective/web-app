@@ -151,8 +151,7 @@ function NotificationCard(props: {
         createdAt,
     } = notification
 
-    const { accountData, setAccountData, updateAccountData, setAlertMessage, setAlertModalOpen } =
-        useContext(AccountContext)
+    const { accountData, setAccountData } = useContext(AccountContext)
     const [seen, setSeen] = useState(notification.seen)
     const [seenLoading, setSeenLoading] = useState(false)
     const cookies = new Cookies()
@@ -177,139 +176,105 @@ function NotificationCard(props: {
         if (!seen) toggleSeen()
     }
 
+    // todo: get account data server side in all function below
     function respondToSpaceInvite(response) {
-        const accessToken = cookies.get('accessToken')
-        if (!accessToken) {
-            setAlertMessage('Your session has run out. Please log in again to respond.')
-            setAlertModalOpen(true)
-        } else {
-            const data = {
-                accountHandle: accountData.handle,
-                accountName: accountData.name,
-                spaceId: triggerSpace.id,
-                spaceHandle: triggerSpace.handle,
-                spaceName: triggerSpace.name,
-                notificationId: id,
-                userId: triggerUser.id,
-                response,
-            }
-            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
-            axios
-                .post(`${config.apiURL}/respond-to-space-invite`, data, options)
-                .then(() => {
-                    updateNotification(id, 'state', response)
-                    markAsSeen()
-                })
-                .catch((error) => console.log(error))
+        const data = {
+            accountHandle: accountData.handle,
+            accountName: accountData.name,
+            spaceId: triggerSpace.id,
+            spaceHandle: triggerSpace.handle,
+            spaceName: triggerSpace.name,
+            notificationId: id,
+            userId: triggerUser.id,
+            response,
         }
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .post(`${config.apiURL}/respond-to-space-invite`, data, options)
+            .then(() => {
+                updateNotification(id, 'state', response)
+                markAsSeen()
+            })
+            .catch((error) => console.log(error))
     }
 
     function respondToSpaceAccessRequest(response) {
-        const accessToken = cookies.get('accessToken')
-        if (!accessToken) {
-            setAlertMessage('Your session has run out. Please log in again to respond.')
-            setAlertModalOpen(true)
-        } else {
-            const data = {
-                accountHandle: accountData.handle,
-                accountName: accountData.name,
-                spaceId: triggerSpace.id,
-                spaceHandle: triggerSpace.handle,
-                spaceName: triggerSpace.name,
-                notificationId: id,
-                userId: triggerUser.id,
-                response,
-            }
-            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
-            axios
-                .post(`${config.apiURL}/respond-to-space-access-request`, data, options)
-                .then(() => {
-                    updateNotification(id, 'state', response)
-                    markAsSeen()
-                })
-                .catch((error) => console.log(error))
+        const data = {
+            accountHandle: accountData.handle,
+            accountName: accountData.name,
+            spaceId: triggerSpace.id,
+            spaceHandle: triggerSpace.handle,
+            spaceName: triggerSpace.name,
+            notificationId: id,
+            userId: triggerUser.id,
+            response,
         }
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .post(`${config.apiURL}/respond-to-space-access-request`, data, options)
+            .then(() => {
+                updateNotification(id, 'state', response)
+                markAsSeen()
+            })
+            .catch((error) => console.log(error))
     }
 
     function respondToModInvite(response) {
-        const accessToken = cookies.get('accessToken')
-        if (!accessToken) {
-            setAlertMessage('Your session has run out. Please log in again to respond.')
-            setAlertModalOpen(true)
-        } else {
-            const data = {
-                notificationId: id,
-                userId: triggerUser.id,
-                spaceId: triggerSpace.id,
-                response,
-            }
-            const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
-            axios
-                .post(`${config.apiURL}/respond-to-mod-invite`, data, authHeader)
-                .then((res) => {
-                    if (res.status === 200) {
-                        updateNotification(id, 'state', response)
-                        markAsSeen()
-                        // todo: update if/when required
-                        // if (response === 'accepted') {
-                        //     const newModeratedSpaces = [
-                        //         ...accountData.ModeratedSpaces,
-                        //         {
-                        //             handle: triggerSpace.handle,
-                        //             name: triggerSpace.name,
-                        //             flagImagePath: triggerSpace.flagImagePath,
-                        //         },
-                        //     ]
-                        //     updateAccountData('ModeratedSpaces', newModeratedSpaces)
-                        // }
-                    } else {
-                        // handle errors
-                        console.log(res.data.message)
-                    }
-                })
-                .catch((res) => console.log('res: ', res))
+        const data = {
+            notificationId: id,
+            userId: triggerUser.id,
+            spaceId: triggerSpace.id,
+            response,
         }
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .post(`${config.apiURL}/respond-to-mod-invite`, data, options)
+            .then((res) => {
+                updateNotification(id, 'state', response)
+                markAsSeen()
+                // todo: update if/when required
+                // if (response === 'accepted') {
+                //     const newModeratedSpaces = [
+                //         ...accountData.ModeratedSpaces,
+                //         {
+                //             handle: triggerSpace.handle,
+                //             name: triggerSpace.name,
+                //             flagImagePath: triggerSpace.flagImagePath,
+                //         },
+                //     ]
+                //     updateAccountData('ModeratedSpaces', newModeratedSpaces)
+                // }
+            })
+            .catch((error) => console.log(error))
     }
 
     function respondToParentSpaceRequest(response) {
-        const accessToken = cookies.get('accessToken')
-        if (!accessToken) {
-            setAlertMessage('Your session has run out. Please log in again to respond.')
-            setAlertModalOpen(true)
-        } else {
-            const data = {
-                requestorId: triggerUser.id,
-                childId: triggerSpace.id,
-                parentId: secondarySpace.id,
-                response,
-            }
-            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
-            axios
-                .post(`${config.apiURL}/respond-to-parent-space-request`, data, options)
-                .then(() => {
-                    updateNotification(id, 'state', response)
-                    markAsSeen()
-                })
-                .catch((error) => console.log('error: ', error))
+        const data = {
+            requestorId: triggerUser.id,
+            childId: triggerSpace.id,
+            parentId: secondarySpace.id,
+            response,
         }
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .post(`${config.apiURL}/respond-to-parent-space-request`, data, options)
+            .then(() => {
+                updateNotification(id, 'state', response)
+                markAsSeen()
+            })
+            .catch((error) => console.log(error))
     }
 
     function respondToWeaveInvite(response) {
-        const accessToken = cookies.get('accessToken')
-        if (!accessToken) {
-            setAlertMessage('Your session has run out. Please log in again to respond.')
-            setAlertModalOpen(true)
-        } else {
-            const data = { postId, notificationId: id, response }
-            const authHeader = { headers: { Authorization: `Bearer ${accessToken}` } }
-            axios
-                .post(`${config.apiURL}/respond-to-gbg-invite`, data, authHeader)
-                .then(() => {
-                    updateNotification(id, 'state', response)
-                    markAsSeen()
-                })
-                .catch((error) => console.log(error))
-        }
+        const data = { postId, notificationId: id, response }
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .post(`${config.apiURL}/respond-to-gbg-invite`, data, options)
+            .then(() => {
+                updateNotification(id, 'state', response)
+                markAsSeen()
+            })
+            .catch((error) => console.log(error))
     }
 
     function linkUrl() {
@@ -322,7 +287,7 @@ function NotificationCard(props: {
 
     useEffect(() => setSeen(notification.seen), [notification])
 
-    // todo: use switch case to render different notification types
+    // todo: use switch case to render different notification types?
 
     return (
         <Row centerX className={`${styles.wrapper} ${!seen && styles.unseen}`}>

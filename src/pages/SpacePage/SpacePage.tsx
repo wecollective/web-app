@@ -57,6 +57,7 @@ function SpacePage(): JSX.Element {
         setIsFollowing,
         setSelectedSpaceSubPage,
     } = useContext(SpaceContext)
+    const { id, handle, access } = spaceData
     const [headerCollapsed, setHeaderColapsed] = useState(false)
     const [accessRequestLoading, setAccessRequestLoading] = useState(false)
     const [followSpaceLoading, setFollowSpaceLoading] = useState(false)
@@ -64,7 +65,7 @@ function SpacePage(): JSX.Element {
     const location = useLocation()
     const spaceHandle = location.pathname.split('/')[2]
     const subpage = location.pathname.split('/')[3]
-    const awaitingSpaceData = spaceHandle !== spaceData.handle
+    const awaitingSpaceData = spaceHandle !== handle
     const { clientWidth } = document.documentElement
     const mobileView = clientWidth < 900
     const tabletView = clientWidth >= 900 && clientWidth < 1200
@@ -83,45 +84,33 @@ function SpacePage(): JSX.Element {
     }
 
     function requestAccess() {
-        const accessToken = cookies.get('accessToken')
-        if (!accessToken) {
-            setAlertMessage('Your session has run out. Please log in again.')
-            setAlertModalOpen(true)
-        } else {
-            setAccessRequestLoading(true)
-            const data = {
-                accountHandle: accountData.handle,
-                accountName: accountData.name,
-                spaceId: spaceData.id,
-            }
-            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
-            axios
-                .post(`${config.apiURL}/request-space-access`, data, options)
-                .then(() => {
-                    setAccessRequestLoading(false)
-                    setSpaceData({ ...spaceData, access: 'pending' })
-                })
-                .catch((error) => console.log(error))
+        setAccessRequestLoading(true)
+        const data = {
+            accountHandle: accountData.handle,
+            accountName: accountData.name,
+            spaceId: id,
         }
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .post(`${config.apiURL}/request-space-access`, data, options)
+            .then(() => {
+                setAccessRequestLoading(false)
+                setSpaceData({ ...spaceData, access: 'pending' })
+            })
+            .catch((error) => console.log(error))
     }
 
     function toggleFollowing() {
-        const accessToken = cookies.get('accessToken')
-        if (!accessToken) {
-            setAlertMessage('Your session has run out. Please log in again.')
-            setAlertModalOpen(true)
-        } else {
-            setFollowSpaceLoading(true)
-            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
-            const data = { spaceId: spaceData.id, isFollowing }
-            axios
-                .post(`${config.apiURL}/toggle-follow-space`, data, options)
-                .then(() => {
-                    setFollowSpaceLoading(false)
-                    setIsFollowing(!isFollowing)
-                })
-                .catch((error) => console.log(error))
-        }
+        setFollowSpaceLoading(true)
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        const data = { spaceId: id, isFollowing }
+        axios
+            .post(`${config.apiURL}/toggle-follow-space`, data, options)
+            .then(() => {
+                setFollowSpaceLoading(false)
+                setIsFollowing(!isFollowing)
+            })
+            .catch((error) => console.log(error))
     }
 
     function followButtonClick() {
@@ -131,22 +120,19 @@ function SpacePage(): JSX.Element {
 
     function renderAccessButton(): JSX.Element | null {
         if (loggedIn) {
-            if (spaceData.access !== 'granted') {
+            if (access !== 'granted') {
                 // show access button
-                let accessText = ''
-                if (spaceData.access === 'pending') accessText = 'Access requested'
-                if (spaceData.access === 'blocked') accessText = 'Request access'
+                let text = ''
+                if (access === 'blocked') text = 'Request access' // allow click
+                if (access === 'pending') text = 'Access requested' // disable click
+                if (access === 'blocked-by-ancestor') text = 'Access blocked by a private ancestor' // disable click
                 return (
                     <Button
-                        icon={spaceData.access === 'pending' ? <SuccessIcon /> : undefined}
-                        text={accessText}
+                        icon={access === 'pending' ? <SuccessIcon /> : undefined}
+                        text={text}
                         color='aqua'
                         loading={accessRequestLoading}
-                        disabled={
-                            awaitingSpaceData ||
-                            spaceData.access === 'pending' ||
-                            accessRequestLoading
-                        }
+                        disabled={awaitingSpaceData || access !== 'blocked' || accessRequestLoading}
                         onClick={requestAccess}
                         style={{ marginRight: 10, marginTop: mobileView ? 5 : 0 }}
                     />
@@ -194,12 +180,12 @@ function SpacePage(): JSX.Element {
     // handle invite token if present
     useEffect(() => {
         // problem: after log in, space data access not updated before token check...
-        if (spaceData.id) {
+        if (id) {
             const urlParams = Object.fromEntries(new URLSearchParams(location.search))
             const { inviteToken } = urlParams
-            if (inviteToken && spaceData.access !== 'granted') {
+            if (inviteToken && access !== 'granted') {
                 if (loggedIn) {
-                    const data = { spaceId: spaceData.id, inviteToken }
+                    const data = { spaceId: id, inviteToken }
                     const accessToken = cookies.get('accessToken')
                     const options = { headers: { Authorization: `Bearer ${accessToken}` } }
                     axios
@@ -218,7 +204,7 @@ function SpacePage(): JSX.Element {
                 }
             }
         }
-    }, [spaceData.id, spaceData.access])
+    }, [id, access])
 
     // const wecoSpace =
     //     spaceData.id && (spaceData.id === 51 || spaceData.SpaceAncestors.find((a) => a.id === 51))

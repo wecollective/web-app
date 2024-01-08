@@ -114,7 +114,7 @@ function PostCard(props: {
     const { liked, rated, reposted, commented, linked } = accountReactions
     const [parentLinks, setParentLinks] = useState<any>(null)
     const [likeLoading, setLikeLoading] = useState(false)
-    const [draggable, setDraggable] = useState(true)
+    const [draggable, setDraggable] = useState(['post', 'comment', 'bead'].includes(type))
     const [topicImage, setTopicImage] = useState('')
     const [menuOpen, setMenuOpen] = useState(false)
     const [likeModalOpen, setLikeModalOpen] = useState(false)
@@ -249,7 +249,7 @@ function PostCard(props: {
         if (loggedIn) getAccountReactions()
         else setButtonsDisabled(false)
         if (type !== 'post') getParentLinks()
-        addDragEvents()
+        if (['post', 'comment', 'bead'].includes(type)) addDragEvents()
     }, [])
 
     return (
@@ -259,7 +259,7 @@ function PostCard(props: {
             className={`${styles.post} ${styles[location]} ${styling && styles.styling}`}
             style={style}
             // style={{ ...style, backgroundColor: color }}
-            draggable={['post', 'comment', 'bead'].includes(type) && draggable}
+            draggable={draggable}
         >
             {/* <div className={styles.watermark} /> */}
             {parentLinks && (

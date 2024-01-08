@@ -47,11 +47,10 @@ function ToyBoxItem(props: {
         const toyboxItem = document.getElementById(itemId)
         toyboxItem?.addEventListener('dragover', (e) => e.preventDefault())
         toyboxItem?.addEventListener('mouseenter', () => {
-            updateDragItem({ type: 'post', data, fromToyBox: true })
+            updateDragItem({ type, data, fromToyBox: true })
         })
         toyboxItem?.addEventListener('dragstart', (e) => {
             toyboxItem.classList.add(styles.dragging)
-            // updateDragItem({ type, data, fromToyBox: true })
             const dragItem = document.getElementById('drag-item')
             e.dataTransfer?.setDragImage(dragItem!, 50, 50)
         })
