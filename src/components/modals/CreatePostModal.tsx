@@ -21,7 +21,7 @@ import UrlPreview from '@components/cards/PostCard/UrlCard'
 import CommentInput from '@components/draft-js/CommentInput'
 import DraftTextEditor from '@components/draft-js/DraftTextEditor'
 import AddPostSpacesModal from '@components/modals/AddPostSpacesModal'
-import GBGSettingsModal from '@components/modals/GBGSettingsModal'
+import GameSettingsModal from '@components/modals/GameSettingsModal'
 import ImageModal from '@components/modals/ImageModal'
 import Modal from '@components/modals/Modal'
 import NextBeadModal from '@components/modals/NextBeadModal'
@@ -31,19 +31,22 @@ import { UserContext } from '@contexts/UserContext'
 import config from '@src/Config'
 import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import {
+    GAMES,
+    GAME_TYPES,
+    GameSettings,
     MEDIA_TYPES,
     MediaType,
     allowedAudioTypes,
     allowedImageTypes,
     audioMBLimit,
     capitalise,
-    defaultGBGSettings,
     findDraftLength,
     findSearchableText,
     findUrlSearchableText,
     formatTimeMMSS,
     getDraftPlainText,
     imageMBLimit,
+    isGame,
     postTypeIcons,
     scrapeUrl,
     simplifyText,
@@ -94,7 +97,7 @@ function MediaButton(props: { type: string; selected: boolean; onClick: () => vo
     )
 }
 
-const MODAL_TYPES = ['glass-bead-game', 'card', 'wisdom-gym', 'poll', 'post'] as const
+const MODAL_TYPES = [...GAME_TYPES, 'card', 'poll', 'post'] as const
 
 type ModalType = (typeof MODAL_TYPES)[number]
 
@@ -107,7 +110,7 @@ export type CreatePostModalSettings = { type: ModalType; source?: { type: Source
 // eslint-disable-next-line react/require-default-props
 export type CreatePostModalProps = { settings: CreatePostModalSettings; onClose: () => void }
 
-const MODAL_HEADER: { [key in ModalType]: string } = {
+const MODAL_HEADER: Record<ModalType, string> = {
     'glass-bead-game': 'New Glass Bead Game',
     card: 'New Card',
     poll: 'New Governance Poll',
@@ -474,10 +477,11 @@ function CreatePostModal({
         setCard({ ...card, [face]: { ...cardFace, images: [] } })
     }
 
-    // gbg
-    const [GBGSettingsModalOpen, setGBGSettingsModalOpen] = useState(false)
-    const [GBGSettings, setGBGSettings] = useState<any>(defaultGBGSettings)
-    const { synchronous, multiplayer, players, totalMoves, movesPerPlayer } = GBGSettings
+    // game
+    const [gameSettingsModalOpen, setGameSettingsModalOpen] = useState(false)
+    const [gameSettings, setGameSettings] = useState<GameSettings>(
+        () => type in GAMES && GAMES[type].defaultSettings
+    )
     const [topicOptions, setTopicOptions] = useState<any[]>([])
     const [topicImage, setTopicImage] = useState<any>({ id: uuidv4(), Image: { url: '' } })
     const [beads, setBeads] = useState<any[]>([])
@@ -524,48 +528,14 @@ function CreatePostModal({
         setErrors([])
     }
 
-    function renderGBGInfoRow() {
-        return (
-            <Row spaceBetween centerY className={styles.gbgInfo}>
-                {players.length ? (
-                    <>
-                        <FlagImageHighlights
-                            type='user'
-                            imagePaths={players.map((p) => p.flagImagePath)}
-                            imageSize={30}
-                            text={`${players.length} players`}
-                        />
-                        <Row centerY>
-                            <p>Waiting for {players.length - 1}</p>
-                            <FlagImageHighlights
-                                type='user'
-                                imagePaths={players
-                                    .filter((p) => p.id !== accountData.id)
-                                    .map((p) => p.flagImagePath)}
-                                imageSize={30}
-                                style={{ marginLeft: 10 }}
-                            />
-                        </Row>
-                    </>
-                ) : (
-                    <>
-                        <Row centerY>
-                            <UsersIcon />
-                            <p>Open to all users</p>
-                        </Row>
-                        <p>Waiting for move: 1 {totalMoves ? `/ ${totalMoves}` : ''}</p>
-                    </>
-                )}
-            </Row>
-        )
-    }
-
     function removeBead(beadIndex) {
         setBeads([...beads.filter((bead, i) => i + 1 !== beadIndex)])
     }
 
     function renderBeads() {
-        const showNextBeadButton = !multiplayer && (!totalMoves || beads.length < totalMoves)
+        const showNextBeadButton =
+            !gameSettings.multiplayer &&
+            (!gameSettings.totalMoves || beads.length < gameSettings.totalMoves)
         // if (postType === 'gbg-from-post' && synchronous) showNextBeadButton = false
         return (
             <Row centerX>
@@ -683,12 +653,12 @@ function CreatePostModal({
             front.mediaTypes = frontMediaTypes.join(',')
             back.mediaTypes = backMediaTypes.join(',')
         }
-        if (mediaTypes.includes('glass-bead-game')) {
+        if (mediaTypes.some(isGame)) {
             post.glassBeadGame = {
-                settings: GBGSettings,
+                settings: gameSettings,
                 topicImage,
                 topicGroup: findTopicGroup(),
-                beads: !multiplayer && !synchronous ? beads : [],
+                beads: !gameSettings.multiplayer && !gameSettings.synchronous ? beads : [],
             }
         }
         if (source) post.source = { type: source.type, id: source.id, linkDescription }
@@ -842,12 +812,12 @@ function CreatePostModal({
             ) : (
                 <Column centerX style={{ width: '100%' }}>
                     <h1>{MODAL_HEADER[type]}</h1>
-                    {mediaTypes.includes('glass-bead-game') && (
+                    {mediaTypes.some(isGame) && GAMES[type].settingsEditable && (
                         <Button
                             text='Game settings'
                             color='aqua'
                             icon={<SettingsIcon />}
-                            onClick={() => setGBGSettingsModalOpen(true)}
+                            onClick={() => setGameSettingsModalOpen(true)}
                             style={{ marginBottom: 20 }}
                         />
                     )}
@@ -887,7 +857,7 @@ function CreatePostModal({
                             )}
                         </Row>
                         <Column className={styles.content}>
-                            {showTitle && !mediaTypes.includes('glass-bead-game') && (
+                            {showTitle && !mediaTypes.some(isGame) && (
                                 <Row centerY spaceBetween className={styles.title}>
                                     <input
                                         placeholder='Title...'
@@ -908,7 +878,7 @@ function CreatePostModal({
                                     />
                                 </Row>
                             )}
-                            {mediaTypes.includes('glass-bead-game') && (
+                            {mediaTypes.some(isGame) && (
                                 <Row centerY spaceBetween className={styles.topic}>
                                     <Column centerX centerY className={styles.imageWrapper}>
                                         {topicImage.Image.url && (
@@ -1262,12 +1232,69 @@ function CreatePostModal({
                                     </Row>
                                 </Column>
                             )}
-                            {mediaTypes.includes('glass-bead-game') && (
-                                <Column className={styles.gbg}>
-                                    {!synchronous && (
-                                        <Column>{multiplayer && renderGBGInfoRow()}</Column>
+                            {mediaTypes.some(isGame) && (
+                                <Column className={styles.game}>
+                                    {!gameSettings.synchronous && (
+                                        <Column>
+                                            {gameSettings.multiplayer && (
+                                                <Row
+                                                    spaceBetween
+                                                    centerY
+                                                    className={styles.gameInfo}
+                                                >
+                                                    {gameSettings.players.length ? (
+                                                        <>
+                                                            <FlagImageHighlights
+                                                                type='user'
+                                                                imagePaths={gameSettings.players.map(
+                                                                    (p) => p.flagImagePath
+                                                                )}
+                                                                imageSize={30}
+                                                                text={`${gameSettings.players.length} players`}
+                                                            />
+                                                            <Row centerY>
+                                                                <p>
+                                                                    Waiting for{' '}
+                                                                    {gameSettings.players.length -
+                                                                        1}
+                                                                </p>
+                                                                <FlagImageHighlights
+                                                                    type='user'
+                                                                    imagePaths={gameSettings.players
+                                                                        .filter(
+                                                                            (p) =>
+                                                                                p.id !==
+                                                                                accountData.id
+                                                                        )
+                                                                        .map(
+                                                                            (p) => p.flagImagePath
+                                                                        )}
+                                                                    imageSize={30}
+                                                                    style={{ marginLeft: 10 }}
+                                                                />
+                                                            </Row>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Row centerY>
+                                                                <UsersIcon />
+                                                                <p>Open to all users</p>
+                                                            </Row>
+                                                            <p>
+                                                                Waiting for move: 1{' '}
+                                                                {gameSettings.totalMoves
+                                                                    ? `/ ${gameSettings.totalMoves}`
+                                                                    : ''}
+                                                            </p>
+                                                        </>
+                                                    )}
+                                                </Row>
+                                            )}
+                                        </Column>
                                     )}
-                                    {!synchronous && !multiplayer && renderBeads()}
+                                    {!gameSettings.synchronous &&
+                                        !gameSettings.multiplayer &&
+                                        renderBeads()}
                                 </Column>
                             )}
                         </Column>
@@ -1310,21 +1337,21 @@ function CreatePostModal({
                     close={() => setImageModalOpen(false)}
                 />
             )}
-            {GBGSettingsModalOpen && (
-                <GBGSettingsModal
-                    settings={GBGSettings}
+            {gameSettingsModalOpen && (
+                <GameSettingsModal
+                    settings={gameSettings}
                     setSettings={(newSettings) => {
-                        setGBGSettings(newSettings)
+                        setGameSettings(newSettings)
                         setErrors([])
                     }}
-                    close={() => setGBGSettingsModalOpen(false)}
+                    close={() => setGameSettingsModalOpen(false)}
                 />
             )}
             {nextBeadModalOpen && (
                 <NextBeadModal
                     preview
-                    settings={GBGSettings}
-                    players={GBGSettings.players}
+                    settings={gameSettings}
+                    players={gameSettings.players}
                     onSave={(bead) => {
                         setBeads([...beads, bead])
                         setErrors([])

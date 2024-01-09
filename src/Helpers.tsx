@@ -17,6 +17,7 @@ import { EditorState, convertFromRaw } from 'draft-js'
 import React from 'react'
 import Cookies from 'universal-cookie'
 import { v4 as uuidv4 } from 'uuid'
+import { IUser } from './Interfaces'
 
 // constants
 export const megaByte = 1048576
@@ -29,6 +30,65 @@ export const maxPostChars = 5000
 export const maxUrls = 5
 const cookies = new Cookies()
 
+export type GameSettings = {
+    synchronous: boolean
+    multiplayer: boolean
+    players: IUser[]
+    startTime?: string
+    endTime?: string
+    allowedBeadTypes: MediaType[]
+    totalMoves?: number
+    movesPerPlayer?: number
+    moveDuration?: number
+    introDuration?: number
+    intervalDuration?: number
+    outroDuration?: number
+    characterLimit?: number
+    moveTimeWindow?: number
+}
+
+type GameConfig = {
+    defaultSettings: GameSettings
+    settingsEditable?: boolean
+}
+
+export const GAMES: Record<GameType, GameConfig> = {
+    'glass-bead-game': {
+        defaultSettings: {
+            synchronous: true,
+            startTime: '',
+            endTime: '',
+            multiplayer: true,
+            players: [],
+            allowedBeadTypes: ['audio'],
+            totalMoves: 0,
+            movesPerPlayer: 5,
+            moveDuration: 60,
+            introDuration: 0,
+            intervalDuration: 0,
+            outroDuration: 0,
+            characterLimit: 0,
+            moveTimeWindow: 0,
+        },
+        settingsEditable: true,
+    },
+    'wisdom-gym': {
+        defaultSettings: {
+            synchronous: true,
+            multiplayer: true,
+            players: [],
+            allowedBeadTypes: ['audio'],
+        },
+        settingsEditable: false,
+    },
+}
+
+export const GAME_TYPES = ['glass-bead-game', 'wisdom-gym'] as const
+
+export type GameType = (typeof GAME_TYPES)[number]
+
+export const isGame = (type: string): type is GameType => GAME_TYPES.includes(type as GameType)
+
 export const MEDIA_TYPES = [
     'text',
     'url',
@@ -36,7 +96,7 @@ export const MEDIA_TYPES = [
     'audio',
     'event',
     'poll',
-    'glass-bead-game',
+    ...GAME_TYPES,
     'card',
 ] as const
 
@@ -130,23 +190,6 @@ export const defaultSpaceData = {
     totalRatings: 0,
     totalPosts: 0,
     totalChildren: 0,
-}
-
-export const defaultGBGSettings = {
-    synchronous: true,
-    startTime: '',
-    endTime: '',
-    multiplayer: true,
-    players: [],
-    allowedBeadTypes: ['audio'],
-    totalMoves: 0,
-    movesPerPlayer: 5,
-    moveDuration: 60,
-    introDuration: 0,
-    intervalDuration: 0,
-    outroDuration: 0,
-    characterLimit: 0,
-    moveTimeWindow: 0,
 }
 
 export const postTypeIcons = {

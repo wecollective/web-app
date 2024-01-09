@@ -8,7 +8,7 @@ import LoadingWheel from '@components/animations/LoadingWheel'
 import BeadCard from '@components/cards/PostCard/BeadCard'
 import NextBeadModal from '@components/modals/NextBeadModal'
 import config from '@src/Config'
-import { defaultGBGSettings, formatTimeHHDDMMSS, pluralise } from '@src/Helpers'
+import { GAMES, formatTimeHHDDMMSS, pluralise } from '@src/Helpers'
 import { AccountContext } from '@src/contexts/AccountContext'
 import styles from '@styles/components/cards/PostCard/GlassBeadGameCard.module.scss'
 import { DNAIcon, DoorIcon, PlusIcon, UsersIcon } from '@svgs/all'
@@ -25,7 +25,7 @@ function GlassBeadGame(props: {
     const { postId, isOwnPost, setTopicImage } = props
     const { accountData, setAlertMessage, setAlertModalOpen, loggedIn } = useContext(AccountContext)
     const [loading, setLoading] = useState(true)
-    const [game, setGame] = useState<any>(defaultGBGSettings)
+    const [game, setGame] = useState<any>(GAMES['glass-bead-game'].defaultSettings)
     const {
         synchronous,
         multiplayer,

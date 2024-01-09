@@ -1,10 +1,10 @@
 /* eslint-disable no-underscore-dangle */
 import Column from '@components/Column'
 import Modal from '@components/modals/Modal'
-import styles from '@styles/components/modals/GBGHelpModal.module.scss'
+import styles from '@styles/components/modals/GameHelpModal.module.scss'
 import React from 'react'
 
-function GBGHelpModal(props: { close: () => void }): JSX.Element {
+function GameHelpModal(props: { close: () => void }): JSX.Element {
     const { close } = props
 
     return (
@@ -38,4 +38,4 @@ function GBGHelpModal(props: { close: () => void }): JSX.Element {
     )
 }
 
-export default GBGHelpModal
+export default GameHelpModal
