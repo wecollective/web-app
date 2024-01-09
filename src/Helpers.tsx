@@ -29,6 +29,19 @@ export const maxPostChars = 5000
 export const maxUrls = 5
 const cookies = new Cookies()
 
+export const MEDIA_TYPES = [
+    'text',
+    'url',
+    'image',
+    'audio',
+    'event',
+    'poll',
+    'glass-bead-game',
+    'card',
+] as const
+
+export type MediaType = (typeof MEDIA_TYPES)[number]
+
 export const weekDays = [
     'Monday',
     'Tuesday',

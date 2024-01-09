@@ -31,6 +31,8 @@ import { UserContext } from '@contexts/UserContext'
 import config from '@src/Config'
 import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import {
+    MEDIA_TYPES,
+    MediaType,
     allowedAudioTypes,
     allowedImageTypes,
     audioMBLimit,
@@ -92,20 +94,40 @@ function MediaButton(props: { type: string; selected: boolean; onClick: () => vo
     )
 }
 
-function CreatePostModal(): JSX.Element {
-    const {
-        accountData,
-        setCreatePostModalOpen,
-        createPostModalSettings,
-        setCreatePostModalSettings,
-    } = useContext(AccountContext)
-    const { sourceType, sourceId, game, governance } = createPostModalSettings
+const MODAL_TYPES = ['glass-bead-game', 'card', 'wisdom-gym', 'poll', 'post'] as const
+
+type ModalType = (typeof MODAL_TYPES)[number]
+
+const SOURCE_TYPES = ['post']
+
+type SourceType = (typeof SOURCE_TYPES)[number]
+
+export type CreatePostModalSettings = { type: ModalType; source?: { type: SourceType; id: string } }
+
+// eslint-disable-next-line react/require-default-props
+export type CreatePostModalProps = { settings: CreatePostModalSettings; onClose: () => void }
+
+const MODAL_HEADER: { [key in ModalType]: string } = {
+    'glass-bead-game': 'New Glass Bead Game',
+    card: 'New Card',
+    poll: 'New Governance Poll',
+    'wisdom-gym': 'New Wisdom Gym',
+    post: 'New Post',
+}
+
+function CreatePostModal({
+    settings: { type, source },
+    onClose,
+}: CreatePostModalProps): JSX.Element {
+    const { accountData } = useContext(AccountContext)
     const { spaceData, spacePosts, setSpacePosts, governancePolls, setGovernancePolls } =
         useContext(SpaceContext)
     const { userPosts, setUserPosts } = useContext(UserContext)
     const [loading, setLoading] = useState(false)
     const [linkDescription, setLinkDescription] = useState('')
-    const [mediaTypes, setMediaTypes] = useState<string[]>([])
+    const [mediaTypes, setMediaTypes] = useState<MediaType[]>(() =>
+        MEDIA_TYPES.includes(type as MediaType) ? [type as MediaType] : []
+    )
     const [spaces, setSpaces] = useState<any[]>([spaceData.id ? spaceData : defaultSelectedSpace])
     const [showTitle, setShowTitle] = useState(true)
     const [title, setTitle] = useState('')
@@ -122,24 +144,14 @@ function CreatePostModal(): JSX.Element {
     const maxUrls = 5
     const location = useLocation()
     const [x, page, pageHandle, subPage] = location.pathname.split('/')
-    const contentTypes = ['image', 'audio', 'event']
-    if (!governance) contentTypes.push('poll')
-
-    function closeModal() {
-        setCreatePostModalOpen(false)
-        setCreatePostModalSettings({})
+    const contentTypes: MediaType[] = ['image', 'audio', 'event']
+    if (type !== 'poll') {
+        contentTypes.push('poll')
     }
 
-    function findModalHeader() {
-        if (game === 'glass-bead-game') return 'New Glass Bead Game'
-        if (game === 'card') return 'New card'
-        if (governance) return 'New governance poll'
-        return 'New post'
-    }
-
-    function initializeMediaDropBox(type) {
+    function initializeMediaDropBox(mediaType: MediaType) {
         let dragLeaveCounter = 0 // used to avoid dragleave firing when hovering child elements
-        const dropbox = document.getElementById(`${type}-drop`)
+        const dropbox = document.getElementById(`${mediaType}-drop`)
         if (dropbox) {
             dropbox.addEventListener('dragover', (e) => e.preventDefault())
             dropbox.addEventListener('dragenter', () => {
@@ -155,18 +167,18 @@ function CreatePostModal(): JSX.Element {
                 dragLeaveCounter = 0
                 dropbox.classList.remove(styles.dragOver)
                 if (e.dataTransfer) {
-                    if (type === 'image') addImageFiles(e.dataTransfer)
-                    if (type === 'audio') addAudioFiles(e.dataTransfer)
+                    if (mediaType === 'image') addImageFiles(e.dataTransfer)
+                    if (mediaType === 'audio') addAudioFiles(e.dataTransfer)
                 }
             })
         }
     }
 
-    function mediaButtonClick(type) {
-        if (mediaTypes.includes(type)) setMediaTypes(mediaTypes.filter((t) => t !== type))
+    function mediaButtonClick(mediaType: MediaType) {
+        if (mediaTypes.includes(mediaType)) setMediaTypes(mediaTypes.filter((t) => t !== mediaType))
         else {
-            Promise.all([setMediaTypes([...mediaTypes, type])]).then(() => {
-                if (['image', 'audio'].includes(type)) initializeMediaDropBox(type)
+            Promise.all([setMediaTypes([...mediaTypes, mediaType])]).then(() => {
+                if (['image', 'audio'].includes(mediaType)) initializeMediaDropBox(mediaType)
             })
         }
     }
@@ -650,7 +662,7 @@ function CreatePostModal(): JSX.Element {
                 locked: pollAnswersLocked,
                 type: simplifyText(pollType),
             }
-            if (governance) {
+            if (type === 'poll') {
                 post.poll.governance = true
                 post.poll.action = pollAction === 'None' ? null : pollAction
                 post.poll.threshold = pollAction === 'Create spaces' ? pollThreshold : null
@@ -679,8 +691,8 @@ function CreatePostModal(): JSX.Element {
                 beads: !multiplayer && !synchronous ? beads : [],
             }
         }
-        if (sourceId) post.source = { type: sourceType, id: sourceId, linkDescription }
-        if (governance) post.governance = { action: pollAction, threshold: pollThreshold }
+        if (source) post.source = { type: source.type, id: source.id, linkDescription }
+        if (type === 'poll') post.governance = { action: pollAction, threshold: pollThreshold }
         post.searchableText = findSearchableText(post)
         // validate post
         const validation = validatePost(post)
@@ -707,20 +719,14 @@ function CreatePostModal(): JSX.Element {
                         page === 'u' && subPage === 'posts' && pageHandle === accountData.handle
                     if (addToSpaceFeed) setSpacePosts([newPost, ...spacePosts])
                     if (addToUserFeed) setUserPosts([newPost, ...userPosts])
-                    if (governance) setGovernancePolls([...governancePolls, newPost])
+                    if (type === 'poll') setGovernancePolls([...governancePolls, newPost])
                     setLoading(false)
                     setSaved(true)
-                    setTimeout(() => closeModal(), 1000)
+                    setTimeout(() => onClose(), 1000)
                 })
                 .catch((error) => console.log(error))
         }
     }
-
-    // set media types
-    useEffect(() => {
-        if (game) setMediaTypes([game])
-        if (governance) setMediaTypes(['poll'])
-    }, [])
 
     // remove errors and initialise date picker if mediaTypes include event
     useEffect(() => {
@@ -830,12 +836,12 @@ function CreatePostModal(): JSX.Element {
     }, [pollAction])
 
     return (
-        <Modal className={styles.wrapper} close={closeModal} centerX confirmClose={!saved}>
+        <Modal className={styles.wrapper} close={onClose} centerX confirmClose={!saved}>
             {saved ? (
                 <SuccessMessage text='Post created!' />
             ) : (
                 <Column centerX style={{ width: '100%' }}>
-                    <h1>{findModalHeader()}</h1>
+                    <h1>{MODAL_HEADER[type]}</h1>
                     {mediaTypes.includes('glass-bead-game') && (
                         <Button
                             text='Game settings'
@@ -845,9 +851,9 @@ function CreatePostModal(): JSX.Element {
                             style={{ marginBottom: 20 }}
                         />
                     )}
-                    {sourceId && (
+                    {source && (
                         <Column centerX style={{ width: '100%', maxWidth: 350, marginBottom: 20 }}>
-                            <p style={{ marginBottom: 10 }}>linked from post ID: {sourceId}</p>
+                            <p style={{ marginBottom: 10 }}>linked from post ID: {source.id}</p>
                             <Input
                                 type='text'
                                 placeholder='Link description...'
@@ -869,7 +875,7 @@ function CreatePostModal(): JSX.Element {
                             />
                             <PostSpaces spaces={spaces} preview />
                             <p className='grey'>now</p>
-                            {!governance && (
+                            {type !== 'poll' && (
                                 <button
                                     className={styles.addSpacesButton}
                                     type='button'
@@ -1119,7 +1125,7 @@ function CreatePostModal(): JSX.Element {
                                             onOffText
                                             style={{ margin: '5px 10px' }}
                                         />
-                                        {governance && (
+                                        {type === 'poll' && (
                                             <DropDown
                                                 title='Action'
                                                 options={['None', 'Create spaces']} // 'Assign Moderators'
@@ -1130,7 +1136,7 @@ function CreatePostModal(): JSX.Element {
                                                 style={{ margin: '5px 10px' }}
                                             />
                                         )}
-                                        {governance && pollAction === 'Create spaces' && (
+                                        {type === 'poll' && pollAction === 'Create spaces' && (
                                             <Row centerY style={{ margin: '5px 10px' }}>
                                                 <p>Threshold</p>
                                                 <Input
@@ -1268,12 +1274,12 @@ function CreatePostModal(): JSX.Element {
                     </Column>
                     {!!contentTypes.length && (
                         <Row style={{ marginBottom: 20 }}>
-                            {contentTypes.map((type) => (
+                            {contentTypes.map((contentType) => (
                                 <MediaButton
-                                    key={type}
-                                    type={type}
-                                    selected={mediaTypes.includes(type)}
-                                    onClick={() => mediaButtonClick(type)}
+                                    key={contentType}
+                                    type={contentType}
+                                    selected={mediaTypes.includes(contentType)}
+                                    onClick={() => mediaButtonClick(contentType)}
                                 />
                             ))}
                         </Row>
