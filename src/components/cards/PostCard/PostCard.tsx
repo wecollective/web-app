@@ -387,27 +387,39 @@ function PostCard(props: {
                     <Urls
                         key={updatedAt}
                         postId={id}
-                        urlBlocks={UrlBlocks.map((block) => {
-                            return { ...block.Post, Url: block.Post.MediaLink.Url }
-                        })}
+                        urlBlocks={
+                            UrlBlocks
+                                ? UrlBlocks.map((block) => {
+                                      return { ...block.Post, Url: block.Post.MediaLink.Url }
+                                  })
+                                : null
+                        }
                         style={{ marginBottom: 10 }}
                     />
                 )}
                 {!isBlock && mediaTypes.includes('image') && (
                     <Images
                         postId={id}
-                        imageBlocks={ImageBlocks.map((block) => {
-                            return { ...block.Post, Image: block.Post.MediaLink.Image }
-                        })}
+                        imageBlocks={
+                            ImageBlocks
+                                ? ImageBlocks.map((block) => {
+                                      return { ...block.Post, Image: block.Post.MediaLink.Image }
+                                  })
+                                : null
+                        }
                         style={{ marginBottom: 10 }}
                     />
                 )}
                 {!isBlock && mediaTypes.includes('audio') && (
                     <Audios
                         postId={id}
-                        audioBlocks={AudioBlocks.map((block) => {
-                            return { ...block.Post, Audio: block.Post.MediaLink.Audio }
-                        })}
+                        audioBlocks={
+                            AudioBlocks
+                                ? AudioBlocks.map((block) => {
+                                      return { ...block.Post, Audio: block.Post.MediaLink.Audio }
+                                  })
+                                : null
+                        }
                         style={{ marginBottom: 10 }}
                     />
                 )}
