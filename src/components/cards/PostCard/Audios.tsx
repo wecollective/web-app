@@ -1,20 +1,22 @@
 import Column from '@components/Column'
+import Row from '@components/Row'
+import LoadingWheel from '@components/animations/LoadingWheel'
 import AudioCard from '@components/cards/PostCard/AudioCard'
 import config from '@src/Config'
 import styles from '@styles/components/cards/PostCard/Audios.module.scss'
 import axios from 'axios'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 function Audios(props: { postId: number; audioBlocks?: any[]; style?: any }): JSX.Element {
     const { postId, audioBlocks, style } = props
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(false)
     const [blocks, setBlocks] = useState<any[]>(audioBlocks || [])
     const [totalBlocks, setTotalBlocks] = useState(0)
     // const [startIndex, setStartIndex] = useState(0)
     // const [modalOpen, setModalOpen] = useState(false)
 
-    function getAudio(offset: number) {
+    function getNextAudios(offset: number) {
         setLoading(true)
         axios
             .get(`${config.apiURL}/post-audio?postId=${postId}&offset=${offset}`)
@@ -32,6 +34,18 @@ function Audios(props: { postId: number; audioBlocks?: any[]; style?: any }): JS
     //         getAudio(blocks.length)
     //     }
     // }
+
+    useEffect(() => {
+        // blocks retrieved seperately for comments
+        if (!audioBlocks) getNextAudios(0)
+    }, [])
+
+    if (loading)
+        return (
+            <Row centerX centerY className={styles.loading} style={style}>
+                <LoadingWheel size={30} />
+            </Row>
+        )
 
     return (
         <Column style={style} className={styles.wrapper}>
@@ -63,7 +77,7 @@ function Audios(props: { postId: number; audioBlocks?: any[]; style?: any }): JS
 }
 
 Audios.defaultProps = {
-    audioBlocks: [],
+    audioBlocks: null,
     style: null,
 }
 

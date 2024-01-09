@@ -31,6 +31,7 @@ function Comments(props: {
         axios
             .get(`${config.apiURL}/post-comments?postId=${id}&offset=${offset}&filter=${filter}`)
             .then((res) => {
+                // console.log('post-comments: ', res.data)
                 const newComments = offset ? [...comments, ...res.data.comments] : res.data.comments
                 setComments(newComments)
                 setRemainingComments(res.data.totalChildren - newComments.length)

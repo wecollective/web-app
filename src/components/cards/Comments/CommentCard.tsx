@@ -72,6 +72,9 @@ function CommentCard(props: {
         updatedAt,
         Creator,
         Comments,
+        // UrlBlocks,
+        // ImageBlocks,
+        // AudioBlocks,
     } = comment
     const [loading, setLoading] = useState(false)
     const [remainingComments, setRemainingComments] = useState(totalChildComments - Comments.length)
@@ -407,6 +410,43 @@ function CommentCard(props: {
                                             {mediaTypes.includes('audio') && (
                                                 <Audios postId={id} style={{ margin: '10px 0' }} />
                                             )}
+                                            {/* {mediaTypes.includes('url') && (
+                                                <Urls
+                                                    key={updatedAt}
+                                                    postId={id}
+                                                    urlBlocks={UrlBlocks.map((block) => {
+                                                        return {
+                                                            ...block.Post,
+                                                            Url: block.Post.MediaLink.Url,
+                                                        }
+                                                    })}
+                                                    style={{ marginBottom: 10 }}
+                                                />
+                                            )}
+                                            {mediaTypes.includes('image') && (
+                                                <Images
+                                                    postId={id}
+                                                    imageBlocks={ImageBlocks.map((block) => {
+                                                        return {
+                                                            ...block.Post,
+                                                            Image: block.Post.MediaLink.Image,
+                                                        }
+                                                    })}
+                                                    style={{ marginBottom: 10 }}
+                                                />
+                                            )}
+                                            {mediaTypes.includes('audio') && (
+                                                <Audios
+                                                    postId={id}
+                                                    audioBlocks={AudioBlocks.map((block) => {
+                                                        return {
+                                                            ...block.Post,
+                                                            Audio: block.Post.MediaLink.Audio,
+                                                        }
+                                                    })}
+                                                    style={{ marginBottom: 10 }}
+                                                />
+                                            )} */}
                                         </Column>
                                     )}
                                     {selected && state === 'active' && (
