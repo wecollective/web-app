@@ -23,13 +23,13 @@ function Images(props: { postId: number; imageBlocks?: any[]; style?: any }): JS
     const [modalOpen, setModalOpen] = useState(false)
 
     function getNextImages(offset: number) {
-        setLoading(true)
+        if (!offset) setLoading(true)
         axios
             .get(`${config.apiURL}/post-images?postId=${postId}&offset=${offset}`)
             .then((res) => {
                 setBlocks([...blocks, ...res.data.blocks])
                 setTotalBlocks(res.data.total)
-                setLoading(false)
+                if (!offset) setLoading(false)
             })
             .catch((error) => console.log(error))
     }
