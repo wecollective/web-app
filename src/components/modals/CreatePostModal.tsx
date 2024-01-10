@@ -17,7 +17,7 @@ import AudioCard from '@components/cards/PostCard/AudioCard'
 import BeadCard from '@components/cards/PostCard/BeadCard'
 import PollAnswer from '@components/cards/PostCard/PollAnswer'
 import PostSpaces from '@components/cards/PostCard/PostSpaces'
-import UrlPreview from '@components/cards/PostCard/UrlCard'
+import UrlCard from '@components/cards/PostCard/UrlCard'
 import CommentInput from '@components/draft-js/CommentInput'
 import DraftTextEditor from '@components/draft-js/DraftTextEditor'
 import AddPostSpacesModal from '@components/modals/AddPostSpacesModal'
@@ -961,7 +961,7 @@ function CreatePostModal(): JSX.Element {
                                 }}
                             />
                             {urls.map((u) => (
-                                <UrlPreview
+                                <UrlCard
                                     key={u.url}
                                     type='post'
                                     urlData={u}

@@ -4,7 +4,7 @@ import Row from '@components/Row'
 import LoadingWheel from '@components/animations/LoadingWheel'
 import styles from '@styles/components/cards/PostCard/UrlCard.module.scss'
 import { LinkIcon } from '@svgs/all'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 function UrlCard(props: {
     type: 'post' | 'bead'
@@ -25,6 +25,8 @@ function UrlCard(props: {
             setWorkingImage(`//images.weserv.nl/?url=${workingImage}`)
         } else setWorkingImage('')
     }
+
+    useEffect(() => setWorkingImage(image), [image])
 
     if (loading)
         return (
