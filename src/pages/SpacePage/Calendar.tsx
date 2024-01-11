@@ -176,7 +176,7 @@ function Calendar(): JSX.Element {
                 <Modal
                     centerX
                     close={() => setEventModalOpen(false)}
-                    style={{ maxWidth: mobileView ? null : 900 }}
+                    style={{ width: '100vw', maxWidth: 900 }}
                 >
                     {selectedPost ? (
                         <PostCard location='post-page' post={selectedPost} />
