@@ -247,6 +247,10 @@ function CommentCard(props: {
     }, [collapsed])
 
     useEffect(() => {
+        if (showMutedComment) addSelectionEvents()
+    }, [showMutedComment])
+
+    useEffect(() => {
         if (selected && loggedIn) getAccountReactions()
         else setButtonsDisabled(false)
     }, [selected])
