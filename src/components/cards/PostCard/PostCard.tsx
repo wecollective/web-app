@@ -86,7 +86,7 @@ function PostCard(props: {
     const [post, setPost] = useState(postData)
     const {
         id,
-        type,
+        type, // post, comment, bead, poll-answer, card-face, gbg-room-comment, url-block, image-block, audio-block
         mediaTypes,
         title,
         text,
@@ -217,7 +217,7 @@ function PostCard(props: {
     function toggleLike() {
         setLikeLoading(true)
         if (loggedIn) {
-            const data = { type: 'post', id } as any
+            const data = { type, id } as any
             if (!liked) data.spaceId = location.includes('space') ? spaceData.id : null
             const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
             axios
@@ -559,7 +559,7 @@ function PostCard(props: {
                 )}
                 {likeModalOpen && (
                     <LikeModal
-                        itemType='post'
+                        itemType={type}
                         itemData={{ ...post, liked: accountReactions.liked }}
                         updateItem={() => {
                             setPost({ ...post, totalLikes: totalLikes + (liked ? -1 : 1) })
@@ -577,7 +577,7 @@ function PostCard(props: {
                 )}
                 {ratingModalOpen && (
                     <RatingModal
-                        itemType='post'
+                        itemType={type}
                         itemData={{ ...post, rated: accountReactions.rated }}
                         updateItem={() => {
                             setPost({ ...post, totalRatings: totalRatings + (rated ? -1 : 1) })

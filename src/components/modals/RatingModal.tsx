@@ -15,15 +15,14 @@ import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 function RatingModal(props: {
-    itemType: 'post'
+    itemType: string // all post types + link
     itemData: any
     updateItem: () => void
     close: () => void
 }): JSX.Element {
     const { itemType, itemData, updateItem, close } = props
     const { id, rated } = itemData
-    const { loggedIn, accountData, setLogInModalOpen, setAlertMessage, setAlertModalOpen } =
-        useContext(AccountContext)
+    const { loggedIn, accountData, setLogInModalOpen } = useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
     const [ratings, setRatings] = useState<any[]>([])
     const [averageScore, setAverageScore] = useState(0)
@@ -38,7 +37,7 @@ function RatingModal(props: {
 
     function getRatings() {
         axios
-            .get(`${config.apiURL}/ratings?itemType=${itemType}&itemId=${id}`)
+            .get(`${config.apiURL}/ratings?type=post&id=${id}`)
             .then((res) => {
                 setRatings(res.data)
                 setAverageScore(
@@ -51,7 +50,7 @@ function RatingModal(props: {
 
     function toggleRating() {
         setResponseLoading(true)
-        const data = { itemType, itemId: id } as any
+        const data = { type: itemType, id } as any
         if (!rated) {
             // todo: get user data server side
             data.accountHandle = accountData.handle

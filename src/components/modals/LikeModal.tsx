@@ -13,15 +13,14 @@ import React, { useContext, useEffect, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 function LikeModal(props: {
-    itemType: 'post' | 'link'
+    itemType: string // all post types + link
     itemData: any
     updateItem: () => void
     close: () => void
 }): JSX.Element {
     const { itemType, itemData, updateItem, close } = props
     const { id, liked } = itemData
-    const { loggedIn, accountData, setLogInModalOpen, setAlertMessage, setAlertModalOpen } =
-        useContext(AccountContext)
+    const { loggedIn, accountData, setLogInModalOpen } = useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
     const [likes, setLikes] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
@@ -33,8 +32,9 @@ function LikeModal(props: {
         : 'No likes yet...'
 
     function getLikes() {
+        const type = itemType === 'link' ? 'link' : 'post'
         axios
-            .get(`${config.apiURL}/likes?itemType=${itemType}&itemId=${id}`)
+            .get(`${config.apiURL}/likes?type=${type}&id=${id}`)
             .then((res) => {
                 setLikes(res.data)
                 setLoading(false)

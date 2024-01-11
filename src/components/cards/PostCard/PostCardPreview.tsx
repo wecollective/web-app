@@ -18,6 +18,7 @@ import { CalendarIcon, CardIcon, LinkIcon, PollIcon } from '@svgs/all'
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { v4 as uuidv4 } from 'uuid'
 
 function PostCardPreview(props: {
     post: any
@@ -183,7 +184,7 @@ function PostCardPreview(props: {
                             {mediaTypes === 'audio' && (
                                 <Row centerX className={`${styles.block} ${styles.audio}`}>
                                     <AudioCard
-                                        id={mediaData.id}
+                                        id={uuidv4()}
                                         url={mediaData.url}
                                         staticBars={250}
                                         location='post-preview'

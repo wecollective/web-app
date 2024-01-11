@@ -316,42 +316,29 @@ function NotificationCard(props: {
                 </Content>
             )}
 
-            {type === 'post-like' && (
+            {type.includes('-like') && (
                 <Content
                     typeIcon={<LikeIcon />}
                     preview={
-                        <PostCardPreview
-                            post={relatedPost}
-                            link={`/p/${postId}`}
-                            onClick={markAsSeen}
-                            style={{ marginTop: 10 }}
-                        />
+                        type.includes('comment') ? (
+                            <CommentCardPreview
+                                comment={relatedComment}
+                                link={`/p/${commentId}`}
+                                onClick={markAsSeen}
+                                style={{ marginTop: 10 }}
+                            />
+                        ) : (
+                            <PostCardPreview
+                                post={relatedPost}
+                                link={`/p/${postId}`}
+                                onClick={markAsSeen}
+                                style={{ marginTop: 10 }}
+                            />
+                        )
                     }
                 >
                     <UserButton user={triggerUser} imageSize={32} fontSize={15} />
-                    <p>liked your post</p>
-                    {triggerSpace && <p>in</p>}
-                    {triggerSpace && (
-                        <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
-                    )}
-                    <CreatedAt date={createdAt} />
-                </Content>
-            )}
-
-            {type === 'comment-like' && (
-                <Content
-                    typeIcon={<LikeIcon />}
-                    preview={
-                        <CommentCardPreview
-                            comment={relatedComment}
-                            link={`/p/${commentId}`}
-                            onClick={markAsSeen}
-                            style={{ marginTop: 10 }}
-                        />
-                    }
-                >
-                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
-                    <p>liked your comment</p>
+                    <p>liked your {type.split('-like')[0].replaceAll('-', ' ')}</p>
                     {triggerSpace && <p>in</p>}
                     {triggerSpace && (
                         <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
@@ -412,42 +399,29 @@ function NotificationCard(props: {
                 </Content>
             )}
 
-            {type === 'post-rating' && (
+            {type.includes('-rating') && (
                 <Content
                     typeIcon={<StarIcon />}
                     preview={
-                        <PostCardPreview
-                            post={relatedPost}
-                            link={`/p/${postId}`}
-                            onClick={markAsSeen}
-                            style={{ marginTop: 10 }}
-                        />
+                        type.includes('comment') ? (
+                            <CommentCardPreview
+                                comment={relatedComment}
+                                link={`/p/${commentId}`}
+                                onClick={markAsSeen}
+                                style={{ marginTop: 10 }}
+                            />
+                        ) : (
+                            <PostCardPreview
+                                post={relatedPost}
+                                link={`/p/${postId}`}
+                                onClick={markAsSeen}
+                                style={{ marginTop: 10 }}
+                            />
+                        )
                     }
                 >
                     <UserButton user={triggerUser} imageSize={32} fontSize={15} />
-                    <p>rated your post</p>
-                    {triggerSpace && <p>in</p>}
-                    {triggerSpace && (
-                        <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
-                    )}
-                    <CreatedAt date={createdAt} />
-                </Content>
-            )}
-
-            {type === 'comment-rating' && (
-                <Content
-                    typeIcon={<StarIcon />}
-                    preview={
-                        <CommentCardPreview
-                            comment={relatedComment}
-                            link={`/p/${commentId}`}
-                            onClick={markAsSeen}
-                            style={{ marginTop: 10 }}
-                        />
-                    }
-                >
-                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
-                    <p>rated your comment</p>
+                    <p>rated your {type.split('-rating')[0].replaceAll('-', ' ')}</p>
                     {triggerSpace && <p>in</p>}
                     {triggerSpace && (
                         <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />

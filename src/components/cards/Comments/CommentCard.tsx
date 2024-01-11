@@ -156,7 +156,7 @@ function CommentCard(props: {
     function toggleLike() {
         setLikeLoading(true)
         if (loggedIn) {
-            const data = { type: 'post', id } as any
+            const data = { type: 'comment', id } as any
             if (!liked) {
                 data.rootId = rootId
                 data.spaceId = window.location.pathname.includes('/s/') ? spaceData.id : null
@@ -461,7 +461,7 @@ function CommentCard(props: {
                                             >
                                                 {likeLoading ? (
                                                     <LoadingWheel
-                                                        size={15}
+                                                        size={18}
                                                         style={{ marginRight: 5 }}
                                                     />
                                                 ) : (
@@ -533,7 +533,7 @@ function CommentCard(props: {
                         )}
                         {likeModalOpen && (
                             <LikeModal
-                                itemType='post'
+                                itemType='comment'
                                 itemData={{ ...comment, liked: accountReactions.liked }}
                                 updateItem={() => {
                                     setComment({
@@ -547,7 +547,7 @@ function CommentCard(props: {
                         )}
                         {ratingModalOpen && (
                             <RatingModal
-                                itemType='post'
+                                itemType='comment'
                                 itemData={{ ...comment, rated: accountReactions.rated }}
                                 updateItem={() => {
                                     setComment({
