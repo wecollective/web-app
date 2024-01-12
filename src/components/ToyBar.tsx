@@ -18,6 +18,7 @@ import {
     ChevronDownIcon,
     ChevronUpIcon,
     DeleteIcon,
+    EyeIcon,
     InboxIcon,
     PlusIcon,
     PostIcon,
@@ -41,7 +42,6 @@ function ToyBar(): JSX.Element {
         toyBoxItemsRef,
         setAlertModalOpen,
         setAlertMessage,
-        setCreatePostModalOpen,
         setCreatePostModalSettings,
         setCreateSpaceModalOpen,
     } = useContext(AccountContext)
@@ -88,7 +88,7 @@ function ToyBar(): JSX.Element {
     }
 
     function newPost() {
-        if (loggedIn) setCreatePostModalOpen(true)
+        if (loggedIn) setCreatePostModalSettings({ type: 'post' })
         else {
             setAlertModalOpen(true)
             setAlertMessage('Log in to create a post')
@@ -420,8 +420,7 @@ function ToyBar(): JSX.Element {
                         <button
                             type='button'
                             onClick={() => {
-                                setCreatePostModalSettings({ game: 'glass-bead-game' })
-                                setCreatePostModalOpen(true)
+                                setCreatePostModalSettings({ type: 'glass-bead-game' })
                                 setGameModalOpen(false)
                             }}
                         >
@@ -431,14 +430,25 @@ function ToyBar(): JSX.Element {
                         <button
                             type='button'
                             onClick={() => {
-                                setCreatePostModalSettings({ game: 'card' })
-                                setCreatePostModalOpen(true)
+                                setCreatePostModalSettings({ type: 'card' })
                                 setGameModalOpen(false)
                             }}
                         >
                             <CardIcon />
                             <p>Create a card</p>
                         </button>
+                        {config.devApp && (
+                            <button
+                                type='button'
+                                onClick={() => {
+                                    setCreatePostModalSettings({ type: 'wisdom-gym' })
+                                    setGameModalOpen(false)
+                                }}
+                            >
+                                <EyeIcon />
+                                <p>Wisdom Gym</p>
+                            </button>
+                        )}
                     </Row>
                 </Modal>
             )}

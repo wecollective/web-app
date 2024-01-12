@@ -9,24 +9,25 @@ import Input from '@components/Input'
 import Row from '@components/Row'
 import SearchSelector from '@components/SearchSelector'
 import Toggle from '@components/Toggle'
-import GBGHelpModal from '@components/modals/GBGHelpModal'
+import GameHelpModal from '@components/modals/GameHelpModal'
 import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
 import { capitalise, findDHMFromMinutes, findMinutesFromDHM, pluralise } from '@src/Helpers'
 import colors from '@styles/Colors.module.scss'
-import styles from '@styles/components/modals/GBGSettingsModal.module.scss'
+import styles from '@styles/components/modals/GameSettingsModal.module.scss'
 import { ChevronDownIcon, ChevronUpIcon, HelpIcon, SearchIcon } from '@svgs/all'
 import axios from 'axios'
 import 'flatpickr/dist/themes/material_green.css'
 import React, { useContext, useState } from 'react'
 
-function GBGSettingsModal(props: {
+function GameSettingsModal(props: {
     settings: any
     setSettings: (settings: any) => void
     close: () => void
 }): JSX.Element {
     const { settings, setSettings, close } = props
+
     const { accountData } = useContext(AccountContext)
     const [helpModalOpen, setHelpModalOpen] = useState(false)
     const [openToAllUsers, setOpenToAllUsers] = useState(!settings.players.length)
@@ -972,9 +973,9 @@ function GBGSettingsModal(props: {
                 )}
             </Column>
             <Button text='Save settings' color='blue' onClick={save} />
-            {helpModalOpen && <GBGHelpModal close={() => setHelpModalOpen(false)} />}
+            {helpModalOpen && <GameHelpModal close={() => setHelpModalOpen(false)} />}
         </Modal>
     )
 }
 
-export default GBGSettingsModal
+export default GameSettingsModal

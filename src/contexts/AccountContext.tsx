@@ -1,6 +1,7 @@
 import config from '@src/Config'
 import { getDraftPlainText } from '@src/Helpers'
 import { IAccountContext } from '@src/Interfaces'
+import { CreatePostModalSettings } from '@src/components/modals/CreatePostModal'
 import axios from 'axios'
 import React, { createContext, useEffect, useRef, useState } from 'react'
 import Cookies from 'universal-cookie'
@@ -38,8 +39,8 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
     const [logInModalOpen, setLogInModalOpen] = useState(false)
     const [registerModalOpen, setRegisterModalOpen] = useState(false)
     const [forgotPasswordModalOpen, setForgotPasswordModalOpen] = useState(false)
-    const [createPostModalSettings, setCreatePostModalSettings] = useState<any>({})
-    const [createPostModalOpen, setCreatePostModalOpen] = useState(false)
+    const [createPostModalSettings, setCreatePostModalSettings] =
+        useState<CreatePostModalSettings>()
     const [createSpaceModalOpen, setCreateSpaceModalOpen] = useState(false)
     const [createCommentModalOpen, setCreateCommentModalOpen] = useState(false)
     const [settingModalOpen, setSettingModalOpen] = useState(false)
@@ -137,8 +138,6 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                 setForgotPasswordModalOpen,
                 createPostModalSettings,
                 setCreatePostModalSettings,
-                createPostModalOpen,
-                setCreatePostModalOpen,
                 createSpaceModalOpen,
                 setCreateSpaceModalOpen,
                 createCommentModalOpen,

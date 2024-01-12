@@ -1,3 +1,5 @@
+import { CreatePostModalSettings } from './components/modals/CreatePostModal'
+
 /* eslint-disable camelcase */
 export interface ISpace {
     id: number
@@ -125,10 +127,8 @@ export interface IAccountContext {
     setRegisterModalOpen: (payload: boolean) => void
     forgotPasswordModalOpen: boolean
     setForgotPasswordModalOpen: (payload: boolean) => void
-    createPostModalSettings: any
-    setCreatePostModalSettings: (payload: any) => void
-    createPostModalOpen: boolean
-    setCreatePostModalOpen: (payload: boolean) => void
+    createPostModalSettings: CreatePostModalSettings | undefined
+    setCreatePostModalSettings: (payload?: CreatePostModalSettings) => void
     createSpaceModalOpen: boolean
     setCreateSpaceModalOpen: (payload: boolean) => void
     createCommentModalOpen: boolean

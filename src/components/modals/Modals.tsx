@@ -28,7 +28,8 @@ function Modals(): JSX.Element {
         setClaimAccountModalOpen,
         resetPasswordModalOpen,
         imageUploadModalOpen,
-        createPostModalOpen,
+        createPostModalSettings,
+        setCreatePostModalSettings,
         createSpaceModalOpen,
         dropModalOpen,
     } = useContext(AccountContext)
@@ -47,7 +48,12 @@ function Modals(): JSX.Element {
             )}
             {resetPasswordModalOpen && <ResetPasswordModal />}
             {imageUploadModalOpen && <GlobalImageUploadModal />}
-            {createPostModalOpen && <CreatePostModal />}
+            {createPostModalSettings && (
+                <CreatePostModal
+                    settings={createPostModalSettings}
+                    onClose={() => setCreatePostModalSettings()}
+                />
+            )}
             {createSpaceModalOpen && <CreateSpaceModal />}
             {dropModalOpen && <DropModal />}
         </>

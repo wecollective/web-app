@@ -64,20 +64,20 @@ $transitionSpeed: 0.5s;
             .title {
                 margin-bottom: 5px;
 
-                > input {
+                >input {
                     all: unset;
                     width: 100%;
                     font-size: 24px;
                 }
 
-                > button {
+                >button {
                     pointer-events: none;
                     opacity: 0;
                     transition: all 0.5s;
                 }
 
                 &:hover {
-                    > button {
+                    >button {
                         pointer-events: all;
                         opacity: 1;
                     }
@@ -96,7 +96,7 @@ $transitionSpeed: 0.5s;
                     flex-shrink: 0;
                     position: relative;
 
-                    > img {
+                    >img {
                         width: inherit;
                         height: inherit;
                         border-radius: inherit;
@@ -106,13 +106,13 @@ $transitionSpeed: 0.5s;
                         box-shadow: 0 0 10px 0 rgba(10, 8, 72, 0.1);
                     }
 
-                    > svg {
+                    >svg {
                         color: $grey5;
                         width: 30px;
                         height: 30px;
                     }
 
-                    > label {
+                    >label {
                         position: absolute;
                         width: 60px;
                         height: 60px;
@@ -125,7 +125,7 @@ $transitionSpeed: 0.5s;
                     position: relative;
                     width: 100%;
 
-                    > input {
+                    >input {
                         all: unset;
                         width: 100%;
                         font-size: 24px;
@@ -215,7 +215,7 @@ $transitionSpeed: 0.5s;
                         all: unset;
                         cursor: pointer;
 
-                        > img {
+                        >img {
                             object-fit: cover;
                             margin-bottom: 10px;
                             box-shadow: 0 0 10px 0 rgba(10, 8, 72, 0.06);
@@ -223,31 +223,34 @@ $transitionSpeed: 0.5s;
                     }
 
                     &.large {
-                        .imageButton > img {
+                        .imageButton>img {
                             max-width: 100%;
                             max-height: 450px;
                         }
-                        > p {
+
+                        >p {
                             width: 100%;
                         }
                     }
 
                     &.medium {
-                        .imageButton > img {
+                        .imageButton>img {
                             width: 300px;
                             height: 300px;
                         }
-                        > p {
+
+                        >p {
                             width: 100%;
                         }
                     }
 
                     &.small {
-                        .imageButton > img {
+                        .imageButton>img {
                             width: 225px;
                             height: 225px;
                         }
-                        > p {
+
+                        >p {
                             width: 100%;
                         }
                     }
@@ -256,14 +259,14 @@ $transitionSpeed: 0.5s;
                         height: 20px;
                         margin: 7px 10px 5px 0;
 
-                        > button {
+                        >button {
                             all: unset;
                             cursor: pointer;
                             width: 20px;
                             height: 20px;
                             margin: 0 10px;
 
-                            > svg {
+                            >svg {
                                 opacity: 0.15;
                                 width: 20px;
                                 height: 20px;
@@ -275,7 +278,8 @@ $transitionSpeed: 0.5s;
 
             .pollAnswers {
                 margin-top: 10px;
-                > div {
+
+                >div {
                     &:not(:last-child) {
                         margin-bottom: 10px;
                     }
@@ -304,11 +308,11 @@ $transitionSpeed: 0.5s;
                     right: 40px;
                     z-index: 5;
 
-                    > button {
+                    >button {
                         all: unset;
                         cursor: pointer;
 
-                        > svg {
+                        >svg {
                             width: 30px;
                             height: 30px;
                             color: $grey4;
@@ -340,7 +344,7 @@ $transitionSpeed: 0.5s;
                             height: inherit;
                             border-radius: inherit;
 
-                            > img {
+                            >img {
                                 position: absolute;
                                 border-radius: inherit;
                                 width: 100%;
@@ -352,12 +356,12 @@ $transitionSpeed: 0.5s;
                 }
             }
 
-            .gbg {
-                .gbgInfo {
+            .game {
+                .gameInfo {
                     margin-top: 10px;
                     color: $grey5;
 
-                    > div > svg {
+                    >div>svg {
                         width: 25px;
                         height: 25px;
                         margin-right: 5px;
@@ -379,7 +383,7 @@ $transitionSpeed: 0.5s;
                         animation-timing-function: ease-in;
                         animation-duration: 2s;
 
-                        > svg {
+                        >svg {
                             transform: rotate(90deg);
                             height: 35px;
                             color: $bluegrey2;
@@ -405,14 +409,14 @@ $transitionSpeed: 0.5s;
                             background-color: rgb(245, 251, 255);
                         }
 
-                        > svg {
+                        >svg {
                             width: 40px;
                             height: 40px;
                             color: $grey6;
                             margin-bottom: 10px;
                         }
 
-                        > p {
+                        >p {
                             color: $grey6;
                             width: 150px;
                             text-align: center;
@@ -427,9 +431,9 @@ $transitionSpeed: 0.5s;
         margin-bottom: 20px;
         position: relative;
 
-        > div,
-        > input,
-        > button {
+        >div,
+        >input,
+        >button {
             margin-bottom: 10px;
         }
 
@@ -439,7 +443,8 @@ $transitionSpeed: 0.5s;
 
         .errors {
             margin-bottom: 20px;
-            > p {
+
+            >p {
                 font-size: 14px;
                 color: $red;
             }
@@ -502,10 +507,12 @@ $transitionSpeed: 0.5s;
             flex-shrink: 0;
             background-color: $aqua;
             color: white;
+
             &:hover {
                 &:not(.disabled) {
                     cursor: pointer;
                     filter: brightness(110%);
+
                     &.grey {
                         filter: brightness(96%);
                     }

@@ -14,7 +14,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
 function Governance(): JSX.Element {
-    const { setCreatePostModalSettings, setCreatePostModalOpen } = useContext(AccountContext)
+    const { setCreatePostModalSettings } = useContext(AccountContext)
     const { spaceData, spaceNotFound, isModerator, governancePolls, setGovernancePolls } =
         useContext(SpaceContext)
     const [loading, setLoading] = useState(true)
@@ -54,8 +54,7 @@ function Governance(): JSX.Element {
                             text='New poll'
                             color='blue'
                             onClick={() => {
-                                setCreatePostModalSettings({ governance: true })
-                                setCreatePostModalOpen(true)
+                                setCreatePostModalSettings({ type: 'poll' })
                             }}
                             style={{ marginBottom: 30 }}
                         />

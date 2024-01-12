@@ -71,7 +71,6 @@ function PostCard(props: {
         setAlertModalOpen,
         setAlertMessage,
         setCreatePostModalSettings,
-        setCreatePostModalOpen,
     } = useContext(AccountContext)
     const {
         spaceData,
@@ -237,8 +236,7 @@ function PostCard(props: {
 
     function linkNewPost() {
         if (loggedIn) {
-            setCreatePostModalSettings({ sourceType: 'post', sourceId: id })
-            setCreatePostModalOpen(true)
+            setCreatePostModalSettings({ type: 'post', source: { type: 'post', id } })
         } else {
             setAlertMessage('Log in to link posts')
             setAlertModalOpen(true)
