@@ -74,7 +74,7 @@ function UserContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
         axios
             .post(`${config.apiURL}/user-posts`, data, options)
             .then((res) => {
-                console.log('user-posts: ', res.data)
+                // console.log('user-posts: ', res.data)
                 if (currentUserHandle.current === userData.handle) {
                     setUserPosts(firstLoad ? res.data : [...userPosts, ...res.data])
                     setUserPostsPaginationHasMore(res.data.length === userPostsPaginationLimit)

@@ -29,7 +29,7 @@ function Card(props: { postId: any; style?: any }): JSX.Element {
         axios
             .get(`${config.apiURL}/card-faces?postId=${postId}`)
             .then((res) => {
-                console.log('card-faces: ', res.data)
+                // console.log('card-faces: ', res.data)
                 setBlocks(res.data)
                 setLoading(false)
             })
