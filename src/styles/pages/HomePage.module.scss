@@ -69,7 +69,7 @@
 
         .highlights {
             color: white;
-            margin-bottom: 160px;
+            margin-top: 140px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -90,6 +90,10 @@
                     }
                 }
             }
+        }
+
+        .emptyHighlights {
+            height: 205px;
         }
     }
 }

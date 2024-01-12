@@ -182,8 +182,7 @@ function Homepage(): JSX.Element {
                     color='blue'
                     onClick={() => history('/s/all')}
                 />
-                <CollapsibleCards data={cardData} style={{ marginTop: 40 }} />
-                {highlights && (
+                {highlights ? (
                     <div className={styles.highlights}>
                         <FlagImageHighlights
                             type='post'
@@ -216,7 +215,10 @@ function Homepage(): JSX.Element {
                             outline={2}
                         />
                     </div>
+                ) : (
+                    <div className={styles.emptyHighlights} />
                 )}
+                <CollapsibleCards data={cardData} style={{ marginTop: 40, marginBottom: 160 }} />
             </Column>
         </Column>
     )
