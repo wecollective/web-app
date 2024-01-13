@@ -16,12 +16,12 @@ import {
     BellIcon,
     CastaliaIcon,
     CommentIcon,
-    EnvelopeIcon,
     EyeClosedIcon,
     EyeIcon,
     FailIcon,
     LikeIcon,
     LinkIcon,
+    MessageIcon,
     PollIcon,
     PostIcon,
     RetweetIcon,
@@ -309,7 +309,7 @@ function NotificationCard(props: {
             )}
 
             {type === 'email-verified' && (
-                <Content typeIcon={<EnvelopeIcon />}>
+                <Content typeIcon={<MessageIcon />}>
                     <p>Email verified</p>
                     <Success />
                     <CreatedAt date={createdAt} />

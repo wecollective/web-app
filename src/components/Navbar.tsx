@@ -19,6 +19,7 @@ import {
     EyeIcon,
     GovernanceIcon,
     LikeIcon,
+    MessageIcon,
     PostIcon,
     SearchIcon,
     SettingsIcon,
@@ -459,6 +460,24 @@ function Navbar(): JSX.Element {
                             )}
                             {profileDropDownOpen && (
                                 <div className={styles.profileDropDown}>
+                                    <Link to={`/u/${accountData.handle}/notifications`}>
+                                        <BellIcon />
+                                        <p>Notifications</p>
+                                        {accountData.unseenNotifications > 0 && (
+                                            <div className={styles.unseenItems}>
+                                                <p>{accountData.unseenNotifications}</p>
+                                            </div>
+                                        )}
+                                    </Link>
+                                    <Link to={`/u/${accountData.handle}/messages`}>
+                                        <MessageIcon />
+                                        <p>Messages</p>
+                                        {accountData.unseenMessages > 0 && (
+                                            <div className={styles.unseenItems}>
+                                                <p>{accountData.unseenMessages}</p>
+                                            </div>
+                                        )}
+                                    </Link>
                                     <Link to={`/u/${accountData.handle}/about`}>
                                         <AboutIcon />
                                         <p>About</p>
@@ -478,15 +497,6 @@ function Navbar(): JSX.Element {
                                     <Link to={`/u/${accountData.handle}/likes`}>
                                         <LikeIcon />
                                         <p>Likes</p>
-                                    </Link>
-                                    <Link to={`/u/${accountData.handle}/notifications`}>
-                                        <BellIcon />
-                                        <p>Notifications</p>
-                                        {accountData.unseenNotifications > 0 && (
-                                            <div className={styles.unseenItems}>
-                                                <p>{accountData.unseenNotifications}</p>
-                                            </div>
-                                        )}
                                     </Link>
                                     <Link to={`/u/${accountData.handle}/settings`}>
                                         <SettingsIcon />

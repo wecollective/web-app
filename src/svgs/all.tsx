@@ -32,7 +32,7 @@ import { ReactComponent as DNAIcon } from '@svgs/dna.svg'
 import { ReactComponent as DonateIcon } from '@svgs/donate-solid.svg'
 import { ReactComponent as DoorIcon } from '@svgs/door-open-solid.svg'
 import { ReactComponent as VerticalEllipsisIcon } from '@svgs/ellipsis-vertical-solid.svg'
-import { ReactComponent as EnvelopeIcon } from '@svgs/envelope-solid.svg'
+import { ReactComponent as MessageIcon } from '@svgs/envelope-solid.svg'
 import { ReactComponent as DangerIcon } from '@svgs/exclamation-circle-solid.svg'
 import { ReactComponent as ExpandIcon } from '@svgs/expand-solid.svg'
 import { ReactComponent as EyeClosedIcon } from '@svgs/eye-slash-solid.svg'
@@ -127,7 +127,6 @@ export {
     DonateIcon,
     DoorIcon,
     EditIcon,
-    EnvelopeIcon,
     ExpandIcon,
     EyeClosedIcon,
     EyeIcon,
@@ -142,6 +141,7 @@ export {
     LinkIcon,
     LoadingWheelIcon,
     LockIcon,
+    MessageIcon,
     MicrophoneIcon,
     MinusIcon,
     NeuronIcon,
