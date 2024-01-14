@@ -6,14 +6,51 @@
     margin-top: -15px;
 
     .sidebar {
-        width: 300px;
+        width: 350px;
         height: 100%;
         background-color: white;
         padding: 20px;
     }
 
-    .messages {
+    .chat {
         width: 100%;
         padding: 20px;
+
+        .messages {
+            height: 100%;
+        }
+    }
+
+    .image {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background-color: $grey2;
+        margin-bottom: 20px;
+        position: relative;
+
+        > img {
+            width: inherit;
+            height: inherit;
+            border-radius: inherit;
+            object-fit: cover;
+            position: absolute;
+            background-color: white;
+            box-shadow: 0 0 10px 0 rgba(10, 8, 72, 0.1);
+        }
+
+        > svg {
+            color: $grey5;
+            width: 60px;
+            height: 60px;
+        }
+
+        > label {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            cursor: pointer;
+            border-radius: 50%;
+        }
     }
 }
