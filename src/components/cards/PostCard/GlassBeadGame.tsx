@@ -65,10 +65,9 @@ function GlassBeadGame(props: {
         }
     }
 
-    function updateNextPlayer(latestBeads, latestPlayers) {
-        const movesLeft =
-            !movesPerPlayer || latestBeads.length < latestPlayers.length * movesPerPlayer
-        setNextPlayer(movesLeft ? latestPlayers[latestBeads.length % latestPlayers.length] : null)
+    function updateNextPlayer(numberOfBeads: number, latestPlayers: any[]) {
+        const movesLeft = !movesPerPlayer || numberOfBeads < latestPlayers.length * movesPerPlayer
+        setNextPlayer(movesLeft ? latestPlayers[numberOfBeads % latestPlayers.length] : null)
     }
 
     function getGBGData() {
@@ -90,7 +89,7 @@ function GlassBeadGame(props: {
                         orderedPlayers.push(res.data.players.find((p) => p.id === +playerId))
                     })
                     setPlayers(orderedPlayers)
-                    updateNextPlayer(res.data.beads, orderedPlayers)
+                    updateNextPlayer(res.data.game.totalBeads, orderedPlayers)
                     updateDeadline(res.data.game.nextMoveDeadline)
                 }
                 setLoading(false)
@@ -359,7 +358,7 @@ function GlassBeadGame(props: {
                         setGame({ ...game, totalBeads: game.totalBeads + 1 })
                         const newBeads = [...beads, newBead]
                         setBeads(newBeads)
-                        updateNextPlayer(newBeads, players)
+                        updateNextPlayer(game.totalBeads + 1, players)
                         updateDeadline(newDeadline)
                     }}
                     close={() => setNextBeadModalOpen(false)}
