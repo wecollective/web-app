@@ -176,16 +176,12 @@ function NotificationCard(props: {
         if (!seen) toggleSeen()
     }
 
-    // todo: get account data server side in all function below
-    function respondToSpaceInvite(response) {
+    function respondToSpaceInvite(spaceType, response) {
         const data = {
-            accountHandle: accountData.handle,
-            accountName: accountData.name,
-            spaceId: triggerSpace.id,
-            spaceHandle: triggerSpace.handle,
-            spaceName: triggerSpace.name,
             notificationId: id,
+            spaceId: triggerSpace.id,
             userId: triggerUser.id,
+            type: spaceType,
             response,
         }
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
@@ -198,6 +194,7 @@ function NotificationCard(props: {
             .catch((error) => console.log(error))
     }
 
+    // todo: get account data server side in all function below
     function respondToSpaceAccessRequest(response) {
         const data = {
             accountHandle: accountData.handle,
@@ -626,20 +623,29 @@ function NotificationCard(props: {
                 </Content>
             )}
 
-            {type === 'space-invite' && (
-                <Content typeIcon={<SpacesIcon />}>
+            {['space-invite', 'chat-invite'].includes(type) && (
+                <Content
+                    typeIcon={type.split('-')[0] === 'chat' ? <CommentIcon /> : <SpacesIcon />}
+                >
                     <UserButton user={triggerUser} imageSize={32} fontSize={15} />
-                    <p>invited you to join</p>
+                    <p>invited you to {type.split('-')[0] === 'chat' ? 'chat' : 'join'}</p>
                     <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
                     <CreatedAt date={createdAt} />
-                    <State state={state} respond={(response) => respondToSpaceInvite(response)} />
+                    <State
+                        state={state}
+                        respond={(response) => respondToSpaceInvite(type.split('-')[0], response)}
+                    />
                 </Content>
             )}
 
-            {type === 'space-invite-response' && (
-                <Content typeIcon={<SpacesIcon />}>
+            {type.includes('-invite-response') && (
+                <Content
+                    typeIcon={type.split('-')[0] === 'chat' ? <CommentIcon /> : <SpacesIcon />}
+                >
                     <UserButton user={triggerUser} imageSize={32} fontSize={15} />
-                    <p>{state} your invitation to join</p>
+                    <p>
+                        {state} your invitation to {type.split('-')[0] === 'chat' ? 'chat' : 'join'}
+                    </p>
                     <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
                     <CreatedAt date={createdAt} />
                 </Content>
