@@ -9,7 +9,33 @@
         width: 350px;
         height: 100%;
         background-color: white;
-        padding: 20px;
+        padding: 10px;
+
+        .chatRow {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            border-radius: 5px;
+            padding: 5px;
+
+            .chatImage {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                object-fit: cover;
+                margin-right: 10px;
+            }
+
+            h1 {
+                font-size: 16px;
+                font-weight: 800;
+                margin: 0;
+            }
+
+            &.selected {
+                background-color: $blue8;
+            }
+        }
     }
 
     .chat {
@@ -21,6 +47,7 @@
         }
     }
 
+    // upload
     .image {
         width: 120px;
         height: 120px;

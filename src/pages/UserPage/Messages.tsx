@@ -1,23 +1,23 @@
 import Button from '@components/Button'
 import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
+import ImageTitle from '@components/ImageTitle'
+import Input from '@components/Input'
 import Row from '@components/Row'
+import SearchSelector from '@components/SearchSelector'
+import LoadingWheel from '@components/animations/LoadingWheel'
+import CommentInput from '@components/draft-js/CommentInput'
+import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
 import UserNotFound from '@pages/UserPage/UserNotFound'
-// import LoadingWheel from '@components/LoadingWheel'
-import ImageTitle from '@components/ImageTitle'
-import Input from '@components/Input'
-import SearchSelector from '@components/SearchSelector'
-import CommentInput from '@components/draft-js/CommentInput'
-import Modal from '@components/modals/Modal'
 import config from '@src/Config'
 import { imageMBLimit } from '@src/Helpers'
 import styles from '@styles/pages/UserPage/Messages.module.scss'
 import { ImageIcon, PlusIcon, UsersIcon } from '@svgs/all'
 import axios from 'axios'
 import React, { useContext, useEffect, useRef, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
 function Messages(): JSX.Element {
@@ -39,30 +39,19 @@ function Messages(): JSX.Element {
     const history = useNavigate()
     const cookies = new Cookies()
     const location = useLocation()
-    const userHandle = location.pathname.split('/')[2]
-
-    // creating a new chat:
-    // create private space (no parent) (type: chat)
-    // create SpaceUser entires: access, moderator, follower
-    // for other users mark access: pending (until they have accepted it)
-
-    // getting chats:
-    // find all spaces of type 'chat' that user has access to (exclude children as retrieved & displayed within root)
-
-    // getting posts:
-    // find all posts within space (include comments)
+    const [x, page, userHandle, subPage] = location.pathname.split('/')
+    const urlParams = Object.fromEntries(new URLSearchParams(location.search))
+    const { chatId } = urlParams
 
     // todo:
-    // + add space type field: 'default' or 'chat'
     // + add unseenMessages column on Users table
     // + need to keep track of unseen messages per chat and user (add to SpaceUserStat table?)
-    // + need to tag all comments with root posts spaces (to make vivisible in chats and enable visibility/search in normal spaces)
 
     function getChats() {
         setChatsLoading(true)
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
-            .post(`${config.apiURL}/chats`, options)
+            .get(`${config.apiURL}/chats`, options)
             .then((res) => {
                 console.log('chats res: ', res.data)
                 setChats(res.data)
@@ -71,7 +60,7 @@ function Messages(): JSX.Element {
             .catch((error) => console.log(error))
     }
 
-    function getMessages(chatId: number, offset: number) {
+    function getMessages(offset: number) {
         if (offset) setNextMessagesLoading(true)
         else setMessagesLoading(true)
         const data = { chatId, offset }
@@ -117,12 +106,21 @@ function Messages(): JSX.Element {
 
     function createChat() {
         setCreateChatLoading(true)
+        const data = { name, userIds: users.map((u) => u.id) }
+        const formData = new FormData()
+        if (imageFile) formData.append('image', imageFile)
+        formData.append('post-data', JSON.stringify(data))
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
-            .post(`${config.apiURL}/create-chat`, options)
+            .post(`${config.apiURL}/create-chat`, formData, options)
             .then((res) => {
-                console.log('chats res: ', res.data)
+                setChats([...chats, res.data])
                 setCreateChatLoading(false)
+                setNewChatModalOpen(false)
+                // reset values
+                setName('')
+                setImageFile(null)
+                setImageURL('')
             })
             .catch((error) => console.log(error))
     }
@@ -139,32 +137,46 @@ function Messages(): JSX.Element {
         }
     }, [userData.id, loggedIn])
 
-    // when chats loaded, get chat messages
+    // if chatId included in url params, get messages
     useEffect(() => {
-        if (!chatsLoading) getMessages(chats[0].id, 0)
-    }, [chatsLoading])
+        if (chatId) getMessages(0)
+    }, [chatId])
 
     if (userNotFound) return <UserNotFound />
     return (
         <Row className={styles.wrapper}>
             <Column className={styles.sidebar}>
-                <Button
-                    text='New Chat'
-                    icon={<PlusIcon />}
-                    color='blue'
-                    onClick={() => setNewChatModalOpen(true)}
-                    style={{ width: 120 }}
-                />
-                chats list...
+                <Row spaceBetween>
+                    <Button
+                        text='New Chat'
+                        icon={<PlusIcon />}
+                        color='blue'
+                        onClick={() => setNewChatModalOpen(true)}
+                        style={{ width: 120 }}
+                    />
+                    {chatsLoading && <LoadingWheel size={30} />}
+                </Row>
+                {chats.map((chat) => (
+                    <Link
+                        to={`?chatId=${chat.id}`}
+                        key={chat.id}
+                        className={`${styles.chatRow} ${+chatId === chat.id && styles.selected}`}
+                    >
+                        <img src={chat.flagImagePath} className={styles.chatImage} alt='' />
+                        <Column>
+                            <h1>{chat.name}</h1>
+                        </Column>
+                    </Link>
+                ))}
             </Column>
             <Column className={styles.chat}>
                 <p>Chat info...</p>
                 <Column className={styles.messages}>messages go here...</Column>
                 <CommentInput
-                    type='poll-answer'
-                    placeholder='New answer...'
-                    parent={{ type: 'space', id: 0 }}
-                    onSave={(data) => console.log('new comment: ', data)}
+                    type='chat-message'
+                    placeholder='New message...'
+                    parent={{ type: 'space', id: +chatId }}
+                    onSave={(data) => setMessages([...messages, data])}
                     style={{ marginTop: 10 }}
                 />
             </Column>
@@ -232,7 +244,7 @@ function Messages(): JSX.Element {
                     <Button
                         text='Create chat'
                         color='blue'
-                        disabled={createChatLoading}
+                        disabled={createChatLoading || !users.length}
                         loading={createChatLoading}
                         onClick={createChat}
                         style={{ marginTop: 30 }}

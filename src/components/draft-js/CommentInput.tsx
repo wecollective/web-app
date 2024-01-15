@@ -59,7 +59,7 @@ import RecordRTC from 'recordrtc'
 import { v4 as uuidv4 } from 'uuid'
 
 function CommentInput(props: {
-    type: 'comment' | 'poll-answer' // group thread, gbg room (?)
+    type: 'comment' | 'poll-answer' | 'chat-message' // group thread, gbg room (?)
     parent?: { type: string; id: number } | null
     placeholder: string
     preview?: boolean // determines whether onSave function uploads or just passes data back to parent
