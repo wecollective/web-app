@@ -30,7 +30,7 @@
     .spaceMapView {
         width: 100%;
         min-width: calc(100vw - 20px);
-        height: calc(100vh - 240px);
+        height: calc(100vh - 135px);
         padding: 0 10px;
 
         @include for-desktop-small-up {

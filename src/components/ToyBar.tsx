@@ -13,6 +13,7 @@ import config from '@src/Config'
 import styles from '@styles/components/ToyBar.module.scss'
 import TBIstyles from '@styles/components/cards/ToyBoxItem.module.scss'
 import {
+    AnglesUpIcon,
     CardIcon,
     CastaliaIcon,
     ChevronDownIcon,
@@ -34,6 +35,8 @@ function ToyBar(): JSX.Element {
         accountData,
         loggedIn,
         dragItemRef,
+        toyboxCollapsed,
+        setToyboxCollapsed,
         toyBoxRow,
         setToyBoxRow,
         toyBoxRowRef,
@@ -166,148 +169,145 @@ function ToyBar(): JSX.Element {
         let dragLeaveCounter = 0 // used to avoid dragleave firing when hovering child elements
         let hoverIndex = toyBoxItemsRef.current.length // used to animate cards
         let dropIndex = toyBoxItemsRef.current.length // determines drop location
-        if (toybox && trash) {
-            toybox.addEventListener('dragover', (e) => {
-                e.preventDefault()
-                const { x } = toybox.getBoundingClientRect()
-                const difference = e.clientX - x
-                const hIndex = Math.floor((difference - 55) / 110)
-                // if new hover index, reposition cards and update drop index
-                if (hoverIndex !== hIndex) {
-                    hoverIndex = hIndex
-                    // update item positions and drop index
-                    const items = document.querySelectorAll(`.${TBIstyles.wrapper}`)
-                    items.forEach((item, i) => {
-                        if (i < hIndex) item.classList.remove(TBIstyles.moveRight)
-                        if (i === hIndex)
-                            dropIndex = item.classList.contains(TBIstyles.moveRight) ? i : i + 1
-                        if (i > hIndex) item.classList.add(TBIstyles.moveRight)
-                    })
-                    // handle edges
-                    if (hIndex < 0) dropIndex = 0
-                    if (hIndex >= toyBoxItemsRef.current.length)
-                        dropIndex = toyBoxItemsRef.current.length
-                }
-            })
-            toybox.addEventListener('dragenter', () => {
-                dragLeaveCounter += 1
-                if (dragLeaveCounter === 1) {
-                    // highlight drop box if present
-                    if (!toyBoxItems.length) {
-                        const inbox = document.getElementById('inbox')
-                        if (inbox) inbox.classList.add(styles.highlighted)
-                    }
-                    // re-enable transions
-                    const items = document.querySelectorAll(`.${TBIstyles.wrapper}`)
-                    items.forEach((item) => item.classList.remove(TBIstyles.noTransition))
-                    // highlight match if present
-                    const { type, data, fromToyBox } = dragItemRef.current
-                    const match = !fromToyBox && document.getElementById(`tbi-${type}-${data.id}`)
-                    if (match) match.classList.add(TBIstyles.highlighted)
-                }
-            })
-            toybox.addEventListener('dragleave', () => {
-                dragLeaveCounter -= 1
-                if (dragLeaveCounter === 0) {
-                    // remove drop box highlight if present
-                    if (!toyBoxItems.length) {
-                        const inbox = document.getElementById('inbox')
-                        if (inbox) inbox.classList.remove(styles.highlighted)
-                    }
-                    // reset item positions
-                    const items = document.querySelectorAll(`.${TBIstyles.wrapper}`)
-                    items.forEach((item) => item.classList.remove(TBIstyles.moveRight))
-                    // remove highlighted match if present
-                    const { type, data, fromToyBox } = dragItemRef.current
-                    const match = !fromToyBox && document.getElementById(`tbi-${type}-${data.id}`)
-                    if (match) match.classList.remove(TBIstyles.highlighted)
-                    // reset indexes
-                    hoverIndex = toyBoxItemsRef.current.length
-                    dropIndex = toyBoxItemsRef.current.length
-                }
-            })
-            toybox.addEventListener('drop', () => {
-                dragLeaveCounter = 0
-                const { type, data, fromToyBox } = dragItemRef.current
-                const duplicate =
-                    !fromToyBox && toyBoxItemsRef.current.find((item) => isMatch(item))
+        toybox?.addEventListener('dragover', (e) => {
+            e.preventDefault()
+            const { x } = toybox.getBoundingClientRect()
+            const difference = e.clientX - x
+            const hIndex = Math.floor((difference - 55) / 110)
+            // if new hover index, reposition cards and update drop index
+            if (hoverIndex !== hIndex) {
+                hoverIndex = hIndex
+                // update item positions and drop index
                 const items = document.querySelectorAll(`.${TBIstyles.wrapper}`)
-                if (duplicate) {
-                    // reset item positions
-                    items.forEach((item) => item.classList.remove(TBIstyles.moveRight))
-                    // fade out match
-                    const match = document.getElementById(`tbi-${type}-${data.id}`)
-                    if (match) match.classList.remove(TBIstyles.highlighted)
-                } else {
-                    // update items array
-                    let newItems = JSON.parse(JSON.stringify(toyBoxItemsRef.current))
-                    if (!fromToyBox) addToyBoxItem(dropIndex)
-                    else {
-                        // save new item positions
-                        const oldIndex = newItems.findIndex((item) => isMatch(item))
-                        const newIndex = dropIndex > oldIndex ? dropIndex - 1 : dropIndex
-                        if (newIndex !== oldIndex) moveToyBoxItem(oldIndex, newIndex)
-                        // mark old item for removal after transition
-                        const oldItem = newItems.find((item) => isMatch(item))
-                        oldItem.data.id = 'removed'
-                    }
-                    newItems.splice(dropIndex, 0, dragItemRef.current)
-                    toyBoxItemsRef.current = newItems
-                    Promise.all([setToyBoxItems(newItems)]).then(() => {
-                        // reset indexes
-                        hoverIndex = newItems.length
-                        dropIndex = newItems.length
-                        // remove animation and reposition items
-                        items.forEach((item) => {
-                            item.classList.add(TBIstyles.noTransition)
-                            item.classList.remove(TBIstyles.moveRight)
-                        })
-                        if (fromToyBox) {
-                            // transition out old item
-                            const oldItem = document.getElementById(`tbi-${type}-removed`)
-                            if (oldItem) oldItem.classList.add(TBIstyles.removing)
-                            // remove old item
-                            setTimeout(() => {
-                                newItems = newItems.filter((i) => i.data.id !== 'removed')
-                                setToyBoxItems(newItems)
-                                toyBoxItemsRef.current = newItems
-                            }, animationSpeed)
-                        }
-                    })
+                items.forEach((item, i) => {
+                    if (i < hIndex) item.classList.remove(TBIstyles.moveRight)
+                    if (i === hIndex)
+                        dropIndex = item.classList.contains(TBIstyles.moveRight) ? i : i + 1
+                    if (i > hIndex) item.classList.add(TBIstyles.moveRight)
+                })
+                // handle edges
+                if (hIndex < 0) dropIndex = 0
+                if (hIndex >= toyBoxItemsRef.current.length)
+                    dropIndex = toyBoxItemsRef.current.length
+            }
+        })
+        toybox?.addEventListener('dragenter', () => {
+            dragLeaveCounter += 1
+            if (dragLeaveCounter === 1) {
+                // highlight drop box if present
+                if (!toyBoxItems.length) {
+                    const inbox = document.getElementById('inbox')
+                    if (inbox) inbox.classList.add(styles.highlighted)
                 }
-            })
-            // trash
-            trash.addEventListener('dragover', (e) => e.preventDefault())
-            trash.addEventListener('dragenter', () => {
-                const { fromToyBox } = dragItemRef.current
-                if (fromToyBox) trash.classList.add(styles.hover)
-            })
-            trash.addEventListener('dragleave', () => {
-                trash.classList.remove(styles.hover)
-            })
-            trash.addEventListener('drop', () => {
-                trash.classList.remove(styles.hover)
+                // re-enable transions
+                const items = document.querySelectorAll(`.${TBIstyles.wrapper}`)
+                items.forEach((item) => item.classList.remove(TBIstyles.noTransition))
+                // highlight match if present
                 const { type, data, fromToyBox } = dragItemRef.current
-                if (fromToyBox) {
-                    // save deleted item
-                    const itemIndex = toyBoxItemsRef.current.findIndex((item) => isMatch(item))
-                    deleteToyBoxItem(itemIndex)
-                    // update UI
-                    const oldItem = document.getElementById(`tbi-${type}-${data.id}`)
-                    const newItems = toyBoxItemsRef.current.filter((item) => !isMatch(item))
-                    if (newItems.length) {
-                        oldItem?.classList.add(TBIstyles.removing)
+                const match = !fromToyBox && document.getElementById(`tbi-${type}-${data.id}`)
+                if (match) match.classList.add(TBIstyles.highlighted)
+            }
+        })
+        toybox?.addEventListener('dragleave', () => {
+            dragLeaveCounter -= 1
+            if (dragLeaveCounter === 0) {
+                // remove drop box highlight if present
+                if (!toyBoxItems.length) {
+                    const inbox = document.getElementById('inbox')
+                    if (inbox) inbox.classList.remove(styles.highlighted)
+                }
+                // reset item positions
+                const items = document.querySelectorAll(`.${TBIstyles.wrapper}`)
+                items.forEach((item) => item.classList.remove(TBIstyles.moveRight))
+                // remove highlighted match if present
+                const { type, data, fromToyBox } = dragItemRef.current
+                const match = !fromToyBox && document.getElementById(`tbi-${type}-${data.id}`)
+                if (match) match.classList.remove(TBIstyles.highlighted)
+                // reset indexes
+                hoverIndex = toyBoxItemsRef.current.length
+                dropIndex = toyBoxItemsRef.current.length
+            }
+        })
+        toybox?.addEventListener('drop', () => {
+            dragLeaveCounter = 0
+            const { type, data, fromToyBox } = dragItemRef.current
+            const duplicate = !fromToyBox && toyBoxItemsRef.current.find((item) => isMatch(item))
+            const items = document.querySelectorAll(`.${TBIstyles.wrapper}`)
+            if (duplicate) {
+                // reset item positions
+                items.forEach((item) => item.classList.remove(TBIstyles.moveRight))
+                // fade out match
+                const match = document.getElementById(`tbi-${type}-${data.id}`)
+                if (match) match.classList.remove(TBIstyles.highlighted)
+            } else {
+                // update items array
+                let newItems = JSON.parse(JSON.stringify(toyBoxItemsRef.current))
+                if (!fromToyBox) addToyBoxItem(dropIndex)
+                else {
+                    // save new item positions
+                    const oldIndex = newItems.findIndex((item) => isMatch(item))
+                    const newIndex = dropIndex > oldIndex ? dropIndex - 1 : dropIndex
+                    if (newIndex !== oldIndex) moveToyBoxItem(oldIndex, newIndex)
+                    // mark old item for removal after transition
+                    const oldItem = newItems.find((item) => isMatch(item))
+                    oldItem.data.id = 'removed'
+                }
+                newItems.splice(dropIndex, 0, dragItemRef.current)
+                toyBoxItemsRef.current = newItems
+                Promise.all([setToyBoxItems(newItems)]).then(() => {
+                    // reset indexes
+                    hoverIndex = newItems.length
+                    dropIndex = newItems.length
+                    // remove animation and reposition items
+                    items.forEach((item) => {
+                        item.classList.add(TBIstyles.noTransition)
+                        item.classList.remove(TBIstyles.moveRight)
+                    })
+                    if (fromToyBox) {
+                        // transition out old item
+                        const oldItem = document.getElementById(`tbi-${type}-removed`)
+                        if (oldItem) oldItem.classList.add(TBIstyles.removing)
+                        // remove old item
                         setTimeout(() => {
+                            newItems = newItems.filter((i) => i.data.id !== 'removed')
                             setToyBoxItems(newItems)
                             toyBoxItemsRef.current = newItems
                         }, animationSpeed)
-                    } else {
+                    }
+                })
+            }
+        })
+        // trash
+        trash?.addEventListener('dragover', (e) => e.preventDefault())
+        trash?.addEventListener('dragenter', () => {
+            const { fromToyBox } = dragItemRef.current
+            if (fromToyBox) trash.classList.add(styles.hover)
+        })
+        trash?.addEventListener('dragleave', () => {
+            trash.classList.remove(styles.hover)
+        })
+        trash?.addEventListener('drop', () => {
+            trash.classList.remove(styles.hover)
+            const { type, data, fromToyBox } = dragItemRef.current
+            if (fromToyBox) {
+                // save deleted item
+                const itemIndex = toyBoxItemsRef.current.findIndex((item) => isMatch(item))
+                deleteToyBoxItem(itemIndex)
+                // update UI
+                const oldItem = document.getElementById(`tbi-${type}-${data.id}`)
+                const newItems = toyBoxItemsRef.current.filter((item) => !isMatch(item))
+                if (newItems.length) {
+                    oldItem?.classList.add(TBIstyles.removing)
+                    setTimeout(() => {
                         setToyBoxItems(newItems)
                         toyBoxItemsRef.current = newItems
-                    }
+                    }, animationSpeed)
+                } else {
+                    setToyBoxItems(newItems)
+                    toyBoxItemsRef.current = newItems
                 }
-            })
-        }
+            }
+        })
     }
 
     useEffect(() => {
@@ -317,7 +317,16 @@ function ToyBar(): JSX.Element {
 
     if (!loggedIn) return <div />
     return (
-        <Row centerY className={styles.wrapper}>
+        <Row centerY className={`${styles.wrapper} ${toyboxCollapsed && styles.collapsed}`}>
+            <button
+                type='button'
+                className={styles.collapseButton}
+                onClick={() => setToyboxCollapsed(!toyboxCollapsed)}
+            >
+                <AnglesUpIcon
+                    style={{ transform: `rotate(${toyboxCollapsed ? '0' : '180'}deg)` }}
+                />
+            </button>
             <Row centerY className={`${styles.left} ${mobileView && styles.mobile}`}>
                 <CloseOnClickOutside onClick={() => setShowNewButtons(false)}>
                     <>

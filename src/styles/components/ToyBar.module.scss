@@ -7,7 +7,61 @@
     bottom: 0;
     background-color: rgba($grey1, 0.9);
     box-shadow: 0 0px 20px 0 rgba(10, 8, 72, 0.14);
-    transition: opacity 0.3s;
+    transition: all 0.3s;
+
+    .collapseButton {
+        all: unset;
+        cursor: pointer;
+        position: absolute;
+        top: 0;
+        opacity: 0;
+        pointer-events: none;
+        left: calc(50% - 20px);
+        width: 40px;
+        height: 24px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: rgba($grey1, 0.9);
+        color: $grey5;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+        transition-property: top, opacity, color;
+        transition-duration: 0.3s;
+        border-top: 1px solid $grey3;
+        border-left: 1px solid $grey3;
+        border-right: 1px solid $grey3;
+
+        > svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        &:hover {
+            color: $blue5;
+        }
+    }
+
+    &:hover {
+        .collapseButton {
+            top: -24px;
+            opacity: 1;
+            pointer-events: all;
+        }
+    }
+
+    &.collapsed {
+        bottom: -120px;
+        .collapseButton {
+            top: -24px;
+            width: 100%;
+            left: 0;
+            opacity: 1;
+            pointer-events: all;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+    }
 
     .left {
         background-color: $grey1;
