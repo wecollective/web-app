@@ -64,7 +64,17 @@ function Governance(): JSX.Element {
                     ) : (
                         <Column style={{ width: 780 }}>
                             {governancePolls.map((poll) => (
-                                <PostCard key={poll.id} post={poll} location='space-governance' />
+                                <PostCard
+                                    key={poll.id}
+                                    post={poll}
+                                    location='space-governance'
+                                    onDelete={(id: number) =>
+                                        setGovernancePolls(
+                                            governancePolls.filter((p) => p.id !== id)
+                                        )
+                                    }
+                                    setPost={() => console.error('TODO')}
+                                />
                             ))}
                         </Column>
                     )}

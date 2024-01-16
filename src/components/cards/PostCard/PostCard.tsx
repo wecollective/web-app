@@ -9,7 +9,6 @@ import AudioCard from '@components/cards/PostCard/AudioCard'
 import Audios from '@components/cards/PostCard/Audios'
 import Card from '@components/cards/PostCard/Card'
 import EventCard from '@components/cards/PostCard/EventCard'
-import GlassBeadGame from '@components/cards/PostCard/GlassBeadGame'
 import Images from '@components/cards/PostCard/Images'
 import PollCard from '@components/cards/PostCard/PollCard'
 import PostSpaces from '@components/cards/PostCard/PostSpaces'
@@ -23,11 +22,17 @@ import RatingModal from '@components/modals/RatingModal'
 import RemovePostModal from '@components/modals/RemovePostModal'
 import RepostModal from '@components/modals/RepostModal'
 import { AccountContext } from '@contexts/AccountContext'
-import { PostContext } from '@contexts/PostContext'
 import { SpaceContext } from '@contexts/SpaceContext'
-import { UserContext } from '@contexts/UserContext'
 import config from '@src/Config'
-import { dateCreated, timeSinceCreated, timeSinceCreatedShort } from '@src/Helpers'
+import {
+    Post,
+    dateCreated,
+    getGameType,
+    includesGame,
+    timeSinceCreated,
+    timeSinceCreatedShort,
+} from '@src/Helpers'
+import Game from '@src/components/cards/PostCard/Game'
 import {
     AngleUpIcon,
     AnglesUpIcon,
@@ -49,8 +54,9 @@ import Cookies from 'universal-cookie'
 
 // todo: try firing off account reactions request before post block reuest for all media here
 function PostCard(props: {
-    post: any
-    index?: number
+    post: Post
+    setPost: (post: Post) => void
+    onDelete: (id: number) => void
     location:
         | 'post-page'
         | 'space-posts'
@@ -63,7 +69,7 @@ function PostCard(props: {
     styling?: boolean
     style?: any
 }): JSX.Element {
-    const { index, post: postData, location, collapse, styling, style } = props
+    const { post, setPost, location, collapse, styling, style, onDelete } = props
     const {
         accountData,
         loggedIn,
@@ -72,32 +78,19 @@ function PostCard(props: {
         setAlertMessage,
         setCreatePostModalSettings,
     } = useContext(AccountContext)
-    const {
-        spaceData,
-        postFilters,
-        spacePosts,
-        setSpacePosts,
-        governancePolls,
-        setGovernancePolls,
-    } = useContext(SpaceContext)
-    const { userPosts, setUserPosts } = useContext(UserContext)
-    const { setPostState } = useContext(PostContext)
-    const [post, setPost] = useState(postData)
+    const { spaceData, postFilters } = useContext(SpaceContext)
     const {
         id,
-        type, // post, comment, bead, poll-answer, card-face, gbg-room-comment, url-block, image-block, audio-block
+        type,
         mediaTypes,
         title,
         text,
-        color,
         createdAt,
         updatedAt,
         totalComments,
-        totalLikes,
         totalRatings,
         totalReposts,
         totalLinks,
-        // sourcePostId,
         Creator,
         DirectSpaces,
         UrlBlocks,
@@ -108,6 +101,7 @@ function PostCard(props: {
         Audio,
         Url,
     } = post
+    const [totalLikes, setTotalLikes] = useState(post.totalLikes)
     const [buttonsDisabled, setButtonsDisabled] = useState(true)
     const [accountReactions, setAccountReactions] = useState<any>({})
     const { liked, rated, reposted, commented, linked } = accountReactions
@@ -222,7 +216,7 @@ function PostCard(props: {
             axios
                 .post(`${config.apiURL}/${liked ? 'remove' : 'add'}-like`, data, options)
                 .then(() => {
-                    setPost({ ...post, totalLikes: totalLikes + (liked ? -1 : 1) })
+                    setTotalLikes(totalLikes + (liked ? -1 : 1))
                     setAccountReactions({ ...accountReactions, liked: !liked })
                     setLikeLoading(false)
                 })
@@ -385,46 +379,35 @@ function PostCard(props: {
                     <Urls
                         key={updatedAt}
                         postId={id}
-                        urlBlocks={
-                            UrlBlocks
-                                ? UrlBlocks.map((block) => {
-                                      return { ...block.Post, Url: block.Post.MediaLink.Url }
-                                  })
-                                : null
-                        }
+                        urlBlocks={UrlBlocks?.map((block) => {
+                            return { ...block.Post, Url: block.Post.MediaLink.Url }
+                        })}
                         style={{ marginBottom: 10 }}
                     />
                 )}
                 {!isBlock && mediaTypes.includes('image') && (
                     <Images
                         postId={id}
-                        imageBlocks={
-                            ImageBlocks
-                                ? ImageBlocks.map((block) => {
-                                      return { ...block.Post, Image: block.Post.MediaLink.Image }
-                                  })
-                                : null
-                        }
+                        imageBlocks={ImageBlocks?.map((block) => {
+                            return { ...block.Post, Image: block.Post.MediaLink.Image }
+                        })}
                         style={{ marginBottom: 10 }}
                     />
                 )}
                 {!isBlock && mediaTypes.includes('audio') && (
                     <Audios
                         postId={id}
-                        audioBlocks={
-                            AudioBlocks
-                                ? AudioBlocks.map((block) => {
-                                      return { ...block.Post, Audio: block.Post.MediaLink.Audio }
-                                  })
-                                : null
-                        }
+                        audioBlocks={AudioBlocks?.map((block) => {
+                            return { ...block.Post, Audio: block.Post.MediaLink.Audio }
+                        })}
                         style={{ marginBottom: 10 }}
                     />
                 )}
-                {Event && <EventCard postData={post} setPostData={setPost} location={location} />}
+                {Event && <EventCard post={post} setPost={setPost} location={location} />}
                 {mediaTypes.includes('poll') && <PollCard postData={post} location={location} />}
-                {mediaTypes.includes('glass-bead-game') && (
-                    <GlassBeadGame
+                {includesGame(mediaTypes) && (
+                    <Game
+                        type={getGameType(mediaTypes)}
                         postId={id}
                         setTopicImage={setTopicImage}
                         isOwnPost={Creator.id === accountData.id}
@@ -594,15 +577,7 @@ function PostCard(props: {
                 {deletePostModalOpen && (
                     <DeletePostModal
                         post={post}
-                        onDelete={() => {
-                            if (location === 'space-posts')
-                                setSpacePosts(spacePosts.filter((p) => p.id !== id))
-                            if (location === 'user-posts')
-                                setUserPosts(userPosts.filter((p) => p.id !== id))
-                            if (location === 'space-governance')
-                                setGovernancePolls(governancePolls.filter((p) => p.id !== id))
-                            if (location === 'post-page') setPostState('deleted')
-                        }}
+                        onDelete={onDelete}
                         close={() => setDeletePostModalOpen(false)}
                     />
                 )}
@@ -619,65 +594,9 @@ function PostCard(props: {
 }
 
 PostCard.defaultProps = {
-    index: null,
     collapse: false,
     styling: false,
     style: null,
 }
 
 export default PostCard
-
-/* {location !== 'post-page' && (
-    <Link
-        to={`/p/${id}`}
-        className={styles.link}
-        title='Open post page'
-        style={location === 'preview' ? { pointerEvents: 'none' } : {}}
-    >
-        <ExpandIcon />
-    </Link>
-)} */
-
-/* <Row className={styles.otherButtons}>
-    {['text', 'url', 'audio', 'image'].includes(type) && (
-        <button
-            type='button'
-            title='Create string from post'
-            disabled={location === 'preview'}
-            onClick={() => {
-                if (loggedIn) {
-                    setCreatePostModalSettings({
-                        type: 'string-from-post',
-                        source: postData,
-                    })
-                    setCreatePostModalOpen(true)
-                } else {
-                    setAlertMessage('Log in to create strings from posts')
-                    setAlertModalOpen(true)
-                }
-            }}
-        >
-            <StringIcon />
-        </button>
-    )}
-</Row> */
-
-/* {['prism', 'decision-tree'].includes(type) && (
-    <StatButton
-        icon={<ArrowRightIcon />}
-        iconSize={20}
-        text='Open game room'
-        disabled={location === 'preview'}
-        onClick={() => history(`/p/${id}`)}
-    />
-)} */
-
-/* <button
-    className={styles.gbgFromPostButton}
-    type='button'
-    title='Create GBG from post'
-    // disabled={location === 'preview'}
-    onClick={startNewGbgFromPost}
->
-    <CastaliaIcon />
-</button> */

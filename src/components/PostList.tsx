@@ -24,8 +24,8 @@ function PostList(props: {
     const { location, posts, totalPosts, loading, nextPostsLoading, className, styling, style } =
         props
     const { dragItemRef, setDropLocation, setDropModalOpen } = useContext(AccountContext)
-    const { spaceData, resetSpacePosts } = useContext(SpaceContext)
-    const { resetUserPosts } = useContext(UserContext)
+    const { spaceData, spacePosts, setSpacePosts, resetSpacePosts } = useContext(SpaceContext)
+    const { userPosts, setUserPosts, resetUserPosts } = useContext(UserContext)
     const mobileView = document.documentElement.clientWidth < 900
     const l = useLocation()
     const spaceHandle = l.pathname.split('/')[2]
@@ -76,7 +76,21 @@ function PostList(props: {
                                     key={post.id}
                                     location={location}
                                     styling={styling}
-                                    // collapse
+                                    onDelete={(id: number) => {
+                                        switch (location) {
+                                            case 'space-posts':
+                                                setSpacePosts(spacePosts.filter((p) => p.id !== id))
+                                                break
+                                            case 'user-posts':
+                                                setUserPosts(userPosts.filter((p) => p.id !== id))
+                                                break
+                                            default: {
+                                                const exhaustiveCheck: never = location
+                                                throw exhaustiveCheck
+                                            }
+                                        }
+                                    }}
+                                    setPost={() => console.error('TODO')}
                                 />
                             ))}
                             {nextPostsLoading && (

@@ -617,7 +617,12 @@ function PostMap(props: { postMapData: any; params: any }): JSX.Element {
                     style={{ width: '100vw', maxWidth: 900 }}
                 >
                     {selectedPost ? (
-                        <PostCard location='space-post-map' post={selectedPost} />
+                        <PostCard
+                            location='space-post-map'
+                            post={selectedPost}
+                            setPost={() => console.error('TODO')}
+                            onDelete={() => console.error('TODO')}
+                        />
                     ) : (
                         <LoadingWheel />
                     )}

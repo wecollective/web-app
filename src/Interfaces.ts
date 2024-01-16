@@ -233,19 +233,6 @@ export interface ISpaceContext {
     resetSpacePeople: () => void
 }
 
-export interface IPostContext {
-    selectedSubPage: string
-    setSelectedSubPage: (payload: string) => void
-    postData: any
-    setPostData: (payload: any) => void
-    postDataLoading: boolean
-    postState: string
-    setPostState: (payload: string) => void
-    // functions
-    getPostData: (payload: number) => void
-    resetPostContext: () => void
-}
-
 export interface IUserContext {
     isOwnAccount: boolean
     selectedUserSubPage: string

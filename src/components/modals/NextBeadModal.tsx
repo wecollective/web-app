@@ -10,6 +10,7 @@ import DraftTextEditor from '@components/draft-js/DraftTextEditor'
 import ImageModal from '@components/modals/ImageModal'
 import Modal from '@components/modals/Modal'
 import {
+    GameSettings,
     allowedAudioTypes,
     allowedImageTypes,
     audioMBLimit,
@@ -38,7 +39,7 @@ const beadColors = [white, red, orange, yellow, green, blue, purple]
 function NextBeadModal(props: {
     preview?: boolean
     postId?: number
-    settings: any
+    settings: GameSettings
     players: any[]
     onSave: (bead: any) => void
     close: () => void

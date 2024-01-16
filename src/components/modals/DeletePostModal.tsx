@@ -8,7 +8,7 @@ import Cookies from 'universal-cookie'
 
 function DeletePostModal(props: {
     post: any
-    onDelete: () => void
+    onDelete: (id: number) => void
     close: () => void
 }): JSX.Element {
     const { post, onDelete, close } = props
@@ -25,7 +25,7 @@ function DeletePostModal(props: {
             .then(() => {
                 setLoading(false)
                 close()
-                onDelete()
+                onDelete(post.id)
             })
             .catch((error) => console.log(error))
     }
