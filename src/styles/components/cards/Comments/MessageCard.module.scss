@@ -1,0 +1,139 @@
+@import '@styles/Variables';
+
+.wrapper {
+    position: relative;
+    cursor: move;
+    align-self: flex-start;
+    margin-bottom: 10px;
+
+    &.isOwnComment {
+        align-self: flex-end;
+
+        .message {
+            background-color: $blue8;
+        }
+    }
+
+    .message {
+        background-color: $grey1;
+        border-radius: 10px;
+        padding: 10px 12px;
+        width: 100%;
+
+        .header {
+            margin-bottom: 5px;
+
+            .id {
+                display: flex;
+                align-items: center;
+            }
+
+            .menuButton {
+                all: unset;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                padding-left: 8px;
+                flex-shrink: 0;
+
+                svg {
+                    color: $grey4;
+                    height: 18px;
+                    transition: color 0.3s;
+                }
+
+                &:hover {
+                    svg {
+                        color: $grey6;
+                    }
+                }
+            }
+
+            .menu {
+                position: absolute;
+                top: 30px;
+                right: 10px;
+                background-color: white;
+                box-shadow: 0 0 7px 0 rgba(black, 0.15);
+                border-radius: 5px;
+                padding: 10px;
+                z-index: 10;
+
+                button {
+                    all: unset;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+
+                    &:not(:last-child) {
+                        margin-bottom: 10px;
+                    }
+
+                    &:hover > svg {
+                        color: $grey6;
+                    }
+
+                    > svg {
+                        width: 18px;
+                        height: 18px;
+                        margin-right: 8px;
+                        color: $grey5;
+                        transition: color 0.3s;
+                    }
+                }
+            }
+        }
+
+        .content {
+            position: relative;
+            border-radius: 10px;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .footer {
+            margin-top: 5px;
+
+            .stat {
+                all: unset;
+                cursor: pointer;
+                font-size: 14px;
+                color: $grey4;
+                margin-right: 15px;
+                display: flex;
+                align-items: center;
+                transition: all 0.5s;
+
+                > button {
+                    all: unset;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                }
+
+                svg {
+                    width: 18px;
+                    height: 18px;
+                    margin-right: 5px;
+                }
+
+                &:hover {
+                    color: $grey6;
+                }
+
+                &.reply {
+                    margin-right: 5px;
+                    svg {
+                        transform: rotate(180deg);
+                    }
+                }
+
+                &.blue {
+                    svg {
+                        color: $blue1;
+                    }
+                }
+            }
+        }
+    }
+}
