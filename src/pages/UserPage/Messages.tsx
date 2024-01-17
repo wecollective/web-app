@@ -6,6 +6,7 @@ import Input from '@components/Input'
 import Row from '@components/Row'
 import SearchSelector from '@components/SearchSelector'
 import LoadingWheel from '@components/animations/LoadingWheel'
+import MessageCard from '@components/cards/Comments/MessageCard'
 import CommentInput from '@components/draft-js/CommentInput'
 import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
@@ -21,7 +22,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
 function Messages(): JSX.Element {
-    const { accountData, loggedIn } = useContext(AccountContext)
+    const { accountData, loggedIn, setToyboxCollapsed } = useContext(AccountContext)
     const { userData, userNotFound } = useContext(UserContext)
     const [chats, setChats] = useState<any[]>([])
     const [chatsLoading, setChatsLoading] = useState(true)
@@ -69,7 +70,10 @@ function Messages(): JSX.Element {
             .post(`${config.apiURL}/messages`, data, options)
             .then((res) => {
                 console.log('messages res: ', res.data)
-                setMessages(offset ? [...messages, ...res.data] : res.data)
+                const formatedMessages = res.data.map((message) => {
+                    return { ...message, Comments: [] }
+                })
+                setMessages(offset ? [...messages, ...formatedMessages] : formatedMessages)
                 if (offset) setNextMessagesLoading(false)
                 else setMessagesLoading(false)
             })
@@ -130,6 +134,7 @@ function Messages(): JSX.Element {
         if (userData.id) {
             if (userHandle === accountData.handle) {
                 window.scrollTo({ top: 320, behavior: 'smooth' })
+                setToyboxCollapsed(true)
                 getChats()
             } else {
                 history(`/u/${userHandle}/posts`)
@@ -160,25 +165,36 @@ function Messages(): JSX.Element {
                     <Link
                         to={`?chatId=${chat.id}`}
                         key={chat.id}
-                        className={`${styles.chatRow} ${+chatId === chat.id && styles.selected}`}
+                        className={`${styles.chat} ${+chatId === chat.id && styles.selected}`}
                     >
-                        <img src={chat.flagImagePath} className={styles.chatImage} alt='' />
+                        <img src={chat.flagImagePath} alt='' />
                         <Column>
                             <h1>{chat.name}</h1>
                         </Column>
                     </Link>
                 ))}
             </Column>
-            <Column className={styles.chat}>
-                <p>Chat info...</p>
-                <Column className={styles.messages}>messages go here...</Column>
-                <CommentInput
-                    type='chat-message'
-                    placeholder='New message...'
-                    parent={{ type: 'space', id: +chatId }}
-                    onSave={(data) => setMessages([...messages, data])}
-                    style={{ marginTop: 10 }}
-                />
+            <Column className={`${styles.messages} hide-scrollbars`}>
+                <Row className={styles.header}>
+                    <p>Chat info...</p>
+                </Row>
+                <Column className={`${styles.scrollWrapper} hide-scrollbars`}>
+                    {messages.map((message) => (
+                        <MessageCard
+                            key={message.id}
+                            message={message}
+                            removeMessage={() => null}
+                        />
+                    ))}
+                </Column>
+                <Row className={styles.input}>
+                    <CommentInput
+                        type='chat-message'
+                        placeholder='New message...'
+                        parent={{ type: 'space', id: +chatId }}
+                        onSave={(data) => setMessages([data, ...messages])}
+                    />
+                </Row>
             </Column>
             {newChatModalOpen && (
                 <Modal

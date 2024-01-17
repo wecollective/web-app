@@ -2,23 +2,22 @@
 
 .wrapper {
     width: 100%;
-    height: calc(100vh - 225px);
+    height: calc(100vh - 120px);
     margin-top: -15px;
 
     .sidebar {
         width: 350px;
         height: 100%;
-        background-color: white;
         padding: 10px;
 
-        .chatRow {
+        .chat {
             margin-top: 10px;
             display: flex;
             align-items: center;
             border-radius: 5px;
             padding: 5px;
 
-            .chatImage {
+            > img {
                 width: 40px;
                 height: 40px;
                 border-radius: 50%;
@@ -38,12 +37,31 @@
         }
     }
 
-    .chat {
+    .messages {
+        position: relative;
         width: 100%;
-        padding: 20px;
+        height: 100%;
+        background-color: white;
 
-        .messages {
-            height: 100%;
+        .header {
+            position: absolute;
+            top: 10px;
+        }
+
+        .scrollWrapper {
+            overflow-y: scroll;
+            margin-bottom: 94px;
+            padding: 0 10px;
+            flex-direction: column-reverse;
+        }
+
+        .input {
+            position: fixed;
+            bottom: 0;
+            width: calc(100% - 300px);
+            padding: 10px 10px 35px 10px;
+            background-color: white;
+            z-index: 5;
         }
     }
 
