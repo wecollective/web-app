@@ -54,10 +54,7 @@ function MessageCard(props: {
         createdAt,
         updatedAt,
         Creator,
-        Comments,
     } = message
-    const [loading, setLoading] = useState(false)
-    const [remainingComments, setRemainingComments] = useState(totalChildComments - Comments.length)
     const [collapsed, setCollapsed] = useState(false)
     const [buttonsDisabled, setButtonsDisabled] = useState(true)
     const [accountReactions, setAccountReactions] = useState<any>({})
@@ -219,7 +216,7 @@ function MessageCard(props: {
     return (
         <Row
             className={`${styles.wrapper} ${Creator.id === accountData.id && styles.isOwnComment}`}
-            style={{ width: fullWidth ? '100%' : 'auto', maxWidth: 900 }}
+            style={{ width: fullWidth ? 'calc(100% - 100px)' : 'auto', maxWidth: 900 }}
         >
             <Column style={{ marginRight: 10 }}>
                 <FlagImage type='user' size={30} imagePath={Creator.flagImagePath} />
@@ -262,7 +259,7 @@ function MessageCard(props: {
                         )}
                     </Row>
                     {selected && (
-                        <Row style={{ flexShrink: 0 }}>
+                        <Row style={{ marginLeft: 10, flexShrink: 0 }}>
                             <Link to={`/p/${id}`} className={styles.id} title='Open post page'>
                                 <p className='grey'>ID:</p>
                                 <p style={{ marginLeft: 5 }}>{id}</p>

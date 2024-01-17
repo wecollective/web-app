@@ -26,7 +26,9 @@ function Messages(): JSX.Element {
     const { userData, userNotFound } = useContext(UserContext)
     const [chats, setChats] = useState<any[]>([])
     const [chatsLoading, setChatsLoading] = useState(true)
+    const [scrollTopReached, setScrollTopReached] = useState(false)
     const [messages, setMessages] = useState<any[]>([])
+    const [totalMessages, setTotalMessages] = useState(0)
     const [messagesLoading, setMessagesLoading] = useState(false)
     const [nextMessagesLoading, setNextMessagesLoading] = useState(false)
     const [newChatModalOpen, setNewChatModalOpen] = useState(false)
@@ -48,6 +50,13 @@ function Messages(): JSX.Element {
     // + add unseenMessages column on Users table
     // + need to keep track of unseen messages per chat and user (add to SpaceUserStat table?)
 
+    function scrollHandler(e) {
+        const { scrollHeight, scrollTop, clientHeight } = e.target
+        const topReached = scrollHeight + scrollTop > clientHeight
+        if (topReached) console.log('topReached')
+        setScrollTopReached(topReached)
+    }
+
     function getChats() {
         setChatsLoading(true)
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
@@ -62,6 +71,8 @@ function Messages(): JSX.Element {
     }
 
     function getMessages(offset: number) {
+        const scrollWrapper = document.getElementById('scroll-wrapper')
+        scrollWrapper?.scrollTo({ top: 0 })
         if (offset) setNextMessagesLoading(true)
         else setMessagesLoading(true)
         const data = { chatId, offset }
@@ -69,11 +80,8 @@ function Messages(): JSX.Element {
         axios
             .post(`${config.apiURL}/messages`, data, options)
             .then((res) => {
-                console.log('messages res: ', res.data)
-                const formatedMessages = res.data.map((message) => {
-                    return { ...message, Comments: [] }
-                })
-                setMessages(offset ? [...messages, ...formatedMessages] : formatedMessages)
+                setTotalMessages(res.data.total)
+                setMessages(offset ? [...messages, ...res.data.messages] : res.data.messages)
                 if (offset) setNextMessagesLoading(false)
                 else setMessagesLoading(false)
             })
@@ -129,15 +137,21 @@ function Messages(): JSX.Element {
             .catch((error) => console.log(error))
     }
 
+    // add scroll handler
+    useEffect(() => {
+        const scrollWrapper = document.getElementById('scroll-wrapper')
+        scrollWrapper?.addEventListener('scroll', scrollHandler)
+        return () => scrollWrapper?.removeEventListener('scroll', scrollHandler)
+    }, [])
+
     // if logged in and is own account get chats, otherwise redirect to posts page
     useEffect(() => {
         if (userData.id) {
-            if (userHandle === accountData.handle) {
+            if (userHandle !== accountData.handle) history(`/u/${userHandle}/posts`)
+            else {
                 window.scrollTo({ top: 320, behavior: 'smooth' })
                 setToyboxCollapsed(true)
                 getChats()
-            } else {
-                history(`/u/${userHandle}/posts`)
             }
         }
     }, [userData.id, loggedIn])
@@ -146,6 +160,11 @@ function Messages(): JSX.Element {
     useEffect(() => {
         if (chatId) getMessages(0)
     }, [chatId])
+
+    // get next messages when scroll top reached
+    useEffect(() => {
+        if (scrollTopReached && totalMessages > messages.length) getMessages(messages.length)
+    }, [scrollTopReached])
 
     if (userNotFound) return <UserNotFound />
     return (
@@ -178,7 +197,7 @@ function Messages(): JSX.Element {
                 <Row className={styles.header}>
                     <p>Chat info...</p>
                 </Row>
-                <Column className={`${styles.scrollWrapper} hide-scrollbars`}>
+                <Column id='scroll-wrapper' className={`${styles.scrollWrapper} hide-scrollbars`}>
                     {messages.map((message) => (
                         <MessageCard
                             key={message.id}
