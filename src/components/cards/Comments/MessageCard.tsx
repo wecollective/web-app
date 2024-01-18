@@ -54,6 +54,9 @@ function MessageCard(props: {
         createdAt,
         updatedAt,
         Creator,
+        UrlBlocks,
+        ImageBlocks,
+        AudioBlocks,
     } = message
     const [collapsed, setCollapsed] = useState(false)
     const [buttonsDisabled, setButtonsDisabled] = useState(true)
@@ -306,13 +309,51 @@ function MessageCard(props: {
                         }`}
                     />
                     {mediaTypes.includes('url') && (
-                        <Urls key={updatedAt} postId={id} style={{ margin: '10px 0' }} />
+                        <Urls
+                            key={updatedAt}
+                            postId={id}
+                            urlBlocks={
+                                UrlBlocks
+                                    ? UrlBlocks.map((block) => {
+                                          return { ...block.Post, Url: block.Post.MediaLink.Url }
+                                      })
+                                    : null
+                            }
+                            style={{ margin: '10px 0' }}
+                        />
                     )}
+
                     {mediaTypes.includes('image') && (
-                        <Images postId={id} style={{ margin: '10px 0' }} />
+                        <Images
+                            postId={id}
+                            imageBlocks={
+                                ImageBlocks
+                                    ? ImageBlocks.map((block) => {
+                                          return {
+                                              ...block.Post,
+                                              Image: block.Post.MediaLink.Image,
+                                          }
+                                      })
+                                    : null
+                            }
+                            style={{ margin: '10px 0' }}
+                        />
                     )}
                     {mediaTypes.includes('audio') && (
-                        <Audios postId={id} style={{ margin: '10px 0', width: '100%' }} />
+                        <Audios
+                            postId={id}
+                            audioBlocks={
+                                AudioBlocks
+                                    ? AudioBlocks.map((block) => {
+                                          return {
+                                              ...block.Post,
+                                              Audio: block.Post.MediaLink.Audio,
+                                          }
+                                      })
+                                    : null
+                            }
+                            style={{ margin: '10px 0', width: '100%' }}
+                        />
                     )}
                 </Column>
                 {selected && state === 'active' && (
