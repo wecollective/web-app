@@ -25,6 +25,7 @@ function Messages(): JSX.Element {
     const { accountData, loggedIn, setToyboxCollapsed } = useContext(AccountContext)
     const { userData, userNotFound } = useContext(UserContext)
     const [chats, setChats] = useState<any[]>([])
+    const [selectedChat, setSelectedChat] = useState<any>(null)
     const [chatsLoading, setChatsLoading] = useState(true)
     const [scrollTopReached, setScrollTopReached] = useState(false)
     const [messages, setMessages] = useState<any[]>([])
@@ -52,12 +53,12 @@ function Messages(): JSX.Element {
 
     function scrollHandler(e) {
         const { scrollHeight, scrollTop, clientHeight } = e.target
-        const topReached = scrollHeight + scrollTop > clientHeight
+        const topReached = scrollHeight + scrollTop < clientHeight + 5
         if (topReached) console.log('topReached')
         setScrollTopReached(topReached)
     }
 
-    function getChats() {
+    function getChats(offset) {
         setChatsLoading(true)
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
@@ -66,13 +67,18 @@ function Messages(): JSX.Element {
                 console.log('chats res: ', res.data)
                 setChats(res.data)
                 setChatsLoading(false)
+                if (chatId) {
+                    history(`?chatId=${chatId}`)
+                    setSelectedChat(res.data.find((chat) => chat.id === +chatId))
+                } else {
+                    history(`?chatId=${res.data[0].id}`)
+                    setSelectedChat(res.data.find((chat) => chat.id === res.data[0].id))
+                }
             })
             .catch((error) => console.log(error))
     }
 
     function getMessages(offset: number) {
-        const scrollWrapper = document.getElementById('scroll-wrapper')
-        scrollWrapper?.scrollTo({ top: 0 })
         if (offset) setNextMessagesLoading(true)
         else setMessagesLoading(true)
         const data = { chatId, offset }
@@ -151,14 +157,17 @@ function Messages(): JSX.Element {
             else {
                 window.scrollTo({ top: 320, behavior: 'smooth' })
                 setToyboxCollapsed(true)
-                getChats()
+                getChats(0)
             }
         }
     }, [userData.id, loggedIn])
 
-    // if chatId included in url params, get messages
+    // if chatId included in url params, get messages and set selected chat
     useEffect(() => {
-        if (chatId) getMessages(0)
+        if (chatId) {
+            getMessages(0)
+            if (selectedChat) setSelectedChat(chats.find((chat) => chat.id === +chatId))
+        }
     }, [chatId])
 
     // get next messages when scroll top reached
@@ -186,17 +195,23 @@ function Messages(): JSX.Element {
                         key={chat.id}
                         className={`${styles.chat} ${+chatId === chat.id && styles.selected}`}
                     >
-                        <img src={chat.flagImagePath} alt='' />
+                        <img src={chat.flagImagePath || chat.otherUser.flagImagePath} alt='' />
                         <Column>
-                            <h1>{chat.name}</h1>
+                            <h1>{chat.name || chat.otherUser.name}</h1>
                         </Column>
                     </Link>
                 ))}
             </Column>
             <Column className={`${styles.messages} hide-scrollbars`}>
-                <Row className={styles.header}>
-                    <p>Chat info...</p>
-                </Row>
+                {selectedChat && (
+                    <Row centerY className={styles.header}>
+                        <img
+                            src={selectedChat.flagImagePath || selectedChat.otherUser.flagImagePath}
+                            alt=''
+                        />
+                        <h1>{selectedChat.name || selectedChat.otherUser.name}</h1>
+                    </Row>
+                )}
                 <Column id='scroll-wrapper' className={`${styles.scrollWrapper} hide-scrollbars`}>
                     {messages.map((message) => (
                         <MessageCard
@@ -237,7 +252,7 @@ function Messages(): JSX.Element {
                     </Column>
                     <Input
                         type='text'
-                        placeholder='Name...'
+                        placeholder='Name... (optional)'
                         value={name}
                         maxLength={30}
                         onChange={(v) => setName(v)}
