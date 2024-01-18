@@ -58,6 +58,7 @@ function MessageCard(props: {
         ImageBlocks,
         AudioBlocks,
     } = message
+    const [visible, setVisible] = useState(false)
     const [collapsed, setCollapsed] = useState(false)
     const [buttonsDisabled, setButtonsDisabled] = useState(true)
     const [accountReactions, setAccountReactions] = useState<any>({})
@@ -201,7 +202,10 @@ function MessageCard(props: {
         })
     }
 
-    useEffect(() => addDragEvents(), [])
+    useEffect(() => {
+        setVisible(true)
+        addDragEvents()
+    }, [])
 
     useEffect(() => {
         if (!collapsed) addSelectionEvents()
@@ -218,7 +222,9 @@ function MessageCard(props: {
 
     return (
         <Row
-            className={`${styles.wrapper} ${Creator.id === accountData.id && styles.isOwnComment}`}
+            className={`${styles.wrapper} ${visible && styles.visible} ${
+                Creator.id === accountData.id && styles.isOwnComment
+            }`}
             style={{ width: fullWidth ? 'calc(100% - 100px)' : 'auto', maxWidth: 900 }}
         >
             <Column style={{ marginRight: 10 }}>

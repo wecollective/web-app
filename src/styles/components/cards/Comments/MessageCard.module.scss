@@ -5,6 +5,12 @@
     cursor: move;
     align-self: flex-start;
     margin-top: 10px;
+    opacity: 0;
+    transition: opacity 0.1s;
+
+    &.visible {
+        opacity: 1;
+    }
 
     &.isOwnComment {
         align-self: flex-end;

@@ -76,6 +76,7 @@ function CommentCard(props: {
         // ImageBlocks,
         // AudioBlocks,
     } = comment
+    const [visible, setVisible] = useState(false)
     const [loading, setLoading] = useState(false)
     const [remainingComments, setRemainingComments] = useState(totalChildComments - Comments.length)
     const [collapsed, setCollapsed] = useState(false)
@@ -240,7 +241,10 @@ function CommentCard(props: {
         })
     }
 
-    useEffect(() => addDragEvents(), [])
+    useEffect(() => {
+        setVisible(true)
+        addDragEvents()
+    }, [])
 
     useEffect(() => {
         if (!collapsed) addSelectionEvents()
@@ -268,12 +272,12 @@ function CommentCard(props: {
             </button>
         )
     return (
-        <Row>
+        <Row className={`${styles.wrapper} ${visible && styles.visible}`}>
             {depth > 0 && <div className={styles.indentation} />}
             <Column style={{ width: depth ? 'calc(100% - 26px)' : '100%' }}>
                 <Column
                     id={`comment-${id}`}
-                    className={`${styles.wrapper} ${highlighted && styles.highlighted} ${
+                    className={`${styles.contentWrapper} ${highlighted && styles.highlighted} ${
                         location === 'link-map' && styles.linkMap
                     }`}
                     draggable={draggable}

@@ -20,230 +20,239 @@
     }
 }
 
-.muteButton {
-    all: unset;
-    cursor: pointer;
-    margin-left: 10px;
-
-    svg {
-        width: 20px;
-        height: 20px;
-        margin-right: 5px;
-        color: $grey5;
-    }
-}
-
-$grey: $grey2;
-
-.indentation {
-    width: 10px;
-    border-left: 2px dotted $grey;
-    margin-left: 14px;
-    flex-shrink: 0;
-    z-index: 1;
-}
-
 .wrapper {
-    position: relative;
-    cursor: move;
+    opacity: 0;
+    transition: opacity 0.1s;
 
-    &.linkMap {
-        background-color: white;
-        padding: 20px;
-        border-radius: 10px;
-        width: 100%;
-        margin: 0;
+    &.visible {
+        opacity: 1;
     }
 
-    .userImage {
+    .muteButton {
         all: unset;
-        position: relative;
         cursor: pointer;
+        margin-left: 10px;
 
-        .collapse {
-            position: absolute;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background-color: rgba($grey5, 0);
-            box-shadow: 0 0 0 2px white;
-            transition: all 0.5s;
-
-            > svg {
-                width: 18px;
-                height: 18px;
-                transform: rotate(90deg);
-                color: white;
-                opacity: 0;
-                transition: all 0.5s;
-                filter: drop-shadow(0 0 2px rgb(black, 0.4));
-            }
-
-            &.collapsed {
-                background-color: rgba($grey5, 0.6);
-                > svg {
-                    opacity: 1;
-                }
-            }
-
-            &:hover {
-                background-color: rgba($grey5, 0.8);
-                > svg {
-                    opacity: 1;
-                }
-            }
+        svg {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            color: $grey5;
         }
     }
 
-    .line {
-        height: calc(100% - 20px);
+    $grey: $grey2;
+
+    .indentation {
         width: 10px;
         border-left: 2px dotted $grey;
         margin-left: 14px;
-        // margin-top: 5px;
         flex-shrink: 0;
-
-        // &.blue {
-        //     border-left: 2px dotted rgba($blue5, 0.5); // $grey4
-        // }
+        z-index: 1;
     }
 
-    .content {
+    .contentWrapper {
         position: relative;
-        margin-left: 8px;
-        border-radius: 10px;
-        padding: 5px 0 0 0;
-        font-size: 14px;
-        width: calc(100% - 36px);
+        cursor: move;
 
-        .header {
-            margin-bottom: 5px;
+        &.linkMap {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 100%;
+            margin: 0;
+        }
 
-            .id {
-                display: flex;
-                align-items: center;
-            }
+        .userImage {
+            all: unset;
+            position: relative;
+            cursor: pointer;
 
-            .menuButton {
-                all: unset;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                padding-left: 8px;
-                flex-shrink: 0;
+            .collapse {
+                position: absolute;
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                background-color: rgba($grey5, 0);
+                box-shadow: 0 0 0 2px white;
+                transition: all 0.5s;
 
-                svg {
-                    color: $grey4;
+                > svg {
+                    width: 18px;
                     height: 18px;
-                    transition: color 0.3s;
+                    transform: rotate(90deg);
+                    color: white;
+                    opacity: 0;
+                    transition: all 0.5s;
+                    filter: drop-shadow(0 0 2px rgb(black, 0.4));
+                }
+
+                &.collapsed {
+                    background-color: rgba($grey5, 0.6);
+                    > svg {
+                        opacity: 1;
+                    }
                 }
 
                 &:hover {
-                    svg {
-                        color: $grey6;
+                    background-color: rgba($grey5, 0.8);
+                    > svg {
+                        opacity: 1;
                     }
                 }
             }
+        }
 
-            .menu {
-                position: absolute;
-                top: 30px;
-                right: 10px;
-                background-color: white;
-                box-shadow: 0 0 7px 0 rgba(black, 0.15);
-                border-radius: 5px;
-                padding: 10px;
-                z-index: 10;
+        .line {
+            height: calc(100% - 20px);
+            width: 10px;
+            border-left: 2px dotted $grey;
+            margin-left: 14px;
+            // margin-top: 5px;
+            flex-shrink: 0;
 
-                button {
+            // &.blue {
+            //     border-left: 2px dotted rgba($blue5, 0.5); // $grey4
+            // }
+        }
+
+        .content {
+            position: relative;
+            margin-left: 8px;
+            border-radius: 10px;
+            padding: 5px 0 0 0;
+            font-size: 14px;
+            width: calc(100% - 36px);
+
+            .header {
+                margin-bottom: 5px;
+
+                .id {
+                    display: flex;
+                    align-items: center;
+                }
+
+                .menuButton {
                     all: unset;
                     cursor: pointer;
                     display: flex;
                     align-items: center;
+                    padding-left: 8px;
+                    flex-shrink: 0;
 
-                    &:not(:last-child) {
-                        margin-bottom: 10px;
-                    }
-
-                    &:hover > svg {
-                        color: $grey6;
-                    }
-
-                    > svg {
-                        width: 18px;
+                    svg {
+                        color: $grey4;
                         height: 18px;
-                        margin-right: 8px;
-                        color: $grey5;
                         transition: color 0.3s;
                     }
+
+                    &:hover {
+                        svg {
+                            color: $grey6;
+                        }
+                    }
+                }
+
+                .menu {
+                    position: absolute;
+                    top: 30px;
+                    right: 10px;
+                    background-color: white;
+                    box-shadow: 0 0 7px 0 rgba(black, 0.15);
+                    border-radius: 5px;
+                    padding: 10px;
+                    z-index: 10;
+
+                    button {
+                        all: unset;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+
+                        &:not(:last-child) {
+                            margin-bottom: 10px;
+                        }
+
+                        &:hover > svg {
+                            color: $grey6;
+                        }
+
+                        > svg {
+                            width: 18px;
+                            height: 18px;
+                            margin-right: 8px;
+                            color: $grey5;
+                            transition: color 0.3s;
+                        }
+                    }
                 }
             }
         }
-    }
 
-    &.highlighted .content {
-        background-color: $blue7;
-        padding: 5px 12px 8px 12px;
-    }
+        &.highlighted .content {
+            background-color: $blue7;
+            padding: 5px 12px 8px 12px;
+        }
 
-    .footer {
-        margin-top: 5px;
+        .footer {
+            margin-top: 5px;
 
-        .stat {
-            all: unset;
-            cursor: pointer;
-            font-size: 14px;
-            color: $grey4;
-            margin-right: 15px;
-            display: flex;
-            align-items: center;
-            transition: all 0.5s;
-
-            > button {
+            .stat {
                 all: unset;
                 cursor: pointer;
+                font-size: 14px;
+                color: $grey4;
+                margin-right: 15px;
                 display: flex;
                 align-items: center;
-            }
+                transition: all 0.5s;
 
-            svg {
-                width: 18px;
-                height: 18px;
-                margin-right: 5px;
-            }
+                > button {
+                    all: unset;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                }
 
-            &:hover {
-                color: $grey6;
-            }
-
-            &.reply {
-                margin-right: 5px;
                 svg {
-                    transform: rotate(180deg);
+                    width: 18px;
+                    height: 18px;
+                    margin-right: 5px;
+                }
+
+                &:hover {
+                    color: $grey6;
+                }
+
+                &.reply {
+                    margin-right: 5px;
+                    svg {
+                        transform: rotate(180deg);
+                    }
+                }
+
+                &.blue {
+                    svg {
+                        color: $blue1;
+                    }
                 }
             }
+        }
 
-            &.blue {
-                svg {
-                    color: $blue1;
-                }
+        .markdown {
+            font-size: 14px;
+
+            &.deleted {
+                color: $grey4;
             }
         }
     }
 
-    .markdown {
-        font-size: 14px;
-
-        &.deleted {
-            color: $grey4;
-        }
+    .loadMore {
+        all: unset;
+        cursor: pointer;
+        color: $blue1;
+        margin-left: 15px;
+        margin-bottom: 10px;
     }
-}
-
-.loadMore {
-    all: unset;
-    cursor: pointer;
-    color: $blue1;
-    margin-left: 15px;
-    margin-bottom: 10px;
 }

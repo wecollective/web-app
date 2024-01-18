@@ -6,12 +6,17 @@
     box-shadow: 0 7px 10px 0 rgba(10, 8, 72, 0.04);
     border: 1px solid $grey2;
     position: relative;
-    opacity: 1;
     padding: 25px 15px;
     cursor: move; /* fallback if grab cursor is unsupported */
     // cursor: grab;
     // cursor: -moz-grab;
     // cursor: -webkit-grab;
+    opacity: 0;
+    transition: opacity 0.1s;
+
+    &.visible {
+        opacity: 1;
+    }
 
     // .watermark {
     //     position: absolute;
@@ -46,8 +51,6 @@
             border-radius: 0;
         }
     }
-
-    transition: all 1s;
 
     @include for-tablet-portrait-up {
         padding: 25px 35px 15px 35px;

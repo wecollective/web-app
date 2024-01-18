@@ -108,6 +108,7 @@ function PostCard(props: {
         Audio,
         Url,
     } = post
+    const [visible, setVisible] = useState(false)
     const [buttonsDisabled, setButtonsDisabled] = useState(true)
     const [accountReactions, setAccountReactions] = useState<any>({})
     const { liked, rated, reposted, commented, linked } = accountReactions
@@ -244,9 +245,10 @@ function PostCard(props: {
     }
 
     useEffect(() => {
+        setVisible(true)
         if (loggedIn) getAccountReactions()
         else setButtonsDisabled(false)
-        if (type !== 'post') getParentLinks()
+        if (!['post', 'chat-message'].includes(type)) getParentLinks()
         if (['post', 'comment', 'bead'].includes(type)) addDragEvents()
     }, [])
 
@@ -254,7 +256,9 @@ function PostCard(props: {
         <Column
             key={id}
             id={`post-${id}`}
-            className={`${styles.post} ${styles[location]} ${styling && styles.styling}`}
+            className={`${styles.post} ${visible && styles.visible} ${styles[location]} ${
+                styling && styles.styling
+            }`}
             style={style}
             // style={{ ...style, backgroundColor: color }}
             draggable={draggable}
