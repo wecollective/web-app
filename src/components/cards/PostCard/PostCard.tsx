@@ -437,7 +437,7 @@ function PostCard(props: {
                 {mediaTypes.includes('card') && <Card postId={id} />}
                 {/* block posts */}
                 {type === 'url-block' && (
-                    <UrlCard key={Url.id} type='post' urlData={Url} style={{ marginBottom: 10 }} />
+                    <UrlCard type='post' urlData={Url} style={{ marginBottom: 10 }} />
                 )}
                 {type === 'image-block' && (
                     <img

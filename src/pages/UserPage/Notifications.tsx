@@ -40,7 +40,7 @@ function Notifications(): JSX.Element {
         axios
             .post(`${config.apiURL}/account-notifications`, data, options)
             .then((res) => {
-                console.log('account-notifications: ', res.data)
+                // console.log('account-notifications: ', res.data)
                 setMoreItems(res.data.length === 10)
                 setItemOffset(offset + res.data.length)
                 setNotifications(offset ? [...notifications, ...res.data] : res.data)

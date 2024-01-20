@@ -37,6 +37,7 @@ function Likes(): JSX.Element {
         axios
             .post(`${config.apiURL}/liked-posts`, { offset }, options)
             .then((res) => {
+                // console.log('liked-posts: ', res.data)
                 setMoreItems(res.data.length === 10)
                 setItemsOffset(offset + res.data.length)
                 setItems(offset ? [...items, ...res.data] : res.data)

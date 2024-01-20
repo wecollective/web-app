@@ -48,7 +48,7 @@ function PostList(props: {
         const postList = document.getElementById('placeholder') as any
         if (loading) {
             postList.style.visibility = 'visible'
-        } else {
+        } else if (spaceHandle === spaceData.handle) {
             postList.style.opacity = 0
             setTimeout(() => {
                 postList.style.visibility = 'hidden'
