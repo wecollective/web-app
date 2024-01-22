@@ -58,7 +58,6 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
     const cookies = new Cookies()
 
     function getAccountData() {
-        console.log('AccountContext: getAccountData')
         const accessToken = cookies.get('accessToken')
         const options = { headers: { Authorization: `Bearer ${accessToken}` } }
         if (!accessToken) setAccountDataLoading(false)

@@ -179,7 +179,12 @@ function Calendar(): JSX.Element {
                     style={{ width: '100vw', maxWidth: 900 }}
                 >
                     {selectedPost ? (
-                        <PostCard location='post-page' post={selectedPost} />
+                        <PostCard
+                            location='post-page'
+                            post={selectedPost}
+                            setPost={() => console.error('TODO')}
+                            onDelete={() => console.error('TODO')}
+                        />
                     ) : (
                         <LoadingWheel />
                     )}

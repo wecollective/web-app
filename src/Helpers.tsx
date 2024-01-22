@@ -47,6 +47,12 @@ export type GameSettings = {
     moveTimeWindow?: number
 }
 
+export type GameState = GameSettings & {
+    totalBeads: number
+    state: 'active' | 'cancelled'
+    nextMoveDeadline: number
+}
+
 type GameConfig = {
     defaultSettings: GameSettings
     settingsEditable?: boolean
@@ -89,6 +95,12 @@ export type GameType = (typeof GAME_TYPES)[number]
 
 export const isGame = (type: string): type is GameType => GAME_TYPES.includes(type as GameType)
 
+export const includesGame = (mediaTypes: string) =>
+    GAME_TYPES.some((type) => mediaTypes.includes(type))
+
+export const getGameType = (mediaTypes: string) =>
+    GAME_TYPES.find((type) => mediaTypes.includes(type))!
+
 export const MEDIA_TYPES = [
     'text',
     'url',
@@ -101,6 +113,84 @@ export const MEDIA_TYPES = [
 ] as const
 
 export type MediaType = (typeof MEDIA_TYPES)[number]
+
+export const POST_TYPE = [
+    'post',
+    'comment',
+    'bead',
+    'poll-answer',
+    'card-face',
+    'gbg-room-comment',
+    'url-block',
+    'image-block',
+    'audio-block',
+] as const
+
+export type PostType = (typeof POST_TYPE)[number]
+
+export type UrlBlock = {
+    Post: BlockPost<UrlMediaLink>
+}
+
+export type BlockPost<MediaLinkType> = {
+    MediaLink: MediaLinkType
+}
+
+export type UrlMediaLink = {
+    Url: Url
+}
+
+export type Url = unknown
+
+export type ImageBlock = {
+    Post: BlockPost<ImageMediaLink>
+}
+
+export type ImageMediaLink = {
+    Image: unknown
+}
+
+export type AudioBlock = {
+    Post: BlockPost<AudioMediaLink>
+}
+
+export type AudioMediaLink = {
+    Audio: unknown
+}
+
+export type Post = {
+    id: number
+    type: PostType
+    mediaTypes: string
+    title: string
+    text: string
+    createdAt: string
+    updatedAt: string
+    totalComments: number
+    totalLikes: number
+    totalRatings: number
+    totalReposts: number
+    totalLinks: number
+    Creator: IUser
+    DirectSpaces: { id: number }[]
+    UrlBlocks?: UrlBlock[]
+    ImageBlocks?: ImageBlock[]
+    AudioBlocks?: AudioBlock[]
+    Event: Event
+    Image: { url: string }
+    Audio: { id: number; url: string }
+    Url: { id: number }
+}
+
+export type Event = {
+    id: number
+    startTime: string
+    endTime: string
+    Going: UserEvent[]
+    Interested: UserEvent[]
+}
+
+export type UserEvent = { id: number; flagImagePath: string }
 
 export const weekDays = [
     'Monday',

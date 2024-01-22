@@ -115,7 +115,6 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     }
 
     function getSpaceData(handle: string) {
-        console.log(`SpaceContext: getSpaceData (${handle})`)
         const accessToken = cookies.get('accessToken')
         const options = { headers: { Authorization: `Bearer ${accessToken}` } }
         resetSpaceList()

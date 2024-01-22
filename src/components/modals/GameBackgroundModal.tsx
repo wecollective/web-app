@@ -9,7 +9,7 @@ import axios from 'axios'
 import React, { useState } from 'react'
 import Cookies from 'universal-cookie'
 
-function GBGBackgroundModal(props: {
+function GameBackgroundModal(props: {
     gameData: any
     signalNewBackground: (type: 'image' | 'video', url: string, startTime?: number) => void
     close: () => void
@@ -157,7 +157,7 @@ function GBGBackgroundModal(props: {
             </Row>
             <Button
                 text='Save background'
-                color='gbg-white'
+                color='game-white'
                 disabled={!imageURL && !imageFile && !videoURL}
                 loading={loading}
                 onClick={saveBackground}
@@ -166,4 +166,4 @@ function GBGBackgroundModal(props: {
     )
 }
 
-export default GBGBackgroundModal
+export default GameBackgroundModal

@@ -102,7 +102,16 @@ function LinkMap(): JSX.Element {
 
     function renderItem(item, type) {
         if (['post', 'comment'].includes(type))
-            return <PostCard key={item.id} post={item} location='link-modal' collapse />
+            return (
+                <PostCard
+                    key={item.id}
+                    post={item}
+                    location='link-modal'
+                    collapse
+                    setPost={() => console.error('TODO')}
+                    onDelete={() => console.error('TODO')}
+                />
+            )
         if (type === 'user')
             return <VerticalUserCard key={item.id} user={item} style={{ flexGrow: 0, margin: 0 }} />
         if (type === 'space') return <HorizontalSpaceCard key={item.id} space={item} />

@@ -12,8 +12,8 @@ function Button(props: {
         | 'purple'
         | 'grey'
         | 'light-green'
-        | 'gbg-black'
-        | 'gbg-white'
+        | 'game-black'
+        | 'game-white'
         | 'aqua-gradient'
     size?: 'small' | 'medium' | 'medium-large' | 'large'
     style?: any

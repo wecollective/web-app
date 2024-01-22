@@ -105,7 +105,7 @@ const SOURCE_TYPES = ['post']
 
 type SourceType = (typeof SOURCE_TYPES)[number]
 
-export type CreatePostModalSettings = { type: ModalType; source?: { type: SourceType; id: string } }
+export type CreatePostModalSettings = { type: ModalType; source?: { type: SourceType; id: number } }
 
 // eslint-disable-next-line react/require-default-props
 export type CreatePostModalProps = { settings: CreatePostModalSettings; onClose: () => void }

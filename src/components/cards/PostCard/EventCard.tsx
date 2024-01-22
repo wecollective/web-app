@@ -6,7 +6,7 @@ import Row from '@components/Row'
 import UserButton from '@components/UserButton'
 import Modal from '@components/modals/Modal'
 import config from '@src/Config'
-import { findEventDuration, findEventTimes } from '@src/Helpers'
+import { Post, findEventDuration, findEventTimes } from '@src/Helpers'
 import { AccountContext } from '@src/contexts/AccountContext'
 import styles from '@styles/components/cards/PostCard/EventCard.module.scss'
 import { CalendarIcon, SuccessIcon } from '@svgs/all'
@@ -15,12 +15,12 @@ import React, { useContext, useState } from 'react'
 import Cookies from 'universal-cookie'
 
 function EventCard(props: {
-    postData: any
-    setPostData: (data: any) => void
+    post: Post
+    setPost: (data: Post) => void
     location: string
 }): JSX.Element {
-    const { postData, setPostData, location } = props
-    const { id, Event } = postData
+    const { post, setPost, location } = props
+    const { id, Event } = post
     const { startTime, endTime, Going, Interested } = Event
     const { accountData, setAlertMessage, setAlertModalOpen } = useContext(AccountContext)
     const [goingModalOpen, setGoingModalOpen] = useState(false)
@@ -52,8 +52,8 @@ function EventCard(props: {
             axios
                 .post(`${config.apiURL}/respond-to-event`, data, options)
                 .then(() => {
-                    setPostData({
-                        ...postData,
+                    setPost({
+                        ...post,
                         Event: {
                             ...Event,
                             Going: going

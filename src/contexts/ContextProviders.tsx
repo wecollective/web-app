@@ -1,5 +1,4 @@
 import AccountContextProvider from '@contexts/AccountContext'
-import PostContextProvider from '@contexts/PostContext'
 import SpaceContextProvider from '@contexts/SpaceContext'
 import UserContextProvider from '@contexts/UserContext'
 import config from '@src/Config'
@@ -15,11 +14,9 @@ function ContextProviders(props: { children: any }): JSX.Element {
             <AccountContextProvider>
                 <SpaceContextProvider>
                     <UserContextProvider>
-                        <PostContextProvider>
-                            <GoogleReCaptchaProvider reCaptchaKey={config.recaptchaSiteKey || ''}>
-                                {children}
-                            </GoogleReCaptchaProvider>
-                        </PostContextProvider>
+                        <GoogleReCaptchaProvider reCaptchaKey={config.recaptchaSiteKey || ''}>
+                            {children}
+                        </GoogleReCaptchaProvider>
                     </UserContextProvider>
                 </SpaceContextProvider>
             </AccountContextProvider>

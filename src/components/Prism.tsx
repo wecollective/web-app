@@ -1,31 +1,38 @@
 import PostCard from '@components/cards/PostCard/PostCard'
 import PrismMap from '@components/PrismMap'
-import { PostContext } from '@contexts/PostContext'
 import config from '@src/Config'
+import { Post } from '@src/Helpers'
 import { IPrism } from '@src/Interfaces'
 import styles from '@styles/components/Prism.module.scss'
 import axios from 'axios'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
-function Prism(): JSX.Element {
-    const { postData } = useContext(PostContext)
+function Prism({
+    post,
+    setPost,
+    onDelete,
+}: {
+    post: Post
+    setPost: (post: Post) => void
+    onDelete: () => void
+}): JSX.Element {
     const [prismData, setPrismData] = useState<Partial<IPrism>>({})
 
     function getPrismData() {
         console.log('Prism: getPrismData')
         axios
-            .get(`${config.apiURL}/prism-data?postId=${postData.id}`)
+            .get(`${config.apiURL}/prism-data?postId=${post.id}`)
             .then((res) => setPrismData(res.data))
     }
 
     useEffect(() => {
         getPrismData()
-    }, [postData])
+    }, [post])
 
     return (
         <div className={styles.prism}>
             <div className={styles.postCardContainer}>
-                <PostCard post={postData} location='post-page' />
+                <PostCard post={post} setPost={setPost} onDelete={onDelete} location='post-page' />
             </div>
             <div className={styles.infoBar}>
                 <span>
@@ -41,7 +48,7 @@ function Prism(): JSX.Element {
                     {prismData.privacy}
                 </span>
             </div>
-            <PrismMap postData={postData} prismData={prismData} />
+            <PrismMap postData={post} prismData={prismData} />
         </div>
     )
 }
