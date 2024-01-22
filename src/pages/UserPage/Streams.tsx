@@ -305,7 +305,7 @@ function Streams(): JSX.Element {
                                             key={s.id}
                                             type='space'
                                             imagePath={s.flagImagePath}
-                                            title={trimText(s.name, 25)}
+                                            title={s.name ? trimText(s.name, 25) : ''}
                                             link={`/s/${s.handle}`}
                                             style={{ marginBottom: 10 }}
                                         />

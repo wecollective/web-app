@@ -1,17 +1,22 @@
 @import '@styles/Variables';
 
 .wrapper {
-    position: relative;
-    width: 100%;
-    margin-bottom: 800px;
-}
-
-.gradient {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(247, 247, 249, 1));
-    z-index: 1;
+    width: calc(100% - 20px);
+    margin-bottom: 800px;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.5s;
+    z-index: 10;
+
+    .gradient {
+        position: absolute;
+        opacity: inherit;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(247, 247, 249, 1));
+        z-index: 1;
+    }
 }

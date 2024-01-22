@@ -28,7 +28,7 @@ function Space(props: {
     // check access
     useEffect(() => {
         // todo: see if there's a way to prevent this from firing when the array is updated
-        if (loggedIn && type === 'child' && privacy !== 'public') {
+        if (loggedIn && totalChildren > 0 && type === 'child' && privacy !== 'public') {
             const cookies = new Cookies()
             const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
             axios

@@ -4,11 +4,8 @@ import React from 'react'
 function Placeholder(): JSX.Element {
     // todo: re-write
     return (
-        <div className={styles.PHPost}>
+        <div className={styles.wrapper}>
             <div className='PHPostShine' />
-            <div className={styles.PHPostId}>
-                <div className={styles.PHPostIdBlock} />
-            </div>
             <div className={styles.PHPostBody}>
                 <div className={styles.PHPostTags}>
                     <div className={styles.PHPostUserImage} />{' '}

@@ -32,12 +32,10 @@ function PostList(props: {
 
     useEffect(() => {
         if (spaceHandle === spaceData.handle && location === 'space-posts') {
-            const postList = document.getElementById('space-posts')
+            const postList = document.getElementById('post-list')
             postList?.addEventListener('dragover', (e) => e.preventDefault())
             postList?.addEventListener('drop', () => {
-                const { type, data, fromToyBox } = dragItemRef.current
-                console.log('dropped item: ', dragItemRef.current)
-                console.log(type, data.state, fromToyBox)
+                const { data, fromToyBox } = dragItemRef.current
                 if (data.type === 'post' && data.state === 'active' && fromToyBox) {
                     setDropLocation({ type: 'space', data: spaceData })
                     setDropModalOpen(true)
@@ -45,6 +43,19 @@ function PostList(props: {
             })
         }
     }, [spaceData.id])
+
+    useEffect(() => {
+        const postList = document.getElementById('placeholder') as any
+        if (loading) {
+            postList.style.visibility = 'visible'
+        } else if (spaceHandle === spaceData.handle) {
+            postList.style.opacity = 0
+            setTimeout(() => {
+                postList.style.visibility = 'hidden'
+                postList.style.opacity = 1
+            }, 500)
+        }
+    }, [loading])
 
     useEffect(
         () => () => {
@@ -55,10 +66,9 @@ function PostList(props: {
     )
 
     return (
-        <Column id='space-posts' className={`${styles.wrapper} ${className}`} style={style}>
-            {loading ? (
-                <PostListPlaceholder />
-            ) : (
+        <Column id='post-list' className={`${styles.wrapper} ${className}`} style={style}>
+            <PostListPlaceholder id='placeholder' />
+            {!loading && (
                 <Column>
                     {!posts.length ? (
                         <Column centerY centerX className={styles.noResults}>

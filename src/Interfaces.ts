@@ -106,6 +106,8 @@ export interface IAccountContext {
     setAccountData: (payload: any) => void
     accountDataLoading: boolean
     setAccountDataLoading: (payload: boolean) => void
+    toyboxCollapsed: any
+    setToyboxCollapsed: (payload: boolean) => void
     toyBoxRow: any
     setToyBoxRow: (payload: any) => void
     toyBoxRowRef: any

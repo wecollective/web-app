@@ -202,7 +202,6 @@ function NotificationCard(props: {
             spaceId: triggerSpace.id,
             spaceHandle: triggerSpace.handle,
             spaceName: triggerSpace.name,
-            notificationId: id,
             userId: triggerUser.id,
             response,
         }

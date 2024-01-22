@@ -6,6 +6,7 @@ import Input from '@components/Input'
 import Row from '@components/Row'
 import SearchSelector from '@components/SearchSelector'
 import LoadingWheel from '@components/animations/LoadingWheel'
+import MessageCard from '@components/cards/Comments/MessageCard'
 import CommentInput from '@components/draft-js/CommentInput'
 import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
@@ -21,11 +22,14 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
 function Messages(): JSX.Element {
-    const { accountData, loggedIn } = useContext(AccountContext)
+    const { accountData, loggedIn, setToyboxCollapsed } = useContext(AccountContext)
     const { userData, userNotFound } = useContext(UserContext)
     const [chats, setChats] = useState<any[]>([])
+    const [selectedChat, setSelectedChat] = useState<any>(null)
     const [chatsLoading, setChatsLoading] = useState(true)
+    const [scrollTopReached, setScrollTopReached] = useState(false)
     const [messages, setMessages] = useState<any[]>([])
+    const [totalMessages, setTotalMessages] = useState(0)
     const [messagesLoading, setMessagesLoading] = useState(false)
     const [nextMessagesLoading, setNextMessagesLoading] = useState(false)
     const [newChatModalOpen, setNewChatModalOpen] = useState(false)
@@ -47,7 +51,14 @@ function Messages(): JSX.Element {
     // + add unseenMessages column on Users table
     // + need to keep track of unseen messages per chat and user (add to SpaceUserStat table?)
 
-    function getChats() {
+    function scrollHandler(e) {
+        const { scrollHeight, scrollTop, clientHeight } = e.target
+        const topReached = scrollHeight + scrollTop < clientHeight + 5
+        if (topReached) console.log('topReached')
+        setScrollTopReached(topReached)
+    }
+
+    function getChats(offset) {
         setChatsLoading(true)
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
@@ -56,6 +67,13 @@ function Messages(): JSX.Element {
                 console.log('chats res: ', res.data)
                 setChats(res.data)
                 setChatsLoading(false)
+                if (chatId) {
+                    history(`?chatId=${chatId}`)
+                    setSelectedChat(res.data.find((chat) => chat.id === +chatId))
+                } else {
+                    history(`?chatId=${res.data[0].id}`)
+                    setSelectedChat(res.data.find((chat) => chat.id === res.data[0].id))
+                }
             })
             .catch((error) => console.log(error))
     }
@@ -68,8 +86,8 @@ function Messages(): JSX.Element {
         axios
             .post(`${config.apiURL}/messages`, data, options)
             .then((res) => {
-                console.log('messages res: ', res.data)
-                setMessages(offset ? [...messages, ...res.data] : res.data)
+                setTotalMessages(res.data.total)
+                setMessages(offset ? [...messages, ...res.data.messages] : res.data.messages)
                 if (offset) setNextMessagesLoading(false)
                 else setMessagesLoading(false)
             })
@@ -125,22 +143,37 @@ function Messages(): JSX.Element {
             .catch((error) => console.log(error))
     }
 
+    // add scroll handler
+    useEffect(() => {
+        const scrollWrapper = document.getElementById('scroll-wrapper')
+        scrollWrapper?.addEventListener('scroll', scrollHandler)
+        return () => scrollWrapper?.removeEventListener('scroll', scrollHandler)
+    }, [])
+
     // if logged in and is own account get chats, otherwise redirect to posts page
     useEffect(() => {
         if (userData.id) {
-            if (userHandle === accountData.handle) {
+            if (userHandle !== accountData.handle) history(`/u/${userHandle}/posts`)
+            else {
                 window.scrollTo({ top: 320, behavior: 'smooth' })
-                getChats()
-            } else {
-                history(`/u/${userHandle}/posts`)
+                setToyboxCollapsed(true)
+                getChats(0)
             }
         }
     }, [userData.id, loggedIn])
 
-    // if chatId included in url params, get messages
+    // if chatId included in url params, get messages and set selected chat
     useEffect(() => {
-        if (chatId) getMessages(0)
+        if (chatId) {
+            getMessages(0)
+            if (selectedChat) setSelectedChat(chats.find((chat) => chat.id === +chatId))
+        }
     }, [chatId])
+
+    // get next messages when scroll top reached
+    useEffect(() => {
+        if (scrollTopReached && totalMessages > messages.length) getMessages(messages.length)
+    }, [scrollTopReached])
 
     if (userNotFound) return <UserNotFound />
     return (
@@ -160,25 +193,42 @@ function Messages(): JSX.Element {
                     <Link
                         to={`?chatId=${chat.id}`}
                         key={chat.id}
-                        className={`${styles.chatRow} ${+chatId === chat.id && styles.selected}`}
+                        className={`${styles.chat} ${+chatId === chat.id && styles.selected}`}
                     >
-                        <img src={chat.flagImagePath} className={styles.chatImage} alt='' />
+                        <img src={chat.flagImagePath || chat.otherUser.flagImagePath} alt='' />
                         <Column>
-                            <h1>{chat.name}</h1>
+                            <h1>{chat.name || chat.otherUser.name}</h1>
                         </Column>
                     </Link>
                 ))}
             </Column>
-            <Column className={styles.chat}>
-                <p>Chat info...</p>
-                <Column className={styles.messages}>messages go here...</Column>
-                <CommentInput
-                    type='chat-message'
-                    placeholder='New message...'
-                    parent={{ type: 'space', id: +chatId }}
-                    onSave={(data) => setMessages([...messages, data])}
-                    style={{ marginTop: 10 }}
-                />
+            <Column className={`${styles.messages} hide-scrollbars`}>
+                {selectedChat && (
+                    <Row centerY className={styles.header}>
+                        <img
+                            src={selectedChat.flagImagePath || selectedChat.otherUser.flagImagePath}
+                            alt=''
+                        />
+                        <h1>{selectedChat.name || selectedChat.otherUser.name}</h1>
+                    </Row>
+                )}
+                <Column id='scroll-wrapper' className={`${styles.scrollWrapper} hide-scrollbars`}>
+                    {messages.map((message) => (
+                        <MessageCard
+                            key={message.id}
+                            message={message}
+                            removeMessage={() => null}
+                        />
+                    ))}
+                </Column>
+                <Row className={styles.input}>
+                    <CommentInput
+                        type='chat-message'
+                        placeholder='New message...'
+                        parent={{ type: 'space', id: +chatId }}
+                        onSave={(data) => setMessages([data, ...messages])}
+                    />
+                </Row>
             </Column>
             {newChatModalOpen && (
                 <Modal
@@ -202,7 +252,7 @@ function Messages(): JSX.Element {
                     </Column>
                     <Input
                         type='text'
-                        placeholder='Name...'
+                        placeholder='Name... (optional)'
                         value={name}
                         maxLength={30}
                         onChange={(v) => setName(v)}
