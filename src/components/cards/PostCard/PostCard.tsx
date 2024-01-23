@@ -9,6 +9,7 @@ import AudioCard from '@components/cards/PostCard/AudioCard'
 import Audios from '@components/cards/PostCard/Audios'
 import Card from '@components/cards/PostCard/Card'
 import EventCard from '@components/cards/PostCard/EventCard'
+import Game from '@components/cards/PostCard/Game'
 import Images from '@components/cards/PostCard/Images'
 import PollCard from '@components/cards/PostCard/PollCard'
 import PostSpaces from '@components/cards/PostCard/PostSpaces'
@@ -32,7 +33,6 @@ import {
     timeSinceCreated,
     timeSinceCreatedShort,
 } from '@src/Helpers'
-import Game from '@src/components/cards/PostCard/Game'
 import {
     AngleUpIcon,
     AnglesUpIcon,

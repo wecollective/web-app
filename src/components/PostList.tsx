@@ -25,13 +25,13 @@ function PostList(props: {
         props
     const { dragItemRef, setDropLocation, setDropModalOpen } = useContext(AccountContext)
     const { spaceData, spacePosts, setSpacePosts, resetSpacePosts } = useContext(SpaceContext)
-    const { userPosts, setUserPosts, resetUserPosts } = useContext(UserContext)
+    const { userData, userPosts, setUserPosts, resetUserPosts } = useContext(UserContext)
     const mobileView = document.documentElement.clientWidth < 900
     const l = useLocation()
-    const spaceHandle = l.pathname.split('/')[2]
+    const handle = l.pathname.split('/')[2]
 
     useEffect(() => {
-        if (spaceHandle === spaceData.handle && location === 'space-posts') {
+        if (location === 'space-posts' && handle === spaceData.handle) {
             const postList = document.getElementById('post-list')
             postList?.addEventListener('dragover', (e) => e.preventDefault())
             postList?.addEventListener('drop', () => {
@@ -46,9 +46,11 @@ function PostList(props: {
 
     useEffect(() => {
         const postList = document.getElementById('placeholder') as any
+        const samePage =
+            location === 'space-posts' ? handle === spaceData.handle : handle === userData.handle
         if (loading) {
             postList.style.visibility = 'visible'
-        } else if (spaceHandle === spaceData.handle) {
+        } else if (samePage) {
             postList.style.opacity = 0
             setTimeout(() => {
                 postList.style.visibility = 'hidden'
