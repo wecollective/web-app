@@ -14,7 +14,7 @@ function UrlCard(props: {
     remove?: (url?: string) => void
 }): JSX.Element {
     const { type, urlData, loading, style, remove } = props
-    const { url, image, domain, title, description } = urlData
+    const { url, image, domain, favicon, title, description } = urlData
     const [workingImage, setWorkingImage] = useState(image || '')
     const availableMetaData = image || domain || title || description
 
@@ -67,6 +67,7 @@ function UrlCard(props: {
                             {description && <p>{description}</p>}
                             {domain && (
                                 <Row centerY className={styles.domain}>
+                                    {favicon && <img src={favicon} aria-label='favicon' />}
                                     <p>{domain}</p>
                                 </Row>
                             )}
