@@ -57,11 +57,21 @@ function PostPage(): JSX.Element {
             })
     }
 
+    // get post data on page load when account data ready or when user logs in/out
     useEffect(() => {
-        if (!accountDataLoading && !(state.state === 'ready' && postId !== state.post.id)) {
+        if (!accountDataLoading) {
+            setState({ state: 'loading' })
             getPostData()
         }
-    }, [accountDataLoading, postId, loggedIn])
+    }, [accountDataLoading, loggedIn])
+
+    // get new post data when post url has changed
+    useEffect(() => {
+        if (state.state === 'ready' && state.post.id !== postId) {
+            setState({ state: 'loading' })
+            getPostData()
+        }
+    }, [postId])
 
     if (state.state !== 'ready') {
         return (
