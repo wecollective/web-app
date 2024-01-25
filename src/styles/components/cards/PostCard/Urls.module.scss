@@ -9,10 +9,15 @@
 }
 
 .wrapper {
-    padding: 10px;
-    border: 1px solid $grey2;
-    border-radius: 10px;
     background-color: $grey1;
+    padding: 10px;
+    margin: 0 -15px 0 -15px;
+
+    @include for-tablet-portrait-up {
+        border-radius: 10px;
+        margin: 0;
+        border: 1px solid $grey2;
+    }
 
     > div {
         position: relative;

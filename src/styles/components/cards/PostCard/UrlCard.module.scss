@@ -11,23 +11,12 @@ $borderRadius: 5px;
 
 .wrapper {
     width: 100%;
-    // margin: 0;
-    border-radius: $borderRadius;
-    border: 1px solid $grey2;
-    // width: calc(100% + 30px);
-    // border-radius: 0;
     background-color: white;
     overflow: hidden;
     transition: background-color 0.3s;
     position: relative;
-    // margin: 0 -15px 0 -15px;
-
-    // @include for-tablet-portrait-up {
-    //     width: 100%;
-    //     margin: 0;
-    //     border-radius: $borderRadius;
-    //     border: 1px solid $grey2;
-    // }
+    border: 1px solid $grey2;
+    border-radius: $borderRadius;
 
     &:hover {
         background-color: $blue7;

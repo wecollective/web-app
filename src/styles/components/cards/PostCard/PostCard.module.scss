@@ -4,33 +4,19 @@
     width: 100%;
     background-color: white;
     box-shadow: 0 7px 10px 0 rgba(10, 8, 72, 0.04);
-    border: 1px solid $grey2;
     position: relative;
     padding: 25px 15px;
-    cursor: move; /* fallback if grab cursor is unsupported */
-    // cursor: grab;
-    // cursor: -moz-grab;
-    // cursor: -webkit-grab;
+    cursor: move;
     opacity: 0;
     transition: opacity 0.1s, border 0.5s, background-color 0.5s;
+
+    @include for-tablet-portrait-up {
+        border: 1px solid $grey2;
+    }
 
     &.visible {
         opacity: 1;
     }
-
-    // .watermark {
-    //     position: absolute;
-    //     top: 0;
-    //     left: 0;
-    //     width: inherit;
-    //     height: 100%;
-    //     background-color: white;
-    //     border: 2px solid white;
-    //     border-radius: inherit;
-    //     opacity: 0.5;
-    //     // z-index: 1;
-    //     pointer-events: none;
-    // }
 
     &.dragging {
         background-color: rgb(237, 246, 251);
@@ -360,6 +346,20 @@
         }
     }
 }
+
+// .watermark {
+//     position: absolute;
+//     top: 0;
+//     left: 0;
+//     width: inherit;
+//     height: 100%;
+//     background-color: white;
+//     border: 2px solid white;
+//     border-radius: inherit;
+//     opacity: 0.5;
+//     // z-index: 1;
+//     pointer-events: none;
+// }
 
 // .postType {
 //     border-radius: 50%;

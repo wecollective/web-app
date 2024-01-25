@@ -2,9 +2,14 @@
 
 .wrapper {
     padding: 10px 10px 5px 10px;
-    border: 1px solid $grey2;
-    border-radius: 10px;
     background-color: $grey1;
+    margin: 0 -15px 0 -15px;
+
+    @include for-tablet-portrait-up {
+        border-radius: 10px;
+        margin: 0;
+        border: 1px solid $grey2;
+    }
 
     .images {
         padding-bottom: 5px;
