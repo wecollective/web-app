@@ -41,12 +41,11 @@ function ShowMoreLess(props: {
     }
 
     return (
-        <div className={styles.wrapper}>
+        <div className={styles.wrapper} style={style}>
             <div
                 ref={contentRef}
                 className={styles.content}
                 style={{
-                    ...style,
                     maxHeight: expanded ? contentHeight() : height,
                     overflow: overflow && !expanded ? 'hidden' : 'visible',
                 }}

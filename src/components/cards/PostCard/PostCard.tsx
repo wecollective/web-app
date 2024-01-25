@@ -369,8 +369,12 @@ function PostCard(props: {
                         {text && (
                             <>
                                 {collapse ? (
-                                    <ShowMoreLess height={700} gradientColor='white'>
-                                        <DraftText text={text} style={{ marginBottom: 10 }} />
+                                    <ShowMoreLess
+                                        height={500}
+                                        gradientColor='white'
+                                        style={{ marginBottom: 10 }}
+                                    >
+                                        <DraftText text={text} />
                                     </ShowMoreLess>
                                 ) : (
                                     <DraftText text={text} style={{ marginBottom: 10 }} />

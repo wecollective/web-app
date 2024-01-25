@@ -103,6 +103,7 @@ function PostList(props: {
                                         }
                                     }}
                                     setPost={() => console.error('TODO')}
+                                    collapse
                                 />
                             ))}
                             {nextPostsLoading && (
