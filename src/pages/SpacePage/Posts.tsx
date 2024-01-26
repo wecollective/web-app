@@ -5,6 +5,7 @@ import Row from '@components/Row'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import SpaceNotFound from '@pages/SpaceNotFound'
+import Followers from '@src/pages/SpacePage/Followers'
 import NavigationList from '@src/pages/SpacePage/NavigationList'
 import PostMap from '@src/pages/SpacePage/PostMap'
 import TopContributors from '@src/pages/SpacePage/TopContributors'
@@ -107,6 +108,7 @@ function Posts(): JSX.Element {
                     </Column>
                     {largeScreen && (
                         <Column className={styles.topContributorsWrapper}>
+                            <Followers />
                             <TopContributors />
                         </Column>
                     )}

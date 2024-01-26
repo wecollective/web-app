@@ -206,37 +206,8 @@ function SpacePage(): JSX.Element {
         }
     }, [id, access])
 
-    // const wecoSpace =
-    //     spaceData.id && (spaceData.id === 51 || spaceData.SpaceAncestors.find((a) => a.id === 51))
-
-    // useEffect(() => {
-    //     if (wecoSpace) {
-    //         const texture = textures
-    //             .paths()
-    //             .d('hexagons')
-    //             .size(10)
-    //             .strokeWidth(0.2)
-    //             .stroke('#d8eaf2')
-    //         const svg = d3
-    //             .select(`#space-background`)
-    //             .append('svg')
-    //             .attr('width', '100%')
-    //             .attr('height', '100%')
-    //         // add texture to defs
-    //         svg.call(texture)
-    //         // create background
-    //         svg.append('rect')
-    //             .attr('width', '100%')
-    //             .attr('height', '100%')
-    //             .style('fill', texture.url())
-    //     } else {
-    //         d3.select(`#space-background`).select('svg').remove()
-    //     }
-    // }, [spaceData.id])
-
     return (
         <Column centerX className={styles.wrapper}>
-            {/* <div id='space-background' className={styles.background} /> */}
             <Column centerX className={`${styles.header} ${headerCollapsed && styles.collapsed}`}>
                 <CoverImage type='space' image={spaceData.coverImagePath} canEdit={isModerator} />
                 {awaitingSpaceData ? (
@@ -341,3 +312,33 @@ function SpacePage(): JSX.Element {
 }
 
 export default SpacePage
+
+// <div id='space-background' className={styles.background} />
+
+// const wecoSpace =
+//     spaceData.id && (spaceData.id === 51 || spaceData.SpaceAncestors.find((a) => a.id === 51))
+
+// useEffect(() => {
+//     if (wecoSpace) {
+//         const texture = textures
+//             .paths()
+//             .d('hexagons')
+//             .size(10)
+//             .strokeWidth(0.2)
+//             .stroke('#d8eaf2')
+//         const svg = d3
+//             .select(`#space-background`)
+//             .append('svg')
+//             .attr('width', '100%')
+//             .attr('height', '100%')
+//         // add texture to defs
+//         svg.call(texture)
+//         // create background
+//         svg.append('rect')
+//             .attr('width', '100%')
+//             .attr('height', '100%')
+//             .style('fill', texture.url())
+//     } else {
+//         d3.select(`#space-background`).select('svg').remove()
+//     }
+// }, [spaceData.id])
