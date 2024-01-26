@@ -181,7 +181,7 @@ function Game(props: {
             <Row spaceBetween centerY className={styles.infoRow}>
                 <FlagImageHighlights
                     type='user'
-                    imagePaths={players.map((p) => p.flagImagePath)}
+                    images={players.splice(0, 3).map((p) => p.flagImagePath)}
                     imageSize={30}
                     text={`${players.length} players`}
                 />
@@ -213,7 +213,7 @@ function Game(props: {
                         <p>Waiting for {pendingPlayers.length}</p>
                         <FlagImageHighlights
                             type='user'
-                            imagePaths={pendingPlayers.map((p) => p.flagImagePath)}
+                            images={pendingPlayers.splice(0, 3).map((p) => p.flagImagePath)}
                             imageSize={30}
                             style={{ marginLeft: 5 }}
                         />
@@ -227,7 +227,7 @@ function Game(props: {
                         </p>
                         <FlagImageHighlights
                             type='user'
-                            imagePaths={rejectedPlayers.map((p) => p.flagImagePath)}
+                            images={rejectedPlayers.splice(0, 3).map((p) => p.flagImagePath)}
                             imageSize={30}
                         />
                     </Row>

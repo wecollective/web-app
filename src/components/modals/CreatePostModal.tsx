@@ -1246,9 +1246,9 @@ function CreatePostModal({
                                                         <>
                                                             <FlagImageHighlights
                                                                 type='user'
-                                                                imagePaths={gameSettings.players.map(
-                                                                    (p) => p.flagImagePath
-                                                                )}
+                                                                images={gameSettings.players
+                                                                    .splice(0, 3)
+                                                                    .map((p) => p.flagImagePath)}
                                                                 imageSize={30}
                                                                 text={`${gameSettings.players.length} players`}
                                                             />
@@ -1260,7 +1260,8 @@ function CreatePostModal({
                                                                 </p>
                                                                 <FlagImageHighlights
                                                                     type='user'
-                                                                    imagePaths={gameSettings.players
+                                                                    images={gameSettings.players
+                                                                        .splice(0, 3)
                                                                         .filter(
                                                                             (p) =>
                                                                                 p.id !==

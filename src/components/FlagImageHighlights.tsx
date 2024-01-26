@@ -4,14 +4,14 @@ import React from 'react'
 
 function FlagImageHighlights(props: {
     type: 'user' | 'space' | 'post'
-    imagePaths: string[]
+    images: string[]
     imageSize?: number
     text?: string
     style?: any
     outline?: number
     onClick?: () => void
 }): JSX.Element {
-    const { type, imagePaths, imageSize, text, style, outline, onClick } = props
+    const { type, images, imageSize, text, style, outline, onClick } = props
     return (
         <button
             className={`${styles.wrapper} ${onClick && styles.clickable}`}
@@ -19,36 +19,15 @@ function FlagImageHighlights(props: {
             style={style}
             onClick={onClick}
         >
-            {imagePaths.length > 0 && (
-                <div className={styles.item1}>
-                    <FlagImage
-                        type={type}
-                        imagePath={imagePaths[0]}
-                        size={imageSize!}
-                        outline={outline}
-                    />
-                </div>
-            )}
-            {imagePaths.length > 1 && (
-                <div className={styles.item2}>
-                    <FlagImage
-                        type={type}
-                        imagePath={imagePaths[1]}
-                        size={imageSize!}
-                        outline={outline}
-                    />
-                </div>
-            )}
-            {imagePaths.length > 2 && (
-                <div className={styles.item3}>
-                    <FlagImage
-                        type={type}
-                        imagePath={imagePaths[2]}
-                        size={imageSize!}
-                        outline={outline}
-                    />
-                </div>
-            )}
+            {images.map((image, index) => (
+                <FlagImage
+                    type={type}
+                    imagePath={image}
+                    size={imageSize!}
+                    outline={outline}
+                    style={{ marginLeft: index === 0 ? 0 : -10 }}
+                />
+            ))}
             {!!text && <p style={{ marginLeft: imageSize! / 6 }}>{text}</p>}
         </button>
     )

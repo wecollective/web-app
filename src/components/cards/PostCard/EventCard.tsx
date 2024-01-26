@@ -87,7 +87,7 @@ function EventCard(props: {
                     {Going.length > 0 && (
                         <FlagImageHighlights
                             type='user'
-                            imagePaths={Going.map((u) => u.flagImagePath)}
+                            images={Going.splice(0, 3).map((u) => u.flagImagePath)}
                             imageSize={30}
                             text={`${Going.length} going`}
                             onClick={() => setGoingModalOpen(true)}
@@ -97,7 +97,7 @@ function EventCard(props: {
                     {Interested.length > 0 && (
                         <FlagImageHighlights
                             type='user'
-                            imagePaths={Interested.map((u) => u.flagImagePath)}
+                            images={Interested.splice(0, 3).map((u) => u.flagImagePath)}
                             imageSize={30}
                             text={`${Interested.length} interested`}
                             onClick={() => setInterestedModalOpen(true)}
