@@ -89,7 +89,7 @@ function PollAnswer(props: {
                             {votes.length > 0 && (
                                 <FlagImageHighlights
                                     type='user'
-                                    images={votes.splice(0, 3).map((r) => r.Creator.flagImagePath)}
+                                    images={votes.map((r) => r.Creator.flagImagePath).splice(0, 3)}
                                     imageSize={30}
                                     style={{ marginRight: 10 }}
                                 />

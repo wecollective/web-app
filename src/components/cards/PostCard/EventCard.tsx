@@ -34,6 +34,8 @@ function EventCard(props: {
     const allowResponses = new Date(startTime) > new Date()
     const cookies = new Cookies()
 
+    console.log('Going: ', Going)
+
     function respondToEvent(response) {
         const accessToken = cookies.get('accessToken')
         if (!accessToken) {
@@ -87,7 +89,7 @@ function EventCard(props: {
                     {Going.length > 0 && (
                         <FlagImageHighlights
                             type='user'
-                            images={Going.splice(0, 3).map((u) => u.flagImagePath)}
+                            images={Going.map((u) => u.flagImagePath).splice(0, 3)}
                             imageSize={30}
                             text={`${Going.length} going`}
                             onClick={() => setGoingModalOpen(true)}
@@ -97,7 +99,7 @@ function EventCard(props: {
                     {Interested.length > 0 && (
                         <FlagImageHighlights
                             type='user'
-                            images={Interested.splice(0, 3).map((u) => u.flagImagePath)}
+                            images={Interested.map((u) => u.flagImagePath).splice(0, 3)}
                             imageSize={30}
                             text={`${Interested.length} interested`}
                             onClick={() => setInterestedModalOpen(true)}

@@ -21,6 +21,7 @@ function FlagImageHighlights(props: {
         >
             {images.map((image, index) => (
                 <FlagImage
+                    key={image}
                     type={type}
                     imagePath={image}
                     size={imageSize!}
