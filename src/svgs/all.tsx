@@ -77,6 +77,7 @@ import { ReactComponent as SpaceTreeIcon } from '@svgs/space-tree-icon.svg'
 import { ReactComponent as LoadingWheelIcon } from '@svgs/spinner.svg'
 import { ReactComponent as StarIcon } from '@svgs/star-solid.svg'
 import { ReactComponent as StreamIcon } from '@svgs/stream-icon.svg'
+import { ReactComponent as HereIcon } from '@svgs/street-view-solid.svg'
 import { ReactComponent as StringIcon } from '@svgs/string-icon.svg'
 import { ReactComponent as SynapseIcon } from '@svgs/synapse-icon.svg'
 import { ReactComponent as SynapseSource } from '@svgs/synapse-source.svg'
@@ -134,6 +135,7 @@ export {
     GovernanceIcon,
     HandshakeIcon,
     HelpIcon,
+    HereIcon,
     ImageIcon,
     InboxIcon,
     InfinityIcon,

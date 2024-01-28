@@ -34,14 +34,8 @@ import React, { useContext, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 function Navbar(): JSX.Element {
-    const {
-        loggedIn,
-        accountData,
-        accountDataLoading,
-        setLogInModalOpen,
-        setDonateModalOpen,
-        logOut,
-    } = useContext(AccountContext)
+    const { loggedIn, accountData, accountDataLoading, setLogInModalOpen, logOut } =
+        useContext(AccountContext)
     const { spaceData, getSpaceData, isModerator, selectedSpaceSubPage } = useContext(SpaceContext)
     const { userData } = useContext(UserContext)
     const [hamburgerMenuOpen, setHamburgerMenuOpen] = useState(false)

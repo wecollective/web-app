@@ -8,16 +8,15 @@ import Row from '@components/Row'
 import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
+import config from '@src/Config'
 import { onPageBottomReached } from '@src/Helpers'
 import About from '@src/pages/UserPage/About'
-import Notifications from '@src/pages/UserPage/Notifications'
-import Posts from '@src/pages/UserPage/Posts'
-import Settings from '@src/pages/UserPage/Settings'
-// import Sidebar from '@src/pages/UserPage/Sidebar'
-import config from '@src/Config'
 import Following from '@src/pages/UserPage/Following'
 import Likes from '@src/pages/UserPage/Likes'
 import Messages from '@src/pages/UserPage/Messages'
+import Notifications from '@src/pages/UserPage/Notifications'
+import Posts from '@src/pages/UserPage/Posts'
+import Settings from '@src/pages/UserPage/Settings'
 import Streams from '@src/pages/UserPage/Streams'
 import styles from '@styles/pages/UserPage/UserPage.module.scss'
 import {
@@ -39,8 +38,7 @@ import Cookies from 'universal-cookie'
 // todo: load UserNotFound component here instead of in each subpage?
 
 function UserPage(): JSX.Element {
-    const { accountData, accountDataLoading, setPageBottomReached, loggedIn } =
-        useContext(AccountContext)
+    const { accountDataLoading, setPageBottomReached, loggedIn } = useContext(AccountContext)
     const { userData, getUserData, resetUserData, isOwnAccount, setSelectedUserSubPage } =
         useContext(UserContext)
 

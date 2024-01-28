@@ -277,10 +277,12 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
             // remove old listeners
             const listeners = ['room-entered', 'user-entering', 'user-exiting']
             listeners.forEach((event) => socket.removeAllListeners(event))
+            // enter room
             socket.emit('enter-room', {
                 roomId: `space-${spaceData.id}`,
                 user: baseUserData(accountData),
             })
+            // listen for new events
             socket.on('room-entered', (usersInRoom) => {
                 console.log('room-entered', usersInRoom)
                 setPeopleInRoom(usersInRoom)

@@ -11,7 +11,7 @@ import NavigationList from '@pages/SpacePage/NavigationList'
 import PostMap from '@pages/SpacePage/PostMap'
 import TopContributors from '@pages/SpacePage/TopContributors'
 import styles from '@styles/pages/SpacePage/Posts.module.scss'
-import { UsersIcon } from '@svgs/all'
+import { HereIcon } from '@svgs/all'
 import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
@@ -116,7 +116,7 @@ function Posts(): JSX.Element {
                             <Followers />
                             <Column style={{ marginBottom: 20 }}>
                                 <Row centerY className={styles.roomHeader}>
-                                    <UsersIcon />
+                                    <HereIcon />
                                     <p>Present</p>
                                 </Row>
                                 {peopleInRoom.map((user) => (
