@@ -2,6 +2,7 @@
 /* eslint-disable prefer-destructuring */
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
+import { baseUserData } from '@src/Helpers'
 import { ISpaceContext } from '@src/Interfaces'
 import axios from 'axios'
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
@@ -60,7 +61,7 @@ const defaults = {
 }
 
 function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Element {
-    const { accountData, loggedIn } = useContext(AccountContext)
+    const { accountData, loggedIn, socket } = useContext(AccountContext)
     const [spaceData, setSpaceData] = useState(defaults.spaceData)
     const [isFollowing, setIsFollowing] = useState(false)
     const [isModerator, setIsModerator] = useState(false)
@@ -99,10 +100,13 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     const [spacePeoplePaginationHasMore, setSpacePeoplePaginationHasMore] = useState(true)
     // governance
     const [governancePolls, setGovernancePolls] = useState<any[]>([])
+    // websockets
+    const [peopleInRoom, setPeopleInRoom] = useState<any[]>([])
 
     const spaceHandleRef = useRef('')
     const cookies = new Cookies()
     const location = useLocation()
+    const [x, page, spaceHandle] = location.pathname.split('/')
 
     function updateSpaceUserStatus(space) {
         if (loggedIn) {
@@ -115,8 +119,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     }
 
     function getSpaceData(handle: string) {
-        const accessToken = cookies.get('accessToken')
-        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         resetSpaceList()
         resetSpacePosts()
         resetSpacePeople()
@@ -125,9 +128,6 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
             .get(`${config.apiURL}/space-data?handle=${handle}`, options)
             .then((res) => {
                 // console.log('space-data: ', res.data)
-                // todo: apply default people filters when set up
-                // setPostFilters()
-                // setDefaultPeopleFilters()
                 updateSpaceUserStatus(res.data)
                 setSpaceData(res.data)
             })
@@ -262,8 +262,39 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     useEffect(() => updateSpaceUserStatus(spaceData), [loggedIn])
 
     useEffect(() => {
-        spaceHandleRef.current = location.pathname.split('/')[2]
-    }, [location])
+        // set new handle
+        spaceHandleRef.current = spaceHandle
+        // exit old room if leaving
+        if (socket && spaceData.id && (page !== 's' || spaceHandle !== spaceData.handle)) {
+            console.log('exit room', spaceData.id)
+            socket.emit('exit-room', { roomId: `space-${spaceData.id}`, userId: accountData.id })
+        }
+    }, [spaceHandle])
+
+    useEffect(() => {
+        if (spaceData.id && loggedIn) {
+            console.log('enter room', spaceData.id)
+            // remove old listeners
+            const listeners = ['room-entered', 'user-entering', 'user-exiting']
+            listeners.forEach((event) => socket.removeAllListeners(event))
+            socket.emit('enter-room', {
+                roomId: `space-${spaceData.id}`,
+                user: baseUserData(accountData),
+            })
+            socket.on('room-entered', (usersInRoom) => {
+                console.log('room-entered', usersInRoom)
+                setPeopleInRoom(usersInRoom)
+            })
+            socket.on('user-entering', (user) => {
+                console.log('user-entering', user.id)
+                setPeopleInRoom((people) => [user, ...people])
+            })
+            socket.on('user-exiting', (userId) => {
+                console.log('user-exiting', userId)
+                setPeopleInRoom((people) => people.filter((u) => u.id !== userId))
+            })
+        }
+    }, [spaceData.id])
 
     return (
         <SpaceContext.Provider
@@ -320,6 +351,8 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
 
                 governancePolls,
                 setGovernancePolls,
+
+                peopleInRoom,
 
                 getSpaceData,
                 getSpacePosts,

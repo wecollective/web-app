@@ -186,7 +186,7 @@ function Homepage(): JSX.Element {
                     <div className={styles.highlights}>
                         <FlagImageHighlights
                             type='post'
-                            imagePaths={highlights.posts}
+                            images={highlights.posts}
                             imageSize={45}
                             text={`${highlights.totals.totalPosts} Post${pluralise(
                                 highlights.posts.length
@@ -196,7 +196,7 @@ function Homepage(): JSX.Element {
                         />
                         <FlagImageHighlights
                             type='space'
-                            imagePaths={highlights.spaces}
+                            images={highlights.spaces}
                             imageSize={45}
                             text={`${highlights.totals.totalSpaces} Space${pluralise(
                                 highlights.totals.totalSpaces
@@ -206,7 +206,7 @@ function Homepage(): JSX.Element {
                         />
                         <FlagImageHighlights
                             type='user'
-                            imagePaths={highlights.users}
+                            images={highlights.users}
                             imageSize={45}
                             text={`${highlights.totals.totalUsers} ${
                                 isPlural(highlights.totals.totalUsers) ? 'People' : 'Person'

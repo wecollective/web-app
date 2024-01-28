@@ -4,6 +4,7 @@ import { IAccountContext } from '@src/Interfaces'
 import { CreatePostModalSettings } from '@src/components/modals/CreatePostModal'
 import axios from 'axios'
 import React, { createContext, useEffect, useRef, useState } from 'react'
+import { io } from 'socket.io-client'
 import Cookies from 'universal-cookie'
 
 export const AccountContext = createContext<IAccountContext>({} as IAccountContext)
@@ -22,9 +23,10 @@ const defaults = {
 }
 
 function AccountContextProvider({ children }: { children: JSX.Element }): JSX.Element {
-    const [loggedIn, setLoggedIn] = useState(false)
     const [accountData, setAccountData] = useState(defaults.accountData)
     const [accountDataLoading, setAccountDataLoading] = useState(true)
+    const [socket, setSocket] = useState<any>(null)
+    const [loggedIn, setLoggedIn] = useState(false)
     const [pageBottomReached, setPageBottomReached] = useState(false)
     const [toyboxCollapsed, setToyboxCollapsed] = useState(false)
     const [toyBoxRow, setToyBoxRow] = useState({ id: null, index: 0, name: '', image: '' })
@@ -57,6 +59,7 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
 
     const cookies = new Cookies()
 
+    // todo: connect socket even if not logged in?
     function getAccountData() {
         const accessToken = cookies.get('accessToken')
         const options = { headers: { Authorization: `Bearer ${accessToken}` } }
@@ -67,6 +70,10 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                 .get(`${config.apiURL}/account-data`, options)
                 .then((res) => {
                     const { id, handle, name, bio, flagImagePath } = res.data
+                    setAccountData(res.data)
+                    // connect socket
+                    setSocket(io(config.apiWebSocketURL || ''))
+                    // add greencheck script
                     const script = document.getElementById('greencheck')
                     script!.innerHTML = JSON.stringify({
                         id,
@@ -75,7 +82,6 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                         description: bio ? getDraftPlainText(bio) : '',
                         image: flagImagePath,
                     })
-                    setAccountData(res.data)
                     setLoggedIn(true)
                     setAccountDataLoading(false)
                 })
@@ -96,6 +102,7 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
         cookies.remove('accessToken', { path: '/' })
         const script = document.getElementById('greencheck')
         script!.innerHTML = ''
+        socket.emit('log-out', accountData.id)
         setAccountData(defaults.accountData)
         setLoggedIn(false)
     }
@@ -107,14 +114,31 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
 
     useEffect(() => getAccountData(), [])
 
+    useEffect(() => {
+        if (socket) {
+            socket.emit('log-in', accountData.id)
+            // listen for events
+            socket.on('notification', (data) => {
+                console.log('new notification: ', data.notification)
+                setAccountData((oldData) => {
+                    return {
+                        ...oldData,
+                        unseenNotifications: oldData.unseenNotifications + 1,
+                    }
+                })
+            })
+        }
+    }, [socket])
+
     return (
         <AccountContext.Provider
             value={{
-                loggedIn,
                 accountData,
                 setAccountData,
                 accountDataLoading,
                 setAccountDataLoading,
+                socket,
+                loggedIn,
                 toyboxCollapsed,
                 setToyboxCollapsed,
                 toyBoxRow,

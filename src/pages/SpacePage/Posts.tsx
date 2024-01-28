@@ -2,14 +2,16 @@ import Column from '@components/Column'
 import PostFilters from '@components/PostFilters'
 import PostList from '@components/PostList'
 import Row from '@components/Row'
+import UserButton from '@components/UserButton'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import SpaceNotFound from '@pages/SpaceNotFound'
-import Followers from '@src/pages/SpacePage/Followers'
-import NavigationList from '@src/pages/SpacePage/NavigationList'
-import PostMap from '@src/pages/SpacePage/PostMap'
-import TopContributors from '@src/pages/SpacePage/TopContributors'
+import Followers from '@pages/SpacePage/Followers'
+import NavigationList from '@pages/SpacePage/NavigationList'
+import PostMap from '@pages/SpacePage/PostMap'
+import TopContributors from '@pages/SpacePage/TopContributors'
 import styles from '@styles/pages/SpacePage/Posts.module.scss'
+import { UsersIcon } from '@svgs/all'
 import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
@@ -30,6 +32,7 @@ function Posts(): JSX.Element {
         spacePostsPaginationOffset,
         spacePostsPaginationLimit,
         spacePostsPaginationHasMore,
+        peopleInRoom,
     } = useContext(SpaceContext)
     // const [mediumScreen, setMediumScreen] = useState(false)
     const [largeScreen, setLargeScreen] = useState(false)
@@ -82,6 +85,7 @@ function Posts(): JSX.Element {
             // setMediumScreen(document.documentElement.clientWidth >= 1000)
             setLargeScreen(document.documentElement.clientWidth >= 1200)
         })
+        return () => setSpacePostsLoading(true)
     }, [])
 
     if (spaceNotFound) return <SpaceNotFound />
@@ -108,7 +112,23 @@ function Posts(): JSX.Element {
                     </Column>
                     {largeScreen && (
                         <Column className={styles.topContributorsWrapper}>
+                            {/* todo: create one component for this whole bar */}
                             <Followers />
+                            <Column style={{ marginBottom: 20 }}>
+                                <Row centerY className={styles.roomHeader}>
+                                    <UsersIcon />
+                                    <p>Present</p>
+                                </Row>
+                                {peopleInRoom.map((user) => (
+                                    <UserButton
+                                        key={user.id}
+                                        user={user}
+                                        imageSize={35}
+                                        maxChars={18}
+                                        style={{ marginBottom: 10 }}
+                                    />
+                                ))}
+                            </Column>
                             <TopContributors />
                         </Column>
                     )}

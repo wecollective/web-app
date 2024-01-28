@@ -34,8 +34,6 @@ function EventCard(props: {
     const allowResponses = new Date(startTime) > new Date()
     const cookies = new Cookies()
 
-    console.log('Going: ', Going)
-
     function respondToEvent(response) {
         const accessToken = cookies.get('accessToken')
         if (!accessToken) {

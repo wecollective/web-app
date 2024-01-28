@@ -101,6 +101,7 @@ export interface ISpaceMapData {
 }
 
 export interface IAccountContext {
+    socket: any
     loggedIn: boolean
     accountData: any
     setAccountData: (payload: any) => void
@@ -216,6 +217,8 @@ export interface ISpaceContext {
 
     governancePolls: any[]
     setGovernancePolls: (payload: any[]) => void
+
+    peopleInRoom: any[]
 
     getSpaceData: (handle: string, callback?: any) => void
     getSpacePosts: (spaceId: number, offset: number, limit: number, params: any) => void

@@ -699,7 +699,7 @@ export function getTextSelection() {
     return text
 }
 
-export function scrapeUrl(url) {
+export function scrapeUrl(url): any {
     const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
     return axios.get(`${config.apiURL}/scrape-url?url=${url}`, options)
 }
@@ -816,4 +816,9 @@ export function uploadPost(post) {
     formData.append('post-data', JSON.stringify(postData))
     const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
     return axios.post(`${config.apiURL}/create-${post.type}`, formData, options)
+}
+
+export function baseUserData(accountData) {
+    const { id, name, handle, flagImagePath } = accountData
+    return { id, name, handle, flagImagePath }
 }
