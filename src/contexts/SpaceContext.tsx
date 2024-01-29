@@ -272,7 +272,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     }, [spaceHandle])
 
     useEffect(() => {
-        if (spaceData.id && loggedIn) {
+        if (spaceData.id) {
             console.log('enter room', spaceData.id)
             // remove old listeners
             const listeners = ['room-entered', 'user-entering', 'user-exiting']

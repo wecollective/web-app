@@ -67,8 +67,10 @@ function CommentInput(props: {
     className?: string
     style?: any
     onSave: (data: any) => void
+    signalTyping?: (typing: boolean) => void
 }): JSX.Element {
-    const { type, parent, preview, placeholder, maxChars, className, style, onSave } = props
+    const { type, parent, preview, placeholder, maxChars, className, style, onSave, signalTyping } =
+        props
     const { accountData } = useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
     const [editorState, setEditorState] = useState<any>(null)
@@ -143,6 +145,9 @@ function CommentInput(props: {
         const content = newState.getCurrentContent()
         const plainText = content.getPlainText()
         const rawDraft = convertToRaw(content)
+        const startedTyping = !totalChars && plainText.length
+        const stoppedTyping = totalChars && !plainText.length
+        if (signalTyping && (startedTyping || stoppedTyping)) signalTyping(!!plainText.length)
         setTotalChars(plainText.length)
         // extract urls
         const extractedLinks = extractLinks(plainText)
@@ -580,6 +585,7 @@ CommentInput.defaultProps = {
     maxChars: 0,
     className: '',
     style: null,
+    signalTyping: null,
 }
 
 export default CommentInput

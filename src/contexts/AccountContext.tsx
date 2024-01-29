@@ -61,18 +61,20 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
 
     // todo: connect socket even if not logged in?
     function getAccountData() {
+        // connect socket
+        setSocket(io(config.apiWebSocketURL || ''))
         const accessToken = cookies.get('accessToken')
-        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
         if (!accessToken) setAccountDataLoading(false)
         else {
             setAccountDataLoading(true)
+            const options = { headers: { Authorization: `Bearer ${accessToken}` } }
             axios
                 .get(`${config.apiURL}/account-data`, options)
                 .then((res) => {
                     const { id, handle, name, bio, flagImagePath } = res.data
                     setAccountData(res.data)
-                    // connect socket
-                    setSocket(io(config.apiWebSocketURL || ''))
+                    // // connect socket
+                    // setSocket(io(config.apiWebSocketURL || ''))
                     // add greencheck script
                     const script = document.getElementById('greencheck')
                     script!.innerHTML = JSON.stringify({
@@ -115,7 +117,7 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
     useEffect(() => getAccountData(), [])
 
     useEffect(() => {
-        if (socket) {
+        if (!accountDataLoading) {
             socket.emit('log-in', accountData.id)
             // listen for events
             socket.on('notification', (data) => {
@@ -128,7 +130,7 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                 })
             })
         }
-    }, [socket])
+    }, [accountDataLoading])
 
     return (
         <AccountContext.Provider

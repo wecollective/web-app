@@ -1,4 +1,5 @@
 import FlagImage from '@components/FlagImage'
+import Row from '@components/Row'
 import UserButtonModal from '@components/modals/UserButtonModal'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
@@ -86,22 +87,29 @@ function UserButton(props: {
         }
     }, [])
 
+    if (id)
+        return (
+            <Link
+                to={`/u/${handle}`}
+                id={buttonId}
+                className={`${styles.wrapper} ${className}`}
+                style={style}
+                onMouseEnter={onMouseEnter}
+                onMouseLeave={onMouseLeave}
+                draggable
+            >
+                <FlagImage type='user' size={imageSize!} imagePath={flagImagePath} />
+                <p style={{ fontSize, color }}>{maxChars ? trimText(text, maxChars) : text}</p>
+                {showModal && (
+                    <UserButtonModal user={{ ...user, ...modalData }} transparent={transparent} />
+                )}
+            </Link>
+        )
     return (
-        <Link
-            to={`/u/${handle}`}
-            id={buttonId}
-            className={`${styles.wrapper} ${className}`}
-            style={style}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
-            draggable
-        >
-            <FlagImage type='user' size={imageSize!} imagePath={flagImagePath} />
-            <p style={{ fontSize, color }}>{maxChars ? trimText(text, maxChars) : text}</p>
-            {showModal && (
-                <UserButtonModal user={{ ...user, ...modalData }} transparent={transparent} />
-            )}
-        </Link>
+        <Row centerY className={className} style={style}>
+            <FlagImage type='user' size={imageSize!} imagePath='' />
+            <p style={{ marginLeft: 5, fontSize, color }}>Anon</p>
+        </Row>
     )
 }
 

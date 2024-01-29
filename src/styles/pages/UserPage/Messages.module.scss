@@ -6,10 +6,15 @@
     margin-top: -15px;
 
     .sidebar {
-        width: 350px;
+        width: 250px;
         height: 100%;
         padding: 10px;
         border-right: 1px solid $grey2;
+        flex-shrink: 0;
+
+        @include for-desktop-small-up {
+            width: 350px;
+        }
 
         .chat {
             margin-top: 10px;
@@ -52,16 +57,16 @@
             z-index: 5;
             background-color: white;
             border-bottom: 1px solid $grey2;
+            padding: 0 10px;
 
-            > img {
+            > div > img {
                 width: 40px;
                 height: 40px;
                 border-radius: 50%;
                 object-fit: cover;
-                margin-left: 10px;
             }
 
-            > h1 {
+            > div > h1 {
                 font-size: 16px;
                 font-weight: 800;
                 margin: 0;
@@ -80,10 +85,24 @@
         .input {
             position: fixed;
             bottom: 0;
-            width: calc(100% - 300px);
+            width: calc(100% - 245px);
             padding: 10px 10px 35px 10px;
             background-color: white;
             z-index: 5;
+
+            @include for-desktop-small-up {
+                width: calc(100% - 350px);
+            }
+
+            // user typing text
+            .peopleTyping {
+                margin: -6px 0 5px 0;
+                align-items: flex-end;
+                > p {
+                    color: $grey4;
+                    margin-right: 2px;
+                }
+            }
         }
     }
 

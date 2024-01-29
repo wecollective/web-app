@@ -13,21 +13,25 @@ import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
 import UserNotFound from '@pages/UserPage/UserNotFound'
 import config from '@src/Config'
-import { imageMBLimit } from '@src/Helpers'
+import { imageMBLimit, baseUserData } from '@src/Helpers'
+import FlagImageHighlights from '@src/components/FlagImageHighlights'
 import styles from '@styles/pages/UserPage/Messages.module.scss'
 import { ImageIcon, PlusIcon, UsersIcon } from '@svgs/all'
 import axios from 'axios'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
+import TypingDots from '@components/animations/TypingDots'
 
 function Messages(): JSX.Element {
-    const { accountData, loggedIn, setToyboxCollapsed } = useContext(AccountContext)
+    const { accountData, loggedIn, socket, setToyboxCollapsed } = useContext(AccountContext)
     const { userData, userNotFound } = useContext(UserContext)
     const [chats, setChats] = useState<any[]>([])
-    const [selectedChat, setSelectedChat] = useState<any>(null)
     const [chatsLoading, setChatsLoading] = useState(true)
+    const [selectedChat, setSelectedChat] = useState<any>(null)
     const [scrollTopReached, setScrollTopReached] = useState(false)
+    const [peopleInRoom, setPeopleInRoom] = useState<any[]>([])
+    const [peopleTyping, setPeopleTyping] = useState<any[]>([])
     const [messages, setMessages] = useState<any[]>([])
     const [totalMessages, setTotalMessages] = useState(0)
     const [messagesLoading, setMessagesLoading] = useState(false)
@@ -143,6 +147,53 @@ function Messages(): JSX.Element {
             .catch((error) => console.log(error))
     }
 
+    function addSocketSignals() {
+        // clean up old connection if present
+        socket.emit('exit-room', { roomId: `chat-${chatId}`, userId: accountData.id })
+        const listeners = ['room-entered', 'user-entering', 'user-exiting']
+        listeners.forEach((event) => socket.removeAllListeners(event))
+        // enter room
+        socket.emit('enter-room', {
+            roomId: `chat-${chatId}`,
+            user: baseUserData(accountData),
+        })
+        // listen for new events
+        socket.on('room-entered', (usersInRoom) => {
+            console.log('room-entered', usersInRoom)
+            setPeopleInRoom(usersInRoom)
+        })
+        socket.on('user-entering', (user) => {
+            console.log('user-entering', user.id)
+            setPeopleInRoom((people) => [user, ...people])
+        })
+        socket.on('user-exiting', (userId) => {
+            console.log('user-exiting', userId)
+            setPeopleInRoom((people) => people.filter((u) => u.id !== userId))
+        })
+        socket.on('user-started-typing', (user) => {
+            console.log('user-started-typing', user)
+            setPeopleTyping((people) => [user, ...people])
+        })
+        socket.on('user-stopped-typing', (user) => {
+            console.log('user-started-typing', user)
+            setPeopleTyping((people) => people.filter((u) => u.id !== user.id))
+        })
+    }
+
+    function signalTyping(typing: boolean) {
+        if (typing) {
+            socket.emit('user-started-typing', {
+                roomId: `chat-${chatId}`,
+                user: baseUserData(accountData),
+            })
+        } else {
+            socket.emit('user-stopped-typing', {
+                roomId: `chat-${chatId}`,
+                user: baseUserData(accountData),
+            })
+        }
+    }
+
     // add scroll handler
     useEffect(() => {
         const scrollWrapper = document.getElementById('scroll-wrapper')
@@ -169,6 +220,11 @@ function Messages(): JSX.Element {
             if (selectedChat) setSelectedChat(chats.find((chat) => chat.id === +chatId))
         }
     }, [chatId])
+
+    // add socket signals
+    useEffect(() => {
+        if (accountData.id && chatId && socket) addSocketSignals()
+    }, [accountData.id, chatId, socket])
 
     // get next messages when scroll top reached
     useEffect(() => {
@@ -204,12 +260,21 @@ function Messages(): JSX.Element {
             </Column>
             <Column className={`${styles.messages} hide-scrollbars`}>
                 {selectedChat && (
-                    <Row centerY className={styles.header}>
-                        <img
-                            src={selectedChat.flagImagePath || selectedChat.otherUser.flagImagePath}
-                            alt=''
+                    <Row spaceBetween className={styles.header}>
+                        <Row centerY>
+                            <img
+                                src={
+                                    selectedChat.flagImagePath ||
+                                    selectedChat.otherUser.flagImagePath
+                                }
+                                alt=''
+                            />
+                            <h1>{selectedChat.name || selectedChat.otherUser.name}</h1>
+                        </Row>
+                        <FlagImageHighlights
+                            type='user'
+                            images={peopleInRoom.map((u) => u.flagImagePath)}
                         />
-                        <h1>{selectedChat.name || selectedChat.otherUser.name}</h1>
                     </Row>
                 )}
                 <Column id='scroll-wrapper' className={`${styles.scrollWrapper} hide-scrollbars`}>
@@ -221,14 +286,22 @@ function Messages(): JSX.Element {
                         />
                     ))}
                 </Column>
-                <Row className={styles.input}>
+
+                <Column className={styles.input}>
+                    {!!peopleTyping.length && (
+                        <Row className={styles.peopleTyping}>
+                            <p>{peopleTyping.map((u) => u.name).join(', ')} typing</p>
+                            <TypingDots style={{ marginBottom: 1 }} />
+                        </Row>
+                    )}
                     <CommentInput
                         type='chat-message'
                         placeholder='New message...'
                         parent={{ type: 'space', id: +chatId }}
                         onSave={(data) => setMessages([data, ...messages])}
+                        signalTyping={signalTyping}
                     />
-                </Row>
+                </Column>
             </Column>
             {newChatModalOpen && (
                 <Modal

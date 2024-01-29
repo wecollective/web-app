@@ -1,0 +1,72 @@
+@import '@styles/Variables';
+
+$speed: 1.5s;
+
+@keyframes dot1 {
+    0% {
+        transform: translateY(0);
+    }
+    20% {
+        transform: translateY(-4px);
+    }
+    40% {
+        transform: translateY(0);
+    }
+}
+
+@keyframes dot2 {
+    10% {
+        transform: translateY(0);
+    }
+    30% {
+        transform: translateY(-4px);
+    }
+    50% {
+        transform: translateY(0);
+    }
+}
+
+@keyframes dot3 {
+    20% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-4px);
+    }
+    60% {
+        transform: translateY(0);
+    }
+}
+
+.wrapper {
+    width: 16px;
+    height: 8px;
+    position: relative;
+
+    div {
+        width: 4px;
+        height: 4px;
+        background-color: $grey4;
+        border-radius: 50%;
+        flex-shrink: 0;
+        &:not(:last-child) {
+            margin-right: 2px;
+        }
+        // position: absolute;
+    }
+
+    .dot1 {
+        animation: dot1 $speed ease-in infinite;
+        // left: 0;
+    }
+
+    .dot2 {
+        animation: dot2 $speed ease-in infinite;
+        // left: 6px;
+    }
+
+    .dot3 {
+        animation: dot3 $speed ease-in infinite;
+        // left: 12px;
+    }
+}
