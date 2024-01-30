@@ -19,10 +19,10 @@ import Cookies from 'universal-cookie'
 // todo: pass in updateItem function instead of set post and update account reactions there
 function RepostModal(props: {
     close: () => void
-    postData: any
-    setPostData: (payload: any) => void
+    post: any
+    updatePost: (newReposts: number) => void
 }): JSX.Element {
-    const { close, postData, setPostData } = props
+    const { close, post, updatePost } = props
     const { loggedIn, accountData, setLogInModalOpen, setAlertMessage, setAlertModalOpen } =
         useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
@@ -42,9 +42,9 @@ function RepostModal(props: {
         : 'No reposts yet...'
 
     async function getRepostData() {
-        const getReposts = await axios.get(`${config.apiURL}/post-reposts?postId=${postData.id}`)
+        const getReposts = await axios.get(`${config.apiURL}/post-reposts?postId=${post.id}`)
         const getIndirectSpaces = await axios.get(
-            `${config.apiURL}/post-indirect-spaces?postId=${postData.id}`
+            `${config.apiURL}/post-indirect-spaces?postId=${post.id}`
         )
         Promise.all([getReposts, getIndirectSpaces])
             .then((responses) => {
@@ -58,7 +58,7 @@ function RepostModal(props: {
     function findAllSpaceIds() {
         const ids = [
             ...reposts.map((r) => r.Space.id),
-            ...postData.DirectSpaces.map((s) => s.id),
+            ...post.DirectSpaces.map((s) => s.id),
             ...indirectSpaces.map((s) => s.id),
             ...selectedSpaces.map((s) => s.id),
         ]
@@ -188,7 +188,7 @@ function RepostModal(props: {
             const data = {
                 accountHandle: accountData.handle,
                 accountName: accountData.name,
-                postId: postData.id,
+                postId: post.id,
                 spaceId: window.location.pathname.includes('/s/') ? spaceData.id : null,
                 spaceIds: selectedSpaces.map((space) => space.id),
             }
@@ -196,12 +196,7 @@ function RepostModal(props: {
             axios
                 .post(`${config.apiURL}/repost-post`, data, authHeader)
                 .then(() => {
-                    setPostData({
-                        ...postData,
-                        totalReactions: postData.totalReactions + selectedSpaces.length,
-                        totalReposts: postData.totalReposts + selectedSpaces.length,
-                        accountRepost: true,
-                    })
+                    updatePost(selectedSpaces.length)
                     close()
                 })
                 .catch((error) => console.log(error))

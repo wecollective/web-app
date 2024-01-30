@@ -87,9 +87,6 @@ function PostCard(props: {
         text,
         createdAt,
         updatedAt,
-        totalComments,
-        totalRatings,
-        totalReposts,
         totalLinks,
         Creator,
         DirectSpaces,
@@ -102,6 +99,9 @@ function PostCard(props: {
         Url,
     } = post
     const [totalLikes, setTotalLikes] = useState(post.totalLikes)
+    const [totalComments, setTotalComments] = useState(post.totalComments)
+    const [totalRatings, setTotalRatings] = useState(post.totalRatings)
+    const [totalReposts, setTotalReposts] = useState(post.totalReposts)
     const [visible, setVisible] = useState(false)
     const [buttonsDisabled, setButtonsDisabled] = useState(true)
     const [accountReactions, setAccountReactions] = useState<any>({})
@@ -161,15 +161,19 @@ function PostCard(props: {
         }
     }
 
-    function getAccountCommented() {
-        // used to check if account comments still present after comment deleted
+    function getAccountReaction(reaction: string) {
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-        axios
-            .get(`${config.apiURL}/account-reactions?postId=${id}&types=comment`, options)
-            .then((res) =>
-                setAccountReactions({ ...accountReactions, commented: res.data.commented })
-            )
-            .catch((error) => console.log(error))
+        setTimeout(() => {
+            axios
+                .get(`${config.apiURL}/account-reactions?postId=${id}&types=${reaction}`, options)
+                .then((res) =>
+                    setAccountReactions({
+                        ...accountReactions,
+                        [reaction]: res.data[`${reaction}ed`],
+                    })
+                )
+                .catch((error) => console.log(error))
+        }, 2000)
     }
 
     function getParentLinks() {
@@ -240,6 +244,7 @@ function PostCard(props: {
 
     useEffect(() => {
         setVisible(true)
+        getAccountReaction('comment')
         if (loggedIn) getAccountReactions()
         else setButtonsDisabled(false)
         if (!['post', 'chat-message'].includes(type)) getParentLinks()
@@ -539,8 +544,8 @@ function PostCard(props: {
                         location={location}
                         totalComments={totalComments}
                         incrementTotalComments={(value) => {
-                            setPost({ ...post, totalComments: totalComments + value })
-                            if (value < 1) getAccountCommented()
+                            setTotalComments(totalComments + value)
+                            if (value < 1) getAccountReaction('comment')
                             else setAccountReactions({ ...accountReactions, commented: true })
                         }}
                         style={{ margin: '10px -8px 0 -8px' }}
@@ -551,7 +556,7 @@ function PostCard(props: {
                         itemType={type}
                         itemData={{ ...post, liked: accountReactions.liked }}
                         updateItem={() => {
-                            setPost({ ...post, totalLikes: totalLikes + (liked ? -1 : 1) })
+                            setTotalLikes(totalLikes + (liked ? -1 : 1))
                             setAccountReactions({ ...accountReactions, liked: !liked })
                         }}
                         close={() => setLikeModalOpen(false)}
@@ -559,8 +564,11 @@ function PostCard(props: {
                 )}
                 {repostModalOpen && (
                     <RepostModal
-                        postData={post}
-                        setPostData={setPost}
+                        post={post}
+                        updatePost={(newReposts) => {
+                            setTotalReposts(totalReposts + newReposts)
+                            setAccountReactions({ ...accountReactions, reposted: true })
+                        }}
                         close={() => setRepostModalOpen(false)}
                     />
                 )}
@@ -569,7 +577,7 @@ function PostCard(props: {
                         itemType={type}
                         itemData={{ ...post, rated: accountReactions.rated }}
                         updateItem={() => {
-                            setPost({ ...post, totalRatings: totalRatings + (rated ? -1 : 1) })
+                            setTotalRatings(totalRatings + (rated ? -1 : 1))
                             setAccountReactions({ ...accountReactions, rated: !rated })
                         }}
                         close={() => setRatingModalOpen(false)}
