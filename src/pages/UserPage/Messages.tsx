@@ -6,6 +6,7 @@ import Input from '@components/Input'
 import Row from '@components/Row'
 import SearchSelector from '@components/SearchSelector'
 import LoadingWheel from '@components/animations/LoadingWheel'
+import TypingDots from '@components/animations/TypingDots'
 import MessageCard from '@components/cards/Comments/MessageCard'
 import CommentInput from '@components/draft-js/CommentInput'
 import Modal from '@components/modals/Modal'
@@ -13,7 +14,7 @@ import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
 import UserNotFound from '@pages/UserPage/UserNotFound'
 import config from '@src/Config'
-import { imageMBLimit, baseUserData } from '@src/Helpers'
+import { baseUserData, imageMBLimit } from '@src/Helpers'
 import FlagImageHighlights from '@src/components/FlagImageHighlights'
 import styles from '@styles/pages/UserPage/Messages.module.scss'
 import { ImageIcon, PlusIcon, UsersIcon } from '@svgs/all'
@@ -21,7 +22,6 @@ import axios from 'axios'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
-import TypingDots from '@components/animations/TypingDots'
 
 function Messages(): JSX.Element {
     const { accountData, loggedIn, socket, setToyboxCollapsed } = useContext(AccountContext)
@@ -94,6 +94,16 @@ function Messages(): JSX.Element {
                 setMessages(offset ? [...messages, ...res.data.messages] : res.data.messages)
                 if (offset) setNextMessagesLoading(false)
                 else setMessagesLoading(false)
+            })
+            .catch((error) => console.log(error))
+    }
+
+    function getMessage(messageId: number) {
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .get(`${config.apiURL}/post-data?postId=${messageId}`, options)
+            .then((res) => {
+                setMessages((oldMessages) => [res.data, ...oldMessages])
             })
             .catch((error) => console.log(error))
     }
@@ -175,8 +185,13 @@ function Messages(): JSX.Element {
             setPeopleTyping((people) => [user, ...people])
         })
         socket.on('user-stopped-typing', (user) => {
-            console.log('user-started-typing', user)
+            console.log('user-stopped-typing', user)
             setPeopleTyping((people) => people.filter((u) => u.id !== user.id))
+        })
+
+        socket.on('new-message', (messageId) => {
+            console.log('new-message', messageId)
+            getMessage(messageId)
         })
     }
 
@@ -298,7 +313,7 @@ function Messages(): JSX.Element {
                         type='chat-message'
                         placeholder='New message...'
                         parent={{ type: 'space', id: +chatId }}
-                        onSave={(data) => setMessages([data, ...messages])}
+                        onSave={(data) => console.log('new message sent: ', data)}
                         signalTyping={signalTyping}
                     />
                 </Column>

@@ -120,8 +120,8 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
         if (!accountDataLoading) {
             socket.emit('log-in', accountData.id)
             // listen for events
-            socket.on('notification', (data) => {
-                console.log('new notification: ', data.notification)
+            socket.on('notification', (notification) => {
+                console.log('new notification: ', notification)
                 setAccountData((oldData) => {
                     return {
                         ...oldData,

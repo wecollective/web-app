@@ -244,7 +244,6 @@ function PostCard(props: {
 
     useEffect(() => {
         setVisible(true)
-        getAccountReaction('comment')
         if (loggedIn) getAccountReactions()
         else setButtonsDisabled(false)
         if (!['post', 'chat-message'].includes(type)) getParentLinks()
