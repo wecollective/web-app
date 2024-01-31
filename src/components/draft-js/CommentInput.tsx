@@ -91,6 +91,7 @@ function CommentInput(props: {
     const recordingInterval = useRef<any>(null)
     const wrapperRef = useRef<HTMLDivElement>(null)
     const editorRef = useRef<any>(null)
+    const typingTimeout = useRef<any>(null)
     const inputId = uuidv4()
     const allowedFileTypes = [...allowedImageTypes, ...allowedAudioTypes]
     const styleMap = {
@@ -145,9 +146,15 @@ function CommentInput(props: {
         const content = newState.getCurrentContent()
         const plainText = content.getPlainText()
         const rawDraft = convertToRaw(content)
-        const startedTyping = !totalChars && plainText.length
-        const stoppedTyping = totalChars && !plainText.length
-        if (signalTyping && (startedTyping || stoppedTyping)) signalTyping(!!plainText.length)
+        // signal typing and set timeout
+        if (signalTyping && totalChars < plainText.length) {
+            if (typingTimeout.current) clearTimeout(typingTimeout.current)
+            else signalTyping(true)
+            typingTimeout.current = setTimeout(() => {
+                signalTyping(false)
+                typingTimeout.current = null
+            }, 2000)
+        }
         setTotalChars(plainText.length)
         // extract urls
         const extractedLinks = extractLinks(plainText)
@@ -359,6 +366,7 @@ function CommentInput(props: {
                     newPost.parent = parent
                     if (type === 'poll-answer') newPost.Link = { state: 'active' }
                     onSave(newPost)
+                    setFocused(false)
                     resetData()
                 })
                 .catch((error) => console.log(error))

@@ -313,7 +313,7 @@ function Messages(): JSX.Element {
                         type='chat-message'
                         placeholder='New message...'
                         parent={{ type: 'space', id: +chatId }}
-                        onSave={(data) => console.log('new message sent: ', data)}
+                        onSave={() => signalTyping(false)}
                         signalTyping={signalTyping}
                     />
                 </Column>
