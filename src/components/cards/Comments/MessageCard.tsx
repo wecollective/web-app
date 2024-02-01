@@ -79,6 +79,7 @@ function MessageCard(props: {
     const cookies = new Cookies()
     const history = useNavigate()
     const fullWidth = mediaTypes.includes('audio') || mediaTypes.includes('url')
+    const hasReactions = totalLikes || totalLinks || totalRatings
 
     function toggleLike() {
         setLikeLoading(true)
@@ -132,7 +133,7 @@ function MessageCard(props: {
                 <button
                     type='button'
                     className={linked ? styles.purple : ''}
-                    onClick={() => history(`/linkmap?item=message&id=${id}`)}
+                    onClick={() => history(`/linkmap?item=comment&id=${id}`)}
                 >
                     <NeuronIcon />
                 </button>
@@ -185,7 +186,7 @@ function MessageCard(props: {
             className={`${styles.wrapper} ${visible && styles.visible} ${
                 Creator.id === accountData.id && styles.isOwnComment
             }`}
-            style={{ width: '100%' }}
+            style={{ width: '100%', marginBottom: hasReactions ? 10 : 0 }}
         >
             <Row
                 className={styles.container}
@@ -274,6 +275,38 @@ function MessageCard(props: {
                             />
                         )}
                     </Column>
+                    <Row className={styles.reactions}>
+                        {totalLikes > 0 && (
+                            <button
+                                type='button'
+                                className={styles.red}
+                                onClick={() => setLikeModalOpen(true)}
+                            >
+                                <LikeIcon />
+                                {totalLikes > 1 && <p>{totalLikes}</p>}
+                            </button>
+                        )}
+                        {totalLinks > 0 && (
+                            <button
+                                type='button'
+                                className={styles.purple}
+                                onClick={() => history(`/linkmap?item=comment&id=${id}`)}
+                            >
+                                <NeuronIcon />
+                                {totalLinks > 1 && <p>{totalLinks}</p>}
+                            </button>
+                        )}
+                        {totalRatings > 0 && (
+                            <button
+                                type='button'
+                                className={styles.orange}
+                                onClick={() => setRatingModalOpen(true)}
+                            >
+                                <ZapIcon />
+                                {totalRatings > 1 && <p>{totalRatings}</p>}
+                            </button>
+                        )}
+                    </Row>
                 </Column>
                 {!isOwnComment && renderButtons()}
                 <Column className={`message-${id}-drag-disabled`} style={{ cursor: 'default' }}>

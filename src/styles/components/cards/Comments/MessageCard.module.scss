@@ -16,6 +16,9 @@
         .container {
             .message {
                 background-color: $blue8;
+                .reactions {
+                    left: 5px;
+                }
             }
         }
     }
@@ -30,6 +33,7 @@
 
     .container {
         .message {
+            position: relative;
             background-color: $grey1;
             border-radius: 10px;
             padding: 10px 12px;
@@ -45,6 +49,61 @@
                 border-radius: 10px;
                 font-size: 14px;
                 width: 100%;
+            }
+
+            .reactions {
+                position: absolute;
+                right: 5px;
+                bottom: -14px;
+
+                > button {
+                    all: unset;
+                    cursor: pointer;
+                    background-color: white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 4px;
+                    border-radius: 12px;
+                    border: 1px solid $grey2;
+
+                    &:hover {
+                        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+                    }
+
+                    &:not(:last-child) {
+                        margin-right: 5px;
+                    }
+
+                    svg {
+                        width: 14px;
+                        height: 14px;
+                    }
+
+                    p {
+                        font-size: 12px;
+                        margin-left: 2px;
+                        color: $grey7;
+                    }
+
+                    &.red {
+                        svg {
+                            color: $likeRed;
+                        }
+                    }
+
+                    &.purple {
+                        svg {
+                            color: $linkPurple;
+                        }
+                    }
+
+                    &.orange {
+                        svg {
+                            color: $ratingOrange;
+                        }
+                    }
+                }
             }
         }
 
