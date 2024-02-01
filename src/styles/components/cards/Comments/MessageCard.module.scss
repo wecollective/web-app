@@ -51,29 +51,55 @@
         .buttons {
             visibility: hidden;
             margin: 0 10px;
+            color: $grey4;
+
+            > button,
+            > a {
+                width: 18px;
+
+                svg {
+                    width: 18px;
+                    height: 18px;
+                    color: $grey4;
+                }
+
+                &:hover {
+                    svg {
+                        color: $grey6;
+                    }
+                }
+            }
 
             > button {
                 all: unset;
                 cursor: pointer;
-                height: 20px;
 
                 &:not(:last-child) {
                     margin-right: 10px;
                 }
 
-                &.blue {
-                    color: $blue8;
+                &.red {
+                    svg {
+                        color: $likeRed;
+                    }
+                    &:hover {
+                        svg {
+                            color: $likeRed;
+                        }
+                    }
                 }
-            }
 
-            > a {
-                height: 20px;
-            }
+                &.purple {
+                    svg {
+                        color: $linkPurple;
+                    }
+                }
 
-            svg {
-                width: 18px;
-                height: 18px;
-                color: $grey4;
+                &.orange {
+                    svg {
+                        color: $ratingOrange;
+                    }
+                }
             }
 
             // .menuButton {

@@ -10,11 +10,11 @@ import DeletePostModal from '@components/modals/DeletePostModal'
 import EditPostModal from '@components/modals/EditPostModal'
 import LikeModal from '@components/modals/LikeModal'
 import RatingModal from '@components/modals/RatingModal'
-import UserButtonModal from '@components/modals/UserButtonModal'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
-import { dateCreated, getTextSelection, timeSinceCreated } from '@src/Helpers'
+import { dateCreated, timeSinceCreated } from '@src/Helpers'
+import LoadingWheel from '@src/components/animations/LoadingWheel'
 import styles from '@styles/components/cards/Comments/MessageCard.module.scss'
 import {
     DeleteIcon,
@@ -26,7 +26,7 @@ import {
     ZapIcon,
 } from '@svgs/all'
 import axios from 'axios'
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
@@ -56,11 +56,14 @@ function MessageCard(props: {
         UrlBlocks,
         ImageBlocks,
         AudioBlocks,
+        Reactions,
     } = message
     const [visible, setVisible] = useState(false)
-    const [collapsed, setCollapsed] = useState(false)
-    const [buttonsDisabled, setButtonsDisabled] = useState(true)
-    const [accountReactions, setAccountReactions] = useState<any>({})
+    const [accountReactions, setAccountReactions] = useState<any>({
+        liked: !!Reactions.find((r) => r.type === 'like'),
+        rated: !!Reactions.find((r) => r.type === 'rating'),
+        linked: !!Reactions.find((r) => r.type === 'linked'),
+    })
     const { liked, rated, linked } = accountReactions
     const [draggable, setDraggable] = useState(true)
     const [menuOpen, setMenuOpen] = useState(false)
@@ -70,50 +73,12 @@ function MessageCard(props: {
     const [editModalOpen, setEditModalOpen] = useState(false)
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
     const [showMutedComment, setShowMutedComment] = useState(false)
-    const [showUserModal, setShowUserModal] = useState(false)
-    const [userModalTransparent, setUserModalTransparent] = useState(true)
-    const [userModalData, setUserModalData] = useState({
-        bio: '',
-        coverImagePath: '',
-        totalPosts: 0,
-        totalComments: 0,
-    })
-    const [selected, setSelected] = useState(false)
-    const selectedRef = useRef(false)
-    const mouseOver = useRef(false)
-    const hoverDelay = 500
     const isOwnComment = Creator.id === accountData.id
     const muted = accountData.id && accountData.mutedUsers.includes(Creator.id)
     const edited = createdAt !== updatedAt
     const cookies = new Cookies()
     const history = useNavigate()
     const fullWidth = mediaTypes.includes('audio') || mediaTypes.includes('url')
-
-    function getAccountReactions() {
-        // only request values if reactions present
-        const types = [] as string[]
-        if (totalLikes) types.push('like')
-        if (totalRatings) types.push('rating')
-        if (totalLinks) types.push('link')
-        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-        axios
-            .get(
-                `${config.apiURL}/account-reactions?postType=post&postId=${id}&types=${types.join(
-                    ','
-                )}`,
-                options
-            )
-            .then((res) => {
-                setAccountReactions(res.data)
-                setButtonsDisabled(false)
-            })
-            .catch((error) => console.log(error))
-    }
-
-    function toggleSelected() {
-        setSelected(!selectedRef.current)
-        selectedRef.current = !selectedRef.current
-    }
 
     function toggleLike() {
         setLikeLoading(true)
@@ -139,33 +104,6 @@ function MessageCard(props: {
         }
     }
 
-    // todo: refactor? (used for user hover)
-    function onMouseEnter() {
-        // start hover delay
-        mouseOver.current = true
-        setTimeout(() => {
-            if (mouseOver.current) {
-                setShowUserModal(true)
-                setTimeout(() => {
-                    if (mouseOver.current) setUserModalTransparent(false)
-                }, 200)
-            }
-        }, hoverDelay)
-        // get modal data
-        axios
-            .get(`${config.apiURL}/user-modal-data?userId=${Creator.id}`)
-            .then((res) => setUserModalData(res.data))
-            .catch((error) => console.log(error))
-    }
-
-    function onMouseLeave() {
-        mouseOver.current = false
-        setUserModalTransparent(true)
-        setTimeout(() => {
-            if (!mouseOver.current) setShowUserModal(false)
-        }, hoverDelay)
-    }
-
     function addDragEvents() {
         const messageCard = document.getElementById(`message-${id}`)
         messageCard?.addEventListener('dragstart', (e) => {
@@ -180,48 +118,27 @@ function MessageCard(props: {
         })
     }
 
-    function addSelectionEvents() {
-        // toggle selected on header clicks
-        const header = document.getElementById(`message-${id}-header`)
-        header?.addEventListener('click', () => toggleSelected())
-        // toggle selected on text clicks if no text selection
-        const messageText = document.getElementById(`message-${id}-text`)
-        messageText?.addEventListener('click', () => {
-            // todo: check if reply input empty
-            const textSelection = getTextSelection()
-            if (state !== 'deleted' && !textSelection) toggleSelected()
-        })
-        // add drag disabled regions
-        const dragDisabledRegions = Array.from(
-            document.getElementsByClassName(`message-${id}-drag-disabled`)
-        )
-        dragDisabledRegions.forEach((region) => {
-            region.addEventListener('mouseenter', () => setDraggable(false))
-            region.addEventListener('mouseleave', () => setDraggable(true))
-        })
-    }
-
     function renderButtons() {
         return (
             <Row centerY className={styles.buttons}>
                 <button
                     type='button'
-                    className={liked && styles.blue}
+                    className={liked ? styles.red : ''}
                     disabled={likeLoading}
                     onClick={toggleLike}
                 >
-                    <LikeIcon />
+                    {likeLoading ? <LoadingWheel size={18} /> : <LikeIcon />}
                 </button>
                 <button
                     type='button'
-                    className={linked && styles.blue}
+                    className={linked ? styles.purple : ''}
                     onClick={() => history(`/linkmap?item=message&id=${id}`)}
                 >
                     <NeuronIcon />
                 </button>
                 <button
                     type='button'
-                    className={rated && styles.blue}
+                    className={rated ? styles.orange : ''}
                     onClick={() => setRatingModalOpen(true)}
                 >
                     <ZapIcon />
@@ -260,21 +177,8 @@ function MessageCard(props: {
 
     useEffect(() => {
         setVisible(true)
-        addDragEvents()
+        // addDragEvents()
     }, [])
-
-    useEffect(() => {
-        if (!collapsed) addSelectionEvents()
-    }, [collapsed])
-
-    useEffect(() => {
-        if (showMutedComment) addSelectionEvents()
-    }, [showMutedComment])
-
-    useEffect(() => {
-        if (selected && loggedIn) getAccountReactions()
-        else setButtonsDisabled(false)
-    }, [selected])
 
     return (
         <Row
@@ -295,7 +199,7 @@ function MessageCard(props: {
                 )}
                 <Column className={styles.message}>
                     <Row spaceBetween className={styles.header}>
-                        <Row id={`message-${id}-header`} style={{ width: '100%' }}>
+                        <Row style={{ width: '100%' }}>
                             {!isOwnComment && (
                                 <>
                                     {state === 'account-deleted' ? (
@@ -305,8 +209,6 @@ function MessageCard(props: {
                                     ) : (
                                         <Link
                                             to={`/u/${Creator.handle}`}
-                                            onMouseEnter={onMouseEnter}
-                                            onMouseLeave={onMouseLeave}
                                             style={{ marginRight: 5 }}
                                         >
                                             <p style={{ fontWeight: 600 }}>{Creator.name}</p>
@@ -415,12 +317,6 @@ function MessageCard(props: {
                             post={message}
                             onDelete={() => removeMessage(message)}
                             close={() => setDeleteModalOpen(false)}
-                        />
-                    )}
-                    {showUserModal && (
-                        <UserButtonModal
-                            user={{ ...Creator, ...userModalData }}
-                            transparent={userModalTransparent}
                         />
                     )}
                 </Column>

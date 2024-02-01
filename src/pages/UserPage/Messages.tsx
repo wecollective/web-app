@@ -90,6 +90,7 @@ function Messages(): JSX.Element {
         axios
             .post(`${config.apiURL}/messages`, data, options)
             .then((res) => {
+                // console.log(res.data.messages)
                 setTotalMessages(res.data.total)
                 setMessages(offset ? [...messages, ...res.data.messages] : res.data.messages)
                 if (offset) setNextMessagesLoading(false)
