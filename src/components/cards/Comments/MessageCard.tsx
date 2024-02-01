@@ -2,7 +2,6 @@ import CloseOnClickOutside from '@components/CloseOnClickOutside'
 import Column from '@components/Column'
 import FlagImage from '@components/FlagImage'
 import Row from '@components/Row'
-import LoadingWheel from '@components/animations/LoadingWheel'
 import Audios from '@components/cards/PostCard/Audios'
 import Images from '@components/cards/PostCard/Images'
 import Urls from '@components/cards/PostCard/Urls'
@@ -20,9 +19,9 @@ import styles from '@styles/components/cards/Comments/MessageCard.module.scss'
 import {
     DeleteIcon,
     EditIcon,
-    EyeClosedIcon,
     LikeIcon,
     NeuronIcon,
+    OpenIcon,
     VerticalEllipsisIcon,
     ZapIcon,
 } from '@svgs/all'
@@ -202,6 +201,63 @@ function MessageCard(props: {
         })
     }
 
+    function renderButtons() {
+        return (
+            <Row centerY className={styles.buttons}>
+                <button
+                    type='button'
+                    className={liked && styles.blue}
+                    disabled={likeLoading}
+                    onClick={toggleLike}
+                >
+                    <LikeIcon />
+                </button>
+                <button
+                    type='button'
+                    className={linked && styles.blue}
+                    onClick={() => history(`/linkmap?item=message&id=${id}`)}
+                >
+                    <NeuronIcon />
+                </button>
+                <button
+                    type='button'
+                    className={rated && styles.blue}
+                    onClick={() => setRatingModalOpen(true)}
+                >
+                    <ZapIcon />
+                </button>
+                <Link to={`/p/${id}`} className={styles.id} title='Open post page'>
+                    <OpenIcon style={{ width: 16, height: 16 }} />
+                </Link>
+                {isOwnComment && (
+                    <button
+                        type='button'
+                        style={{ marginLeft: 5 }}
+                        onClick={() => setMenuOpen(!menuOpen)}
+                    >
+                        <VerticalEllipsisIcon />
+                    </button>
+                )}
+                {menuOpen && (
+                    <CloseOnClickOutside onClick={() => setMenuOpen(false)}>
+                        <Column className={styles.menu}>
+                            <Column>
+                                <button type='button' onClick={() => setEditModalOpen(true)}>
+                                    <EditIcon />
+                                    Edit
+                                </button>
+                                <button type='button' onClick={() => setDeleteModalOpen(true)}>
+                                    <DeleteIcon />
+                                    Delete
+                                </button>
+                            </Column>
+                        </Column>
+                    </CloseOnClickOutside>
+                )}
+            </Row>
+        )
+    }
+
     useEffect(() => {
         setVisible(true)
         addDragEvents()
@@ -225,38 +281,49 @@ function MessageCard(props: {
             className={`${styles.wrapper} ${visible && styles.visible} ${
                 Creator.id === accountData.id && styles.isOwnComment
             }`}
-            style={{ width: fullWidth ? 'calc(100% - 100px)' : 'auto', maxWidth: 900 }}
+            style={{ width: '100%' }}
         >
-            <Column style={{ marginRight: 10 }}>
-                <FlagImage type='user' size={30} imagePath={Creator.flagImagePath} />
-            </Column>
-            <Column className={styles.message}>
-                <Row spaceBetween className={styles.header}>
-                    <Row id={`message-${id}-header`} style={{ width: '100%' }}>
-                        {state === 'account-deleted' ? (
-                            <p className='grey' style={{ marginRight: 5 }}>
-                                [Account deleted]
-                            </p>
-                        ) : (
-                            <Link
-                                to={`/u/${Creator.handle}`}
-                                onMouseEnter={onMouseEnter}
-                                onMouseLeave={onMouseLeave}
-                                style={{ marginRight: 5 }}
+            <Row
+                className={styles.container}
+                style={{ width: fullWidth ? 'calc(100% - 100px)' : 'auto', maxWidth: 900 }}
+            >
+                {isOwnComment && renderButtons()}
+                {!isOwnComment && (
+                    <Column style={{ marginRight: 10 }}>
+                        <FlagImage type='user' size={30} imagePath={Creator.flagImagePath} />
+                    </Column>
+                )}
+                <Column className={styles.message}>
+                    <Row spaceBetween className={styles.header}>
+                        <Row id={`message-${id}-header`} style={{ width: '100%' }}>
+                            {!isOwnComment && (
+                                <>
+                                    {state === 'account-deleted' ? (
+                                        <p className='grey' style={{ marginRight: 5 }}>
+                                            [Account deleted]
+                                        </p>
+                                    ) : (
+                                        <Link
+                                            to={`/u/${Creator.handle}`}
+                                            onMouseEnter={onMouseEnter}
+                                            onMouseLeave={onMouseLeave}
+                                            style={{ marginRight: 5 }}
+                                        >
+                                            <p style={{ fontWeight: 600 }}>{Creator.name}</p>
+                                        </Link>
+                                    )}
+                                </>
+                            )}
+                            <p
+                                className='grey'
+                                title={`${dateCreated(createdAt)} ${
+                                    edited ? `(edited: ${dateCreated(updatedAt)})` : ''
+                                }`}
                             >
-                                <p style={{ fontWeight: 600 }}>{Creator.name}</p>
-                            </Link>
-                        )}
-                        <p
-                            className='grey'
-                            title={`${dateCreated(createdAt)} ${
-                                edited ? `(edited: ${dateCreated(updatedAt)})` : ''
-                            }`}
-                        >
-                            {timeSinceCreated(createdAt)}
-                        </p>
-                        {edited && <p className='grey'>*</p>}
-                        {muted && (
+                                {timeSinceCreated(createdAt)}
+                            </p>
+                            {edited && <p className='grey'>*</p>}
+                            {/* {muted && (
                             <button
                                 type='button'
                                 className={styles.muteButton}
@@ -265,196 +332,99 @@ function MessageCard(props: {
                             >
                                 <EyeClosedIcon />
                             </button>
-                        )}
-                    </Row>
-                    {selected && (
-                        <Row style={{ marginLeft: 10, flexShrink: 0 }}>
-                            <Link to={`/p/${id}`} className={styles.id} title='Open post page'>
-                                <p className='grey'>ID:</p>
-                                <p style={{ marginLeft: 5 }}>{id}</p>
-                            </Link>
-                            {isOwnComment && (
-                                <button
-                                    type='button'
-                                    className={styles.menuButton}
-                                    onClick={() => setMenuOpen(!menuOpen)}
-                                >
-                                    <VerticalEllipsisIcon />
-                                </button>
-                            )}
-                            {menuOpen && (
-                                <CloseOnClickOutside onClick={() => setMenuOpen(false)}>
-                                    <Column className={styles.menu}>
-                                        <Column>
-                                            <button
-                                                type='button'
-                                                onClick={() => setEditModalOpen(true)}
-                                            >
-                                                <EditIcon />
-                                                Edit
-                                            </button>
-                                            <button
-                                                type='button'
-                                                onClick={() => setDeleteModalOpen(true)}
-                                            >
-                                                <DeleteIcon />
-                                                Delete
-                                            </button>
-                                        </Column>
-                                    </Column>
-                                </CloseOnClickOutside>
-                            )}
+                        )} */}
                         </Row>
-                    )}
-                </Row>
-                <Column className={styles.content}>
-                    <DraftText
-                        text={state === 'deleted' ? '[message deleted]' : text}
-                        markdownStyles={`${styles.markdown} ${
-                            state === 'deleted' && styles.deleted
-                        }`}
-                    />
-                    {mediaTypes.includes('url') && (
-                        <Urls
-                            key={updatedAt}
-                            postId={id}
-                            urlBlocks={
-                                UrlBlocks
-                                    ? UrlBlocks.map((block) => {
-                                          return { ...block.Post, Url: block.Post.MediaLink.Url }
-                                      })
-                                    : null
-                            }
-                            style={{ margin: '10px 0' }}
+                    </Row>
+                    <Column className={styles.content}>
+                        <DraftText
+                            text={state === 'deleted' ? '[message deleted]' : text}
+                            markdownStyles={`${styles.markdown} ${
+                                state === 'deleted' && styles.deleted
+                            }`}
                         />
-                    )}
+                        {mediaTypes.includes('url') && (
+                            <Urls
+                                key={updatedAt}
+                                postId={id}
+                                urlBlocks={UrlBlocks?.map((block) => {
+                                    return { ...block.Post, Url: block.Post.MediaLink.Url }
+                                })}
+                                style={{ margin: '10px 0' }}
+                            />
+                        )}
 
-                    {mediaTypes.includes('image') && (
-                        <Images
-                            postId={id}
-                            imageBlocks={
-                                ImageBlocks
-                                    ? ImageBlocks.map((block) => {
-                                          return {
-                                              ...block.Post,
-                                              Image: block.Post.MediaLink.Image,
-                                          }
-                                      })
-                                    : null
-                            }
-                            style={{ margin: '10px 0' }}
+                        {mediaTypes.includes('image') && (
+                            <Images
+                                postId={id}
+                                imageBlocks={ImageBlocks?.map((block) => {
+                                    return { ...block.Post, Image: block.Post.MediaLink.Image }
+                                })}
+                                style={{ margin: '10px 0' }}
+                            />
+                        )}
+                        {mediaTypes.includes('audio') && (
+                            <Audios
+                                postId={id}
+                                audioBlocks={AudioBlocks?.map((block) => {
+                                    return { ...block.Post, Audio: block.Post.MediaLink.Audio }
+                                })}
+                                style={{ margin: '10px 0', width: '100%' }}
+                            />
+                        )}
+                    </Column>
+                </Column>
+                {!isOwnComment && renderButtons()}
+                <Column className={`message-${id}-drag-disabled`} style={{ cursor: 'default' }}>
+                    {likeModalOpen && (
+                        <LikeModal
+                            itemType='message'
+                            itemData={{ ...message, liked: accountReactions.liked }}
+                            updateItem={() => {
+                                setMessage({
+                                    ...message,
+                                    totalLikes: totalLikes + (liked ? -1 : 1),
+                                })
+                                setAccountReactions({ ...accountReactions, liked: !liked })
+                            }}
+                            close={() => setLikeModalOpen(false)}
                         />
                     )}
-                    {mediaTypes.includes('audio') && (
-                        <Audios
-                            postId={id}
-                            audioBlocks={
-                                AudioBlocks
-                                    ? AudioBlocks.map((block) => {
-                                          return {
-                                              ...block.Post,
-                                              Audio: block.Post.MediaLink.Audio,
-                                          }
-                                      })
-                                    : null
-                            }
-                            style={{ margin: '10px 0', width: '100%' }}
+                    {ratingModalOpen && (
+                        <RatingModal
+                            itemType='message'
+                            itemData={{ ...message, rated: accountReactions.rated }}
+                            updateItem={() => {
+                                setMessage({
+                                    ...message,
+                                    totalRatings: totalRatings + (rated ? -1 : 1),
+                                })
+                                setAccountReactions({ ...accountReactions, rated: !rated })
+                            }}
+                            close={() => setRatingModalOpen(false)}
+                        />
+                    )}
+                    {editModalOpen && (
+                        <EditPostModal
+                            post={message}
+                            setPost={(newComment) => setMessage(newComment)}
+                            close={() => setEditModalOpen(false)}
+                        />
+                    )}
+                    {deleteModalOpen && (
+                        <DeletePostModal
+                            post={message}
+                            onDelete={() => removeMessage(message)}
+                            close={() => setDeleteModalOpen(false)}
+                        />
+                    )}
+                    {showUserModal && (
+                        <UserButtonModal
+                            user={{ ...Creator, ...userModalData }}
+                            transparent={userModalTransparent}
                         />
                     )}
                 </Column>
-                {selected && state === 'active' && (
-                    <Row className={styles.footer}>
-                        <Row centerY className={`${styles.stat} ${liked && styles.blue}`}>
-                            {likeLoading ? (
-                                <LoadingWheel size={18} style={{ marginRight: 5 }} />
-                            ) : (
-                                <button
-                                    type='button'
-                                    disabled={buttonsDisabled || likeLoading}
-                                    onClick={toggleLike}
-                                >
-                                    <LikeIcon />
-                                </button>
-                            )}
-                            <button
-                                type='button'
-                                onClick={() => (totalLikes ? setLikeModalOpen(true) : toggleLike())}
-                                disabled={buttonsDisabled || likeLoading}
-                            >
-                                <p>{totalLikes}</p>
-                            </button>
-                        </Row>
-                        <button
-                            type='button'
-                            className={`${styles.stat} ${linked && styles.blue}`}
-                            disabled={buttonsDisabled}
-                            onClick={() => history(`/linkmap?item=message&id=${id}`)}
-                        >
-                            <NeuronIcon />
-                            <p>{totalLinks}</p>
-                        </button>
-                        <button
-                            type='button'
-                            className={`${styles.stat} ${rated && styles.blue}`}
-                            disabled={buttonsDisabled}
-                            onClick={() => setRatingModalOpen(true)}
-                        >
-                            <ZapIcon />
-                            <p>{totalRatings}</p>
-                        </button>
-                    </Row>
-                )}
-            </Column>
-            <Column className={`message-${id}-drag-disabled`} style={{ cursor: 'default' }}>
-                {likeModalOpen && (
-                    <LikeModal
-                        itemType='message'
-                        itemData={{ ...message, liked: accountReactions.liked }}
-                        updateItem={() => {
-                            setMessage({
-                                ...message,
-                                totalLikes: totalLikes + (liked ? -1 : 1),
-                            })
-                            setAccountReactions({ ...accountReactions, liked: !liked })
-                        }}
-                        close={() => setLikeModalOpen(false)}
-                    />
-                )}
-                {ratingModalOpen && (
-                    <RatingModal
-                        itemType='message'
-                        itemData={{ ...message, rated: accountReactions.rated }}
-                        updateItem={() => {
-                            setMessage({
-                                ...message,
-                                totalRatings: totalRatings + (rated ? -1 : 1),
-                            })
-                            setAccountReactions({ ...accountReactions, rated: !rated })
-                        }}
-                        close={() => setRatingModalOpen(false)}
-                    />
-                )}
-                {editModalOpen && (
-                    <EditPostModal
-                        post={message}
-                        setPost={(newComment) => setMessage(newComment)}
-                        close={() => setEditModalOpen(false)}
-                    />
-                )}
-                {deleteModalOpen && (
-                    <DeletePostModal
-                        post={message}
-                        onDelete={() => removeMessage(message)}
-                        close={() => setDeleteModalOpen(false)}
-                    />
-                )}
-                {showUserModal && (
-                    <UserButtonModal
-                        user={{ ...Creator, ...userModalData }}
-                        transparent={userModalTransparent}
-                    />
-                )}
-            </Column>
+            </Row>
         </Row>
     )
 }

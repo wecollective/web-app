@@ -34,6 +34,7 @@ import { ReactComponent as DoorIcon } from '@svgs/door-open-solid.svg'
 import { ReactComponent as VerticalEllipsisIcon } from '@svgs/ellipsis-vertical-solid.svg'
 import { ReactComponent as MessageIcon } from '@svgs/envelope-solid.svg'
 import { ReactComponent as DangerIcon } from '@svgs/exclamation-circle-solid.svg'
+import { ReactComponent as OpenIcon } from '@svgs/expand-icon.svg'
 import { ReactComponent as ExpandIcon } from '@svgs/expand-solid.svg'
 import { ReactComponent as EyeClosedIcon } from '@svgs/eye-slash-solid.svg'
 import { ReactComponent as EyeIcon } from '@svgs/eye-solid.svg'
@@ -149,6 +150,7 @@ export {
     NeuronIcon,
     NewIcon,
     OSIcon,
+    OpenIcon,
     PaperClipIcon,
     PauseIcon,
     PlayIcon,

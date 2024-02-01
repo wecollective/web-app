@@ -58,11 +58,11 @@ function Messages(): JSX.Element {
     function scrollHandler(e) {
         const { scrollHeight, scrollTop, clientHeight } = e.target
         const topReached = scrollHeight + scrollTop < clientHeight + 5
-        if (topReached) console.log('topReached')
         setScrollTopReached(topReached)
     }
 
     function getChats(offset) {
+        // todo: set up pagination
         setChatsLoading(true)
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
@@ -163,11 +163,8 @@ function Messages(): JSX.Element {
         const listeners = ['room-entered', 'user-entering', 'user-exiting']
         listeners.forEach((event) => socket.removeAllListeners(event))
         // enter room
-        socket.emit('enter-room', {
-            roomId: `chat-${chatId}`,
-            user: baseUserData(accountData),
-        })
-        // listen for new events
+        socket.emit('enter-room', { roomId: `chat-${chatId}`, user: baseUserData(accountData) })
+        // listen for events
         socket.on('room-entered', (usersInRoom) => {
             console.log('room-entered', usersInRoom)
             setPeopleInRoom(usersInRoom)
@@ -188,7 +185,6 @@ function Messages(): JSX.Element {
             console.log('user-stopped-typing', user)
             setPeopleTyping((people) => people.filter((u) => u.id !== user.id))
         })
-
         socket.on('new-message', (messageId) => {
             console.log('new-message', messageId)
             getMessage(messageId)
@@ -196,17 +192,9 @@ function Messages(): JSX.Element {
     }
 
     function signalTyping(typing: boolean) {
-        if (typing) {
-            socket.emit('user-started-typing', {
-                roomId: `chat-${chatId}`,
-                user: baseUserData(accountData),
-            })
-        } else {
-            socket.emit('user-stopped-typing', {
-                roomId: `chat-${chatId}`,
-                user: baseUserData(accountData),
-            })
-        }
+        const user = { id: accountData.id, name: accountData.name }
+        if (typing) socket.emit('user-started-typing', { roomId: `chat-${chatId}`, user })
+        else socket.emit('user-stopped-typing', { roomId: `chat-${chatId}`, user })
     }
 
     // add scroll handler
