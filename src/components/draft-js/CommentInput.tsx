@@ -59,8 +59,8 @@ import RecordRTC from 'recordrtc'
 import { v4 as uuidv4 } from 'uuid'
 
 function CommentInput(props: {
-    type: 'comment' | 'poll-answer' | 'chat-message' // group thread, gbg room (?)
-    parent?: { type: string; id: number } | null
+    type: 'comment' | 'poll-answer' | 'chat-message' | 'chat-reply' // group thread, gbg room (?)
+    links?: any
     placeholder: string
     preview?: boolean // determines whether onSave function uploads or just passes data back to parent
     maxChars?: number // todo: does this make sense to pass in here?
@@ -69,7 +69,7 @@ function CommentInput(props: {
     onSave: (data: any) => void
     signalTyping?: (typing: boolean) => void
 }): JSX.Element {
-    const { type, parent, preview, placeholder, maxChars, className, style, onSave, signalTyping } =
+    const { type, links, preview, placeholder, maxChars, className, style, onSave, signalTyping } =
         props
     const { accountData } = useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
@@ -354,8 +354,7 @@ function CommentInput(props: {
             onSave(post)
             resetData()
         } else {
-            // upload post
-            post.link = { parent }
+            post.links = links
             uploadPost(post)
                 .then((res) => {
                     const newPost = res.data
@@ -363,7 +362,7 @@ function CommentInput(props: {
                     newPost.Creator = { id, handle, name, flagImagePath }
                     newPost.Comments = []
                     newPost.Reactions = []
-                    newPost.parent = parent
+                    newPost.links = links
                     if (type === 'poll-answer') newPost.Link = { state: 'active' }
                     onSave(newPost)
                     setFocused(false)
@@ -588,7 +587,7 @@ function CommentInput(props: {
 }
 
 CommentInput.defaultProps = {
-    parent: null,
+    links: null,
     preview: false,
     maxChars: 0,
     className: '',

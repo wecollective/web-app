@@ -372,9 +372,14 @@ function Messages(): JSX.Element {
                         </Row>
                     )}
                     <CommentInput
-                        type='chat-message'
-                        placeholder='New message...'
-                        parent={{ type: 'space', id: +chatId }}
+                        type={replyParent ? 'chat-reply' : 'chat-message'}
+                        placeholder={replyParent ? 'Reply...' : 'New message...'}
+                        links={{
+                            chatId: +chatId,
+                            parent: replyParent
+                                ? { id: replyParent.id, type: 'chat-message' }
+                                : null,
+                        }}
                         onSave={() => signalTyping(false)}
                         signalTyping={signalTyping}
                     />

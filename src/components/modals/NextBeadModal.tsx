@@ -250,7 +250,7 @@ function NextBeadModal(props: {
             close()
         } else {
             // upload post
-            bead.link = { parent: { id: postId, type: 'post' } }
+            bead.links = { parent: { id: postId, type: 'post' } }
             uploadPost(bead)
                 .then((res) => {
                     const { newBead, newDeadline } = res.data

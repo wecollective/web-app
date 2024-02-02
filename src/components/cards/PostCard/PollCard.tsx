@@ -285,7 +285,7 @@ function PollCard(props: { postData: any; location: string }): JSX.Element {
                 <CommentInput
                     type='poll-answer'
                     placeholder='New answer...'
-                    parent={{ type: 'post', id }}
+                    links={{ parent: { type: 'post', id } }}
                     onSave={(data) => addAnswer(data)}
                     style={{ marginTop: 10 }}
                 />

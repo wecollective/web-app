@@ -50,7 +50,7 @@ function Comments(props: {
     }
 
     function addComment(comment) {
-        const { parent } = comment
+        const { parent } = comment.links
         if (parent.id === post.id) setComments([comment, ...comments])
         else {
             const newComments = [...comments]
@@ -81,7 +81,7 @@ function Comments(props: {
                 <CommentInput
                     type='comment'
                     placeholder='Comment...'
-                    parent={{ id, type }}
+                    links={{ parent: { id, type } }}
                     onSave={(newComment) => addComment(newComment)}
                     maxChars={5000}
                     style={{ marginBottom: 10 }}

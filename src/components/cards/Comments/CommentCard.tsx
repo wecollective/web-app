@@ -522,7 +522,7 @@ function CommentCard(props: {
                             <CommentInput
                                 type='comment'
                                 placeholder='Reply...'
-                                parent={{ type: 'comment', id }}
+                                links={{ parent: { type: 'comment', id } }}
                                 onSave={(newComment) => {
                                     addComment(newComment)
                                     toggleSelected()
