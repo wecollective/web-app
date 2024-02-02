@@ -14,10 +14,11 @@ import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
 import UserNotFound from '@pages/UserPage/UserNotFound'
 import config from '@src/Config'
-import { baseUserData, imageMBLimit } from '@src/Helpers'
+import { baseUserData, getDraftPlainText, imageMBLimit, trimText } from '@src/Helpers'
 import FlagImageHighlights from '@src/components/FlagImageHighlights'
+import AudioCard from '@src/components/cards/PostCard/AudioCard'
 import styles from '@styles/pages/UserPage/Messages.module.scss'
-import { ImageIcon, PlusIcon, UsersIcon } from '@svgs/all'
+import { ImageIcon, PlusIcon, ReplyIcon, UsersIcon } from '@svgs/all'
 import axios from 'axios'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -36,6 +37,7 @@ function Messages(): JSX.Element {
     const [totalMessages, setTotalMessages] = useState(0)
     const [messagesLoading, setMessagesLoading] = useState(false)
     const [nextMessagesLoading, setNextMessagesLoading] = useState(false)
+    const [replyParent, setReplyParent] = useState<any>(null)
     const [newChatModalOpen, setNewChatModalOpen] = useState(false)
     const [createChatLoading, setCreateChatLoading] = useState(false)
     const [userOptions, setUserOptions] = useState<any[]>([])
@@ -90,7 +92,7 @@ function Messages(): JSX.Element {
         axios
             .post(`${config.apiURL}/messages`, data, options)
             .then((res) => {
-                // console.log(res.data.messages)
+                // console.log('messages res:', res.data.messages)
                 setTotalMessages(res.data.total)
                 setMessages(offset ? [...messages, ...res.data.messages] : res.data.messages)
                 if (offset) setNextMessagesLoading(false)
@@ -287,11 +289,82 @@ function Messages(): JSX.Element {
                             key={message.id}
                             message={message}
                             removeMessage={() => null}
+                            setReplyParent={(parent) => {
+                                console.log('reply parent: ', parent)
+                                setReplyParent(parent)
+                            }}
                         />
                     ))}
                 </Column>
-
                 <Column className={styles.input}>
+                    {replyParent && (
+                        <Column className={styles.replyParent}>
+                            <Column centerY centerX className={styles.closeButton}>
+                                <CloseButton size={16} onClick={() => setReplyParent(null)} />
+                            </Column>
+                            <Row centerY className={styles.replyParentHeader}>
+                                <ReplyIcon />
+                                <h1>{replyParent.Creator.name}</h1>
+                            </Row>
+                            {replyParent.text && (
+                                <p>{trimText(getDraftPlainText(replyParent.text), 300)}</p>
+                            )}
+                            {replyParent.UrlBlocks.length > 0 && (
+                                <Row className={styles.replyParentUrl}>
+                                    <img
+                                        src={replyParent.UrlBlocks[0].Post.MediaLink.Url.image}
+                                        alt=''
+                                    />
+                                    <Column centerY>
+                                        {replyParent.UrlBlocks[0].Post.MediaLink.Url.title && (
+                                            <h1 className={styles.urlTitle}>
+                                                {trimText(
+                                                    replyParent.UrlBlocks[0].Post.MediaLink.Url
+                                                        .title,
+                                                    60
+                                                )}
+                                            </h1>
+                                        )}
+                                        {replyParent.UrlBlocks[0].Post.MediaLink.Url
+                                            .description && (
+                                            <p className={styles.description}>
+                                                {trimText(
+                                                    replyParent.UrlBlocks[0].Post.MediaLink.Url
+                                                        .description,
+                                                    60
+                                                )}
+                                            </p>
+                                        )}
+                                    </Column>
+                                </Row>
+                            )}
+                            {replyParent.ImageBlocks.length > 0 && (
+                                <Row className={styles.replyParentImages}>
+                                    {replyParent.ImageBlocks.map((imageBlock) => (
+                                        <img
+                                            key={imageBlock.Post.id}
+                                            src={imageBlock.Post.MediaLink.Image.url}
+                                            alt=''
+                                        />
+                                    )).splice(0, 5)}
+                                </Row>
+                            )}
+                            {replyParent.AudioBlocks.length > 0 && (
+                                <AudioCard
+                                    key={replyParent.id}
+                                    url={replyParent.AudioBlocks[0].Post.MediaLink.Audio.url}
+                                    location='reply-parent'
+                                    staticBars={200}
+                                    style={{
+                                        height: 100,
+                                        width: '100%',
+                                        maxWidth: 600,
+                                        margin: '5px 0',
+                                    }}
+                                />
+                            )}
+                        </Column>
+                    )}
                     {!!peopleTyping.length && (
                         <Row className={styles.peopleTyping}>
                             <p>{peopleTyping.map((u) => u.name).join(', ')} typing</p>

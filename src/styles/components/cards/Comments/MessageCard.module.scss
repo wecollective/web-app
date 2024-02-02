@@ -6,6 +6,7 @@
     margin-top: 10px;
     opacity: 0;
     transition: opacity 0.1s;
+    width: 100%;
 
     &.visible {
         opacity: 1;
@@ -13,119 +14,85 @@
 
     &.isOwnComment {
         justify-content: flex-end;
-        .container {
-            .message {
-                background-color: $blue8;
-                .reactions {
-                    left: 5px;
-                }
+        .message {
+            background-color: $blue8;
+            .reactions {
+                left: 5px;
             }
         }
     }
 
     &:hover {
-        .container {
-            .buttons {
-                visibility: visible;
-            }
+        .buttons {
+            visibility: visible;
         }
     }
 
-    .container {
-        .message {
-            position: relative;
-            background-color: $grey1;
-            border-radius: 10px;
-            padding: 10px 12px;
-            width: 100%;
-            border: 1px solid $grey2;
+    .message {
+        position: relative;
+        max-width: calc(100% - 180px);
+        background-color: $grey1;
+        border-radius: 10px;
+        padding: 10px 12px;
+        border: 1px solid $grey2;
+        flex-shrink: 0;
 
-            .header {
-                margin-bottom: 5px;
-            }
-
-            .content {
-                position: relative;
-                border-radius: 10px;
-                font-size: 14px;
-                width: 100%;
-            }
-
-            .reactions {
-                position: absolute;
-                right: 5px;
-                bottom: -15px;
-
-                > button {
-                    all: unset;
-                    cursor: pointer;
-                    background-color: white;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    padding: 4px;
-                    border-radius: 12px;
-                    border: 1px solid $grey2;
-
-                    &:hover {
-                        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-                    }
-
-                    &:not(:last-child) {
-                        margin-right: 5px;
-                    }
-
-                    svg {
-                        width: 14px;
-                        height: 14px;
-                    }
-
-                    p {
-                        font-size: 12px;
-                        line-height: 12px;
-                        margin-left: 2px;
-                        color: $grey7;
-                    }
-
-                    &.red {
-                        svg {
-                            color: $likeRed;
-                        }
-                    }
-
-                    &.purple {
-                        svg {
-                            color: $linkPurple;
-                        }
-                    }
-
-                    &.orange {
-                        svg {
-                            color: $ratingOrange;
-                        }
-                    }
-                }
-            }
+        @include for-desktop-small-up {
+            max-width: 700px;
         }
 
-        .buttons {
-            position: relative;
-            visibility: hidden;
-            margin: 0 10px;
+        @include for-desktop-large-up {
+            max-width: 900px;
+        }
+
+        .header {
+            margin-bottom: 5px;
+        }
+
+        .content {
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .reactions {
+            position: absolute;
+            right: 5px;
+            bottom: -15px;
 
             > button {
                 all: unset;
                 cursor: pointer;
-                margin-right: 10px;
+                background-color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 4px;
+                border-radius: 12px;
+                border: 1px solid $grey2;
+
+                &:hover {
+                    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+                }
+
+                &:not(:last-child) {
+                    margin-right: 5px;
+                }
+
+                svg {
+                    width: 14px;
+                    height: 14px;
+                }
+
+                p {
+                    font-size: 12px;
+                    line-height: 12px;
+                    margin-left: 2px;
+                    color: $grey7;
+                }
 
                 &.red {
                     svg {
                         color: $likeRed;
-                    }
-                    &:hover {
-                        svg {
-                            color: $likeRed;
-                        }
                     }
                 }
 
@@ -141,61 +108,96 @@
                     }
                 }
             }
+        }
+    }
 
-            > a {
-                margin: 0 7px 1px 2px;
-            }
+    .buttons {
+        position: relative;
+        visibility: hidden;
+        margin: 0 10px;
 
-            > button,
-            > a {
-                width: 18px;
+        > button {
+            all: unset;
+            cursor: pointer;
+            margin-right: 10px;
 
+            &.red {
                 svg {
-                    width: 18px;
-                    height: 18px;
-                    color: $grey4;
-                    transition: color 0.2s;
+                    color: $likeRed;
                 }
-
                 &:hover {
                     svg {
-                        color: $grey6;
+                        color: $likeRed;
                     }
                 }
             }
 
-            .menu {
-                position: absolute;
-                top: calc(50% + 15px);
-                right: 5px;
-                background-color: white;
-                box-shadow: 0 0 7px 0 rgba(black, 0.15);
-                border-radius: 5px;
-                padding: 10px;
-                z-index: 10;
+            &.purple {
+                svg {
+                    color: $linkPurple;
+                }
+            }
 
-                button {
-                    all: unset;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    font-size: 14px;
+            &.orange {
+                svg {
+                    color: $ratingOrange;
+                }
+            }
+        }
 
-                    &:not(:last-child) {
-                        margin-bottom: 10px;
-                    }
+        > a {
+            margin: 0 7px 1px 2px;
+        }
 
-                    &:hover > svg {
-                        color: $grey6;
-                    }
+        > button,
+        > a {
+            width: 18px;
 
-                    > svg {
-                        width: 18px;
-                        height: 18px;
-                        margin-right: 6px;
-                        color: $grey5;
-                        transition: color 0.2s;
-                    }
+            svg {
+                width: 18px;
+                height: 18px;
+                color: $grey4;
+                transition: color 0.2s;
+            }
+
+            &:hover {
+                svg {
+                    color: $grey6;
+                }
+            }
+        }
+
+        .menu {
+            position: absolute;
+            top: calc(50% + 15px);
+            right: 5px;
+            background-color: white;
+            box-shadow: 0 0 7px 0 rgba(black, 0.15);
+            border-radius: 5px;
+            padding: 10px;
+            z-index: 10;
+
+            button {
+                all: unset;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                font-size: 14px;
+
+                &:not(:last-child) {
+                    margin-bottom: 10px;
+                }
+
+                &:hover > svg {
+                    color: $grey6;
+                }
+
+                > svg {
+                    width: 18px;
+                    height: 18px;
+                    margin-right: 6px;
+                    color: $grey5;
+                    transition: color 0.2s;
                 }
             }
         }

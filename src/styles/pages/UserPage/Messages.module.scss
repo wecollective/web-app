@@ -45,16 +45,18 @@
 
     .messages {
         position: relative;
-        width: 100%;
         height: 100%;
         background-color: white;
 
+        width: calc(100% - 250px);
+        @include for-desktop-small-up {
+            width: calc(100% - 350px);
+        }
+
         .header {
-            position: absolute;
-            top: 0;
             width: 100%;
             height: 60px;
-            z-index: 5;
+            flex-shrink: 0;
             background-color: white;
             border-bottom: 1px solid $grey2;
             padding: 0 10px;
@@ -76,22 +78,86 @@
 
         .scrollWrapper {
             overflow-y: scroll;
-            margin: 60px 0 94px 0;
             padding: 0 10px 5px 10px;
             flex-direction: column-reverse;
             height: 100%;
         }
 
         .input {
-            position: fixed;
-            bottom: 0;
-            width: calc(100% - 245px);
-            padding: 10px 10px 35px 10px;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
             background-color: white;
-            z-index: 5;
 
-            @include for-desktop-small-up {
-                width: calc(100% - 350px);
+            .replyParent {
+                position: relative;
+                background-color: $blue8;
+                border: 1px solid $blue5;
+                border-radius: 10px;
+                padding: 5px 10px;
+                margin-bottom: 10px;
+
+                .closeButton {
+                    position: absolute;
+                    right: 5px;
+                    top: 5px;
+                    width: 20px;
+                    height: 20px;
+                    background-color: white;
+                    border: 1px solid $grey4;
+                    border-radius: 50%;
+                }
+
+                .replyParentHeader {
+                    > svg {
+                        width: 16px;
+                        height: 16px;
+                        color: $grey5;
+                        margin-right: 8px;
+                        transform: rotate(180deg);
+                    }
+                    > h1 {
+                        font-size: 16px;
+                        font-weight: 800;
+                        margin: 0;
+                    }
+                }
+
+                .replyParentUrl {
+                    margin: 5px 0;
+                    padding: 5px;
+                    background-color: white;
+                    border-radius: 5px;
+                    border: 1px solid $grey2;
+                    width: 100%;
+                    max-width: 600px;
+
+                    > img {
+                        height: 50px;
+                        width: 80px;
+                        border-radius: 5px;
+                        object-fit: cover;
+                        margin-right: 5px;
+                    }
+
+                    h1 {
+                        font-size: 16px;
+                        font-weight: 800;
+                        margin: 0;
+                    }
+                }
+
+                .replyParentImages {
+                    margin: 5px 0;
+
+                    > img {
+                        width: 80px;
+                        height: 80px;
+                        object-fit: cover;
+                        margin-right: 10px;
+                        border-radius: 5px;
+                    }
+                }
             }
 
             // user typing text

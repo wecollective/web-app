@@ -569,7 +569,7 @@ function CommentInput(props: {
                                 url={audio.Audio.url}
                                 staticBars={250}
                                 location='new-post'
-                                style={{ height: 140 }}
+                                style={{ height: '100%', width: '100%' }}
                             />
                         </Column>
                     ))}

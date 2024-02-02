@@ -22,6 +22,7 @@ import {
     LikeIcon,
     NeuronIcon,
     OpenIcon,
+    ReplyIcon,
     VerticalEllipsisIcon,
     ZapIcon,
 } from '@svgs/all'
@@ -32,10 +33,10 @@ import Cookies from 'universal-cookie'
 
 function MessageCard(props: {
     message: any
-    highlighted?: boolean
     removeMessage: (message: any) => void
+    setReplyParent: (message: any) => void
 }): JSX.Element {
-    const { message: messageData, highlighted, removeMessage } = props
+    const { message: messageData, setReplyParent, removeMessage } = props
     const { loggedIn, accountData, updateDragItem, setAlertMessage, setAlertModalOpen } =
         useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
@@ -122,6 +123,9 @@ function MessageCard(props: {
     function renderButtons() {
         return (
             <Row centerY className={styles.buttons}>
+                <button type='button' onClick={() => setReplyParent(messageData)}>
+                    <ReplyIcon style={{ transform: 'rotate(180deg)' }} />
+                </button>
                 <button
                     type='button'
                     className={liked ? styles.red : ''}
@@ -186,47 +190,42 @@ function MessageCard(props: {
             className={`${styles.wrapper} ${visible && styles.visible} ${
                 Creator.id === accountData.id && styles.isOwnComment
             }`}
-            style={{ width: '100%', marginBottom: hasReactions ? 10 : 0 }}
+            style={{ marginBottom: hasReactions ? 10 : 0 }}
         >
-            <Row
-                className={styles.container}
-                style={{ width: fullWidth ? 'calc(100% - 100px)' : 'auto', maxWidth: 900 }}
+            {isOwnComment && renderButtons()}
+            {!isOwnComment && (
+                <Column style={{ marginRight: 10 }}>
+                    <FlagImage type='user' size={30} imagePath={Creator.flagImagePath} />
+                </Column>
+            )}
+            <Column
+                className={styles.message}
+                style={{ width: fullWidth ? 'calc(100% - 100px)' : 'auto' }}
             >
-                {isOwnComment && renderButtons()}
-                {!isOwnComment && (
-                    <Column style={{ marginRight: 10 }}>
-                        <FlagImage type='user' size={30} imagePath={Creator.flagImagePath} />
-                    </Column>
-                )}
-                <Column className={styles.message}>
-                    <Row spaceBetween className={styles.header}>
-                        <Row style={{ width: '100%' }}>
-                            {!isOwnComment && (
-                                <>
-                                    {state === 'account-deleted' ? (
-                                        <p className='grey' style={{ marginRight: 5 }}>
-                                            [Account deleted]
-                                        </p>
-                                    ) : (
-                                        <Link
-                                            to={`/u/${Creator.handle}`}
-                                            style={{ marginRight: 5 }}
-                                        >
-                                            <p style={{ fontWeight: 600 }}>{Creator.name}</p>
-                                        </Link>
-                                    )}
-                                </>
+                <Row className={styles.header}>
+                    {!isOwnComment && (
+                        <>
+                            {state === 'account-deleted' ? (
+                                <p className='grey' style={{ marginRight: 5 }}>
+                                    [Account deleted]
+                                </p>
+                            ) : (
+                                <Link to={`/u/${Creator.handle}`} style={{ marginRight: 5 }}>
+                                    <p style={{ fontWeight: 600 }}>{Creator.name}</p>
+                                </Link>
                             )}
-                            <p
-                                className='grey'
-                                title={`${dateCreated(createdAt)} ${
-                                    edited ? `(edited: ${dateCreated(updatedAt)})` : ''
-                                }`}
-                            >
-                                {timeSinceCreated(createdAt)}
-                            </p>
-                            {edited && <p className='grey'>*</p>}
-                            {/* {muted && (
+                        </>
+                    )}
+                    <p
+                        className='grey'
+                        title={`${dateCreated(createdAt)} ${
+                            edited ? `(edited: ${dateCreated(updatedAt)})` : ''
+                        }`}
+                    >
+                        {timeSinceCreated(createdAt)}
+                    </p>
+                    {edited && <p className='grey'>*</p>}
+                    {/* {muted && (
                             <button
                                 type='button'
                                 className={styles.muteButton}
@@ -236,130 +235,128 @@ function MessageCard(props: {
                                 <EyeClosedIcon />
                             </button>
                         )} */}
-                        </Row>
-                    </Row>
-                    <Column className={styles.content}>
-                        <DraftText
-                            text={state === 'deleted' ? '[message deleted]' : text}
-                            markdownStyles={`${styles.markdown} ${
-                                state === 'deleted' && styles.deleted
-                            }`}
+                </Row>
+                <Column className={styles.content}>
+                    <DraftText
+                        text={state === 'deleted' ? '[message deleted]' : text}
+                        markdownStyles={`${styles.markdown} ${
+                            state === 'deleted' && styles.deleted
+                        }`}
+                    />
+                    {mediaTypes.includes('url') && (
+                        <Urls
+                            key={updatedAt}
+                            postId={id}
+                            urlBlocks={UrlBlocks?.map((block) => {
+                                return { ...block.Post, Url: block.Post.MediaLink.Url }
+                            })}
+                            style={{ margin: '10px 0' }}
                         />
-                        {mediaTypes.includes('url') && (
-                            <Urls
-                                key={updatedAt}
-                                postId={id}
-                                urlBlocks={UrlBlocks?.map((block) => {
-                                    return { ...block.Post, Url: block.Post.MediaLink.Url }
-                                })}
-                                style={{ margin: '10px 0' }}
-                            />
-                        )}
+                    )}
 
-                        {mediaTypes.includes('image') && (
-                            <Images
-                                postId={id}
-                                imageBlocks={ImageBlocks?.map((block) => {
-                                    return { ...block.Post, Image: block.Post.MediaLink.Image }
-                                })}
-                                style={{ margin: '10px 0' }}
-                            />
-                        )}
-                        {mediaTypes.includes('audio') && (
-                            <Audios
-                                postId={id}
-                                audioBlocks={AudioBlocks?.map((block) => {
-                                    return { ...block.Post, Audio: block.Post.MediaLink.Audio }
-                                })}
-                                style={{ margin: '10px 0', width: '100%' }}
-                            />
-                        )}
-                    </Column>
-                    <Row className={styles.reactions}>
-                        {totalLikes > 0 && (
-                            <button
-                                type='button'
-                                className={styles.red}
-                                onClick={() => setLikeModalOpen(true)}
-                            >
-                                <LikeIcon />
-                                {totalLikes > 1 && <p>{totalLikes}</p>}
-                            </button>
-                        )}
-                        {totalLinks > 0 && (
-                            <button
-                                type='button'
-                                className={styles.purple}
-                                onClick={() => history(`/linkmap?item=comment&id=${id}`)}
-                            >
-                                <NeuronIcon />
-                                {totalLinks > 1 && <p>{totalLinks}</p>}
-                            </button>
-                        )}
-                        {totalRatings > 0 && (
-                            <button
-                                type='button'
-                                className={styles.orange}
-                                onClick={() => setRatingModalOpen(true)}
-                            >
-                                <ZapIcon />
-                                {totalRatings > 1 && <p>{totalRatings}</p>}
-                            </button>
-                        )}
-                    </Row>
-                </Column>
-                {!isOwnComment && renderButtons()}
-                <Column className={`message-${id}-drag-disabled`} style={{ cursor: 'default' }}>
-                    {likeModalOpen && (
-                        <LikeModal
-                            itemType='message'
-                            itemData={{ ...message, liked: accountReactions.liked }}
-                            updateItem={() => {
-                                setMessage({
-                                    ...message,
-                                    totalLikes: totalLikes + (liked ? -1 : 1),
-                                })
-                                setAccountReactions({ ...accountReactions, liked: !liked })
-                            }}
-                            close={() => setLikeModalOpen(false)}
+                    {mediaTypes.includes('image') && (
+                        <Images
+                            postId={id}
+                            imageBlocks={ImageBlocks?.map((block) => {
+                                return { ...block.Post, Image: block.Post.MediaLink.Image }
+                            })}
+                            style={{ margin: '10px 0' }}
                         />
                     )}
-                    {ratingModalOpen && (
-                        <RatingModal
-                            itemType='message'
-                            itemData={{ ...message, rated: accountReactions.rated }}
-                            updateItem={() => {
-                                setMessage({
-                                    ...message,
-                                    totalRatings: totalRatings + (rated ? -1 : 1),
-                                })
-                                setAccountReactions({ ...accountReactions, rated: !rated })
-                            }}
-                            close={() => setRatingModalOpen(false)}
-                        />
-                    )}
-                    {editModalOpen && (
-                        <EditPostModal
-                            post={message}
-                            setPost={(newComment) => setMessage(newComment)}
-                            close={() => setEditModalOpen(false)}
-                        />
-                    )}
-                    {deleteModalOpen && (
-                        <DeletePostModal
-                            post={message}
-                            onDelete={() => removeMessage(message)}
-                            close={() => setDeleteModalOpen(false)}
+                    {mediaTypes.includes('audio') && (
+                        <Audios
+                            postId={id}
+                            audioBlocks={AudioBlocks?.map((block) => {
+                                return { ...block.Post, Audio: block.Post.MediaLink.Audio }
+                            })}
+                            style={{ margin: '10px 0' }}
                         />
                     )}
                 </Column>
-            </Row>
+                <Row className={styles.reactions}>
+                    {totalLikes > 0 && (
+                        <button
+                            type='button'
+                            className={styles.red}
+                            onClick={() => setLikeModalOpen(true)}
+                        >
+                            <LikeIcon />
+                            {totalLikes > 1 && <p>{totalLikes}</p>}
+                        </button>
+                    )}
+                    {totalLinks > 0 && (
+                        <button
+                            type='button'
+                            className={styles.purple}
+                            onClick={() => history(`/linkmap?item=comment&id=${id}`)}
+                        >
+                            <NeuronIcon />
+                            {totalLinks > 1 && <p>{totalLinks}</p>}
+                        </button>
+                    )}
+                    {totalRatings > 0 && (
+                        <button
+                            type='button'
+                            className={styles.orange}
+                            onClick={() => setRatingModalOpen(true)}
+                        >
+                            <ZapIcon />
+                            {totalRatings > 1 && <p>{totalRatings}</p>}
+                        </button>
+                    )}
+                </Row>
+            </Column>
+            {!isOwnComment && renderButtons()}
+            <Column className={`message-${id}-drag-disabled`} style={{ cursor: 'default' }}>
+                {likeModalOpen && (
+                    <LikeModal
+                        itemType='message'
+                        itemData={{ ...message, liked: accountReactions.liked }}
+                        updateItem={() => {
+                            setMessage({
+                                ...message,
+                                totalLikes: totalLikes + (liked ? -1 : 1),
+                            })
+                            setAccountReactions({ ...accountReactions, liked: !liked })
+                        }}
+                        close={() => setLikeModalOpen(false)}
+                    />
+                )}
+                {ratingModalOpen && (
+                    <RatingModal
+                        itemType='message'
+                        itemData={{ ...message, rated: accountReactions.rated }}
+                        updateItem={() => {
+                            setMessage({
+                                ...message,
+                                totalRatings: totalRatings + (rated ? -1 : 1),
+                            })
+                            setAccountReactions({ ...accountReactions, rated: !rated })
+                        }}
+                        close={() => setRatingModalOpen(false)}
+                    />
+                )}
+                {editModalOpen && (
+                    <EditPostModal
+                        post={message}
+                        setPost={(newComment) => setMessage(newComment)}
+                        close={() => setEditModalOpen(false)}
+                    />
+                )}
+                {deleteModalOpen && (
+                    <DeletePostModal
+                        post={message}
+                        onDelete={() => removeMessage(message)}
+                        close={() => setDeleteModalOpen(false)}
+                    />
+                )}
+            </Column>
         </Row>
     )
 }
 
-MessageCard.defaultProps = {
-    highlighted: false,
-}
+// MessageCard.defaultProps = {
+//     highlighted: false,
+// }
 
 export default MessageCard
