@@ -54,7 +54,7 @@
             .reactions {
                 position: absolute;
                 right: 5px;
-                bottom: -14px;
+                bottom: -15px;
 
                 > button {
                     all: unset;
@@ -82,6 +82,7 @@
 
                     p {
                         font-size: 12px;
+                        line-height: 12px;
                         margin-left: 2px;
                         color: $grey7;
                     }
@@ -108,34 +109,14 @@
         }
 
         .buttons {
+            position: relative;
             visibility: hidden;
             margin: 0 10px;
-            color: $grey4;
-
-            > button,
-            > a {
-                width: 18px;
-
-                svg {
-                    width: 18px;
-                    height: 18px;
-                    color: $grey4;
-                }
-
-                &:hover {
-                    svg {
-                        color: $grey6;
-                    }
-                }
-            }
 
             > button {
                 all: unset;
                 cursor: pointer;
-
-                &:not(:last-child) {
-                    margin-right: 10px;
-                }
+                margin-right: 10px;
 
                 &.red {
                     svg {
@@ -161,60 +142,62 @@
                 }
             }
 
-            // .menuButton {
-            //     all: unset;
-            //     cursor: pointer;
-            //     display: flex;
-            //     align-items: center;
-            //     padding-left: 8px;
-            //     flex-shrink: 0;
+            > a {
+                margin: 0 7px 1px 2px;
+            }
 
-            //     svg {
-            //         color: $grey4;
-            //         height: 18px;
-            //         transition: color 0.3s;
-            //     }
+            > button,
+            > a {
+                width: 18px;
 
-            //     &:hover {
-            //         svg {
-            //             color: $grey6;
-            //         }
-            //     }
-            // }
+                svg {
+                    width: 18px;
+                    height: 18px;
+                    color: $grey4;
+                    transition: color 0.2s;
+                }
 
-            // .menu {
-            //     position: absolute;
-            //     top: 30px;
-            //     right: 10px;
-            //     background-color: white;
-            //     box-shadow: 0 0 7px 0 rgba(black, 0.15);
-            //     border-radius: 5px;
-            //     padding: 10px;
-            //     z-index: 10;
+                &:hover {
+                    svg {
+                        color: $grey6;
+                    }
+                }
+            }
 
-            //     button {
-            //         all: unset;
-            //         cursor: pointer;
-            //         display: flex;
-            //         align-items: center;
+            .menu {
+                position: absolute;
+                top: calc(50% + 15px);
+                right: 5px;
+                background-color: white;
+                box-shadow: 0 0 7px 0 rgba(black, 0.15);
+                border-radius: 5px;
+                padding: 10px;
+                z-index: 10;
 
-            //         &:not(:last-child) {
-            //             margin-bottom: 10px;
-            //         }
+                button {
+                    all: unset;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    font-size: 14px;
 
-            //         &:hover > svg {
-            //             color: $grey6;
-            //         }
+                    &:not(:last-child) {
+                        margin-bottom: 10px;
+                    }
 
-            //         > svg {
-            //             width: 18px;
-            //             height: 18px;
-            //             margin-right: 8px;
-            //             color: $grey5;
-            //             transition: color 0.3s;
-            //         }
-            //     }
-            // }
+                    &:hover > svg {
+                        color: $grey6;
+                    }
+
+                    > svg {
+                        width: 18px;
+                        height: 18px;
+                        margin-right: 6px;
+                        color: $grey5;
+                        transition: color 0.2s;
+                    }
+                }
+            }
         }
     }
 }

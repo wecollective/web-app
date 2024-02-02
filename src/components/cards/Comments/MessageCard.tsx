@@ -144,13 +144,13 @@ function MessageCard(props: {
                 >
                     <ZapIcon />
                 </button>
-                <Link to={`/p/${id}`} className={styles.id} title='Open post page'>
+                <Link to={`/p/${id}`} title='Open post page'>
                     <OpenIcon style={{ width: 16, height: 16 }} />
                 </Link>
                 {isOwnComment && (
                     <button
                         type='button'
-                        style={{ marginLeft: 5 }}
+                        style={{ margin: 0 }}
                         onClick={() => setMenuOpen(!menuOpen)}
                     >
                         <VerticalEllipsisIcon />
