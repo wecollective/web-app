@@ -159,11 +159,7 @@ function EditPostModal(props: {
                                 data.searchableText = findUrlSearchableText(data)
                                 data.new = true
                                 // update urls array
-                                setUrls((us) => {
-                                    const newUrls = [...us.filter((u) => u.url !== url)]
-                                    newUrls.push(data)
-                                    return newUrls
-                                })
+                                setUrls((us) => us.map((u) => (u.url === url ? data : u)))
                             }
                         }
                     })

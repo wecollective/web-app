@@ -765,11 +765,7 @@ function CreatePostModal({
                                 data.url = url
                                 data.searchableText = findUrlSearchableText(data)
                                 // update urls array
-                                setUrls((us) => {
-                                    const newUrls = [...us.filter((u) => u.url !== url)]
-                                    newUrls.push(data)
-                                    return newUrls
-                                })
+                                setUrls((us) => us.map((u) => (u.url === url ? data : u)))
                             }
                         }
                     })
