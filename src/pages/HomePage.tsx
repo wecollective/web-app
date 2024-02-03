@@ -5,6 +5,7 @@ import FlagImageHighlights from '@components/FlagImageHighlights'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
 import { isPlural, pluralise } from '@src/Helpers'
+import SEO from '@src/components/SEO'
 import styles from '@styles/pages/HomePage.module.scss'
 import { CastaliaIcon, DoorIcon, HandshakeIcon, OSIcon, PollIcon } from '@svgs/all'
 import axios from 'axios'
@@ -153,6 +154,7 @@ function Homepage(): JSX.Element {
 
     return (
         <Column className={styles.wrapper}>
+            <SEO title='we { collective }' description='play together' image='' />
             <Column className={styles.background}>
                 <div className={styles.sky} />
                 <div className={styles.earthImage}>

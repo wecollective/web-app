@@ -9,7 +9,8 @@ import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
 import { UserContext } from '@contexts/UserContext'
 import config from '@src/Config'
-import { onPageBottomReached } from '@src/Helpers'
+import { capitalise, getDraftPlainText, onPageBottomReached } from '@src/Helpers'
+import SEO from '@src/components/SEO'
 import About from '@src/pages/UserPage/About'
 import Following from '@src/pages/UserPage/Following'
 import Likes from '@src/pages/UserPage/Likes'
@@ -110,6 +111,13 @@ function UserPage(): JSX.Element {
 
     return (
         <Column centerX className={styles.wrapper}>
+            <SEO
+                title={`${userData.name} (u/${userData.handle}) ${
+                    subpage && subpage !== 'posts' ? `| ${capitalise(subpage)}` : ''
+                }`}
+                description={userData.bio ? getDraftPlainText(userData.bio) : ''}
+                image={userData.flagImagePath}
+            />
             {/* <Sidebar /> */}
             <Column centerX className={`${styles.header} ${headerCollapsed && styles.collapsed}`}>
                 <CoverImage type='user' image={userData.coverImagePath} canEdit={isOwnAccount} />

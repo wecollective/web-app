@@ -12,7 +12,8 @@ import { SpaceContext } from '@contexts/SpaceContext'
 import PageNotFound from '@pages/PageNotFound'
 import Settings from '@pages/SpacePage/Settings'
 import config from '@src/Config'
-import { onPageBottomReached } from '@src/Helpers'
+import { capitalise, getDraftPlainText, onPageBottomReached } from '@src/Helpers'
+import SEO from '@src/components/SEO'
 import About from '@src/pages/SpacePage/About'
 import Calendar from '@src/pages/SpacePage/Calendar'
 import Governance from '@src/pages/SpacePage/Governance'
@@ -208,6 +209,13 @@ function SpacePage(): JSX.Element {
 
     return (
         <Column centerX className={styles.wrapper}>
+            <SEO
+                title={`${spaceData.name} (s/${spaceData.handle}) ${
+                    subpage && subpage !== 'posts' ? `| ${capitalise(subpage)}` : ''
+                }`}
+                description={spaceData.description ? getDraftPlainText(spaceData.description) : ''}
+                image={spaceData.flagImagePath}
+            />
             <Column centerX className={`${styles.header} ${headerCollapsed && styles.collapsed}`}>
                 <CoverImage type='space' image={spaceData.coverImagePath} canEdit={isModerator} />
                 {awaitingSpaceData ? (

@@ -11,26 +11,29 @@ import SpacePage from '@pages/SpacePage/SpacePage'
 import UserPage from '@pages/UserPage/UserPage'
 import styles from '@styles/App.module.scss'
 import React from 'react'
+import { HelmetProvider } from 'react-helmet-async'
 import { Route, Routes } from 'react-router-dom'
 
 function App(): JSX.Element {
     return (
         <div className={styles.wrapper}>
-            <ContextProviders>
-                <div id='preloaded-images' style={{ position: 'fixed', opacity: 0 }} />
-                <Modals />
-                <Navbar />
-                <ToyBar />
-                <DragItem />
-                <Routes>
-                    <Route path='/' element={<HomePage />} />
-                    <Route path='/s/:spaceHandle/*' element={<SpacePage />} />
-                    <Route path='/p/:postId/*' element={<PostPage />} />
-                    <Route path='/u/:userHandle/*' element={<UserPage />} />
-                    <Route path='/linkmap' element={<LinkMap />} />
-                    <Route element={<PageNotFound />} />
-                </Routes>
-            </ContextProviders>
+            <HelmetProvider>
+                <ContextProviders>
+                    <div id='preloaded-images' style={{ position: 'fixed', opacity: 0 }} />
+                    <Modals />
+                    <Navbar />
+                    <ToyBar />
+                    <DragItem />
+                    <Routes>
+                        <Route path='/' element={<HomePage />} />
+                        <Route path='/s/:spaceHandle/*' element={<SpacePage />} />
+                        <Route path='/p/:postId/*' element={<PostPage />} />
+                        <Route path='/u/:userHandle/*' element={<UserPage />} />
+                        <Route path='/linkmap' element={<LinkMap />} />
+                        <Route element={<PageNotFound />} />
+                    </Routes>
+                </ContextProviders>
+            </HelmetProvider>
         </div>
     )
 }

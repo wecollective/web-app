@@ -6,7 +6,8 @@ import LoadingWheel from '@components/animations/LoadingWheel'
 import PostCard from '@components/cards/PostCard/PostCard'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
-import { Post, includesGame } from '@src/Helpers'
+import { Post, getDraftPlainText, includesGame } from '@src/Helpers'
+import SEO from '@src/components/SEO'
 import styles from '@styles/pages/PostPage/PostPage.module.scss'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
@@ -37,7 +38,7 @@ function PostPage(): JSX.Element {
             .get(`${config.apiURL}/post-data?postId=${postId}`, options)
             .then((res) => {
                 // console.log('post-data: ', res.data)
-                setState({ state: 'ready', post: res.data })
+                setState({ state: 'ready', post: res.data as Post })
             })
             .catch((error) => {
                 const { message } = error.response.data
@@ -107,8 +108,37 @@ function PostPage(): JSX.Element {
         return <GameRoom post={post} setPost={setPost} />
     }
 
+    function findDescription() {
+        if (post.text) return getDraftPlainText(post.text)
+        if (post.UrlBlocks && post.UrlBlocks.length) {
+            const urlWithTitle = post.UrlBlocks.find((block) => block.Post.MediaLink.Url.title)
+            if (urlWithTitle) return urlWithTitle.Post.MediaLink.Url.title
+            const urlWithText = post.UrlBlocks.find((block) => block.Post.MediaLink.Url.description)
+            if (urlWithText) return urlWithText.Post.MediaLink.Url.description
+        }
+        return ''
+    }
+
+    function findImage() {
+        if (post.ImageBlocks && post.ImageBlocks.length) {
+            return post.ImageBlocks[0].Post.MediaLink.Image.url
+        }
+        if (post.UrlBlocks && post.UrlBlocks.length) {
+            const urlWithImage = post.UrlBlocks.find((block) => block.Post.MediaLink.Url.image)
+            if (urlWithImage) return urlWithImage.Post.MediaLink.Url.image
+        }
+        if (post.Creator.flagImagePath) return post.Creator.flagImagePath
+        return ''
+    }
+
     return (
         <Column centerX className={styles.wrapper}>
+            <SEO
+                title={`${post.Creator.name} ${post.title ? `| ${post.title}` : ''}`}
+                description={findDescription()}
+                image={findImage()}
+                creator={`u/${post.Creator.handle}`}
+            />
             <Column className={styles.postCardWrapper}>
                 <PostCard post={post} setPost={setPost} onDelete={onDelete} location='post-page' />
             </Column>
