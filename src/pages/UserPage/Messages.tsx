@@ -1,6 +1,7 @@
 import Button from '@components/Button'
 import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
+import FlagImageHighlights from '@components/FlagImageHighlights'
 import ImageTitle from '@components/ImageTitle'
 import Input from '@components/Input'
 import Row from '@components/Row'
@@ -8,6 +9,7 @@ import SearchSelector from '@components/SearchSelector'
 import LoadingWheel from '@components/animations/LoadingWheel'
 import TypingDots from '@components/animations/TypingDots'
 import MessageCard from '@components/cards/Comments/MessageCard'
+import AudioCard from '@components/cards/PostCard/AudioCard'
 import CommentInput from '@components/draft-js/CommentInput'
 import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
@@ -15,8 +17,6 @@ import { UserContext } from '@contexts/UserContext'
 import UserNotFound from '@pages/UserPage/UserNotFound'
 import config from '@src/Config'
 import { baseUserData, getDraftPlainText, imageMBLimit, trimText } from '@src/Helpers'
-import FlagImageHighlights from '@src/components/FlagImageHighlights'
-import AudioCard from '@src/components/cards/PostCard/AudioCard'
 import styles from '@styles/pages/UserPage/Messages.module.scss'
 import { ImageIcon, PlusIcon, ReplyIcon, UsersIcon } from '@svgs/all'
 import axios from 'axios'
@@ -289,10 +289,7 @@ function Messages(): JSX.Element {
                             key={message.id}
                             message={message}
                             removeMessage={() => null}
-                            setReplyParent={(parent) => {
-                                console.log('reply parent: ', parent)
-                                setReplyParent(parent)
-                            }}
+                            setReplyParent={(parent) => setReplyParent(parent)}
                         />
                     ))}
                 </Column>

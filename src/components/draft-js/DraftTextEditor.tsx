@@ -21,7 +21,7 @@ import {
     UnorderedListButton,
 } from '@draft-js-plugins/buttons'
 import Editor from '@draft-js-plugins/editor'
-import { ImageIcon } from '@src/svgs/all'
+import { ImageIcon } from '@svgs/all'
 // import createEmojiPlugin, { defaultTheme as emojiTheme } from '@draft-js-plugins/emoji'
 // import '@draft-js-plugins/emoji/lib/plugin.css'
 import createImagePlugin from '@draft-js-plugins/image'

@@ -1,7 +1,7 @@
+import ImageTitle from '@components/ImageTitle'
 import Row from '@components/Row'
 import SpaceButton from '@components/SpaceButton'
 import Modal from '@components/modals/Modal'
-import ImageTitle from '@src/components/ImageTitle'
 import styles from '@styles/components/cards/PostCard/PostSpaces.module.scss'
 import React, { useState } from 'react'
 

@@ -9,7 +9,7 @@ import Row from '@components/Row'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import { UserContext } from '@contexts/UserContext'
-import NavigationList from '@src/pages/SpacePage/NavigationList'
+import NavigationList from '@pages/SpacePage/NavigationList'
 import styles from '@styles/components/Navbar.module.scss'
 import {
     AboutIcon,

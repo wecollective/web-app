@@ -2,6 +2,7 @@
 import Column from '@components/Column'
 import ImageTitle from '@components/ImageTitle'
 import Row from '@components/Row'
+import LoadingWheel from '@components/animations/LoadingWheel'
 import AudioCard from '@components/cards/PostCard/AudioCard'
 import PostSpaces from '@components/cards/PostCard/PostSpaces'
 import config from '@src/Config'
@@ -12,7 +13,6 @@ import {
     timeSinceCreatedShort,
     trimText,
 } from '@src/Helpers'
-import LoadingWheel from '@src/components/animations/LoadingWheel'
 import styles from '@styles/components/cards/PostCard/PostCardPreview.module.scss'
 import { CalendarIcon, CardIcon, LinkIcon, PollIcon } from '@svgs/all'
 import axios from 'axios'

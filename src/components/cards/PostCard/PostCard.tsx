@@ -33,6 +33,7 @@ import {
     timeSinceCreated,
     timeSinceCreatedShort,
 } from '@src/Helpers'
+import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
 import {
     AngleUpIcon,
     AnglesUpIcon,
@@ -45,8 +46,7 @@ import {
     SynapseIcon,
     VerticalEllipsisIcon,
     ZapIcon,
-} from '@src/svgs/all'
-import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
+} from '@svgs/all'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'

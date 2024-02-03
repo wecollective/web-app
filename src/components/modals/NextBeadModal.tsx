@@ -9,6 +9,7 @@ import UrlPreview from '@components/cards/PostCard/UrlCard'
 import DraftTextEditor from '@components/draft-js/DraftTextEditor'
 import ImageModal from '@components/modals/ImageModal'
 import Modal from '@components/modals/Modal'
+import { AccountContext } from '@contexts/AccountContext'
 import {
     GameSettings,
     allowedAudioTypes,
@@ -25,7 +26,6 @@ import {
     uploadPost,
     validatePost,
 } from '@src/Helpers'
-import { AccountContext } from '@src/contexts/AccountContext'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/modals/NextBeadModal.module.scss'
 import getBlobDuration from 'get-blob-duration'

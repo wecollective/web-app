@@ -1,7 +1,7 @@
+import { CreatePostModalSettings } from '@components/modals/CreatePostModal'
 import config from '@src/Config'
 import { getDraftPlainText } from '@src/Helpers'
 import { IAccountContext } from '@src/Interfaces'
-import { CreatePostModalSettings } from '@src/components/modals/CreatePostModal'
 import axios from 'axios'
 import React, { createContext, useEffect, useRef, useState } from 'react'
 import { io } from 'socket.io-client'
