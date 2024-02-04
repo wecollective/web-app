@@ -49,6 +49,24 @@
             margin-bottom: 5px;
         }
 
+        .parent {
+            background-color: $blue9;
+            border-radius: 5px;
+            padding: 5px 10px;
+            margin-bottom: 10px;
+            border: 1px solid $blue5;
+
+            h1 {
+                font-size: 16px;
+                font-weight: 800;
+                margin: 0;
+            }
+
+            p {
+                font-size: 14px;
+            }
+        }
+
         .content {
             border-radius: 10px;
             font-size: 14px;

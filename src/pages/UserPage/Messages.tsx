@@ -374,10 +374,10 @@ function Messages(): JSX.Element {
                         links={{
                             chatId: +chatId,
                             parent: replyParent
-                                ? { id: replyParent.id, type: 'chat-message' }
+                                ? { id: replyParent.id, type: replyParent.type }
                                 : null,
                         }}
-                        onSave={() => signalTyping(false)}
+                        onSave={() => setReplyParent(null)}
                         signalTyping={signalTyping}
                     />
                 </Column>

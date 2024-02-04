@@ -14,7 +14,7 @@ import RatingModal from '@components/modals/RatingModal'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
-import { dateCreated, timeSinceCreated } from '@src/Helpers'
+import { dateCreated, getDraftPlainText, timeSinceCreated, trimText } from '@src/Helpers'
 import styles from '@styles/components/cards/Comments/MessageCard.module.scss'
 import {
     DeleteIcon,
@@ -58,6 +58,7 @@ function MessageCard(props: {
         ImageBlocks,
         AudioBlocks,
         Reactions,
+        Parent,
     } = message
     const [visible, setVisible] = useState(false)
     const [accountReactions, setAccountReactions] = useState<any>({
@@ -236,6 +237,12 @@ function MessageCard(props: {
                             </button>
                         )} */}
                 </Row>
+                {Parent && (
+                    <Column className={styles.parent}>
+                        <h1>{Parent.Creator.name}</h1>
+                        {Parent.text && <p>{trimText(getDraftPlainText(Parent.text), 300)}</p>}
+                    </Column>
+                )}
                 <Column className={styles.content}>
                     <DraftText
                         text={state === 'deleted' ? '[message deleted]' : text}
