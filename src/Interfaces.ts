@@ -3,6 +3,7 @@ import { CreatePostModalSettings } from './components/modals/CreatePostModal'
 /* eslint-disable camelcase */
 export interface ISpace {
     id: number
+    type: string | null
     handle: string
     name: string
     description: string

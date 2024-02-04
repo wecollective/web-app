@@ -140,14 +140,14 @@ export type UrlMediaLink = {
     Url: Url
 }
 
-export type Url = unknown
+export type Url = any
 
 export type ImageBlock = {
     Post: BlockPost<ImageMediaLink>
 }
 
 export type ImageMediaLink = {
-    Image: unknown
+    Image: any
 }
 
 export type AudioBlock = {
@@ -815,7 +815,9 @@ export function uploadPost(post) {
     attachPostFiles(formData, postData)
     formData.append('post-data', JSON.stringify(postData))
     const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-    return axios.post(`${config.apiURL}/create-${post.type}`, formData, options)
+    let route = post.type
+    if (post.type === 'chat-reply') route = 'chat-message'
+    return axios.post(`${config.apiURL}/create-${route}`, formData, options)
 }
 
 export function baseUserData(accountData) {

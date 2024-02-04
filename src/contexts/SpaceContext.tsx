@@ -14,6 +14,7 @@ export const SpaceContext = createContext<ISpaceContext>({} as ISpaceContext)
 const defaults = {
     spaceData: {
         id: null,
+        type: null,
         handle: null,
         name: null,
         description: null,
@@ -140,12 +141,21 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
     }
 
     function getSpacePosts(spaceId, offset, limit, params) {
-        console.log(`SpaceContext: getSpacePosts (${offset + 1} to ${offset + limit})`)
+        console.log(`SpaceContext: getSpacePosts (${offset + 1} to ${offset + limit})`, params)
         setPostFilters(params)
         const firstLoad = offset === 0
         if (firstLoad) setSpacePostsLoading(true)
         else setNextSpacePostsLoading(true)
-        const data = { spaceId, offset, limit, params, mutedUsers: accountData.mutedUsers || [] }
+        let postTypes = ['post']
+        if (spaceData.type === 'chat') postTypes = ['chat-message']
+        const data = {
+            spaceId,
+            offset,
+            limit,
+            params,
+            mutedUsers: accountData.mutedUsers || [],
+            postTypes,
+        }
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
             .post(`${config.apiURL}/space-posts`, data, options)
