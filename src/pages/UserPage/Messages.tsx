@@ -1,3 +1,4 @@
+/* eslint-disable prefer-destructuring */
 import Button from '@components/Button'
 import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
@@ -149,13 +150,16 @@ function Messages(): JSX.Element {
         axios
             .post(`${config.apiURL}/create-chat`, formData, options)
             .then((res) => {
-                setChats([...chats, res.data])
+                const newChat = res.data as any
+                newChat.otherUser = users[0]
+                setChats([...chats, newChat])
                 setCreateChatLoading(false)
                 setNewChatModalOpen(false)
                 // reset values
                 setName('')
                 setImageFile(null)
                 setImageURL('')
+                setUsers([])
             })
             .catch((error) => console.log(error))
     }
@@ -163,7 +167,14 @@ function Messages(): JSX.Element {
     function addSocketSignals() {
         // clean up old connection if present
         socket.emit('exit-room', { roomId: `chat-${chatId}`, userId: accountData.id })
-        const listeners = ['room-entered', 'user-entering', 'user-exiting']
+        const listeners = [
+            'room-entered',
+            'user-entering',
+            'user-exiting',
+            'user-started-typing',
+            'user-stopped-typing',
+            'new-message',
+        ]
         listeners.forEach((event) => socket.removeAllListeners(event))
         // enter room
         socket.emit('enter-room', { roomId: `chat-${chatId}`, user: baseUserData(accountData) })

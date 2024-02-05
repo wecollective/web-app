@@ -640,7 +640,8 @@ export function trimNumber(number, maxValue) {
 }
 
 export function trimText(text: string, maxChars: number) {
-    return text.length > maxChars ? text.substring(0, maxChars).concat('...') : text
+    if (text) return text.length > maxChars ? text.substring(0, maxChars).concat('...') : text
+    return '...'
 }
 
 export function simplifyText(text: string) {
