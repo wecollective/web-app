@@ -21,16 +21,18 @@ function EventCard(props: {
 }): JSX.Element {
     const { post, setPost, location } = props
     const { id, Event } = post
-    const { startTime, endTime, Going, Interested } = Event
+    const { startTime, endTime } = Event
     const { accountData, setAlertMessage, setAlertModalOpen } = useContext(AccountContext)
     const [goingModalOpen, setGoingModalOpen] = useState(false)
     const [interestedModalOpen, setInterestedModalOpen] = useState(false)
     const [goingLoading, setGoingLoading] = useState(false)
     const [interestedLoading, setInterestedLoading] = useState(false)
+    const [peopleGoing, setPeopleGoing] = useState(Event.Going)
+    const [peopleInterested, setPeopleInterested] = useState(Event.Interested)
     // todo: paginate responses and get account response seperately
-    const going = Going.map((u) => u.id).includes(accountData.id)
-    const interested = Interested.map((u) => u.id).includes(accountData.id)
-    const activeUsers = Going.length > 0 || Interested.length > 0
+    const going = peopleGoing.map((u) => u.id).includes(accountData.id)
+    const interested = peopleInterested.map((u) => u.id).includes(accountData.id)
+    const activeUsers = peopleGoing.length > 0 || peopleInterested.length > 0
     const allowResponses = new Date(startTime) > new Date()
     const cookies = new Cookies()
 
@@ -43,31 +45,29 @@ function EventCard(props: {
             if (response === 'going') setGoingLoading(true)
             else setInterestedLoading(true)
             const options = { headers: { Authorization: `Bearer ${accessToken}` } }
-            const data = {
-                postId: id,
-                eventId: Event.id,
-                startTime,
-                response,
-            }
+            const data = { postId: id, eventId: Event.id, startTime, response }
             axios
                 .post(`${config.apiURL}/respond-to-event`, data, options)
                 .then(() => {
-                    setPost({
-                        ...post,
-                        Event: {
-                            ...Event,
-                            Going: going
-                                ? [...Going.filter((u) => u.id !== accountData.id)]
-                                : response === 'going'
-                                ? [...Going, accountData]
-                                : Going,
-                            Interested: interested
-                                ? [...Interested.filter((u) => u.id !== accountData.id)]
-                                : response === 'interested'
-                                ? [...Interested, accountData]
-                                : Interested,
-                        },
-                    })
+                    if (response === 'going') {
+                        setPeopleGoing(
+                            going
+                                ? peopleGoing.filter((u) => u.id !== accountData.id)
+                                : [...peopleGoing, accountData]
+                        )
+                        if (!going && interested)
+                            setPeopleInterested(
+                                peopleInterested.filter((u) => u.id !== accountData.id)
+                            )
+                    } else {
+                        setPeopleInterested(
+                            interested
+                                ? peopleInterested.filter((u) => u.id !== accountData.id)
+                                : [...peopleInterested, accountData]
+                        )
+                        if (!interested && going)
+                            setPeopleGoing(peopleGoing.filter((u) => u.id !== accountData.id))
+                    }
                     setGoingLoading(false)
                     setInterestedLoading(false)
                 })
@@ -84,22 +84,22 @@ function EventCard(props: {
             </Row>
             {activeUsers && (
                 <Row style={{ marginTop: 10 }}>
-                    {Going.length > 0 && (
+                    {peopleGoing.length > 0 && (
                         <FlagImageHighlights
                             type='user'
-                            images={Going.map((u) => u.flagImagePath).splice(0, 3)}
+                            images={peopleGoing.map((u) => u.flagImagePath).splice(0, 3)}
                             imageSize={30}
-                            text={`${Going.length} going`}
+                            text={`${peopleGoing.length} going`}
                             onClick={() => setGoingModalOpen(true)}
                             style={{ marginRight: 15 }}
                         />
                     )}
-                    {Interested.length > 0 && (
+                    {peopleInterested.length > 0 && (
                         <FlagImageHighlights
                             type='user'
-                            images={Interested.map((u) => u.flagImagePath).splice(0, 3)}
+                            images={peopleInterested.map((u) => u.flagImagePath).splice(0, 3)}
                             imageSize={30}
-                            text={`${Interested.length} interested`}
+                            text={`${peopleInterested.length} interested`}
                             onClick={() => setInterestedModalOpen(true)}
                         />
                     )}
@@ -132,7 +132,7 @@ function EventCard(props: {
                 <Modal centerX close={() => setGoingModalOpen(false)}>
                     <h1>Going to event</h1>
                     <Column centerX>
-                        {Going.map((user) => (
+                        {peopleGoing.map((user) => (
                             <UserButton
                                 key={user.id}
                                 user={user}
@@ -148,7 +148,7 @@ function EventCard(props: {
                 <Modal centerX close={() => setInterestedModalOpen(false)}>
                     <h1>Interested in event</h1>
                     <Column centerX>
-                        {Interested.map((user) => (
+                        {peopleInterested.map((user) => (
                             <UserButton
                                 key={user.id}
                                 user={user}
