@@ -5,6 +5,13 @@
     height: calc(100vh - 120px);
     margin-top: -15px;
 
+    .icon {
+        width: 26px;
+        height: 26px;
+        color: $grey4;
+        margin-right: 10px;
+    }
+
     .sidebar {
         width: 250px;
         height: 100%;
@@ -61,18 +68,10 @@
             border-bottom: 1px solid $grey2;
             padding: 0 10px;
 
-            > div > img {
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
-                object-fit: cover;
-            }
-
-            > div > h1 {
+            h1 {
                 font-size: 16px;
                 font-weight: 800;
                 margin: 0;
-                margin-left: 10px;
             }
         }
 

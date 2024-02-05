@@ -18,8 +18,17 @@ import { UserContext } from '@contexts/UserContext'
 import UserNotFound from '@pages/UserPage/UserNotFound'
 import config from '@src/Config'
 import { baseUserData, getDraftPlainText, imageMBLimit, trimText } from '@src/Helpers'
+import FlagImage from '@src/components/FlagImage'
 import styles from '@styles/pages/UserPage/Messages.module.scss'
-import { ImageIcon, PlusIcon, ReplyIcon, UsersIcon } from '@svgs/all'
+import {
+    HereIcon,
+    ImageIcon,
+    ReplyIcon,
+    SearchIcon,
+    TextIcon,
+    UserIcon,
+    UsersIcon,
+} from '@svgs/all'
 import axios from 'axios'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -39,13 +48,15 @@ function Messages(): JSX.Element {
     const [messagesLoading, setMessagesLoading] = useState(false)
     const [nextMessagesLoading, setNextMessagesLoading] = useState(false)
     const [replyParent, setReplyParent] = useState<any>(null)
-    const [newChatModalOpen, setNewChatModalOpen] = useState(false)
-    const [createChatLoading, setCreateChatLoading] = useState(false)
+    const [newChatOpen, setNewChatOpen] = useState(false)
+    const [newGroupModalOpen, setNewGroupModalOpen] = useState(false)
+    const [createGroupLoading, setCreateGroupLoading] = useState(false)
+    const [chatNotFoundError, setChatNotFoundError] = useState(false)
     const [userOptions, setUserOptions] = useState<any[]>([])
     const [users, setUsers] = useState<any[]>([])
     const [imageFile, setImageFile] = useState<any>(null)
     const [imageURL, setImageURL] = useState<any>('')
-    const [name, setName] = useState('')
+    const [groupName, setGroupName] = useState('')
     const userSearch = useRef('')
     const history = useNavigate()
     const cookies = new Cookies()
@@ -74,32 +85,34 @@ function Messages(): JSX.Element {
                 console.log('chats res: ', res.data)
                 setChats(res.data)
                 setChatsLoading(false)
-                if (chatId) {
-                    history(`?chatId=${chatId}`)
-                    setSelectedChat(res.data.find((chat) => chat.id === +chatId))
-                } else {
-                    history(`?chatId=${res.data[0].id}`)
-                    setSelectedChat(res.data.find((chat) => chat.id === res.data[0].id))
-                }
+                if (chatId) history(`?chatId=${chatId}`)
+                else history(`?chatId=${res.data[0].id}`)
             })
             .catch((error) => console.log(error))
     }
 
     function getMessages(offset: number) {
         if (offset) setNextMessagesLoading(true)
-        else setMessagesLoading(true)
+        else {
+            setChatNotFoundError(false)
+            setMessagesLoading(true)
+        }
         const data = { chatId, offset }
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
             .post(`${config.apiURL}/messages`, data, options)
             .then((res) => {
-                // console.log('messages res:', res.data.messages)
+                // console.log('messages res:', res.data)
+                if (!offset) setSelectedChat(res.data.chat)
                 setTotalMessages(res.data.total)
                 setMessages(offset ? [...messages, ...res.data.messages] : res.data.messages)
                 if (offset) setNextMessagesLoading(false)
                 else setMessagesLoading(false)
             })
-            .catch((error) => console.log(error))
+            .catch((error) => {
+                console.log(error)
+                if (error.response.status === 404) setChatNotFoundError(true)
+            })
     }
 
     function getMessage(messageId: number) {
@@ -127,7 +140,7 @@ function Messages(): JSX.Element {
         }
     }
 
-    function addChatImage() {
+    function addGroupImage() {
         const input = document.getElementById('stream-image-file-input') as HTMLInputElement
         if (input && input.files && input.files[0]) {
             if (input.files[0].size > imageMBLimit * 1024 * 1024) {
@@ -140,23 +153,22 @@ function Messages(): JSX.Element {
         }
     }
 
-    function createChat() {
-        setCreateChatLoading(true)
-        const data = { name, userIds: users.map((u) => u.id) }
+    function createGroup() {
+        setCreateGroupLoading(true)
+        const data = { name: groupName, userIds: users.map((u) => u.id) }
         const formData = new FormData()
         if (imageFile) formData.append('image', imageFile)
         formData.append('post-data', JSON.stringify(data))
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         axios
-            .post(`${config.apiURL}/create-chat`, formData, options)
+            .post(`${config.apiURL}/create-chat-group`, formData, options)
             .then((res) => {
-                const newChat = res.data as any
-                newChat.otherUser = users[0]
-                setChats([...chats, newChat])
-                setCreateChatLoading(false)
-                setNewChatModalOpen(false)
-                // reset values
-                setName('')
+                setChats([...chats, res.data])
+                history(`?chatId=${res.data.id}`)
+                setCreateGroupLoading(false)
+                setNewGroupModalOpen(false)
+                // reset modal values
+                setGroupName('')
                 setImageFile(null)
                 setImageURL('')
                 setUsers([])
@@ -211,6 +223,23 @@ function Messages(): JSX.Element {
         else socket.emit('user-stopped-typing', { roomId: `chat-${chatId}`, user })
     }
 
+    function selectUser(user) {
+        setUserOptions([])
+        // check if user chat already exists or open new one (create on first message)
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .post(`${config.apiURL}/create-chat`, { userId: user.id }, options)
+            .then((res) => {
+                console.log('user-chat res: ', res.data)
+                if (res.data.existingChatId) history(`?chatId=${res.data.existingChatId}`)
+                else {
+                    setChats([{ ...res.data, otherUser: user }, ...chats])
+                    history(`?chatId=${res.data.id}`)
+                }
+            })
+            .catch((error) => console.log(error))
+    }
+
     // add scroll handler
     useEffect(() => {
         const scrollWrapper = document.getElementById('scroll-wrapper')
@@ -234,12 +263,12 @@ function Messages(): JSX.Element {
     useEffect(() => {
         if (chatId) {
             getMessages(0)
+            // disconnect from previous chat if present
             if (selectedChat) {
                 socket.emit('exit-room', {
                     roomId: `chat-${selectedChat.id}`,
                     userId: accountData.id,
                 })
-                setSelectedChat(chats.find((chat) => chat.id === +chatId))
             }
         }
     }, [chatId])
@@ -258,25 +287,57 @@ function Messages(): JSX.Element {
     return (
         <Row className={styles.wrapper}>
             <Column className={styles.sidebar}>
-                <Row spaceBetween>
-                    <Button
-                        text='New Chat'
-                        icon={<PlusIcon />}
-                        color='blue'
-                        onClick={() => setNewChatModalOpen(true)}
-                        style={{ width: 120 }}
-                    />
-                    {chatsLoading && <LoadingWheel size={30} />}
-                </Row>
+                {chatsLoading ? (
+                    <LoadingWheel size={30} />
+                ) : (
+                    <Row>
+                        <Button
+                            text='New Chat'
+                            icon={<UserIcon />}
+                            color='blue'
+                            onClick={() => setNewChatOpen(!newChatOpen)}
+                            style={{ marginRight: 10 }}
+                        />
+                        <Button
+                            text='New Group'
+                            icon={<UsersIcon />}
+                            color='aqua'
+                            onClick={() => {
+                                setNewChatOpen(false)
+                                setNewGroupModalOpen(true)
+                            }}
+                        />
+                    </Row>
+                )}
+                {newChatOpen && (
+                    <Row centerY style={{ marginTop: 10 }}>
+                        <SearchIcon className={styles.icon} />
+                        <SearchSelector
+                            type='user'
+                            placeholder='People...'
+                            onSearchQuery={(query) => findUsers(query)}
+                            onOptionSelected={selectUser}
+                            onBlur={() => setTimeout(() => setUserOptions([]), 200)}
+                            options={userOptions}
+                            style={{ width: '100%' }}
+                        />
+                    </Row>
+                )}
                 {chats.map((chat) => (
                     <Link
                         to={`?chatId=${chat.id}`}
                         key={chat.id}
                         className={`${styles.chat} ${+chatId === chat.id && styles.selected}`}
                     >
-                        <img src={chat.flagImagePath || chat.otherUser.flagImagePath} alt='' />
-                        <Column>
-                            <h1>{chat.name || chat.otherUser.name}</h1>
+                        <FlagImage
+                            type='space'
+                            imagePath={
+                                chat.name ? chat.flagImagePath : chat.otherUser.flagImagePath
+                            }
+                            size={40}
+                        />
+                        <Column style={{ marginLeft: 5 }}>
+                            <h1>{chat.otherUser ? chat.otherUser.name : chat.name}</h1>
                         </Column>
                     </Link>
                 ))}
@@ -285,19 +346,37 @@ function Messages(): JSX.Element {
                 {selectedChat && (
                     <Row spaceBetween className={styles.header}>
                         <Row centerY>
-                            <img
-                                src={
-                                    selectedChat.flagImagePath ||
-                                    selectedChat.otherUser.flagImagePath
+                            <FlagImage
+                                type='space'
+                                imagePath={
+                                    selectedChat.name
+                                        ? selectedChat.flagImagePath
+                                        : selectedChat.otherUser.flagImagePath
                                 }
-                                alt=''
+                                size={40}
+                                style={{ border: '1px solid #eee', marginRight: 5 }}
                             />
-                            <h1>{selectedChat.name || selectedChat.otherUser.name}</h1>
+                            <h1 style={{ marginRight: 30 }}>
+                                {selectedChat.name || selectedChat.otherUser.name}
+                            </h1>
                         </Row>
-                        <FlagImageHighlights
-                            type='user'
-                            images={peopleInRoom.map((u) => u.flagImagePath)}
-                        />
+                        <Row centerY>
+                            {selectedChat.name && (
+                                <Row centerY>
+                                    <UsersIcon className={styles.icon} />
+                                    <FlagImageHighlights
+                                        type='user'
+                                        images={selectedChat.Members.map((u) => u.flagImagePath)}
+                                        style={{ marginRight: 20 }}
+                                    />
+                                </Row>
+                            )}
+                            <HereIcon className={styles.icon} />
+                            <FlagImageHighlights
+                                type='user'
+                                images={peopleInRoom.map((u) => u.flagImagePath)}
+                            />
+                        </Row>
                     </Row>
                 )}
                 <Column id='scroll-wrapper' className={`${styles.scrollWrapper} hide-scrollbars`}>
@@ -399,13 +478,13 @@ function Messages(): JSX.Element {
                     />
                 </Column>
             </Column>
-            {newChatModalOpen && (
+            {newGroupModalOpen && (
                 <Modal
                     centerX
-                    close={() => setNewChatModalOpen(false)}
+                    close={() => setNewGroupModalOpen(false)}
                     style={{ overflow: 'visible' }}
                 >
-                    <h1>Create a new chat</h1>
+                    <h1>New group</h1>
                     <Column centerX centerY className={styles.image}>
                         {imageURL && <img src={imageURL} alt='' />}
                         <ImageIcon />
@@ -414,24 +493,23 @@ function Messages(): JSX.Element {
                                 type='file'
                                 id='stream-image-file-input'
                                 accept='.png, .jpg, .jpeg, .gif'
-                                onChange={addChatImage}
+                                onChange={addGroupImage}
                                 hidden
                             />
                         </label>
                     </Column>
-                    <Input
-                        type='text'
-                        placeholder='Name... (optional)'
-                        value={name}
-                        maxLength={30}
-                        onChange={(v) => setName(v)}
-                        style={{ marginBottom: 30 }}
-                    />
-                    <p style={{ marginBottom: 10 }}>Add people to the chat:</p>
-                    <Row centerY style={{ marginBottom: 10 }}>
-                        <UsersIcon
-                            style={{ width: 25, height: 25, color: '#bbb', marginRight: 10 }}
+                    <Row centerY style={{ marginBottom: 20 }}>
+                        <TextIcon className={styles.icon} />
+                        <Input
+                            type='text'
+                            placeholder='Name... (required)'
+                            value={groupName}
+                            maxLength={30}
+                            onChange={(v) => setGroupName(v)}
                         />
+                    </Row>
+                    <Row centerY style={{ marginBottom: 10 }}>
+                        <UsersIcon className={styles.icon} />
                         <SearchSelector
                             type='user'
                             placeholder='People...'
@@ -445,27 +523,30 @@ function Messages(): JSX.Element {
                             style={{ width: '100%' }}
                         />
                     </Row>
-                    {users.map((user) => (
-                        <Row key={user.id} centerY style={{ marginBottom: 10 }}>
-                            <ImageTitle
-                                type='space'
-                                imagePath={user.flagImagePath}
-                                title={`u/${user.handle}`}
-                                fontSize={16}
-                                style={{ marginRight: 10 }}
-                            />
-                            <CloseButton
-                                size={17}
-                                onClick={() => setUsers(users.filter((u) => u.id !== user.id))}
-                            />
-                        </Row>
-                    ))}
+                    <Column style={{ width: '100%' }}>
+                        {users.map((user) => (
+                            <Row key={user.id} centerY style={{ marginBottom: 10 }}>
+                                <ImageTitle
+                                    type='space'
+                                    imagePath={user.flagImagePath}
+                                    imageSize={36}
+                                    title={`u/${user.handle}`}
+                                    fontSize={16}
+                                    style={{ marginRight: 10 }}
+                                />
+                                <CloseButton
+                                    size={17}
+                                    onClick={() => setUsers(users.filter((u) => u.id !== user.id))}
+                                />
+                            </Row>
+                        ))}
+                    </Column>
                     <Button
-                        text='Create chat'
+                        text='Create group'
                         color='blue'
-                        disabled={createChatLoading || !users.length}
-                        loading={createChatLoading}
-                        onClick={createChat}
+                        disabled={createGroupLoading || !groupName || !users.length}
+                        loading={createGroupLoading}
+                        onClick={createGroup}
                         style={{ marginTop: 30 }}
                     />
                 </Modal>

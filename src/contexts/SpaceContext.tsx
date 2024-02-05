@@ -36,7 +36,7 @@ const defaults = {
         DirectChildSpaces: [],
         DirectParentSpaces: [],
         SpaceAncestors: [],
-        UsersWithAccess: [],
+        Members: [],
     },
     postFilters: {
         filter: 'Active',
