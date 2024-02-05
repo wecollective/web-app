@@ -223,7 +223,13 @@ function Messages(): JSX.Element {
     useEffect(() => {
         if (chatId) {
             getMessages(0)
-            if (selectedChat) setSelectedChat(chats.find((chat) => chat.id === +chatId))
+            if (selectedChat) {
+                socket.emit('exit-room', {
+                    roomId: `chat-${selectedChat.id}`,
+                    userId: accountData.id,
+                })
+                setSelectedChat(chats.find((chat) => chat.id === +chatId))
+            }
         }
     }, [chatId])
 
