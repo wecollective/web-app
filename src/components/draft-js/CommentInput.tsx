@@ -52,7 +52,7 @@ import styles from '@styles/components/draft-js/CommentInput.module.scss'
 import draftStyles from '@styles/components/draft-js/TextStyling.module.scss'
 import { MicrophoneIcon, PaperClipIcon } from '@svgs/all'
 import axios from 'axios'
-import { ContentState, EditorState, convertToRaw } from 'draft-js'
+import { ContentState, EditorState, convertToRaw, getDefaultKeyBinding } from 'draft-js'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import RecordRTC from 'recordrtc'
@@ -73,7 +73,7 @@ function CommentInput(props: {
         props
     const { accountData } = useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
-    const [editorState, setEditorState] = useState<any>(null)
+    const [editorState, setEditorState] = useState<any>(EditorState.createEmpty())
     const [rawUrls, setRawUrls] = useState<any[]>([])
     const [urls, setUrls] = useState<any[]>([])
     const [mentions, setMentions] = useState<any[]>([])
@@ -87,6 +87,7 @@ function CommentInput(props: {
     const [focused, setFocused] = useState(false)
     const [errors, setErrors] = useState<string[]>([])
     const [saveLoading, setSaveLoading] = useState(false)
+    const [enterKeyPressed, setEnterKeyPressed] = useState(false)
     const audioRecorder = useRef<any>(null)
     const recordingInterval = useRef<any>(null)
     const wrapperRef = useRef<HTMLDivElement>(null)
@@ -319,10 +320,11 @@ function CommentInput(props: {
         const newContentState = ContentState.createFromText('')
         const newEditorState = EditorState.createWithContent(newContentState)
         setEditorState(newEditorState)
-        setTotalChars(newEditorState.getCurrentContent().getPlainText().length)
+        setTotalChars(0)
         setImages([])
         setAudios([])
         setUrls([])
+        setTimeout(() => editorRef.current!.focus(), 0)
     }
 
     function save() {
@@ -365,23 +367,39 @@ function CommentInput(props: {
                     newPost.links = links
                     if (type === 'poll-answer') newPost.Link = { state: 'active' }
                     onSave(newPost)
-                    setFocused(false)
                     resetData()
                 })
                 .catch((error) => console.log(error))
         }
     }
 
+    // draft-js functions keyBindingFn & handleKeyCommand used to listen for enter key press on keyboard
+    function keyBindingFn(e) {
+        // skip if shift key also pressed as 'enter + shift' combo used to create new lines
+        if (e.keyCode === 13 && !e.shiftKey) return 'save-via-enter-key-down'
+        return getDefaultKeyBinding(e)
+    }
+
+    function handleKeyCommand(command) {
+        if (command === 'save-via-enter-key-down') {
+            // trigger enterKeyPressed hook to check if save disabled (with latest state) before saving
+            setEnterKeyPressed(true)
+            return 'handled'
+        }
+        return 'not-handled'
+    }
+
+    useEffect(() => {
+        if (enterKeyPressed) {
+            if (!saveDisabled()) save()
+            setEnterKeyPressed(false)
+        }
+    }, [enterKeyPressed])
+
     // initialize component
     useEffect(() => {
         initializeDropBox()
-        // set up editor
-        // todo: create with new state rather than from empty text
-        const contentState = ContentState.createFromText('')
-        const newEditorState = EditorState.createWithContent(contentState)
-        setEditorState(newEditorState)
-        setTotalChars(newEditorState.getCurrentContent().getPlainText().length)
-        // set up click outside handler
+        // add click outside handler
         document.addEventListener('mousedown', handleClickOutside)
         return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [])
@@ -455,6 +473,8 @@ function CommentInput(props: {
                                 plugins={plugins}
                                 customStyleMap={styleMap}
                                 onChange={onEditorStateChange}
+                                keyBindingFn={keyBindingFn}
+                                handleKeyCommand={handleKeyCommand}
                                 stripPastedStyles
                                 spellCheck
                             />
