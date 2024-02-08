@@ -240,11 +240,12 @@ function Messages(): JSX.Element {
             .catch((error) => console.log(error))
     }
 
-    function onSave() {
+    function onSave(newMessage) {
         setReplyParent(null)
         // move chat to top of the list
         if (chats[0].id !== +chatId) {
             const movedChat = chats.find((chat) => chat.id === +chatId)
+            movedChat.lastMessage = { Creator: accountData, text: newMessage.text }
             const newChats = [movedChat, ...chats.filter((chat) => chat.id !== +chatId)]
             setChats(newChats)
         }
@@ -346,8 +347,21 @@ function Messages(): JSX.Element {
                             }
                             size={40}
                         />
-                        <Column style={{ marginLeft: 5 }}>
+                        <Column style={{ marginLeft: 10 }}>
                             <h1>{chat.otherUser ? chat.otherUser.name : chat.name}</h1>
+                            {chat.lastMessage && (
+                                <Row>
+                                    <p>
+                                        <b>
+                                            {chat.lastMessage.Creator.id === accountData.id
+                                                ? 'You'
+                                                : chat.lastMessage.Creator.name}
+                                            :
+                                        </b>{' '}
+                                        {trimText(getDraftPlainText(chat.lastMessage.text), 100)}
+                                    </p>
+                                </Row>
+                            )}
                         </Column>
                     </Link>
                 ))}
