@@ -73,8 +73,6 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                 .then((res) => {
                     const { id, handle, name, bio, flagImagePath } = res.data
                     setAccountData(res.data)
-                    // // connect socket
-                    // setSocket(io(config.apiWebSocketURL || ''))
                     // add greencheck script
                     const script = document.getElementById('greencheck')
                     script!.innerHTML = JSON.stringify({

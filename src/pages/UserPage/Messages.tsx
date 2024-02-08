@@ -240,6 +240,16 @@ function Messages(): JSX.Element {
             .catch((error) => console.log(error))
     }
 
+    function onSave() {
+        setReplyParent(null)
+        // move chat to top of the list
+        if (chats[0].id !== +chatId) {
+            const movedChat = chats.find((chat) => chat.id === +chatId)
+            const newChats = [movedChat, ...chats.filter((chat) => chat.id !== +chatId)]
+            setChats(newChats)
+        }
+    }
+
     // add scroll handler
     useEffect(() => {
         const scrollWrapper = document.getElementById('scroll-wrapper')
@@ -473,7 +483,7 @@ function Messages(): JSX.Element {
                                 ? { id: replyParent.id, type: replyParent.type }
                                 : null,
                         }}
-                        onSave={() => setReplyParent(null)}
+                        onSave={onSave}
                         signalTyping={signalTyping}
                     />
                 </Column>
