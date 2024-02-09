@@ -17,7 +17,7 @@ module.exports = {
         '@typescript-eslint/explicit-module-boundary-types': 'off',
     },
     parserOptions: {
-        project: 'tsconfig.json',
+        project: './tsconfig.json',
         tsconfigRootDir: __dirname,
         sourceType: 'module',
     },
