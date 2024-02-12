@@ -44,8 +44,7 @@ function SpacePage(): JSX.Element {
         accountDataLoading,
         loggedIn,
         setPageBottomReached,
-        setAlertMessage,
-        setAlertModalOpen,
+        alert,
         setClaimAccountModalOpen,
     } = useContext(AccountContext)
     const {
@@ -195,13 +194,11 @@ function SpacePage(): JSX.Element {
                         .catch((error) => {
                             console.log(error)
                             if (error.response && error.response.data.message === 'Invalid token') {
-                                setAlertMessage('Invalid invite token')
-                                setAlertModalOpen(true)
+                                alert('Invalid invite token')
                             }
                         })
                 } else {
-                    setAlertMessage('Log in and refresh page to use this invite link')
-                    setAlertModalOpen(true)
+                    alert('Log in and refresh page to use this invite link')
                 }
             }
         }

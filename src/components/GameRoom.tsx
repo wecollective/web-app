@@ -599,11 +599,9 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
                             }
                             setPlayers((previousPlayers) => [...previousPlayers, newPlayer])
                             setLoadingStream(false)
-                            openVideoWall()
                         })
                         .catch(() => {
-                            setAlertMessage('Unable to connect media devices')
-                            setAlertModalOpen(true)
+                            alert('Unable to connect media devices')
                             setLoadingStream(false)
                         })
                 })
@@ -1177,7 +1175,6 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
     function addEventListenersToBead(index) {
         d3.select(`#post-audio-bead-card-${post.id}-${index}`)
             .on('play', () => {
-                liveBeadIndexRef.current = index
                 d3.select('#play-button').attr('display', 'none')
                 d3.select('#pause-button').attr('display', 'flex')
             })
@@ -1189,15 +1186,14 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
                 const nextBead = d3.select(`#post-audio-bead-card-${post.id}-${index + 1}`).node()
                 if (nextBead) nextBead.play()
                 else {
-                    liveBeadIndexRef.current = 0
                     d3.select('#play-button').attr('display', 'flex')
                     d3.select('#pause-button').attr('display', 'none')
                 }
             })
     }
 
-    function updateMobileTab(tab: 'comments' | 'game' | 'videos') {
-        switch (tab) {
+    useEffect(() => {
+        switch (mobileTab) {
             case 'comments':
                 if (showComments) {
                     setMobileTab('game')
@@ -1205,28 +1201,28 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
                 } else {
                     setMobileTab('comments')
                     setShowComments(true)
-                    updateShowVideos(false)
+                    setShowVideos(false)
                 }
                 break
             case 'game':
                 setMobileTab('game')
                 setShowComments(false)
-                updateShowVideos(false)
+                setShowVideos(false)
                 break
             case 'videos':
                 if (showVideos) {
                     setMobileTab('game')
-                    updateShowVideos(false)
+                    setShowVideos(false)
                 } else {
                     setMobileTab('videos')
-                    openVideoWall()
+                    setShowVideos(true)
                     setShowComments(false)
                 }
                 break
             default:
                 break
         }
-    }
+    }, [mobileTab])
 
     async function getGameData() {
         return axios.get(`${config.apiURL}/gbg-data?postId=${post.id}&noLimit=true`)
