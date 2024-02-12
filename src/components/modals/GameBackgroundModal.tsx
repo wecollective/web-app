@@ -1,30 +1,38 @@
+/* eslint-disable react/function-component-definition */
+/* eslint-disable no-nested-ternary */
 import Button from '@components/Button'
 import Input from '@components/Input'
-import Modal from '@components/modals/Modal'
 import Row from '@components/Row'
 import config from '@src/Config'
 import { imageMBLimit } from '@src/Helpers'
+import { AccountContext } from '@src/contexts/AccountContext'
 import styles from '@styles/components/modals/GBGBackgroundModal.module.scss'
 import axios from 'axios'
-import React, { useState } from 'react'
+import getYouTubeID from 'get-youtube-id'
+import React, { FC, useContext, useState } from 'react'
+import { Socket } from 'socket.io-client'
 import Cookies from 'universal-cookie'
+import Modal from './Modal'
 
-function GameBackgroundModal(props: {
+const getVideoId = (url: string) => (url.match(/^\w+$/) ? url : getYouTubeID(url))
+
+const GameBackgroundModal: FC<{
     gameData: any
-    signalNewBackground: (type: 'image' | 'video', url: string, startTime?: number) => void
-    close: () => void
-}): JSX.Element {
-    const { gameData, signalNewBackground, close } = props
+    roomId: number
+    socket: Socket
+    onClose: () => void
+}> = ({ gameData, roomId, socket, onClose }) => {
     const [imageFile, setImageFile] = useState<File>()
     const [imageURL, setImageURL] = useState('')
     const [videoURL, setVideoURL] = useState('')
+    const videoId = getVideoId(videoURL)
     const [videoStartTime, setVideoStartTime] = useState(0)
     const [imagePreviewURL, setImagePreviewURL] = useState('')
-    const [showImagePreview, setShowImagePreview] = useState(false)
-    const [showVideoPreview, setShowVideoPreview] = useState(false)
+    const [preview, setPreview] = useState<'image' | 'video'>()
     const [fileSizeError, setFileSizeError] = useState(false)
     const [loading, setLoading] = useState(false)
     const cookies = new Cookies()
+    const { accountData } = useContext(AccountContext)
 
     function resetState() {
         setImageFile(undefined)
@@ -42,79 +50,110 @@ function GameBackgroundModal(props: {
     function selectImageFile() {
         const input = document.getElementById('file-input') as HTMLInputElement
         if (input && input.files && input.files[0]) {
-            setShowVideoPreview(false)
+            setPreview(undefined)
             resetState()
             if (input.files[0].size > imageMBLimit * 1024 * 1024) {
-                setShowImagePreview(false)
                 setFileSizeError(true)
                 removeInputFiles()
             } else {
                 setImageFile(input.files[0])
                 setImagePreviewURL(URL.createObjectURL(input.files[0]))
-                setShowImagePreview(true)
+                setPreview('image')
             }
         }
     }
 
     function selectImageURL(url) {
-        setShowVideoPreview(false)
+        setPreview(undefined)
         resetState()
         removeInputFiles()
         setImageURL(url)
         setImagePreviewURL(url)
-        setShowImagePreview(url.length > 0)
+        if (url.length > 0) {
+            setPreview('image')
+        }
     }
 
     function selectVideoURL(url) {
-        setShowImagePreview(false)
+        setPreview(undefined)
         resetState()
         removeInputFiles()
         setVideoURL(url)
-        setShowVideoPreview(true)
+        setPreview('video')
     }
 
-    function saveBackground() {
+    async function saveBackground() {
         setLoading(true)
         const accessToken = cookies.get('accessToken')
         const options = { headers: { Authorization: `Bearer ${accessToken}` } }
         let data
+        let signalData
         if (imageFile) {
             data = new FormData()
             data.append('image', imageFile)
             options.headers['Content-Type'] = 'multipart/form-data'
-        } else if (imageURL) data = { imageURL }
-        else data = { id: gameData.id, videoURL, videoStartTime }
+            signalData = {
+                type: 'image',
+            }
+        } else if (imageURL) {
+            data = { imageURL }
+            signalData = {
+                type: 'image',
+                url: imageURL,
+            }
+        } else {
+            data = {
+                id: gameData.id,
+                videoURL: videoId,
+                videoStartTime,
+            }
+            signalData = {
+                type: 'video',
+                url: videoId,
+                startTime: videoStartTime,
+            }
+        }
 
-        axios
-            .post(`${config.apiURL}/gbg-background?gameId=${gameData.id}`, data, options)
-            .then((res) => {
-                if (videoURL) signalNewBackground('video', videoURL, videoStartTime)
-                else signalNewBackground('image', imageURL || res.data.imageURL)
-                setLoading(false)
-                close()
-            })
-            .catch((error) => console.log(error))
+        const res = await axios.post(
+            `${config.apiURL}/gbg-background?gameId=${gameData.id}`,
+            data,
+            options
+        )
+
+        socket.emit('outgoing-new-background', {
+            roomId,
+            userSignaling: {
+                id: accountData.id,
+                handle: accountData.handle,
+                name: accountData.name || 'Anonymous',
+                flagImagePath: accountData.flagImagePath,
+            },
+            gameData,
+            ...signalData,
+            url: signalData.url || res.data.imageURL,
+        })
+        setLoading(false)
+        onClose()
     }
 
     return (
-        <Modal centerX close={close} style={{ textAlign: 'center' }}>
+        <Modal centerX close={onClose} style={{ textAlign: 'center' }}>
             <h1>Add a new background</h1>
-            {showImagePreview && (
+            {preview === 'image' ? (
                 <img
                     id='image-preview'
                     className={`${styles.imagePreview} ${styles.square}`}
                     src={imagePreviewURL}
                     alt=''
                 />
-            )}
-            {showVideoPreview && (
+            ) : preview === 'video' && videoId ? (
                 <iframe
                     className={styles.videoPreview}
                     id='videoBackground'
                     title='video background'
-                    src={`https://www.youtube.com/embed/${videoURL}?t=9&autoplay=1&mute=1&enablejsapi=1`}
+                    src={`https://www.youtube.com/embed/${videoId}?t=9&autoplay=1&mute=1&enablejsapi=1`}
                 />
-            )}
+            ) : null}
             <p>Upload an image from your device</p>
             {fileSizeError && <p>Image too large. Max size: {imageMBLimit}MB</p>}
             <Row className={styles.fileUploadInput}>
@@ -138,11 +177,10 @@ function GameBackgroundModal(props: {
                 style={{ marginBottom: 30 }}
             />
             <p>or choose a YouTube video background</p>
-            <p>(only include the unique identifier in the videos url i.e: 6whHTP6L2Is)</p>
             <Row centerY style={{ width: '100%', marginBottom: 30 }}>
                 <Input
                     type='text'
-                    placeholder='youtube video url...'
+                    placeholder='youtube video url or id...'
                     value={videoURL}
                     onChange={(url) => selectVideoURL(url)}
                     style={{ marginRight: 20 }}
