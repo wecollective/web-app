@@ -1,16 +1,14 @@
-const devApi = process.env.REACT_APP_API_ENV === 'dev'
-const devApp = process.env.REACT_APP_APP_ENV === 'dev'
+const { REACT_APP_API_ENV, REACT_APP_APP_ENV } = process.env
+const apiEnv = REACT_APP_API_ENV!.toUpperCase()
+const appEnv = REACT_APP_APP_ENV!.toUpperCase()
 
 const config = {
-    devApp,
-    apiURL: devApi ? process.env.REACT_APP_DEV_API_URL : process.env.REACT_APP_PROD_API_URL,
-    apiWebSocketURL: devApi
-        ? process.env.REACT_APP_DEV_WEBSOCKET_API_URL
-        : process.env.REACT_APP_PROD_WEBSOCKET_API_URL,
-    appURL: devApp ? process.env.REACT_APP_DEV_APP_URL : process.env.REACT_APP_PROD_APP_URL,
-    recaptchaSiteKey: devApi
-        ? process.env.REACT_APP_RECAPTCHA_SITE_KEY_DEV
-        : process.env.REACT_APP_RECAPTCHA_SITE_KEY_PROD,
+    devApp: REACT_APP_APP_ENV === 'dev',
+    apiURL: process.env[`REACT_APP_${apiEnv}_API_URL`],
+    apiWebSocketURL: process.env[`REACT_APP_${apiEnv}_WEBSOCKET_API_URL`],
+    appURL: process.env[`REACT_APP_${appEnv}_APP_URL`],
+    recaptchaSiteKey: process.env[`REACT_APP_RECAPTCHA_SITE_KEY_${apiEnv}`],
+    vapidPublicKey: process.env[`REACT_APP_${apiEnv}_VAPID_PUBLIC_KEY`],
     turnServerUrl: process.env.REACT_APP_TURN_SERVER_URL,
     turnServerUsername: process.env.REACT_APP_TURN_SERVER_USERNAME,
     turnServerPassword: process.env.REACT_APP_TURN_SERVER_PASSWORD,
