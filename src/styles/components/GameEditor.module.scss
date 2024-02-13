@@ -1,0 +1,52 @@
+@import '@styles/Variables';
+
+.gameEditor {
+    margin-top: 15px;
+    padding: 10px;
+    border: 1px solid $grey2;
+    border-radius: 10px;
+    background-color: $grey1;
+
+    .icon {
+        width: 14px;
+        height: 14px;
+        color: $grey4;
+        position: absolute
+    }
+
+    .stepWrapper {
+        .addStepButton {
+            visibility: hidden;
+        }
+
+        &:hover {
+            .addStepButton {
+                visibility: visible;
+            }
+        }
+
+        .step {
+            margin-top: 5px;
+            margin-bottom: 5px;
+            border: 1px solid $grey2;
+            padding: 5px;
+            border-radius: 5px;
+
+            &.post {}
+
+            &.repeat {}
+
+            &.turns {}
+        }
+    }
+
+    .subSteps {
+        margin-top: 10px;
+        margin-left: 10px;
+        margin-bottom: 10px;
+
+        border: 1px solid $grey2;
+        padding: 5px;
+        border-radius: 5px;
+    }
+}

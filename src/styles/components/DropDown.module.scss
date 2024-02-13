@@ -50,13 +50,13 @@
         transition: background-color 0.3s;
         position: relative;
 
-        > p {
+        >p {
             font-weight: 600;
             margin-right: 5px;
             color: $grey7;
         }
 
-        > svg {
+        >svg {
             width: 20px;
             height: 20px;
             color: $grey6;
@@ -92,19 +92,24 @@
             all: unset;
             cursor: pointer;
             display: flex;
+
             &:not(:last-child) {
                 margin-bottom: 10px;
             }
+
             white-space: nowrap;
+
             &:hover {
                 font-weight: 600;
             }
+
             // > p {
             //     flex-shrink: 0;
             // }
         }
     }
 }
+
 // .dropDownMenu {
 //     //height: 50px;
 //     // margin: 0 20px 10px 0;

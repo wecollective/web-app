@@ -7,6 +7,7 @@ import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
 import DropDown from '@components/DropDown'
 import FlagImageHighlights from '@components/FlagImageHighlights'
+import GameEditor from '@components/GameEditor'
 import ImageTitle from '@components/ImageTitle'
 import Input from '@components/Input'
 import Row from '@components/Row'
@@ -147,10 +148,11 @@ function CreatePostModal({
     const maxUrls = 5
     const location = useLocation()
     const [x, page, pageHandle, subPage] = location.pathname.split('/')
-    const contentTypes: MediaType[] = ['image', 'audio', 'event']
+    const contentTypes: MediaType[] = ['image', 'audio', 'event', 'game']
     if (type !== 'poll') {
         contentTypes.push('poll')
     }
+    console.log(mediaTypes)
 
     function initializeMediaDropBox(mediaType: MediaType) {
         let dragLeaveCounter = 0 // used to avoid dragleave firing when hovering child elements
@@ -178,8 +180,9 @@ function CreatePostModal({
     }
 
     function mediaButtonClick(mediaType: MediaType) {
-        if (mediaTypes.includes(mediaType)) setMediaTypes(mediaTypes.filter((t) => t !== mediaType))
-        else {
+        if (mediaTypes.includes(mediaType)) {
+            setMediaTypes(mediaTypes.filter((t) => t !== mediaType))
+        } else {
             Promise.all([setMediaTypes([...mediaTypes, mediaType])]).then(() => {
                 if (['image', 'audio'].includes(mediaType)) initializeMediaDropBox(mediaType)
             })
@@ -1294,6 +1297,7 @@ function CreatePostModal({
                                         renderBeads()}
                                 </Column>
                             )}
+                            {mediaTypes.includes('game') && <GameEditor />}
                         </Column>
                     </Column>
                     {!!contentTypes.length && (

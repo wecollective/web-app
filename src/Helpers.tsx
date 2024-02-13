@@ -110,6 +110,7 @@ export const MEDIA_TYPES = [
     'poll',
     ...GAME_TYPES,
     'card',
+    'game',
 ] as const
 
 export type MediaType = (typeof MEDIA_TYPES)[number]
@@ -291,6 +292,7 @@ export const postTypeIcons = {
     poll: <PollIcon />,
     card: <CardIcon />,
     'glass-bead-game': <CastaliaIcon />,
+    game: <CastaliaIcon />,
 }
 
 // functions
