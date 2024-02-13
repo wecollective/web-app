@@ -52,10 +52,7 @@ function LogInModal(props: { close: () => void }): JSX.Element {
         setShowResendVerificationEmail(false)
         if (allValid(formData, setFormData)) {
             setLoading(true)
-            const data = {
-                emailOrHandle: emailOrHandle.value,
-                password: password.value,
-            }
+            const data = { emailOrHandle: emailOrHandle.value, password: password.value }
             axios
                 .post(`${config.apiURL}/log-in`, data)
                 .then((res) => {

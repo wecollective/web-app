@@ -59,9 +59,47 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
 
     const cookies = new Cookies()
 
+    async function registerServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            const registration = await navigator.serviceWorker.getRegistration()
+            if (registration) registration.update()
+            else navigator.serviceWorker.register('/service-worker.js')
+        }
+    }
+
+    async function subscribeToPushNotifications() {
+        // check if service worker registered & already subscribed to push notifications
+        const registration = await navigator.serviceWorker.getRegistration()
+        const subscription = await registration?.pushManager.getSubscription()
+        if (registration && !subscription) {
+            // register new subscription
+            const newSubscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: config.vapidPublicKey,
+            })
+            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+            axios
+                .post(`${config.apiURL}/subscribe-to-push-notifications`, newSubscription, options)
+                .then((res) => {
+                    console.log('subscribe-to-push-notifications res: ', res.data)
+                    // // check if notifications enabled
+                    // if (Notification.permission === 'denied') {
+                    //     Notification.requestPermission().then((permission) => {
+                    //         if (permission === 'granted') {
+                    //             // eslint-disable-next-line no-new
+                    //             new Notification('Notifications enabled')
+                    //         }
+                    //     })
+                    // }
+                })
+                .catch((error) => console.log(error))
+        }
+    }
+
     // todo: connect socket even if not logged in?
     function getAccountData() {
-        // connect socket
+        // register service worker and initialise socket
+        registerServiceWorker()
         setSocket(io(config.apiWebSocketURL || ''))
         const accessToken = cookies.get('accessToken')
         if (!accessToken) setAccountDataLoading(false)
@@ -84,6 +122,7 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                     })
                     setLoggedIn(true)
                     setAccountDataLoading(false)
+                    subscribeToPushNotifications()
                 })
                 .catch((error) => {
                     setAccountDataLoading(false)
@@ -118,8 +157,8 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
         if (!accountDataLoading) {
             socket.emit('log-in', accountData.id)
             // listen for events
-            socket.on('notification', (notification) => {
-                console.log('new notification: ', notification)
+            socket.on('new-notification', () => {
+                // todo: store unseenNotifications as seperate value in local state
                 setAccountData((oldData) => {
                     return {
                         ...oldData,
