@@ -67,8 +67,8 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
         }
     }
 
-    async function subscribeToPushNotifications() {
-        // check if service worker registered & already subscribed to push notifications
+    async function subscribePushNotifications() {
+        // check if service worker registered & subscribed to push notifications
         const registration = await navigator.serviceWorker.getRegistration()
         const subscription = await registration?.pushManager.getSubscription()
         if (registration && !subscription) {
@@ -79,18 +79,24 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
             })
             const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
             axios
-                .post(`${config.apiURL}/subscribe-to-push-notifications`, newSubscription, options)
+                .post(`${config.apiURL}/store-push-subscription`, newSubscription, options)
                 .then((res) => {
                     console.log('subscribe-to-push-notifications res: ', res.data)
-                    // // check if notifications enabled
-                    // if (Notification.permission === 'denied') {
-                    //     Notification.requestPermission().then((permission) => {
-                    //         if (permission === 'granted') {
-                    //             // eslint-disable-next-line no-new
-                    //             new Notification('Notifications enabled')
-                    //         }
-                    //     })
-                    // }
+                })
+                .catch((error) => console.log(error))
+        }
+    }
+
+    async function unsubscribePushNotifications() {
+        const registration = await navigator.serviceWorker.getRegistration()
+        const subscription = await registration?.pushManager.getSubscription()
+        if (registration && subscription) {
+            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+            axios
+                .post(`${config.apiURL}/remove-push-subscription`, subscription, options)
+                .then(() => {
+                    subscription.unsubscribe()
+                    cookies.remove('accessToken', { path: '/' })
                 })
                 .catch((error) => console.log(error))
         }
@@ -122,7 +128,7 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                     })
                     setLoggedIn(true)
                     setAccountDataLoading(false)
-                    subscribeToPushNotifications()
+                    subscribePushNotifications()
                 })
                 .catch((error) => {
                     setAccountDataLoading(false)
@@ -138,10 +144,10 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
 
     function logOut() {
         console.log('AccountContext: logOut')
-        cookies.remove('accessToken', { path: '/' })
+        unsubscribePushNotifications()
+        socket.emit('log-out', accountData.id)
         const script = document.getElementById('greencheck')
         script!.innerHTML = ''
-        socket.emit('log-out', accountData.id)
         setAccountData(defaults.accountData)
         setLoggedIn(false)
     }
