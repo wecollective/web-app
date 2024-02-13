@@ -113,7 +113,7 @@ function Homepage(): JSX.Element {
                     setAlertModalOpen(true)
                 })
                 .catch((error) => {
-                    if (error.response.status === 404) {
+                    if (error.statusCode === 404) {
                         setAlertMessage('Sorry, that email verification token has expired')
                         setAlertModalOpen(true)
                     } else console.log(error)

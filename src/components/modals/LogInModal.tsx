@@ -105,7 +105,7 @@ function LogInModal(props: { close: () => void }): JSX.Element {
                 setSuccess(true)
             })
             .catch((error) => {
-                if (error.response.status === 404) setErrorMessage('Account not found')
+                if (error.statusCode === 404) setErrorMessage('Account not found')
                 setVerificationEmailLoading(false)
             })
     }

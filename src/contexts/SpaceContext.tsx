@@ -134,7 +134,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
             })
             .catch((error) => {
                 if (error.response) {
-                    if (error.response.status === 404) setSpaceNotFound(true)
+                    if (error.statusCode === 404) setSpaceNotFound(true)
                 }
                 console.log(error)
             })
