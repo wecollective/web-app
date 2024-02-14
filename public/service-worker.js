@@ -1,11 +1,39 @@
 this.addEventListener('push', (event) => {
-    // const data = event.data.json()
-    console.log('push recieved', event.data.json())
-    const { title, text } = event.data.json()
+    console.log('push notification: ', event.data.json())
+    const { type, title, text, image } = event.data.json()
+    // display push notification
     this.registration.showNotification(title, {
         body: text,
         icon: '/logo/192-masked.png',
+        image,
     })
+    // inform client
+    if (type === 'notification') {
+        this.clients.matchAll({ includeUncontrolled: true }).then((clients) => {
+            console.log('clients: ', clients)
+            clients.forEach((client) => {
+                client.postMessage({
+                    type: 'new-notification',
+                    // data: data.payload,
+                })
+            })
+        })
+    }
+})
+
+this.addEventListener('pushsubscriptionchange', async (event) => {
+    console.log('pushsubscriptionchange', event)
+    event.waitUntil(
+        this.registration.pushManager
+            .subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: `%REACT_APP_DEV_VAPID_PUBLIC_KEY%`,
+            })
+            .then((newSubscription) => {
+                console.log()
+                // Send the new subscription details to your server
+            })
+    )
 })
 
 // const CACHE_NAME = 'version-0.005'

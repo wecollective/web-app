@@ -145,7 +145,7 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
     function logOut() {
         console.log('AccountContext: logOut')
         unsubscribePushNotifications()
-        socket.emit('log-out', accountData.id)
+        socket.emit('log-out')
         const script = document.getElementById('greencheck')
         script!.innerHTML = ''
         setAccountData(defaults.accountData)
@@ -157,23 +157,28 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
         setDragItem(data)
     }
 
+    function serviceWorkerMessage(event) {
+        const { type } = event.data
+        console.log('sw message', type)
+        if (type === 'new-notification') {
+            setAccountData((oldData) => {
+                return {
+                    ...oldData,
+                    unseenNotifications: oldData.unseenNotifications + 1,
+                }
+            })
+        }
+    }
+
     useEffect(() => getAccountData(), [])
 
     useEffect(() => {
-        if (!accountDataLoading) {
-            socket.emit('log-in', accountData.id)
-            // listen for events
-            socket.on('new-notification', () => {
-                // todo: store unseenNotifications as seperate value in local state
-                setAccountData((oldData) => {
-                    return {
-                        ...oldData,
-                        unseenNotifications: oldData.unseenNotifications + 1,
-                    }
-                })
-            })
+        if (accountData.id) {
+            // listen for notifications from the service worker
+            navigator.serviceWorker.addEventListener('message', serviceWorkerMessage)
         }
-    }, [accountDataLoading])
+        return () => navigator.serviceWorker.removeEventListener('message', serviceWorkerMessage)
+    }, [accountData.id])
 
     return (
         <AccountContext.Provider
