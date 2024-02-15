@@ -275,8 +275,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         // set new handle
         spaceHandleRef.current = spaceHandle
         // exit old room if leaving
-        if (socket && spaceData.id && (page !== 's' || spaceHandle !== spaceData.handle)) {
-            console.log('exit room', spaceData.id)
+        if (spaceData.id && (page !== 's' || spaceHandle !== spaceData.handle)) {
             socket.emit('exit-room', `space-${spaceData.id}`)
         }
     }, [spaceHandle])

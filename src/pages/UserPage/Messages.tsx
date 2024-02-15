@@ -58,13 +58,15 @@ function Messages(): JSX.Element {
     const [imageURL, setImageURL] = useState<any>('')
     const [groupName, setGroupName] = useState('')
     const userSearch = useRef('')
-    const chatIdRef = useRef(0)
     const history = useNavigate()
     const cookies = new Cookies()
     const location = useLocation()
     const [x, page, userHandle, subPage] = location.pathname.split('/')
     const urlParams = Object.fromEntries(new URLSearchParams(location.search))
     const { chatId } = urlParams
+    const cleanup = useRef(() => {
+        // cleanup ref function updated with latest chatId state in addSocketSignals function
+    })
 
     // todo:
     // + add unseenMessages column on Users table
@@ -214,6 +216,8 @@ function Messages(): JSX.Element {
                 icon: '/logo/512-masked.png', // message.Creator.flagImagePath ||
             })
         })
+        // add latest chatId state to cleanup
+        cleanup.current = () => socket.emit('exit-room', `chat-${chatId}`)
     }
 
     function signalTyping(typing: boolean) {
@@ -259,8 +263,7 @@ function Messages(): JSX.Element {
         scrollWrapper?.addEventListener('scroll', scrollHandler)
         return () => {
             scrollWrapper?.removeEventListener('scroll', scrollHandler)
-            // exit old chat room
-            if (chatIdRef.current) socket.emit('exit-room', `chat-${chatIdRef.current}`)
+            cleanup.current()
         }
     }, [])
 
@@ -278,7 +281,6 @@ function Messages(): JSX.Element {
 
     // if chatId included in url params get messages
     useEffect(() => {
-        chatIdRef.current = +chatId || 0
         if (chatId) getMessages(0)
         // disconnect from previous chat if present
         if (selectedChat) socket.emit('exit-room', `chat-${selectedChat.id}`)
@@ -496,6 +498,7 @@ function Messages(): JSX.Element {
                             parent: replyParent
                                 ? { id: replyParent.id, type: replyParent.type }
                                 : null,
+                            peopleInRoom: peopleInRoom.map((u) => u.id),
                         }}
                         onSave={onSave}
                         signalTyping={signalTyping}
