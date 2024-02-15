@@ -1,6 +1,6 @@
 import { CreatePostModalSettings } from '@components/modals/CreatePostModal'
 import config from '@src/Config'
-import { getDraftPlainText } from '@src/Helpers'
+import { baseUserData, getDraftPlainText } from '@src/Helpers'
 import { IAccountContext } from '@src/Interfaces'
 import axios from 'axios'
 import React, { createContext, useEffect, useRef, useState } from 'react'
@@ -102,30 +102,35 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
         }
     }
 
-    // todo: connect socket even if not logged in?
+    function addGreenCheckScript(data) {
+        const { id, handle, name, bio, flagImagePath } = data
+        const script = document.getElementById('greencheck')
+        script!.innerHTML = JSON.stringify({
+            id,
+            username: handle,
+            fullname: name,
+            description: bio ? getDraftPlainText(bio) : '',
+            image: flagImagePath,
+        })
+    }
+
     function getAccountData() {
         // register service worker and initialise socket
         registerServiceWorker()
-        setSocket(io(config.apiWebSocketURL || ''))
+        if (!socket) setSocket(io(config.apiWebSocketURL || ''))
+        // if no access cookie end process
         const accessToken = cookies.get('accessToken')
         if (!accessToken) setAccountDataLoading(false)
         else {
+            // fetch account data
             setAccountDataLoading(true)
             const options = { headers: { Authorization: `Bearer ${accessToken}` } }
             axios
                 .get(`${config.apiURL}/account-data`, options)
                 .then((res) => {
-                    const { id, handle, name, bio, flagImagePath } = res.data
+                    // console.log('account-data: ', res.data)
                     setAccountData(res.data)
-                    // add greencheck script
-                    const script = document.getElementById('greencheck')
-                    script!.innerHTML = JSON.stringify({
-                        id,
-                        username: handle,
-                        fullname: name,
-                        description: bio ? getDraftPlainText(bio) : '',
-                        image: flagImagePath,
-                    })
+                    addGreenCheckScript(res.data)
                     setLoggedIn(true)
                     setAccountDataLoading(false)
                     subscribePushNotifications()
@@ -159,8 +164,8 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
 
     function serviceWorkerMessage(event) {
         const { type } = event.data
-        console.log('sw message', type)
         if (type === 'new-notification') {
+            // todo: store unseen notification seperately...
             setAccountData((oldData) => {
                 return {
                     ...oldData,
@@ -176,6 +181,8 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
         if (accountData.id) {
             // listen for notifications from the service worker
             navigator.serviceWorker.addEventListener('message', serviceWorkerMessage)
+            // add user data to socket
+            socket.emit('log-in', { socketId: socket.id, ...baseUserData(accountData) })
         }
         return () => navigator.serviceWorker.removeEventListener('message', serviceWorkerMessage)
     }, [accountData.id])

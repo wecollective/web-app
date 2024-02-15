@@ -111,7 +111,7 @@ function Messages(): JSX.Element {
             })
             .catch((error) => {
                 console.log(error)
-                if (error.response.status === 404) setChatNotFoundError(true)
+                if (error.statusCode === 404) setChatNotFoundError(true)
             })
     }
 
@@ -177,8 +177,7 @@ function Messages(): JSX.Element {
     }
 
     function addSocketSignals() {
-        // clean up old connection if present
-        socket.emit('exit-room', { roomId: `chat-${chatId}`, userId: accountData.id })
+        // remove old listeners
         const listeners = [
             'room-entered',
             'user-entering',
@@ -189,31 +188,30 @@ function Messages(): JSX.Element {
         ]
         listeners.forEach((event) => socket.removeAllListeners(event))
         // enter room
-        socket.emit('enter-room', { roomId: `chat-${chatId}`, user: baseUserData(accountData) })
+        socket.emit('enter-room', {
+            roomId: `chat-${chatId}`,
+            user: { socketId: socket.id, ...baseUserData(accountData) },
+        })
         // listen for events
-        socket.on('room-entered', (usersInRoom) => {
-            console.log('room-entered', usersInRoom)
-            setPeopleInRoom(usersInRoom)
-        })
-        socket.on('user-entering', (user) => {
-            console.log('user-entering', user.id)
-            setPeopleInRoom((people) => [user, ...people])
-        })
-        socket.on('user-exiting', (userId) => {
-            console.log('user-exiting', userId)
-            setPeopleInRoom((people) => people.filter((u) => u.id !== userId))
-        })
-        socket.on('user-started-typing', (user) => {
-            console.log('user-started-typing', user)
-            setPeopleTyping((people) => [user, ...people])
-        })
-        socket.on('user-stopped-typing', (user) => {
-            console.log('user-stopped-typing', user)
+        socket.on('room-entered', (usersInRoom) => setPeopleInRoom(usersInRoom))
+        socket.on('user-entering', (user) => setPeopleInRoom((people) => [user, ...people]))
+        socket.on('user-exiting', (socketId) =>
+            setPeopleInRoom((people) => people.filter((u) => u.socketId !== socketId))
+        )
+        socket.on('user-started-typing', (user) => setPeopleTyping((people) => [user, ...people]))
+        socket.on('user-stopped-typing', (user) =>
             setPeopleTyping((people) => people.filter((u) => u.id !== user.id))
-        })
-        socket.on('new-message', (messageId) => {
-            console.log('new-message', messageId)
-            getMessage(messageId)
+        )
+        socket.on('new-message', (data) => {
+            const { roomId, message } = data
+            console.log('new-message', data)
+            getMessage(message.id)
+            // if ()
+            // eslint-disable-next-line no-new
+            new Notification(`New message from ${message.Creator.name}`, {
+                body: message.text ? getDraftPlainText(message.text) : '...',
+                icon: '/logo/512-masked.png', // message.Creator.flagImagePath ||
+            })
         })
     }
 
@@ -241,7 +239,10 @@ function Messages(): JSX.Element {
     }
 
     function onSave(newMessage) {
+        console.log('new message: ', newMessage)
         setReplyParent(null)
+        // signal message to peers
+        socket.emit('new-message', { roomId: `chat-${chatId}`, message: newMessage })
         // move chat to top of the list
         if (chats[0].id !== +chatId) {
             const movedChat = chats.find((chat) => chat.id === +chatId)
@@ -275,12 +276,7 @@ function Messages(): JSX.Element {
         if (chatId) {
             getMessages(0)
             // disconnect from previous chat if present
-            if (selectedChat) {
-                socket.emit('exit-room', {
-                    roomId: `chat-${selectedChat.id}`,
-                    userId: accountData.id,
-                })
-            }
+            if (selectedChat) socket.emit('exit-room', `chat-${selectedChat.id}`)
         }
     }, [chatId])
 
