@@ -58,6 +58,7 @@ function Messages(): JSX.Element {
     const [imageURL, setImageURL] = useState<any>('')
     const [groupName, setGroupName] = useState('')
     const userSearch = useRef('')
+    const chatIdRef = useRef(0)
     const history = useNavigate()
     const cookies = new Cookies()
     const location = useLocation()
@@ -256,7 +257,11 @@ function Messages(): JSX.Element {
     useEffect(() => {
         const scrollWrapper = document.getElementById('scroll-wrapper')
         scrollWrapper?.addEventListener('scroll', scrollHandler)
-        return () => scrollWrapper?.removeEventListener('scroll', scrollHandler)
+        return () => {
+            scrollWrapper?.removeEventListener('scroll', scrollHandler)
+            // exit old chat room
+            if (chatIdRef.current) socket.emit('exit-room', `chat-${chatIdRef.current}`)
+        }
     }, [])
 
     // if logged in and is own account get chats, otherwise redirect to posts page
@@ -271,13 +276,12 @@ function Messages(): JSX.Element {
         }
     }, [userData.id, loggedIn])
 
-    // if chatId included in url params, get messages and set selected chat
+    // if chatId included in url params get messages
     useEffect(() => {
-        if (chatId) {
-            getMessages(0)
-            // disconnect from previous chat if present
-            if (selectedChat) socket.emit('exit-room', `chat-${selectedChat.id}`)
-        }
+        chatIdRef.current = +chatId || 0
+        if (chatId) getMessages(0)
+        // disconnect from previous chat if present
+        if (selectedChat) socket.emit('exit-room', `chat-${selectedChat.id}`)
     }, [chatId])
 
     // add socket signals
