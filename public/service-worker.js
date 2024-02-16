@@ -1,23 +1,19 @@
-this.addEventListener('push', (event) => {
-    console.log('push notification: ', event.data.json())
-    const { type, title, text, image } = event.data.json()
+this.addEventListener('push', async (event) => {
+    // console.log('push notification: ', event.data.json())
+    const { type, title, text, icon, image, data } = event.data.json()
     // display push notification
     this.registration.showNotification(title, {
         body: text,
-        icon: '/logo/192-masked.png',
+        icon: icon || '/logo/192-masked.png',
         image,
     })
     // inform client
+    const clients = await this.clients.matchAll({ includeUncontrolled: true })
     if (type === 'notification') {
-        this.clients.matchAll({ includeUncontrolled: true }).then((clients) => {
-            console.log('clients: ', clients)
-            clients.forEach((client) => {
-                client.postMessage({
-                    type: 'new-notification',
-                    // data: data.payload,
-                })
-            })
-        })
+        clients.forEach((client) => client.postMessage({ type: 'new-notification' }))
+    }
+    if (type === 'message') {
+        clients.forEach((client) => client.postMessage({ type: 'new-message', data }))
     }
 })
 

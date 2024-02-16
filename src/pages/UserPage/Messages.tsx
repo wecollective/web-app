@@ -85,7 +85,7 @@ function Messages(): JSX.Element {
         axios
             .get(`${config.apiURL}/chats`, options)
             .then((res) => {
-                console.log('chats res: ', res.data)
+                // console.log('chats res: ', res.data)
                 setChats(res.data)
                 setChatsLoading(false)
                 if (chatId) history(`?chatId=${chatId}`)
@@ -118,14 +118,9 @@ function Messages(): JSX.Element {
             })
     }
 
-    function getMessage(messageId: number) {
+    function getMessage(messageId: number): any {
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-        axios
-            .get(`${config.apiURL}/post-data?postId=${messageId}`, options)
-            .then((res) => {
-                setMessages((oldMessages) => [res.data, ...oldMessages])
-            })
-            .catch((error) => console.log(error))
+        return axios.get(`${config.apiURL}/post-data?postId=${messageId}`, options)
     }
 
     function findUsers(query) {
@@ -179,6 +174,28 @@ function Messages(): JSX.Element {
             .catch((error) => console.log(error))
     }
 
+    function findLastMessagePreview(message) {
+        let text = message.text ? getDraftPlainText(message.text) : ''
+        if (!text) {
+            const mediaTypes = message.mediaTypes.split(',')
+            const mediaType = mediaTypes[mediaTypes.length - 1]
+            if (mediaType === 'image') text = '📷'
+            else if (mediaType === 'audio') text = '🔊'
+            else if (mediaType === 'event') text = '🗓️'
+            else text = '...'
+        } else if (text.length > 100) text = text.substring(0, 100).concat('...')
+        return text
+    }
+
+    function bumpChat(bumpedChatId, newMessage) {
+        setChats((oldChats) => {
+            const movedChat = oldChats.find((chat) => chat.id === bumpedChatId)
+            movedChat.lastMessage = newMessage
+            const newChats = [movedChat, ...oldChats.filter((chat) => chat.id !== bumpedChatId)]
+            return newChats
+        })
+    }
+
     function addSocketSignals() {
         // remove old listeners
         const listeners = [
@@ -205,16 +222,13 @@ function Messages(): JSX.Element {
         socket.on('user-stopped-typing', (user) =>
             setPeopleTyping((people) => people.filter((u) => u.id !== user.id))
         )
-        socket.on('new-message', (data) => {
-            const { roomId, message } = data
-            console.log('new-message', data)
-            getMessage(message.id)
-            // if ()
-            // eslint-disable-next-line no-new
-            new Notification(`New message from ${message.Creator.name}`, {
-                body: message.text ? getDraftPlainText(message.text) : '...',
-                icon: '/logo/512-masked.png', // message.Creator.flagImagePath ||
-            })
+        socket.on('new-message', (messageId) => {
+            getMessage(messageId)
+                .then((res) => {
+                    setMessages((oldMessages) => [res.data, ...oldMessages])
+                    bumpChat(+chatId, res.data)
+                })
+                .catch((error) => console.log(error))
         })
         // add latest chatId state to cleanup
         cleanup.current = () => socket.emit('exit-room', `chat-${chatId}`)
@@ -233,7 +247,7 @@ function Messages(): JSX.Element {
         axios
             .post(`${config.apiURL}/create-chat`, { userId: user.id }, options)
             .then((res) => {
-                console.log('user-chat res: ', res.data)
+                // console.log('user-chat res: ', res.data)
                 if (res.data.existingChatId) history(`?chatId=${res.data.existingChatId}`)
                 else {
                     setChats([{ ...res.data, otherUser: user }, ...chats])
@@ -243,26 +257,23 @@ function Messages(): JSX.Element {
             .catch((error) => console.log(error))
     }
 
-    function onSave(newMessage) {
-        console.log('new message: ', newMessage)
-        setReplyParent(null)
-        // signal message to peers
-        socket.emit('new-message', { roomId: `chat-${chatId}`, message: newMessage })
-        // move chat to top of the list
-        if (chats[0].id !== +chatId) {
-            const movedChat = chats.find((chat) => chat.id === +chatId)
-            movedChat.lastMessage = { Creator: accountData, text: newMessage.text }
-            const newChats = [movedChat, ...chats.filter((chat) => chat.id !== +chatId)]
-            setChats(newChats)
+    function serviceWorkerMessage(event) {
+        const { type, data } = event.data
+        if (type === 'new-message') {
+            getMessage(data.messageId)
+                .then((res) => bumpChat(data.chatId, res.data))
+                .catch((error) => console.log(error))
         }
     }
 
-    // add scroll handler
+    // add scroll and message listener
     useEffect(() => {
         const scrollWrapper = document.getElementById('scroll-wrapper')
         scrollWrapper?.addEventListener('scroll', scrollHandler)
+        navigator.serviceWorker.addEventListener('message', serviceWorkerMessage)
         return () => {
             scrollWrapper?.removeEventListener('scroll', scrollHandler)
+            navigator.serviceWorker.removeEventListener('message', serviceWorkerMessage)
             cleanup.current()
         }
     }, [])
@@ -360,7 +371,7 @@ function Messages(): JSX.Element {
                                                 : chat.lastMessage.Creator.name}
                                             :
                                         </b>{' '}
-                                        {trimText(getDraftPlainText(chat.lastMessage.text), 100)}
+                                        {findLastMessagePreview(chat.lastMessage)}
                                     </p>
                                 </Row>
                             )}
@@ -498,9 +509,12 @@ function Messages(): JSX.Element {
                             parent: replyParent
                                 ? { id: replyParent.id, type: replyParent.type }
                                 : null,
-                            peopleInRoom: peopleInRoom.map((u) => u.id),
+                            membersNotInRoom:
+                                selectedChat?.Members.filter(
+                                    (u) => !peopleInRoom.find((p) => p.id === u.id)
+                                ).map((u) => u.id) || [],
                         }}
-                        onSave={onSave}
+                        onSave={() => setReplyParent(null)}
                         signalTyping={signalTyping}
                     />
                 </Column>
