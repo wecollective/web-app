@@ -180,11 +180,11 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
     useEffect(() => {
         if (accountData.id) {
             // listen for notifications from the service worker
-            navigator.serviceWorker.addEventListener('message', serviceWorkerMessage)
+            navigator.serviceWorker?.addEventListener('message', serviceWorkerMessage)
             // add user data to socket
             socket.emit('log-in', { socketId: socket.id, ...baseUserData(accountData) })
         }
-        return () => navigator.serviceWorker.removeEventListener('message', serviceWorkerMessage)
+        return () => navigator.serviceWorker?.removeEventListener('message', serviceWorkerMessage)
     }, [accountData.id])
 
     return (
