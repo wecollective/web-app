@@ -23,7 +23,7 @@ type Step = {
           post: {
               title: string
               text: string
-              duration: number
+              timeout: number
           }
       }
     | {
@@ -55,7 +55,7 @@ const StepTitle: FC<{ prefix: string; step: Step }> = ({ prefix, step }) => (
         {(() => {
             switch (step.type) {
                 case 'post':
-                    return `(${step.post.duration})`
+                    return `(${step.post.timeout})`
                 case 'rounds':
                     return `(${step.amount}x)`
                 case 'turns':
@@ -251,7 +251,7 @@ const CreateStepModal: FC<{ onClose: () => void; onCreate: (step: Step) => void 
                                     post: {
                                         title: elements.title.value,
                                         text: elements.text.value,
-                                        duration: elements.duration.value,
+                                        timeout: elements.timeout.value,
                                     },
                                 }
                                 break
@@ -311,8 +311,8 @@ const CreateStepModal: FC<{ onClose: () => void; onCreate: (step: Step) => void 
                                         />
                                         <Input
                                             type='text'
-                                            title='Duration'
-                                            name='duration'
+                                            title='Timeout'
+                                            name='timeout'
                                             defaultValue='1m'
                                             placeholder='e.g. 2d 5h 30m 15s'
                                             style={{ marginBottom: 10 }}
@@ -400,7 +400,7 @@ const UpdateStepModal: FC<{ step: Step; onClose: () => void; onUpdate: (step: St
                         case 'post':
                             newStep.post.title = elements.title.value
                             newStep.post.text = elements.text.value
-                            newStep.post.duration = elements.duration.value
+                            newStep.post.timeout = elements.timeout.value
                             break
                         case 'game':
                             newStep.gameId = elements.gameId.value
@@ -444,11 +444,11 @@ const UpdateStepModal: FC<{ step: Step; onClose: () => void; onUpdate: (step: St
                                     />
                                     <Input
                                         type='text'
-                                        title='Duration'
-                                        name='duration'
+                                        title='Timeout'
+                                        name='timeout'
                                         placeholder='e.g. 2d 5h 30m 15s'
                                         style={{ marginBottom: 10 }}
-                                        defaultValue={step.post.duration}
+                                        defaultValue={step.post.timeout}
                                     />
                                 </>
                             )
