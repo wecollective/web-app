@@ -1,17 +1,18 @@
 import styles from '@styles/components/PlainButton.module.scss'
-import React from 'react'
+import React, { MouseEvent } from 'react'
 
 function PlainButton(props: {
+    className?: string
     size: number
-    onClick: () => void
+    onClick: (e: MouseEvent) => void
     style?: any
     children
 }): JSX.Element {
-    const { size, onClick, style, children } = props
+    const { className, size, onClick, style, children } = props
 
     return (
         <button
-            className={styles.plainButton}
+            className={`${styles.plainButton} ${className}`}
             type='button'
             onClick={onClick}
             style={{ ...style, width: size, height: size }}
@@ -22,6 +23,7 @@ function PlainButton(props: {
 }
 
 PlainButton.defaultProps = {
+    className: '',
     style: null,
 }
 

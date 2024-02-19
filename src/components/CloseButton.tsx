@@ -2,17 +2,23 @@ import { TimesIcon } from '@svgs/all'
 import React from 'react'
 import PlainButton from './modals/PlainButton'
 
-function CloseButton(props: { size: number; onClick: () => void; style?: any }): JSX.Element {
-    const { size, onClick, style } = props
+function CloseButton(props: {
+    className?: string
+    size: number
+    onClick: () => void
+    style?: any
+}): JSX.Element {
+    const { className, size, onClick, style } = props
 
     return (
-        <PlainButton size={size} onClick={onClick} style={style}>
+        <PlainButton className={className} size={size} onClick={onClick} style={style}>
             <TimesIcon width={size} height={size} />
         </PlainButton>
     )
 }
 
 CloseButton.defaultProps = {
+    className: '',
     style: null,
 }
 
