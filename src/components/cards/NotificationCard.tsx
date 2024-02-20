@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import Button from '@components/Button'
 import Column from '@components/Column'
 import Row from '@components/Row'
@@ -311,6 +312,7 @@ function NotificationCard(props: {
                 </Content>
             )}
 
+            {/* todo: refactor when link urls set up for link map */}
             {type.includes('-like') && (
                 <Content
                     typeIcon={<LikeIcon />}
@@ -322,6 +324,8 @@ function NotificationCard(props: {
                                 onClick={markAsSeen}
                                 style={{ marginTop: 10 }}
                             />
+                        ) : type.includes('link') ? (
+                            <div />
                         ) : (
                             <PostCardPreview
                                 post={relatedPost}
@@ -333,7 +337,11 @@ function NotificationCard(props: {
                     }
                 >
                     <UserButton user={triggerUser} imageSize={32} fontSize={15} />
-                    <p>liked your {type.split('-like')[0].replaceAll('-', ' ')}</p>
+                    <p>
+                        liked your{' '}
+                        {type.includes('link') ? '' : type.split('-like')[0].replaceAll('-', ' ')}
+                    </p>
+                    {type.includes('link') && <TextLink text='link' link={linkUrl()} />}
                     {triggerSpace && <p>in</p>}
                     {triggerSpace && (
                         <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
@@ -480,29 +488,29 @@ function NotificationCard(props: {
                 </Content>
             )}
 
-            {type === 'link-like' && (
-                <Content typeIcon={<LikeIcon />}>
-                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
-                    <p>liked your</p>
-                    <TextLink text='link' link={linkUrl()} />
-                    <CreatedAt date={createdAt} />
-                </Content>
-            )}
-
-            {type === 'post-mention' && (
+            {type.includes('-mention') && (
                 <Content
                     typeIcon={<AtIcon />}
                     preview={
-                        <PostCardPreview
-                            post={relatedPost}
-                            link={`/p/${postId}`}
-                            onClick={markAsSeen}
-                            style={{ marginTop: 10 }}
-                        />
+                        type.includes('comment') ? (
+                            <CommentCardPreview
+                                comment={relatedPost}
+                                link={`/p/${postId}`}
+                                onClick={markAsSeen}
+                                style={{ marginTop: 10 }}
+                            />
+                        ) : (
+                            <PostCardPreview
+                                post={relatedPost}
+                                link={`/p/${postId}`}
+                                onClick={markAsSeen}
+                                style={{ marginTop: 10 }}
+                            />
+                        )
                     }
                 >
                     <UserButton user={triggerUser} imageSize={32} fontSize={15} />
-                    <p>mentioned you in a post</p>
+                    <p>mentioned you in a {type.split('-mention')[0].replaceAll('-', ' ')}</p>
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
@@ -522,24 +530,6 @@ function NotificationCard(props: {
                     <p>Your post was removed from</p>
                     <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
                     <p>by its mods</p>
-                    <CreatedAt date={createdAt} />
-                </Content>
-            )}
-
-            {type === 'bead-mention' && (
-                <Content
-                    typeIcon={<AtIcon />}
-                    preview={
-                        <PostCardPreview
-                            post={relatedPost}
-                            link={`/p/${postId}`}
-                            onClick={markAsSeen}
-                            style={{ marginTop: 10 }}
-                        />
-                    }
-                >
-                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
-                    <p>mentioned you in a bead</p>
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
@@ -573,24 +563,6 @@ function NotificationCard(props: {
                     {triggerSpace && (
                         <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
                     )}
-                    <CreatedAt date={createdAt} />
-                </Content>
-            )}
-
-            {type === 'comment-mention' && (
-                <Content
-                    typeIcon={<AtIcon />}
-                    preview={
-                        <CommentCardPreview
-                            comment={relatedComment}
-                            link={`/p/${commentId}`}
-                            onClick={markAsSeen}
-                            style={{ marginTop: 10 }}
-                        />
-                    }
-                >
-                    <UserButton user={triggerUser} imageSize={32} fontSize={15} />
-                    <p>mentioned you in a comment</p>
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
