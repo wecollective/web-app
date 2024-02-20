@@ -19,8 +19,8 @@ import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-function PollCard(props: { postData: any; location: string }): JSX.Element {
-    const { postData, location } = props
+function PollCard(props: { postData: any; location: string; style?: any }): JSX.Element {
+    const { postData, location, style } = props
     const { id } = postData
     const { accountData, setAlertMessage, setAlertModalOpen, loggedIn } = useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
@@ -212,7 +212,7 @@ function PollCard(props: { postData: any; location: string }): JSX.Element {
             </Row>
         )
     return (
-        <Column className={styles.wrapper}>
+        <Column className={styles.wrapper} style={style}>
             {totalVotes > 0 && (
                 <Row centerX className={styles.results}>
                     <PieChart
@@ -312,6 +312,10 @@ function PollCard(props: { postData: any; location: string }): JSX.Element {
             )}
         </Column>
     )
+}
+
+PollCard.defaultProps = {
+    style: null,
 }
 
 export default PollCard

@@ -415,7 +415,7 @@ function PostCard(props: {
                         style={{ marginBottom: 10 }}
                     />
                 )}
-                {Event && <EventCard post={post} setPost={setPost} location={location} />}
+                {Event && <EventCard post={post} location={location} />}
                 {mediaTypes.includes('poll') && <PollCard postData={post} location={location} />}
                 {includesGame(mediaTypes) && (
                     <Game

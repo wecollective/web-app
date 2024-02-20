@@ -85,7 +85,7 @@ function Card(props: { postId: any; style?: any }): JSX.Element {
         )
 
     return (
-        <Column centerX className={styles.wrapper}>
+        <Column centerX className={styles.wrapper} style={style}>
             <Row centerY className={styles.smallScreenHeader} style={{ marginBottom: 10 }}>
                 <Link to={`/p/${card.id}`} title='Open post page' style={{ marginRight: 20 }}>
                     <Row centerX>

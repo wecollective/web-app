@@ -22,8 +22,9 @@ function Game(props: {
     postId: number
     isOwnPost: boolean
     setTopicImage: (url: string) => void
+    style?: any
 }): JSX.Element {
-    const { type, postId, isOwnPost, setTopicImage } = props
+    const { type, postId, isOwnPost, setTopicImage, style } = props
     const { accountData, setAlertMessage, setAlertModalOpen, loggedIn } = useContext(AccountContext)
     const [game, setGame] = useState<GameState>()
     const [beads, setBeads] = useState<any[]>([])
@@ -324,7 +325,7 @@ function Game(props: {
     }
 
     return (
-        <Column className={styles.wrapper} style={{ marginBottom: totalBeads ? 10 : 0 }}>
+        <Column className={styles.wrapper} style={{ ...style, marginBottom: totalBeads ? 10 : 0 }}>
             {synchronous && (
                 <Row style={{ marginBottom: 10 }}>
                     <Button
@@ -383,6 +384,10 @@ function Game(props: {
             )}
         </Column>
     )
+}
+
+Game.defaultProps = {
+    style: null,
 }
 
 export default Game

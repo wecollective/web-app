@@ -4,7 +4,11 @@ import FlagImage from '@components/FlagImage'
 import Row from '@components/Row'
 import LoadingWheel from '@components/animations/LoadingWheel'
 import Audios from '@components/cards/PostCard/Audios'
+import Card from '@components/cards/PostCard/Card'
+import EventCard from '@components/cards/PostCard/EventCard'
+import Game from '@components/cards/PostCard/Game'
 import Images from '@components/cards/PostCard/Images'
+import PollCard from '@components/cards/PostCard/PollCard'
 import Urls from '@components/cards/PostCard/Urls'
 import DraftText from '@components/draft-js/DraftText'
 import DeletePostModal from '@components/modals/DeletePostModal'
@@ -14,7 +18,14 @@ import RatingModal from '@components/modals/RatingModal'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
-import { dateCreated, getDraftPlainText, timeSinceCreated, trimText } from '@src/Helpers'
+import {
+    dateCreated,
+    getDraftPlainText,
+    getGameType,
+    includesGame,
+    timeSinceCreated,
+    trimText,
+} from '@src/Helpers'
 import styles from '@styles/components/cards/Comments/MessageCard.module.scss'
 import {
     DeleteIcon,
@@ -44,6 +55,7 @@ function MessageCard(props: {
     const {
         id,
         rootId,
+        title,
         text,
         mediaTypes,
         state,
@@ -57,6 +69,7 @@ function MessageCard(props: {
         UrlBlocks,
         ImageBlocks,
         AudioBlocks,
+        Event,
         Reactions,
         Parent,
     } = message
@@ -244,6 +257,7 @@ function MessageCard(props: {
                     </Column>
                 )}
                 <Column className={styles.content}>
+                    {title && <h1 style={{ margin: 0 }}>{title}</h1>}
                     <DraftText
                         text={state === 'deleted' ? '[message deleted]' : text}
                         markdownStyles={`${styles.markdown} ${
@@ -260,7 +274,6 @@ function MessageCard(props: {
                             style={{ margin: '10px 0' }}
                         />
                     )}
-
                     {mediaTypes.includes('image') && (
                         <Images
                             postId={id}
@@ -278,6 +291,28 @@ function MessageCard(props: {
                             })}
                             style={{ margin: '10px 0' }}
                         />
+                    )}
+                    {Event && (
+                        <EventCard post={message} location='message' style={{ marginTop: 10 }} />
+                    )}
+                    {mediaTypes.includes('poll') && (
+                        <PollCard
+                            postData={message}
+                            location='message'
+                            style={{ minWidth: 600, marginTop: 10 }}
+                        />
+                    )}
+                    {includesGame(mediaTypes) && (
+                        <Game
+                            type={getGameType(mediaTypes)}
+                            postId={id}
+                            setTopicImage={() => null}
+                            isOwnPost={Creator.id === accountData.id}
+                            style={{ marginTop: 10 }}
+                        />
+                    )}
+                    {mediaTypes.includes('card') && (
+                        <Card postId={id} style={{ minWidth: 600, marginTop: 10 }} />
                     )}
                 </Column>
                 <Row className={styles.reactions}>
