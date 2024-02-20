@@ -69,8 +69,7 @@ function ImageUploadModal(): JSX.Element {
 
     function saveImage() {
         setLoading(true)
-        const accessToken = cookies.get('accessToken')
-        const options = { headers: { Authorization: `Bearer ${accessToken}` } }
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
         let data
         if (imageURL) data = { imageURL }
         else {
@@ -78,15 +77,9 @@ function ImageUploadModal(): JSX.Element {
             data.append('image', imageFile)
             options.headers['Content-Type'] = 'multipart/form-data'
         }
-        // todo: needs auth check like on ImageUploadModal
+        const id = imageUploadType.includes('space') ? spaceData.id : userData.id
         axios
-            .post(
-                `${config.apiURL}/image-upload?type=${imageUploadType}&id=${
-                    imageUploadType.includes('space') ? spaceData.id : userData.id
-                }`,
-                data,
-                options
-            )
+            .post(`${config.apiURL}/image-upload?type=${imageUploadType}&id=${id}`, data, options)
             .then((res) => {
                 updateUI(imageURL || res.data.imageURL)
                 setLoading(false)
