@@ -176,12 +176,11 @@ function NotificationCard(props: {
         if (!seen) toggleSeen()
     }
 
-    function respondToSpaceInvite(spaceType, response) {
+    function respondToSpaceInvite(response) {
         const data = {
             notificationId: id,
             spaceId: triggerSpace.id,
             userId: triggerUser.id,
-            type: spaceType,
             response,
         }
         const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
@@ -387,10 +386,11 @@ function NotificationCard(props: {
                 >
                     <UserButton user={triggerUser} imageSize={32} fontSize={15} />
                     <p>reposted your post</p>
-                    {triggerSpace && <p>in</p>}
+                    {/* Removed as its confusing displaying source location instead of new reposted location (needs all of new locations to work) */}
+                    {/* {triggerSpace && <p>in</p>}
                     {triggerSpace && (
                         <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
-                    )}
+                    )} */}
                     <CreatedAt date={createdAt} />
                 </Content>
             )}
@@ -622,29 +622,20 @@ function NotificationCard(props: {
                 </Content>
             )}
 
-            {['space-invite', 'chat-invite'].includes(type) && (
-                <Content
-                    typeIcon={type.split('-')[0] === 'chat' ? <CommentIcon /> : <SpacesIcon />}
-                >
+            {type === 'space-invite' && (
+                <Content typeIcon={<SpacesIcon />}>
                     <UserButton user={triggerUser} imageSize={32} fontSize={15} />
-                    <p>invited you to {type.split('-')[0] === 'chat' ? 'chat' : 'join'}</p>
+                    <p>invited you to join</p>
                     <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
                     <CreatedAt date={createdAt} />
-                    <State
-                        state={state}
-                        respond={(response) => respondToSpaceInvite(type.split('-')[0], response)}
-                    />
+                    <State state={state} respond={respondToSpaceInvite} />
                 </Content>
             )}
 
-            {type.includes('-invite-response') && (
-                <Content
-                    typeIcon={type.split('-')[0] === 'chat' ? <CommentIcon /> : <SpacesIcon />}
-                >
+            {type === 'space-invite-response' && (
+                <Content typeIcon={<SpacesIcon />}>
                     <UserButton user={triggerUser} imageSize={32} fontSize={15} />
-                    <p>
-                        {state} your invitation to {type.split('-')[0] === 'chat' ? 'chat' : 'join'}
-                    </p>
+                    <p>{state} your invitation to join</p>
                     <SpaceButton space={triggerSpace} imageSize={32} fontSize={15} />
                     <CreatedAt date={createdAt} />
                 </Content>
