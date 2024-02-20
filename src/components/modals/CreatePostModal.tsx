@@ -7,7 +7,6 @@ import CloseButton from '@components/CloseButton'
 import Column from '@components/Column'
 import DropDown from '@components/DropDown'
 import FlagImageHighlights from '@components/FlagImageHighlights'
-import GameEditor from '@components/GameEditor'
 import ImageTitle from '@components/ImageTitle'
 import Input from '@components/Input'
 import Row from '@components/Row'
@@ -47,13 +46,14 @@ import {
     formatTimeMMSS,
     getDraftPlainText,
     imageMBLimit,
-    isGame,
+    isSpecificGame,
     postTypeIcons,
     scrapeUrl,
     simplifyText,
     uploadPost,
     validatePost,
 } from '@src/Helpers'
+import GameCard, { useGameStatus } from '@src/components/GameCard'
 import styles from '@styles/components/modals/CreatePostModal.module.scss'
 import {
     AudioIcon,
@@ -511,6 +511,14 @@ function CreatePostModal({
         }
     }
 
+    // new game
+    const initialGame = { steps: [] }
+    const [status, setStatus] = useGameStatus({
+        game: initialGame,
+        editing: true,
+        collapsed: false,
+    })
+
     // todo: merge groups into single array
     function updateTopicText(topicText) {
         const arcMatches = GlassBeadGameTopics.archetopics.filter((t) =>
@@ -656,13 +664,16 @@ function CreatePostModal({
             front.mediaTypes = frontMediaTypes.join(',')
             back.mediaTypes = backMediaTypes.join(',')
         }
-        if (mediaTypes.some(isGame)) {
+        if (mediaTypes.some(isSpecificGame)) {
             post.glassBeadGame = {
                 settings: gameSettings,
                 topicImage,
                 topicGroup: findTopicGroup(),
                 beads: !gameSettings.multiplayer && !gameSettings.synchronous ? beads : [],
             }
+        }
+        if (mediaTypes.includes('game')) {
+            post.game = status
         }
         if (source) post.source = { type: source.type, id: source.id, linkDescription }
         if (type === 'poll') post.governance = { action: pollAction, threshold: pollThreshold }
@@ -811,7 +822,7 @@ function CreatePostModal({
             ) : (
                 <Column centerX style={{ width: '100%' }}>
                     <h1>{MODAL_HEADER[type]}</h1>
-                    {mediaTypes.some(isGame) && GAMES[type].settingsEditable && (
+                    {mediaTypes.some(isSpecificGame) && GAMES[type].settingsEditable && (
                         <Button
                             text='Game settings'
                             color='aqua'
@@ -856,7 +867,7 @@ function CreatePostModal({
                             )}
                         </Row>
                         <Column className={styles.content}>
-                            {showTitle && !mediaTypes.some(isGame) && (
+                            {showTitle && !mediaTypes.some(isSpecificGame) && (
                                 <Row centerY spaceBetween className={styles.title}>
                                     <input
                                         placeholder='Title...'
@@ -877,7 +888,7 @@ function CreatePostModal({
                                     />
                                 </Row>
                             )}
-                            {mediaTypes.some(isGame) && (
+                            {mediaTypes.some(isSpecificGame) && (
                                 <Row centerY spaceBetween className={styles.topic}>
                                     <Column centerX centerY className={styles.imageWrapper}>
                                         {topicImage.Image.url && (
@@ -1231,7 +1242,7 @@ function CreatePostModal({
                                     </Row>
                                 </Column>
                             )}
-                            {mediaTypes.some(isGame) && (
+                            {mediaTypes.some(isSpecificGame) && (
                                 <Column className={styles.game}>
                                     {!gameSettings.synchronous && (
                                         <Column>
@@ -1297,7 +1308,13 @@ function CreatePostModal({
                                         renderBeads()}
                                 </Column>
                             )}
-                            {mediaTypes.includes('game') && <GameEditor />}
+                            {mediaTypes.includes('game') && (
+                                <GameCard
+                                    initialGame={initialGame}
+                                    status={status}
+                                    setStatus={setStatus}
+                                />
+                            )}
                         </Column>
                     </Column>
                     {!!contentTypes.length && (

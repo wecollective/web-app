@@ -93,7 +93,8 @@ export const GAME_TYPES = ['glass-bead-game', 'wisdom-gym'] as const
 
 export type GameType = (typeof GAME_TYPES)[number]
 
-export const isGame = (type: string): type is GameType => GAME_TYPES.includes(type as GameType)
+export const isSpecificGame = (type: string): type is GameType =>
+    GAME_TYPES.includes(type as GameType)
 
 export const includesGame = (mediaTypes: string) =>
     GAME_TYPES.some((type) => mediaTypes.includes(type))
@@ -172,6 +173,7 @@ export type Post = {
     totalRatings: number
     totalReposts: number
     totalLinks: number
+    game: Game
     Creator: IUser
     DirectSpaces: { id: number }[]
     UrlBlocks?: UrlBlock[]
@@ -182,6 +184,40 @@ export type Post = {
     Audio: { id: number; url: string }
     Url: { id: number }
 }
+
+export type Game = {
+    steps: Step[]
+}
+
+export type Step = {
+    id: string
+} & (
+    | {
+          type: 'post'
+          post: {
+              title: string
+              text: string
+              timeout: number
+          }
+      }
+    | {
+          type: 'game'
+          gameId: number
+      }
+    | {
+          type: 'rounds'
+          amount: string
+          steps: Step[]
+      }
+    | {
+          type: 'turns'
+          steps: Step[]
+      }
+)
+
+export type StepType = Step['type']
+
+export const STEP_TYPES = ['post', 'rounds', 'turns', 'game'] as const
 
 export type Event = {
     id: number

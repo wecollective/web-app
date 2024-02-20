@@ -2,11 +2,14 @@
 /* eslint-disable jsx-a11y/control-has-associated-label */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable react/function-component-definition */
-import { capitalise } from '@src/Helpers'
-import { CastaliaIcon, DeleteIcon, EditIcon, PlusIcon } from '@src/svgs/all'
+import config from '@src/Config'
+import { Game, STEP_TYPES, Step, StepType, capitalise } from '@src/Helpers'
+import { CastaliaIcon, ChevronDownIcon, DeleteIcon, EditIcon, PlusIcon } from '@src/svgs/all'
 import styles from '@styles/components/GameEditor.module.scss'
+import axios from 'axios'
 import { cloneDeep } from 'lodash'
 import React, { FC, useState } from 'react'
+import Cookies from 'universal-cookie'
 import { v4 as uuid } from 'uuid'
 import Button from './Button'
 import Column from './Column'
@@ -14,40 +17,6 @@ import Input from './Input'
 import Row from './Row'
 import Modal from './modals/Modal'
 import PlainButton from './modals/PlainButton'
-
-type Step = {
-    id: string
-} & (
-    | {
-          type: 'post'
-          post: {
-              title: string
-              text: string
-              timeout: number
-          }
-      }
-    | {
-          type: 'game'
-          gameId: number
-      }
-    | {
-          type: 'rounds'
-          amount: string
-          steps: Step[]
-      }
-    | {
-          type: 'turns'
-          steps: Step[]
-      }
-)
-
-type StepType = Step['type']
-
-const STEP_TYPES = ['post', 'rounds', 'turns', 'game'] as const
-
-type Game = {
-    steps: Step[]
-}
 
 const StepTitle: FC<{ prefix: string; step: Step }> = ({ prefix, step }) => (
     <h5 className={styles.stepTitle}>
@@ -78,20 +47,27 @@ const StepComponent: FC<{
     prependStep: (step: Step) => void
     appendStep: (step: Step) => void
     removeStep: () => void
-}> = ({ prefix, step, updateStep, prependStep, appendStep, removeStep }) => (
+    editing: boolean
+}> = ({ prefix, step, updateStep, prependStep, appendStep, removeStep, editing }) => (
     <Column className={styles.stepWrapper}>
         <Row className={styles.step}>
-            <CreateStepButton onPrepend={prependStep} onAppend={appendStep} />
+            {editing && <CreateStepButton onPrepend={prependStep} onAppend={appendStep} />}
             <Column style={{ flexGrow: 1 }}>
                 <Column className={styles.stepBody}>
                     <Row className={styles.stepHeader}>
                         <StepTitle prefix={prefix} step={step} />
-                        <Row className={styles.stepActions}>
-                            <UpdateStepButton step={step} onUpdate={updateStep} />
-                            <PlainButton className={styles.close} onClick={removeStep} size={14}>
-                                <DeleteIcon />
-                            </PlainButton>
-                        </Row>
+                        {editing && (
+                            <Row className={styles.stepActions}>
+                                <UpdateStepButton step={step} onUpdate={updateStep} />
+                                <PlainButton
+                                    className={styles.close}
+                                    onClick={removeStep}
+                                    size={14}
+                                >
+                                    <DeleteIcon />
+                                </PlainButton>
+                            </Row>
+                        )}
                     </Row>
                     {(() => {
                         switch (step.type) {
@@ -127,6 +103,7 @@ const StepComponent: FC<{
                             prefix={prefix}
                             steps={step.steps}
                             setSteps={(steps) => updateStep({ ...step, steps })}
+                            editing={editing}
                         />
                     )
                 default: {
@@ -138,11 +115,12 @@ const StepComponent: FC<{
     </Column>
 )
 
-const Steps: FC<{ prefix: string; steps: Step[]; setSteps: (steps: Step[]) => void }> = ({
-    prefix,
-    steps,
-    setSteps,
-}) => {
+const Steps: FC<{
+    prefix: string
+    steps: Step[]
+    setSteps: (steps: Step[]) => void
+    editing: boolean
+}> = ({ prefix, steps, setSteps, editing }) => {
     return steps.length ? (
         <div className={styles.steps}>
             {steps.map((step, i) => (
@@ -160,33 +138,103 @@ const Steps: FC<{ prefix: string; steps: Step[]; setSteps: (steps: Step[]) => vo
                         setSteps([...steps.slice(0, i + 1), newStep, ...steps.slice(i + 1)])
                     }
                     removeStep={() => setSteps([...steps.slice(0, i), ...steps.slice(i + 1)])}
+                    editing={editing}
                 />
             ))}
         </div>
     ) : (
         <div className={styles.emptySteps}>
-            <CreateStepButton onAppend={(step) => setSteps([...steps, step])} />
+            {editing ? (
+                <CreateStepButton onAppend={(step) => setSteps([...steps, step])} />
+            ) : (
+                <p style={{ textAlign: 'center' }}>no steps</p>
+            )}
         </div>
     )
 }
 
-const GameEditor: FC = () => {
-    const [state, setState] = useState<Game>({ steps: [] })
-
-    return (
-        <div className={styles.gameEditor}>
-            <Row centerY>
-                <CastaliaIcon className={styles.icon} />
-                <h3 style={{ flexGrow: 1, textAlign: 'center', marginBottom: 10 }}>Game</h3>
-            </Row>
-            <Steps
-                prefix=''
-                steps={state.steps}
-                setSteps={(steps) => setState({ ...state, steps })}
-            />
-        </div>
-    )
+export type GameStatus = {
+    postId?: number
+    game: Game
+    editing: boolean
+    collapsed: boolean
 }
+
+export const useGameStatus = (initialStatus: GameStatus) => useState<GameStatus>(initialStatus)
+
+const GameCard: FC<{
+    initialGame: Game
+    updateInitialGame?: () => void
+    status: GameStatus
+    setStatus: (status: GameStatus) => void
+}> = ({ initialGame, status, setStatus, updateInitialGame }) => (
+    <div className={styles.gameEditor}>
+        <Row centerY>
+            <CastaliaIcon className={styles.icon} />
+            <h3 style={{ flexGrow: 1, textAlign: 'center', marginBottom: 10 }}>Game</h3>
+            {status.collapsed ? (
+                <PlainButton size={14} onClick={() => setStatus({ ...status, collapsed: false })}>
+                    <ChevronDownIcon />
+                </PlainButton>
+            ) : (
+                updateInitialGame &&
+                !status.editing && (
+                    <PlainButton size={14} onClick={() => setStatus({ ...status, editing: true })}>
+                        <EditIcon />
+                    </PlainButton>
+                )
+            )}
+        </Row>
+        {!status.collapsed && (
+            <>
+                <Steps
+                    prefix=''
+                    steps={status.game.steps}
+                    setSteps={(steps) => setStatus({ ...status, game: { ...status.game, steps } })}
+                    editing={status.editing}
+                />
+                {updateInitialGame && status.editing && (
+                    <Row centerX>
+                        <Button
+                            color='grey'
+                            onClick={() =>
+                                setStatus({
+                                    ...status,
+                                    game: initialGame,
+                                    editing: false,
+                                })
+                            }
+                            text='Cancel'
+                            style={{ marginRight: 10 }}
+                        />
+                        <Button
+                            color='blue'
+                            onClick={async () => {
+                                await axios.post(
+                                    `${config.apiURL}/update-post`,
+                                    { id: status.postId, game: status.game },
+                                    {
+                                        headers: {
+                                            Authorization: `Bearer ${new Cookies().get(
+                                                'accessToken'
+                                            )}`,
+                                        },
+                                    }
+                                )
+                                updateInitialGame()
+                                setStatus({
+                                    ...status,
+                                    editing: false,
+                                })
+                            }}
+                            text='Save'
+                        />
+                    </Row>
+                )}
+            </>
+        )}
+    </div>
+)
 
 const CreateStepButton: FC<{
     onPrepend?: (step: Step) => void
@@ -486,4 +534,4 @@ const UpdateStepModal: FC<{ step: Step; onClose: () => void; onUpdate: (step: St
     )
 }
 
-export default GameEditor
+export default GameCard
