@@ -187,10 +187,10 @@ function Messages(): JSX.Element {
         return text
     }
 
-    function bumpChat(bumpedChatId, newMessage) {
+    function bumpChat(bumpedChatId, newMessage?) {
         setChats((oldChats) => {
             const movedChat = oldChats.find((chat) => chat.id === bumpedChatId)
-            movedChat.lastMessage = newMessage
+            if (newMessage) movedChat.lastMessage = newMessage
             const newChats = [movedChat, ...oldChats.filter((chat) => chat.id !== bumpedChatId)]
             return newChats
         })
@@ -247,7 +247,6 @@ function Messages(): JSX.Element {
         axios
             .post(`${config.apiURL}/create-chat`, { userId: user.id }, options)
             .then((res) => {
-                // console.log('user-chat res: ', res.data)
                 if (res.data.existingChatId) history(`?chatId=${res.data.existingChatId}`)
                 else {
                     setChats([{ ...res.data, otherUser: user }, ...chats])
@@ -259,11 +258,12 @@ function Messages(): JSX.Element {
 
     function serviceWorkerMessage(event) {
         const { type, data } = event.data
-        if (type === 'new-message') {
+        if (type === 'message') {
             getMessage(data.messageId)
                 .then((res) => bumpChat(data.chatId, res.data))
                 .catch((error) => console.log(error))
         }
+        if (type === 'chat-invite') setChats((oldChats) => [data.chat, ...oldChats])
     }
 
     // add scroll and message listener
