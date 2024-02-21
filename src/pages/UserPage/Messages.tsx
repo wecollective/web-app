@@ -68,30 +68,10 @@ function Messages(): JSX.Element {
         // cleanup ref function updated with latest chatId state in addSocketSignals function
     })
 
-    // todo:
-    // + add unseenMessages column on Users table
-    // + need to keep track of unseen messages per chat and user (add to SpaceUserStat table?)
-
     function scrollHandler(e) {
         const { scrollHeight, scrollTop, clientHeight } = e.target
         const topReached = scrollHeight + scrollTop < clientHeight + 5
         setScrollTopReached(topReached)
-    }
-
-    function getChats(offset) {
-        // todo: set up pagination
-        setChatsLoading(true)
-        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
-        axios
-            .get(`${config.apiURL}/chats`, options)
-            .then((res) => {
-                // console.log('chats res: ', res.data)
-                setChats(res.data)
-                setChatsLoading(false)
-                if (chatId) history(`?chatId=${chatId}`)
-                else history(`?chatId=${res.data[0].id}`)
-            })
-            .catch((error) => console.log(error))
     }
 
     function getMessages(offset: number) {
@@ -106,7 +86,16 @@ function Messages(): JSX.Element {
             .post(`${config.apiURL}/messages`, data, options)
             .then((res) => {
                 // console.log('messages res:', res.data)
-                if (!offset) setSelectedChat(res.data.chat)
+                if (!offset) {
+                    setSelectedChat(res.data.chat)
+                    // reset unseen messages
+                    setChats((oldChats) => {
+                        const newChats = [...oldChats]
+                        const chat = newChats.find((c) => c.id === res.data.chat.id)
+                        chat.unseenMessages = 0
+                        return newChats
+                    })
+                }
                 setTotalMessages(res.data.total)
                 setMessages(offset ? [...messages, ...res.data.messages] : res.data.messages)
                 if (offset) setNextMessagesLoading(false)
@@ -116,6 +105,22 @@ function Messages(): JSX.Element {
                 console.log(error)
                 if (error.statusCode === 404) setChatNotFoundError(true)
             })
+    }
+
+    // todo: set up pagination with offset
+    function getChats(offset) {
+        setChatsLoading(true)
+        const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+        axios
+            .get(`${config.apiURL}/chats`, options)
+            .then((res) => {
+                // console.log('chats res: ', res.data)
+                setChats(res.data)
+                setChatsLoading(false)
+                if (chatId) getMessages(0)
+                else history(`?chatId=${res.data[0].id}`)
+            })
+            .catch((error) => console.log(error))
     }
 
     function getMessage(messageId: number): any {
@@ -161,7 +166,7 @@ function Messages(): JSX.Element {
         axios
             .post(`${config.apiURL}/create-chat-group`, formData, options)
             .then((res) => {
-                setChats([...chats, res.data])
+                setChats([res.data, ...chats])
                 history(`?chatId=${res.data.id}`)
                 setCreateGroupLoading(false)
                 setNewGroupModalOpen(false)
@@ -187,10 +192,11 @@ function Messages(): JSX.Element {
         return text
     }
 
-    function bumpChat(bumpedChatId, newMessage?) {
+    function bumpChat(bumpedChatId, newMessage, incrementUnseenMessages) {
         setChats((oldChats) => {
             const movedChat = oldChats.find((chat) => chat.id === bumpedChatId)
-            if (newMessage) movedChat.lastMessage = newMessage
+            movedChat.lastMessage = newMessage
+            if (incrementUnseenMessages) movedChat.unseenMessages += 1
             const newChats = [movedChat, ...oldChats.filter((chat) => chat.id !== bumpedChatId)]
             return newChats
         })
@@ -226,7 +232,7 @@ function Messages(): JSX.Element {
             getMessage(messageId)
                 .then((res) => {
                     setMessages((oldMessages) => [res.data, ...oldMessages])
-                    bumpChat(+chatId, res.data)
+                    bumpChat(+chatId, res.data, false)
                 })
                 .catch((error) => console.log(error))
         })
@@ -260,7 +266,7 @@ function Messages(): JSX.Element {
         const { type, data } = event.data
         if (type === 'message') {
             getMessage(data.messageId)
-                .then((res) => bumpChat(data.chatId, res.data))
+                .then((res) => bumpChat(data.chatId, res.data, true))
                 .catch((error) => console.log(error))
         }
         if (type === 'chat-invite') setChats((oldChats) => [data.chat, ...oldChats])
@@ -292,7 +298,7 @@ function Messages(): JSX.Element {
 
     // if chatId included in url params get messages
     useEffect(() => {
-        if (chatId) getMessages(0)
+        if (chatId && !chatsLoading) getMessages(0)
         // disconnect from previous chat if present
         if (selectedChat) socket.emit('exit-room', `chat-${selectedChat.id}`)
     }, [chatId])
@@ -353,29 +359,36 @@ function Messages(): JSX.Element {
                         key={chat.id}
                         className={`${styles.chat} ${+chatId === chat.id && styles.selected}`}
                     >
-                        <FlagImage
-                            type='space'
-                            imagePath={
-                                chat.name ? chat.flagImagePath : chat.otherUser.flagImagePath
-                            }
-                            size={40}
-                        />
-                        <Column style={{ marginLeft: 10 }}>
-                            <h1>{chat.otherUser ? chat.otherUser.name : chat.name}</h1>
-                            {chat.lastMessage && (
-                                <Row>
-                                    <p>
-                                        <b>
-                                            {chat.lastMessage.Creator.id === accountData.id
-                                                ? 'You'
-                                                : chat.lastMessage.Creator.name}
-                                            :
-                                        </b>{' '}
-                                        {findLastMessagePreview(chat.lastMessage)}
-                                    </p>
-                                </Row>
-                            )}
-                        </Column>
+                        <Row>
+                            <FlagImage
+                                type='space'
+                                imagePath={
+                                    chat.name ? chat.flagImagePath : chat.otherUser.flagImagePath
+                                }
+                                size={40}
+                            />
+                            <Column style={{ marginLeft: 10 }}>
+                                <h1>{chat.otherUser ? chat.otherUser.name : chat.name}</h1>
+                                {chat.lastMessage && (
+                                    <Row>
+                                        <p>
+                                            <b>
+                                                {chat.lastMessage.Creator.id === accountData.id
+                                                    ? 'You'
+                                                    : chat.lastMessage.Creator.name}
+                                                :
+                                            </b>{' '}
+                                            {findLastMessagePreview(chat.lastMessage)}
+                                        </p>
+                                    </Row>
+                                )}
+                            </Column>
+                        </Row>
+                        {!!chat.unseenMessages && (
+                            <Column centerX centerY className={styles.unseenMessages}>
+                                {chat.unseenMessages}
+                            </Column>
+                        )}
                     </Link>
                 ))}
             </Column>
