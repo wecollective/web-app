@@ -359,7 +359,7 @@ function Messages(): JSX.Element {
                         key={chat.id}
                         className={`${styles.chat} ${+chatId === chat.id && styles.selected}`}
                     >
-                        <Row>
+                        <Row centerY>
                             <FlagImage
                                 type='space'
                                 imagePath={
@@ -438,6 +438,11 @@ function Messages(): JSX.Element {
                             setReplyParent={(parent) => setReplyParent(parent)}
                         />
                     ))}
+                    {nextMessagesLoading && (
+                        <Row centerX centerY style={{ height: 50, flexShrink: 0 }}>
+                            <LoadingWheel size={30} />
+                        </Row>
+                    )}
                 </Column>
                 <Column className={styles.input}>
                     {replyParent && (
