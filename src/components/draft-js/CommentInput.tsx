@@ -437,10 +437,15 @@ function CommentInput(props: {
         }
     }, [rawUrls])
 
-    // focus on errors
+    // expand input to reveal errors when present
     useEffect(() => {
         if (errors.length) setFocused(true)
     }, [errors])
+
+    // focus cursor on input when reply parent added
+    useEffect(() => {
+        if (links.parent) focus()
+    }, [links.parent])
 
     return (
         <div
