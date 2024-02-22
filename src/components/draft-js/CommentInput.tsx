@@ -108,7 +108,7 @@ function CommentInput(props: {
     const overMaxChars = totalChars > (maxChars || maxPostChars)
     const totalCharsText = `${totalChars}/${maxChars || maxPostChars}`
     const location = useLocation()
-    const [x, page] = location.pathname.split('/')
+    const [x, page, userHandle, subPage] = location.pathname.split('/')
 
     // plugins
     const toolbarOptions = { theme: { buttonStyles: styles, toolbarStyles: styles } }
@@ -324,7 +324,7 @@ function CommentInput(props: {
         setImages([])
         setAudios([])
         setUrls([])
-        setTimeout(() => editorRef.current!.focus(), 0)
+        setTimeout(() => editorRef.current?.focus(), 0)
     }
 
     function save() {
@@ -444,7 +444,19 @@ function CommentInput(props: {
 
     // focus cursor on input when reply parent added
     useEffect(() => {
-        if (links.parent) focus()
+        if (links.parent) {
+            editorRef.current!.focus()
+            // scroll to page bottom (necessary on chrome otherwise input floats off screen)
+            if (subPage === 'messages')
+                setTimeout(
+                    () =>
+                        window.scrollTo({
+                            top: document.body.scrollHeight,
+                            behavior: 'smooth',
+                        }),
+                    300
+                )
+        }
     }, [links.parent])
 
     return (

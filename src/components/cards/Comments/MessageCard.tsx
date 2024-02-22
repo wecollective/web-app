@@ -45,7 +45,7 @@ import Cookies from 'universal-cookie'
 function MessageCard(props: {
     message: any
     removeMessage: (message: any) => void
-    setReplyParent: (message: any) => void
+    setReplyParent: () => void
 }): JSX.Element {
     const { message: messageData, setReplyParent, removeMessage } = props
     const { loggedIn, accountData, updateDragItem, setAlertMessage, setAlertModalOpen } =
@@ -137,7 +137,7 @@ function MessageCard(props: {
     function renderButtons() {
         return (
             <Row centerY className={styles.buttons}>
-                <button type='button' onClick={() => setReplyParent(messageData)}>
+                <button type='button' onClick={() => setReplyParent()}>
                     <ReplyIcon style={{ transform: 'rotate(180deg)' }} />
                 </button>
                 <button

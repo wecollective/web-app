@@ -30,12 +30,13 @@ import {
     UsersIcon,
 } from '@svgs/all'
 import axios from 'axios'
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
 function Messages(): JSX.Element {
-    const { accountData, loggedIn, socket, setToyboxCollapsed } = useContext(AccountContext)
+    const { accountData, setAccountData, loggedIn, socket, setToyboxCollapsed } =
+        useContext(AccountContext)
     const { userData, userNotFound } = useContext(UserContext)
     const [chats, setChats] = useState<any[]>([])
     const [chatsLoading, setChatsLoading] = useState(true)
@@ -67,6 +68,9 @@ function Messages(): JSX.Element {
     const cleanup = useRef(() => {
         // cleanup ref function updated with latest chatId state in addSocketSignals function
     })
+    const parentMemo = useMemo(() => {
+        return replyParent ? { id: replyParent.id, type: replyParent.type } : null
+    }, [replyParent?.id, replyParent?.type])
 
     function scrollHandler(e) {
         const { scrollHeight, scrollTop, clientHeight } = e.target
@@ -74,7 +78,7 @@ function Messages(): JSX.Element {
         setScrollTopReached(topReached)
     }
 
-    function getMessages(offset: number) {
+    function getMessages(offset: number, oldChats?: any[]) {
         if (offset) setNextMessagesLoading(true)
         else {
             setChatNotFoundError(false)
@@ -85,17 +89,20 @@ function Messages(): JSX.Element {
         axios
             .post(`${config.apiURL}/messages`, data, options)
             .then((res) => {
-                // console.log('messages res:', res.data)
-                if (!offset) {
-                    setSelectedChat(res.data.chat)
-                    // reset unseen messages
-                    setChats((oldChats) => {
-                        const newChats = [...oldChats]
-                        const chat = newChats.find((c) => c.id === res.data.chat.id)
-                        chat.unseenMessages = 0
-                        return newChats
-                    })
-                }
+                // console.log('messages res:', res.data.messages)
+                if (!offset) setSelectedChat(res.data.chat)
+                // update unseen messages
+                const limit = res.data.messages.length
+                const newChats = oldChats ? [...oldChats] : [...chats]
+                const chat = newChats.find((c) => c.id === +chatId)
+                const decrementBy = chat.unseenMessages > limit ? limit : chat.unseenMessages
+                setAccountData({
+                    ...accountData,
+                    unseenMessages: accountData.unseenMessages - decrementBy,
+                })
+                chat.unseenMessages -= decrementBy
+                setChats(newChats)
+                // update messages
                 setTotalMessages(res.data.total)
                 setMessages(offset ? [...messages, ...res.data.messages] : res.data.messages)
                 if (offset) setNextMessagesLoading(false)
@@ -117,7 +124,7 @@ function Messages(): JSX.Element {
                 // console.log('chats res: ', res.data)
                 setChats(res.data)
                 setChatsLoading(false)
-                if (chatId) getMessages(0)
+                if (chatId) getMessages(0, res.data)
                 else history(`?chatId=${res.data[0].id}`)
             })
             .catch((error) => console.log(error))
@@ -298,6 +305,7 @@ function Messages(): JSX.Element {
 
     // if chatId included in url params get messages
     useEffect(() => {
+        setReplyParent(null)
         if (chatId && !chatsLoading) getMessages(0)
         // disconnect from previous chat if present
         if (selectedChat) socket.emit('exit-room', `chat-${selectedChat.id}`)
@@ -310,7 +318,8 @@ function Messages(): JSX.Element {
 
     // get next messages when scroll top reached
     useEffect(() => {
-        if (scrollTopReached && totalMessages > messages.length) getMessages(messages.length)
+        if (scrollTopReached && !nextMessagesLoading && totalMessages > messages.length)
+            getMessages(messages.length)
     }, [scrollTopReached])
 
     if (userNotFound) return <UserNotFound />
@@ -435,7 +444,7 @@ function Messages(): JSX.Element {
                             key={message.id}
                             message={message}
                             removeMessage={() => null}
-                            setReplyParent={(parent) => setReplyParent(parent)}
+                            setReplyParent={() => setReplyParent(message)}
                         />
                     ))}
                     {nextMessagesLoading && (
@@ -524,9 +533,8 @@ function Messages(): JSX.Element {
                         placeholder={replyParent ? 'Reply...' : 'New message...'}
                         links={{
                             chatId: +chatId,
-                            parent: replyParent
-                                ? { id: replyParent.id, type: replyParent.type }
-                                : null,
+                            chatName: selectedChat?.name,
+                            parent: parentMemo,
                             membersNotInRoom:
                                 selectedChat?.Members.filter(
                                     (u) => !peopleInRoom.find((p) => p.id === u.id)

@@ -17,6 +17,7 @@ const defaults = {
         bio: null,
         flagImagePath: null,
         unseenNotifications: 0,
+        unseenMessages: 0,
         FollowedSpaces: [],
         ModeratedSpaces: [],
     },
@@ -64,6 +65,8 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
             const registration = await navigator.serviceWorker.getRegistration()
             if (registration) registration.update()
             else navigator.serviceWorker.register('/service-worker.js')
+        } else {
+            console.log(' no service worker', navigator)
         }
     }
 
@@ -99,7 +102,7 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                     cookies.remove('accessToken', { path: '/' })
                 })
                 .catch((error) => console.log(error))
-        }
+        } else cookies.remove('accessToken', { path: '/' })
     }
 
     function addGreenCheckScript(data) {
@@ -163,13 +166,23 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
     }
 
     function serviceWorkerMessage(event) {
+        // console.log('serviceWorkerMessage: ', event)
         const { type } = event.data
-        if (type === 'new-notification') {
-            // todo: store unseen notification seperately...
+        if (type === 'notification') {
+            // todo: store unseenNotification seperately...
             setAccountData((oldData) => {
                 return {
                     ...oldData,
                     unseenNotifications: oldData.unseenNotifications + 1,
+                }
+            })
+        }
+        if (type === 'message') {
+            // todo: store unseenMessages seperately...
+            setAccountData((oldData) => {
+                return {
+                    ...oldData,
+                    unseenMessages: oldData.unseenMessages + 1,
                 }
             })
         }

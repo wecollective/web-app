@@ -36,6 +36,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 function Navbar(): JSX.Element {
     const { loggedIn, accountData, accountDataLoading, setLogInModalOpen, logOut } =
         useContext(AccountContext)
+    const { name, handle, flagImagePath, unseenNotifications, unseenMessages } = accountData
     const { spaceData, getSpaceData, isModerator, selectedSpaceSubPage } = useContext(SpaceContext)
     const { userData } = useContext(UserContext)
     const [hamburgerMenuOpen, setHamburgerMenuOpen] = useState(false)
@@ -46,8 +47,7 @@ function Navbar(): JSX.Element {
     const history = useNavigate()
     const location = useLocation()
     const otherUsersPage =
-        location.pathname.split('/')[1] === 'u' &&
-        location.pathname.split('/')[2] !== accountData.handle
+        location.pathname.split('/')[1] === 'u' && location.pathname.split('/')[2] !== handle
 
     // todo: grab followed spaces when needed
 
@@ -351,12 +351,12 @@ function Navbar(): JSX.Element {
                                         <FlagImage
                                             type='user'
                                             size={80}
-                                            imagePath={accountData.flagImagePath}
+                                            imagePath={flagImagePath}
                                             style={{ marginRight: 10 }}
                                         />
                                         <Column>
-                                            <h1>{accountData.name}</h1>
-                                            <p className='grey'>u/{accountData.handle}</p>
+                                            <h1>{name}</h1>
+                                            <p className='grey'>u/{handle}</p>
                                         </Column>
                                     </Row>
                                     <Row style={{ marginBottom: 20 }}>
@@ -364,49 +364,49 @@ function Navbar(): JSX.Element {
                                     </Row>
                                     <Column className={styles.accountMenuTabs}>
                                         <Link
-                                            to={`/u/${accountData.handle}/about`}
+                                            to={`/u/${handle}/about`}
                                             onClick={() => toggleAccountMenu()}
                                         >
                                             <AboutIcon />
                                             <p>About</p>
                                         </Link>
                                         <Link
-                                            to={`/u/${accountData.handle}/posts`}
+                                            to={`/u/${handle}/posts`}
                                             onClick={() => toggleAccountMenu()}
                                         >
                                             <PostIcon />
                                             <p>Posts</p>
                                         </Link>
                                         <Link
-                                            to={`/u/${accountData.handle}/streams/spaces`}
+                                            to={`/u/${handle}/streams/spaces`}
                                             onClick={() => toggleAccountMenu()}
                                         >
                                             <StreamIcon />
                                             <p>Streams</p>
                                         </Link>
                                         <Link
-                                            to={`/u/${accountData.handle}/following`}
+                                            to={`/u/${handle}/following`}
                                             onClick={() => toggleAccountMenu()}
                                         >
                                             <EyeIcon />
                                             <p>Following</p>
                                         </Link>
                                         <Link
-                                            to={`/u/${accountData.handle}/likes`}
+                                            to={`/u/${handle}/likes`}
                                             onClick={() => toggleAccountMenu()}
                                         >
                                             <LikeIcon />
                                             <p>Likes</p>
                                         </Link>
                                         <Link
-                                            to={`/u/${accountData.handle}/notifications`}
+                                            to={`/u/${handle}/notifications`}
                                             onClick={() => toggleAccountMenu()}
                                         >
                                             <BellIcon />
                                             <p>Notifications</p>
                                         </Link>
                                         <Link
-                                            to={`/u/${accountData.handle}/settings`}
+                                            to={`/u/${handle}/settings`}
                                             onClick={() => toggleAccountMenu()}
                                         >
                                             <SettingsIcon />
@@ -416,7 +416,7 @@ function Navbar(): JSX.Element {
                                     {/* <p className='grey'>Followed spaces</p>
                                     <Scrollbars style={{ marginTop: 10 }}>
                                         <Column>
-                                            {accountData.FollowedSpaces.map((space) => (
+                                            {FollowedSpaces.map((space) => (
                                                 <ImageTitle
                                                     key={space.id}
                                                     type='space'
@@ -441,58 +441,54 @@ function Navbar(): JSX.Element {
                             onMouseEnter={() => setProfileDropDownOpen(true)}
                             onMouseLeave={() => setProfileDropDownOpen(false)}
                         >
-                            <p>{accountData.name}</p>
-                            <FlagImage
-                                type='user'
-                                size={40}
-                                imagePath={accountData.flagImagePath}
-                            />
-                            {accountData.unseenNotifications > 0 && (
+                            <p>{name}</p>
+                            <FlagImage type='user' size={40} imagePath={flagImagePath} />
+                            {unseenNotifications + unseenMessages > 0 && (
                                 <div className={styles.totalUnseenItems}>
-                                    <p>{accountData.unseenNotifications}</p>
+                                    <p>{unseenNotifications + unseenMessages}</p>
                                 </div>
                             )}
                             {profileDropDownOpen && (
                                 <div className={styles.profileDropDown}>
-                                    <Link to={`/u/${accountData.handle}/notifications`}>
+                                    <Link to={`/u/${handle}/notifications`}>
                                         <BellIcon />
                                         <p>Notifications</p>
-                                        {accountData.unseenNotifications > 0 && (
+                                        {unseenNotifications > 0 && (
                                             <div className={styles.unseenItems}>
-                                                <p>{accountData.unseenNotifications}</p>
+                                                <p>{unseenNotifications}</p>
                                             </div>
                                         )}
                                     </Link>
-                                    <Link to={`/u/${accountData.handle}/messages`}>
+                                    <Link to={`/u/${handle}/messages`}>
                                         <MessageIcon />
                                         <p>Messages</p>
-                                        {accountData.unseenMessages > 0 && (
+                                        {unseenMessages > 0 && (
                                             <div className={styles.unseenItems}>
-                                                <p>{accountData.unseenMessages}</p>
+                                                <p>{unseenMessages}</p>
                                             </div>
                                         )}
                                     </Link>
-                                    <Link to={`/u/${accountData.handle}/about`}>
+                                    <Link to={`/u/${handle}/about`}>
                                         <AboutIcon />
                                         <p>About</p>
                                     </Link>
-                                    <Link to={`/u/${accountData.handle}/posts`}>
+                                    <Link to={`/u/${handle}/posts`}>
                                         <PostIcon />
                                         <p>Posts</p>
                                     </Link>
-                                    <Link to={`/u/${accountData.handle}/streams/spaces`}>
+                                    <Link to={`/u/${handle}/streams/spaces`}>
                                         <StreamIcon />
                                         <p>Streams</p>
                                     </Link>
-                                    <Link to={`/u/${accountData.handle}/following`}>
+                                    <Link to={`/u/${handle}/following`}>
                                         <EyeIcon />
                                         <p>Following</p>
                                     </Link>
-                                    <Link to={`/u/${accountData.handle}/likes`}>
+                                    <Link to={`/u/${handle}/likes`}>
                                         <LikeIcon />
                                         <p>Likes</p>
                                     </Link>
-                                    <Link to={`/u/${accountData.handle}/settings`}>
+                                    <Link to={`/u/${handle}/settings`}>
                                         <SettingsIcon />
                                         <p>Settings</p>
                                     </Link>
