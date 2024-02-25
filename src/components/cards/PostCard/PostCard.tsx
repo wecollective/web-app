@@ -33,6 +33,7 @@ import {
     timeSinceCreated,
     timeSinceCreatedShort,
 } from '@src/Helpers'
+import GameCard, { useGameStatus } from '@src/components/GameCard'
 import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
 import {
     AngleUpIcon,
@@ -91,6 +92,7 @@ function PostCard(props: {
         Image,
         Audio,
         Url,
+        game,
     } = post
     const [totalLikes, setTotalLikes] = useState(post.totalLikes)
     const [totalComments, setTotalComments] = useState(post.totalComments)
@@ -125,6 +127,12 @@ function PostCard(props: {
     const params = { ...postFilters }
     Object.keys(urlParams).forEach((param) => {
         params[param] = urlParams[param]
+    })
+    const [gameStatus, setGameStatus] = useGameStatus({
+        postId: id,
+        game,
+        editing: false,
+        collapsed: !!collapse,
     })
 
     function getAccountReactions() {
@@ -405,6 +413,14 @@ function PostCard(props: {
                             return { ...block.Post, Audio: block.Post.MediaLink.Audio }
                         })}
                         style={{ marginBottom: 10 }}
+                    />
+                )}
+                {mediaTypes.includes('game') && game && (
+                    <GameCard
+                        initialGame={game}
+                        updateInitialGame={() => setPost({ ...post, game: gameStatus.game })}
+                        status={gameStatus}
+                        setStatus={setGameStatus}
                     />
                 )}
                 {Event && <EventCard post={post} location={location} />}

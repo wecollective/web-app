@@ -7,9 +7,11 @@ import React from 'react'
 function Input(props: {
     type: 'text' | 'number' | 'text-area' | 'password' | 'email'
     id?: string
+    name?: string
     title?: string
     prefix?: string
     placeholder?: string
+    defaultValue?: string | number
     value?: string | number
     rows?: number
     maxLength?: number
@@ -27,11 +29,13 @@ function Input(props: {
     const {
         type,
         id,
+        name,
         title,
         prefix,
         placeholder,
         state,
         errors,
+        defaultValue,
         value,
         rows,
         maxLength,
@@ -45,12 +49,7 @@ function Input(props: {
         onBlur,
     } = props
 
-    function handleChange(newValue) {
-        let validatedValue = type === 'number' ? +newValue : newValue
-        if (min && +newValue < min) validatedValue = min
-        if (max && +newValue > max) validatedValue = max
-        if (onChange) onChange(validatedValue)
-    }
+    console.log(defaultValue, value)
 
     return (
         <div
@@ -64,12 +63,14 @@ function Input(props: {
                 {type === 'text-area' ? (
                     <textarea
                         id={id}
+                        name={name}
                         rows={rows}
                         placeholder={placeholder}
+                        defaultValue={defaultValue}
                         value={value}
                         maxLength={maxLength}
                         onChange={(e) => {
-                            if (onChange) onChange(e.target.value)
+                            onChange?.(e.target.value)
                             resizeTextArea(e.target)
                         }}
                         onBlur={onBlur}
@@ -79,13 +80,24 @@ function Input(props: {
                 ) : (
                     <input
                         id={id}
+                        name={name}
                         placeholder={placeholder}
                         type={type}
-                        value={value}
+                        defaultValue={defaultValue}
+                        // eslint-disable-next-line react/jsx-props-no-spreading
+                        {...(value !== undefined && {
+                            value,
+                        })}
                         maxLength={maxLength}
                         min={min}
                         max={max}
-                        onChange={(e) => handleChange(e.target.value)}
+                        onChange={(e) => {
+                            const newValue = e.target.value
+                            let validatedValue = type === 'number' ? +newValue : newValue
+                            if (min && +newValue < min) validatedValue = min
+                            if (max && +newValue > max) validatedValue = max
+                            onChange?.(validatedValue)
+                        }}
                         onBlur={onBlur}
                         disabled={disabled}
                         data-lpignore={!autoFill}
@@ -104,12 +116,14 @@ function Input(props: {
 Input.defaultProps = {
     title: null,
     id: null,
+    name: null,
     prefix: null,
     placeholder: null,
     state: 'default',
     errors: null,
-    value: '',
-    onChange: null,
+    value: undefined,
+    defaultValue: undefined,
+    onChange: undefined,
     onBlur: null,
     rows: null,
     maxLength: null,

@@ -7,7 +7,7 @@ import React, { useState } from 'react'
 
 function DropDown(props: {
     title: string
-    options: any[]
+    options: readonly any[]
     selectedOption: string | number
     setSelectedOption: any
     // orientation: string
