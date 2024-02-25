@@ -1,22 +1,19 @@
 $speed: 0.7s;
-.wrapper {
-    -webkit-animation: spin $speed linear infinite;
-    -moz-animation: spin $speed linear infinite;
-    animation: spin $speed linear infinite;
-}
-@-moz-keyframes spin {
-    100% {
-        -moz-transform: rotate(360deg);
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
     }
-}
-@-webkit-keyframes spin {
-    100% {
-        -webkit-transform: rotate(360deg);
-    }
-}
-@keyframes spin {
-    100% {
-        -webkit-transform: rotate(360deg);
+    to {
         transform: rotate(360deg);
+    }
+}
+
+.wrapper {
+    overflow: hidden;
+
+    > svg {
+        animation: rotate $speed linear infinite;
+        transform-origin: center;
     }
 }

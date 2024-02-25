@@ -14,12 +14,8 @@ import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-function EventCard(props: {
-    post: Post
-    setPost: (data: Post) => void
-    location: string
-}): JSX.Element {
-    const { post, setPost, location } = props
+function EventCard(props: { post: Post; location: string; style?: any }): JSX.Element {
+    const { post, location, style } = props
     const { id, Event } = post
     const { startTime, endTime } = Event
     const { accountData, alert } = useContext(AccountContext)
@@ -75,7 +71,7 @@ function EventCard(props: {
     }
 
     return (
-        <Column centerX className={styles.wrapper}>
+        <Column centerX className={styles.wrapper} style={style}>
             <Row wrap centerY centerX className={styles.eventTimes}>
                 <CalendarIcon />
                 <p>{findEventTimes(startTime, endTime)}</p>
@@ -161,6 +157,10 @@ function EventCard(props: {
             )}
         </Column>
     )
+}
+
+EventCard.defaultProps = {
+    style: null,
 }
 
 export default EventCard

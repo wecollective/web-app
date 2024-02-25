@@ -134,7 +134,7 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
             })
             .catch((error) => {
                 if (error.response) {
-                    if (error.response.status === 404) setSpaceNotFound(true)
+                    if (error.statusCode === 404) setSpaceNotFound(true)
                 }
                 console.log(error)
             })
@@ -275,36 +275,49 @@ function SpaceContextProvider({ children }: { children: JSX.Element }): JSX.Elem
         // set new handle
         spaceHandleRef.current = spaceHandle
         // exit old room if leaving
-        if (socket && spaceData.id && (page !== 's' || spaceHandle !== spaceData.handle)) {
-            console.log('exit room', spaceData.id)
-            socket.emit('exit-room', { roomId: `space-${spaceData.id}`, userId: accountData.id })
+        if (spaceData.id && (page !== 's' || spaceHandle !== spaceData.handle)) {
+            socket.emit('exit-room', `space-${spaceData.id}`)
         }
     }, [spaceHandle])
 
     useEffect(() => {
         if (spaceData.id) {
-            console.log('enter room', spaceData.id)
             // remove old listeners
-            const listeners = ['room-entered', 'user-entering', 'user-exiting']
+            const listeners = [
+                'room-entered',
+                'user-entering',
+                'user-exiting',
+                'user-logged-in',
+                'user-logged-out',
+            ]
             listeners.forEach((event) => socket.removeAllListeners(event))
             // enter room
             socket.emit('enter-room', {
                 roomId: `space-${spaceData.id}`,
-                user: baseUserData(accountData),
+                user: { socketId: socket.id, ...baseUserData(accountData) },
             })
             // listen for new events
-            socket.on('room-entered', (usersInRoom) => {
-                console.log('room-entered', usersInRoom)
-                setPeopleInRoom(usersInRoom)
-            })
-            socket.on('user-entering', (user) => {
-                console.log('user-entering', user.id)
-                setPeopleInRoom((people) => [user, ...people])
-            })
-            socket.on('user-exiting', (userId) => {
-                console.log('user-exiting', userId)
-                setPeopleInRoom((people) => people.filter((u) => u.id !== userId))
-            })
+            socket.on('room-entered', (usersInRoom) => setPeopleInRoom(usersInRoom))
+            socket.on('user-entering', (user) => setPeopleInRoom((people) => [user, ...people]))
+            socket.on('user-exiting', (socketId) =>
+                setPeopleInRoom((people) => people.filter((u) => u.socketId !== socketId))
+            )
+            socket.on('user-logged-in', (user) =>
+                setPeopleInRoom((people) => {
+                    const userIndex = people.findIndex((u) => u.socketId === user.socketId)
+                    const newPeople = [...people]
+                    newPeople[userIndex] = user
+                    return newPeople
+                })
+            )
+            socket.on('user-logged-out', (socketId) =>
+                setPeopleInRoom((people) => {
+                    const userIndex = people.findIndex((u) => u.socketId === socketId)
+                    const newPeople = [...people]
+                    newPeople[userIndex] = { socketId, id: null }
+                    return newPeople
+                })
+            )
         }
     }, [spaceData.id])
 

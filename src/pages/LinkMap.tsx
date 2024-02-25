@@ -142,7 +142,7 @@ function LinkMap(): JSX.Element {
                         if (id === targetIdRef.current) setTarget(res.data)
                     })
                     .catch((error) => {
-                        if (error.response.status === 404) {
+                        if (error.statusCode === 404) {
                             if (id === targetIdRef.current) {
                                 setTargetNotFound(true)
                                 setTarget(null)
@@ -200,7 +200,7 @@ function LinkMap(): JSX.Element {
             })
             .catch((error) => {
                 console.log(error)
-                if (error.response && error.response.status === 404) {
+                if (error.statusCode === 404) {
                     setTargetError(true)
                     setCreateLinkLoading(false)
                 }

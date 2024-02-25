@@ -23,24 +23,5 @@
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
         <div id="root"></div>
-        <script>
-            // register service worker & subscribe to push notifications
-            if ('serviceWorker' in navigator) {
-                window.addEventListener('load', async () => {
-                    const register = await navigator.serviceWorker.register(
-                        '%PUBLIC_URL%/service-worker.js'
-                    )
-                    const subscription = await register.pushManager.subscribe({
-                        userVisibleOnly: true,
-                        applicationServerKey: `%REACT_APP_DEV_VAPID_PUBLIC_KEY%`,
-                    })
-                    fetch(`http://localhost:5000/subscribe`, {
-                        method: 'POST',
-                        body: JSON.stringify(subscription),
-                        headers: { 'content-type': 'application/json' },
-                    })
-                })
-            }
-        </script>
     </body>
 </html>

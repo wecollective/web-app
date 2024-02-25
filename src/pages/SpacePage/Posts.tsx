@@ -121,7 +121,7 @@ function Posts(): JSX.Element {
                                 </Row>
                                 {peopleInRoom.map((user) => (
                                     <UserButton
-                                        key={user.id}
+                                        key={user.socketId}
                                         user={user}
                                         imageSize={35}
                                         maxChars={18}

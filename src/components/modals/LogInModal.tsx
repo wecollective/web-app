@@ -52,10 +52,7 @@ function LogInModal(props: { close: () => void }): JSX.Element {
         setShowResendVerificationEmail(false)
         if (allValid(formData, setFormData)) {
             setLoading(true)
-            const data = {
-                emailOrHandle: emailOrHandle.value,
-                password: password.value,
-            }
+            const data = { emailOrHandle: emailOrHandle.value, password: password.value }
             axios
                 .post(`${config.apiURL}/log-in`, data)
                 .then((res) => {
@@ -108,7 +105,7 @@ function LogInModal(props: { close: () => void }): JSX.Element {
                 setSuccess(true)
             })
             .catch((error) => {
-                if (error.response.status === 404) setErrorMessage('Account not found')
+                if (error.statusCode === 404) setErrorMessage('Account not found')
                 setVerificationEmailLoading(false)
             })
     }

@@ -57,7 +57,7 @@ function ResetPasswordModal(): JSX.Element {
                     setLoading(false)
                 })
                 .catch((error) => {
-                    if (error.response.status === 404)
+                    if (error.statusCode === 404)
                         setErrorMessage('Sorry, your password reset token has expired')
                     else console.log(error)
                     setLoading(false)

@@ -1,11 +1,63 @@
-this.addEventListener('push', (event) => {
-    // const data = event.data.json()
-    console.log('push recieved', event.data.json())
-    const { title, text } = event.data.json()
+// Listen for push events
+this.addEventListener('push', async (event) => {
+    // console.log('push notification: ', event.data.json())
+    const { type, title, text, icon, image, data } = event.data.json()
+    // display push notification
     this.registration.showNotification(title, {
         body: text,
-        icon: '/logo/192-masked.png',
+        icon: icon || '/logo/192-masked.png',
+        image,
+        data,
     })
+    // post message to the UI
+    const clients = await this.clients.matchAll({ includeUncontrolled: true })
+    clients.forEach((client) => client.postMessage({ type, data }))
+})
+
+// Listen for notification clicks
+this.addEventListener('notificationclick', (event) => {
+    const { url } = event.notification.data
+    if (url) {
+        event.notification.close()
+        // check if there's already a window/tab open with this URL
+        const promiseChain = this.clients
+            .matchAll({
+                type: 'window',
+                includeUncontrolled: true,
+            })
+            .then((windowClients) => {
+                let matchingClient = null
+                for (let i = 0; i < windowClients.length; i += 1) {
+                    const windowClient = windowClients[i]
+                    if (windowClient.url === url) {
+                        matchingClient = windowClient
+                        break
+                    }
+                }
+                if (matchingClient) {
+                    // if matching window found, focus it
+                    return matchingClient.focus()
+                }
+                // if no matching window, open a new one
+                return this.clients.openWindow(url)
+            })
+        event.waitUntil(promiseChain)
+    }
+})
+
+this.addEventListener('pushsubscriptionchange', async (event) => {
+    console.log('pushsubscriptionchange', event)
+    // event.waitUntil(
+    //     this.registration.pushManager
+    //         .subscribe({
+    //             userVisibleOnly: true,
+    //             applicationServerKey: `%REACT_APP_DEV_VAPID_PUBLIC_KEY%`,
+    //         })
+    //         .then((newSubscription) => {
+    //             console.log()
+    //             // Send the new subscription details to your server
+    //         })
+    // )
 })
 
 // const CACHE_NAME = 'version-0.005'

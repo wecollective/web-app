@@ -1,6 +1,6 @@
 import { CreatePostModalSettings } from '@components/modals/CreatePostModal'
 import config from '@src/Config'
-import { getDraftPlainText } from '@src/Helpers'
+import { baseUserData, getDraftPlainText } from '@src/Helpers'
 import { IAccountContext } from '@src/Interfaces'
 import axios from 'axios'
 import React, { createContext, useEffect, useRef, useState } from 'react'
@@ -17,6 +17,7 @@ const defaults = {
         bio: null,
         flagImagePath: null,
         unseenNotifications: 0,
+        unseenMessages: 0,
         FollowedSpaces: [],
         ModeratedSpaces: [],
     },
@@ -58,31 +59,83 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
 
     const cookies = new Cookies()
 
-    // todo: connect socket even if not logged in?
+    async function registerServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            const registration = await navigator.serviceWorker.getRegistration()
+            if (registration) registration.update()
+            else navigator.serviceWorker.register('/service-worker.js')
+        } else {
+            console.log(' no service worker', navigator)
+        }
+    }
+
+    async function subscribePushNotifications() {
+        // check if service worker registered & subscribed to push notifications
+        const registration = await navigator.serviceWorker.getRegistration()
+        const subscription = await registration?.pushManager.getSubscription()
+        if (registration && !subscription) {
+            // register new subscription
+            const newSubscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: config.vapidPublicKey,
+            })
+            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+            axios
+                .post(`${config.apiURL}/store-push-subscription`, newSubscription, options)
+                .then((res) => {
+                    console.log('subscribe-to-push-notifications res: ', res.data)
+                })
+                .catch((error) => console.log(error))
+        }
+    }
+
+    async function unsubscribePushNotifications() {
+        const registration = await navigator.serviceWorker.getRegistration()
+        const subscription = await registration?.pushManager.getSubscription()
+        if (registration && subscription) {
+            const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+            axios
+                .post(`${config.apiURL}/remove-push-subscription`, subscription, options)
+                .then(() => {
+                    subscription.unsubscribe()
+                    cookies.remove('accessToken', { path: '/' })
+                })
+                .catch((error) => console.log(error))
+        } else cookies.remove('accessToken', { path: '/' })
+    }
+
+    function addGreenCheckScript(data) {
+        const { id, handle, name, bio, flagImagePath } = data
+        const script = document.getElementById('greencheck')
+        script!.innerHTML = JSON.stringify({
+            id,
+            username: handle,
+            fullname: name,
+            description: bio ? getDraftPlainText(bio) : '',
+            image: flagImagePath,
+        })
+    }
+
     function getAccountData() {
-        // connect socket
-        setSocket(io(config.apiWebSocketURL || ''))
+        // register service worker and initialise socket
+        registerServiceWorker()
+        if (!socket) setSocket(io(config.apiWebSocketURL || ''))
+        // if no access cookie end process
         const accessToken = cookies.get('accessToken')
         if (!accessToken) setAccountDataLoading(false)
         else {
+            // fetch account data
             setAccountDataLoading(true)
             const options = { headers: { Authorization: `Bearer ${accessToken}` } }
             axios
                 .get(`${config.apiURL}/account-data`, options)
                 .then((res) => {
-                    const { id, handle, name, bio, flagImagePath } = res.data
+                    // console.log('account-data: ', res.data)
                     setAccountData(res.data)
-                    // add greencheck script
-                    const script = document.getElementById('greencheck')
-                    script!.innerHTML = JSON.stringify({
-                        id,
-                        username: handle,
-                        fullname: name,
-                        description: bio ? getDraftPlainText(bio) : '',
-                        image: flagImagePath,
-                    })
+                    addGreenCheckScript(res.data)
                     setLoggedIn(true)
                     setAccountDataLoading(false)
+                    subscribePushNotifications()
                 })
                 .catch((error) => {
                     setAccountDataLoading(false)
@@ -98,10 +151,10 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
 
     function logOut() {
         console.log('AccountContext: logOut')
-        cookies.remove('accessToken', { path: '/' })
+        unsubscribePushNotifications()
+        socket.emit('log-out')
         const script = document.getElementById('greencheck')
         script!.innerHTML = ''
-        socket.emit('log-out', accountData.id)
         setAccountData(defaults.accountData)
         setLoggedIn(false)
     }
@@ -111,23 +164,40 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
         setDragItem(data)
     }
 
+    function serviceWorkerMessage(event) {
+        // console.log('serviceWorkerMessage: ', event)
+        const { type } = event.data
+        if (type === 'notification') {
+            // todo: store unseenNotification seperately...
+            setAccountData((oldData) => {
+                return {
+                    ...oldData,
+                    unseenNotifications: oldData.unseenNotifications + 1,
+                }
+            })
+        }
+        if (type === 'message') {
+            // todo: store unseenMessages seperately...
+            setAccountData((oldData) => {
+                return {
+                    ...oldData,
+                    unseenMessages: oldData.unseenMessages + 1,
+                }
+            })
+        }
+    }
+
     useEffect(() => getAccountData(), [])
 
     useEffect(() => {
-        if (!accountDataLoading) {
-            socket.emit('log-in', accountData.id)
-            // listen for events
-            socket.on('notification', (notification) => {
-                console.log('new notification: ', notification)
-                setAccountData((oldData) => {
-                    return {
-                        ...oldData,
-                        unseenNotifications: oldData.unseenNotifications + 1,
-                    }
-                })
-            })
+        if (accountData.id) {
+            // listen for notifications from the service worker
+            navigator.serviceWorker?.addEventListener('message', serviceWorkerMessage)
+            // add user data to socket
+            socket.emit('log-in', { socketId: socket.id, ...baseUserData(accountData) })
         }
-    }, [accountDataLoading])
+        return () => navigator.serviceWorker?.removeEventListener('message', serviceWorkerMessage)
+    }, [accountData.id])
 
     return (
         <AccountContext.Provider

@@ -111,7 +111,7 @@ function Homepage(): JSX.Element {
                     )
                 })
                 .catch((error) => {
-                    if (error.response.status === 404) {
+                    if (error.statusCode === 404) {
                         alert('Sorry, that email verification token has expired')
                     } else console.log(error)
                 })

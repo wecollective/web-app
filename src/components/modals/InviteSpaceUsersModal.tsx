@@ -119,7 +119,7 @@ function InviteSpaceUsersModal(props: { close: () => void }): JSX.Element {
                             <Column centerX style={{ marginTop: 20 }}>
                                 <p>Selected people:</p>
                                 {selectedUsers.map((user) => (
-                                    <Row centerY style={{ marginTop: 10 }}>
+                                    <Row centerY key={user.id} style={{ marginTop: 10 }}>
                                         <ImageTitle
                                             type='user'
                                             imagePath={user.flagImagePath}

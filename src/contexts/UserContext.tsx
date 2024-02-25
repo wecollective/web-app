@@ -59,7 +59,7 @@ function UserContextProvider({ children }: { children: JSX.Element }): JSX.Eleme
                 if (returnFunction) returnFunction(res.data)
             })
             .catch((error) => {
-                if (error.response.status === 404) setUserNotFound(true)
+                if (error.statusCode === 404) setUserNotFound(true)
                 else console.log('error: ', error)
             })
     }

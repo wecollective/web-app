@@ -2,6 +2,8 @@ import FlagImage from '@components/FlagImage'
 import styles from '@styles/components/FlagImageHighlights.module.scss'
 import React from 'react'
 
+// todo: pass in items instead of image strings so id included and can be used instead of index for the key
+// required for socket users where duplicates are allowed if multiple tabs open
 function FlagImageHighlights(props: {
     type: 'user' | 'space' | 'post'
     images: string[]
@@ -21,7 +23,8 @@ function FlagImageHighlights(props: {
         >
             {images.map((image, index) => (
                 <FlagImage
-                    key={image}
+                    // eslint-disable-next-line react/no-array-index-key
+                    key={index}
                     type={type}
                     imagePath={image}
                     size={imageSize!}

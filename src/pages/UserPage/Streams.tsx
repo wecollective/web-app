@@ -91,7 +91,7 @@ function Streams(): JSX.Element {
             })
             .catch((error) => {
                 console.log(error)
-                if (error.response.status === 404) {
+                if (error.statusCode === 404) {
                     setStreamNotFound(true)
                     setSourcesLoading(false)
                 }
@@ -128,7 +128,7 @@ function Streams(): JSX.Element {
             })
             .catch((error) => {
                 console.log(error)
-                if (error.response.status === 404) {
+                if (error.statusCode === 404) {
                     setStreamNotFound(true)
                     if (offset) setNextPostsLoading(false)
                     else setPostsLoading(false)
