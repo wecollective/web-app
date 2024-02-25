@@ -25,7 +25,7 @@ function Game(props: {
     style?: any
 }): JSX.Element {
     const { type, postId, isOwnPost, setTopicImage, style } = props
-    const { accountData, setAlertMessage, setAlertModalOpen, loggedIn } = useContext(AccountContext)
+    const { accountData, alert, loggedIn } = useContext(AccountContext)
     const [game, setGame] = useState<GameState>()
     const [beads, setBeads] = useState<any[]>([])
     const [players, setPlayers] = useState<any[]>([])
@@ -256,8 +256,7 @@ function Game(props: {
                     onClick={() => {
                         if (loggedIn) setNextBeadModalOpen(true)
                         else {
-                            setAlertMessage('Log in to add beads')
-                            setAlertModalOpen(true)
+                            alert('Log in to add beads')
                         }
                     }}
                     // todo: refactor margin with screen width taken into account

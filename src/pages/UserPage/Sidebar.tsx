@@ -33,10 +33,8 @@ function Sidebar(): JSX.Element {
                         shape='square'
                         id={id}
                         title='Add a new flag image'
-                        onSaved={(imageURL) =>
-                            setUserData({ ...userData, flagImagePath: imageURL })
-                        }
-                        close={() => setImageUploadModalOpen(false)}
+                        onSave={(imageURL) => setUserData({ ...userData, flagImagePath: imageURL })}
+                        onClose={() => setImageUploadModalOpen(false)}
                     />
                 )}
             </div>

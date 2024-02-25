@@ -105,7 +105,7 @@ function PostPage(): JSX.Element {
     }
 
     if (includesGame(post.mediaTypes) && subPage === 'game-room') {
-        return <GameRoom post={post} setPost={setPost} />
+        return <GameRoom key={post.id} post={post} setPost={setPost} />
     }
 
     function findDescription() {

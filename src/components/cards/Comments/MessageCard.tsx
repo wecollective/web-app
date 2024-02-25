@@ -48,8 +48,7 @@ function MessageCard(props: {
     setReplyParent: () => void
 }): JSX.Element {
     const { message: messageData, setReplyParent, removeMessage } = props
-    const { loggedIn, accountData, updateDragItem, setAlertMessage, setAlertModalOpen } =
-        useContext(AccountContext)
+    const { loggedIn, accountData, updateDragItem, alert } = useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
     const [message, setMessage] = useState(messageData)
     const {
@@ -115,8 +114,7 @@ function MessageCard(props: {
                 .catch((error) => console.log(error))
         } else {
             setLikeLoading(false)
-            setAlertMessage(`Log in to like messages`)
-            setAlertModalOpen(true)
+            alert(`Log in to like messages`)
         }
     }
 

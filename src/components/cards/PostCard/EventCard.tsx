@@ -18,7 +18,7 @@ function EventCard(props: { post: Post; location: string; style?: any }): JSX.El
     const { post, location, style } = props
     const { id, Event } = post
     const { startTime, endTime } = Event
-    const { accountData, setAlertMessage, setAlertModalOpen } = useContext(AccountContext)
+    const { accountData, alert } = useContext(AccountContext)
     const [goingModalOpen, setGoingModalOpen] = useState(false)
     const [interestedModalOpen, setInterestedModalOpen] = useState(false)
     const [goingLoading, setGoingLoading] = useState(false)
@@ -35,8 +35,7 @@ function EventCard(props: { post: Post; location: string; style?: any }): JSX.El
     function respondToEvent(response) {
         const accessToken = cookies.get('accessToken')
         if (!accessToken) {
-            setAlertMessage('Log in to respond to events')
-            setAlertModalOpen(true)
+            alert('Log in to respond to events')
         } else {
             if (response === 'going') setGoingLoading(true)
             else setInterestedLoading(true)

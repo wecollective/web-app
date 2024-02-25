@@ -15,7 +15,8 @@ import React, { useContext } from 'react'
 // todo: remove close props and use account context in modals
 function Modals(): JSX.Element {
     const {
-        alertModalOpen,
+        alertMessage,
+        closeAlertModal,
         logInModalOpen,
         setLogInModalOpen,
         registerModalOpen,
@@ -36,7 +37,13 @@ function Modals(): JSX.Element {
 
     return (
         <>
-            {alertModalOpen && <AlertModal />}
+            {alertMessage && (
+                <AlertModal
+                    message={alertMessage}
+                    onClose={closeAlertModal}
+                    onLogin={() => setLogInModalOpen(true)}
+                />
+            )}
             {logInModalOpen && <LogInModal close={() => setLogInModalOpen(false)} />}
             {registerModalOpen && <RegisterModal close={() => setRegisterModalOpen(false)} />}
             {forgotPasswordModalOpen && (

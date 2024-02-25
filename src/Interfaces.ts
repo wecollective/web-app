@@ -119,10 +119,9 @@ export interface IAccountContext {
     dragItem: any
     dragItemRef: any
     updateDragItem: (payload: { type: string; data: any; fromToyBox?: boolean }) => void
-    alertModalOpen: boolean
-    setAlertModalOpen: (payload: boolean) => void
-    alertMessage: string
-    setAlertMessage: (payload: string) => void
+    alertMessage: string | undefined
+    alert: (message: string) => void
+    closeAlertModal: () => void
     authModalOpen: boolean
     setAuthModalOpen: (payload: boolean) => void
     logInModalOpen: boolean

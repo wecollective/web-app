@@ -37,8 +37,7 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
     const [dragItem, setDragItem] = useState({ type: '', data: null })
     const dragItemRef = useRef<any>(null)
     // modals
-    const [alertModalOpen, setAlertModalOpen] = useState(false)
-    const [alertMessage, setAlertMessage] = useState('')
+    const [alertMessage, setAlertMessage] = useState<string>()
     const [authModalOpen, setAuthModalOpen] = useState(false)
     const [logInModalOpen, setLogInModalOpen] = useState(false)
     const [registerModalOpen, setRegisterModalOpen] = useState(false)
@@ -220,10 +219,9 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                 dragItem,
                 dragItemRef,
                 updateDragItem,
-                alertModalOpen,
-                setAlertModalOpen,
                 alertMessage,
-                setAlertMessage,
+                alert: setAlertMessage,
+                closeAlertModal: () => setAlertMessage(undefined),
                 authModalOpen,
                 setAuthModalOpen,
                 logInModalOpen,
