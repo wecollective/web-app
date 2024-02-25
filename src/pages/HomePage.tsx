@@ -19,15 +19,14 @@ function Homepage(): JSX.Element {
     const {
         loggedIn,
         accountDataLoading,
-        setAlertMessage,
-        setAlertModalOpen,
+        alert,
         setResetPasswordModalOpen,
         setResetPasswordToken,
         setRegisterModalOpen,
         setClaimAccountModalOpen,
     } = useContext(AccountContext)
     const urlParams = new URLSearchParams(window.location.search)
-    const alert = urlParams.get('alert')
+    const alertMessage = urlParams.get('alert')
     const history = useNavigate()
     const cookies = new Cookies()
 
@@ -103,27 +102,25 @@ function Homepage(): JSX.Element {
     ]
 
     function showRedirectAlerts() {
-        if (alert === 'verify-email') {
+        if (alertMessage === 'verify-email') {
             axios
                 .post(`${config.apiURL}/verify-email`, { token: urlParams.get('token') })
                 .then(() => {
-                    setAlertMessage(
+                    alert(
                         'Success! Your email has been verified. Log in to start using your account.'
                     )
-                    setAlertModalOpen(true)
                 })
                 .catch((error) => {
                     if (error.statusCode === 404) {
-                        setAlertMessage('Sorry, that email verification token has expired')
-                        setAlertModalOpen(true)
+                        alert('Sorry, that email verification token has expired')
                     } else console.log(error)
                 })
         }
-        if (alert === 'reset-password') {
+        if (alertMessage === 'reset-password') {
             setResetPasswordModalOpen(true)
             setResetPasswordToken(urlParams.get('token'))
         }
-        if (alert === 'claim-account') setClaimAccountModalOpen(true)
+        if (alertMessage === 'claim-account') setClaimAccountModalOpen(true)
     }
 
     function getHomepageHighlights() {
@@ -148,7 +145,7 @@ function Homepage(): JSX.Element {
     }, [])
 
     useEffect(() => {
-        if (!accountDataLoading && !loggedIn && alert === 'create-account')
+        if (!accountDataLoading && !loggedIn && alertMessage === 'create-account')
             setRegisterModalOpen(true)
     }, [accountDataLoading])
 

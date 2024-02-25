@@ -15,10 +15,10 @@ function ImageUploadModal(props: {
     id: number
     title: string
     subTitle?: string
-    onSaved?: (imageURL: string) => void
-    close: () => void
+    onSave?: (imageURL: string) => void
+    onClose: () => void
 }): JSX.Element {
-    const { type, shape, id, title, subTitle, onSaved, close } = props
+    const { type, shape, id, title, subTitle, onSave, onClose } = props
     const [imageFile, setImageFile] = useState<File>()
     const [imageURL, setImageURL] = useState('')
     const [imagePreviewURL, setImagePreviewURL] = useState('')
@@ -66,15 +66,15 @@ function ImageUploadModal(props: {
         axios
             .post(`${config.apiURL}/image-upload?type=${type}&id=${id}`, data, options)
             .then((res) => {
-                if (onSaved) onSaved(imageURL || res.data.imageURL)
+                onSave?.(imageURL || res.data.imageURL)
                 setLoading(false)
-                close()
+                onClose()
             })
             .catch((error) => console.log(error))
     }
 
     return (
-        <Modal close={close} centerX>
+        <Modal close={onClose} centerX>
             <h1>{title}</h1>
             {subTitle && <p>{subTitle}</p>}
             {imagePreviewURL && (
@@ -119,7 +119,7 @@ function ImageUploadModal(props: {
 
 ImageUploadModal.defaultProps = {
     subTitle: null,
-    onSaved: null,
+    onSave: null,
 }
 
 export default ImageUploadModal

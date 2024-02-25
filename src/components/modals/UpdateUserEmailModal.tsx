@@ -12,8 +12,7 @@ import Cookies from 'universal-cookie'
 
 function UpdateUserEmailModal(props: { close: () => void }): JSX.Element {
     const { close } = props
-    const { accountData, setAccountData, setAlertModalOpen, setAlertMessage } =
-        useContext(AccountContext)
+    const { accountData, setAccountData, alert } = useContext(AccountContext)
     const [email, setEmail] = useState({
         ...defaultErrorState,
         value: accountData.email,
@@ -46,8 +45,7 @@ function UpdateUserEmailModal(props: { close: () => void }): JSX.Element {
                     .catch((error) => console.log(error))
             }
         } else {
-            setAlertMessage('Log in to update your email')
-            setAlertModalOpen(true)
+            alert('Log in to update your email')
         }
     }
 

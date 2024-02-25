@@ -43,8 +43,7 @@ function ToyBar(): JSX.Element {
         toyBoxItems,
         setToyBoxItems,
         toyBoxItemsRef,
-        setAlertModalOpen,
-        setAlertMessage,
+        alert,
         setCreatePostModalSettings,
         setCreateSpaceModalOpen,
     } = useContext(AccountContext)
@@ -93,24 +92,21 @@ function ToyBar(): JSX.Element {
     function newPost() {
         if (loggedIn) setCreatePostModalSettings({ type: 'post' })
         else {
-            setAlertModalOpen(true)
-            setAlertMessage('Log in to create a post')
+            alert('Log in to create a post')
         }
     }
 
     function newSpace() {
         if (loggedIn) setCreateSpaceModalOpen(true)
         else {
-            setAlertModalOpen(true)
-            setAlertMessage('Log in to create a space')
+            alert('Log in to create a space')
         }
     }
 
     function newGame() {
         if (loggedIn) setGameModalOpen(true)
         else {
-            setAlertModalOpen(true)
-            setAlertMessage('Log in to create a game')
+            alert('Log in to create a game')
         }
     }
 

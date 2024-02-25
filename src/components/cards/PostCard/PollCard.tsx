@@ -19,10 +19,10 @@ import * as d3 from 'd3'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-function PollCard(props: { postData: any; location: string }): JSX.Element {
-    const { postData, location } = props
+function PollCard(props: { postData: any; location: string; style?: any }): JSX.Element {
+    const { postData, location, style } = props
     const { id } = postData
-    const { accountData, setAlertMessage, setAlertModalOpen, loggedIn } = useContext(AccountContext)
+    const { accountData, alert, loggedIn } = useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
     const [loading, setLoading] = useState(true)
     const [pollData, setPollData] = useState<any>(null)
@@ -121,8 +121,7 @@ function PollCard(props: { postData: any; location: string }): JSX.Element {
 
     function vote() {
         if (!loggedIn) {
-            setAlertMessage('Log in to vote on polls')
-            setAlertModalOpen(true)
+            alert('Log in to vote on polls')
         } else {
             setVoteLoading(true)
             const options = { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
@@ -212,7 +211,7 @@ function PollCard(props: { postData: any; location: string }): JSX.Element {
             </Row>
         )
     return (
-        <Column className={styles.wrapper}>
+        <Column className={styles.wrapper} style={style}>
             {totalVotes > 0 && (
                 <Row centerX className={styles.results}>
                     <PieChart
@@ -312,6 +311,10 @@ function PollCard(props: { postData: any; location: string }): JSX.Element {
             )}
         </Column>
     )
+}
+
+PollCard.defaultProps = {
+    style: null,
 }
 
 export default PollCard

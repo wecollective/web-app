@@ -17,6 +17,7 @@ const defaults = {
         bio: null,
         flagImagePath: null,
         unseenNotifications: 0,
+        unseenMessages: 0,
         FollowedSpaces: [],
         ModeratedSpaces: [],
     },
@@ -36,8 +37,7 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
     const [dragItem, setDragItem] = useState({ type: '', data: null })
     const dragItemRef = useRef<any>(null)
     // modals
-    const [alertModalOpen, setAlertModalOpen] = useState(false)
-    const [alertMessage, setAlertMessage] = useState('')
+    const [alertMessage, setAlertMessage] = useState<string>()
     const [authModalOpen, setAuthModalOpen] = useState(false)
     const [logInModalOpen, setLogInModalOpen] = useState(false)
     const [registerModalOpen, setRegisterModalOpen] = useState(false)
@@ -64,6 +64,8 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
             const registration = await navigator.serviceWorker.getRegistration()
             if (registration) registration.update()
             else navigator.serviceWorker.register('/service-worker.js')
+        } else {
+            console.log(' no service worker', navigator)
         }
     }
 
@@ -99,7 +101,7 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                     cookies.remove('accessToken', { path: '/' })
                 })
                 .catch((error) => console.log(error))
-        }
+        } else cookies.remove('accessToken', { path: '/' })
     }
 
     function addGreenCheckScript(data) {
@@ -163,13 +165,23 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
     }
 
     function serviceWorkerMessage(event) {
+        // console.log('serviceWorkerMessage: ', event)
         const { type } = event.data
-        if (type === 'new-notification') {
-            // todo: store unseen notification seperately...
+        if (type === 'notification') {
+            // todo: store unseenNotification seperately...
             setAccountData((oldData) => {
                 return {
                     ...oldData,
                     unseenNotifications: oldData.unseenNotifications + 1,
+                }
+            })
+        }
+        if (type === 'message') {
+            // todo: store unseenMessages seperately...
+            setAccountData((oldData) => {
+                return {
+                    ...oldData,
+                    unseenMessages: oldData.unseenMessages + 1,
                 }
             })
         }
@@ -180,11 +192,11 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
     useEffect(() => {
         if (accountData.id) {
             // listen for notifications from the service worker
-            navigator.serviceWorker.addEventListener('message', serviceWorkerMessage)
+            navigator.serviceWorker?.addEventListener('message', serviceWorkerMessage)
             // add user data to socket
             socket.emit('log-in', { socketId: socket.id, ...baseUserData(accountData) })
         }
-        return () => navigator.serviceWorker.removeEventListener('message', serviceWorkerMessage)
+        return () => navigator.serviceWorker?.removeEventListener('message', serviceWorkerMessage)
     }, [accountData.id])
 
     return (
@@ -207,10 +219,9 @@ function AccountContextProvider({ children }: { children: JSX.Element }): JSX.El
                 dragItem,
                 dragItemRef,
                 updateDragItem,
-                alertModalOpen,
-                setAlertModalOpen,
                 alertMessage,
-                setAlertMessage,
+                alert: setAlertMessage,
+                closeAlertModal: () => setAlertMessage(undefined),
                 authModalOpen,
                 setAuthModalOpen,
                 logInModalOpen,

@@ -14,15 +14,11 @@ import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import Cookies from 'universal-cookie'
 
-function EventCard(props: {
-    post: Post
-    setPost: (data: Post) => void
-    location: string
-}): JSX.Element {
-    const { post, setPost, location } = props
+function EventCard(props: { post: Post; location: string; style?: any }): JSX.Element {
+    const { post, location, style } = props
     const { id, Event } = post
     const { startTime, endTime } = Event
-    const { accountData, setAlertMessage, setAlertModalOpen } = useContext(AccountContext)
+    const { accountData, alert } = useContext(AccountContext)
     const [goingModalOpen, setGoingModalOpen] = useState(false)
     const [interestedModalOpen, setInterestedModalOpen] = useState(false)
     const [goingLoading, setGoingLoading] = useState(false)
@@ -39,8 +35,7 @@ function EventCard(props: {
     function respondToEvent(response) {
         const accessToken = cookies.get('accessToken')
         if (!accessToken) {
-            setAlertMessage('Log in to respond to events')
-            setAlertModalOpen(true)
+            alert('Log in to respond to events')
         } else {
             if (response === 'going') setGoingLoading(true)
             else setInterestedLoading(true)
@@ -76,7 +71,7 @@ function EventCard(props: {
     }
 
     return (
-        <Column centerX className={styles.wrapper}>
+        <Column centerX className={styles.wrapper} style={style}>
             <Row wrap centerY centerX className={styles.eventTimes}>
                 <CalendarIcon />
                 <p>{findEventTimes(startTime, endTime)}</p>
@@ -162,6 +157,10 @@ function EventCard(props: {
             )}
         </Column>
     )
+}
+
+EventCard.defaultProps = {
+    style: null,
 }
 
 export default EventCard

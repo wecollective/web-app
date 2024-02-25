@@ -1,7 +1,7 @@
 {
     "short_name": "Weco",
     "name": "Weco",
-    "version": "0.004",
+    "version": "0.01",
     "icons": [
         {
             "src": "/logo/192-masked.png",
@@ -13,6 +13,21 @@
             "type": "image/png",
             "sizes": "512x512",
             "purpose": "maskable"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/logo/512-masked.png",
+            "type": "image/png",
+            "sizes": "512x512",
+            "form_factor": "wide",
+            "label": "Weco"
+        },
+        {
+            "src": "/logo/512-masked.png",
+            "type": "image/png",
+            "sizes": "512x512",
+            "label": "Weco"
         }
     ],
     "start_url": ".",

@@ -23,8 +23,7 @@ function RepostModal(props: {
     updatePost: (newReposts: number) => void
 }): JSX.Element {
     const { close, post, updatePost } = props
-    const { loggedIn, accountData, setLogInModalOpen, setAlertMessage, setAlertModalOpen } =
-        useContext(AccountContext)
+    const { loggedIn, accountData, setLogInModalOpen, alert } = useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
     const searchQuery = useRef('')
     const [spacesLoading, setSpacesLoading] = useState(false)
@@ -202,8 +201,7 @@ function RepostModal(props: {
                 .catch((error) => console.log(error))
         } else {
             close()
-            setAlertMessage('Log in to like posts')
-            setAlertModalOpen(true)
+            alert('Log in to like posts')
         }
     }
 

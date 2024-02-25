@@ -71,14 +71,8 @@ function PostCard(props: {
     style?: any
 }): JSX.Element {
     const { post, setPost, location, collapse, styling, style, onDelete } = props
-    const {
-        accountData,
-        loggedIn,
-        updateDragItem,
-        setAlertModalOpen,
-        setAlertMessage,
-        setCreatePostModalSettings,
-    } = useContext(AccountContext)
+    const { accountData, loggedIn, updateDragItem, alert, setCreatePostModalSettings } =
+        useContext(AccountContext)
     const { spaceData, postFilters } = useContext(SpaceContext)
     const {
         id,
@@ -236,8 +230,7 @@ function PostCard(props: {
                 .catch((error) => console.log(error))
         } else {
             setLikeLoading(false)
-            setAlertMessage(`Log in to like posts`)
-            setAlertModalOpen(true)
+            alert(`Log in to like posts`)
         }
     }
 
@@ -245,8 +238,7 @@ function PostCard(props: {
         if (loggedIn) {
             setCreatePostModalSettings({ type: 'post', source: { type: 'post', id } })
         } else {
-            setAlertMessage('Log in to link posts')
-            setAlertModalOpen(true)
+            alert('Log in to link posts')
         }
     }
 
@@ -431,7 +423,7 @@ function PostCard(props: {
                         setStatus={setGameStatus}
                     />
                 )}
-                {Event && <EventCard post={post} setPost={setPost} location={location} />}
+                {Event && <EventCard post={post} location={location} />}
                 {mediaTypes.includes('poll') && <PollCard postData={post} location={location} />}
                 {includesGame(mediaTypes) && (
                     <Game
@@ -490,8 +482,7 @@ function PostCard(props: {
                             onClick={() => {
                                 if (loggedIn || totalComments) setCommentsOpen(!commentsOpen)
                                 else {
-                                    setAlertMessage('Log in to comment on posts')
-                                    setAlertModalOpen(true)
+                                    alert('Log in to comment on posts')
                                 }
                             }}
                         >

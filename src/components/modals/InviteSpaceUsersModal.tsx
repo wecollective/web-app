@@ -16,7 +16,7 @@ import Cookies from 'universal-cookie'
 
 function InviteSpaceUsersModal(props: { close: () => void }): JSX.Element {
     const { close } = props
-    const { accountData, setAlertMessage, setAlertModalOpen } = useContext(AccountContext)
+    const { accountData, alert } = useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
     const [usersWithAccessLoaded, setUsersWithAccessLoaded] = useState(false)
     const [usersWithAccess, setUsersWithAccess] = useState<number[]>([])
@@ -52,8 +52,7 @@ function InviteSpaceUsersModal(props: { close: () => void }): JSX.Element {
     function sendInvites() {
         const accessToken = cookies.get('accessToken')
         if (!accessToken) {
-            setAlertMessage('Your session has run out. Please log in again to invite users.')
-            setAlertModalOpen(true)
+            alert('Your session has run out. Please log in again to invite users.')
         } else {
             setLoading(true)
             const data = {
@@ -120,7 +119,7 @@ function InviteSpaceUsersModal(props: { close: () => void }): JSX.Element {
                             <Column centerX style={{ marginTop: 20 }}>
                                 <p>Selected people:</p>
                                 {selectedUsers.map((user) => (
-                                    <Row centerY style={{ marginTop: 10 }}>
+                                    <Row centerY key={user.id} style={{ marginTop: 10 }}>
                                         <ImageTitle
                                             type='user'
                                             imagePath={user.flagImagePath}

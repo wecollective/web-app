@@ -40,7 +40,7 @@ export type GameSettings = {
     totalMoves?: number
     movesPerPlayer?: number
     moveDuration?: number
-    introDuration?: number
+    introDuration?: number | null
     intervalDuration?: number
     outroDuration?: number
     characterLimit?: number
@@ -52,6 +52,8 @@ export type GameState = GameSettings & {
     state: 'active' | 'cancelled'
     nextMoveDeadline: number
 }
+
+export type GameData = GameSettings & { id: number; locked?: boolean }
 
 type GameConfig = {
     defaultSettings: GameSettings
@@ -566,10 +568,6 @@ export function invalidateFormItem(
             errors: [error],
         },
     })
-}
-
-export function notNull(value: number | null): number | false {
-    return value !== null ? value : false
 }
 
 export function statTitle(text: string, value: number): string {
