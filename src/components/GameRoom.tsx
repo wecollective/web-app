@@ -183,7 +183,7 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
 
     // state refs (used for up to date values between renders)
     const socket = useMemo(() => io(config.apiWebSocketURL || ''), [])
-    const [mySocketId, setMySocketId] = useState<string>()
+    const mySocketIdRef = useRef('')
     const peersRef = useRef<any[]>([])
     const secondsTimerRef = useRef<any>(null)
     const audioRecorderRef = useRef<any>(null)
@@ -241,7 +241,7 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
     }
     // todo: potentially remove and use players instead
     const totalUsersStreaming = videos.length + (userIsStreaming ? 1 : 0)
-    const isYou = (id) => id === mySocketId
+    const isYou = (id) => id === mySocketIdRef.current
 
     function allowedTo(type) {
         switch (type) {
@@ -284,7 +284,7 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
             setVideoTrackEnabled(true)
             socket.emit('outgoing-stream-disconnected', {
                 roomId,
-                socketId: mySocketId,
+                socketId: mySocketIdRef.current,
                 userData,
             })
             if (!videos.length) {
@@ -311,7 +311,7 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
                         id: accountData.id,
                         name: accountData.name,
                         flagImagePath: accountData.flagImagePath,
-                        socketId: mySocketId,
+                        socketId: mySocketIdRef.current,
                     }
                     setPlayers((previousPlayers) => [...previousPlayers, newPlayer])
                     setLoadingStream(false)
@@ -337,7 +337,7 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
                                 id: accountData.id,
                                 name: accountData.name,
                                 flagImagePath: accountData.flagImagePath,
-                                socketId: mySocketId,
+                                socketId: mySocketIdRef.current,
                             }
                             setPlayers((previousPlayers) => [...previousPlayers, newPlayer])
                             setLoadingStream(false)
@@ -550,17 +550,20 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
     }
 
     function startGame(data) {
-        setGameData(data)
+        const { introDuration } = data.gameData
+        setGameData((oldGameData) => {
+            return { ...oldGameData, ...data.gameData }
+        })
         setPlayers(data.players)
         setShowComments(false)
         setShowVideos(false)
         const firstPlayer = data.players[0]
         d3.select(`#player-${firstPlayer.socketId}`).text('(up next)')
-        if (data.introDuration > 0) {
+        if (introDuration > 0) {
             d3.select('#timer-move-state').text('Intro')
-            d3.select('#timer-seconds').text(data.introDuration)
-            startArc('move', data.introDuration, colors.black)
-            let timeLeft = data.introDuration
+            d3.select('#timer-seconds').text(introDuration)
+            startArc('move', introDuration, colors.black)
+            let timeLeft = introDuration
             secondsTimerRef.current = setInterval(() => {
                 timeLeft -= 1
                 d3.select('#timer-seconds').text(timeLeft)
@@ -573,7 +576,7 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
     }
 
     function startMove(moveNumber, turnNumber, player, data) {
-        const { movesPerPlayer, moveDuration, intervalDuration } = data
+        const { movesPerPlayer, moveDuration, intervalDuration } = data.gameData
         // if your move, start audio recording
         if (isYou(player.socketId)) startAudioRecording()
         // calculate turn and game duration
@@ -632,7 +635,7 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
     }
 
     function startInterval(moveNumber, turnNumber, nextPlayer, data) {
-        const { intervalDuration } = data
+        const { intervalDuration } = data.gameData
         // start interval timer
         startArc('move', intervalDuration, colors.black)
         lowMetalTone.play()
@@ -655,11 +658,12 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
     }
 
     function startOutro(data) {
+        const { outroDuration } = data.gameData
         d3.select('#timer-move-state').text('Outro')
-        d3.select('#timer-seconds').text(data.outroDuration)
+        d3.select('#timer-seconds').text(outroDuration)
         d3.selectAll(`.${styles.playerState}`).text('')
-        startArc('move', data.outroDuration, colors.black, true)
-        let timeLeft = data.outroDuration
+        startArc('move', outroDuration, colors.black, true)
+        let timeLeft = outroDuration
         secondsTimerRef.current = setInterval(() => {
             timeLeft -= 1
             d3.select('#timer-seconds').text(timeLeft)
@@ -681,8 +685,6 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
         d3.select(`#move-arc`).remove()
         d3.selectAll(`.${styles.playerState}`).text('')
         pushComment('The game ended')
-        // addPlayButtonToCenterBead()
-        d3.select('#timer-bead-wave-form').transition(1000).style('opacity', 0)
         if (largeScreen) {
             setShowComments(true)
             setShowVideos(true)
@@ -971,7 +973,6 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
             setPlayers(res[0].data.players)
             setComments(res[1].data)
             setLoading(false)
-            if (gameBeads.length) d3.select('#timer-bead-wave-form').style('opacity', 0)
             gameBeads.forEach((bead, index) => addEventListenersToBead(index))
 
             // join room
@@ -983,7 +984,7 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
             // listen for signals:
             socket.on('incoming-room-joined', (payload) => {
                 const { socketId: incomingSocketId, usersInRoom } = payload
-                setMySocketId(incomingSocketId)
+                mySocketIdRef.current = incomingSocketId
                 setUsers([
                     ...usersInRoom,
                     {
@@ -1153,9 +1154,8 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
                     .duration(1000)
                     .style('opacity', 0)
                     .remove()
-                d3.select('#timer-bead-wave-form').transition(1000).style('opacity', 1)
                 pushComment(`${data.userSignaling.name} started the game`)
-                startGame(data.gameData)
+                startGame(data)
             })
             // stop game signal recieved
             socket.on('incoming-stop-game', (data) => {
@@ -1171,8 +1171,6 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
                 d3.select(`#turn-arc`).remove()
                 d3.select(`#move-arc`).remove()
                 d3.select('#timer-seconds').text('')
-                // addPlayButtonToCenterBead()
-                // d3.select('#timer-bead-wave-form').transition(1000).style('opacity', 0)
                 setTurn(0)
                 // todo: store move index as ref so 999 can be avoided
                 if (audioRecorderRef.current && audioRecorderRef.current.state === 'recording')
@@ -1187,10 +1185,6 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
             socket.on('incoming-audio-bead', (data) => {
                 setBeads((previousBeads) => [...previousBeads, data])
                 addEventListenersToBead(data.Link.index)
-                // if (!gameInProgressRef.current) {
-                //     d3.select('#timer-bead-wave-form').transition(1000).style('opacity', 0)
-                //     // addPlayButtonToCenterBead()
-                // }
             })
             // peer refresh request
             socket.on('incoming-refresh-request', (data) => {
@@ -1250,7 +1244,7 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
     }, [])
 
     useEffect(() => {
-        if (!loading) buildCanvas()
+        if (!loading) setTimeout(() => buildCanvas(), 500)
     }, [loading])
 
     return (
@@ -1258,7 +1252,7 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
             {showLoadingAnimation && (
                 <div className={styles.loadingAnimation} id='loading-animation' />
             )}
-            {!loading && mySocketId && (
+            {!loading && (
                 <>
                     {gameData.backgroundVideo && (
                         <iframe
@@ -1475,10 +1469,9 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
                             {gameSettingsModalOpen && (
                                 <GameRoomGameSettingsModal
                                     onClose={() => setGameSettingsModalOpen(false)}
-                                    post={post}
                                     roomId={roomId}
                                     gameData={gameData}
-                                    socketId={mySocketId}
+                                    socketId={mySocketIdRef.current}
                                     socket={socket}
                                     players={players}
                                     setPlayers={setPlayers}

@@ -49,8 +49,6 @@ function Input(props: {
         onBlur,
     } = props
 
-    console.log(defaultValue, value)
-
     return (
         <div
             className={`${styles.wrapper} ${styles[type]} ${disabled && styles.disabled}`}

@@ -10,7 +10,7 @@ import Row from '@components/Row'
 import LoadingWheel from '@components/animations/LoadingWheel'
 import Modal from '@components/modals/Modal'
 import config from '@src/Config'
-import { GameData, Post, allValid, defaultErrorState } from '@src/Helpers'
+import { GameData, allValid, defaultErrorState } from '@src/Helpers'
 import { IUser } from '@src/Interfaces'
 import { AccountContext } from '@src/contexts/AccountContext'
 import styles from '@styles/components/Game.module.scss'
@@ -22,7 +22,6 @@ import { Socket } from 'socket.io-client'
 type Player = IUser & { socketId: string }
 
 export type GameRoomGameSettingsModal = {
-    post: Post
     socket: Socket
     roomId: number
     gameData: GameData
@@ -44,7 +43,6 @@ const gameDefaults = {
 
 export function GameRoomGameSettingsModal({
     roomId,
-    post,
     gameData,
     socketId,
     players,
@@ -55,7 +53,6 @@ export function GameRoomGameSettingsModal({
     const { accountData } = useContext(AccountContext)
 
     const [formData, setFormData] = useState({
-        topic: post.title,
         introDuration: {
             value: gameData.introDuration || gameDefaults.introDuration,
             validate: (v) => (v > 300 ? ['Must be 5 mins or less'] : []),
@@ -106,7 +103,7 @@ export function GameRoomGameSettingsModal({
         if (allValid(formData, setFormData) && players.length) {
             setLoading(true)
             const data = {
-                postId: post.id,
+                postId: roomId,
                 gameId: gameData.id,
                 movesPerPlayer: movesPerPlayer.value,
                 moveDuration: moveDuration.value,
@@ -117,7 +114,6 @@ export function GameRoomGameSettingsModal({
             }
             await axios.post(`${config.apiURL}/save-glass-bead-game-settings`, data)
             setLoading(false)
-
             socket.emit('outgoing-start-game', {
                 roomId,
                 userSignaling: {
@@ -127,7 +123,7 @@ export function GameRoomGameSettingsModal({
                     flagImagePath: accountData.flagImagePath,
                 },
                 gameData: data,
-                postId: post.id,
+                players,
             })
             onClose()
         }
@@ -228,7 +224,7 @@ export function GameRoomGameSettingsModal({
                     )}
                 </div>
                 <Row>
-                    <Button text='Save' color='game-white' disabled={loading} submit />
+                    <Button text='Start game' color='game-white' disabled={loading} submit />
                     {loading && <LoadingWheel />}
                 </Row>
             </form>
