@@ -400,6 +400,7 @@ const CreateStepModal: FC<{ onClose: () => void; onCreate: (step: Step) => void 
                 <>
                     {STEP_TYPES.map((stepType) => (
                         <Button
+                            key={stepType}
                             style={{ marginBottom: 10 }}
                             onClick={() => setType(stepType)}
                             color='grey'
