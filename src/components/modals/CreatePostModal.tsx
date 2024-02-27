@@ -513,7 +513,7 @@ function CreatePostModal({
 
     // new game
     const initialGame = { steps: [] }
-    const [status, setStatus] = useGameStatus({
+    const [gameStatus, setGameStatus] = useGameStatus({
         game: initialGame,
         editing: true,
         collapsed: false,
@@ -673,7 +673,7 @@ function CreatePostModal({
             }
         }
         if (mediaTypes.includes('game')) {
-            post.game = status
+            post.game = gameStatus.game
         }
         if (source) post.source = { type: source.type, id: source.id, linkDescription }
         if (type === 'poll') post.governance = { action: pollAction, threshold: pollThreshold }
@@ -1311,8 +1311,8 @@ function CreatePostModal({
                             {mediaTypes.includes('game') && (
                                 <GameCard
                                     initialGame={initialGame}
-                                    status={status}
-                                    setStatus={setStatus}
+                                    status={gameStatus}
+                                    setStatus={setGameStatus}
                                 />
                             )}
                         </Column>
