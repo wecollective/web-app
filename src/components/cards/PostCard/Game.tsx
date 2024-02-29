@@ -331,7 +331,7 @@ function Game(props: {
                         text={`Play ${type.replaceAll('-', ' ')}`}
                         color='game-white'
                         icon={<DoorIcon />}
-                        onClick={() => history(`/p/${postId}/game-room`)}
+                        onClick={() => history(`/p/${postId}`)}
                     />
                 </Row>
             )}

@@ -54,6 +54,7 @@ $commentGreen: #1dd050;
 $linkPurple: #7a66ed;
 $ratingOrange: #faa21d;
 $repostBlue: #44b1f7;
+$gamePurple: #7a66ed;
 
 // gradients
 $aquaGradient: -webkit-linear-gradient(75deg, #51a7dc 0%, #63ccad 100%);
@@ -93,31 +94,37 @@ $coverImageHeight: 120px;
         @content;
     }
 }
+
 @mixin for-tablet-portrait-up {
     @media (min-width: 600px) {
         @content;
     }
 }
+
 @mixin for-post-width-up {
     @media (min-width: 800px) {
         @content;
     }
 }
+
 @mixin for-tablet-landscape-up {
     @media (min-width: 900px) {
         @content;
     }
 }
+
 @mixin for-desktop-small-up {
     @media (min-width: 1200px) {
         @content;
     }
 }
+
 @mixin for-desktop-medium-up {
     @media (min-width: 1500px) {
         @content;
     }
 }
+
 @mixin for-desktop-large-up {
     @media (min-width: 1800px) {
         @content;

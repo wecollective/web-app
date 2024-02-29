@@ -33,6 +33,7 @@ import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import {
     GAMES,
     GAME_TYPES,
+    Game,
     GameSettings,
     MEDIA_TYPES,
     MediaType,
@@ -53,7 +54,7 @@ import {
     uploadPost,
     validatePost,
 } from '@src/Helpers'
-import GameCard, { useGameStatus } from '@src/components/GameCard'
+import GameCard, { GameState } from '@src/components/GameCard'
 import styles from '@styles/components/modals/CreatePostModal.module.scss'
 import {
     AudioIcon,
@@ -152,7 +153,6 @@ function CreatePostModal({
     if (type !== 'poll') {
         contentTypes.push('poll')
     }
-    console.log(mediaTypes)
 
     function initializeMediaDropBox(mediaType: MediaType) {
         let dragLeaveCounter = 0 // used to avoid dragleave firing when hovering child elements
@@ -512,11 +512,10 @@ function CreatePostModal({
     }
 
     // new game
-    const initialGame = { steps: [] }
-    const [gameStatus, setGameStatus] = useGameStatus({
+    const initialGame: Game = { steps: [] }
+    const [gameState, setGameState] = useState<GameState>({
         game: initialGame,
-        editing: true,
-        collapsed: false,
+        dirty: true,
     })
 
     // todo: merge groups into single array
@@ -673,7 +672,7 @@ function CreatePostModal({
             }
         }
         if (mediaTypes.includes('game')) {
-            post.game = gameStatus.game
+            post.game = gameState.game
         }
         if (source) post.source = { type: source.type, id: source.id, linkDescription }
         if (type === 'poll') post.governance = { action: pollAction, threshold: pollThreshold }
@@ -1311,8 +1310,9 @@ function CreatePostModal({
                             {mediaTypes.includes('game') && (
                                 <GameCard
                                     initialGame={initialGame}
-                                    status={gameStatus}
-                                    setStatus={setGameStatus}
+                                    state={gameState}
+                                    setState={setGameState}
+                                    editable
                                 />
                             )}
                         </Column>

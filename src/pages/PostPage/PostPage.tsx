@@ -7,7 +7,8 @@ import LoadingWheel from '@components/animations/LoadingWheel'
 import PostCard from '@components/cards/PostCard/PostCard'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
-import { Post, getDraftPlainText, includesGame } from '@src/Helpers'
+import { Post, getDraftPlainText, includesSpecificGame } from '@src/Helpers'
+import PlayRoom from '@src/components/Play'
 import styles from '@styles/pages/PostPage/PostPage.module.scss'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
@@ -26,7 +27,6 @@ type State =
 function PostPage(): JSX.Element {
     const location = useLocation()
     const postId = +location.pathname.split('/')[2]
-    const subPage = location.pathname.split('/')[3]
     const { accountDataLoading, loggedIn } = useContext(AccountContext)
     const [state, setState] = useState<State>({ state: 'loading' })
 
@@ -100,14 +100,6 @@ function PostPage(): JSX.Element {
     const setPost = (newPost: Post) => setState({ state: 'ready', post: newPost })
     const onDelete = () => setState({ state: 'deleted' })
 
-    if (post.mediaTypes.includes('prism')) {
-        return <Prism post={post} setPost={setPost} onDelete={onDelete} />
-    }
-
-    if (includesGame(post.mediaTypes) && subPage === 'game-room') {
-        return <GameRoom key={post.id} post={post} setPost={setPost} />
-    }
-
     function findDescription() {
         if (post.text) return getDraftPlainText(post.text)
         if (post.UrlBlocks && post.UrlBlocks.length) {
@@ -132,17 +124,32 @@ function PostPage(): JSX.Element {
     }
 
     return (
-        <Column centerX className={styles.wrapper}>
+        <>
             <SEO
                 title={`${post.Creator.name} ${post.title ? `| ${post.title}` : ''}`}
                 description={findDescription()}
                 image={findImage()}
                 creator={`u/${post.Creator.handle}`}
             />
-            <Column className={styles.postCardWrapper}>
-                <PostCard post={post} setPost={setPost} onDelete={onDelete} location='post-page' />
-            </Column>
-        </Column>
+            {post.mediaTypes.includes('prism') ? (
+                <Prism post={post} setPost={setPost} onDelete={onDelete} />
+            ) : includesSpecificGame(post.mediaTypes) ? (
+                <GameRoom key={post.id} post={post} setPost={setPost} />
+            ) : post.mediaTypes.includes('play') ? (
+                <PlayRoom key={post.id} post={post} onDelete={onDelete} setPost={setPost} />
+            ) : (
+                <Column centerX className={styles.wrapper}>
+                    <Column className={styles.postCardWrapper}>
+                        <PostCard
+                            post={post}
+                            setPost={setPost}
+                            onDelete={onDelete}
+                            location='post-page'
+                        />
+                    </Column>
+                </Column>
+            )}
+        </>
     )
 }
 

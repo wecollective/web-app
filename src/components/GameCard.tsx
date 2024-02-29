@@ -1,24 +1,40 @@
+/* eslint-disable no-nested-ternary */
+/* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable react/require-default-props */
 /* eslint-disable jsx-a11y/control-has-associated-label */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable react/function-component-definition */
-import config from '@src/Config'
-import { Game, STEP_TYPES, Step, StepType, capitalise } from '@src/Helpers'
-import { CastaliaIcon, ChevronDownIcon, DeleteIcon, EditIcon, PlusIcon } from '@src/svgs/all'
-import styles from '@styles/components/GameEditor.module.scss'
-import axios from 'axios'
+import {
+    Game,
+    Play,
+    Post,
+    STEP_TYPES,
+    Step,
+    StepContext,
+    StepType,
+    capitalise,
+    uploadPost,
+} from '@src/Helpers'
+import { AccountContext } from '@src/contexts/AccountContext'
+import { CastaliaIcon, DeleteIcon, EditIcon, PlusIcon } from '@src/svgs/all'
+import styles from '@styles/components/GameCard.module.scss'
 import { cloneDeep } from 'lodash'
-import React, { FC, useState } from 'react'
-import Cookies from 'universal-cookie'
+import React, { FC, useContext, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { v4 as uuid } from 'uuid'
 import Button from './Button'
 import Column from './Column'
 import Input from './Input'
+import { PLAY_BUTTON_TEXT } from './PlayCard'
 import Row from './Row'
 import Modal from './modals/Modal'
 import PlainButton from './modals/PlainButton'
 
-const StepTitle: FC<{ prefix: string; step: Step }> = ({ prefix, step }) => (
+const StepTitle: FC<{ prefix: string; step: Step; stepContext?: StepContext }> = ({
+    prefix,
+    step,
+    stepContext,
+}) => (
     <h5 className={styles.stepTitle}>
         {prefix} {capitalise(step.type)}{' '}
         {(() => {
@@ -26,8 +42,23 @@ const StepTitle: FC<{ prefix: string; step: Step }> = ({ prefix, step }) => (
                 case 'post':
                     return `(${step.post.timeout})`
                 case 'rounds':
-                    return `(${step.amount}x)`
+                    if (stepContext && `${step.id}_round` in stepContext.variables) {
+                        return (
+                            <span style={{ color: '#00daa2', fontWeight: 'bold' }}>
+                                {stepContext.variables[`${step.id}_round`]} of {step.amount}
+                            </span>
+                        )
+                    }
+
+                    return <>({step.amount}x)</>
                 case 'turns':
+                    if (stepContext && `${step.id}_player` in stepContext.variables) {
+                        return (
+                            <span style={{ color: '#00daa2', fontWeight: 'bold' }}>
+                                player {stepContext.variables[`${step.id}_player`]}
+                            </span>
+                        )
+                    }
                     return `(for each player)`
                 case 'game':
                     return step.gameId
@@ -47,16 +78,17 @@ const StepComponent: FC<{
     prependStep: (step: Step) => void
     appendStep: (step: Step) => void
     removeStep: () => void
-    editing: boolean
-}> = ({ prefix, step, updateStep, prependStep, appendStep, removeStep, editing }) => (
+    editable?: boolean
+    stepContext?: StepContext
+}> = ({ prefix, step, updateStep, prependStep, appendStep, removeStep, editable, stepContext }) => (
     <Column className={styles.stepWrapper}>
-        <Row className={styles.step}>
-            {editing && <CreateStepButton onPrepend={prependStep} onAppend={appendStep} />}
+        <Row className={`${styles.step} ${stepContext?.stepId === step.id && styles.current}`}>
+            <CreateStepButton onPrepend={prependStep} onAppend={appendStep} editable={editable} />
             <Column style={{ flexGrow: 1 }}>
                 <Column className={styles.stepBody}>
                     <Row className={styles.stepHeader}>
-                        <StepTitle prefix={prefix} step={step} />
-                        {editing && (
+                        <StepTitle prefix={prefix} step={step} stepContext={stepContext} />
+                        {editable && (
                             <Row className={styles.stepActions}>
                                 <UpdateStepButton step={step} onUpdate={updateStep} />
                                 <PlainButton
@@ -99,12 +131,15 @@ const StepComponent: FC<{
                 case 'rounds':
                 case 'turns':
                     return (
-                        <Steps
-                            prefix={prefix}
-                            steps={step.steps}
-                            setSteps={(steps) => updateStep({ ...step, steps })}
-                            editing={editing}
-                        />
+                        <div className={styles.stepsWrapper}>
+                            <Steps
+                                prefix={prefix}
+                                steps={step.steps}
+                                setSteps={(steps) => updateStep({ ...step, steps })}
+                                editable={editable}
+                                stepContext={stepContext}
+                            />
+                        </div>
                     )
                 default: {
                     const exhaustivenessCheck: never = step
@@ -119,8 +154,9 @@ const Steps: FC<{
     prefix: string
     steps: Step[]
     setSteps: (steps: Step[]) => void
-    editing: boolean
-}> = ({ prefix, steps, setSteps, editing }) => {
+    editable?: boolean
+    stepContext?: StepContext
+}> = ({ prefix, steps, setSteps, editable, stepContext }) => {
     return steps.length ? (
         <div className={styles.steps}>
             {steps.map((step, i) => (
@@ -138,14 +174,15 @@ const Steps: FC<{
                         setSteps([...steps.slice(0, i + 1), newStep, ...steps.slice(i + 1)])
                     }
                     removeStep={() => setSteps([...steps.slice(0, i), ...steps.slice(i + 1)])}
-                    editing={editing}
+                    editable={editable}
+                    stepContext={stepContext}
                 />
             ))}
         </div>
     ) : (
         <div className={styles.emptySteps}>
-            {editing ? (
-                <CreateStepButton onAppend={(step) => setSteps([...steps, step])} />
+            {editable ? (
+                <CreateStepButton onAppend={(step) => setSteps([...steps, step])} editable />
             ) : (
                 <p style={{ textAlign: 'center' }}>no steps</p>
             )}
@@ -153,99 +190,181 @@ const Steps: FC<{
     )
 }
 
-export type GameStatus = {
-    postId?: number
+export type GameState = {
     game: Game
-    editing: boolean
-    collapsed: boolean
+    dirty: boolean
 }
 
-export const useGameStatus = (initialStatus: GameStatus) => useState<GameStatus>(initialStatus)
+export type GameCardProps = GameCardContentProps
 
-const GameCard: FC<{
+const GameCard: FC<GameCardProps> = (props) => {
+    return (
+        <div className={styles.gameCard}>
+            <Row centerY style={{ marginBottom: 10 }}>
+                <CastaliaIcon className={styles.icon} />
+                <h3 style={{ marginLeft: 5, color: 'gray' }}>Game</h3>
+            </Row>
+            <GameCardContent {...props} />
+        </div>
+    )
+}
+
+export type PlayLink = {
+    id: string
+    title: string
+    play: Play
+}
+
+export type GameCardContentProps = {
     initialGame: Game
-    updateInitialGame?: () => void
-    status: GameStatus
-    setStatus: (status: GameStatus) => void
-}> = ({ initialGame, status, setStatus, updateInitialGame }) => (
-    <div className={styles.gameEditor}>
-        <Row centerY>
-            <CastaliaIcon className={styles.icon} />
-            <h3 style={{ flexGrow: 1, textAlign: 'center', marginBottom: 10 }}>Game</h3>
-            {status.collapsed ? (
-                <PlainButton size={14} onClick={() => setStatus({ ...status, collapsed: false })}>
-                    <ChevronDownIcon />
-                </PlainButton>
-            ) : (
-                updateInitialGame &&
-                !status.editing && (
-                    <PlainButton size={14} onClick={() => setStatus({ ...status, editing: true })}>
-                        <EditIcon />
-                    </PlainButton>
-                )
-            )}
-        </Row>
-        {!status.collapsed && (
-            <>
-                <Steps
-                    prefix=''
-                    steps={status.game.steps}
-                    setSteps={(steps) => setStatus({ ...status, game: { ...status.game, steps } })}
-                    editing={status.editing}
-                />
-                {updateInitialGame && status.editing && (
-                    <Row centerX>
-                        <Button
-                            color='grey'
-                            onClick={() =>
-                                setStatus({
-                                    ...status,
-                                    game: initialGame,
-                                    editing: false,
-                                })
+    state: GameState
+    setState: (state: GameState) => void
+    postContext?: {
+        saveState: (state: GameState) => void
+        post: Post
+        plays?: PlayLink[]
+    }
+    collapsed?: boolean
+    stepContext?: StepContext
+    editable?: boolean
+}
+
+export const GameCardContent: FC<GameCardContentProps> = ({
+    initialGame,
+    state,
+    setState,
+    postContext,
+    stepContext,
+    collapsed,
+    editable,
+}) => {
+    const navigate = useNavigate()
+    const { accountData } = useContext(AccountContext)
+
+    return (
+        <Row style={{ ...(collapsed && { maxHeight: 300 }) }}>
+            <Column
+                style={{
+                    padding: 5,
+                    flexGrow: 1,
+                    ...(postContext?.plays && { flexBasis: '50%' }),
+                }}
+            >
+                <Row>
+                    <h4 style={{ flexGrow: 1 }}>Steps</h4>
+                </Row>
+                <>
+                    <Column style={{ overflowY: 'auto' }}>
+                        <Steps
+                            prefix=''
+                            steps={state.game.steps}
+                            setSteps={(steps) =>
+                                setState({ ...state, game: { ...state.game, steps }, dirty: true })
                             }
-                            text='Cancel'
-                            style={{ marginRight: 10 }}
+                            editable={editable}
+                            stepContext={stepContext}
                         />
+                    </Column>
+                    {postContext && state.dirty && (
+                        <Row centerX style={{ marginTop: 10 }}>
+                            <Button
+                                color='grey'
+                                onClick={() =>
+                                    setState({
+                                        ...state,
+                                        game: initialGame,
+                                        dirty: false,
+                                    })
+                                }
+                                text='Cancel'
+                                style={{ marginRight: 10 }}
+                            />
+                            <Button
+                                color='blue'
+                                onClick={async () =>
+                                    postContext.saveState({ ...state, dirty: false })
+                                }
+                                text='Save'
+                            />
+                        </Row>
+                    )}
+                </>
+            </Column>
+            {postContext?.plays && (
+                <Column style={{ padding: 5, flexGrow: 1, flexBasis: '50%' }}>
+                    <h4>Plays</h4>
+                    <Column style={{ overflowY: 'auto' }}>
+                        {postContext.plays.length ? (
+                            postContext.plays.map((play) => (
+                                <Row centerY spaceBetween style={{ marginBottom: 5 }}>
+                                    <a href={`/p/${play.id}`}>
+                                        {play.title} ({play.play.status},{' '}
+                                        {play.play.playerIds.length} players)
+                                    </a>
+                                    <Button
+                                        style={{ marginLeft: 5 }}
+                                        onClick={async () => {
+                                            navigate(`/p/${play.id}`)
+                                        }}
+                                        size='medium'
+                                        color='grey'
+                                        text={PLAY_BUTTON_TEXT[play.play.status]}
+                                    />
+                                </Row>
+                            ))
+                        ) : (
+                            <span>This game hasn&apos;t been played yet</span>
+                        )}
+                    </Column>
+                    <Row style={{ justifyContent: 'flex-end', marginTop: 10 }}>
                         <Button
                             color='blue'
                             onClick={async () => {
-                                await axios.post(
-                                    `${config.apiURL}/update-post`,
-                                    { id: status.postId, game: status.game },
-                                    {
-                                        headers: {
-                                            Authorization: `Bearer ${new Cookies().get(
-                                                'accessToken'
-                                            )}`,
-                                        },
-                                    }
-                                )
-                                updateInitialGame()
-                                setStatus({
-                                    ...status,
-                                    editing: false,
-                                })
+                                const play: Play = {
+                                    playerIds: [accountData.id],
+                                    gameId: postContext.post.id,
+                                    game: state.game,
+                                    status: 'waiting',
+                                    variables: {},
+                                }
+                                const post = {
+                                    type: 'post',
+                                    title: `Play of "${postContext.post.title}"`,
+                                    mediaTypes: 'play',
+                                    mentions: [],
+                                    spaceIds: postContext.post.DirectSpaces.map(
+                                        (space) => space.id
+                                    ),
+                                    play,
+                                    source: {
+                                        type: 'post',
+                                        id: postContext.post.id,
+                                        // linkDescription: ''
+                                    },
+                                }
+                                const res = await uploadPost(post)
+                                navigate(`/p/${res.data.post.id}`)
                             }}
-                            text='Save'
+                            text='Start new play'
                         />
                     </Row>
-                )}
-            </>
-        )}
-    </div>
-)
+                </Column>
+            )}
+        </Row>
+    )
+}
 
 const CreateStepButton: FC<{
     onPrepend?: (step: Step) => void
     onAppend: (step: Step) => void
-}> = ({ onPrepend, onAppend }) => {
+    editable?: boolean
+}> = ({ onPrepend, onAppend, editable }) => {
     const [open, setOpen] = useState(false)
     const [prepend, setPrepend] = useState(false)
 
     return (
         <>
-            <Row centerX className={styles.addStepButton}>
+            <Row centerX className={`${styles.addStepButton} ${editable && styles.editable}`}>
                 <PlainButton
                     size={14}
                     onClick={(e) => {
@@ -288,13 +407,13 @@ const CreateStepModal: FC<{ onClose: () => void; onCreate: (step: Step) => void 
                         let step: Step
                         console.log(e.currentTarget.elements)
                         const elements = e.currentTarget.elements as any
-                        const base = {
-                            id: uuid(),
+                        const baseStep = {
+                            id: uuid().replaceAll('-', ''),
                         }
                         switch (type) {
                             case 'post':
                                 step = {
-                                    ...base,
+                                    ...baseStep,
                                     type: 'post',
                                     post: {
                                         title: elements.title.value,
@@ -306,7 +425,7 @@ const CreateStepModal: FC<{ onClose: () => void; onCreate: (step: Step) => void 
                             case 'rounds':
                                 console.log(elements)
                                 step = {
-                                    ...base,
+                                    ...baseStep,
                                     type: 'rounds',
                                     amount: elements.amount.value,
                                     steps: [],
@@ -314,7 +433,7 @@ const CreateStepModal: FC<{ onClose: () => void; onCreate: (step: Step) => void 
                                 break
                             case 'turns': {
                                 step = {
-                                    ...base,
+                                    ...baseStep,
                                     type: 'turns',
                                     steps: [],
                                 }
@@ -322,7 +441,7 @@ const CreateStepModal: FC<{ onClose: () => void; onCreate: (step: Step) => void 
                             }
                             case 'game': {
                                 step = {
-                                    ...base,
+                                    ...baseStep,
                                     type: 'game',
                                     gameId: elements.gameId.value,
                                 }

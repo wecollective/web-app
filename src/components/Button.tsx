@@ -20,19 +20,23 @@ function Button(props: {
     disabled?: boolean
     loading?: boolean
     submit?: boolean
-    onClick?: () => void
+    onClick?: (() => void) | null
 }): JSX.Element {
     const { text, icon, color, size, style, disabled, loading, submit, onClick } = props
+    const isDisabled = disabled || loading || onClick === null
+    if (text === 'Add Step') {
+        console.log(disabled, loading, onClick, isDisabled)
+    }
 
     return (
         <button
             className={`${styles.button} ${styles[color]} ${styles[size || 'large']} ${
-                (disabled || loading) && styles.disabled
+                isDisabled && styles.disabled
             }`}
             style={style}
             type={submit ? 'submit' : 'button'}
-            disabled={disabled || loading}
-            onClick={onClick}
+            disabled={isDisabled}
+            onClick={onClick ?? undefined}
         >
             {!!icon && icon}
             {!!text && <p>{text}</p>}
@@ -49,7 +53,7 @@ Button.defaultProps = {
     disabled: false,
     loading: false,
     submit: false,
-    onClick: null,
+    onClick: undefined,
 }
 
 export default Button

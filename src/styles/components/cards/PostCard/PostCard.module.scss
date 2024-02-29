@@ -56,7 +56,7 @@
             margin-right: 20px;
         }
 
-        > svg {
+        >svg {
             width: 16px;
             height: 16px;
             color: $grey7;
@@ -96,12 +96,12 @@
             align-items: center;
 
             &:hover {
-                > svg {
+                >svg {
                     color: $grey6;
                 }
             }
 
-            > svg {
+            >svg {
                 color: $grey4;
                 width: 10px;
                 height: 25px;
@@ -129,11 +129,11 @@
                     margin-bottom: 10px;
                 }
 
-                &:hover > svg {
+                &:hover>svg {
                     color: $grey6;
                 }
 
-                > svg {
+                >svg {
                     width: 20px;
                     height: 20px;
                     margin-right: 8px;
@@ -150,7 +150,7 @@
         .sourcePostId {
             margin-bottom: 20px;
 
-            > a {
+            >a {
                 display: flex;
                 background-color: $grey1;
                 padding: 12px;
@@ -203,21 +203,24 @@
         margin: 0 -8px;
 
         .reactions {
+
             // like button styled seperately due to different html
             .like {
                 $color: $likeRed;
                 margin-right: 14px;
+
                 &:hover,
                 &.highlighted {
-                    > button {
+                    >button {
                         color: $color;
+
                         &:first-child {
                             background-color: rgba($color, $backgroundOpacity);
                         }
                     }
                 }
 
-                > button {
+                >button {
                     all: unset;
                     cursor: pointer;
                     color: $grey5;
@@ -245,7 +248,7 @@
                 }
             }
 
-            > button {
+            >button {
                 all: unset;
                 cursor: pointer;
                 display: flex;
@@ -253,7 +256,7 @@
                 margin-right: 14px;
                 color: $grey5;
 
-                > div {
+                >div {
                     width: 34px;
                     height: 34px;
                     border-radius: 50%;
@@ -267,46 +270,70 @@
                     }
                 }
 
-                > p {
+                >p {
                     transition: color 0.3s;
                 }
 
                 &.comment {
                     $color: $commentGreen;
+
                     &:hover,
                     &.highlighted {
                         color: $color;
-                        > div {
+
+                        >div {
                             background-color: rgba($color, $backgroundOpacity);
                         }
                     }
                 }
+
                 &.link {
                     $color: $linkPurple;
+
                     &:hover,
                     &.highlighted {
                         color: $color;
-                        > div {
+
+                        >div {
                             background-color: rgba($color, $backgroundOpacity);
                         }
                     }
                 }
+
                 &.rating {
                     $color: $ratingOrange;
+
                     &:hover,
                     &.highlighted {
                         color: $color;
-                        > div {
+
+                        >div {
                             background-color: rgba($color, $backgroundOpacity);
                         }
                     }
                 }
+
                 &.repost {
                     $color: $repostBlue;
+
                     &:hover,
                     &.highlighted {
                         color: $color;
-                        > div {
+
+                        >div {
+                            background-color: rgba($color, $backgroundOpacity);
+                        }
+                    }
+                }
+
+                &.game {
+                    $color: $gamePurple;
+
+                    &:hover,
+                    &.highlighted {
+                        color: $color;
+
+                        >div {
                             background-color: rgba($color, $backgroundOpacity);
                         }
                     }
@@ -325,12 +352,13 @@
             &.highlighted {
                 $color: $linkPurple;
                 color: $color;
-                > div {
+
+                >div {
                     background-color: rgba($color, $backgroundOpacity);
                 }
             }
 
-            > div {
+            >div {
                 width: 34px;
                 height: 34px;
                 border-radius: 50%;
