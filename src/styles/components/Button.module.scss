@@ -76,6 +76,16 @@
         font-size: 10px;
         height: 20px;
         padding: 0 10px;
+
+        >svg {
+            width: 10px;
+            height: 10px;
+
+            &:not(:last-child) {
+                margin-right: 3px;
+                margin-left: -1px;
+            }
+        }
     }
 
     &.medium {
