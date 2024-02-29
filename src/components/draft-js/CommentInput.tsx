@@ -442,22 +442,22 @@ function CommentInput(props: {
         if (errors.length) setFocused(true)
     }, [errors])
 
-    // focus cursor on input when reply parent added
-    useEffect(() => {
-        if (links.parent) {
-            editorRef.current!.focus()
-            // scroll to page bottom (necessary on chrome otherwise input floats off screen)
-            if (subPage === 'messages')
-                setTimeout(
-                    () =>
-                        window.scrollTo({
-                            top: document.body.scrollHeight,
-                            behavior: 'smooth',
-                        }),
-                    300
-                )
-        }
-    }, [links.parent])
+    // // // focus cursor on input when reply parent added
+    // useEffect(() => {
+    //     if (links && links.parent) {
+    //         editorRef.current!.focus()
+    //         // // scroll to page bottom (necessary on chrome otherwise input floats off screen)
+    //         // if (subPage === 'messages')
+    //         //     setTimeout(
+    //         //         () =>
+    //         //             window.scrollTo({
+    //         //                 top: document.body.scrollHeight,
+    //         //                 behavior: 'smooth',
+    //         //             }),
+    //         //         300
+    //         //     )
+    //     }
+    // }, [links])
 
     return (
         <div
