@@ -376,7 +376,8 @@ function CommentInput(props: {
     // draft-js functions keyBindingFn & handleKeyCommand used to listen for enter key press on keyboard
     function keyBindingFn(e) {
         // skip if shift key also pressed as 'enter + shift' combo used to create new lines
-        if (e.keyCode === 13 && !e.shiftKey) return 'save-via-enter-key-down'
+        if (type.includes('chat') && e.keyCode === 13 && !e.shiftKey)
+            return 'save-via-enter-key-down'
         return getDefaultKeyBinding(e)
     }
 
