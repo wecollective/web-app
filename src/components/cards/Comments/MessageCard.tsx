@@ -22,7 +22,7 @@ import {
     dateCreated,
     getDraftPlainText,
     getGameType,
-    includesGame,
+    includesSpecificGame,
     timeSinceCreated,
     trimText,
 } from '@src/Helpers'
@@ -69,7 +69,7 @@ function MessageCard(props: {
         ImageBlocks,
         AudioBlocks,
         Event,
-        Reactions,
+        Reactions = [],
         Parent,
     } = message
     const [visible, setVisible] = useState(false)
@@ -300,7 +300,7 @@ function MessageCard(props: {
                             style={{ minWidth: 600, marginTop: 10 }}
                         />
                     )}
-                    {includesGame(mediaTypes) && (
+                    {includesSpecificGame(mediaTypes) && (
                         <Game
                             type={getGameType(mediaTypes)}
                             postId={id}

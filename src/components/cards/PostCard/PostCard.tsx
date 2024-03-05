@@ -29,15 +29,17 @@ import {
     Post,
     dateCreated,
     getGameType,
-    includesGame,
+    includesSpecificGame,
     timeSinceCreated,
     timeSinceCreatedShort,
 } from '@src/Helpers'
-import GameCard, { useGameStatus } from '@src/components/GameCard'
+import GameCard, { GameState, PlayLink } from '@src/components/GameCard'
+import PlayCard, { PlayState } from '@src/components/PlayCard'
 import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
 import {
     AngleUpIcon,
     AnglesUpIcon,
+    CastaliaIcon,
     CommentIcon,
     DeleteIcon,
     EditIcon,
@@ -93,6 +95,7 @@ function PostCard(props: {
         Audio,
         Url,
         game,
+        play,
     } = post
     const [totalLikes, setTotalLikes] = useState(post.totalLikes)
     const [totalComments, setTotalComments] = useState(post.totalComments)
@@ -110,7 +113,7 @@ function PostCard(props: {
     const [likeModalOpen, setLikeModalOpen] = useState(false)
     const [repostModalOpen, setRepostModalOpen] = useState(false)
     const [ratingModalOpen, setRatingModalOpen] = useState(false)
-    const [commentsOpen, setCommentsOpen] = useState(location === 'post-page')
+    const [commentsOpen, setCommentsOpen] = useState(false)
     const [deletePostModalOpen, setDeletePostModalOpen] = useState(false)
     const [editPostModalOpen, setEditPostModalOpen] = useState(false)
     const [removePostModalOpen, setRemovePostModalOpen] = useState(false)
@@ -128,12 +131,30 @@ function PostCard(props: {
     Object.keys(urlParams).forEach((param) => {
         params[param] = urlParams[param]
     })
-    const [gameStatus, setGameStatus] = useGameStatus({
-        postId: id,
-        game,
-        editing: false,
-        collapsed: !!collapse,
-    })
+    const plays: PlayLink[] = [
+        {
+            id: 'dummy',
+            title: 'foo',
+            play: {
+                gameId: post.id,
+                playerIds: [accountData.id],
+                status: 'waiting',
+                variables: {},
+                game: { steps: [] },
+            },
+        },
+    ]
+    const [gameState, setGameState] = useState<GameState | undefined>(
+        game && {
+            game,
+            dirty: false,
+        }
+    )
+    const [playState, setPlayState] = useState<PlayState | undefined>(
+        play && {
+            play,
+        }
+    )
 
     function getAccountReactions() {
         // only request values if reactions present
@@ -415,17 +436,9 @@ function PostCard(props: {
                         style={{ marginBottom: 10 }}
                     />
                 )}
-                {mediaTypes.includes('game') && game && (
-                    <GameCard
-                        initialGame={game}
-                        updateInitialGame={() => setPost({ ...post, game: gameStatus.game })}
-                        status={gameStatus}
-                        setStatus={setGameStatus}
-                    />
-                )}
                 {Event && <EventCard post={post} location={location} />}
                 {mediaTypes.includes('poll') && <PollCard postData={post} location={location} />}
-                {includesGame(mediaTypes) && (
+                {includesSpecificGame(mediaTypes) && (
                     <Game
                         type={getGameType(mediaTypes)}
                         postId={id}
@@ -455,6 +468,37 @@ function PostCard(props: {
                         style={{ height: 160, width: '100%', marginBottom: 10 }}
                     />
                 )}
+                {game && gameState && (
+                    <GameCard
+                        collapsed={collapse}
+                        initialGame={game}
+                        postContext={{
+                            post,
+                            saveState: async (state) => {
+                                await axios.post(
+                                    `${config.apiURL}/update-post`,
+                                    { id: post.id, game: state.game },
+                                    {
+                                        headers: {
+                                            Authorization: `Bearer ${new Cookies().get(
+                                                'accessToken'
+                                            )}`,
+                                        },
+                                    }
+                                )
+                                setGameState(state)
+                                setPost({ ...post, game: state.game })
+                            },
+                            plays,
+                        }}
+                        editable={isOwnPost}
+                        state={gameState}
+                        setState={setGameState}
+                    />
+                )}
+                {playState && location !== 'post-page' && (
+                    <PlayCard post={post} state={playState} />
+                )}
             </Column>
             {showFooter && (
                 <Row spaceBetween className={styles.footer}>
@@ -480,6 +524,9 @@ function PostCard(props: {
                             className={`${styles.comment} ${commented && styles.highlighted}`}
                             disabled={buttonsDisabled}
                             onClick={() => {
+                                if (play && location === 'post-page') {
+                                    return
+                                }
                                 if (loggedIn || totalComments) setCommentsOpen(!commentsOpen)
                                 else {
                                     alert('Log in to comment on posts')
@@ -530,6 +577,14 @@ function PostCard(props: {
                                     <RepostIcon />
                                 </Column>
                                 <p>{totalReposts}</p>
+                            </button>
+                        )}
+                        {game && (
+                            <button type='button' className={`${styles.game}`} disabled>
+                                <Column centerX centerY>
+                                    <CastaliaIcon />
+                                </Column>
+                                <p>{plays.length}</p>
                             </button>
                         )}
                     </Row>

@@ -98,7 +98,7 @@ export type GameType = (typeof GAME_TYPES)[number]
 export const isSpecificGame = (type: string): type is GameType =>
     GAME_TYPES.includes(type as GameType)
 
-export const includesGame = (mediaTypes: string) =>
+export const includesSpecificGame = (mediaTypes: string) =>
     GAME_TYPES.some((type) => mediaTypes.includes(type))
 
 export const getGameType = (mediaTypes: string) =>
@@ -120,6 +120,7 @@ export type MediaType = (typeof MEDIA_TYPES)[number]
 
 export const POST_TYPE = [
     'post',
+    'play',
     'comment',
     'bead',
     'poll-answer',
@@ -175,7 +176,8 @@ export type Post = {
     totalRatings: number
     totalReposts: number
     totalLinks: number
-    game: Game
+    game?: Game
+    play?: Play
     Creator: IUser
     DirectSpaces: { id: number }[]
     UrlBlocks?: UrlBlock[]
@@ -190,6 +192,21 @@ export type Post = {
 export type Game = {
     steps: Step[]
 }
+
+export type PlayVariables = Record<string, string | number | boolean>
+
+export type StepContext = {
+    stepId: string
+    variables: PlayVariables
+}
+
+export type Play = {
+    game: Game
+    gameId: number
+    playerIds: number[]
+    status: 'waiting' | 'started' | 'paused' | 'stopped' | 'ended'
+    variables: PlayVariables
+} & ({ status: 'waiting' | 'stopped' | 'ended' } | { status: 'started' | 'paused'; stepId: string })
 
 export type Step = {
     id: string
