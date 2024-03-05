@@ -141,6 +141,14 @@ export type BlockPost<MediaLinkType> = {
     MediaLink: MediaLinkType
 }
 
+export type PlayBlock = {
+    Post: { id: string; title: string; play: Play }
+}
+
+export type GameBlock = {
+    Post: { id: string; title: string; Plays: PlayBlock[] }
+}
+
 export type UrlMediaLink = {
     Url: Url
 }
@@ -184,6 +192,8 @@ export type Post = {
     ImageBlocks?: ImageBlock[]
     AudioBlocks?: AudioBlock[]
     Event: Event
+    Games?: GameBlock[]
+    Plays?: PlayBlock[]
     Image: { url: string }
     Audio: { id: number; url: string }
     Url: { id: number }

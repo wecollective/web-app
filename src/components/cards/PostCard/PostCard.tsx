@@ -33,7 +33,7 @@ import {
     timeSinceCreated,
     timeSinceCreatedShort,
 } from '@src/Helpers'
-import GameCard, { GameState, PlayLink } from '@src/components/GameCard'
+import GameCard, { GameState } from '@src/components/GameCard'
 import PlayCard, { PlayState } from '@src/components/PlayCard'
 import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
 import {
@@ -131,19 +131,6 @@ function PostCard(props: {
     Object.keys(urlParams).forEach((param) => {
         params[param] = urlParams[param]
     })
-    const plays: PlayLink[] = [
-        {
-            id: 'dummy',
-            title: 'foo',
-            play: {
-                gameId: post.id,
-                playerIds: [accountData.id],
-                status: 'waiting',
-                variables: {},
-                game: { steps: [] },
-            },
-        },
-    ]
     const [gameState, setGameState] = useState<GameState | undefined>(
         game && {
             game,
@@ -489,11 +476,9 @@ function PostCard(props: {
                                 setGameState(state)
                                 setPost({ ...post, game: state.game })
                             },
-                            plays,
                         }}
-                        editable={isOwnPost}
                         state={gameState}
-                        setState={setGameState}
+                        setState={isOwnPost && setGameState}
                     />
                 )}
                 {playState && location !== 'post-page' && (
@@ -584,7 +569,7 @@ function PostCard(props: {
                                 <Column centerX centerY>
                                     <CastaliaIcon />
                                 </Column>
-                                <p>{plays.length}</p>
+                                <p>{post.Plays?.length ?? 0}</p>
                             </button>
                         )}
                     </Row>

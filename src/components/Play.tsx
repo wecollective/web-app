@@ -182,7 +182,7 @@ const PlaySidebar: FC<{
     )
 
     return (
-        <div style={{ width: 300, padding: 10, borderRight: '1px solid #ededef' }}>
+        <Column style={{ width: 300, padding: 10, borderRight: '1px solid #ededef' }}>
             <h2>Game</h2>
             <Row style={{ marginBottom: 10 }}>
                 <Button
@@ -298,19 +298,18 @@ const PlaySidebar: FC<{
                     dirty: state.dirty,
                     game: state.play.game,
                 }}
-                editable={
+                setState={
                     (isOwnPost && state.play.status === 'waiting') ||
                     state.play.status === 'stopped' ||
-                    state.play.status === 'ended'
-                }
-                setState={({ dirty, game }) =>
-                    setState({
-                        dirty,
-                        play: {
-                            ...state.play,
-                            game,
-                        },
-                    })
+                    (state.play.status === 'ended' &&
+                        (({ dirty, game }) =>
+                            setState({
+                                dirty,
+                                play: {
+                                    ...state.play,
+                                    game,
+                                },
+                            })))
                 }
                 postContext={{
                     post,
@@ -332,7 +331,7 @@ const PlaySidebar: FC<{
                         : undefined
                 }
             />
-        </div>
+        </Column>
     )
 }
 

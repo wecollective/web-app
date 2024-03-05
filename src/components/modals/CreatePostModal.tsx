@@ -1312,7 +1312,6 @@ function CreatePostModal({
                                     initialGame={initialGame}
                                     state={gameState}
                                     setState={setGameState}
-                                    editable
                                 />
                             )}
                         </Column>
