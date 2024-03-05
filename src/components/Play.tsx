@@ -11,7 +11,7 @@ import React, { FC, useContext, useEffect, useMemo, useState } from 'react'
 import Cookies from 'universal-cookie'
 import Button from './Button'
 import Column from './Column'
-import { GameCardContent } from './GameCard'
+import { PlaySteps } from './GameCard'
 import Row from './Row'
 import LoadingWheel from './animations/LoadingWheel'
 import MessageCard from './cards/Comments/MessageCard'
@@ -292,7 +292,7 @@ const PlaySidebar: FC<{
                     }
                 />
             </Row>
-            <GameCardContent
+            <PlaySteps
                 initialGame={post.play!.game}
                 state={{
                     dirty: state.dirty,
@@ -311,17 +311,16 @@ const PlaySidebar: FC<{
                                 },
                             })))
                 }
-                postContext={{
-                    post,
-                    saveState: ({ dirty, game }) =>
-                        saveState({
-                            dirty,
-                            play: {
-                                ...state.play,
-                                game,
-                            },
-                        }),
-                }}
+                post={post}
+                saveState={({ dirty, game }) =>
+                    saveState({
+                        dirty,
+                        play: {
+                            ...state.play,
+                            game,
+                        },
+                    })
+                }
                 stepContext={
                     state.play?.status === 'started' || state.play?.status === 'paused'
                         ? {

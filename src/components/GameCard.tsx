@@ -19,7 +19,7 @@ import { AccountContext } from '@src/contexts/AccountContext'
 import { CastaliaIcon, DeleteIcon, EditIcon, PlusIcon } from '@src/svgs/all'
 import styles from '@styles/components/GameCard.module.scss'
 import { cloneDeep } from 'lodash'
-import React, { FC, useContext, useState } from 'react'
+import React, { FC, PropsWithChildren, useContext, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { v4 as uuid } from 'uuid'
 import Button from './Button'
@@ -192,188 +192,81 @@ const Steps: FC<{
     )
 }
 
+const SaveableSteps: FC<{
+    initialGame: Game
+    state: GameState
+    setState: (state: GameState) => void
+    saveState: (state: GameState) => void
+    stepContext?: StepContext
+}> = ({ initialGame, state, setState, saveState, stepContext }) => (
+    <Column style={{ flexGrow: 1 }}>
+        <Row>
+            <h4 style={{ flexGrow: 1 }}>Steps</h4>
+        </Row>
+        <Column style={{ overflowY: 'auto' }}>
+            <Steps
+                prefix=''
+                steps={state.game.steps}
+                setSteps={
+                    setState &&
+                    ((steps) =>
+                        setState({
+                            ...state,
+                            game: { ...state.game, steps },
+                            dirty: true,
+                        }))
+                }
+                stepContext={stepContext}
+            />
+        </Column>
+        {state.dirty && (
+            <Row centerX style={{ marginTop: 10 }}>
+                <Button
+                    color='grey'
+                    onClick={
+                        setState &&
+                        (() =>
+                            setState({
+                                ...state,
+                                game: initialGame,
+                                dirty: false,
+                            }))
+                    }
+                    text='Cancel'
+                    style={{ marginRight: 10 }}
+                />
+                <Button
+                    color='blue'
+                    onClick={async () => saveState!({ ...state, dirty: false })}
+                    text='Save'
+                />
+            </Row>
+        )}
+    </Column>
+)
+
 export type GameState = {
     game: Game
     dirty: boolean
 }
 
-export type GameCardProps = GameCardContentProps
+const GameCardWrapper: FC<PropsWithChildren> = ({ children }) => (
+    <div className={styles.gameCard}>{children}</div>
+)
 
-const GameCard: FC<GameCardProps> = (props) => {
-    return (
-        <div className={styles.gameCard}>
-            <Row centerY style={{ marginBottom: 10 }}>
-                <CastaliaIcon className={styles.icon} />
-                <h3 style={{ marginLeft: 5, color: 'gray' }}>Game</h3>
-            </Row>
-            <GameCardContent {...props} />
-        </div>
-    )
-}
+const GameCardHeader: FC = () => (
+    <Row centerY style={{ marginBottom: 10 }}>
+        <CastaliaIcon className={styles.icon} />
+        <h3 style={{ marginLeft: 5, color: 'gray' }}>Game</h3>
+    </Row>
+)
 
-export const PLAY_BUTTON_TEXT: Record<Play['status'], string> = {
+const PLAY_BUTTON_TEXT: Record<Play['status'], string> = {
     waiting: 'Join',
     started: 'Join',
     paused: 'View',
     ended: 'View',
     stopped: 'View',
-}
-
-export type GameCardContentProps = {
-    initialGame: Game
-    state: GameState
-    setState?: (state: GameState) => void
-    postContext?: {
-        saveState?: (state: GameState) => void
-        post: Post
-    }
-    collapsed?: boolean
-    stepContext?: StepContext
-}
-
-export const GameCardContent: FC<GameCardContentProps> = ({
-    initialGame,
-    state,
-    setState,
-    postContext,
-    stepContext,
-    collapsed,
-}) => {
-    const navigate = useNavigate()
-    const { accountData } = useContext(AccountContext)
-    const plays = postContext?.post.mediaTypes.includes('game')
-        ? postContext.post.Plays ?? []
-        : undefined
-
-    return (
-        <Row style={{ flexGrow: 1, ...(collapsed && { maxHeight: 300 }) }}>
-            <Column
-                style={{
-                    padding: 5,
-                    flexGrow: 1,
-                    ...(plays && { flexBasis: '50%' }),
-                }}
-            >
-                <Column style={{ flexGrow: 1 }}>
-                    <Row>
-                        <h4 style={{ flexGrow: 1 }}>Steps</h4>
-                    </Row>
-                    <Column style={{ overflowY: 'auto' }}>
-                        <Steps
-                            prefix=''
-                            steps={state.game.steps}
-                            setSteps={
-                                setState &&
-                                ((steps) =>
-                                    setState({
-                                        ...state,
-                                        game: { ...state.game, steps },
-                                        dirty: true,
-                                    }))
-                            }
-                            stepContext={stepContext}
-                        />
-                    </Column>
-                    {postContext && state.dirty && (
-                        <Row centerX style={{ marginTop: 10 }}>
-                            <Button
-                                color='grey'
-                                onClick={
-                                    setState &&
-                                    (() =>
-                                        setState({
-                                            ...state,
-                                            game: initialGame,
-                                            dirty: false,
-                                        }))
-                                }
-                                text='Cancel'
-                                style={{ marginRight: 10 }}
-                            />
-                            {postContext.saveState && (
-                                <Button
-                                    color='blue'
-                                    onClick={async () =>
-                                        postContext.saveState!({ ...state, dirty: false })
-                                    }
-                                    text='Save'
-                                />
-                            )}
-                        </Row>
-                    )}
-                </Column>
-                {postContext?.post.play && (
-                    <Row style={{ justifyContent: 'flex-end' }}>
-                        <Button
-                            color='grey'
-                            onClick={() => navigate(`/p/${postContext.post.play!.gameId}`)}
-                            text='View original game'
-                        />
-                    </Row>
-                )}
-            </Column>
-            {postContext && plays && (
-                <Column style={{ padding: 5, flexGrow: 1, flexBasis: '50%' }}>
-                    <h4>Plays</h4>
-                    <Column style={{ overflowY: 'auto' }}>
-                        {plays.length ? (
-                            plays.map(({ Post: play }) => (
-                                <Row centerY spaceBetween style={{ marginBottom: 5 }}>
-                                    <a href={`/p/${play.id}`}>
-                                        {play.title} ({play.play.status},{' '}
-                                        {play.play.playerIds.length} players)
-                                    </a>
-                                    <Button
-                                        style={{ marginLeft: 5 }}
-                                        onClick={async () => {
-                                            navigate(`/p/${play.id}`)
-                                        }}
-                                        size='medium'
-                                        color='grey'
-                                        text={PLAY_BUTTON_TEXT[play.play.status]}
-                                    />
-                                </Row>
-                            ))
-                        ) : (
-                            <span>This game hasn&apos;t been played yet</span>
-                        )}
-                    </Column>
-                    <Row style={{ justifyContent: 'flex-end', marginTop: 10 }}>
-                        <Button
-                            color='blue'
-                            onClick={async () => {
-                                const play: Play = {
-                                    playerIds: [accountData.id],
-                                    gameId: postContext.post.id,
-                                    game: state.game,
-                                    status: 'waiting',
-                                    variables: {},
-                                }
-                                const post = {
-                                    type: 'post',
-                                    title: `Play of "${postContext.post.title}"`,
-                                    mediaTypes: 'play',
-                                    mentions: [],
-                                    spaceIds: postContext.post.DirectSpaces.map(
-                                        (space) => space.id
-                                    ),
-                                    play,
-                                    source: {
-                                        type: 'post',
-                                        id: postContext.post.id,
-                                        relationship: 'play',
-                                    },
-                                }
-                                const res = await uploadPost(post)
-                                navigate(`/p/${res.data.post.id}`)
-                            }}
-                            text='Start new play'
-                        />
-                    </Row>
-                </Column>
-            )}
-        </Row>
-    )
 }
 
 const CreateStepButton: FC<{
@@ -678,4 +571,214 @@ const UpdateStepModal: FC<{ step: Step; onClose: () => void; onUpdate: (step: St
     )
 }
 
-export default GameCard
+export const CreateGameCard: FC<{
+    state: GameState
+    setState?: (state: GameState) => void
+}> = ({ state, setState }) => {
+    return (
+        <GameCardWrapper>
+            <GameCardHeader />
+            <Row style={{ flexGrow: 1 }}>
+                <Column
+                    style={{
+                        padding: 5,
+                        flexGrow: 1,
+                    }}
+                >
+                    <Row>
+                        <h4 style={{ flexGrow: 1 }}>Steps</h4>
+                    </Row>
+                    <Column style={{ overflowY: 'auto' }}>
+                        <Steps
+                            prefix=''
+                            steps={state.game.steps}
+                            setSteps={
+                                setState &&
+                                ((steps) =>
+                                    setState({
+                                        ...state,
+                                        game: { ...state.game, steps },
+                                        dirty: true,
+                                    }))
+                            }
+                        />
+                    </Column>
+                </Column>
+            </Row>
+        </GameCardWrapper>
+    )
+}
+
+export const GameCard: FC<{
+    initialGame: Game
+    state: GameState
+    setState: (state: GameState) => void
+    saveState: (state: GameState) => void
+    post: Post
+    collapsed: boolean
+}> = ({ initialGame, state, setState, saveState, post, collapsed }) => {
+    const navigate = useNavigate()
+    const { accountData } = useContext(AccountContext)
+    const plays = post.Plays ?? []
+
+    return (
+        <GameCardWrapper>
+            <GameCardHeader />
+            <Row style={{ flexGrow: 1, ...(collapsed && { maxHeight: 300 }) }}>
+                <Column
+                    style={{
+                        padding: 5,
+                        flexGrow: 1,
+                        flexBasis: '50%',
+                    }}
+                >
+                    <SaveableSteps
+                        initialGame={initialGame}
+                        saveState={saveState}
+                        setState={setState}
+                        state={state}
+                    />
+                </Column>
+                <Column style={{ padding: 5, flexGrow: 1, flexBasis: '50%' }}>
+                    <h4>Plays</h4>
+                    <Column style={{ overflowY: 'auto' }}>
+                        {plays.length ? (
+                            plays.map(({ Post: play }) => (
+                                <Row centerY spaceBetween style={{ marginBottom: 5 }}>
+                                    <a href={`/p/${play.id}`}>
+                                        {play.title} ({play.play.status},{' '}
+                                        {play.play.playerIds.length} players)
+                                    </a>
+                                    <Button
+                                        style={{ marginLeft: 5 }}
+                                        onClick={async () => {
+                                            navigate(`/p/${play.id}`)
+                                        }}
+                                        size='medium'
+                                        color='grey'
+                                        text={PLAY_BUTTON_TEXT[play.play.status]}
+                                    />
+                                </Row>
+                            ))
+                        ) : (
+                            <span>This game hasn&apos;t been played yet</span>
+                        )}
+                    </Column>
+                    <Row style={{ justifyContent: 'flex-end', marginTop: 10 }}>
+                        <Button
+                            color='blue'
+                            onClick={async () => {
+                                const play: Play = {
+                                    playerIds: [accountData.id],
+                                    gameId: post.id,
+                                    game: state.game,
+                                    status: 'waiting',
+                                    variables: {},
+                                }
+                                const newPost = {
+                                    type: 'post',
+                                    title: `Play of "${post.title}"`,
+                                    mediaTypes: 'play',
+                                    mentions: [],
+                                    spaceIds: post.DirectSpaces.map((space) => space.id),
+                                    play,
+                                    source: {
+                                        type: 'post',
+                                        id: post.id,
+                                        relationship: 'play',
+                                    },
+                                }
+                                const res = await uploadPost(newPost)
+                                navigate(`/p/${res.data.post.id}`)
+                            }}
+                            text='Start new play'
+                        />
+                    </Row>
+                </Column>
+            </Row>
+        </GameCardWrapper>
+    )
+}
+
+export const PlayCard: FC<{ post: Post }> = ({ post }) => {
+    const navigate = useNavigate()
+    const play = post.play!
+    const { game } = play
+
+    return (
+        <GameCardWrapper>
+            <Row centerY style={{ marginBottom: 10 }}>
+                <CastaliaIcon className={styles.icon} />
+                <h3 style={{ marginLeft: 5, color: 'gray' }}>Play ({play.status})</h3>
+            </Row>
+            Players: {play.playerIds}
+            <Row style={{ flexGrow: 1, maxHeight: 300 }}>
+                <Column
+                    style={{
+                        padding: 5,
+                        flexGrow: 1,
+                    }}
+                >
+                    <Row>
+                        <h4 style={{ flexGrow: 1 }}>Steps</h4>
+                    </Row>
+                    <Column style={{ overflowY: 'auto' }}>
+                        <Steps prefix='' steps={game.steps} />
+                    </Column>
+                    <Row style={{ justifyContent: 'flex-end' }}>
+                        <Button
+                            color='grey'
+                            onClick={() => navigate(`/p/${play.gameId}`)}
+                            text='View original game'
+                        />
+                        <Button
+                            style={{ marginLeft: 10 }}
+                            color='blue'
+                            onClick={() => navigate(`/p/${post.id}`)}
+                            text={PLAY_BUTTON_TEXT[play.status]}
+                        />
+                    </Row>
+                </Column>
+            </Row>
+        </GameCardWrapper>
+    )
+}
+
+export const PlaySteps: FC<{
+    initialGame: Game
+    state: GameState
+    setState: (state: GameState) => void
+    saveState: (state: GameState) => void
+    post: Post
+    collapsed?: boolean
+    stepContext?: StepContext
+}> = ({ initialGame, state, setState, saveState, post, stepContext, collapsed }) => {
+    const navigate = useNavigate()
+    const play = post.play!
+
+    return (
+        <Row style={{ flexGrow: 1, ...(collapsed && { maxHeight: 300 }) }}>
+            <Column
+                style={{
+                    padding: 5,
+                    flexGrow: 1,
+                }}
+            >
+                <SaveableSteps
+                    initialGame={initialGame}
+                    saveState={saveState}
+                    setState={setState}
+                    state={state}
+                    stepContext={stepContext}
+                />
+                <Row style={{ justifyContent: 'flex-end' }}>
+                    <Button
+                        color='grey'
+                        onClick={() => navigate(`/p/${play.gameId}`)}
+                        text='View original game'
+                    />
+                </Row>
+            </Column>
+        </Row>
+    )
+}

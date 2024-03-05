@@ -33,7 +33,6 @@ import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import {
     GAMES,
     GAME_TYPES,
-    Game,
     GameSettings,
     MEDIA_TYPES,
     MediaType,
@@ -54,7 +53,7 @@ import {
     uploadPost,
     validatePost,
 } from '@src/Helpers'
-import GameCard, { GameState } from '@src/components/GameCard'
+import { CreateGameCard, GameState } from '@src/components/GameCard'
 import styles from '@styles/components/modals/CreatePostModal.module.scss'
 import {
     AudioIcon,
@@ -512,9 +511,8 @@ function CreatePostModal({
     }
 
     // new game
-    const initialGame: Game = { steps: [] }
     const [gameState, setGameState] = useState<GameState>({
-        game: initialGame,
+        game: { steps: [] },
         dirty: true,
     })
 
@@ -1308,11 +1306,7 @@ function CreatePostModal({
                                 </Column>
                             )}
                             {mediaTypes.includes('game') && (
-                                <GameCard
-                                    initialGame={initialGame}
-                                    state={gameState}
-                                    setState={setGameState}
-                                />
+                                <CreateGameCard state={gameState} setState={setGameState} />
                             )}
                         </Column>
                     </Column>

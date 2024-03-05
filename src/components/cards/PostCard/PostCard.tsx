@@ -33,8 +33,7 @@ import {
     timeSinceCreated,
     timeSinceCreatedShort,
 } from '@src/Helpers'
-import GameCard, { GameState } from '@src/components/GameCard'
-import PlayCard, { PlayState } from '@src/components/PlayCard'
+import { GameCard, GameState, PlayCard } from '@src/components/GameCard'
 import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
 import {
     AngleUpIcon,
@@ -135,11 +134,6 @@ function PostCard(props: {
         game && {
             game,
             dirty: false,
-        }
-    )
-    const [playState, setPlayState] = useState<PlayState | undefined>(
-        play && {
-            play,
         }
     )
 
@@ -457,33 +451,27 @@ function PostCard(props: {
                 )}
                 {game && gameState && (
                     <GameCard
-                        collapsed={collapse}
+                        collapsed={!!collapse}
                         initialGame={game}
-                        postContext={{
-                            post,
-                            saveState: async (state) => {
-                                await axios.post(
-                                    `${config.apiURL}/update-post`,
-                                    { id: post.id, game: state.game },
-                                    {
-                                        headers: {
-                                            Authorization: `Bearer ${new Cookies().get(
-                                                'accessToken'
-                                            )}`,
-                                        },
-                                    }
-                                )
-                                setGameState(state)
-                                setPost({ ...post, game: state.game })
-                            },
+                        post={post}
+                        saveState={async (state) => {
+                            await axios.post(
+                                `${config.apiURL}/update-post`,
+                                { id: post.id, game: state.game },
+                                {
+                                    headers: {
+                                        Authorization: `Bearer ${new Cookies().get('accessToken')}`,
+                                    },
+                                }
+                            )
+                            setGameState(state)
+                            setPost({ ...post, game: state.game })
                         }}
                         state={gameState}
                         setState={isOwnPost && setGameState}
                     />
                 )}
-                {playState && location !== 'post-page' && (
-                    <PlayCard post={post} state={playState} />
-                )}
+                {post.play && location !== 'post-page' && <PlayCard post={post} />}
             </Column>
             {showFooter && (
                 <Row spaceBetween className={styles.footer}>
