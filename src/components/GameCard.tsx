@@ -192,7 +192,7 @@ const Steps: FC<{
     )
 }
 
-const SaveableSteps: FC<{
+export const SaveableSteps: FC<{
     initialGame: Game
     state: GameState
     setState: (state: GameState) => void
@@ -741,44 +741,5 @@ export const PlayCard: FC<{ post: Post }> = ({ post }) => {
                 </Column>
             </Row>
         </GameCardWrapper>
-    )
-}
-
-export const PlaySteps: FC<{
-    initialGame: Game
-    state: GameState
-    setState: (state: GameState) => void
-    saveState: (state: GameState) => void
-    post: Post
-    collapsed?: boolean
-    stepContext?: StepContext
-}> = ({ initialGame, state, setState, saveState, post, stepContext, collapsed }) => {
-    const navigate = useNavigate()
-    const play = post.play!
-
-    return (
-        <Row style={{ flexGrow: 1, ...(collapsed && { maxHeight: 300 }) }}>
-            <Column
-                style={{
-                    padding: 5,
-                    flexGrow: 1,
-                }}
-            >
-                <SaveableSteps
-                    initialGame={initialGame}
-                    saveState={saveState}
-                    setState={setState}
-                    state={state}
-                    stepContext={stepContext}
-                />
-                <Row style={{ justifyContent: 'flex-end' }}>
-                    <Button
-                        color='grey'
-                        onClick={() => navigate(`/p/${play.gameId}`)}
-                        text='View original game'
-                    />
-                </Row>
-            </Column>
-        </Row>
     )
 }

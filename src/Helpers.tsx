@@ -216,7 +216,11 @@ export type Play = {
     playerIds: number[]
     status: 'waiting' | 'started' | 'paused' | 'stopped' | 'ended'
     variables: PlayVariables
-} & ({ status: 'waiting' | 'stopped' | 'ended' } | { status: 'started' | 'paused'; stepId: string })
+} & (
+    | { status: 'waiting' | 'stopped' | 'ended' }
+    | { status: 'paused'; step: LeafStep }
+    | { status: 'started'; step: LeafStep; stepTimeout: number }
+)
 
 export type Step = {
     id: string
@@ -243,6 +247,8 @@ export type Step = {
           steps: Step[]
       }
 )
+
+export type LeafStep = Extract<Step, { type: 'post' }>
 
 export type StepType = Step['type']
 

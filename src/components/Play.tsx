@@ -3,26 +3,27 @@
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable react/function-component-definition */
 import config from '@src/Config'
-import { Play, PlayVariables, Post, Step } from '@src/Helpers'
+import { LeafStep, PlayVariables, Post, Step } from '@src/Helpers'
 import { AccountContext } from '@src/contexts/AccountContext'
 import axios from 'axios'
 import { omit } from 'lodash'
-import React, { FC, useContext, useEffect, useMemo, useState } from 'react'
-import Cookies from 'universal-cookie'
+import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { io } from 'socket.io-client'
 import Button from './Button'
 import Column from './Column'
-import { PlaySteps } from './GameCard'
+import { GameState, SaveableSteps } from './GameCard'
 import Row from './Row'
 import LoadingWheel from './animations/LoadingWheel'
 import MessageCard from './cards/Comments/MessageCard'
 import PostCard from './cards/PostCard/PostCard'
 import CommentInput from './draft-js/CommentInput'
 
-const getFirstStep = (
+const getFirstLeafStep = (
     step: Step | undefined,
     variables: PlayVariables,
     playerIds: number[]
-): undefined | { stepId: string; variables: PlayVariables } => {
+): undefined | { step: LeafStep; variables: PlayVariables } => {
     if (!step) {
         return undefined
     }
@@ -30,14 +31,14 @@ const getFirstStep = (
         case 'game':
             throw new Error('TODO')
         case 'post':
-            return { stepId: step.id, variables }
+            return { step, variables }
         case 'rounds': {
-            const firstStep = getFirstStep(step.steps[0], variables, playerIds)
+            const firstStep = getFirstLeafStep(step.steps[0], variables, playerIds)
             if (!firstStep) {
                 return undefined
             }
             return {
-                stepId: firstStep.stepId,
+                step: firstStep.step,
                 variables: {
                     ...firstStep.variables,
                     [`${step.id}_round`]: firstStep.variables[`${step.id}_round`] ?? 1,
@@ -45,12 +46,12 @@ const getFirstStep = (
             }
         }
         case 'turns': {
-            const firstStep = getFirstStep(step.steps[0], variables, playerIds)
+            const firstStep = getFirstLeafStep(step.steps[0], variables, playerIds)
             if (!firstStep) {
                 return undefined
             }
             return {
-                stepId: firstStep.stepId,
+                step: firstStep.step,
                 variables: {
                     ...firstStep.variables,
                     [`${step.id}_player`]: firstStep.variables[`${step.id}_player`] ?? playerIds[0],
@@ -64,19 +65,19 @@ const getFirstStep = (
     }
 }
 
-const getNextStep = (
+const getNextLeafStep = (
     steps: Step[],
     stepId: string,
     variables: PlayVariables,
     playerIds: number[]
-): undefined | { stepId?: string; variables: PlayVariables } => {
+): undefined | { step?: LeafStep; variables: PlayVariables } => {
     let currentFound = false
     let currentVariables = variables
     for (let i = 0; i < steps.length; i++) {
         const step = steps[i]
 
         if (currentFound) {
-            const nextStep = getFirstStep(step, currentVariables, playerIds)
+            const nextStep = getFirstLeafStep(step, currentVariables, playerIds)
             if (nextStep) {
                 return nextStep
             }
@@ -90,19 +91,19 @@ const getNextStep = (
                     }
                     break
                 case 'rounds': {
-                    const result = getNextStep(step.steps, stepId, currentVariables, playerIds)
+                    const result = getNextLeafStep(step.steps, stepId, currentVariables, playerIds)
                     if (!result) {
                         break
                     }
 
-                    if (result.stepId) {
+                    if (result.step) {
                         return result
                     }
 
                     const roundKey = `${step.id}_round`
                     const currentRound = currentVariables[roundKey] as number
                     if (currentRound < +step.amount) {
-                        const firstStep = getFirstStep(
+                        const firstStep = getFirstLeafStep(
                             step,
                             {
                                 ...result.variables,
@@ -120,12 +121,12 @@ const getNextStep = (
                     break
                 }
                 case 'turns': {
-                    const result = getNextStep(step.steps, stepId, currentVariables, playerIds)
+                    const result = getNextLeafStep(step.steps, stepId, currentVariables, playerIds)
                     if (!result) {
                         break
                     }
 
-                    if (result.stepId) {
+                    if (result.step) {
                         return result
                     }
 
@@ -133,7 +134,7 @@ const getNextStep = (
                     const currentPlayerId = result.variables[playerKey] as number
                     const currentPlayerIndex = playerIds.indexOf(currentPlayerId)
                     if (currentPlayerIndex < playerIds.length - 1) {
-                        const firstStep = getFirstStep(
+                        const firstStep = getFirstLeafStep(
                             step,
                             {
                                 ...result.variables,
@@ -167,169 +168,104 @@ const getNextStep = (
 
 const PlaySidebar: FC<{
     post: Post
-    state: PlayState
-    setState: (state: PlayState) => void
-    saveState: (state: PlayState) => void
-}> = ({ post, state, setState, saveState }) => {
+    setPost: (post: Post) => void
+    emit: (action: string, data?: any) => void
+}> = ({ post, setPost, emit }) => {
+    const play = post.play!
+    const { game } = play
+    const [gameState, setGameState] = useState<GameState>({
+        dirty: false,
+        game: play.game,
+    })
     const { accountData } = useContext(AccountContext)
     const isOwnPost = accountData && accountData.id === post.Creator?.id
     const playerIds = useMemo(() => [accountData.id], [accountData.id])
-    const play = state.play!
+    const navigate = useNavigate()
 
     const firstStep = useMemo(
-        () => getFirstStep(state.play.game.steps[0], {}, playerIds),
-        [playerIds, state.play.game.steps]
+        () => getFirstLeafStep(play.game.steps[0], {}, playerIds),
+        [playerIds, play.game.steps]
     )
 
     return (
         <Column style={{ width: 300, padding: 10, borderRight: '1px solid #ededef' }}>
-            <h2>Game</h2>
-            <Row style={{ marginBottom: 10 }}>
-                <Button
-                    color='blue'
-                    text='Start'
-                    onClick={
-                        !state.dirty &&
-                        (play.status === 'waiting' ||
-                            play.status === 'stopped' ||
-                            play.status === 'ended') &&
-                        firstStep
-                            ? () => {
-                                  saveState({
-                                      ...state,
-                                      play: {
-                                          ...play,
-                                          status: 'started',
-                                          stepId: firstStep.stepId,
-                                          variables: firstStep.variables,
-                                      },
-                                  })
-                              }
-                            : play.status === 'paused'
-                            ? () => {
-                                  saveState({
-                                      ...state,
-                                      play: {
-                                          ...play,
-                                          status: 'started',
-                                      },
-                                  })
-                              }
-                            : null
-                    }
-                />
-                <Button
-                    color='aqua'
-                    text='Next'
-                    style={{ marginLeft: 10 }}
-                    onClick={
-                        play.status === 'started' || play.status === 'paused'
-                            ? () => {
-                                  const nextStep = getNextStep(
-                                      state.play.game.steps,
-                                      play.stepId,
-                                      play.variables,
-                                      play.playerIds
-                                  )
-                                  if (nextStep?.stepId) {
-                                      saveState({
-                                          ...state,
-                                          play: {
-                                              ...play,
-                                              stepId: nextStep.stepId,
-                                              variables: nextStep.variables,
-                                          },
-                                      })
-                                  } else {
-                                      saveState({
-                                          ...state,
-                                          play: {
-                                              game: play.game,
-                                              gameId: play.gameId,
-                                              playerIds: play.playerIds,
-                                              status: 'ended',
-                                              variables: {},
-                                          },
-                                      })
+            <h2>Play ({play.status})</h2>
+            {isOwnPost && (
+                <Row style={{ marginBottom: 10 }}>
+                    <Button
+                        color='blue'
+                        text='Start'
+                        onClick={
+                            (!gameState.dirty &&
+                                (play.status === 'waiting' ||
+                                    play.status === 'ended' ||
+                                    play.status === 'stopped') &&
+                                firstStep) ||
+                            play.status === 'paused'
+                                ? () => emit('start')
+                                : null
+                        }
+                    />
+                    <Button
+                        color='aqua'
+                        text='Next'
+                        style={{ marginLeft: 10 }}
+                        onClick={
+                            play.status === 'started' || play.status === 'paused'
+                                ? () => emit('next')
+                                : null
+                        }
+                    />
+                    <Button
+                        color='aqua'
+                        text='Pause'
+                        style={{ marginLeft: 10 }}
+                        disabled={!play || play?.status === 'paused'}
+                        onClick={play.status === 'started' ? () => emit('pause') : null}
+                    />
+                    <Button
+                        color='aqua'
+                        text='Stop'
+                        style={{ marginLeft: 10 }}
+                        onClick={
+                            play.status === 'started' || play.status === 'paused'
+                                ? () => emit('stop')
+                                : null
+                        }
+                    />
+                </Row>
+            )}
+            <Row style={{ flexGrow: 1 }}>
+                <Column
+                    style={{
+                        padding: 5,
+                        flexGrow: 1,
+                    }}
+                >
+                    <SaveableSteps
+                        initialGame={game}
+                        saveState={(newGameState) => {
+                            emit('update-game', { game: newGameState.game })
+                            setGameState(newGameState)
+                        }}
+                        setState={setGameState}
+                        state={gameState}
+                        stepContext={
+                            play.status === 'started' || play.status === 'paused'
+                                ? {
+                                      stepId: play.step.id,
+                                      variables: play.variables,
                                   }
-                              }
-                            : null
-                    }
-                />
-                <Button
-                    color='aqua'
-                    text='Pause'
-                    style={{ marginLeft: 10 }}
-                    disabled={!play || play?.status === 'paused'}
-                    onClick={
-                        play.status === 'started'
-                            ? () =>
-                                  saveState({
-                                      ...state,
-                                      play: {
-                                          ...play,
-                                          status: 'paused',
-                                      },
-                                  })
-                            : null
-                    }
-                />
-                <Button
-                    color='aqua'
-                    text='Stop'
-                    style={{ marginLeft: 10 }}
-                    onClick={
-                        play.status === 'started' || play.status === 'paused'
-                            ? () =>
-                                  saveState({
-                                      ...state,
-                                      play: {
-                                          ...play,
-                                          status: 'stopped',
-                                      },
-                                  })
-                            : null
-                    }
-                />
+                                : undefined
+                        }
+                    />
+                    <Button
+                        color='grey'
+                        onClick={() => navigate(`/p/${play.gameId}`)}
+                        text='View original game'
+                    />
+                </Column>
             </Row>
-            <PlaySteps
-                initialGame={post.play!.game}
-                state={{
-                    dirty: state.dirty,
-                    game: state.play.game,
-                }}
-                setState={
-                    (isOwnPost && state.play.status === 'waiting') ||
-                    state.play.status === 'stopped' ||
-                    (state.play.status === 'ended' &&
-                        (({ dirty, game }) =>
-                            setState({
-                                dirty,
-                                play: {
-                                    ...state.play,
-                                    game,
-                                },
-                            })))
-                }
-                post={post}
-                saveState={({ dirty, game }) =>
-                    saveState({
-                        dirty,
-                        play: {
-                            ...state.play,
-                            game,
-                        },
-                    })
-                }
-                stepContext={
-                    state.play?.status === 'started' || state.play?.status === 'paused'
-                        ? {
-                              stepId: state.play.stepId,
-                              variables: state.play.variables,
-                          }
-                        : undefined
-                }
-            />
         </Column>
     )
 }
@@ -435,48 +371,41 @@ const PostChildren: FC<{
     )
 }
 
-type PlayState = {
-    dirty: boolean
-    play: Play
-}
-
 const PlayRoom: FC<{ post: Post; setPost: (post: Post) => void; onDelete: () => void }> = ({
     post,
     setPost,
     onDelete,
 }) => {
     const { accountData, setToyboxCollapsed } = useContext(AccountContext)
+    const socket = useMemo(() => io(config.apiWebSocketURL || ''), [])
+    const userData = {
+        id: accountData.id,
+        handle: accountData.handle,
+        name: accountData.name || 'Anonymous',
+        flagImagePath: accountData.flagImagePath,
+    }
 
     useEffect(() => {
         setToyboxCollapsed(true)
+        socket.emit('outgoing-join-room', {
+            roomId: post.id,
+            userData,
+        })
+
+        socket.on('play:incoming-updated', ({ play }) => {
+            console.log(play)
+            setPost({ ...post, play })
+        })
     }, [])
 
-    const play = post.play!
-    const [playState, setPlayState] = useState<PlayState>(() => ({
-        dirty: false,
-        play,
-    }))
+    const emit = useCallback(
+        (action, data) => socket.emit(`play:outgoing-${action}`, { id: post.id, ...data }),
+        []
+    )
 
     return (
         <Row style={{ width: '100%', height: 'calc(100vh - 60px - 25px)', marginTop: '60px' }}>
-            <PlaySidebar
-                post={post}
-                state={playState}
-                setState={setPlayState}
-                saveState={async (state) => {
-                    setPlayState(state)
-                    await axios.post(
-                        `${config.apiURL}/update-post`,
-                        { id: post.id, play: state.play },
-                        {
-                            headers: {
-                                Authorization: `Bearer ${new Cookies().get('accessToken')}`,
-                            },
-                        }
-                    )
-                    setPost({ ...post, play: state.play })
-                }}
-            />
+            <PlaySidebar post={post} emit={emit} setPost={setPost} />
             <Column style={{ height: '100%', flexGrow: 1, background: 'white' }}>
                 <div style={{ padding: 10 }}>
                     <PostCard
