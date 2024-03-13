@@ -8,12 +8,12 @@ import PostCard from '@components/cards/PostCard/PostCard'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
 import { Post, getDraftPlainText, includesSpecificGame } from '@src/Helpers'
-import PlayRoom from '@src/components/Play'
 import styles from '@styles/pages/PostPage/PostPage.module.scss'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import Cookies from 'universal-cookie'
+import PlayPage from './PlayPage'
 
 type State =
     | {
@@ -131,12 +131,12 @@ function PostPage(): JSX.Element {
                 image={findImage()}
                 creator={`u/${post.Creator.handle}`}
             />
-            {post.mediaTypes.includes('prism') ? (
+            {post.mediaTypes?.includes('prism') ? (
                 <Prism post={post} setPost={setPost} onDelete={onDelete} />
             ) : includesSpecificGame(post.mediaTypes) ? (
                 <GameRoom key={post.id} post={post} setPost={setPost} />
-            ) : post.mediaTypes.includes('play') ? (
-                <PlayRoom key={post.id} post={post} onDelete={onDelete} setPost={setPost} />
+            ) : post.mediaTypes?.includes('play') ? (
+                <PlayPage key={post.id} post={post} onDelete={onDelete} setPost={setPost} />
             ) : (
                 <Column centerX className={styles.wrapper}>
                     <Column className={styles.postCardWrapper}>

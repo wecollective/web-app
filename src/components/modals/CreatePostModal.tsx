@@ -53,7 +53,7 @@ import {
     uploadPost,
     validatePost,
 } from '@src/Helpers'
-import { CreateGameCard, GameState } from '@src/components/GameCard'
+import { CreateGameCard, GameState } from '@src/components/cards/GameCard'
 import styles from '@styles/components/modals/CreatePostModal.module.scss'
 import {
     AudioIcon,

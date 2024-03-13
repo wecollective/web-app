@@ -98,11 +98,11 @@ export type GameType = (typeof GAME_TYPES)[number]
 export const isSpecificGame = (type: string): type is GameType =>
     GAME_TYPES.includes(type as GameType)
 
-export const includesSpecificGame = (mediaTypes: string) =>
-    GAME_TYPES.some((type) => mediaTypes.includes(type))
+export const includesSpecificGame = (mediaTypes?: string) =>
+    GAME_TYPES.some((type) => mediaTypes?.includes(type))
 
-export const getGameType = (mediaTypes: string) =>
-    GAME_TYPES.find((type) => mediaTypes.includes(type))!
+export const getGameType = (mediaTypes?: string) =>
+    GAME_TYPES.find((type) => mediaTypes?.includes(type))!
 
 export const MEDIA_TYPES = [
     'text',
@@ -171,8 +171,14 @@ export type AudioMediaLink = {
     Audio: unknown
 }
 
+type PostState = 'active' | 'deleted' | 'account-deleted'
+
+type ReactionType = 'like' | 'rating' | 'linked'
+
 export type Post = {
     id: number
+    rootId?: number
+    state: PostState
     type: PostType
     mediaTypes: string
     title: string
@@ -186,11 +192,14 @@ export type Post = {
     totalLinks: number
     game?: Game
     play?: Play
+    move?: Move
     Creator: IUser
     DirectSpaces: { id: number }[]
     UrlBlocks?: UrlBlock[]
     ImageBlocks?: ImageBlock[]
     AudioBlocks?: AudioBlock[]
+    Reactions?: { type: ReactionType }[]
+    Parent?: Post
     Event: Event
     Games?: GameBlock[]
     Plays?: PlayBlock[]
@@ -203,35 +212,42 @@ export type Game = {
     steps: Step[]
 }
 
+export type Move = (
+    | { status: 'skipped' | 'ended' }
+    | { status: 'paused'; elapsedTime: number }
+    | {
+          startedAt: number
+          timeout: number
+          status: 'started'
+      }
+) & { playId?: number }
+
 export type PlayVariables = Record<string, string | number | boolean>
 
 export type StepContext = {
     stepId: string
     variables: PlayVariables
+    playerIds: string[]
 }
 
 export type Play = {
     game: Game
     gameId: number
     playerIds: number[]
-    status: 'waiting' | 'started' | 'paused' | 'stopped' | 'ended'
     variables: PlayVariables
 } & (
     | { status: 'waiting' | 'stopped' | 'ended' }
-    | { status: 'paused'; step: LeafStep }
-    | { status: 'started'; step: LeafStep; stepTimeout: number }
+    | { status: 'started'; stepId: string; moveId: number }
 )
 
 export type Step = {
     id: string
 } & (
     | {
-          type: 'post'
-          post: {
-              title: string
-              text: string
-              timeout: number
-          }
+          type: 'move'
+          title: string
+          text: string
+          timeout: string
       }
     | {
           type: 'game'
@@ -239,20 +255,22 @@ export type Step = {
       }
     | {
           type: 'rounds'
+          name: string
           amount: string
           steps: Step[]
       }
     | {
           type: 'turns'
+          name: string
           steps: Step[]
       }
 )
 
-export type LeafStep = Extract<Step, { type: 'post' }>
+export type MoveStep = Extract<Step, { type: 'move' }>
 
 export type StepType = Step['type']
 
-export const STEP_TYPES = ['post', 'rounds', 'turns', 'game'] as const
+export const STEP_TYPES = ['move', 'rounds', 'turns', 'game'] as const
 
 export type Event = {
     id: number
@@ -385,7 +403,7 @@ export function resizeTextArea(target: HTMLElement): void {
     t.style.height = `${target.scrollHeight}px`
 }
 
-export function dateCreated(createdAt: string | undefined): string | undefined {
+export function dateCreated(createdAt: string | number | undefined): string | undefined {
     if (createdAt === undefined) return undefined
     const sourceDate = new Date(createdAt)
     const d = sourceDate.toString().split(/[ :]/)

@@ -19,6 +19,7 @@ import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import {
+    Post,
     dateCreated,
     getDraftPlainText,
     getGameType,
@@ -41,9 +42,10 @@ import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
+import MoveCard from '../MoveCard'
 
 function MessageCard(props: {
-    message: any
+    message: Post
     removeMessage: (message: any) => void
     setReplyParent: () => void
 }): JSX.Element {
@@ -61,7 +63,6 @@ function MessageCard(props: {
         totalLikes,
         totalRatings,
         totalLinks,
-        totalChildComments,
         createdAt,
         updatedAt,
         Creator,
@@ -71,6 +72,7 @@ function MessageCard(props: {
         Event,
         Reactions = [],
         Parent,
+        move,
     } = message
     const [visible, setVisible] = useState(false)
     const [accountReactions, setAccountReactions] = useState<any>({
@@ -192,6 +194,8 @@ function MessageCard(props: {
         )
     }
 
+    useEffect(() => setMessage(messageData), [messageData])
+
     useEffect(() => {
         setVisible(true)
         // addDragEvents()
@@ -201,7 +205,7 @@ function MessageCard(props: {
         <Row
             className={`${styles.wrapper} ${visible && styles.visible} ${
                 Creator.id === accountData.id && styles.isOwnComment
-            }`}
+            } ${move && `${styles.move} ${styles[move.status]}`}`}
             style={{ marginBottom: hasReactions ? 10 : 0 }}
         >
             {isOwnComment && renderButtons()}
@@ -229,7 +233,6 @@ function MessageCard(props: {
                         </>
                     )}
                     <p
-                        className='grey'
                         title={`${dateCreated(createdAt)} ${
                             edited ? `(edited: ${dateCreated(updatedAt)})` : ''
                         }`}
@@ -312,6 +315,7 @@ function MessageCard(props: {
                     {mediaTypes.includes('card') && (
                         <Card postId={id} style={{ minWidth: 600, marginTop: 10 }} />
                     )}
+                    {move && <MoveCard move={move} />}
                 </Column>
                 <Row className={styles.reactions}>
                     {totalLikes > 0 && (

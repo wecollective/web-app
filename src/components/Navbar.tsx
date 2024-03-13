@@ -276,7 +276,7 @@ function Navbar(): JSX.Element {
                     className={styles.homeButton}
                     onClick={() => {
                         rotateButton()
-                        history('/')
+                        history(loggedIn ? '/s/all/posts' : '/')
                     }}
                 >
                     <WecoLogo />

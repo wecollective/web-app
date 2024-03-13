@@ -33,7 +33,7 @@ import {
     timeSinceCreated,
     timeSinceCreatedShort,
 } from '@src/Helpers'
-import { GameCard, GameState, PlayCard } from '@src/components/GameCard'
+import { GameCard, GameState, PlayCard } from '@src/components/cards/GameCard'
 import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
 import {
     AngleUpIcon,
@@ -362,7 +362,7 @@ function PostCard(props: {
                     <Column className={`post-${id}-drag-disabled`} style={{ cursor: 'text' }}>
                         {title && (
                             <>
-                                {mediaTypes.includes('glass-bead-game') ? (
+                                {mediaTypes?.includes('glass-bead-game') ? (
                                     <Row centerY className={styles.topic}>
                                         {topicImage && <img src={topicImage} alt='' />}
                                         <h1>{title}</h1>
@@ -389,7 +389,7 @@ function PostCard(props: {
                         )}
                     </Column>
                 )}
-                {!isBlock && mediaTypes.includes('url') && (
+                {!isBlock && mediaTypes?.includes('url') && (
                     <Urls
                         key={updatedAt}
                         postId={id}
@@ -399,7 +399,7 @@ function PostCard(props: {
                         style={{ marginBottom: 10 }}
                     />
                 )}
-                {!isBlock && mediaTypes.includes('image') && (
+                {!isBlock && mediaTypes?.includes('image') && (
                     <Images
                         postId={id}
                         imageBlocks={ImageBlocks?.map((block) => {
@@ -408,7 +408,7 @@ function PostCard(props: {
                         style={{ marginBottom: 10 }}
                     />
                 )}
-                {!isBlock && mediaTypes.includes('audio') && (
+                {!isBlock && mediaTypes?.includes('audio') && (
                     <Audios
                         postId={id}
                         audioBlocks={AudioBlocks?.map((block) => {
@@ -418,7 +418,7 @@ function PostCard(props: {
                     />
                 )}
                 {Event && <EventCard post={post} location={location} />}
-                {mediaTypes.includes('poll') && <PollCard postData={post} location={location} />}
+                {mediaTypes?.includes('poll') && <PollCard postData={post} location={location} />}
                 {includesSpecificGame(mediaTypes) && (
                     <Game
                         type={getGameType(mediaTypes)}
@@ -427,7 +427,7 @@ function PostCard(props: {
                         isOwnPost={Creator.id === accountData.id}
                     />
                 )}
-                {mediaTypes.includes('card') && <Card postId={id} />}
+                {mediaTypes?.includes('card') && <Card postId={id} />}
                 {/* block posts */}
                 {type === 'url-block' && (
                     <UrlCard type='post' urlData={Url} style={{ marginBottom: 10 }} />

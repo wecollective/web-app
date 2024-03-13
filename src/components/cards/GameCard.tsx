@@ -22,12 +22,12 @@ import { cloneDeep } from 'lodash'
 import React, { FC, PropsWithChildren, useContext, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { v4 as uuid } from 'uuid'
-import Button from './Button'
-import Column from './Column'
-import Input from './Input'
-import Row from './Row'
-import Modal from './modals/Modal'
-import PlainButton from './modals/PlainButton'
+import Button from '../Button'
+import Column from '../Column'
+import Input from '../Input'
+import Row from '../Row'
+import Modal from '../modals/Modal'
+import PlainButton from '../modals/PlainButton'
 
 const StepTitle: FC<{ prefix: string; step: Step; stepContext?: StepContext }> = ({
     prefix,
@@ -38,27 +38,36 @@ const StepTitle: FC<{ prefix: string; step: Step; stepContext?: StepContext }> =
         {prefix} {capitalise(step.type)}{' '}
         {(() => {
             switch (step.type) {
-                case 'post':
-                    return `(${step.post.timeout})`
+                case 'move':
+                    return `(${step.timeout})`
                 case 'rounds':
-                    if (stepContext && `${step.id}_round` in stepContext.variables) {
+                    if (stepContext && step.name in stepContext.variables) {
                         return (
                             <span style={{ color: '#00daa2', fontWeight: 'bold' }}>
-                                {stepContext.variables[`${step.id}_round`]} of {step.amount}
+                                step {step.name}={stepContext.variables[step.name]} of {step.amount}
                             </span>
                         )
                     }
 
-                    return <>({step.amount}x)</>
+                    return (
+                        <>
+                            (for each step {step.name} of {step.amount})
+                        </>
+                    )
                 case 'turns':
-                    if (stepContext && `${step.id}_player` in stepContext.variables) {
+                    if (stepContext && step.name in stepContext.variables) {
                         return (
                             <span style={{ color: '#00daa2', fontWeight: 'bold' }}>
-                                player {stepContext.variables[`${step.id}_player`]}
+                                player {step.name}={stepContext.variables[step.name]} of{' '}
+                                {stepContext.playerIds.length}
                             </span>
                         )
                     }
-                    return `(for each player)`
+                    return (
+                        <>
+                            (for each player {step.name} of {stepContext?.playerIds.length ?? '?'})
+                        </>
+                    )
                 case 'game':
                     return step.gameId
                 default: {
@@ -101,11 +110,11 @@ const StepComponent: FC<{
                     </Row>
                     {(() => {
                         switch (step.type) {
-                            case 'post':
+                            case 'move':
                                 return (
                                     <div>
-                                        <div>{step.post.title}</div>
-                                        <div>{step.post.text}</div>
+                                        <div>{step.title}</div>
+                                        <div>{step.text}</div>
                                     </div>
                                 )
                             case 'game':
@@ -123,7 +132,7 @@ const StepComponent: FC<{
         </Row>
         {(() => {
             switch (step.type) {
-                case 'post':
+                case 'move':
                 case 'game':
                     return null
                 case 'rounds':
@@ -195,7 +204,7 @@ const Steps: FC<{
 export const SaveableSteps: FC<{
     initialGame: Game
     state: GameState
-    setState: (state: GameState) => void
+    setState?: (state: GameState) => void
     saveState: (state: GameState) => void
     stepContext?: StepContext
 }> = ({ initialGame, state, setState, saveState, stepContext }) => (
@@ -264,7 +273,6 @@ const GameCardHeader: FC = () => (
 const PLAY_BUTTON_TEXT: Record<Play['status'], string> = {
     waiting: 'Join',
     started: 'Join',
-    paused: 'View',
     ended: 'View',
     stopped: 'View',
 }
@@ -304,7 +312,7 @@ const CreateStepButton: FC<{
 
 const INFO: Record<StepType, string> = {
     game: 'Play a sub-game',
-    post: 'Create a post',
+    move: 'Trigger a move',
     rounds: 'Repeat the same sequence',
     turns: 'Repeat for each player',
 }
@@ -328,15 +336,13 @@ const CreateStepModal: FC<{ onClose: () => void; onCreate: (step: Step) => void 
                             id: uuid().replaceAll('-', ''),
                         }
                         switch (type) {
-                            case 'post':
+                            case 'move':
                                 step = {
                                     ...baseStep,
-                                    type: 'post',
-                                    post: {
-                                        title: elements.title.value,
-                                        text: elements.text.value,
-                                        timeout: elements.timeout.value,
-                                    },
+                                    type: 'move',
+                                    title: elements.title.value,
+                                    text: elements.text.value,
+                                    timeout: elements.timeout.value,
                                 }
                                 break
                             case 'rounds':
@@ -344,6 +350,7 @@ const CreateStepModal: FC<{ onClose: () => void; onCreate: (step: Step) => void 
                                 step = {
                                     ...baseStep,
                                     type: 'rounds',
+                                    name: elements.name.value,
                                     amount: elements.amount.value,
                                     steps: [],
                                 }
@@ -352,6 +359,7 @@ const CreateStepModal: FC<{ onClose: () => void; onCreate: (step: Step) => void 
                                 step = {
                                     ...baseStep,
                                     type: 'turns',
+                                    name: elements.name.value,
                                     steps: [],
                                 }
                                 break
@@ -378,7 +386,7 @@ const CreateStepModal: FC<{ onClose: () => void; onCreate: (step: Step) => void 
                     </h3>
                     {(() => {
                         switch (type) {
-                            case 'post':
+                            case 'move':
                                 return (
                                     <>
                                         <Input
@@ -405,13 +413,22 @@ const CreateStepModal: FC<{ onClose: () => void; onCreate: (step: Step) => void 
                                 )
                             case 'rounds':
                                 return (
-                                    <Input
-                                        type='number'
-                                        title='Repetitions'
-                                        name='amount'
-                                        defaultValue={5}
-                                        style={{ marginBottom: 10 }}
-                                    />
+                                    <>
+                                        <Input
+                                            type='number'
+                                            title='Repetitions'
+                                            name='amount'
+                                            defaultValue={5}
+                                            style={{ marginBottom: 10 }}
+                                        />
+                                        <Input
+                                            type='text'
+                                            title='Name'
+                                            name='name'
+                                            defaultValue='R'
+                                            style={{ marginBottom: 10 }}
+                                        />
+                                    </>
                                 )
                             case 'game':
                                 return (
@@ -423,7 +440,15 @@ const CreateStepModal: FC<{ onClose: () => void; onCreate: (step: Step) => void 
                                     />
                                 )
                             case 'turns':
-                                return <></>
+                                return (
+                                    <Input
+                                        type='text'
+                                        title='Name'
+                                        name='name'
+                                        defaultValue='P'
+                                        style={{ marginBottom: 10 }}
+                                    />
+                                )
                             default: {
                                 const exhaustivenessCheck: never = type
                                 throw exhaustivenessCheck
@@ -482,18 +507,20 @@ const UpdateStepModal: FC<{ step: Step; onClose: () => void; onUpdate: (step: St
                     const newStep: Step = cloneDeep(step)
                     const elements = e.currentTarget.elements as any
                     switch (newStep.type) {
-                        case 'post':
-                            newStep.post.title = elements.title.value
-                            newStep.post.text = elements.text.value
-                            newStep.post.timeout = elements.timeout.value
+                        case 'move':
+                            newStep.title = elements.title.value
+                            newStep.text = elements.text.value
+                            newStep.timeout = elements.timeout.value
                             break
                         case 'game':
                             newStep.gameId = elements.gameId.value
                             break
                         case 'rounds':
                             newStep.amount = elements.amount.value
+                            newStep.name = elements.name.value
                             break
                         case 'turns': {
+                            newStep.name = elements.name.value
                             break
                         }
                         default: {
@@ -510,7 +537,7 @@ const UpdateStepModal: FC<{ step: Step; onClose: () => void; onUpdate: (step: St
                 </h3>
                 {(() => {
                     switch (step.type) {
-                        case 'post':
+                        case 'move':
                             return (
                                 <>
                                     <Input
@@ -518,14 +545,14 @@ const UpdateStepModal: FC<{ step: Step; onClose: () => void; onUpdate: (step: St
                                         title='Title'
                                         name='title'
                                         style={{ marginBottom: 10 }}
-                                        defaultValue={step.post.title}
+                                        defaultValue={step.title}
                                     />
                                     <Input
                                         type='text-area'
                                         title='Text'
                                         name='text'
                                         style={{ marginBottom: 10 }}
-                                        defaultValue={step.post.text}
+                                        defaultValue={step.text}
                                     />
                                     <Input
                                         type='text'
@@ -533,7 +560,7 @@ const UpdateStepModal: FC<{ step: Step; onClose: () => void; onUpdate: (step: St
                                         name='timeout'
                                         placeholder='e.g. 2d 5h 30m 15s'
                                         style={{ marginBottom: 10 }}
-                                        defaultValue={step.post.timeout}
+                                        defaultValue={step.timeout}
                                     />
                                 </>
                             )
@@ -549,16 +576,34 @@ const UpdateStepModal: FC<{ step: Step; onClose: () => void; onUpdate: (step: St
                             )
                         case 'rounds':
                             return (
-                                <Input
-                                    type='number'
-                                    title='Repetitions'
-                                    name='amount'
-                                    style={{ marginBottom: 10 }}
-                                    defaultValue={step.amount}
-                                />
+                                <>
+                                    <Input
+                                        type='number'
+                                        title='Repetitions'
+                                        name='amount'
+                                        style={{ marginBottom: 10 }}
+                                        defaultValue={step.amount}
+                                    />
+                                    <Input
+                                        type='text'
+                                        title='Name'
+                                        name='name'
+                                        defaultValue={step.name}
+                                        style={{ marginBottom: 10 }}
+                                    />
+                                </>
                             )
                         case 'turns':
-                            return <></>
+                            return (
+                                <Input
+                                    type='number'
+                                    title='Name'
+                                    name='name'
+                                    defaultValue={step.name}
+                                    style={{ marginBottom: 10 }}
+                                />
+                            )
+
                         default: {
                             const exhaustivenessCheck: never = step
                             throw exhaustivenessCheck

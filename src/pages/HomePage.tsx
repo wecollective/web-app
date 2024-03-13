@@ -145,8 +145,13 @@ function Homepage(): JSX.Element {
     }, [])
 
     useEffect(() => {
-        if (!accountDataLoading && !loggedIn && alertMessage === 'create-account')
-            setRegisterModalOpen(true)
+        if (!accountDataLoading) {
+            if (loggedIn) {
+                history('/s/all/posts')
+            } else if (!loggedIn && alertMessage === 'create-account') {
+                setRegisterModalOpen(true)
+            }
+        }
     }, [accountDataLoading])
 
     return (
