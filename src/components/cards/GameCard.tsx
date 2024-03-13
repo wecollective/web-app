@@ -270,9 +270,10 @@ const GameCardHeader: FC = () => (
     </Row>
 )
 
-const PLAY_BUTTON_TEXT: Record<Play['status'], string> = {
+export const PLAY_BUTTON_TEXT: Record<Play['status'], string> = {
     waiting: 'Join',
     started: 'Join',
+    paused: 'Join',
     ended: 'View',
     stopped: 'View',
 }
@@ -663,8 +664,7 @@ export const GameCard: FC<{
     collapsed: boolean
 }> = ({ initialGame, state, setState, saveState, post, collapsed }) => {
     const navigate = useNavigate()
-    const { accountData } = useContext(AccountContext)
-    const plays = post.Plays ?? []
+    const { play } = state.game
 
     return (
         <GameCardWrapper>
@@ -685,106 +685,106 @@ export const GameCard: FC<{
                     />
                 </Column>
                 <Column style={{ padding: 5, flexGrow: 1, flexBasis: '50%' }}>
-                    <h4>Plays</h4>
-                    <Column style={{ overflowY: 'auto' }}>
-                        {plays.length ? (
-                            plays.map(({ Post: play }) => (
-                                <Row centerY spaceBetween style={{ marginBottom: 5 }}>
-                                    <a href={`/p/${play.id}`}>
-                                        {play.title} ({play.play.status},{' '}
-                                        {play.play.playerIds.length} players)
-                                    </a>
-                                    <Button
-                                        style={{ marginLeft: 5 }}
-                                        onClick={async () => {
-                                            navigate(`/p/${play.id}`)
-                                        }}
-                                        size='medium'
-                                        color='grey'
-                                        text={PLAY_BUTTON_TEXT[play.play.status]}
-                                    />
-                                </Row>
-                            ))
-                        ) : (
-                            <span>This game hasn&apos;t been played yet</span>
-                        )}
-                    </Column>
-                    <Row style={{ justifyContent: 'flex-end', marginTop: 10 }}>
+                    <Row centerY spaceBetween style={{ marginBottom: 5 }}>
+                        {play.status}, {play.playerIds.length} players{' '}
                         <Button
-                            color='blue'
+                            style={{ marginLeft: 5 }}
                             onClick={async () => {
-                                const play: Play = {
-                                    playerIds: [accountData.id],
-                                    gameId: post.id,
-                                    game: state.game,
-                                    status: 'waiting',
-                                    variables: {},
-                                }
-                                const newPost = {
-                                    type: 'post',
-                                    title: `Play of "${post.title}"`,
-                                    mediaTypes: 'play',
-                                    mentions: [],
-                                    spaceIds: post.DirectSpaces.map((space) => space.id),
-                                    play,
-                                    source: {
-                                        type: 'post',
-                                        id: post.id,
-                                        relationship: 'play',
-                                    },
-                                }
-                                const res = await uploadPost(newPost)
-                                navigate(`/p/${res.data.post.id}`)
+                                navigate(`/p/${post.id}`)
                             }}
-                            text='Start new play'
+                            size='medium'
+                            color='blue'
+                            text={PLAY_BUTTON_TEXT[play.status]}
                         />
                     </Row>
+                    {post.Original && (
+                        <>
+                            <h4>Original</h4>
+                            <Row centerY spaceBetween style={{ marginBottom: 5 }}>
+                                {post.Original.Parent.game.play.status},{' '}
+                                {post.Original.Parent.game.play.playerIds.length} players
+                                <Button
+                                    style={{ marginLeft: 5 }}
+                                    onClick={async () => {
+                                        navigate(`/p/${post.Original!.Parent.id}`)
+                                    }}
+                                    size='medium'
+                                    color='grey'
+                                    text={PLAY_BUTTON_TEXT[post.Original.Parent.game.play.status]}
+                                />
+                            </Row>
+                        </>
+                    )}
+
+                    <Spawns post={post} />
                 </Column>
             </Row>
         </GameCardWrapper>
     )
 }
 
-export const PlayCard: FC<{ post: Post }> = ({ post }) => {
+export const Spawns = ({ post }: { post: Post }) => {
     const navigate = useNavigate()
-    const play = post.play!
-    const { game } = play
+    const { accountData } = useContext(AccountContext)
+    const spawns = post.Spawns ?? []
+    const game = post.game!
 
     return (
-        <GameCardWrapper>
-            <Row centerY style={{ marginBottom: 10 }}>
-                <CastaliaIcon className={styles.icon} />
-                <h3 style={{ marginLeft: 5, color: 'gray' }}>Play ({play.status})</h3>
-            </Row>
-            Players: {play.playerIds}
-            <Row style={{ flexGrow: 1, maxHeight: 300 }}>
-                <Column
-                    style={{
-                        padding: 5,
-                        flexGrow: 1,
-                    }}
-                >
-                    <Row>
-                        <h4 style={{ flexGrow: 1 }}>Steps</h4>
-                    </Row>
-                    <Column style={{ overflowY: 'auto' }}>
-                        <Steps prefix='' steps={game.steps} />
-                    </Column>
-                    <Row style={{ justifyContent: 'flex-end' }}>
+        <Column style={{ overflowY: 'auto' }}>
+            <h4>Spawns</h4>
+            {spawns.length ? (
+                spawns.map(({ Post: spawn }) => (
+                    <Row centerY spaceBetween style={{ marginBottom: 5 }}>
+                        <a href={`/p/${spawn.id}`}>
+                            {spawn.title} ({spawn.game.play.status},{' '}
+                            {spawn.game.play.playerIds.length} players)
+                        </a>
                         <Button
+                            style={{ marginLeft: 5 }}
+                            onClick={async () => {
+                                navigate(`/p/${spawn.id}`)
+                            }}
+                            size='medium'
                             color='grey'
-                            onClick={() => navigate(`/p/${play.gameId}`)}
-                            text='View original game'
-                        />
-                        <Button
-                            style={{ marginLeft: 10 }}
-                            color='blue'
-                            onClick={() => navigate(`/p/${post.id}`)}
-                            text={PLAY_BUTTON_TEXT[play.status]}
+                            text={PLAY_BUTTON_TEXT[spawn.game.play.status]}
                         />
                     </Row>
-                </Column>
+                ))
+            ) : (
+                <p className='grey'>This game has not been spawned so far.</p>
+            )}
+            <Row style={{ marginTop: 10 }}>
+                <Button
+                    color='blue'
+                    onClick={async () => {
+                        const newGame: Game = {
+                            ...game,
+                            play: {
+                                playerIds: [accountData.id],
+                                status: 'waiting',
+                                variables: {},
+                            },
+                        }
+                        const newPost = {
+                            type: 'post',
+                            title: post.title,
+                            text: post.text,
+                            mediaTypes: 'game,play',
+                            mentions: [],
+                            spaceIds: post.DirectSpaces.map((space) => space.id),
+                            game: newGame,
+                            source: {
+                                type: 'post',
+                                id: post.id,
+                                relationship: 'spawn',
+                            },
+                        }
+                        const res = await uploadPost(newPost)
+                        navigate(`/p/${res.data.post.id}`)
+                    }}
+                    text='Spawn new Game'
+                />
             </Row>
-        </GameCardWrapper>
+        </Column>
     )
 }

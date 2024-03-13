@@ -512,7 +512,7 @@ function CreatePostModal({
 
     // new game
     const [gameState, setGameState] = useState<GameState>({
-        game: { steps: [] },
+        game: { steps: [], play: { status: 'waiting', playerIds: [], variables: {} } },
         dirty: true,
     })
 

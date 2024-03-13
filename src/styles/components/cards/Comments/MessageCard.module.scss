@@ -33,7 +33,8 @@
     &.move {
         justify-content: center;
 
-        &.started {
+        &.started,
+        &.paused {
             .message {
                 background-color: $green3;
                 // flex-grow: 1;

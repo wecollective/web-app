@@ -13,7 +13,7 @@ import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import Cookies from 'universal-cookie'
-import PlayPage from './PlayPage'
+import GamePage from './GamePage'
 
 type State =
     | {
@@ -135,8 +135,8 @@ function PostPage(): JSX.Element {
                 <Prism post={post} setPost={setPost} onDelete={onDelete} />
             ) : includesSpecificGame(post.mediaTypes) ? (
                 <GameRoom key={post.id} post={post} setPost={setPost} />
-            ) : post.mediaTypes?.includes('play') ? (
-                <PlayPage key={post.id} post={post} onDelete={onDelete} setPost={setPost} />
+            ) : post.mediaTypes?.includes('game') ? (
+                <GamePage key={post.id} post={post} onDelete={onDelete} setPost={setPost} />
             ) : (
                 <Column centerX className={styles.wrapper}>
                     <Column className={styles.postCardWrapper}>

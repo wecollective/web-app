@@ -33,7 +33,7 @@ import {
     timeSinceCreated,
     timeSinceCreatedShort,
 } from '@src/Helpers'
-import { GameCard, GameState, PlayCard } from '@src/components/cards/GameCard'
+import { GameCard, GameState } from '@src/components/cards/GameCard'
 import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
 import {
     AngleUpIcon,
@@ -94,7 +94,6 @@ function PostCard(props: {
         Audio,
         Url,
         game,
-        play,
     } = post
     const [totalLikes, setTotalLikes] = useState(post.totalLikes)
     const [totalComments, setTotalComments] = useState(post.totalComments)
@@ -449,7 +448,7 @@ function PostCard(props: {
                         style={{ height: 160, width: '100%', marginBottom: 10 }}
                     />
                 )}
-                {game && gameState && (
+                {game && gameState && location !== 'post-page' && (
                     <GameCard
                         collapsed={!!collapse}
                         initialGame={game}
@@ -471,7 +470,6 @@ function PostCard(props: {
                         setState={isOwnPost && setGameState}
                     />
                 )}
-                {post.play && location !== 'post-page' && <PlayCard post={post} />}
             </Column>
             {showFooter && (
                 <Row spaceBetween className={styles.footer}>
@@ -497,7 +495,7 @@ function PostCard(props: {
                             className={`${styles.comment} ${commented && styles.highlighted}`}
                             disabled={buttonsDisabled}
                             onClick={() => {
-                                if (play && location === 'post-page') {
+                                if (game && location === 'post-page') {
                                     return
                                 }
                                 if (loggedIn || totalComments) setCommentsOpen(!commentsOpen)
@@ -557,7 +555,7 @@ function PostCard(props: {
                                 <Column centerX centerY>
                                     <CastaliaIcon />
                                 </Column>
-                                <p>{post.Plays?.length ?? 0}</p>
+                                <p>{post.Spawns?.length ?? 0}</p>
                             </button>
                         )}
                     </Row>

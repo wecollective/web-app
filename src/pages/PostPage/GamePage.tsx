@@ -14,34 +14,34 @@ import Column from '../../components/Column'
 import Row from '../../components/Row'
 import LoadingWheel from '../../components/animations/LoadingWheel'
 import MessageCard from '../../components/cards/Comments/MessageCard'
-import { GameState, SaveableSteps } from '../../components/cards/GameCard'
+import { GameState, PLAY_BUTTON_TEXT, SaveableSteps, Spawns } from '../../components/cards/GameCard'
 import PostCard from '../../components/cards/PostCard/PostCard'
 import CommentInput from '../../components/draft-js/CommentInput'
 
 const EVENTS = {
     outgoing: {
-        updateGame: 'outgoing-update-play-game',
-        start: 'outgoing-start-play',
-        stop: 'outgoing-stop-play',
+        updateGame: 'gs:outgoing-update-game',
+        start: 'gs:outgoing-start-game',
+        stop: 'gs:outgoing-stop-game',
 
-        skip: 'outgoing-skip-move',
-        pause: 'outgoing-pause-move',
+        skip: 'gs:outgoing-skip-move',
+        pause: 'gs:outgoing-pause-move',
     },
     incoming: {
-        updated: 'incoming-play-updated',
+        updated: 'gs:incoming-updated-game',
     },
 } as const
 
-const PlaySidebar: FC<{
+const GameSidebar: FC<{
     post: Post
     setPost: (post: Post) => void
     emit: (action: string, data?: any) => void
 }> = ({ post, setPost, emit }) => {
-    const play = post.play!
-    const { game } = play
+    const game = post.game!
+    const { play } = game
     const [gameState, setGameState] = useState<GameState>({
         dirty: false,
-        game: play.game,
+        game,
     })
     const { accountData } = useContext(AccountContext)
     const isOwnPost = accountData && accountData.id === post.Creator?.id
@@ -51,13 +51,13 @@ const PlaySidebar: FC<{
     useEffect(() => {
         setGameState({
             dirty: false,
-            game: play.game,
+            game,
         })
-    }, [play.game])
+    }, [game])
 
     return (
         <Column style={{ width: 300, padding: 10, borderRight: '1px solid #ededef' }}>
-            <h2>Play ({play.status})</h2>
+            <h2>Game ({play.status})</h2>
             {isOwnPost && (
                 <Row style={{ marginBottom: 10 }}>
                     <Button
@@ -66,9 +66,28 @@ const PlaySidebar: FC<{
                         onClick={
                             !gameState.dirty &&
                             (play.status === 'waiting' ||
+                                play.status === 'paused' ||
                                 play.status === 'ended' ||
                                 play.status === 'stopped')
                                 ? () => emit(EVENTS.outgoing.start)
+                                : null
+                        }
+                    />
+                    <Button
+                        color='blue'
+                        text='Pause'
+                        style={{ marginLeft: 10 }}
+                        onClick={
+                            play.status === 'started' ? () => emit(EVENTS.outgoing.pause) : null
+                        }
+                    />
+                    <Button
+                        color='blue'
+                        text='Skip'
+                        style={{ marginLeft: 10 }}
+                        onClick={
+                            play.status === 'started' || play.status === 'paused'
+                                ? () => emit(EVENTS.outgoing.skip)
                                 : null
                         }
                     />
@@ -77,49 +96,63 @@ const PlaySidebar: FC<{
                         text='Stop'
                         style={{ marginLeft: 10 }}
                         onClick={
-                            play.status === 'started' ? () => emit(EVENTS.outgoing.stop) : null
+                            play.status === 'started' || play.status === 'paused'
+                                ? () => emit(EVENTS.outgoing.stop)
+                                : null
                         }
                     />
                 </Row>
             )}
-            <Row style={{ flexGrow: 1 }}>
-                <Column
-                    style={{
-                        padding: 5,
-                        flexGrow: 1,
+            <Column
+                style={{
+                    padding: 5,
+                    flexGrow: 1,
+                }}
+            >
+                <SaveableSteps
+                    initialGame={game}
+                    saveState={(newGameState) => {
+                        emit(EVENTS.outgoing.updateGame, { game: newGameState.game })
+                        setGameState(newGameState)
                     }}
-                >
-                    <SaveableSteps
-                        initialGame={game}
-                        saveState={(newGameState) => {
-                            emit(EVENTS.outgoing.updateGame, { game: newGameState.game })
-                            setGameState(newGameState)
-                        }}
-                        setState={
-                            play.status === 'waiting' ||
-                            play.status === 'ended' ||
-                            play.status === 'stopped'
-                                ? setGameState
-                                : undefined
-                        }
-                        state={gameState}
-                        stepContext={
-                            play.status === 'started'
-                                ? {
-                                      stepId: play.stepId,
-                                      variables: play.variables,
-                                      playerIds,
-                                  }
-                                : undefined
-                        }
-                    />
-                    <Button
-                        color='grey'
-                        onClick={() => navigate(`/p/${play.gameId}`)}
-                        text='View original game'
-                    />
-                </Column>
-            </Row>
+                    setState={
+                        play.status === 'waiting' ||
+                        play.status === 'ended' ||
+                        play.status === 'stopped'
+                            ? setGameState
+                            : undefined
+                    }
+                    state={gameState}
+                    stepContext={
+                        play.status === 'started'
+                            ? {
+                                  stepId: play.step.id,
+                                  variables: play.variables,
+                                  playerIds,
+                              }
+                            : undefined
+                    }
+                />
+            </Column>
+            {post.Original && (
+                <>
+                    <h4>Original</h4>
+                    <Row centerY spaceBetween style={{ marginBottom: 5 }}>
+                        {post.Original.Parent.game.play.status},{' '}
+                        {post.Original.Parent.game.play.playerIds.length} players
+                        <Button
+                            style={{ marginLeft: 5 }}
+                            onClick={async () => {
+                                navigate(`/p/${post.Original!.Parent.id}`)
+                            }}
+                            size='medium'
+                            color='grey'
+                            text={PLAY_BUTTON_TEXT[post.Original.Parent.game.play.status]}
+                        />
+                    </Row>
+                </>
+            )}
+            <Spawns post={post} />
         </Column>
     )
 }
@@ -181,7 +214,7 @@ const PostChildren: FC<{
     )
 }
 
-const PlayPage: FC<{ post: Post; setPost: (post: Post) => void; onDelete: () => void }> = ({
+const GamePage: FC<{ post: Post; setPost: (post: Post) => void; onDelete: () => void }> = ({
     post,
     setPost,
     onDelete,
@@ -220,8 +253,8 @@ const PlayPage: FC<{ post: Post; setPost: (post: Post) => void; onDelete: () => 
             userData,
         })
 
-        socket.on(EVENTS.incoming.updated, ({ play }) => {
-            setPost({ ...post, play })
+        socket.on(EVENTS.incoming.updated, ({ game }) => {
+            setPost({ ...post, game })
             getChildren()
         })
     }, [])
@@ -233,7 +266,7 @@ const PlayPage: FC<{ post: Post; setPost: (post: Post) => void; onDelete: () => 
 
     return (
         <Row style={{ width: '100%', height: 'calc(100vh - 60px - 25px)', marginTop: '60px' }}>
-            <PlaySidebar post={post} emit={emit} setPost={setPost} />
+            <GameSidebar post={post} emit={emit} setPost={setPost} />
             <Column style={{ height: '100%', flexGrow: 1, background: 'white' }}>
                 <div style={{ padding: 10 }}>
                     <PostCard
@@ -256,4 +289,4 @@ const PlayPage: FC<{ post: Post; setPost: (post: Post) => void; onDelete: () => 
     )
 }
 
-export default PlayPage
+export default GamePage

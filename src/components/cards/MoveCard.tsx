@@ -4,18 +4,22 @@ import React, { useEffect, useRef } from 'react'
 import Button from '../Button'
 import Row from '../Row'
 
-function MoveProgressBar({ move }: { move: Extract<Move, { status: 'started' }> }) {
+function MoveProgressBar({ move }: { move: Extract<Move, { status: 'started' | 'paused' }> }) {
     const ref = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         const interval = setInterval(() => {
             if (ref.current) {
-                const progress = (+new Date() - move.startedAt) / (move.timeout - move.startedAt)
+                const progress =
+                    move.status === 'started'
+                        ? (move.elapsedTime + +new Date() - move.startedAt) /
+                          (move.elapsedTime + move.timeout - move.startedAt)
+                        : move.elapsedTime / (move.remainingTime + move.elapsedTime)
                 ref.current.style.width = `${100 * Math.max(0, Math.min(progress, 1))}%`
             }
         }, 17)
         return () => clearInterval(interval)
-    }, [])
+    }, [move.status])
 
     return (
         <div className={styles.progressBar}>
@@ -29,11 +33,19 @@ function MoveCard({ move }: { move: Move }) {
         <div>
             <div>{move.status}</div>
             {move.status === 'started' && (
-                <Row>
-                    <Button color='aqua' text='Pause' /> <Button color='grey' text='Skip' />
+                <Row style={{ justifyContent: 'center' }}>
+                    <Button color='grey' text='Pause' />
+                    <Button color='grey' text='Skip' style={{ marginLeft: 10 }} />
                 </Row>
             )}
-            {move.status === 'started' && <MoveProgressBar move={move} />}
+            {move.status === 'paused' && (
+                <Row>
+                    <Button color='grey' text='Start' />
+                </Row>
+            )}
+            {(move.status === 'started' || move.status === 'paused') && (
+                <MoveProgressBar move={move} />
+            )}
         </div>
     )
 }

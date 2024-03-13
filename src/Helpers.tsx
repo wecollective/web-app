@@ -120,7 +120,6 @@ export type MediaType = (typeof MEDIA_TYPES)[number]
 
 export const POST_TYPE = [
     'post',
-    'play',
     'comment',
     'bead',
     'poll-answer',
@@ -141,12 +140,12 @@ export type BlockPost<MediaLinkType> = {
     MediaLink: MediaLinkType
 }
 
-export type PlayBlock = {
-    Post: { id: string; title: string; play: Play }
+export type OriginalBlock = {
+    Parent: { id: string; title: string; game: Game }
 }
 
-export type GameBlock = {
-    Post: { id: string; title: string; Plays: PlayBlock[] }
+export type SpawnBlock = {
+    Post: { id: string; title: string; game: Game }
 }
 
 export type UrlMediaLink = {
@@ -191,7 +190,6 @@ export type Post = {
     totalReposts: number
     totalLinks: number
     game?: Game
-    play?: Play
     move?: Move
     Creator: IUser
     DirectSpaces: { id: number }[]
@@ -201,8 +199,8 @@ export type Post = {
     Reactions?: { type: ReactionType }[]
     Parent?: Post
     Event: Event
-    Games?: GameBlock[]
-    Plays?: PlayBlock[]
+    Original?: OriginalBlock
+    Spawns?: SpawnBlock[]
     Image: { url: string }
     Audio: { id: number; url: string }
     Url: { id: number }
@@ -210,17 +208,19 @@ export type Post = {
 
 export type Game = {
     steps: Step[]
+    play: Play
 }
 
 export type Move = (
     | { status: 'skipped' | 'ended' }
-    | { status: 'paused'; elapsedTime: number }
+    | { status: 'paused'; elapsedTime: number; remainingTime: number }
     | {
+          elapsedTime: number
           startedAt: number
           timeout: number
           status: 'started'
       }
-) & { playId?: number }
+) & { gameId?: number }
 
 export type PlayVariables = Record<string, string | number | boolean>
 
@@ -231,13 +231,11 @@ export type StepContext = {
 }
 
 export type Play = {
-    game: Game
-    gameId: number
     playerIds: number[]
     variables: PlayVariables
 } & (
     | { status: 'waiting' | 'stopped' | 'ended' }
-    | { status: 'started'; stepId: string; moveId: number }
+    | { status: 'started' | 'paused'; step: MoveStep; moveId: number }
 )
 
 export type Step = {
