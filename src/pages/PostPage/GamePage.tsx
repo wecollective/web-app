@@ -294,14 +294,15 @@ const GamePage: FC<{ post: Post; setPost: (post: Post) => void; onDelete: () => 
             roomId: post.id,
             userData,
         })
-        socket.on('incoming-room-joined', (payload) => {
-            const { socketId: incomingSocketId, usersInRoom } = payload
-            streaming.mySocketIdRef.current = incomingSocketId
+        // TODO
+        // socket.on('incoming-room-joined', (payload) => {
+        //     const { socketId: incomingSocketId, usersInRoom } = payload
+        //     streaming.mySocketIdRef.current = incomingSocketId
 
-            for (const user of usersInRoom) {
-                streaming.createPeer(user.socketId, user.userData)
-            }
-        })
+        //     for (const user of usersInRoom) {
+        //         streaming.createPeer(user.socketId, user.userData)
+        //     }
+        // })
 
         socket.on(GAME_EVENTS.incoming.updated, ({ game: newGame, changedChildren }) => {
             if (newGame) {

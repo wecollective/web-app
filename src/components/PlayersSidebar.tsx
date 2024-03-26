@@ -15,8 +15,6 @@ import PlainButton from './modals/PlainButton'
 
 const StreamingUsers: FC<{ streaming: Streaming }> = ({ streaming }) => {
     const { accountData } = useContext(AccountContext)
-    const userIsStreaming = false
-    const loadingStream = false
     const userData = {
         id: accountData.id,
         handle: accountData.handle,
@@ -32,11 +30,11 @@ const StreamingUsers: FC<{ streaming: Streaming }> = ({ streaming }) => {
             </Row>
             <Column>
                 <Button
-                    text={`${userIsStreaming ? 'Stop' : 'Start'} streaming`}
-                    color={userIsStreaming ? 'red' : 'aqua'}
+                    text={`${streaming.userIsStreaming ? 'Stop' : 'Start'} streaming`}
+                    color={streaming.userIsStreaming ? 'red' : 'aqua'}
                     style={{ marginBottom: 10, alignSelf: 'flex-start' }}
-                    loading={loadingStream}
-                    disabled={loadingStream}
+                    loading={streaming.loadingStream}
+                    disabled={streaming.loadingStream}
                     onClick={() => streaming.toggleStream()}
                 />
                 {streaming.userIsStreaming && (
