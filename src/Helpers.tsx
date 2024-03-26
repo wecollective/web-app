@@ -154,12 +154,14 @@ export type BlockPost<MediaLinkType> = {
     MediaLink: MediaLinkType
 }
 
+export type BaseGamePost = { id: number; title: string; game: Game }
+
 export type ParentBlock = {
-    Parent: { id: string; title: string; game: Game }
+    Parent: BaseGamePost
 }
 
 export type ChildBlock = {
-    Post: { id: string; title: string; game: Game }
+    Post: BaseGamePost
 }
 
 export type UrlMediaLink = {
@@ -224,6 +226,7 @@ export type Post = {
 export type Game = {
     steps: Step[]
     play: Play
+    players: BaseUser[]
 }
 
 export type Move = (
@@ -242,17 +245,18 @@ export type PlayVariables = Record<string, string | number | boolean>
 export type StepContext = {
     stepId: string
     variables: PlayVariables
-    playerIds: string[]
+    players: BaseUser[]
 }
 
 export type Play = {
-    playerIds: number[]
     variables: PlayVariables
 } & (
     | { status: 'waiting' | 'stopped' | 'ended' }
     | { status: 'paused'; step: MoveStep; moveId?: number }
     | { status: 'started' | 'paused'; step: MoveStep; moveId: number }
 )
+
+export type PlayStatus = Play['status']
 
 export type Step = {
     id: string
@@ -285,6 +289,15 @@ export type Event = {
 }
 
 export type UserEvent = { id: number; flagImagePath: string }
+
+export type BaseUser = {
+    id: number
+    handle: string
+    name: string
+    flagImagePath: string
+}
+
+export type Peer = BaseUser & { socketId: string }
 
 export const weekDays = [
     'Monday',
@@ -912,7 +925,7 @@ export function uploadPost(post) {
     return axios.post(`${config.apiURL}/create-${route}`, formData, options)
 }
 
-export function baseUserData(accountData) {
+export function baseUserData(accountData): BaseUser {
     const { id, name, handle, flagImagePath } = accountData
     return { id, name, handle, flagImagePath }
 }

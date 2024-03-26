@@ -6,6 +6,7 @@ $transitionSpeed: 1s;
     0% {
         opacity: 0;
     }
+
     100% {
         opacity: 1;
     }
@@ -59,7 +60,7 @@ $transitionSpeed: 1s;
             display: none;
         }
 
-        > button {
+        >button {
             all: unset;
             width: calc(100% / 3);
             height: 60px;
@@ -68,16 +69,20 @@ $transitionSpeed: 1s;
             align-items: center;
             cursor: pointer;
             transition: background-color 0.5s;
+
             &:hover {
                 background-color: $grey3;
             }
+
             &.selected {
                 background-color: $grey4;
-                > svg {
+
+                >svg {
                     color: $blue5;
                 }
             }
-            > svg {
+
+            >svg {
                 height: 40px;
                 width: 40px;
                 color: $grey6;
@@ -89,9 +94,11 @@ $transitionSpeed: 1s;
         width: 100%;
         height: calc(100% - 60px);
         transition: height $transitionSpeed;
+
         @include for-tablet-landscape-up {
             height: 100%;
         }
+
         &.showBeads {
             height: calc(100% - 240px);
         }
@@ -113,6 +120,7 @@ $transitionSpeed: 1s;
             &.hidden {
                 width: 350px;
                 margin-left: -350px;
+
                 @include for-tablet-landscape-up {
                     margin-left: -330px;
                 }
@@ -120,9 +128,11 @@ $transitionSpeed: 1s;
 
             &.transparent {
                 background-color: rgba($white, 0.3);
+
                 .commentInput {
                     background-color: rgba(#f7f7f9, 0.2);
                 }
+
                 .closeCommentsBar {
                     background-color: rgba($grey2, 0.2);
                 }
@@ -141,13 +151,14 @@ $transitionSpeed: 1s;
                         width: calc(100% - 50px);
 
                         .header {
-                            > h1 {
+                            >h1 {
                                 font-size: 14px;
                                 font-weight: 800;
                                 margin: 0;
                                 overflow-wrap: break-word;
                             }
-                            > p {
+
+                            >p {
                                 margin-left: 5px;
                                 color: $grey4;
                                 overflow-wrap: break-word;
@@ -184,10 +195,12 @@ $transitionSpeed: 1s;
                 height: 100%;
                 width: 20px;
                 background-color: $grey2;
-                > svg {
+
+                >svg {
                     color: $grey4;
                     height: 18px;
                 }
+
                 @include for-tablet-landscape-up {
                     display: flex;
                 }
@@ -214,28 +227,31 @@ $transitionSpeed: 1s;
                 }
 
                 &.large {
-                    > p {
+                    >p {
                         font-size: 16px;
                     }
+
                     .player {
                         .position {
                             width: 35px;
                             height: 35px;
                             font-size: 16px;
                         }
+
                         .playerState {
                             font-size: 16px;
                         }
                     }
                 }
 
-                > p {
+                >p {
                     font-size: 10px;
                     margin-bottom: 5px;
                 }
 
                 .player {
                     margin-top: 5px;
+
                     @include for-tablet-landscape-up {
                         margin-top: 10px;
                     }
@@ -254,25 +270,29 @@ $transitionSpeed: 1s;
 
                 .gameLocked {
                     margin-bottom: 10px;
-                    > svg {
+
+                    >svg {
                         width: 15px;
                         height: 15px;
                         opacity: 0.3;
                         margin-right: 5px;
                     }
-                    > p {
+
+                    >p {
                         color: $grey5;
                         font-size: 12px;
                     }
 
                     @include for-tablet-landscape-up {
                         margin-bottom: 15px;
-                        > svg {
+
+                        >svg {
                             width: 25px;
                             height: 25px;
                             margin-right: 7px;
                         }
-                        > p {
+
+                        >p {
                             color: $grey5;
                             font-size: 16px;
                         }
@@ -293,6 +313,7 @@ $transitionSpeed: 1s;
                     height: calc(100% - 140px);
                     color: $grey3;
                     z-index: -1;
+
                     @include for-tablet-landscape-up {
                         top: 200px;
                         height: calc(100% - 200px);
@@ -304,16 +325,18 @@ $transitionSpeed: 1s;
                 }
 
                 .topicText {
-                    > h1 {
+                    >h1 {
                         margin: 0;
                         font-size: 20px;
                         line-height: 20px;
+
                         @include for-tablet-landscape-up {
                             font-size: 25px;
                             line-height: 25px;
                         }
                     }
-                    > button {
+
+                    >button {
                         all: unset;
                         cursor: pointer;
                         margin-left: 10px;
@@ -367,9 +390,11 @@ $transitionSpeed: 1s;
                         opacity: 0;
                         transition-property: opacity;
                         transition-duration: 0.3s;
+
                         &:hover {
                             opacity: 1;
                         }
+
                         p {
                             padding: 0 15px;
                         }
@@ -403,22 +428,25 @@ $transitionSpeed: 1s;
                     justify-content: center;
                     position: relative;
 
-                    > .timerArcTitles {
+                    >.timerArcTitles {
                         position: absolute;
                         top: -1px;
                         display: flex;
                         flex-direction: column;
                         align-items: center;
+
                         // color: white;
                         // text-shadow: 0px 2px black;
-                        > p {
+                        >p {
                             margin-bottom: 8px;
                         }
-                        > span {
+
+                        >span {
                             font-size: 24px;
                         }
                     }
-                    > .mainBead {
+
+                    >.mainBead {
                         width: 160px;
                         height: 160px;
                         position: absolute;
@@ -429,7 +457,8 @@ $transitionSpeed: 1s;
                         align-items: center;
                         justify-content: center;
                         box-shadow: 0 1px 10px 0 rgba(10, 8, 72, 0.15);
-                        > img {
+
+                        >img {
                             width: 120px;
                             height: 120px;
                         }
@@ -442,7 +471,7 @@ $transitionSpeed: 1s;
                 right: 20px;
                 top: 20px;
 
-                > p {
+                >p {
                     margin-bottom: 10px;
                 }
 
@@ -453,6 +482,7 @@ $transitionSpeed: 1s;
                 .peopleStreaming,
                 .peopleInRoom {
                     display: none;
+
                     @include for-tablet-landscape-up {
                         display: flex;
                     }
@@ -477,156 +507,113 @@ $transitionSpeed: 1s;
             &.xl {
                 $width: $fullWidth / 3 + px;
                 $height: $fullHeight / 3 + px;
+
                 &.hidden {
                     margin-right: -$width;
                 }
+
                 width: $width;
+
                 .videoWrapper {
                     width: $width;
                     height: $height;
-                    > video {
-                        width: $width;
-                        height: $height;
-                    }
-                }
-            }
-            // 3
-            &.lg {
-                $width: $fullWidth / 4 + px;
-                $height: $fullHeight / 4 + px;
-                &.hidden {
-                    margin-right: -$width;
-                }
-                width: $width;
-                .videoWrapper {
-                    width: $width;
-                    height: $height;
-                    > video {
-                        width: $width;
-                        height: $height;
-                    }
-                }
-            }
-            // 4
-            &.md {
-                $width: $fullWidth / 5 + px;
-                $height: $fullHeight / 5 + px;
-                &.hidden {
-                    margin-right: -$width;
-                }
-                width: $width;
-                .videoWrapper {
-                    width: $width;
-                    height: $height;
-                    > video {
-                        width: $width;
-                        height: $height;
-                    }
-                }
-            }
-            // 5 +
-            &.sm {
-                $width: $fullWidth / 6 + px;
-                $height: $fullHeight / 6 + px;
-                &.hidden {
-                    margin-right: -$width;
-                }
-                width: $width;
-                .videoWrapper {
-                    width: $width;
-                    height: $height;
-                    > video {
-                        width: $width;
-                        height: $height;
-                    }
-                }
-            }
-            // mobile
-            &.mobile {
-                $width: 100%;
-                $height: auto;
-                &.hidden {
-                    margin-right: -100%;
-                }
-                width: $width;
-                width: calc(100% - 20px);
-                .videoWrapper {
-                    width: $width;
-                    height: $height;
-                    > video {
+
+                    >video {
                         width: $width;
                         height: $height;
                     }
                 }
             }
 
-            .videoWrapper {
-                display: flex;
-                position: relative;
-                margin-bottom: $padding;
-                flex-shrink: 0;
-                &:last-child {
-                    margin-bottom: 0;
+            // 3
+            &.lg {
+                $width: $fullWidth / 4 + px;
+                $height: $fullHeight / 4 + px;
+
+                &.hidden {
+                    margin-right: -$width;
                 }
-                > svg {
-                    position: absolute;
-                    width: 60px;
-                    height: 60px;
-                    top: calc(50% - 30px);
-                    left: calc(50% - 30px);
-                    color: $grey6;
-                }
-                > video {
-                    border-radius: 10px;
-                    background-color: black;
-                    border: 2px solid black;
-                    object-fit: cover;
-                }
-                > .videoUser {
-                    position: absolute;
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    margin: 7px;
-                    padding: 7px 10px;
-                    border-radius: 7px;
-                    background-color: rgba(255, 255, 255, 0.5);
-                }
-                > .videoButtons {
-                    position: absolute;
-                    bottom: 0;
-                    right: 0;
-                    padding: 8px 12px;
-                    display: flex;
-                    > button {
-                        all: unset;
-                        color: $white;
-                        background-color: rgba($black1, 0.3);
-                        padding: 7px;
-                        border-radius: 50%;
-                        cursor: pointer;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        &:not(:last-child) {
-                            margin-right: 10px;
-                        }
-                        > svg {
-                            width: 20px;
-                            height: 20px;
-                            opacity: 0.8;
-                            transition: opacity 0.5s;
-                        }
-                        transition: background-color 0.5s;
-                        &:hover {
-                            background-color: rgba($black1, 0.5);
-                            > svg {
-                                opacity: 1;
-                            }
-                        }
+
+                width: $width;
+
+                .videoWrapper {
+                    width: $width;
+                    height: $height;
+
+                    >video {
+                        width: $width;
+                        height: $height;
                     }
                 }
             }
+
+            // 4
+            &.md {
+                $width: $fullWidth / 5 + px;
+                $height: $fullHeight / 5 + px;
+
+                &.hidden {
+                    margin-right: -$width;
+                }
+
+                width: $width;
+
+                .videoWrapper {
+                    width: $width;
+                    height: $height;
+
+                    >video {
+                        width: $width;
+                        height: $height;
+                    }
+                }
+            }
+
+            // 5 +
+            &.sm {
+                $width: $fullWidth / 6 + px;
+                $height: $fullHeight / 6 + px;
+
+                &.hidden {
+                    margin-right: -$width;
+                }
+
+                width: $width;
+
+                .videoWrapper {
+                    width: $width;
+                    height: $height;
+
+                    >video {
+                        width: $width;
+                        height: $height;
+                    }
+                }
+            }
+
+            // mobile
+            &.mobile {
+                $width: 100%;
+                $height: auto;
+
+                &.hidden {
+                    margin-right: -100%;
+                }
+
+                width: $width;
+                width: calc(100% - 20px);
+
+                .videoWrapper {
+                    width: $width;
+                    height: $height;
+
+                    >video {
+                        width: $width;
+                        height: $height;
+                    }
+                }
+            }
+
         }
     }
 
@@ -658,16 +645,19 @@ $transitionSpeed: 1s;
         .bead {
             width: 100px;
             height: 100px;
-            > img {
+
+            >img {
                 width: 50px;
                 height: 50px;
                 left: calc(50% - 25px);
                 top: calc(50% - 25px);
             }
+
             @include for-tablet-landscape-up {
                 width: 140px;
                 height: 140px;
-                > img {
+
+                >img {
                     width: 80px;
                     height: 80px;
                     left: calc(50% - 40px);
@@ -682,7 +672,8 @@ $transitionSpeed: 1s;
             animation-name: fadeInOpacity;
             animation-timing-function: ease-in;
             animation-duration: 2s;
-            > svg {
+
+            >svg {
                 transform: rotate(90deg);
                 height: 30px;
                 color: $grey3;
@@ -690,8 +681,90 @@ $transitionSpeed: 1s;
 
             @include for-tablet-landscape-up {
                 width: 50px;
-                > svg {
+
+                >svg {
                     height: 50px;
+                }
+            }
+        }
+    }
+}
+
+.videoWrapper {
+    display: flex;
+    position: relative;
+    $padding: 10px;
+    margin-bottom: $padding;
+    flex-shrink: 0;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+
+    >svg {
+        position: absolute;
+        width: 60px;
+        height: 60px;
+        top: calc(50% - 30px);
+        left: calc(50% - 30px);
+        color: $grey6;
+    }
+
+    >video {
+        border-radius: 10px;
+        background-color: black;
+        border: 2px solid black;
+        object-fit: cover;
+        width: 100%;
+    }
+
+    >.videoUser {
+        position: absolute;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        margin: 7px;
+        padding: 7px 10px;
+        border-radius: 7px;
+        background-color: rgba(255, 255, 255, 0.5);
+    }
+
+    >.videoButtons {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        padding: 8px 12px;
+        display: flex;
+
+        >button {
+            all: unset;
+            color: $white;
+            background-color: rgba($black1, 0.3);
+            padding: 7px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            &:not(:last-child) {
+                margin-right: 10px;
+            }
+
+            >svg {
+                width: 20px;
+                height: 20px;
+                opacity: 0.8;
+                transition: opacity 0.5s;
+            }
+
+            transition: background-color 0.5s;
+
+            &:hover {
+                background-color: rgba($black1, 0.5);
+
+                >svg {
+                    opacity: 1;
                 }
             }
         }
@@ -707,6 +780,7 @@ $transitionSpeed: 1s;
         flex-direction: column;
     }
 }
+
 .position {
     width: 35px;
     height: 35px;
@@ -724,19 +798,23 @@ $transitionSpeed: 1s;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    > button {
+
+    >button {
         all: unset;
         cursor: pointer;
         display: flex;
         color: $grey4;
+
         &:hover {
             color: $grey5;
         }
+
         &:disabled {
             color: $grey3;
             cursor: unset;
         }
-        > svg {
+
+        >svg {
             width: 16px;
             height: 16px;
         }

@@ -15,6 +15,7 @@ import Modal from '@components/modals/Modal'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
 import { Post, dateCreated, isPlural, timeSinceCreated } from '@src/Helpers'
+import useStreaming from '@src/hooks/use-streaming'
 import styles from '@styles/components/Game.module.scss'
 import {
     AudioIcon,
@@ -35,8 +36,6 @@ import axios from 'axios'
 import * as d3 from 'd3'
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import RecordRTC from 'recordrtc'
-import Peer from 'simple-peer'
 import { io } from 'socket.io-client'
 import Cookies from 'universal-cookie'
 import { v4 as uuidv4 } from 'uuid'
@@ -72,7 +71,7 @@ const colors = {
     white: 'white',
 }
 
-function Video(props) {
+export function Video(props) {
     const {
         id,
         user,
@@ -147,7 +146,6 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
     const [loading, setLoading] = useState(true)
     const [gameData, setGameData] = useState<any>()
     const [gameInProgress, setGameInProgress] = useState(false)
-    const [userIsStreaming, setUserIsStreaming] = useState(false)
     const [players, setPlayers] = useState<any[]>([])
     const [gameSettingsModalOpen, setGameSettingsModalOpen] = useState(false)
     const [users, setUsers] = useState<any[]>([])
@@ -155,14 +153,9 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
     const [comments, setComments] = useState<any[]>([])
     const [showComments, setShowComments] = useState(document.body.clientWidth >= 900)
     const [showVideos, setShowVideos] = useState(false)
-    const [videos, setVideos] = useState<any[]>([])
     const [firstInteractionWithPage, setFirstInteractionWithPage] = useState(true)
     const [newComment, setNewComment] = useState('')
-    const [audioTrackEnabled, setAudioTrackEnabled] = useState(true)
-    const [videoTrackEnabled, setVideoTrackEnabled] = useState(true)
-    const [audioOnly, setAudioOnly] = useState(false)
     const [turn, setTurn] = useState(0)
-    const [loadingStream, setLoadingStream] = useState(false)
     const [backgroundModalOpen, setBackgroundModalOpen] = useState(false)
     const [showLoadingAnimation, setShowLoadingAnimation] = useState(true)
     const [topicImageModalOpen, setTopicImageModalOpen] = useState(false)
@@ -183,13 +176,7 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
 
     // state refs (used for up to date values between renders)
     const socket = useMemo(() => io(config.apiWebSocketURL || ''), [])
-    const mySocketIdRef = useRef('')
-    const peersRef = useRef<any[]>([])
     const secondsTimerRef = useRef<any>(null)
-    const audioRecorderRef = useRef<any>(null)
-    const streamRef = useRef<any>(null)
-    const audioRef = useRef<any>(null)
-    const videoRef = useRef<any>(null)
 
     const history = useNavigate()
     const largeScreen = document.body.clientWidth >= 900
@@ -227,18 +214,61 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
             .outerRadius(moveArcRadius - 0.5)
             .cornerRadius(5),
     }
-    const iceConfig = {
-        // iceTransportPolicy: 'relay',
-        iceServers: [
-            // { urls: 'stun:stun.l.google.com:19302' },
-            { urls: `stun:${config.turnServerUrl}` },
-            {
-                urls: `turn:${config.turnServerUrl}`,
-                username: config.turnServerUsername,
-                credential: config.turnServerPassword,
-            },
-        ],
-    }
+
+    const {
+        audioOnly,
+        audioRecorderRef,
+        audioTrackEnabled,
+        createPeer,
+        destroyPeer,
+        loadingStream,
+        mySocketIdRef,
+        refreshStream: originalRefreshStream,
+        startAudioRecording,
+        stopAudioRecording,
+        toggleAudioTrack,
+        toggleStream: originalToggleStream,
+        toggleVideoTrack,
+        userIsStreaming,
+        videoTrackEnabled,
+        videos,
+    } = useStreaming({
+        socket,
+        roomId,
+        showVideos,
+        onStartStreaming: () => {
+            setPlayers((previousPlayers) => [
+                ...previousPlayers,
+                {
+                    id: accountData.id,
+                    name: accountData.name,
+                    flagImagePath: accountData.flagImagePath,
+                    socketId: mySocketIdRef.current,
+                },
+            ])
+            setShowVideos(true)
+        },
+        onStream: (socketId, user) => {
+            pushComment(`${user.name}'s video connected`)
+            setPlayers((previousPlayers) => [
+                ...previousPlayers,
+                {
+                    id: user.id,
+                    name: user.name,
+                    flagImagePath: user.flagImagePath,
+                    socketId,
+                },
+            ])
+        },
+        onRefreshRequest: (socketId) => {
+            setPlayers((ps) => [...ps.filter((p) => p.socketId !== socketId)])
+        },
+        onStreamDisconnected: (socketId, user) => {
+            setPlayers((ps) => [...ps.filter((p) => p.socketId !== socketId)])
+            pushComment(`${user.name}'s stream disconnected`)
+        },
+    })
+
     // todo: potentially remove and use players instead
     const totalUsersStreaming = videos.length + (userIsStreaming ? 1 : 0)
     const isYou = (id) => id === mySocketIdRef.current
@@ -273,159 +303,16 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
     }
 
     function toggleStream() {
-        if (userIsStreaming) {
-            // close stream
-            videoRef.current.pause()
-            videoRef.current.srcObject = null
-            streamRef.current.getTracks().forEach((track) => track.stop())
-            streamRef.current = null
-            setUserIsStreaming(false)
-            setAudioTrackEnabled(true)
-            setVideoTrackEnabled(true)
-            socket.emit('outgoing-stream-disconnected', {
-                roomId,
-                socketId: mySocketIdRef.current,
-                userData,
-            })
-            if (!videos.length) {
-                setShowVideos(false)
-                setMobileTab('game')
-            }
-        } else {
-            // set up and signal stream
-            setLoadingStream(true)
-            navigator.mediaDevices
-                .getUserMedia({ video: { width: 427, height: 240 }, audio: true })
-                .then((stream) => {
-                    setUserIsStreaming(true)
-                    setAudioOnly(false)
-                    streamRef.current = stream
-                    // auto disable video and audio tracks when connected
-                    // streamRef.current.getTracks().forEach((track) => (track.enabled = false))
-                    peersRef.current.forEach((p) => p.peer.addStream(stream))
-                    setTimeout(() => {
-                        videoRef.current = document.getElementById('your-video')
-                        videoRef.current.srcObject = stream
-                    }, 1000)
-                    const newPlayer = {
-                        id: accountData.id,
-                        name: accountData.name,
-                        flagImagePath: accountData.flagImagePath,
-                        socketId: mySocketIdRef.current,
-                    }
-                    setPlayers((previousPlayers) => [...previousPlayers, newPlayer])
-                    setLoadingStream(false)
-                    setShowVideos(true)
-                })
-                .catch(() => {
-                    console.log('Unable to connect video, trying audio only...')
-                    navigator.mediaDevices
-                        .getUserMedia({ audio: { sampleRate: 24000 } })
-                        .then((stream) => {
-                            setUserIsStreaming(true)
-                            setAudioOnly(true)
-                            streamRef.current = stream
-                            streamRef.current
-                                .getTracks()
-                                .forEach((track) => (track.enabled = false))
-                            peersRef.current.forEach((p) => p.peer.addStream(stream))
-                            setTimeout(() => {
-                                videoRef.current = document.getElementById('your-video')
-                                videoRef.current.srcObject = stream
-                            }, 1000)
-                            const newPlayer = {
-                                id: accountData.id,
-                                name: accountData.name,
-                                flagImagePath: accountData.flagImagePath,
-                                socketId: mySocketIdRef.current,
-                            }
-                            setPlayers((previousPlayers) => [...previousPlayers, newPlayer])
-                            setLoadingStream(false)
-                        })
-                        .catch(() => {
-                            alert('Unable to connect media devices')
-                            setLoadingStream(false)
-                        })
-                })
-            // set up seperate audio stream for moves
-            navigator.mediaDevices
-                .getUserMedia({ audio: { sampleRate: 24000 } })
-                .then((audio) => (audioRef.current = audio))
+        originalToggleStream()
+        if (!videos.length) {
+            setShowVideos(false)
+            setMobileTab('game')
         }
     }
 
     function refreshStream(socketId, user) {
-        // singal refresh request
-        socket.emit('outgoing-refresh-request', {
-            userToSignal: socketId,
-            userSignaling: {
-                socketId: socket.id,
-                userData,
-            },
-        })
-        // destory old peer connection
-        const peerObject = peersRef.current.find((p) => p.socketId === socketId)
-        if (peerObject) {
-            peerObject.peer.destroy()
-            peersRef.current = peersRef.current.filter((p) => p.socketId !== socketId)
-            setVideos((oldVideos) => oldVideos.filter((v) => v.socketId !== socketId))
-            setPlayers((ps) => [...ps.filter((p) => p.socketId !== socketId)])
-        }
-        // create new peer connection
-        const peer = new Peer({
-            initiator: true,
-            config: iceConfig,
-            stream: streamRef.current,
-        })
-        peer.on('signal', (data) => {
-            socket.emit('outgoing-signal-request', {
-                userToSignal: socketId,
-                userSignaling: {
-                    socketId: socket.id,
-                    userData,
-                },
-                signal: data,
-            })
-        })
-        peer.on('stream', (stream) => {
-            setVideos((oldVideos) => [
-                ...oldVideos,
-                {
-                    socketId,
-                    userData: user,
-                    peer,
-                    audioOnly: !stream.getVideoTracks().length,
-                },
-            ])
-            pushComment(`${user.name}'s video connected`)
-            addStreamToVideo(socketId, stream)
-            const newPlayer = {
-                id: user.id,
-                name: user.name,
-                flagImagePath: user.flagImagePath,
-                socketId,
-            }
-            setPlayers((previousPlayers) => [...previousPlayers, newPlayer])
-        })
-        peer.on('close', () => peer.destroy())
-        peer.on('error', (error) => console.log(error))
-        peersRef.current.push({
-            socketId,
-            userData: user,
-            peer,
-        })
-    }
-
-    function toggleAudioTrack() {
-        const audioTrack = streamRef.current.getTracks()[0]
-        audioTrack.enabled = !audioTrackEnabled
-        setAudioTrackEnabled(!audioTrackEnabled)
-    }
-
-    function toggleVideoTrack() {
-        const videoTrack = streamRef.current.getTracks()[1]
-        videoTrack.enabled = !videoTrackEnabled
-        setVideoTrackEnabled(!videoTrackEnabled)
+        originalRefreshStream(socketId, user)
+        setPlayers((ps) => [...ps.filter((p) => p.socketId !== socketId)])
     }
 
     function findVideoSize() {
@@ -487,30 +374,6 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
                     return arcs[`${type}Arc2`](d)
                 }
             })
-    }
-
-    function startAudioRecording() {
-        audioRecorderRef.current = RecordRTC(audioRef.current, {
-            type: 'audio',
-            mimeType: 'audio/wav',
-            recorderType: RecordRTC.StereoAudioRecorder,
-            bufferSize: 16384,
-            numberOfAudioChannels: 1,
-            desiredSampRate: 24000,
-        })
-        audioRecorderRef.current.startRecording()
-    }
-
-    function stopAudioRecording(isRecording: boolean) {
-        return new Promise((resolve) => {
-            if (!isRecording) resolve(null)
-            else {
-                audioRecorderRef.current.stopRecording(() => {
-                    const blob = audioRecorderRef.current.getBlob()
-                    resolve(blob)
-                })
-            }
-        })
     }
 
     function uploadAudio(moveNumber, blob) {
@@ -707,19 +570,6 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
             gameData,
         })
         axios.post(`${config.apiURL}/save-glass-bead-game`, { postId: post.id })
-    }
-
-    function addStreamToVideo(socketId, stream) {
-        setTimeout(() => {
-            const video = document.getElementById(socketId) as HTMLVideoElement
-            if (video) {
-                video.srcObject = stream
-                if (showVideos) {
-                    video.muted = false
-                    video.play()
-                }
-            }
-        }, 1000)
     }
 
     useEffect(() => {
@@ -993,127 +843,7 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
                     },
                 ])
                 pushComment(`You joined the room`)
-                usersInRoom.forEach((user) => {
-                    // remove old peer if present
-                    const peerObject = peersRef.current.find((p) => p.socketId === user.socketId)
-                    if (peerObject) {
-                        peerObject.peer.destroy()
-                        peersRef.current = peersRef.current.filter(
-                            (p) => p.socketId !== user.socketId
-                        )
-                        setVideos((oldVideos) =>
-                            oldVideos.filter((v) => v.socketId !== user.socketId)
-                        )
-                    }
-                    // create peer connection
-                    const peer = new Peer({
-                        initiator: true,
-                        config: iceConfig,
-                    })
-                    peer.on('signal', (data) => {
-                        socket.emit('outgoing-signal-request', {
-                            userToSignal: user.socketId,
-                            userSignaling: {
-                                socketId: socket.id,
-                                userData,
-                            },
-                            signal: data,
-                        })
-                    })
-                    // peer.on('connect', () => console.log('connect 1'))
-                    peer.on('stream', (stream) => {
-                        setVideos((oldVideos) => [
-                            ...oldVideos,
-                            {
-                                socketId: user.socketId,
-                                userData: user.userData,
-                                peer,
-                                audioOnly: !stream.getVideoTracks().length,
-                            },
-                        ])
-                        pushComment(`${user.userData.name}'s video connected`)
-                        addStreamToVideo(user.socketId, stream)
-                        const newPlayer = {
-                            id: user.userData.id,
-                            name: user.userData.name,
-                            flagImagePath: user.userData.flagImagePath,
-                            socketId: user.socketId,
-                        }
-                        setPlayers((previousPlayers) => [...previousPlayers, newPlayer])
-                    })
-                    peer.on('close', () => peer.destroy())
-                    peer.on('error', (error) => console.log(error))
-                    peersRef.current.push({
-                        socketId: user.socketId,
-                        userData: user.userData,
-                        peer,
-                    })
-                })
-            })
-            // signal returned from peer
-            socket.on('incoming-signal', (payload) => {
-                const peerObject = peersRef.current.find((p) => p.socketId === payload.id)
-                if (peerObject) {
-                    if (peerObject.peer.readable) peerObject.peer.signal(payload.signal)
-                    else {
-                        peerObject.peer.destroy()
-                        peersRef.current = peersRef.current.filter((p) => p.socketId !== payload.id)
-                    }
-                } else console.log('no peer!')
-            })
-            // signal request from peer
-            socket.on('incoming-signal-request', (payload) => {
-                const { signal, userSignaling } = payload
-                // search for peer in peers array
-                const existingPeer = peersRef.current.find(
-                    (p) => p.socketId === userSignaling.socketId
-                )
-                // if peer exists, pass signal to peer
-                if (existingPeer) {
-                    existingPeer.peer.signal(signal)
-                } else {
-                    // otherwise, create new peer connection (with stream if running)
-                    const peer = new Peer({
-                        initiator: false,
-                        stream: streamRef.current,
-                        config: iceConfig,
-                    })
-                    peer.on('signal', (data) => {
-                        socket.emit('outgoing-signal', {
-                            userToSignal: userSignaling.socketId,
-                            signal: data,
-                        })
-                    })
-                    peer.on('connect', () => console.log('peer connect 2'))
-                    peer.on('stream', (stream) => {
-                        setVideos((oldVideos) => [
-                            ...oldVideos,
-                            {
-                                socketId: userSignaling.socketId,
-                                userData: userSignaling.userData,
-                                peer,
-                                audioOnly: !stream.getVideoTracks().length,
-                            },
-                        ])
-                        pushComment(`${userSignaling.userData.name}'s video connected`)
-                        addStreamToVideo(userSignaling.socketId, stream)
-                        const newPlayer = {
-                            id: userSignaling.userData.id,
-                            name: userSignaling.userData.name,
-                            flagImagePath: userSignaling.userData.flagImagePath,
-                            socketId: userSignaling.socketId,
-                        }
-                        setPlayers((previousPlayers) => [...previousPlayers, newPlayer])
-                    })
-                    peer.on('close', () => peer.destroy())
-                    peer.on('error', (error) => console.log('error 2: ', error))
-                    peer.signal(signal)
-                    peersRef.current.push({
-                        socketId: userSignaling.socketId,
-                        userData: userSignaling.userData,
-                        peer,
-                    })
-                }
+                usersInRoom.forEach((user) => createPeer(user.socketId, user.userData))
             })
             // user joined room
             socket.on('incoming-user-joined', (user) => {
@@ -1122,14 +852,8 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
             })
             // user left room
             socket.on('incoming-user-left', (user) => {
-                const peerObject = peersRef.current.find((p) => p.socketId === user.socketId)
-                if (peerObject) {
-                    peerObject.peer.destroy()
-                    peersRef.current = peersRef.current.filter((p) => p.socketId !== user.socketId)
-                }
+                destroyPeer(user.socketId)
                 setUsers((oldUsers) => oldUsers.filter((u) => u.socketId !== user.socketId))
-                peersRef.current = peersRef.current.filter((p) => p.socketId !== user.socketId)
-                setVideos((oldVideos) => oldVideos.filter((v) => v.socketId !== user.socketId))
                 setPlayers((ps) => [...ps.filter((p) => p.socketId !== user.socketId)])
                 pushComment(`${user.userData.name} left the room`)
             })
@@ -1186,17 +910,6 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
                 setBeads((previousBeads) => [...previousBeads, data])
                 addEventListenersToBead(data.Link.index)
             })
-            // peer refresh request
-            socket.on('incoming-refresh-request', (data) => {
-                const { id } = data
-                const peerObject = peersRef.current.find((p) => p.socketId === id)
-                if (peerObject) {
-                    peerObject.peer.destroy()
-                    peersRef.current = peersRef.current.filter((p) => p.socketId !== id)
-                    setVideos((oldVideos) => oldVideos.filter((v) => v.socketId !== id))
-                    setPlayers((ps) => [...ps.filter((p) => p.socketId !== id)])
-                }
-            })
             // new background
             socket.on('incoming-new-background', (data) => {
                 const { type, url, startTime, userSignaling } = data
@@ -1229,12 +942,6 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
                 const { userSignaling, url } = data
                 setGameData({ ...data.gameData, topicImage: url })
                 pushComment(`${userSignaling.name} added a new topic image`)
-            })
-            // stream disconnected
-            socket.on('incoming-stream-disconnected', (data) => {
-                setVideos((oldVideos) => oldVideos.filter((v) => v.socketId !== data.socketId))
-                setPlayers((ps) => [...ps.filter((p) => p.socketId !== data.socketId)])
-                pushComment(`${data.userData.name}'s stream disconnected`)
             })
         })
 

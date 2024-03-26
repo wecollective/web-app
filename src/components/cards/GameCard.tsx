@@ -5,22 +5,45 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable react/function-component-definition */
 import config from '@src/Config'
-import { Game, Post, Step, StepContext, StepType } from '@src/Helpers'
+import {
+    BaseGamePost,
+    BaseUser,
+    Game,
+    PlayStatus,
+    Post,
+    Step,
+    StepContext,
+    StepType,
+    baseUserData,
+} from '@src/Helpers'
 import { AccountContext } from '@src/contexts/AccountContext'
-import { CastaliaIcon, DeleteIcon, EditIcon, PlusIcon } from '@src/svgs/all'
+import { CastaliaIcon, DeleteIcon, EditIcon, PlusIcon, UsersIcon } from '@src/svgs/all'
 import styles from '@styles/components/GameCard.module.scss'
 import axios from 'axios'
 import { capitalize, cloneDeep } from 'lodash'
 import { customAlphabet } from 'nanoid'
-import React, { FC, PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react'
+import React, {
+    FC,
+    PropsWithChildren,
+    ReactNode,
+    SVGProps,
+    useContext,
+    useEffect,
+    useMemo,
+    useState,
+} from 'react'
 import { useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 import { useDebounceValue } from 'usehooks-ts'
 import Button from '../Button'
+import CloseButton from '../CloseButton'
 import Column from '../Column'
 import DropDown from '../DropDown'
+import FlagImageHighlights from '../FlagImageHighlights'
 import Input from '../Input'
 import Row from '../Row'
+import SearchSelector from '../SearchSelector'
+import UserButton from '../UserButton'
 import Modal from '../modals/Modal'
 import PlainButton from '../modals/PlainButton'
 import PostCard from './PostCard/PostCard'
@@ -54,7 +77,7 @@ const StepTitle: FC<{ prefix: string; step: Step; stepContext?: StepContext }> =
                                     </span>
                                 )
                             }
-                            return <>(repeat for {stepContext?.playerIds.length ?? 0} players)</>
+                            return <>(repeat for all players)</>
                         case 'rounds':
                             if (stepContext && step.name in stepContext.variables) {
                                 return (
@@ -654,7 +677,7 @@ const UpdateStepModal: FC<{ step: Step; onClose: () => void; onUpdate: (step: St
 
 export const CreateGameCard: FC<{
     state: GameState
-    setState?: (state: GameState) => void
+    setState: (state: GameState) => void
 }> = ({ state, setState }) => {
     return (
         <GameCardWrapper>
@@ -686,7 +709,98 @@ export const CreateGameCard: FC<{
                     </Column>
                 </Column>
             </Row>
+            <Players
+                players={state.game.players}
+                setPlayers={(players) =>
+                    setState({ dirty: true, game: { ...state.game, players } })
+                }
+            />
         </GameCardWrapper>
+    )
+}
+
+export const UserList: FC<
+    PropsWithChildren<{
+        users: BaseUser[]
+        title: string
+        Icon: React.FunctionComponent<SVGProps<SVGSVGElement>>
+        userChildren?: (user: BaseUser) => ReactNode
+    }>
+> = ({ users, title, Icon, children, userChildren }) => {
+    return (
+        <Column style={{ marginBottom: 15, flexShrink: 1 }}>
+            <Row style={{ marginBottom: 10 }} centerY>
+                <Icon style={{ width: 30, height: 30, marginRight: 10, color: '#c5c5c7' }} />
+                <h4 style={{ color: '#c5c5c7' }}>{title}</h4>
+            </Row>
+            <Column>
+                {users.map((user) => (
+                    <Row key={user.id} centerY style={{ marginBottom: 10 }}>
+                        <UserButton key={user.id} user={user} imageSize={35} maxChars={18} />
+                        {userChildren?.(user)}
+                    </Row>
+                ))}
+                {children}
+            </Column>
+        </Column>
+    )
+}
+
+export const Players: FC<{ players: BaseUser[]; setPlayers?: (players: BaseUser[]) => void }> = ({
+    players,
+    setPlayers,
+}) => {
+    const [userOptions, setUserOptions] = useState<BaseUser[]>([])
+    const [search, setSearch] = useState('')
+    const [debouncedSearch] = useDebounceValue(search, 500)
+
+    useEffect(() => {
+        ;(async () => {
+            if (debouncedSearch === '') {
+                setUserOptions([])
+            } else {
+                const options = {
+                    headers: { Authorization: `Bearer ${cookies.get('accessToken')}` },
+                }
+                const data = { query: debouncedSearch, blacklist: players.map((u) => u.id) }
+                const res = await axios.post(`${config.apiURL}/find-people`, data, options)
+                setUserOptions(res.data)
+            }
+        })()
+    }, [debouncedSearch])
+
+    return (
+        <UserList
+            title='Players'
+            Icon={UsersIcon}
+            users={players}
+            userChildren={
+                setPlayers &&
+                ((user) => (
+                    <CloseButton
+                        size={17}
+                        style={{ marginLeft: 5 }}
+                        onClick={() => setPlayers(players.filter((u) => u.id !== user.id))}
+                    />
+                ))
+            }
+        >
+            {setPlayers && (
+                <Row centerY style={{ marginBottom: 10 }}>
+                    <SearchSelector
+                        type='user'
+                        placeholder='Add player...'
+                        onSearchQuery={(query) => setSearch(query)}
+                        onOptionSelected={(player) => {
+                            setPlayers([...players, player])
+                            setUserOptions([])
+                        }}
+                        onBlur={() => setTimeout(() => setUserOptions([]), 200)}
+                        options={userOptions}
+                    />
+                </Row>
+            )}
+        </UserList>
     )
 }
 
@@ -698,9 +812,6 @@ export const GameCard: FC<{
     post: Post
     collapsed: boolean
 }> = ({ initialGame, state, setState, saveState, post, collapsed }) => {
-    const navigate = useNavigate()
-    const { play } = state.game
-
     return (
         <GameCardWrapper>
             <GameCardHeader />
@@ -720,42 +831,109 @@ export const GameCard: FC<{
                     />
                 </Column>
                 <Column style={{ padding: 5, flexGrow: 1, flexBasis: '50%' }}>
-                    <h4>Play</h4>
-                    <Row centerY spaceBetween style={{ marginBottom: 5 }}>
-                        {play.status}, {play.playerIds.length} players{' '}
-                        <Button
-                            style={{ marginLeft: 5 }}
-                            onClick={async () => {
-                                navigate(`/p/${post.id}`)
-                            }}
-                            size='medium'
-                            color='blue'
-                            text='Play'
-                        />
-                    </Row>
-                    {post.Originals && (
-                        <>
-                            <h5>Original</h5>
-                            <Row centerY spaceBetween style={{ marginBottom: 5 }}>
-                                {post.Originals.Parent.game.play.status},{' '}
-                                {post.Originals.Parent.game.play.playerIds.length} players
-                                <Button
-                                    style={{ marginLeft: 5 }}
-                                    onClick={async () => {
-                                        navigate(`/p/${post.Originals!.Parent.id}`)
-                                    }}
-                                    size='medium'
-                                    color='grey'
-                                    text='Play'
-                                />
-                            </Row>
-                        </>
-                    )}
-
-                    <Remixes post={post} />
+                    <Plays post={post} />
                 </Column>
             </Row>
         </GameCardWrapper>
+    )
+}
+
+export const Plays: FC<{ post: Post; onlyRelated?: boolean }> = ({ post, onlyRelated }) => {
+    const { accountData, setCreatePostModalSettings } = useContext(AccountContext)
+    return (
+        <>
+            <h4>{onlyRelated ? 'Related Plays' : 'Plays'}</h4>
+            {!onlyRelated && (
+                <GameLink post={post as BaseGamePost} overrideTitle='This game' main />
+            )}
+            {post.Originals && <GameLink post={post.Originals.Parent} overrideTitle='Original' />}
+            {(post.Remixes ?? []).map(({ Post: remix }) => (
+                <GameLink key={remix.id} post={remix} />
+            ))}
+            <Row style={{ marginTop: 10, justifyContent: 'flex-end' }}>
+                <Button
+                    color='grey'
+                    onClick={async () => {
+                        const newGame: Game = {
+                            steps: remixSteps(post.id, post.game!.steps),
+                            play: {
+                                status: 'waiting',
+                                variables: {},
+                            },
+                            players: [baseUserData(accountData)],
+                        }
+                        setCreatePostModalSettings({
+                            type: 'post',
+                            game: newGame,
+                            title: `Remix of "${post.title}"`,
+                        })
+                    }}
+                    text='Remix'
+                />
+            </Row>
+        </>
+    )
+}
+
+const STATUS_COLOR: Record<PlayStatus, string> = {
+    waiting: '#f59c27',
+    ended: 'inherit',
+    paused: '#f59c27',
+    started: '#159437',
+    stopped: '#ff4848',
+}
+
+export const PlayStatusIndicator: FC<{ status: PlayStatus }> = ({ status }) => (
+    <span
+        style={{
+            color: STATUS_COLOR[status],
+            textAlign: 'center',
+            border: `1px solid ${STATUS_COLOR[status]}`,
+            borderRadius: 10,
+            padding: `2px 5px`,
+            marginRight: 5,
+        }}
+    >
+        {status}
+    </span>
+)
+
+const GameLink: FC<{ post: BaseGamePost; overrideTitle?: string; main?: boolean }> = ({
+    post,
+    overrideTitle,
+    main,
+}) => {
+    const navigate = useNavigate()
+    return (
+        <Row centerY spaceBetween style={{ marginBottom: 5, fontSize: 12 }}>
+            <PlayStatusIndicator status={post.game.play.status} />
+            <a
+                href={`/p/${post.id}`}
+                style={{
+                    flexGrow: 1,
+                    fontWeight: overrideTitle && 'bold',
+                    overflow: 'hidden',
+                    whiteSpace: 'nowrap',
+                    textOverflow: 'ellipsis',
+                }}
+            >
+                {overrideTitle ?? post.title}
+            </a>
+            <FlagImageHighlights
+                type='user'
+                style={{ marginLeft: 10 }}
+                images={post.game!.players.map((u) => u.flagImagePath)}
+            />
+            <Button
+                style={{ marginLeft: 5 }}
+                onClick={async () => {
+                    navigate(`/p/${post.id}`)
+                }}
+                size='medium'
+                color={main ? 'blue' : 'grey'}
+                text='Play'
+            />
+        </Row>
     )
 }
 
@@ -790,62 +968,6 @@ const remixSteps = (gameId: number, steps: Step[]) => {
             text: replaceAll(step.text, ids),
         }),
     }))
-}
-
-export const Remixes = ({ post }: { post: Post }) => {
-    const navigate = useNavigate()
-    const { accountData, setCreatePostModalSettings } = useContext(AccountContext)
-
-    const remixes = post.Remixes ?? []
-    const game = post.game!
-
-    return (
-        <Column style={{ overflowY: 'auto', marginBottom: 10 }}>
-            <h5>Remixes</h5>
-            {remixes.length ? (
-                remixes.map(({ Post: remix }) => (
-                    <Row centerY spaceBetween style={{ marginBottom: 5 }}>
-                        <a href={`/p/${remix.id}`}>
-                            {remix.title} ({remix.game.play.status},{' '}
-                            {remix.game.play.playerIds.length} players)
-                        </a>
-                        <Button
-                            style={{ marginLeft: 5 }}
-                            onClick={async () => {
-                                navigate(`/p/${remix.id}`)
-                            }}
-                            size='medium'
-                            color='grey'
-                            text='Play'
-                        />
-                    </Row>
-                ))
-            ) : (
-                <p className='grey'>This game has not been remixed so far.</p>
-            )}
-            <Row style={{ marginTop: 10, justifyContent: 'flex-end' }}>
-                <Button
-                    color='grey'
-                    onClick={async () => {
-                        const newGame: Game = {
-                            steps: remixSteps(post.id, game.steps),
-                            play: {
-                                status: 'waiting',
-                                playerIds: [accountData.id],
-                                variables: {},
-                            },
-                        }
-                        setCreatePostModalSettings({
-                            type: 'post',
-                            game: newGame,
-                            title: `Remix of "${post.title}"`,
-                        })
-                    }}
-                    text='Remix'
-                />
-            </Row>
-        </Column>
-    )
 }
 
 const FindGame = ({

@@ -1,39 +1,43 @@
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-plusplus */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable react/function-component-definition */
 import config from '@src/Config'
-import { GAME_EVENTS, Post } from '@src/Helpers'
+import { BaseUser, GAME_EVENTS, Peer, Post, baseUserData } from '@src/Helpers'
+import PlayersSidebar from '@src/components/PlayersSidebar'
+import TypingDots from '@src/components/animations/TypingDots'
 import { AccountContext } from '@src/contexts/AccountContext'
+import useStreaming from '@src/hooks/use-streaming'
 import axios from 'axios'
 import { orderBy, uniqBy } from 'lodash'
 import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { io } from 'socket.io-client'
 import Button from '../../components/Button'
 import Column from '../../components/Column'
 import Row from '../../components/Row'
 import LoadingWheel from '../../components/animations/LoadingWheel'
 import MessageCard from '../../components/cards/Comments/MessageCard'
-import { GameState, Remixes, SaveableSteps } from '../../components/cards/GameCard'
+import {
+    GameState,
+    PlayStatusIndicator,
+    Plays,
+    SaveableSteps,
+} from '../../components/cards/GameCard'
 import PostCard from '../../components/cards/PostCard/PostCard'
 import CommentInput from '../../components/draft-js/CommentInput'
 
 const GameSidebar: FC<{
+    gameState: GameState
+    setGameState: (gameState: GameState) => void
     post: Post
     setPost: (post: Post) => void
     emit: (action: string, data?: any) => void
-}> = ({ post, setPost, emit }) => {
+}> = ({ post, setPost, emit, gameState, setGameState }) => {
     const game = post.game!
     const { play } = game
-    const [gameState, setGameState] = useState<GameState>({
-        dirty: false,
-        game,
-    })
     const { accountData } = useContext(AccountContext)
     const isOwnPost = accountData && accountData.id === post.Creator?.id
-    const playerIds = useMemo(() => [accountData.id], [accountData.id])
-    const navigate = useNavigate()
 
     useEffect(() => {
         setGameState({
@@ -44,7 +48,9 @@ const GameSidebar: FC<{
 
     return (
         <Column style={{ width: 300, padding: 10, borderRight: '1px solid #ededef' }}>
-            <h2>Game ({play.status})</h2>
+            <h2>
+                Game <PlayStatusIndicator status={play.status} />
+            </h2>
             {isOwnPost && (
                 <Row style={{ marginBottom: 10 }}>
                     <Button
@@ -102,7 +108,7 @@ const GameSidebar: FC<{
                     initialGame={game}
                     saveState={(newGameState) => {
                         emit(GAME_EVENTS.outgoing.updateGame, { game: newGameState.game })
-                        setGameState(newGameState)
+                        setPost({ ...post, game: newGameState.game })
                     }}
                     setState={
                         play.status === 'waiting' ||
@@ -117,31 +123,13 @@ const GameSidebar: FC<{
                             ? {
                                   stepId: play.step.id,
                                   variables: play.variables,
-                                  playerIds,
+                                  players: game.players,
                               }
                             : undefined
                     }
                 />
             </Column>
-            {post.Originals && (
-                <>
-                    <h4>Original</h4>
-                    <Row centerY spaceBetween style={{ marginBottom: 5 }}>
-                        {post.Originals.Parent.game.play.status},{' '}
-                        {post.Originals.Parent.game.play.playerIds.length} players
-                        <Button
-                            style={{ marginLeft: 5 }}
-                            onClick={async () => {
-                                navigate(`/p/${post.Originals!.Parent.id}`)
-                            }}
-                            size='medium'
-                            color='grey'
-                            text='Play'
-                        />
-                    </Row>
-                </>
-            )}
-            <Remixes post={post} />
+            <Plays post={post} onlyRelated />
         </Column>
     )
 }
@@ -153,7 +141,11 @@ const PostChildren: FC<{
     limit: number
     loading: boolean
     emit: (event: string, data?) => void
-}> = ({ post, emit, postChildren, setChildren, limit, loading }) => {
+    typing: BaseUser[]
+}> = ({ post, emit, postChildren, setChildren, limit, loading, typing }) => {
+    const { accountData } = useContext(AccountContext)
+    const notMeTyping = typing.filter((u) => u.id !== accountData.id)
+
     return (
         <>
             <Column
@@ -187,6 +179,21 @@ const PostChildren: FC<{
                     </Row>
                 )}
             </Column>
+            {!!notMeTyping.length && (
+                <Row
+                    style={{
+                        width: '100%',
+                        alignItems: 'flex-end',
+                        justifyContent: 'flex-end',
+                        padding: 10,
+                    }}
+                >
+                    <p style={{ marginRight: 2 }}>
+                        {notMeTyping.map((u) => u.name).join(', ')} typing
+                    </p>
+                    <TypingDots style={{ marginBottom: 1 }} />
+                </Row>
+            )}
             <div style={{ padding: 10 }}>
                 <CommentInput
                     type='comment'
@@ -201,6 +208,12 @@ const PostChildren: FC<{
                             childrenLimit: limit + 1,
                         })
                     }}
+                    signalTyping={(typingStatus) =>
+                        emit(typingStatus ? 'user-started-typing' : 'user-stopped-typing', {
+                            roomId: post.id,
+                            user: { id: accountData.id, name: accountData.name },
+                        })
+                    }
                 />
             </div>
         </>
@@ -225,6 +238,26 @@ const GamePage: FC<{ post: Post; setPost: (post: Post) => void; onDelete: () => 
         childrenLimit: number
     }>({ postChildren: [], childrenLimit: 100 })
     const [childrenLoading, setChildrenLoading] = useState(true)
+    const game = post.game!
+    const [gameState, setGameState] = useState<GameState>({
+        dirty: false,
+        game,
+    })
+    const [allPresent, setPresent] = useState<Peer[]>([])
+    const present = uniqBy(allPresent, ({ id }) => id)
+    const [allTyping, setTyping] = useState<Peer[]>([])
+    const typing = uniqBy(allTyping, ({ id }) => id)
+    const ongoing =
+        gameState.game.play.status === 'started' || gameState.game.play.status === 'paused'
+    const streaming = useStreaming({
+        socket,
+        roomId: post.id,
+        showVideos: true,
+        onRefreshRequest: () => console.log('todo'),
+        onStartStreaming: () => console.log('todo'),
+        onStream: () => console.log('todo'),
+        onStreamDisconnected: () => console.log('todo'),
+    })
 
     async function getChildren(childrenIds?: number[]) {
         const {
@@ -249,7 +282,6 @@ const GamePage: FC<{ post: Post; setPost: (post: Post) => void; onDelete: () => 
     }
 
     useEffect(() => {
-        console.log(childrenLimit)
         if (childrenLimit > postChildren.length) {
             setChildrenLoading(true)
             getChildren()
@@ -262,13 +294,36 @@ const GamePage: FC<{ post: Post; setPost: (post: Post) => void; onDelete: () => 
             roomId: post.id,
             userData,
         })
+        socket.on('incoming-room-joined', (payload) => {
+            const { socketId: incomingSocketId, usersInRoom } = payload
+            streaming.mySocketIdRef.current = incomingSocketId
 
-        socket.on(GAME_EVENTS.incoming.updated, ({ game, changedChildren }) => {
-            if (game) {
-                setPost({ ...post, game })
+            for (const user of usersInRoom) {
+                streaming.createPeer(user.socketId, user.userData)
+            }
+        })
+
+        socket.on(GAME_EVENTS.incoming.updated, ({ game: newGame, changedChildren }) => {
+            if (newGame) {
+                setPost({ ...post, game: newGame })
             }
             getChildren(changedChildren.map(({ id }) => id))
         })
+
+        socket.emit('enter-room', {
+            roomId: post.id,
+            user: { socketId: socket.id, ...baseUserData(accountData) },
+        })
+        // listen for events
+        socket.on('room-entered', (usersInRoom) => setPresent(usersInRoom))
+        socket.on('user-entering', (user) => setPresent((people) => [user, ...people]))
+        socket.on('user-exiting', (socketId) =>
+            setPresent((people) => people.filter((u) => u.socketId !== socketId))
+        )
+        socket.on('user-started-typing', (user) => setTyping((people) => [user, ...people]))
+        socket.on('user-stopped-typing', (user) =>
+            setTyping((people) => people.filter((u) => u.id !== user.id))
+        )
     }, [])
 
     const emit = useCallback(
@@ -278,7 +333,13 @@ const GamePage: FC<{ post: Post; setPost: (post: Post) => void; onDelete: () => 
 
     return (
         <Row style={{ width: '100%', height: 'calc(100vh - 60px - 25px)', marginTop: '60px' }}>
-            <GameSidebar post={post} emit={emit} setPost={setPost} />
+            <GameSidebar
+                post={post}
+                emit={emit}
+                setPost={setPost}
+                gameState={gameState}
+                setGameState={setGameState}
+            />
             <Column style={{ height: '100%', flexGrow: 1, background: 'white' }}>
                 <div style={{ padding: 10 }}>
                     <PostCard
@@ -295,8 +356,21 @@ const GamePage: FC<{ post: Post; setPost: (post: Post) => void; onDelete: () => 
                     limit={childrenLimit}
                     loading={childrenLoading}
                     emit={emit}
+                    typing={typing}
                 />
             </Column>
+            <PlayersSidebar
+                players={gameState.game.players}
+                setPlayers={
+                    ongoing
+                        ? undefined
+                        : (players) => {
+                              console.log('update players!')
+                          }
+                }
+                present={present}
+                streaming={streaming}
+            />
         </Row>
     )
 }

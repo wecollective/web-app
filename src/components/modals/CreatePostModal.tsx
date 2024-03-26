@@ -40,6 +40,7 @@ import {
     allowedAudioTypes,
     allowedImageTypes,
     audioMBLimit,
+    baseUserData,
     capitalise,
     findDraftLength,
     findSearchableText,
@@ -530,7 +531,8 @@ function CreatePostModal({
     const [gameState, setGameState] = useState<GameState>({
         game: initialGame ?? {
             steps: [],
-            play: { status: 'waiting', playerIds: [], variables: {} },
+            players: [baseUserData(accountData)],
+            play: { status: 'waiting', variables: {} },
         },
         dirty: true,
     })
