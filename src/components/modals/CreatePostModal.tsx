@@ -33,6 +33,7 @@ import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import {
     GAMES,
     GAME_TYPES,
+    Game,
     GameSettings,
     MEDIA_TYPES,
     MediaType,
@@ -106,7 +107,12 @@ const SOURCE_TYPES = ['post']
 
 type SourceType = (typeof SOURCE_TYPES)[number]
 
-export type CreatePostModalSettings = { type: ModalType; source?: { type: SourceType; id: number } }
+export type CreatePostModalSettings = {
+    type: ModalType
+    title?: string
+    source?: { type: SourceType; id: number; relationship?: string }
+    game?: Game
+}
 
 // eslint-disable-next-line react/require-default-props
 export type CreatePostModalProps = { settings: CreatePostModalSettings; onClose: () => void }
@@ -120,7 +126,7 @@ const MODAL_HEADER: Record<ModalType, string> = {
 }
 
 function CreatePostModal({
-    settings: { type, source },
+    settings: { type, source, game: initialGame, title: initialTitle },
     onClose,
 }: CreatePostModalProps): JSX.Element {
     const { accountData } = useContext(AccountContext)
@@ -129,12 +135,22 @@ function CreatePostModal({
     const { userPosts, setUserPosts } = useContext(UserContext)
     const [loading, setLoading] = useState(false)
     const [linkDescription, setLinkDescription] = useState('')
-    const [mediaTypes, setMediaTypes] = useState<MediaType[]>(() =>
-        MEDIA_TYPES.includes(type as MediaType) ? [type as MediaType] : []
-    )
+    const [mediaTypes, setMediaTypes] = useState<MediaType[]>(() => {
+        const initialMediaTypes: MediaType[] = []
+
+        if (MEDIA_TYPES.includes(type as MediaType)) {
+            initialMediaTypes.push(type as MediaType)
+        }
+
+        if (initialGame) {
+            initialMediaTypes.push('game')
+        }
+
+        return initialMediaTypes
+    })
     const [spaces, setSpaces] = useState<any[]>([spaceData.id ? spaceData : defaultSelectedSpace])
     const [showTitle, setShowTitle] = useState(true)
-    const [title, setTitle] = useState('')
+    const [title, setTitle] = useState(initialTitle ?? '')
     const [text, setText] = useState('')
     const [mentions, setMentions] = useState<any[]>([])
     const [rawUrls, setRawUrls] = useState<any[]>([])
@@ -512,7 +528,10 @@ function CreatePostModal({
 
     // new game
     const [gameState, setGameState] = useState<GameState>({
-        game: { steps: [], play: { status: 'waiting', playerIds: [], variables: {} } },
+        game: initialGame ?? {
+            steps: [],
+            play: { status: 'waiting', playerIds: [], variables: {} },
+        },
         dirty: true,
     })
 
@@ -672,7 +691,13 @@ function CreatePostModal({
         if (mediaTypes.includes('game')) {
             post.game = gameState.game
         }
-        if (source) post.source = { type: source.type, id: source.id, linkDescription }
+        if (source)
+            post.source = {
+                type: source.type,
+                id: source.id,
+                relationship: source.relationship,
+                linkDescription,
+            }
         if (type === 'poll') post.governance = { action: pollAction, threshold: pollThreshold }
         post.searchableText = findSearchableText(post)
         // validate post

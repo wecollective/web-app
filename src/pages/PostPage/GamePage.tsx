@@ -3,9 +3,10 @@
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable react/function-component-definition */
 import config from '@src/Config'
-import { Post } from '@src/Helpers'
+import { GAME_EVENTS, Post } from '@src/Helpers'
 import { AccountContext } from '@src/contexts/AccountContext'
 import axios from 'axios'
+import { orderBy, uniqBy } from 'lodash'
 import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { io } from 'socket.io-client'
@@ -14,23 +15,9 @@ import Column from '../../components/Column'
 import Row from '../../components/Row'
 import LoadingWheel from '../../components/animations/LoadingWheel'
 import MessageCard from '../../components/cards/Comments/MessageCard'
-import { GameState, PLAY_BUTTON_TEXT, SaveableSteps, Spawns } from '../../components/cards/GameCard'
+import { GameState, Remixes, SaveableSteps } from '../../components/cards/GameCard'
 import PostCard from '../../components/cards/PostCard/PostCard'
 import CommentInput from '../../components/draft-js/CommentInput'
-
-const EVENTS = {
-    outgoing: {
-        updateGame: 'gs:outgoing-update-game',
-        start: 'gs:outgoing-start-game',
-        stop: 'gs:outgoing-stop-game',
-
-        skip: 'gs:outgoing-skip-move',
-        pause: 'gs:outgoing-pause-move',
-    },
-    incoming: {
-        updated: 'gs:incoming-updated-game',
-    },
-} as const
 
 const GameSidebar: FC<{
     post: Post
@@ -69,7 +56,7 @@ const GameSidebar: FC<{
                                 play.status === 'paused' ||
                                 play.status === 'ended' ||
                                 play.status === 'stopped')
-                                ? () => emit(EVENTS.outgoing.start)
+                                ? () => emit(GAME_EVENTS.outgoing.start)
                                 : null
                         }
                     />
@@ -78,7 +65,9 @@ const GameSidebar: FC<{
                         text='Pause'
                         style={{ marginLeft: 10 }}
                         onClick={
-                            play.status === 'started' ? () => emit(EVENTS.outgoing.pause) : null
+                            play.status === 'started'
+                                ? () => emit(GAME_EVENTS.outgoing.pause)
+                                : null
                         }
                     />
                     <Button
@@ -87,7 +76,7 @@ const GameSidebar: FC<{
                         style={{ marginLeft: 10 }}
                         onClick={
                             play.status === 'started' || play.status === 'paused'
-                                ? () => emit(EVENTS.outgoing.skip)
+                                ? () => emit(GAME_EVENTS.outgoing.skip)
                                 : null
                         }
                     />
@@ -97,7 +86,7 @@ const GameSidebar: FC<{
                         style={{ marginLeft: 10 }}
                         onClick={
                             play.status === 'started' || play.status === 'paused'
-                                ? () => emit(EVENTS.outgoing.stop)
+                                ? () => emit(GAME_EVENTS.outgoing.stop)
                                 : null
                         }
                     />
@@ -112,7 +101,7 @@ const GameSidebar: FC<{
                 <SaveableSteps
                     initialGame={game}
                     saveState={(newGameState) => {
-                        emit(EVENTS.outgoing.updateGame, { game: newGameState.game })
+                        emit(GAME_EVENTS.outgoing.updateGame, { game: newGameState.game })
                         setGameState(newGameState)
                     }}
                     setState={
@@ -124,7 +113,7 @@ const GameSidebar: FC<{
                     }
                     state={gameState}
                     stepContext={
-                        play.status === 'started'
+                        play.status === 'started' || play.status === 'paused'
                             ? {
                                   stepId: play.step.id,
                                   variables: play.variables,
@@ -134,25 +123,25 @@ const GameSidebar: FC<{
                     }
                 />
             </Column>
-            {post.Original && (
+            {post.Originals && (
                 <>
                     <h4>Original</h4>
                     <Row centerY spaceBetween style={{ marginBottom: 5 }}>
-                        {post.Original.Parent.game.play.status},{' '}
-                        {post.Original.Parent.game.play.playerIds.length} players
+                        {post.Originals.Parent.game.play.status},{' '}
+                        {post.Originals.Parent.game.play.playerIds.length} players
                         <Button
                             style={{ marginLeft: 5 }}
                             onClick={async () => {
-                                navigate(`/p/${post.Original!.Parent.id}`)
+                                navigate(`/p/${post.Originals!.Parent.id}`)
                             }}
                             size='medium'
                             color='grey'
-                            text={PLAY_BUTTON_TEXT[post.Original.Parent.game.play.status]}
+                            text='Play'
                         />
                     </Row>
                 </>
             )}
-            <Spawns post={post} />
+            <Remixes post={post} />
         </Column>
     )
 }
@@ -160,12 +149,11 @@ const GameSidebar: FC<{
 const PostChildren: FC<{
     post: Post
     postChildren: Post[]
-    setChildren: (children: Post[]) => void
-    loading: boolean
+    setChildren: (status: { postChildren: Post[]; childrenLimit: number }) => void
     limit: number
-    setLimit: (limit: number) => void
-}> = ({ post, postChildren, setChildren, limit, setLimit, loading }) => {
-    console.log(postChildren.length)
+    loading: boolean
+    emit: (event: string, data?) => void
+}> = ({ post, emit, postChildren, setChildren, limit, loading }) => {
     return (
         <>
             <Column
@@ -182,12 +170,15 @@ const PostChildren: FC<{
                         key={child.id}
                         message={child}
                         removeMessage={(message) => {
-                            setChildren(postChildren.filter((c) => c.id !== message))
-                            setLimit(limit - 1)
+                            setChildren({
+                                postChildren: postChildren.filter((c) => c.id !== message),
+                                childrenLimit: limit - 1,
+                            })
                         }}
                         setReplyParent={() => {
                             throw new Error('TODO')
                         }}
+                        emit={emit}
                     />
                 ))}
                 {loading && (
@@ -205,8 +196,10 @@ const PostChildren: FC<{
                     }}
                     maxChars={5000}
                     onSave={(comment) => {
-                        setChildren([...postChildren, comment])
-                        setLimit(limit + 1)
+                        setChildren({
+                            postChildren: [comment, ...postChildren],
+                            childrenLimit: limit + 1,
+                        })
                     }}
                 />
             </div>
@@ -227,23 +220,40 @@ const GamePage: FC<{ post: Post; setPost: (post: Post) => void; onDelete: () => 
         name: accountData.name || 'Anonymous',
         flagImagePath: accountData.flagImagePath,
     }
-    const [postChildren, setChildren] = useState<any[]>([])
-    const [childrenLimit, setChildrenLimit] = useState(100)
+    const [{ postChildren, childrenLimit }, setChildren] = useState<{
+        postChildren: any[]
+        childrenLimit: number
+    }>({ postChildren: [], childrenLimit: 100 })
     const [childrenLoading, setChildrenLoading] = useState(true)
 
-    async function getChildren() {
+    async function getChildren(childrenIds?: number[]) {
         const {
-            data: { children: newChildren },
+            data: { children: changedChildren },
         } = await axios.get(
-            `${config.apiURL}/post-children?postId=${post.id}&limit=${childrenLimit}&offset=${0}`
+            `${config.apiURL}/post-children?postId=${post.id}${
+                childrenIds ? `&childrenIds=${childrenIds}` : `&limit=${childrenLimit}&offset=${0}`
+            }`
         )
-        setChildren(newChildren)
+        setChildren(({ postChildren: oldChildren, childrenLimit: oldChildrenLimit }) => {
+            const newPostChildren = orderBy(
+                uniqBy([...changedChildren, ...oldChildren], (p) => p.id),
+                'createdAt',
+                'desc'
+            )
+            return {
+                postChildren: newPostChildren,
+                childrenLimit: Math.max(oldChildrenLimit, newPostChildren.length),
+            }
+        })
         setChildrenLoading(false)
     }
 
     useEffect(() => {
-        setChildrenLoading(true)
-        getChildren()
+        console.log(childrenLimit)
+        if (childrenLimit > postChildren.length) {
+            setChildrenLoading(true)
+            getChildren()
+        }
     }, [childrenLimit])
 
     useEffect(() => {
@@ -253,9 +263,11 @@ const GamePage: FC<{ post: Post; setPost: (post: Post) => void; onDelete: () => 
             userData,
         })
 
-        socket.on(EVENTS.incoming.updated, ({ game }) => {
-            setPost({ ...post, game })
-            getChildren()
+        socket.on(GAME_EVENTS.incoming.updated, ({ game, changedChildren }) => {
+            if (game) {
+                setPost({ ...post, game })
+            }
+            getChildren(changedChildren.map(({ id }) => id))
         })
     }, [])
 
@@ -281,8 +293,8 @@ const GamePage: FC<{ post: Post; setPost: (post: Post) => void; onDelete: () => 
                     postChildren={postChildren}
                     setChildren={setChildren}
                     limit={childrenLimit}
-                    setLimit={setChildrenLimit}
                     loading={childrenLoading}
+                    emit={emit}
                 />
             </Column>
         </Row>

@@ -4,13 +4,15 @@ import React from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
 function CheckBox(props: {
+    name?: string
     text?: string
-    checked: boolean
-    onChange: (checked: boolean) => void
+    checked?: boolean
+    defaultChecked?: boolean
+    onChange?: (checked: boolean) => void
     disabled?: boolean
     style?: any
 }): JSX.Element {
-    const { text, checked, onChange, disabled, style } = props
+    const { name, text, checked, defaultChecked, onChange, disabled, style } = props
     const id = uuidv4()
     return (
         <label
@@ -20,10 +22,12 @@ function CheckBox(props: {
         >
             <input
                 type='checkbox'
+                name={name}
                 id={id}
                 checked={checked}
-                onChange={(e) => onChange(e.target.checked)}
+                onChange={onChange && ((e) => onChange(e.target.checked))}
                 disabled={disabled}
+                defaultChecked={defaultChecked}
             />
             <div />
             <CheckIcon />
@@ -33,7 +37,11 @@ function CheckBox(props: {
 }
 
 CheckBox.defaultProps = {
+    name: null,
     text: null,
+    checked: undefined,
+    defaultChecked: undefined,
+    onChange: null,
     disabled: false,
     style: null,
 }

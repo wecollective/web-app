@@ -445,6 +445,7 @@ function Messages(): JSX.Element {
                             message={message}
                             removeMessage={() => null}
                             setReplyParent={() => setReplyParent(message)}
+                            emit={() => console.log('TODO')}
                         />
                     ))}
                     {nextMessagesLoading && (

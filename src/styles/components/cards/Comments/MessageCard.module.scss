@@ -33,6 +33,10 @@
     &.move {
         justify-content: center;
 
+        .message {
+            background-color: $green3light;
+        }
+
         &.started,
         &.paused {
             .message {

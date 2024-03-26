@@ -555,7 +555,7 @@ function PostCard(props: {
                                 <Column centerX centerY>
                                     <CastaliaIcon />
                                 </Column>
-                                <p>{post.Spawns?.length ?? 0}</p>
+                                <p>{post.Remixes?.length ?? 0}</p>
                             </button>
                         )}
                     </Row>

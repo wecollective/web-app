@@ -48,8 +48,9 @@ function MessageCard(props: {
     message: Post
     removeMessage: (message: any) => void
     setReplyParent: () => void
+    emit: (event: string, data) => void
 }): JSX.Element {
-    const { message: messageData, setReplyParent, removeMessage } = props
+    const { message: messageData, emit, setReplyParent, removeMessage } = props
     const { loggedIn, accountData, updateDragItem, alert } = useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
     const [message, setMessage] = useState(messageData)
@@ -315,7 +316,7 @@ function MessageCard(props: {
                     {mediaTypes.includes('card') && (
                         <Card postId={id} style={{ minWidth: 600, marginTop: 10 }} />
                     )}
-                    {move && <MoveCard move={move} />}
+                    {move && <MoveCard move={move} emit={emit} />}
                 </Column>
                 <Row className={styles.reactions}>
                     {totalLikes > 0 && (

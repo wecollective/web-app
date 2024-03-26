@@ -30,6 +30,20 @@ export const maxPostChars = 5000
 export const maxUrls = 5
 const cookies = new Cookies()
 
+export const GAME_EVENTS = {
+    outgoing: {
+        updateGame: 'gs:outgoing-update',
+        start: 'gs:outgoing-start',
+        stop: 'gs:outgoing-stop',
+
+        skip: 'gs:outgoing-skip',
+        pause: 'gs:outgoing-pause',
+    },
+    incoming: {
+        updated: 'gs:incoming-updated',
+    },
+} as const
+
 export type GameSettings = {
     synchronous: boolean
     multiplayer: boolean
@@ -140,11 +154,11 @@ export type BlockPost<MediaLinkType> = {
     MediaLink: MediaLinkType
 }
 
-export type OriginalBlock = {
+export type ParentBlock = {
     Parent: { id: string; title: string; game: Game }
 }
 
-export type SpawnBlock = {
+export type ChildBlock = {
     Post: { id: string; title: string; game: Game }
 }
 
@@ -199,8 +213,9 @@ export type Post = {
     Reactions?: { type: ReactionType }[]
     Parent?: Post
     Event: Event
-    Original?: OriginalBlock
-    Spawns?: SpawnBlock[]
+    Originals?: ParentBlock
+    Remixes?: ChildBlock[]
+    IncludedInGames?: ParentBlock[]
     Image: { url: string }
     Audio: { id: number; url: string }
     Url: { id: number }
@@ -235,31 +250,24 @@ export type Play = {
     variables: PlayVariables
 } & (
     | { status: 'waiting' | 'stopped' | 'ended' }
+    | { status: 'paused'; step: MoveStep; moveId?: number }
     | { status: 'started' | 'paused'; step: MoveStep; moveId: number }
 )
 
 export type Step = {
     id: string
+    name: string
+    originalStep?: { gameId: number; stepId: string }
 } & (
     | {
           type: 'move'
-          title: string
+          title?: string
           text: string
           timeout: string
       }
     | {
-          type: 'game'
-          gameId: number
-      }
-    | {
-          type: 'rounds'
-          name: string
-          amount: string
-          steps: Step[]
-      }
-    | {
-          type: 'turns'
-          name: string
+          type: 'sequence'
+          repeat?: { type: 'rounds'; amount: number } | { type: 'turns' }
           steps: Step[]
       }
 )
@@ -267,8 +275,6 @@ export type Step = {
 export type MoveStep = Extract<Step, { type: 'move' }>
 
 export type StepType = Step['type']
-
-export const STEP_TYPES = ['move', 'rounds', 'turns', 'game'] as const
 
 export type Event = {
     id: number

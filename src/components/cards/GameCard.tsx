@@ -4,30 +4,30 @@
 /* eslint-disable jsx-a11y/control-has-associated-label */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable react/function-component-definition */
-import {
-    Game,
-    Play,
-    Post,
-    STEP_TYPES,
-    Step,
-    StepContext,
-    StepType,
-    capitalise,
-    uploadPost,
-} from '@src/Helpers'
+import config from '@src/Config'
+import { Game, Post, Step, StepContext, StepType } from '@src/Helpers'
 import { AccountContext } from '@src/contexts/AccountContext'
 import { CastaliaIcon, DeleteIcon, EditIcon, PlusIcon } from '@src/svgs/all'
 import styles from '@styles/components/GameCard.module.scss'
-import { cloneDeep } from 'lodash'
-import React, { FC, PropsWithChildren, useContext, useState } from 'react'
+import axios from 'axios'
+import { capitalize, cloneDeep } from 'lodash'
+import { customAlphabet } from 'nanoid'
+import React, { FC, PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { v4 as uuid } from 'uuid'
+import Cookies from 'universal-cookie'
+import { useDebounceValue } from 'usehooks-ts'
 import Button from '../Button'
 import Column from '../Column'
+import DropDown from '../DropDown'
 import Input from '../Input'
 import Row from '../Row'
 import Modal from '../modals/Modal'
 import PlainButton from '../modals/PlainButton'
+import PostCard from './PostCard/PostCard'
+
+const getId = customAlphabet('abcdefghijklmnopqrstuvwxyz', 11)
+
+const cookies = new Cookies()
 
 const StepTitle: FC<{ prefix: string; step: Step; stepContext?: StepContext }> = ({
     prefix,
@@ -35,41 +35,43 @@ const StepTitle: FC<{ prefix: string; step: Step; stepContext?: StepContext }> =
     stepContext,
 }) => (
     <h5 className={styles.stepTitle}>
-        {prefix} {capitalise(step.type)}{' '}
+        {prefix} {step.name ?? step.type}{' '}
         {(() => {
             switch (step.type) {
                 case 'move':
-                    return `(${step.timeout})`
-                case 'rounds':
-                    if (stepContext && step.name in stepContext.variables) {
-                        return (
-                            <span style={{ color: '#00daa2', fontWeight: 'bold' }}>
-                                step {step.name}={stepContext.variables[step.name]} of {step.amount}
-                            </span>
-                        )
+                    return null
+                case 'sequence':
+                    if (!step.repeat) {
+                        return null
                     }
 
-                    return (
-                        <>
-                            (for each step {step.name} of {step.amount})
-                        </>
-                    )
-                case 'turns':
-                    if (stepContext && step.name in stepContext.variables) {
-                        return (
-                            <span style={{ color: '#00daa2', fontWeight: 'bold' }}>
-                                player {step.name}={stepContext.variables[step.name]} of{' '}
-                                {stepContext.playerIds.length}
-                            </span>
-                        )
+                    switch (step.repeat.type) {
+                        case 'turns':
+                            if (stepContext && step.name in stepContext.variables) {
+                                return (
+                                    <span style={{ color: '#00daa2', fontWeight: 'bold' }}>
+                                        player {stepContext.variables[step.name]}
+                                    </span>
+                                )
+                            }
+                            return <>(repeat for {stepContext?.playerIds.length ?? 0} players)</>
+                        case 'rounds':
+                            if (stepContext && step.name in stepContext.variables) {
+                                return (
+                                    <span style={{ color: '#00daa2', fontWeight: 'bold' }}>
+                                        step {stepContext.variables[step.name]} of{' '}
+                                        {step.repeat.amount}
+                                    </span>
+                                )
+                            }
+
+                            return <>(repeat {step.repeat.amount} times)</>
+                        default: {
+                            const exhaustivenessCheck: never = step.repeat
+                            throw exhaustivenessCheck
+                        }
                     }
-                    return (
-                        <>
-                            (for each player {step.name} of {stepContext?.playerIds.length ?? '?'})
-                        </>
-                    )
-                case 'game':
-                    return step.gameId
+
                 default: {
                     const exhaustivenessCheck: never = step
                     throw exhaustivenessCheck
@@ -83,11 +85,19 @@ const StepComponent: FC<{
     prefix: string
     step: Step
     updateStep?: (step: Step) => void
-    prependStep?: (step: Step) => void
-    appendStep?: (step: Step) => void
+    prependSteps?: (steps: Step[]) => void
+    appendSteps?: (steps: Step[]) => void
     removeStep?: () => void
     stepContext?: StepContext
-}> = ({ prefix, step, updateStep, prependStep, appendStep, removeStep, stepContext }) => (
+}> = ({
+    prefix,
+    step,
+    updateStep,
+    prependSteps: prependStep,
+    appendSteps: appendStep,
+    removeStep,
+    stepContext,
+}) => (
     <Column className={styles.stepWrapper}>
         <Row className={`${styles.step} ${stepContext?.stepId === step.id && styles.current}`}>
             <CreateStepButton onPrepend={prependStep} onAppend={appendStep} />
@@ -114,12 +124,11 @@ const StepComponent: FC<{
                                 return (
                                     <div>
                                         <div>{step.title}</div>
-                                        <div>{step.text}</div>
+                                        <div style={{ fontSize: 12 }}>{step.text}</div>
+                                        <div style={{ fontSize: 12 }}>{step.timeout}</div>
                                     </div>
                                 )
-                            case 'game':
-                            case 'rounds':
-                            case 'turns':
+                            case 'sequence':
                                 return null
                             default: {
                                 const exhaustivenessCheck: never = step
@@ -133,10 +142,8 @@ const StepComponent: FC<{
         {(() => {
             switch (step.type) {
                 case 'move':
-                case 'game':
                     return null
-                case 'rounds':
-                case 'turns':
+                case 'sequence':
                     return (
                         <div className={styles.stepsWrapper}>
                             <Steps
@@ -148,8 +155,9 @@ const StepComponent: FC<{
                         </div>
                     )
                 default: {
-                    const exhaustivenessCheck: never = step
-                    throw exhaustivenessCheck
+                    return null
+                    // const exhaustivenessCheck: never = step
+                    // throw exhaustivenessCheck
                 }
             }
         })()}
@@ -174,14 +182,19 @@ const Steps: FC<{
                         ((newStep) =>
                             setSteps(steps.map((s) => (s.id === newStep.id ? newStep : s))))
                     }
-                    prependStep={
+                    prependSteps={
                         setSteps &&
-                        ((newStep) => setSteps([...steps.slice(0, i), newStep, ...steps.slice(i)]))
+                        ((newSteps) =>
+                            setSteps([...steps.slice(0, i), ...newSteps, ...steps.slice(i)]))
                     }
-                    appendStep={
+                    appendSteps={
                         setSteps &&
-                        ((newStep) =>
-                            setSteps([...steps.slice(0, i + 1), newStep, ...steps.slice(i + 1)]))
+                        ((newSteps) =>
+                            setSteps([
+                                ...steps.slice(0, i + 1),
+                                ...newSteps,
+                                ...steps.slice(i + 1),
+                            ]))
                     }
                     removeStep={
                         setSteps && (() => setSteps([...steps.slice(0, i), ...steps.slice(i + 1)]))
@@ -193,7 +206,7 @@ const Steps: FC<{
     ) : (
         <div className={styles.emptySteps}>
             {setSteps ? (
-                <CreateStepButton onAppend={(step) => setSteps([...steps, step])} />
+                <CreateStepButton onAppend={(newSteps) => setSteps([...steps, ...newSteps])} />
             ) : (
                 <p style={{ textAlign: 'center' }}>no steps</p>
             )}
@@ -208,11 +221,9 @@ export const SaveableSteps: FC<{
     saveState: (state: GameState) => void
     stepContext?: StepContext
 }> = ({ initialGame, state, setState, saveState, stepContext }) => (
-    <Column style={{ flexGrow: 1 }}>
-        <Row>
-            <h4 style={{ flexGrow: 1 }}>Steps</h4>
-        </Row>
-        <Column style={{ overflowY: 'auto' }}>
+    <Column style={{ flexGrow: 1, flexShrink: 1, height: '100%' }}>
+        <h4 style={{ marginBottom: 10 }}>Moves</h4>
+        <Column style={{ flexShrink: 1, overflowY: 'auto' }}>
             <Steps
                 prefix=''
                 steps={state.game.steps}
@@ -270,17 +281,9 @@ const GameCardHeader: FC = () => (
     </Row>
 )
 
-export const PLAY_BUTTON_TEXT: Record<Play['status'], string> = {
-    waiting: 'Join',
-    started: 'Join',
-    paused: 'Join',
-    ended: 'View',
-    stopped: 'View',
-}
-
 const CreateStepButton: FC<{
-    onPrepend?: (step: Step) => void
-    onAppend?: (step: Step) => void
+    onPrepend?: (steps: Step[]) => void
+    onAppend?: (steps: Step[]) => void
 }> = ({ onPrepend, onAppend }) => {
     const [open, setOpen] = useState(false)
     const [prepend, setPrepend] = useState(false)
@@ -312,21 +315,34 @@ const CreateStepButton: FC<{
 }
 
 const INFO: Record<StepType, string> = {
-    game: 'Play a sub-game',
-    move: 'Trigger a move',
-    rounds: 'Repeat the same sequence',
-    turns: 'Repeat for each player',
+    move: 'A single move',
+    sequence: 'A sequence of moves',
 }
 
-const CreateStepModal: FC<{ onClose: () => void; onCreate: (step: Step) => void }> = ({
+const REPEAT_TYPES = ['', 'rounds', 'turns'] as const
+
+type RepeatType = (typeof REPEAT_TYPES)[number]
+
+const REPEAT_OPTIONS: Record<RepeatType, string> = {
+    '': 'Do not repeat',
+    rounds: 'A specific amount',
+    turns: 'Once per player',
+} as const
+
+const CreateStepModal: FC<{ onClose: () => void; onCreate: (steps: Step[]) => void }> = ({
     onClose,
     onCreate,
 }) => {
-    const [type, setType] = useState<StepType>()
+    const [action, setAction] = useState<StepType | 'game'>()
+    const [repeatType, setRepeatType] = useState<RepeatType>('')
+
+    const id = useMemo(() => getId(), [])
 
     return (
-        <Modal close={onClose} style={{ padding: 25 }}>
-            {type ? (
+        <Modal close={onClose} style={{ padding: 25, overflow: 'visible' }}>
+            {action === 'game' ? (
+                <FindGame onCreate={onCreate} onClose={onClose} />
+            ) : action ? (
                 <form
                     onSubmit={(e) => {
                         e.preventDefault()
@@ -334,68 +350,78 @@ const CreateStepModal: FC<{ onClose: () => void; onCreate: (step: Step) => void 
                         console.log(e.currentTarget.elements)
                         const elements = e.currentTarget.elements as any
                         const baseStep = {
-                            id: uuid().replaceAll('-', ''),
+                            id,
+                            name: elements.name.value,
                         }
-                        switch (type) {
+                        switch (action) {
                             case 'move':
                                 step = {
                                     ...baseStep,
                                     type: 'move',
-                                    title: elements.title.value,
+                                    // title: elements.title.value,
                                     text: elements.text.value,
                                     timeout: elements.timeout.value,
                                 }
+
                                 break
-                            case 'rounds':
-                                console.log(elements)
+                            case 'sequence':
                                 step = {
                                     ...baseStep,
-                                    type: 'rounds',
-                                    name: elements.name.value,
-                                    amount: elements.amount.value,
+                                    type: 'sequence',
                                     steps: [],
                                 }
-                                break
-                            case 'turns': {
-                                step = {
-                                    ...baseStep,
-                                    type: 'turns',
-                                    name: elements.name.value,
-                                    steps: [],
+                                switch (repeatType) {
+                                    case 'rounds':
+                                        step.repeat = {
+                                            type: 'rounds',
+                                            amount: elements.amount.value,
+                                        }
+                                        break
+                                    case 'turns':
+                                        step.repeat = {
+                                            type: 'turns',
+                                        }
+                                        break
+                                    case '':
+                                        break
+                                    default: {
+                                        const exhaustivenessCheck: never = repeatType
+                                        throw exhaustivenessCheck
+                                    }
                                 }
                                 break
-                            }
-                            case 'game': {
-                                step = {
-                                    ...baseStep,
-                                    type: 'game',
-                                    gameId: elements.gameId.value,
-                                }
-                                break
-                            }
+
                             default: {
-                                const exhaustivenessCheck: never = type
+                                const exhaustivenessCheck: never = action
                                 throw exhaustivenessCheck
                             }
                         }
-                        onCreate(step)
+                        onCreate([step])
                         onClose()
                     }}
                 >
-                    <h3 style={{ textAlign: 'left', justifySelf: 'flex-start' }}>
-                        Step: {INFO[type]}
+                    <h3 style={{ textAlign: 'left', justifySelf: 'flex-start', marginBottom: 10 }}>
+                        Step: {INFO[action]}
                     </h3>
+                    <input type='hidden' name='id' value={id} />
+                    <Input
+                        type='text'
+                        title='Name'
+                        name='name'
+                        defaultValue={id}
+                        style={{ marginBottom: 10 }}
+                    />
                     {(() => {
-                        switch (type) {
+                        switch (action) {
                             case 'move':
                                 return (
                                     <>
-                                        <Input
+                                        {/* <Input
                                             type='text'
                                             title='Title'
                                             name='title'
                                             style={{ marginBottom: 10 }}
-                                        />
+                                        /> */}
                                         <Input
                                             type='text-area'
                                             title='Text'
@@ -412,63 +438,61 @@ const CreateStepModal: FC<{ onClose: () => void; onCreate: (step: Step) => void 
                                         />
                                     </>
                                 )
-                            case 'rounds':
+                            case 'sequence':
                                 return (
                                     <>
-                                        <Input
-                                            type='number'
+                                        <DropDown
                                             title='Repetitions'
-                                            name='amount'
-                                            defaultValue={5}
                                             style={{ marginBottom: 10 }}
+                                            options={Object.values(REPEAT_OPTIONS)}
+                                            selectedOption={REPEAT_OPTIONS[repeatType]}
+                                            setSelectedOption={(newRepeatType) =>
+                                                setRepeatType(
+                                                    Object.entries(REPEAT_OPTIONS).find(
+                                                        ([, value]) => value === newRepeatType
+                                                    )![0] as RepeatType
+                                                )
+                                            }
                                         />
-                                        <Input
-                                            type='text'
-                                            title='Name'
-                                            name='name'
-                                            defaultValue='R'
-                                            style={{ marginBottom: 10 }}
-                                        />
+                                        {repeatType === 'rounds' && (
+                                            <Input
+                                                type='number'
+                                                title='Times'
+                                                name='amount'
+                                                defaultValue={5}
+                                                style={{ marginBottom: 10 }}
+                                            />
+                                        )}
                                     </>
                                 )
-                            case 'game':
-                                return (
-                                    <Input
-                                        type='number'
-                                        title='Game ID'
-                                        name='gameId'
-                                        style={{ marginBottom: 10 }}
-                                    />
-                                )
-                            case 'turns':
-                                return (
-                                    <Input
-                                        type='text'
-                                        title='Name'
-                                        name='name'
-                                        defaultValue='P'
-                                        style={{ marginBottom: 10 }}
-                                    />
-                                )
                             default: {
-                                const exhaustivenessCheck: never = type
+                                const exhaustivenessCheck: never = action
                                 throw exhaustivenessCheck
                             }
                         }
                     })()}
-                    <Button color='blue' submit text='Add Step' />
+                    <Button color='blue' submit text={`Add ${capitalize(action)}`} />
                 </form>
             ) : (
                 <>
-                    {STEP_TYPES.map((stepType) => (
-                        <Button
-                            key={stepType}
-                            style={{ marginBottom: 10 }}
-                            onClick={() => setType(stepType)}
-                            color='grey'
-                            text={capitalise(stepType)}
-                        />
-                    ))}
+                    <Button
+                        style={{ marginBottom: 10 }}
+                        onClick={() => setAction('move')}
+                        color='grey'
+                        text='Move'
+                    />
+                    <Button
+                        style={{ marginBottom: 10 }}
+                        onClick={() => setAction('sequence')}
+                        color='grey'
+                        text='Sequence'
+                    />
+                    <Button
+                        style={{ marginBottom: 10 }}
+                        onClick={() => setAction('game')}
+                        color='grey'
+                        text='Game'
+                    />
                 </>
             )}
         </Modal>
@@ -500,6 +524,10 @@ const UpdateStepModal: FC<{ step: Step; onClose: () => void; onUpdate: (step: St
     onClose,
     onUpdate,
 }) => {
+    const [repeatType, setRepeatType] = useState<RepeatType>(
+        (step.type === 'sequence' && step.repeat?.type) || ''
+    )
+
     return (
         <Modal close={onClose} style={{ padding: 25 }}>
             <form
@@ -507,21 +535,34 @@ const UpdateStepModal: FC<{ step: Step; onClose: () => void; onUpdate: (step: St
                     e.preventDefault()
                     const newStep: Step = cloneDeep(step)
                     const elements = e.currentTarget.elements as any
+                    newStep.name = elements.name.value
                     switch (newStep.type) {
                         case 'move':
-                            newStep.title = elements.title.value
+                            // newStep.title = elements.title.value
                             newStep.text = elements.text.value
                             newStep.timeout = elements.timeout.value
                             break
-                        case 'game':
-                            newStep.gameId = elements.gameId.value
-                            break
-                        case 'rounds':
-                            newStep.amount = elements.amount.value
-                            newStep.name = elements.name.value
-                            break
-                        case 'turns': {
-                            newStep.name = elements.name.value
+                        case 'sequence': {
+                            switch (repeatType) {
+                                case 'rounds':
+                                    newStep.repeat = {
+                                        type: 'rounds',
+                                        amount: elements.amount.value,
+                                    }
+                                    break
+                                case 'turns':
+                                    newStep.repeat = {
+                                        type: 'turns',
+                                    }
+                                    break
+                                case '':
+                                    delete newStep.repeat
+                                    break
+                                default: {
+                                    const exhaustivenessCheck: never = repeatType
+                                    throw exhaustivenessCheck
+                                }
+                            }
                             break
                         }
                         default: {
@@ -536,18 +577,25 @@ const UpdateStepModal: FC<{ step: Step; onClose: () => void; onUpdate: (step: St
                 <h3 style={{ textAlign: 'left', justifySelf: 'flex-start' }}>
                     Step: {INFO[step.type]}
                 </h3>
+                <Input
+                    type='text'
+                    title='Name'
+                    name='name'
+                    defaultValue={step.name}
+                    style={{ marginBottom: 10 }}
+                />
                 {(() => {
                     switch (step.type) {
                         case 'move':
                             return (
                                 <>
-                                    <Input
+                                    {/* <Input
                                         type='text'
                                         title='Title'
                                         name='title'
                                         style={{ marginBottom: 10 }}
                                         defaultValue={step.title}
-                                    />
+                                    /> */}
                                     <Input
                                         type='text-area'
                                         title='Text'
@@ -565,46 +613,33 @@ const UpdateStepModal: FC<{ step: Step; onClose: () => void; onUpdate: (step: St
                                     />
                                 </>
                             )
-                        case 'game':
-                            return (
-                                <Input
-                                    type='number'
-                                    title='Game ID'
-                                    name='gameId'
-                                    defaultValue={step.gameId}
-                                    style={{ marginBottom: 10 }}
-                                />
-                            )
-                        case 'rounds':
+                        case 'sequence':
                             return (
                                 <>
-                                    <Input
-                                        type='number'
+                                    <DropDown
                                         title='Repetitions'
-                                        name='amount'
                                         style={{ marginBottom: 10 }}
-                                        defaultValue={step.amount}
+                                        options={Object.values(REPEAT_OPTIONS)}
+                                        selectedOption={REPEAT_OPTIONS[repeatType]}
+                                        setSelectedOption={(newRepeatType) =>
+                                            setRepeatType(
+                                                Object.entries(REPEAT_OPTIONS).find(
+                                                    ([, value]) => value === newRepeatType
+                                                )![0] as RepeatType
+                                            )
+                                        }
                                     />
-                                    <Input
-                                        type='text'
-                                        title='Name'
-                                        name='name'
-                                        defaultValue={step.name}
-                                        style={{ marginBottom: 10 }}
-                                    />
+                                    {repeatType === 'rounds' && (
+                                        <Input
+                                            type='number'
+                                            title='Times'
+                                            name='amount'
+                                            defaultValue={5}
+                                            style={{ marginBottom: 10 }}
+                                        />
+                                    )}
                                 </>
                             )
-                        case 'turns':
-                            return (
-                                <Input
-                                    type='number'
-                                    title='Name'
-                                    name='name'
-                                    defaultValue={step.name}
-                                    style={{ marginBottom: 10 }}
-                                />
-                            )
-
                         default: {
                             const exhaustivenessCheck: never = step
                             throw exhaustivenessCheck
@@ -634,7 +669,7 @@ export const CreateGameCard: FC<{
                     <Row>
                         <h4 style={{ flexGrow: 1 }}>Steps</h4>
                     </Row>
-                    <Column style={{ overflowY: 'auto' }}>
+                    <Column style={{ flexGrow: 1, overflowY: 'auto' }}>
                         <Steps
                             prefix=''
                             steps={state.game.steps}
@@ -685,6 +720,7 @@ export const GameCard: FC<{
                     />
                 </Column>
                 <Column style={{ padding: 5, flexGrow: 1, flexBasis: '50%' }}>
+                    <h4>Play</h4>
                     <Row centerY spaceBetween style={{ marginBottom: 5 }}>
                         {play.status}, {play.playerIds.length} players{' '}
                         <Button
@@ -694,97 +730,232 @@ export const GameCard: FC<{
                             }}
                             size='medium'
                             color='blue'
-                            text={PLAY_BUTTON_TEXT[play.status]}
+                            text='Play'
                         />
                     </Row>
-                    {post.Original && (
+                    {post.Originals && (
                         <>
-                            <h4>Original</h4>
+                            <h5>Original</h5>
                             <Row centerY spaceBetween style={{ marginBottom: 5 }}>
-                                {post.Original.Parent.game.play.status},{' '}
-                                {post.Original.Parent.game.play.playerIds.length} players
+                                {post.Originals.Parent.game.play.status},{' '}
+                                {post.Originals.Parent.game.play.playerIds.length} players
                                 <Button
                                     style={{ marginLeft: 5 }}
                                     onClick={async () => {
-                                        navigate(`/p/${post.Original!.Parent.id}`)
+                                        navigate(`/p/${post.Originals!.Parent.id}`)
                                     }}
                                     size='medium'
                                     color='grey'
-                                    text={PLAY_BUTTON_TEXT[post.Original.Parent.game.play.status]}
+                                    text='Play'
                                 />
                             </Row>
                         </>
                     )}
 
-                    <Spawns post={post} />
+                    <Remixes post={post} />
                 </Column>
             </Row>
         </GameCardWrapper>
     )
 }
 
-export const Spawns = ({ post }: { post: Post }) => {
+const mapSteps = (steps: Step[], cb: (step: Step) => void) =>
+    steps.map((step) =>
+        cb(step.type === 'move' ? step : { ...step, steps: mapSteps(step.steps, cb) })
+    )
+
+const replaceAll = (text: string | undefined, replacements: Record<string, string>) =>
+    text === undefined
+        ? undefined
+        : Object.entries(replacements).reduce(
+              (replacedText, [key, value]) => replacedText.replaceAll(key, value),
+              text
+          )
+
+const remixSteps = (gameId: number, steps: Step[]) => {
+    const ids: Record<string, string> = {}
+    mapSteps(steps, (step) => {
+        ids[step.id] = getId()
+    })
+    return mapSteps(steps, (step) => ({
+        ...step,
+        id: ids[step.id],
+        name: replaceAll(step.name, ids),
+        originalStep: {
+            gameId,
+            stepId: step.id,
+        },
+        ...(step.type === 'move' && {
+            title: replaceAll(step.title, ids),
+            text: replaceAll(step.text, ids),
+        }),
+    }))
+}
+
+export const Remixes = ({ post }: { post: Post }) => {
     const navigate = useNavigate()
-    const { accountData } = useContext(AccountContext)
-    const spawns = post.Spawns ?? []
+    const { accountData, setCreatePostModalSettings } = useContext(AccountContext)
+
+    const remixes = post.Remixes ?? []
     const game = post.game!
 
     return (
-        <Column style={{ overflowY: 'auto' }}>
-            <h4>Spawns</h4>
-            {spawns.length ? (
-                spawns.map(({ Post: spawn }) => (
+        <Column style={{ overflowY: 'auto', marginBottom: 10 }}>
+            <h5>Remixes</h5>
+            {remixes.length ? (
+                remixes.map(({ Post: remix }) => (
                     <Row centerY spaceBetween style={{ marginBottom: 5 }}>
-                        <a href={`/p/${spawn.id}`}>
-                            {spawn.title} ({spawn.game.play.status},{' '}
-                            {spawn.game.play.playerIds.length} players)
+                        <a href={`/p/${remix.id}`}>
+                            {remix.title} ({remix.game.play.status},{' '}
+                            {remix.game.play.playerIds.length} players)
                         </a>
                         <Button
                             style={{ marginLeft: 5 }}
                             onClick={async () => {
-                                navigate(`/p/${spawn.id}`)
+                                navigate(`/p/${remix.id}`)
                             }}
                             size='medium'
                             color='grey'
-                            text={PLAY_BUTTON_TEXT[spawn.game.play.status]}
+                            text='Play'
                         />
                     </Row>
                 ))
             ) : (
-                <p className='grey'>This game has not been spawned so far.</p>
+                <p className='grey'>This game has not been remixed so far.</p>
             )}
-            <Row style={{ marginTop: 10 }}>
+            <Row style={{ marginTop: 10, justifyContent: 'flex-end' }}>
                 <Button
-                    color='blue'
+                    color='grey'
                     onClick={async () => {
                         const newGame: Game = {
-                            ...game,
+                            steps: remixSteps(post.id, game.steps),
                             play: {
-                                playerIds: [accountData.id],
                                 status: 'waiting',
+                                playerIds: [accountData.id],
                                 variables: {},
                             },
                         }
-                        const newPost = {
+                        setCreatePostModalSettings({
                             type: 'post',
-                            title: post.title,
-                            text: post.text,
-                            mediaTypes: 'game,play',
-                            mentions: [],
-                            spaceIds: post.DirectSpaces.map((space) => space.id),
                             game: newGame,
-                            source: {
-                                type: 'post',
-                                id: post.id,
-                                relationship: 'spawn',
-                            },
-                        }
-                        const res = await uploadPost(newPost)
-                        navigate(`/p/${res.data.post.id}`)
+                            title: `Remix of "${post.title}"`,
+                        })
                     }}
-                    text='Spawn new Game'
+                    text='Remix'
                 />
             </Row>
         </Column>
+    )
+}
+
+const FindGame = ({
+    onCreate,
+    onClose,
+}: {
+    onCreate: (steps: Step[]) => void
+    onClose: () => void
+}) => {
+    const [gamePost, setGamePost] = useState<Post | undefined>()
+    const [searchResults, setSearchResults] = useState<Post[]>([])
+    const [search, setSearch] = useState<string>('')
+    const [loading, setLoading] = useState(false)
+
+    const [debouncedSearch] = useDebounceValue(search, 500)
+
+    useEffect(() => {
+        if (debouncedSearch) {
+            setLoading(true)
+            ;(async () => {
+                const res = await axios.get(
+                    `${config.apiURL}/search?type=post&search=${encodeURIComponent(
+                        debouncedSearch
+                    )}&mediaType=game`,
+                    { headers: { Authorization: `Bearer ${cookies.get('accessToken')}` } }
+                )
+                setSearchResults(res.data)
+                setLoading(false)
+            })()
+        } else {
+            setSearchResults([])
+        }
+    }, [debouncedSearch])
+
+    return (
+        <form
+            onSubmit={(e) => {
+                e.preventDefault()
+                onCreate(remixSteps(gamePost!.id, gamePost!.game!.steps))
+                onClose()
+            }}
+        >
+            <h3 style={{ textAlign: 'left', justifySelf: 'flex-start', marginBottom: 10 }}>
+                Import existing game
+            </h3>
+            <Column>
+                {gamePost ? (
+                    <div>
+                        <Row centerY>
+                            <div style={{ flexGrow: 1 }}>Selected game:</div>
+                            <Button
+                                onClick={() => setGamePost(undefined)}
+                                style={{ marginBottom: 10 }}
+                                color='grey'
+                                text='Remove'
+                            />
+                        </Row>
+                        <PostCard
+                            style={{ marginBottom: 10 }}
+                            location='preview'
+                            post={gamePost}
+                            setPost={() => {
+                                throw new Error('TODO')
+                            }}
+                            onDelete={() => {
+                                throw new Error('TODO')
+                            }}
+                        />
+                    </div>
+                ) : (
+                    <>
+                        <Input
+                            type='text'
+                            placeholder='Search existing game'
+                            name='gameSearch'
+                            style={{ marginBottom: 10 }}
+                            onChange={(value) => setSearch(value)}
+                            value={search}
+                        />
+                        {debouncedSearch &&
+                            (loading ? (
+                                <>Loading...</>
+                            ) : searchResults.length ? (
+                                <>
+                                    Results:
+                                    {searchResults.map((post) => (
+                                        <div>
+                                            <button
+                                                type='button'
+                                                style={{
+                                                    color: 'inherit',
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    cursor: 'pointer',
+                                                    textDecoration: 'underline',
+                                                }}
+                                                onClick={() => setGamePost(post)}
+                                            >
+                                                {post.title}
+                                            </button>
+                                        </div>
+                                    ))}
+                                </>
+                            ) : (
+                                <>No results</>
+                            ))}
+                    </>
+                )}
+            </Column>
+            <Button color='blue' submit disabled={!gamePost} text='Import' />
+        </form>
     )
 }
