@@ -51,48 +51,22 @@ import PostCard from './PostCard/PostCard'
 
 const cookies = new Cookies()
 
-const StepTitle: FC<{ prefix: string; step: Step; stepContext?: StepContext }> = ({
-    prefix,
-    step,
-    stepContext,
-}) => (
+const StepTitle: FC<{ prefix: string; step: Step }> = ({ prefix, step }) => (
     <h5 className={styles.stepTitle}>
-        {capitalize(step.type)} [{step.name}]{' '}
-        {(() => {
-            switch (step.type) {
-                case 'move':
-                    return null
-                case 'sequence':
-                    if (!step.repeat) {
-                        return null
-                    }
-
-                    switch (step.repeat.type) {
-                        case 'turns':
-                            return <>(for all players)</>
-                        case 'rounds':
-                            if (stepContext && step.name in stepContext.variables) {
-                                return (
-                                    <span style={{ color: '#00daa2', fontWeight: 'bold' }}>
-                                        step {stepContext.variables[step.name] as number} of{' '}
-                                        {step.repeat.amount}
-                                    </span>
-                                )
-                            }
-
-                            return <>({step.repeat.amount} times)</>
-                        default: {
-                            const exhaustivenessCheck: never = step.repeat
-                            throw exhaustivenessCheck
-                        }
-                    }
-
-                default: {
-                    const exhaustivenessCheck: never = step
-                    throw exhaustivenessCheck
-                }
-            }
-        })()}
+        {capitalize(step.type)}{' '}
+        <span
+            style={{
+                fontSize: 12,
+                color: 'grey',
+                fontWeight: 'normal',
+                flexGrow: 1,
+                backgroundColor: '#ececec',
+                padding: `1px 5px`,
+                borderRadius: '5px',
+            }}
+        >
+            {step.name}
+        </span>
     </h5>
 )
 
@@ -125,7 +99,7 @@ const StepComponent: FC<{
             <Column style={{ flexGrow: 1 }}>
                 <Column className={styles.stepBody}>
                     <Row className={styles.stepHeader}>
-                        <StepTitle prefix={prefix} step={step} stepContext={stepContext} />
+                        <StepTitle prefix={prefix} step={step} />
                         {updateStep && removeStep && (
                             <Row className={styles.stepActions}>
                                 <UpdateStepButton step={step} onUpdate={updateStep} />
@@ -163,7 +137,33 @@ const StepComponent: FC<{
                                             />
                                         )
                                     }
+                                    return (
+                                        <div style={{ fontSize: 12 }}>repeats for all players</div>
+                                    )
                                 }
+                                if (step.repeat?.type === 'rounds') {
+                                    if (stepContext && step.name in stepContext.variables) {
+                                        return (
+                                            <span
+                                                style={{
+                                                    fontSize: 12,
+                                                    color: '#00daa2',
+                                                    fontWeight: 'bold',
+                                                }}
+                                            >
+                                                step {stepContext.variables[step.name] as number} of{' '}
+                                                {step.repeat.amount}
+                                            </span>
+                                        )
+                                    }
+
+                                    return (
+                                        <div style={{ fontSize: 12 }}>
+                                            repeats {step.repeat.amount} times
+                                        </div>
+                                    )
+                                }
+
                                 return null
                             default: {
                                 const exhaustivenessCheck: never = step

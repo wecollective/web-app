@@ -366,7 +366,12 @@ const GamePage: FC<{ post: Post; setPost: (post: Post) => void; onDelete: () => 
                     ongoing
                         ? undefined
                         : (players) => {
-                              console.log('update players!')
+                              const newGame = {
+                                  ...gameState.game,
+                                  players,
+                              }
+                              emit(GAME_EVENTS.outgoing.updateGame, { game: newGame })
+                              setPost({ ...post, game: newGame })
                           }
                 }
                 present={present}
