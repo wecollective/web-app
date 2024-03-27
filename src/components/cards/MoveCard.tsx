@@ -101,33 +101,37 @@ const TextMove: FC<{ post: Post; emit: (event: string, data?) => void }> = ({ po
 const MoveCard: FC<{ post: Post; emit: (event: string, data?) => void }> = ({ post, emit }) => {
     const move = post.move!
     const { loggedIn, accountData, alert } = useContext(AccountContext)
-    const myMove = accountData.id === move.player?.id
+
+    const { submission } = move
+    const myMove = accountData.id === submission?.player?.id
     const ongoing = move.status === 'started' || move.status === 'stopped'
     return (
         <Column style={{ borderTop: '1px solid lightgrey', marginTop: 10, paddingTop: 10 }}>
             <Row style={{ marginBottom: 10 }} centerY>
-                <span style={{ flexGrow: 1, fontWeight: 'bold' }}>
-                    {myMove
-                        ? ongoing
-                            ? 'Your move!'
-                            : 'Your move'
-                        : move.player && <UserButton user={move.player} />}
-                </span>
+                {submission && (
+                    <span style={{ flexGrow: 1, fontWeight: 'bold' }}>
+                        {myMove
+                            ? ongoing
+                                ? 'Your move!'
+                                : 'Your move'
+                            : submission.player && <UserButton user={submission.player} />}
+                    </span>
+                )}
                 <GameStatusIndicator status={move.status} style={{ marginLeft: 5, fontSize: 12 }} />
             </Row>
-            {myMove && (
+            {submission && myMove && (
                 <>
                     {move.status === 'started' && (
                         <>
                             {(() => {
-                                switch (move.type) {
+                                switch (submission.type) {
                                     case 'text': {
                                         return <TextMove post={post} emit={emit} />
                                     }
                                     case 'audio':
                                         return null
                                     default: {
-                                        const exhaustivenessCheck: never = move
+                                        const exhaustivenessCheck: never = submission
                                         throw exhaustivenessCheck
                                     }
                                 }
@@ -148,9 +152,9 @@ const MoveCard: FC<{ post: Post; emit: (event: string, data?) => void }> = ({ po
             {(move.status === 'started' || move.status === 'paused') && (
                 <MoveProgressBar move={move} />
             )}
-            {post.Submissions?.map((submission) => (
+            {post.Submissions?.map((s) => (
                 <div style={{ backgroundColor: '#ececec', borderRadius: 5, padding: 5 }}>
-                    {submission.Post.text}
+                    {s.Post.text}
                 </div>
             ))}
         </Column>

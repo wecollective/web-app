@@ -12,19 +12,17 @@ import {
     BaseUser,
     Game,
     MoveStatus,
-    MoveType,
     PlayStatus,
     Post,
     Step,
     StepContext,
-    StepType,
     baseUserData,
 } from '@src/Helpers'
 import { AccountContext } from '@src/contexts/AccountContext'
 import { CastaliaIcon, DeleteIcon, EditIcon, PlusIcon, UsersIcon } from '@src/svgs/all'
 import styles from '@styles/components/GameCard.module.scss'
 import axios from 'axios'
-import { capitalize, cloneDeep } from 'lodash'
+import { cloneDeep, startCase } from 'lodash'
 import React, {
     FC,
     PropsWithChildren,
@@ -42,7 +40,6 @@ import { v4 as uuid } from 'uuid'
 import Button from '../Button'
 import CloseButton from '../CloseButton'
 import Column from '../Column'
-import DropDown from '../DropDown'
 import FlagImageHighlights from '../FlagImageHighlights'
 import Input from '../Input'
 import Row from '../Row'
@@ -54,22 +51,38 @@ import PostCard from './PostCard/PostCard'
 
 const cookies = new Cookies()
 
+const getStepTypeLabel = (step: Step) =>
+    startCase(
+        step.type === 'sequence'
+            ? step.repeat
+                ? step.repeat.type
+                : 'Sequence'
+            : step.type === 'move'
+            ? step.submission
+                ? `${step.submission.type} ${step.type}`
+                : 'Message'
+            : 'Unknown Step Type'
+    )
+
+const VariableLabel: FC<PropsWithChildren> = ({ children }) => (
+    <span
+        style={{
+            fontSize: 12,
+            color: 'grey',
+            fontWeight: 'normal',
+            flexGrow: 1,
+            backgroundColor: '#ececec',
+            padding: `1px 5px`,
+            borderRadius: '5px',
+        }}
+    >
+        {children}
+    </span>
+)
+
 const StepTitle: FC<{ prefix: string; step: Step }> = ({ prefix, step }) => (
     <h5 className={styles.stepTitle}>
-        {capitalize((step.type === 'sequence' && step.repeat?.type) || step.type)}{' '}
-        <span
-            style={{
-                fontSize: 12,
-                color: 'grey',
-                fontWeight: 'normal',
-                flexGrow: 1,
-                backgroundColor: '#ececec',
-                padding: `1px 5px`,
-                borderRadius: '5px',
-            }}
-        >
-            {step.name}
-        </span>
+        {getStepTypeLabel(step)} <VariableLabel>{step.name}</VariableLabel>
     </h5>
 )
 
@@ -123,19 +136,41 @@ const StepComponent: FC<{
                         switch (step.type) {
                             case 'move':
                                 return (
-                                    <div>
+                                    <div
+                                        style={{
+                                            marginTop: 5,
+                                            fontSize: 11,
+                                            border: `1px solid #5edd80`,
+                                            padding: 5,
+                                            borderRadius: 5,
+                                            backgroundColor:
+                                                stepContext?.stepId === step.id
+                                                    ? '#5edd80'
+                                                    : '#91ffb3',
+                                        }}
+                                    >
                                         <div>{step.title}</div>
-                                        <div style={{ fontSize: 12 }}>Message: {step.text}</div>
-                                        <div style={{ fontSize: 12 }}>Timeout: {step.timeout}</div>
-                                        <div style={{ fontSize: 12 }}>
-                                            Move Type: {step.move?.type}
-                                        </div>
-                                        <div style={{ fontSize: 12 }}>
-                                            Player: {step.move?.player}
-                                        </div>
-                                        {step.move?.type === 'audio' && (
-                                            <div style={{ fontSize: 12 }}>
-                                                Duration: {step.move?.maxDuration}
+                                        <div>{step.text}</div>
+                                        <div>Timeout: {step.timeout}</div>
+                                        {step.submission && (
+                                            <div
+                                                style={{
+                                                    borderTop: `1px solid lightgrey`,
+                                                    marginTop: 5,
+                                                    paddingTop: 5,
+                                                }}
+                                            >
+                                                <div>
+                                                    Player:{' '}
+                                                    <VariableLabel>
+                                                        {step.submission.player}
+                                                    </VariableLabel>
+                                                </div>
+                                                {step.submission.type === 'audio' && (
+                                                    <div>
+                                                        Duration: {step.submission?.maxDuration}
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -389,22 +424,16 @@ const CreateStepButton: FC<{
     )
 }
 
-const INFO: Record<StepType, string> = {
-    move: 'A single move',
-    sequence: 'A sequence of moves',
-}
-
-const REPEAT_TYPES = ['', 'rounds', 'turns'] as const
-
-type RepeatType = (typeof REPEAT_TYPES)[number]
-
-const REPEAT_OPTIONS: Record<RepeatType, string> = {
-    '': 'Do not repeat',
-    rounds: 'A specific amount',
-    turns: 'Once per player',
-} as const
-
-const MOVE_TYPE_OPTIONS = { text: 'Text', audio: 'Audio' }
+const ACTIONS = [
+    'message',
+    'text-move',
+    'audio-move',
+    'sequence',
+    'rounds',
+    'turns',
+    'game',
+] as const
+type Action = (typeof ACTIONS)[number]
 
 const CreateStepModal: FC<{
     existingSteps: Step[]
@@ -412,15 +441,13 @@ const CreateStepModal: FC<{
     onClose: () => void
     onCreate: (steps: Step[]) => void
 }> = ({ existingSteps, ancestors, onClose, onCreate }) => {
-    const [action, setAction] = useState<StepType | 'game' | ''>()
-    const [repeatType, setRepeatType] = useState<RepeatType>('')
-    const [moveType, setMoveType] = useState<MoveType>('text')
+    const [action, setAction] = useState<Action>()
     const [name, setName] = useState<string>()
 
     const id = useMemo(() => uuid(), [])
     const uniqueName = useMemo(
-        () => getUniqueName(existingSteps, (repeatType || action) ?? ''),
-        [action, repeatType]
+        () => getUniqueName(existingSteps, action?.split('-')[0] ?? ''),
+        [action]
     )
 
     return (
@@ -439,71 +466,68 @@ const CreateStepModal: FC<{
                             name: name ?? uniqueName,
                         }
                         switch (action) {
-                            case 'move': {
-                                const baseMove = {
+                            case 'message':
+                                step = {
                                     ...baseStep,
+                                    type: 'move',
                                     // title: elements.title.value,
                                     text: elements.text.value,
                                     timeout: elements.timeout.value,
                                 }
-
-                                switch (moveType) {
-                                    case 'audio':
-                                        step = {
-                                            ...baseMove,
-                                            type: 'move',
-                                            move: {
-                                                type: 'audio',
-                                                player: elements.player.value,
-                                                maxDuration: elements.maxDuration.value,
-                                            },
-                                        }
-                                        break
-                                    case 'text':
-                                        step = {
-                                            ...baseMove,
-                                            type: 'move',
-                                            move: {
-                                                type: 'text',
-                                                player: elements.player.value,
-                                            },
-                                        }
-                                        break
-                                    default: {
-                                        const exhaustivenessCheck: never = moveType
-                                        throw exhaustivenessCheck
-                                    }
-                                }
-
                                 break
-                            }
+                            case 'text-move':
+                                step = {
+                                    ...baseStep,
+                                    type: 'move',
+                                    text: elements.text.value,
+                                    timeout: elements.timeout.value,
+                                    submission: {
+                                        type: 'text',
+                                        player: elements.player.value,
+                                    },
+                                }
+                                break
+                            case 'audio-move':
+                                step = {
+                                    ...baseStep,
+                                    type: 'move',
+                                    text: elements.text.value,
+                                    timeout: elements.timeout.value,
+                                    submission: {
+                                        type: 'audio',
+                                        player: elements.player.value,
+                                        maxDuration: elements.maxDuration.value,
+                                    },
+                                }
+                                break
                             case 'sequence':
                                 step = {
                                     ...baseStep,
                                     type: 'sequence',
                                     steps: [],
                                 }
-                                switch (repeatType) {
-                                    case 'rounds':
-                                        step.repeat = {
-                                            type: 'rounds',
-                                            amount: elements.amount.value,
-                                        }
-                                        break
-                                    case 'turns':
-                                        step.repeat = {
-                                            type: 'turns',
-                                        }
-                                        break
-                                    case '':
-                                        break
-                                    default: {
-                                        const exhaustivenessCheck: never = repeatType
-                                        throw exhaustivenessCheck
-                                    }
+                                break
+                            case 'rounds':
+                                step = {
+                                    ...baseStep,
+                                    type: 'sequence',
+                                    steps: [],
+                                    repeat: {
+                                        type: 'rounds',
+                                        amount: elements.amount.value,
+                                    },
                                 }
                                 break
-
+                            case 'turns':
+                                step = {
+                                    ...baseStep,
+                                    type: 'sequence',
+                                    steps: [],
+                                    repeat: {
+                                        type: 'turns',
+                                    },
+                                }
+                                break
                             default: {
                                 const exhaustivenessCheck: never = action
                                 throw exhaustivenessCheck
@@ -514,7 +538,7 @@ const CreateStepModal: FC<{
                     }}
                 >
                     <h3 style={{ textAlign: 'left', justifySelf: 'flex-start', marginBottom: 10 }}>
-                        Step: {INFO[action]}
+                        {startCase(action)}
                     </h3>
                     <input type='hidden' name='id' value={id} />
                     <Input
@@ -528,7 +552,9 @@ const CreateStepModal: FC<{
                     />
                     {(() => {
                         switch (action) {
-                            case 'move':
+                            case 'message':
+                            case 'text-move':
+                            case 'audio-move':
                                 return (
                                     <>
                                         {/* <Input
@@ -547,104 +573,72 @@ const CreateStepModal: FC<{
                                             type='text'
                                             title='Timeout'
                                             name='timeout'
-                                            defaultValue='1m'
+                                            defaultValue={action === 'message' ? '10s' : '5m'}
                                             placeholder='e.g. 2d 5h 30m 15s'
                                             style={{ marginBottom: 10 }}
                                         />
-                                        <Input
-                                            type='text'
-                                            title='Player'
-                                            name='player'
-                                            style={{ marginBottom: 10 }}
-                                            defaultValue={ancestors
-                                                .filter(
-                                                    (ancestor) =>
-                                                        ancestor.type === 'sequence' &&
-                                                        ancestor.repeat?.type === 'turns'
-                                                )
-                                                .map((step) => `[${step.name}]`)
-                                                .join(' or ')}
-                                        />
-                                        <DropDown
-                                            title='Move Type'
-                                            style={{ marginBottom: 10 }}
-                                            options={Object.values(MOVE_TYPE_OPTIONS)}
-                                            selectedOption={MOVE_TYPE_OPTIONS[moveType]}
-                                            setSelectedOption={(newMoveType) =>
-                                                setRepeatType(
-                                                    Object.entries(MOVE_TYPE_OPTIONS).find(
-                                                        ([, value]) => value === newMoveType
-                                                    )![0] as RepeatType
-                                                )
-                                            }
-                                        />
-                                        {moveType === 'audio' && (
-                                            <Input
-                                                type='text'
-                                                title='Max duration'
-                                                name='maxDuration'
-                                                defaultValue='1m'
-                                                placeholder='e.g. 2d 5h 30m 15s'
-                                                style={{ marginBottom: 10 }}
-                                            />
+                                        {action.includes('move') && (
+                                            <>
+                                                <Input
+                                                    type='text'
+                                                    title='Player'
+                                                    name='player'
+                                                    style={{ marginBottom: 10 }}
+                                                    defaultValue={ancestors
+                                                        .filter(
+                                                            (ancestor) =>
+                                                                ancestor.type === 'sequence' &&
+                                                                ancestor.repeat?.type === 'turns'
+                                                        )
+                                                        .map((step) => step.name)
+                                                        .join(' or ')}
+                                                />
+                                                {action === 'audio-move' && (
+                                                    <Input
+                                                        type='text'
+                                                        title='Max duration'
+                                                        name='maxDuration'
+                                                        defaultValue='1m'
+                                                        placeholder='e.g. 2d 5h 30m 15s'
+                                                        style={{ marginBottom: 10 }}
+                                                    />
+                                                )}
+                                            </>
                                         )}
                                     </>
                                 )
                             case 'sequence':
+                                return null
+                            case 'rounds':
                                 return (
-                                    <>
-                                        <DropDown
-                                            title='Repetitions'
-                                            style={{ marginBottom: 10 }}
-                                            options={Object.values(REPEAT_OPTIONS)}
-                                            selectedOption={REPEAT_OPTIONS[repeatType]}
-                                            setSelectedOption={(newRepeatType) =>
-                                                setRepeatType(
-                                                    Object.entries(REPEAT_OPTIONS).find(
-                                                        ([, value]) => value === newRepeatType
-                                                    )![0] as RepeatType
-                                                )
-                                            }
-                                        />
-                                        {repeatType === 'rounds' && (
-                                            <Input
-                                                type='number'
-                                                title='Times'
-                                                name='amount'
-                                                defaultValue={5}
-                                                style={{ marginBottom: 10 }}
-                                            />
-                                        )}
-                                    </>
+                                    <Input
+                                        type='number'
+                                        title='Times'
+                                        name='amount'
+                                        defaultValue={5}
+                                        style={{ marginBottom: 10 }}
+                                    />
                                 )
+                            case 'turns':
+                                return null
                             default: {
                                 const exhaustivenessCheck: never = action
                                 throw exhaustivenessCheck
                             }
                         }
                     })()}
-                    <Button color='blue' submit text={`Add ${capitalize(action)}`} />
+                    <Button color='blue' submit text={`Add ${startCase(action)}`} />
                 </form>
             ) : (
                 <>
-                    <Button
-                        style={{ marginBottom: 10 }}
-                        onClick={() => setAction('move')}
-                        color='grey'
-                        text='Move'
-                    />
-                    <Button
-                        style={{ marginBottom: 10 }}
-                        onClick={() => setAction('sequence')}
-                        color='grey'
-                        text='Sequence'
-                    />
-                    <Button
-                        style={{ marginBottom: 10 }}
-                        onClick={() => setAction('game')}
-                        color='grey'
-                        text='Game'
-                    />
+                    {ACTIONS.map((a) => (
+                        <Button
+                            style={{ marginBottom: 10 }}
+                            onClick={() => setAction(a)}
+                            color='grey'
+                            text={startCase(a)}
+                        />
+                    ))}
                 </>
             )}
         </Modal>
@@ -676,10 +670,6 @@ const UpdateStepModal: FC<{ step: Step; onClose: () => void; onUpdate: (step: St
     onClose,
     onUpdate,
 }) => {
-    const [repeatType, setRepeatType] = useState<RepeatType>(
-        (step.type === 'sequence' && step.repeat?.type) || ''
-    )
-
     return (
         <Modal close={onClose} style={{ padding: 25 }}>
             <form
@@ -693,37 +683,32 @@ const UpdateStepModal: FC<{ step: Step; onClose: () => void; onUpdate: (step: St
                             // newStep.title = elements.title.value
                             newStep.text = elements.text.value
                             newStep.timeout = elements.timeout.value
-                            newStep.move.player = elements.player.value
-                            switch (newStep.move.type) {
-                                case 'audio':
-                                    newStep.move.maxDuration = elements.maxDuration.value
-                                    break
-                                case 'text':
-                                    break
-                                default: {
-                                    const exhaustivenessCheck: never = newStep.move
-                                    throw exhaustivenessCheck
+                            if (newStep.submission) {
+                                newStep.submission.player = elements.player.value
+                                switch (newStep.submission.type) {
+                                    case 'audio':
+                                        newStep.submission.maxDuration = elements.maxDuration.value
+                                        break
+                                    case 'text':
+                                        break
+                                    default: {
+                                        const exhaustivenessCheck: never = newStep.submission
+                                        throw exhaustivenessCheck
+                                    }
                                 }
                             }
                             break
                         case 'sequence': {
-                            switch (repeatType) {
+                            switch (newStep.repeat?.type) {
                                 case 'rounds':
-                                    newStep.repeat = {
-                                        type: 'rounds',
-                                        amount: elements.amount.value,
-                                    }
+                                    newStep.repeat.amount = elements.amount.value
                                     break
                                 case 'turns':
-                                    newStep.repeat = {
-                                        type: 'turns',
-                                    }
                                     break
-                                case '':
-                                    delete newStep.repeat
+                                case undefined:
                                     break
                                 default: {
-                                    const exhaustivenessCheck: never = repeatType
+                                    const exhaustivenessCheck: never = newStep.repeat
                                     throw exhaustivenessCheck
                                 }
                             }
@@ -739,7 +724,7 @@ const UpdateStepModal: FC<{ step: Step; onClose: () => void; onUpdate: (step: St
                 }}
             >
                 <h3 style={{ textAlign: 'left', justifySelf: 'flex-start' }}>
-                    Step: {INFO[step.type]}
+                    {getStepTypeLabel(step)}
                 </h3>
                 <Input
                     type='text'
@@ -776,42 +761,33 @@ const UpdateStepModal: FC<{ step: Step; onClose: () => void; onUpdate: (step: St
                                         style={{ marginBottom: 10 }}
                                         defaultValue={step.timeout}
                                     />
-                                    <Input
-                                        type='text'
-                                        title='Player'
-                                        name='player'
-                                        style={{ marginBottom: 10 }}
-                                        defaultValue={step.move.player}
-                                    />
-                                    {step.move.type === 'audio' && (
-                                        <Input
-                                            type='text'
-                                            title='Max duration'
-                                            name='maxDuration'
-                                            defaultValue='1m'
-                                            placeholder='e.g. 2d 5h 30m 15s'
-                                            style={{ marginBottom: 10 }}
-                                        />
+                                    {step.submission && (
+                                        <>
+                                            <Input
+                                                type='text'
+                                                title='Player'
+                                                name='player'
+                                                style={{ marginBottom: 10 }}
+                                                defaultValue={step.submission.player}
+                                            />
+                                            {step.submission.type === 'audio' && (
+                                                <Input
+                                                    type='text'
+                                                    title='Max duration'
+                                                    name='maxDuration'
+                                                    defaultValue='1m'
+                                                    placeholder='e.g. 2d 5h 30m 15s'
+                                                    style={{ marginBottom: 10 }}
+                                                />
+                                            )}
+                                        </>
                                     )}
                                 </>
                             )
                         case 'sequence':
-                            return (
-                                <>
-                                    <DropDown
-                                        title='Repetitions'
-                                        style={{ marginBottom: 10 }}
-                                        options={Object.values(REPEAT_OPTIONS)}
-                                        selectedOption={REPEAT_OPTIONS[repeatType]}
-                                        setSelectedOption={(newRepeatType) =>
-                                            setRepeatType(
-                                                Object.entries(REPEAT_OPTIONS).find(
-                                                    ([, value]) => value === newRepeatType
-                                                )![0] as RepeatType
-                                            )
-                                        }
-                                    />
-                                    {repeatType === 'rounds' && (
+                            switch (step.repeat?.type) {
+                                case 'rounds':
+                                    return (
                                         <Input
                                             type='number'
                                             title='Times'
@@ -819,9 +795,16 @@ const UpdateStepModal: FC<{ step: Step; onClose: () => void; onUpdate: (step: St
                                             defaultValue={5}
                                             style={{ marginBottom: 10 }}
                                         />
-                                    )}
-                                </>
-                            )
+                                    )
+                                case 'turns':
+                                    return null
+                                case undefined:
+                                    return null
+                                default: {
+                                    const exhaustivenessCheck: never = step.repeat
+                                    throw exhaustivenessCheck
+                                }
+                            }
                         default: {
                             const exhaustivenessCheck: never = step
                             throw exhaustivenessCheck

@@ -54,12 +54,6 @@
             visibility: visible;
         }
 
-        border-left: 5px solid transparent;
-
-        &.current {
-            border-left: 5px solid $green2;
-        }
-
         .stepBody {
             .stepHeader {
                 cursor: pointer;

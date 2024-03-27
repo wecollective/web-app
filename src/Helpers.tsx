@@ -221,7 +221,7 @@ export type Game = {
     players: BaseUser[]
 }
 
-type MoveConfig =
+type SubmissionConfig =
     | {
           type: 'audio'
           maxDuration: number
@@ -237,7 +237,7 @@ export type Move = (
           startedAt: number
           timeout: number
       }
-) & { gameId?: number; player?: BaseUser } & MoveConfig
+) & { gameId?: number; submission?: { player?: BaseUser } & SubmissionConfig }
 
 export type MoveStatus = Move['status']
 
@@ -269,7 +269,7 @@ export type Step = {
           title?: string
           text: string
           timeout: string
-          move: MoveConfig & { player: string }
+          submission?: SubmissionConfig & { player: string }
       }
     | {
           type: 'sequence'
@@ -280,7 +280,7 @@ export type Step = {
 
 export type StepType = Step['type']
 export type MoveStep = Extract<Step, { type: 'move' }>
-export type MoveType = MoveStep['move']['type']
+export type MoveType = SubmissionConfig['type']
 
 export type Event = {
     id: number
