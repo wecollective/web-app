@@ -43,6 +43,7 @@ import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
+import { GameStatusIndicator } from '../GameCard'
 import MoveCard from '../MoveCard'
 
 function MessageCard(props: {
@@ -211,7 +212,7 @@ function MessageCard(props: {
             style={{ marginBottom: hasReactions ? 10 : 0 }}
         >
             {isOwnComment && renderButtons()}
-            {!isOwnComment && (
+            {!isOwnComment && !move && (
                 <Column style={{ marginRight: 10 }}>
                     <FlagImage type='user' size={30} imagePath={Creator.flagImagePath} />
                 </Column>
@@ -221,7 +222,7 @@ function MessageCard(props: {
                 style={{ width: move ? undefined : fullWidth ? 'calc(100% - 100px)' : 'auto' }}
             >
                 <Row className={styles.header}>
-                    {!isOwnComment && (
+                    {!isOwnComment && !move && (
                         <>
                             {state === 'account-deleted' ? (
                                 <p className='grey' style={{ marginRight: 5 }}>
@@ -241,7 +242,7 @@ function MessageCard(props: {
                     >
                         {timeSinceCreated(createdAt)}
                     </p>
-                    {edited && <p className='grey'>*</p>}
+                    {edited && !move && <p className='grey'>*</p>}
                     {/* {muted && (
                             <button
                                 type='button'
@@ -252,6 +253,17 @@ function MessageCard(props: {
                                 <EyeClosedIcon />
                             </button>
                         )} */}
+                    {move && (
+                        <>
+                            <div style={{ flexGrow: 1 }} />
+                            <div style={{ alignSelf: 'flex-end' }}>
+                                <GameStatusIndicator
+                                    status={move.status}
+                                    style={{ marginLeft: 5, fontSize: 12 }}
+                                />
+                            </div>
+                        </>
+                    )}
                 </Row>
                 {Parent && (
                     <Column className={styles.parent}>

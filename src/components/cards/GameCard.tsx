@@ -573,7 +573,7 @@ const CreateStepModal: FC<{
                                             type='text'
                                             title='Timeout'
                                             name='timeout'
-                                            defaultValue={action === 'message' ? '10s' : '5m'}
+                                            defaultValue={action === 'message' ? '5s' : '5m'}
                                             placeholder='e.g. 2d 5h 30m 15s'
                                             style={{ marginBottom: 10 }}
                                         />
@@ -1027,6 +1027,7 @@ const STATUS_COLOR: Record<PlayStatus | MoveStatus, string> = {
     started: '#159437',
     stopped: '#ff4848',
     skipped: '#ff4848',
+    timeout: '#ff4848',
 }
 
 export const GameStatusIndicator: FC<{ status: PlayStatus | MoveStatus; style?: any }> = ({

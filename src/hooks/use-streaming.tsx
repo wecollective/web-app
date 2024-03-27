@@ -32,8 +32,8 @@ const useStreaming = ({
     const iceConfig = {
         // iceTransportPolicy: 'relay',
         iceServers: [
-            // { urls: 'stun:stun.l.google.com:19302' },
-            { urls: `stun:${config.turnServerUrl}` },
+            { urls: 'stun:stun.l.google.com:19302' },
+            // { urls: `stun:${config.turnServerUrl}` },
             {
                 urls: `turn:${config.turnServerUrl}`,
                 username: config.turnServerUsername,

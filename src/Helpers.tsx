@@ -174,7 +174,9 @@ export type AudioBlock = {
 }
 
 export type AudioMediaLink = {
-    Audio: unknown
+    Audio: {
+        url: string
+    }
 }
 
 type PostState = 'active' | 'deleted' | 'account-deleted'
@@ -208,7 +210,7 @@ export type Post = {
     Event: Event
     Originals?: ParentBlock
     Remixes?: ChildBlock[]
-    Submissions?: { Post: { id: number; type: string; text: string } }[]
+    Submissions?: { Post: { id: number; type: string; text: string; AudioBlocks?: AudioBlock[] } }[]
     IncludedInGames?: ParentBlock[]
     Image: { url: string }
     Audio: { id: number; url: string }
@@ -224,12 +226,12 @@ export type Game = {
 type SubmissionConfig =
     | {
           type: 'audio'
-          maxDuration: number
+          maxDuration: string
       }
     | { type: 'text' }
 
 export type Move = (
-    | { status: 'skipped' | 'ended' | 'stopped' }
+    | { status: 'skipped' | 'ended' | 'stopped' | 'timeout' }
     | { status: 'paused'; elapsedTime: number; remainingTime: number }
     | {
           status: 'started'
@@ -237,7 +239,15 @@ export type Move = (
           startedAt: number
           timeout: number
       }
-) & { gameId?: number; submission?: { player?: BaseUser } & SubmissionConfig }
+) & { gameId?: number; submission?: MoveSubmission }
+export type MoveSubmission = { player?: BaseUser } & (
+    | {
+          type: 'audio'
+          maxDuration: number
+      }
+    | { type: 'text' }
+)
+export type MoveSubmissionAudio = Extract<MoveSubmission, { type: 'audio' }>
 
 export type MoveStatus = Move['status']
 
