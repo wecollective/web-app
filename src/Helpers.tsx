@@ -240,7 +240,7 @@ export type Move = (
       }
 ) & { gameId?: number }
 
-export type PlayVariables = Record<string, string | number | boolean>
+export type PlayVariables = Record<string, string | number | boolean | BaseUser>
 
 export type StepContext = {
     stepId: string

@@ -25,6 +25,7 @@ function Input(props: {
     style?: any
     onChange?: (payload: any) => void
     onBlur?: () => void
+    required?: boolean
 }): JSX.Element {
     const {
         type,
@@ -47,6 +48,7 @@ function Input(props: {
         autoFill,
         onChange,
         onBlur,
+        required,
     } = props
 
     return (
@@ -74,6 +76,7 @@ function Input(props: {
                         onBlur={onBlur}
                         disabled={disabled}
                         data-lpignore={!autoFill}
+                        required={required}
                     />
                 ) : (
                     <input
@@ -99,6 +102,7 @@ function Input(props: {
                         onBlur={onBlur}
                         disabled={disabled}
                         data-lpignore={!autoFill}
+                        required={required}
                     />
                 )}
                 <div className={styles.stateIcon}>
@@ -131,6 +135,7 @@ Input.defaultProps = {
     disabled: false,
     loading: false,
     autoFill: false,
+    required: false,
 }
 
 export default Input

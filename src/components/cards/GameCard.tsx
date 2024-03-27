@@ -1,3 +1,4 @@
+/* eslint-disable no-plusplus */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable react/require-default-props */
@@ -21,7 +22,6 @@ import { CastaliaIcon, DeleteIcon, EditIcon, PlusIcon, UsersIcon } from '@src/sv
 import styles from '@styles/components/GameCard.module.scss'
 import axios from 'axios'
 import { capitalize, cloneDeep } from 'lodash'
-import { customAlphabet } from 'nanoid'
 import React, {
     FC,
     PropsWithChildren,
@@ -35,6 +35,7 @@ import React, {
 import { useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 import { useDebounceValue } from 'usehooks-ts'
+import { v4 as uuid } from 'uuid'
 import Button from '../Button'
 import CloseButton from '../CloseButton'
 import Column from '../Column'
@@ -48,8 +49,6 @@ import Modal from '../modals/Modal'
 import PlainButton from '../modals/PlainButton'
 import PostCard from './PostCard/PostCard'
 
-const getId = customAlphabet('abcdefghijklmnopqrstuvwxyz', 11)
-
 const cookies = new Cookies()
 
 const StepTitle: FC<{ prefix: string; step: Step; stepContext?: StepContext }> = ({
@@ -58,7 +57,7 @@ const StepTitle: FC<{ prefix: string; step: Step; stepContext?: StepContext }> =
     stepContext,
 }) => (
     <h5 className={styles.stepTitle}>
-        {prefix} {step.name ?? step.type}{' '}
+        {capitalize(step.type)} [{step.name}]{' '}
         {(() => {
             switch (step.type) {
                 case 'move':
@@ -70,25 +69,18 @@ const StepTitle: FC<{ prefix: string; step: Step; stepContext?: StepContext }> =
 
                     switch (step.repeat.type) {
                         case 'turns':
-                            if (stepContext && step.name in stepContext.variables) {
-                                return (
-                                    <span style={{ color: '#00daa2', fontWeight: 'bold' }}>
-                                        player {stepContext.variables[step.name]}
-                                    </span>
-                                )
-                            }
-                            return <>(repeat for all players)</>
+                            return <>(for all players)</>
                         case 'rounds':
                             if (stepContext && step.name in stepContext.variables) {
                                 return (
                                     <span style={{ color: '#00daa2', fontWeight: 'bold' }}>
-                                        step {stepContext.variables[step.name]} of{' '}
+                                        step {stepContext.variables[step.name] as number} of{' '}
                                         {step.repeat.amount}
                                     </span>
                                 )
                             }
 
-                            return <>(repeat {step.repeat.amount} times)</>
+                            return <>({step.repeat.amount} times)</>
                         default: {
                             const exhaustivenessCheck: never = step.repeat
                             throw exhaustivenessCheck
@@ -106,6 +98,7 @@ const StepTitle: FC<{ prefix: string; step: Step; stepContext?: StepContext }> =
 
 const StepComponent: FC<{
     prefix: string
+    allSteps: Step[]
     step: Step
     updateStep?: (step: Step) => void
     prependSteps?: (steps: Step[]) => void
@@ -114,6 +107,7 @@ const StepComponent: FC<{
     stepContext?: StepContext
 }> = ({
     prefix,
+    allSteps,
     step,
     updateStep,
     prependSteps: prependStep,
@@ -123,7 +117,11 @@ const StepComponent: FC<{
 }) => (
     <Column className={styles.stepWrapper}>
         <Row className={`${styles.step} ${stepContext?.stepId === step.id && styles.current}`}>
-            <CreateStepButton onPrepend={prependStep} onAppend={appendStep} />
+            <CreateStepButton
+                existingSteps={allSteps}
+                onPrepend={prependStep}
+                onAppend={appendStep}
+            />
             <Column style={{ flexGrow: 1 }}>
                 <Column className={styles.stepBody}>
                     <Row className={styles.stepHeader}>
@@ -152,6 +150,20 @@ const StepComponent: FC<{
                                     </div>
                                 )
                             case 'sequence':
+                                if (step.repeat?.type === 'turns') {
+                                    if (stepContext && step.name in stepContext.variables) {
+                                        const user = stepContext.variables[step.name] as BaseUser
+                                        return (
+                                            <UserButton
+                                                key={user.id}
+                                                user={user}
+                                                imageSize={35}
+                                                maxChars={18}
+                                                style={{ marginTop: 5 }}
+                                            />
+                                        )
+                                    }
+                                }
                                 return null
                             default: {
                                 const exhaustivenessCheck: never = step
@@ -170,6 +182,7 @@ const StepComponent: FC<{
                     return (
                         <div className={styles.stepsWrapper}>
                             <Steps
+                                allSteps={allSteps}
                                 prefix={prefix}
                                 steps={step.steps}
                                 setSteps={updateStep && ((steps) => updateStep({ ...step, steps }))}
@@ -189,16 +202,18 @@ const StepComponent: FC<{
 
 const Steps: FC<{
     prefix: string
+    allSteps: Step[]
     steps: Step[]
     setSteps?: (steps: Step[]) => void
     stepContext?: StepContext
-}> = ({ prefix, steps, setSteps, stepContext }) => {
+}> = ({ prefix, allSteps, steps, setSteps, stepContext }) => {
     return steps.length ? (
         <div className={styles.steps}>
             {steps.map((step, i) => (
                 <StepComponent
                     key={step.id}
                     prefix={`${prefix}${i + 1}.`}
+                    allSteps={allSteps}
                     step={step}
                     updateStep={
                         setSteps &&
@@ -229,7 +244,10 @@ const Steps: FC<{
     ) : (
         <div className={styles.emptySteps}>
             {setSteps ? (
-                <CreateStepButton onAppend={(newSteps) => setSteps([...steps, ...newSteps])} />
+                <CreateStepButton
+                    existingSteps={allSteps}
+                    onAppend={(newSteps) => setSteps([...steps, ...newSteps])}
+                />
             ) : (
                 <p style={{ textAlign: 'center' }}>no steps</p>
             )}
@@ -249,6 +267,7 @@ export const SaveableSteps: FC<{
         <Column style={{ flexShrink: 1, overflowY: 'auto' }}>
             <Steps
                 prefix=''
+                allSteps={state.game.steps}
                 steps={state.game.steps}
                 setSteps={
                     setState &&
@@ -305,9 +324,10 @@ const GameCardHeader: FC = () => (
 )
 
 const CreateStepButton: FC<{
+    existingSteps: Step[]
     onPrepend?: (steps: Step[]) => void
     onAppend?: (steps: Step[]) => void
-}> = ({ onPrepend, onAppend }) => {
+}> = ({ existingSteps, onPrepend, onAppend }) => {
     const [open, setOpen] = useState(false)
     const [prepend, setPrepend] = useState(false)
 
@@ -326,6 +346,7 @@ const CreateStepButton: FC<{
             </Row>
             {onAppend && open && (
                 <CreateStepModal
+                    existingSteps={existingSteps}
                     onClose={() => setOpen(false)}
                     onCreate={
                         onAppend &&
@@ -352,19 +373,27 @@ const REPEAT_OPTIONS: Record<RepeatType, string> = {
     turns: 'Once per player',
 } as const
 
-const CreateStepModal: FC<{ onClose: () => void; onCreate: (steps: Step[]) => void }> = ({
-    onClose,
-    onCreate,
-}) => {
-    const [action, setAction] = useState<StepType | 'game'>()
+const CreateStepModal: FC<{
+    existingSteps: Step[]
+    onClose: () => void
+    onCreate: (steps: Step[]) => void
+}> = ({ existingSteps, onClose, onCreate }) => {
+    const [action, setAction] = useState<StepType | 'game' | ''>()
     const [repeatType, setRepeatType] = useState<RepeatType>('')
+    const [name, setName] = useState<string>()
 
-    const id = useMemo(() => getId(), [])
+    const id = useMemo(() => uuid(), [])
+    const uniqueName = useMemo(
+        () => getUniqueName(existingSteps, (repeatType || action) ?? ''),
+        [action, repeatType]
+    )
+
+    console.log(existingSteps)
 
     return (
         <Modal close={onClose} style={{ padding: 25, overflow: 'visible' }}>
             {action === 'game' ? (
-                <FindGame onCreate={onCreate} onClose={onClose} />
+                <FindGame existingSteps={existingSteps} onCreate={onCreate} onClose={onClose} />
             ) : action ? (
                 <form
                     onSubmit={(e) => {
@@ -374,7 +403,7 @@ const CreateStepModal: FC<{ onClose: () => void; onCreate: (steps: Step[]) => vo
                         const elements = e.currentTarget.elements as any
                         const baseStep = {
                             id,
-                            name: elements.name.value,
+                            name: name ?? uniqueName,
                         }
                         switch (action) {
                             case 'move':
@@ -431,7 +460,9 @@ const CreateStepModal: FC<{ onClose: () => void; onCreate: (steps: Step[]) => vo
                         type='text'
                         title='Name'
                         name='name'
-                        defaultValue={id}
+                        required
+                        value={name ?? uniqueName}
+                        onChange={setName}
                         style={{ marginBottom: 10 }}
                     />
                     {(() => {
@@ -604,6 +635,7 @@ const UpdateStepModal: FC<{ step: Step; onClose: () => void; onUpdate: (step: St
                     type='text'
                     title='Name'
                     name='name'
+                    required
                     defaultValue={step.name}
                     style={{ marginBottom: 10 }}
                 />
@@ -695,6 +727,7 @@ export const CreateGameCard: FC<{
                     <Column style={{ flexGrow: 1, overflowY: 'auto' }}>
                         <Steps
                             prefix=''
+                            allSteps={state.game.steps}
                             steps={state.game.steps}
                             setSteps={
                                 setState &&
@@ -937,43 +970,81 @@ const GameLink: FC<{ post: BaseGamePost; overrideTitle?: string; main?: boolean 
     )
 }
 
-const mapSteps = (steps: Step[], cb: (step: Step) => void) =>
+const reduceSteps = <T,>(steps: Step[], cb: (acc: T, step: Step) => T, acc: T): T =>
+    steps.reduce(
+        (subAcc, step) =>
+            step.type === 'move' ? cb(subAcc, step) : reduceSteps(step.steps, cb, cb(subAcc, step)),
+        acc
+    )
+
+const mapSteps = <T,>(steps: Step[], cb: (step: Step) => T) =>
     steps.map((step) =>
         cb(step.type === 'move' ? step : { ...step, steps: mapSteps(step.steps, cb) })
     )
 
-const replaceAll = (text: string | undefined, replacements: Record<string, string>) =>
+const replaceAllVariables = (text: string | undefined, replacements: Record<string, string>) =>
     text === undefined
         ? undefined
         : Object.entries(replacements).reduce(
-              (replacedText, [key, value]) => replacedText.replaceAll(key, value),
+              (replacedText, [key, value]) => replacedText.replaceAll(`[${key}]`, `[${value}]`),
               text
           )
 
-const remixSteps = (gameId: number, steps: Step[]) => {
-    const ids: Record<string, string> = {}
-    mapSteps(steps, (step) => {
-        ids[step.id] = getId()
-    })
-    return mapSteps(steps, (step) => ({
+const findMax = (steps: Step[], prefix: string) =>
+    reduceSteps(
+        steps,
+        (max, step) => {
+            const match = step.name.match(new RegExp(`^${prefix}(\\d*)$`))
+            if (match) {
+                return Math.max(max, match[1] ? +match[1] : 1)
+            }
+            return max
+        },
+        0
+    )
+
+const getUniqueName = (steps: Step[], prefix: string) => `${prefix}${findMax(steps, prefix) + 1}`
+
+const remixSteps = (gameId: number, steps: Step[], existingSteps?: Step[]) => {
+    const stepsWithNewIds = mapSteps(steps, (step) => ({
         ...step,
-        id: ids[step.id],
-        name: replaceAll(step.name, ids),
+        id: uuid(),
         originalStep: {
             gameId,
             stepId: step.id,
         },
+    }))
+
+    if (!existingSteps) {
+        return stepsWithNewIds
+    }
+
+    const nameMappings = {}
+    const nameCountsByPrefix = {}
+    mapSteps(stepsWithNewIds, (step) => {
+        const [, prefix, postfix] = step.name.match(/^(.*?)(\d*)$/)!
+        if (!(prefix in nameCountsByPrefix)) {
+            nameCountsByPrefix[prefix] = findMax(existingSteps, prefix)
+        }
+        const newPostfix = ++nameCountsByPrefix[prefix]
+        nameMappings[step.name] = `${prefix}${newPostfix}`
+    })
+    return mapSteps(stepsWithNewIds, (step) => ({
+        ...step,
+        name: nameMappings[step.name],
         ...(step.type === 'move' && {
-            title: replaceAll(step.title, ids),
-            text: replaceAll(step.text, ids),
+            title: replaceAllVariables(step.title, nameMappings),
+            text: replaceAllVariables(step.text, nameMappings),
         }),
     }))
 }
 
 const FindGame = ({
+    existingSteps,
     onCreate,
     onClose,
 }: {
+    existingSteps: Step[]
     onCreate: (steps: Step[]) => void
     onClose: () => void
 }) => {
@@ -1006,7 +1077,7 @@ const FindGame = ({
         <form
             onSubmit={(e) => {
                 e.preventDefault()
-                onCreate(remixSteps(gamePost!.id, gamePost!.game!.steps))
+                onCreate(remixSteps(gamePost!.id, gamePost!.game!.steps, existingSteps))
                 onClose()
             }}
         >
