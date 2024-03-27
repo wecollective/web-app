@@ -24,10 +24,10 @@ const useStreaming = ({
     roomId: number
     socket: Socket
     showVideos: boolean
-    onStartStreaming: () => void
-    onStream: (socketId: string, user) => void
-    onRefreshRequest: (socketId: string) => void
-    onStreamDisconnected: (socketId, user) => void
+    onStartStreaming?: () => void
+    onStream?: (socketId: string, user) => void
+    onRefreshRequest?: (socketId: string) => void
+    onStreamDisconnected?: (socketId, user) => void
 }) => {
     const iceConfig = {
         // iceTransportPolicy: 'relay',
@@ -57,7 +57,7 @@ const useStreaming = ({
     const mySocketIdRef = useRef('')
     const videoRef = useRef<any>(null)
     const streamRef = useRef<any>(null)
-    const peersRef = useRef<any[]>([])
+    const peersRef = useRef<{ socketId: string; userData: BaseUser; peer: Peer }[]>([])
     const audioRef = useRef<any>(null)
     const audioRecorderRef = useRef<any>(null)
 
@@ -94,7 +94,7 @@ const useStreaming = ({
                     }, 1000)
 
                     setLoadingStream(false)
-                    onStartStreaming()
+                    onStartStreaming?.()
                 })
                 .catch(() => {
                     console.log('Unable to connect video, trying audio only...')
@@ -113,7 +113,7 @@ const useStreaming = ({
                                 videoRef.current.srcObject = stream
                             }, 1000)
                             setLoadingStream(false)
-                            onStartStreaming()
+                            onStartStreaming?.()
                         })
                         .catch(() => {
                             alert('Unable to connect media devices')
@@ -127,20 +127,15 @@ const useStreaming = ({
         }
     }
 
-    function createPeer(socketId, user, stream?) {
-        console.log('create peer')
-        // remove old peer if present
-        const peerObject = peersRef.current.find((p) => p.socketId === socketId)
-        if (peerObject) {
-            peerObject.peer.destroy()
-            peersRef.current = peersRef.current.filter((p) => p.socketId !== socketId)
-            setVideos((oldVideos) => oldVideos.filter((v) => v.socketId !== socketId))
-        }
+    function createPeer(initiator: boolean, socketId: string, user: BaseUser, stream) {
+        destroyPeer(socketId)
         // create peer connection
         const peer = new Peer({
-            initiator: true,
+            initiator,
             config: iceConfig,
-            stream,
+            ...(stream && {
+                stream,
+            }),
         })
         peer.on('signal', (signal) => {
             socket.emit('outgoing-signal-request', {
@@ -164,13 +159,13 @@ const useStreaming = ({
                 },
             ])
             addStreamToVideo(socketId, newStream)
-            onStream(socketId, user)
+            onStream?.(socketId, user)
         })
-        peer.on('close', () => peer.destroy())
+        peer.on('close', () => destroyPeer(socketId))
         peer.on('error', (error) => console.log(error))
         peersRef.current.push({
-            socketId: user.socketId,
-            userData: user.userData,
+            socketId,
+            userData: user,
             peer,
         })
         return peer
@@ -185,7 +180,7 @@ const useStreaming = ({
                 userData,
             },
         })
-        createPeer(socketId, user, streamRef.current)
+        createPeer(true, socketId, user, streamRef.current)
     }
 
     function addStreamToVideo(socketId, stream) {
@@ -239,11 +234,8 @@ const useStreaming = ({
 
     function destroyPeer(socketId) {
         const peerObject = peersRef.current.find((p) => p.socketId === socketId)
-        if (peerObject) {
-            peerObject.peer.destroy()
-            peersRef.current = peersRef.current.filter((p) => p.socketId !== socketId)
-        }
         peersRef.current = peersRef.current.filter((p) => p.socketId !== socketId)
+        peerObject?.peer.destroy()
         setVideos((oldVideos) => oldVideos.filter((v) => v.socketId !== socketId))
     }
 
@@ -254,8 +246,7 @@ const useStreaming = ({
             if (peerObject) {
                 if (peerObject.peer.readable) peerObject.peer.signal(payload.signal)
                 else {
-                    peerObject.peer.destroy()
-                    peersRef.current = peersRef.current.filter((p) => p.socketId !== payload.id)
+                    destroyPeer(payload.id)
                 }
             } else console.log('no peer!')
         })
@@ -268,6 +259,7 @@ const useStreaming = ({
                 existingPeer.peer.signal(signal)
             } else {
                 const peer = createPeer(
+                    false,
                     userSignaling.socketId,
                     userSignaling.userData,
                     streamRef.current
@@ -278,17 +270,12 @@ const useStreaming = ({
 
         socket.on('incoming-refresh-request', (data) => {
             const { id } = data
-            const peerObject = peersRef.current.find((p) => p.socketId === id)
-            if (peerObject) {
-                peerObject.peer.destroy()
-                peersRef.current = peersRef.current.filter((p) => p.socketId !== id)
-                setVideos((oldVideos) => oldVideos.filter((v) => v.socketId !== id))
-            }
-            onRefreshRequest(id)
+            destroyPeer(id)
+            onRefreshRequest?.(id)
         })
         socket.on('incoming-stream-disconnected', (data) => {
             setVideos((oldVideos) => oldVideos.filter((v) => v.socketId !== data.socketId))
-            onStreamDisconnected(data.socketId, data.userData)
+            onStreamDisconnected?.(data.socketId, data.userData)
         })
     }, [])
 

@@ -843,7 +843,9 @@ function GameRoom({ post, setPost }: { post: Post; setPost: (post: Post) => void
                     },
                 ])
                 pushComment(`You joined the room`)
-                usersInRoom.forEach((user) => createPeer(user.socketId, user.userData))
+                usersInRoom.forEach((user) =>
+                    createPeer(true, user.socketId, user.userData, undefined)
+                )
             })
             // user joined room
             socket.on('incoming-user-joined', (user) => {

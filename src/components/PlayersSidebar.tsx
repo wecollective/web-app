@@ -9,7 +9,6 @@ import Button from './Button'
 import Column from './Column'
 import { Video } from './GameRoom'
 import Row from './Row'
-import UserButton from './UserButton'
 import { Players, UserList } from './cards/GameCard'
 import PlainButton from './modals/PlainButton'
 
@@ -49,8 +48,7 @@ const StreamingUsers: FC<{ streaming: Streaming }> = ({ streaming }) => {
                     />
                 )}
                 {streaming.videos.map((video) => (
-                    <Row key={video.socketId} centerY style={{ marginBottom: 10 }}>
-                        <UserButton user={video.userData} imageSize={35} maxChars={18} />
+                    <Column key={video.socketId} centerY style={{ marginBottom: 10 }}>
                         <Video
                             key={video.socketId}
                             id={video.socketId}
@@ -58,7 +56,7 @@ const StreamingUsers: FC<{ streaming: Streaming }> = ({ streaming }) => {
                             audioOnly={video.audioOnly}
                             refreshStream={streaming.refreshStream}
                         />
-                    </Row>
+                    </Column>
                 ))}
             </Column>
         </Column>

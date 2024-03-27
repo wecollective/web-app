@@ -253,10 +253,6 @@ const GamePage: FC<{ post: Post; setPost: (post: Post) => void; onDelete: () => 
         socket,
         roomId: post.id,
         showVideos: true,
-        onRefreshRequest: () => console.log('todo'),
-        onStartStreaming: () => console.log('todo'),
-        onStream: () => console.log('todo'),
-        onStreamDisconnected: () => console.log('todo'),
     })
 
     async function getChildren(childrenIds?: number[]) {
@@ -299,9 +295,8 @@ const GamePage: FC<{ post: Post; setPost: (post: Post) => void; onDelete: () => 
             const { socketId: incomingSocketId, usersInRoom } = payload
             streaming.mySocketIdRef.current = incomingSocketId
 
-            console.log(usersInRoom)
             for (const user of usersInRoom) {
-                // streaming.createPeer(user.socketId, user.userData)
+                streaming.createPeer(true, user.socketId, user.userData, undefined)
             }
         })
 
