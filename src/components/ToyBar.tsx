@@ -19,7 +19,6 @@ import {
     ChevronDownIcon,
     ChevronUpIcon,
     DeleteIcon,
-    EyeIcon,
     InboxIcon,
     PlusIcon,
     PostIcon,
@@ -442,18 +441,6 @@ function ToyBar(): JSX.Element {
                             <CardIcon />
                             <p>Create a card</p>
                         </button>
-                        {config.devApp && (
-                            <button
-                                type='button'
-                                onClick={() => {
-                                    setCreatePostModalSettings({ type: 'wisdom-gym' })
-                                    setGameModalOpen(false)
-                                }}
-                            >
-                                <EyeIcon />
-                                <p>Wisdom Gym</p>
-                            </button>
-                        )}
                     </Row>
                 </Modal>
             )}

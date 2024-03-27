@@ -75,7 +75,7 @@ import * as d3 from 'd3'
 import flatpickr from 'flatpickr'
 import 'flatpickr/dist/themes/material_green.css'
 import React, { useContext, useEffect, useRef, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import RecordRTC from 'recordrtc'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -113,6 +113,7 @@ export type CreatePostModalSettings = {
     title?: string
     source?: { type: SourceType; id: number; relationship?: string }
     game?: Game
+    onCreate?: 'redirect' | 'close'
 }
 
 // eslint-disable-next-line react/require-default-props
@@ -122,12 +123,11 @@ const MODAL_HEADER: Record<ModalType, string> = {
     'glass-bead-game': 'New Glass Bead Game',
     card: 'New Card',
     poll: 'New Governance Poll',
-    'wisdom-gym': 'New Wisdom Gym',
     post: 'New Post',
 }
 
 function CreatePostModal({
-    settings: { type, source, game: initialGame, title: initialTitle },
+    settings: { type, source, game: initialGame, title: initialTitle, onCreate },
     onClose,
 }: CreatePostModalProps): JSX.Element {
     const { accountData } = useContext(AccountContext)
@@ -166,6 +166,8 @@ function CreatePostModal({
     const location = useLocation()
     const [x, page, pageHandle, subPage] = location.pathname.split('/')
     const contentTypes: MediaType[] = ['image', 'audio', 'event', 'game']
+    const navigate = useNavigate()
+
     if (type !== 'poll') {
         contentTypes.push('poll')
     }
@@ -730,7 +732,12 @@ function CreatePostModal({
                     if (type === 'poll') setGovernancePolls([...governancePolls, newPost])
                     setLoading(false)
                     setSaved(true)
-                    setTimeout(() => onClose(), 1000)
+                    setTimeout(() => {
+                        onClose()
+                        if (onCreate === 'redirect') {
+                            navigate(`/p/${newPost.id}`)
+                        }
+                    }, 1000)
                 })
                 .catch((error) => console.log(error))
         }

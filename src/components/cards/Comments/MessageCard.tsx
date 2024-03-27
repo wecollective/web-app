@@ -317,7 +317,7 @@ function MessageCard(props: {
                     {mediaTypes.includes('card') && (
                         <Card postId={id} style={{ minWidth: 600, marginTop: 10 }} />
                     )}
-                    {move && <MoveCard move={move} emit={emit} />}
+                    {move && <MoveCard post={message} emit={emit} />}
                 </Column>
                 <Row className={styles.reactions}>
                     {totalLikes > 0 && (

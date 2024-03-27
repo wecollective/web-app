@@ -35,9 +35,9 @@ export const GAME_EVENTS = {
         updateGame: 'gs:outgoing-update',
         start: 'gs:outgoing-start',
         stop: 'gs:outgoing-stop',
-
         skip: 'gs:outgoing-skip',
         pause: 'gs:outgoing-pause',
+        submit: 'gs:outgoing-submit',
     },
     incoming: {
         updated: 'gs:incoming-updated',
@@ -94,18 +94,9 @@ export const GAMES: Record<GameType, GameConfig> = {
         },
         settingsEditable: true,
     },
-    'wisdom-gym': {
-        defaultSettings: {
-            synchronous: true,
-            multiplayer: true,
-            players: [],
-            allowedBeadTypes: ['audio'],
-        },
-        settingsEditable: false,
-    },
 }
 
-export const GAME_TYPES = ['glass-bead-game', 'wisdom-gym'] as const
+export const GAME_TYPES = ['glass-bead-game'] as const
 
 export type GameType = (typeof GAME_TYPES)[number]
 
@@ -217,6 +208,7 @@ export type Post = {
     Event: Event
     Originals?: ParentBlock
     Remixes?: ChildBlock[]
+    Submissions?: { Post: { id: number; type: string; text: string } }[]
     IncludedInGames?: ParentBlock[]
     Image: { url: string }
     Audio: { id: number; url: string }

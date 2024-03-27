@@ -1,15 +1,19 @@
+/* eslint-disable react/function-component-definition */
 /* eslint-disable no-nested-ternary */
-import { GAME_EVENTS, Move } from '@src/Helpers'
+import { GAME_EVENTS, Move, Post, uploadPost } from '@src/Helpers'
 import { AccountContext } from '@src/contexts/AccountContext'
 import styles from '@styles/components/cards/Comments/MessageCard.module.scss'
-import React, { useContext, useEffect, useRef } from 'react'
+import React, { FC, useContext, useEffect, useRef, useState } from 'react'
 import Button from '../Button'
 import Column from '../Column'
+import Input from '../Input'
 import Row from '../Row'
 import UserButton from '../UserButton'
 import { GameStatusIndicator } from './GameCard'
 
-function MoveProgressBar({ move }: { move: Extract<Move, { status: 'started' | 'paused' }> }) {
+const MoveProgressBar: FC<{ move: Extract<Move, { status: 'started' | 'paused' }> }> = ({
+    move,
+}) => {
     const ref = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -33,14 +37,75 @@ function MoveProgressBar({ move }: { move: Extract<Move, { status: 'started' | '
     )
 }
 
-function MoveCard({ move, emit }: { move: Move; emit: (event: string, data?) => void }) {
+const TextMove: FC<{ post: Post; emit: (event: string, data?) => void }> = ({ post, emit }) => {
+    const [text, setText] = useState('')
+    return (
+        <form
+            onSubmit={async (e) => {
+                e.preventDefault()
+                const comment = {
+                    type: 'comment',
+                    links: {
+                        parent: {
+                            type: post.type,
+                            id: post.id,
+                            relationship: 'submission',
+                        },
+                    },
+                    text,
+                    searchableText: text,
+                    mentions: [],
+                    urls: [],
+                    images: [],
+                    audios: [],
+                    mediaTypes: '',
+                }
+                const result = await uploadPost(comment)
+                emit(GAME_EVENTS.outgoing.submit, { moveId: post.id })
+            }}
+        >
+            <Input
+                type='text-area'
+                placeholder='Leave a text response.'
+                style={{ marginBottom: 10 }}
+                value={text}
+                onChange={setText}
+                required
+            />
+            <Row className={{ alignItems: 'flex-end' }} />
+            <Row
+                style={{
+                    justifyContent: 'center',
+                    marginBottom: 10,
+                }}
+            >
+                <Button color='grey' text='Skip' onClick={() => emit(GAME_EVENTS.outgoing.skip)} />
+                <Button
+                    color='grey'
+                    text='Pause'
+                    style={{ marginLeft: 10 }}
+                    onClick={() => emit(GAME_EVENTS.outgoing.pause)}
+                />
+                <Button
+                    submit
+                    color='purple'
+                    style={{ marginLeft: 10 }}
+                    text='Submit your move!'
+                    disabled={!text}
+                />
+            </Row>
+        </form>
+    )
+}
+
+const MoveCard: FC<{ post: Post; emit: (event: string, data?) => void }> = ({ post, emit }) => {
+    const move = post.move!
     const { loggedIn, accountData, alert } = useContext(AccountContext)
     const myMove = accountData.id === move.player?.id
     const ongoing = move.status === 'started' || move.status === 'stopped'
     return (
         <Column style={{ borderTop: '1px solid lightgrey', marginTop: 10, paddingTop: 10 }}>
             <Row style={{ marginBottom: 10 }} centerY>
-                <span style={{ marginRight: 5, fontWeight: 'bold' }}>Move:</span>
                 <span style={{ flexGrow: 1, fontWeight: 'bold' }}>
                     {myMove
                         ? ongoing
@@ -54,19 +119,19 @@ function MoveCard({ move, emit }: { move: Move; emit: (event: string, data?) => 
                 <>
                     {move.status === 'started' && (
                         <>
-                            <Row style={{ justifyContent: 'center', marginBottom: 10 }}>
-                                <Button
-                                    color='grey'
-                                    text='Pause'
-                                    onClick={() => emit(GAME_EVENTS.outgoing.pause)}
-                                />
-                                <Button
-                                    color='grey'
-                                    text='Skip'
-                                    style={{ marginLeft: 10 }}
-                                    onClick={() => emit(GAME_EVENTS.outgoing.skip)}
-                                />
-                            </Row>
+                            {(() => {
+                                switch (move.type) {
+                                    case 'text': {
+                                        return <TextMove post={post} emit={emit} />
+                                    }
+                                    case 'audio':
+                                        return null
+                                    default: {
+                                        const exhaustivenessCheck: never = move
+                                        throw exhaustivenessCheck
+                                    }
+                                }
+                            })()}
                         </>
                     )}
                     {move.status === 'paused' && (
@@ -83,6 +148,11 @@ function MoveCard({ move, emit }: { move: Move; emit: (event: string, data?) => 
             {(move.status === 'started' || move.status === 'paused') && (
                 <MoveProgressBar move={move} />
             )}
+            {post.Submissions?.map((submission) => (
+                <div style={{ backgroundColor: '#ececec', borderRadius: 5, padding: 5 }}>
+                    {submission.Post.text}
+                </div>
+            ))}
         </Column>
     )
 }

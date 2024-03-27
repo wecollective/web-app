@@ -33,8 +33,13 @@
     &.move {
         justify-content: center;
 
+        .buttons {
+            display: none
+        }
+
         .message {
-            flex-basis: 450px;
+            max-width: none;
+            flex-basis: 400px;
             flex-shrink: 1;
             background-color: $green3light;
         }

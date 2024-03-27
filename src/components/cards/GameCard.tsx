@@ -1027,6 +1027,7 @@ export const Plays: FC<{ post: Post; onlyRelated?: boolean }> = ({ post, onlyRel
                             type: 'post',
                             game: newGame,
                             title: `Remix of "${post.title}"`,
+                            onCreate: 'redirect',
                         })
                     }}
                     text='Remix'
