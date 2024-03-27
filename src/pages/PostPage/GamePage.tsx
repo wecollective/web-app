@@ -20,7 +20,7 @@ import LoadingWheel from '../../components/animations/LoadingWheel'
 import MessageCard from '../../components/cards/Comments/MessageCard'
 import {
     GameState,
-    PlayStatusIndicator,
+    GameStatusIndicator,
     Plays,
     SaveableSteps,
 } from '../../components/cards/GameCard'
@@ -49,7 +49,7 @@ const GameSidebar: FC<{
     return (
         <Column style={{ width: 300, padding: 10, borderRight: '1px solid #ededef' }}>
             <h2>
-                Game <PlayStatusIndicator status={play.status} />
+                Game <GameStatusIndicator status={play.status} />
             </h2>
             {isOwnPost && (
                 <Row style={{ marginBottom: 10 }}>

@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import CloseOnClickOutside from '@components/CloseOnClickOutside'
 import Column from '@components/Column'
 import FlagImage from '@components/FlagImage'
@@ -217,7 +218,7 @@ function MessageCard(props: {
             )}
             <Column
                 className={styles.message}
-                style={{ width: fullWidth ? 'calc(100% - 100px)' : 'auto' }}
+                style={{ width: move ? undefined : fullWidth ? 'calc(100% - 100px)' : 'auto' }}
             >
                 <Row className={styles.header}>
                     {!isOwnComment && (

@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-plusplus */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable react/jsx-props-no-spreading */
@@ -10,6 +11,8 @@ import {
     BaseGamePost,
     BaseUser,
     Game,
+    MoveStatus,
+    MoveType,
     PlayStatus,
     Post,
     Step,
@@ -53,7 +56,7 @@ const cookies = new Cookies()
 
 const StepTitle: FC<{ prefix: string; step: Step }> = ({ prefix, step }) => (
     <h5 className={styles.stepTitle}>
-        {capitalize(step.type)}{' '}
+        {capitalize((step.type === 'sequence' && step.repeat?.type) || step.type)}{' '}
         <span
             style={{
                 fontSize: 12,
@@ -73,6 +76,7 @@ const StepTitle: FC<{ prefix: string; step: Step }> = ({ prefix, step }) => (
 const StepComponent: FC<{
     prefix: string
     allSteps: Step[]
+    ancestors: Step[]
     step: Step
     updateStep?: (step: Step) => void
     prependSteps?: (steps: Step[]) => void
@@ -82,6 +86,7 @@ const StepComponent: FC<{
 }> = ({
     prefix,
     allSteps,
+    ancestors,
     step,
     updateStep,
     prependSteps: prependStep,
@@ -92,6 +97,7 @@ const StepComponent: FC<{
     <Column className={styles.stepWrapper}>
         <Row className={`${styles.step} ${stepContext?.stepId === step.id && styles.current}`}>
             <CreateStepButton
+                ancestors={ancestors}
                 existingSteps={allSteps}
                 onPrepend={prependStep}
                 onAppend={appendStep}
@@ -119,8 +125,19 @@ const StepComponent: FC<{
                                 return (
                                     <div>
                                         <div>{step.title}</div>
-                                        <div style={{ fontSize: 12 }}>{step.text}</div>
-                                        <div style={{ fontSize: 12 }}>{step.timeout}</div>
+                                        <div style={{ fontSize: 12 }}>Message: {step.text}</div>
+                                        <div style={{ fontSize: 12 }}>Timeout: {step.timeout}</div>
+                                        <div style={{ fontSize: 12 }}>
+                                            Move Type: {step.move?.type}
+                                        </div>
+                                        <div style={{ fontSize: 12 }}>
+                                            Player: {step.move?.player}
+                                        </div>
+                                        {step.move?.type === 'audio' && (
+                                            <div style={{ fontSize: 12 }}>
+                                                Duration: {step.move?.maxDuration}
+                                            </div>
+                                        )}
                                     </div>
                                 )
                             case 'sequence':
@@ -128,13 +145,20 @@ const StepComponent: FC<{
                                     if (stepContext && step.name in stepContext.variables) {
                                         const user = stepContext.variables[step.name] as BaseUser
                                         return (
-                                            <UserButton
-                                                key={user.id}
-                                                user={user}
-                                                imageSize={35}
-                                                maxChars={18}
-                                                style={{ marginTop: 5 }}
-                                            />
+                                            <Row centerY>
+                                                <UserButton
+                                                    key={user.id}
+                                                    user={user}
+                                                    imageSize={24}
+                                                    maxChars={18}
+                                                    style={{
+                                                        marginTop: 5,
+                                                        color: '#00daa2',
+                                                        fontSize: 12,
+                                                        fontWeight: 'bold',
+                                                    }}
+                                                />
+                                            </Row>
                                         )
                                     }
                                     return (
@@ -151,8 +175,8 @@ const StepComponent: FC<{
                                                     fontWeight: 'bold',
                                                 }}
                                             >
-                                                step {stepContext.variables[step.name] as number} of{' '}
-                                                {step.repeat.amount}
+                                                round {stepContext.variables[step.name] as number}{' '}
+                                                of {step.repeat.amount}
                                             </span>
                                         )
                                     }
@@ -184,6 +208,7 @@ const StepComponent: FC<{
                             <Steps
                                 allSteps={allSteps}
                                 prefix={prefix}
+                                ancestors={ancestors}
                                 steps={step.steps}
                                 setSteps={updateStep && ((steps) => updateStep({ ...step, steps }))}
                                 stepContext={stepContext}
@@ -203,10 +228,11 @@ const StepComponent: FC<{
 const Steps: FC<{
     prefix: string
     allSteps: Step[]
+    ancestors: Step[]
     steps: Step[]
     setSteps?: (steps: Step[]) => void
     stepContext?: StepContext
-}> = ({ prefix, allSteps, steps, setSteps, stepContext }) => {
+}> = ({ prefix, allSteps, ancestors, steps, setSteps, stepContext }) => {
     return steps.length ? (
         <div className={styles.steps}>
             {steps.map((step, i) => (
@@ -214,6 +240,7 @@ const Steps: FC<{
                     key={step.id}
                     prefix={`${prefix}${i + 1}.`}
                     allSteps={allSteps}
+                    ancestors={[...ancestors, step]}
                     step={step}
                     updateStep={
                         setSteps &&
@@ -246,6 +273,7 @@ const Steps: FC<{
             {setSteps ? (
                 <CreateStepButton
                     existingSteps={allSteps}
+                    ancestors={ancestors}
                     onAppend={(newSteps) => setSteps([...steps, ...newSteps])}
                 />
             ) : (
@@ -268,6 +296,7 @@ export const SaveableSteps: FC<{
             <Steps
                 prefix=''
                 allSteps={state.game.steps}
+                ancestors={[]}
                 steps={state.game.steps}
                 setSteps={
                     setState &&
@@ -325,9 +354,10 @@ const GameCardHeader: FC = () => (
 
 const CreateStepButton: FC<{
     existingSteps: Step[]
+    ancestors: Step[]
     onPrepend?: (steps: Step[]) => void
     onAppend?: (steps: Step[]) => void
-}> = ({ existingSteps, onPrepend, onAppend }) => {
+}> = ({ existingSteps, ancestors, onPrepend, onAppend }) => {
     const [open, setOpen] = useState(false)
     const [prepend, setPrepend] = useState(false)
 
@@ -347,6 +377,7 @@ const CreateStepButton: FC<{
             {onAppend && open && (
                 <CreateStepModal
                     existingSteps={existingSteps}
+                    ancestors={ancestors}
                     onClose={() => setOpen(false)}
                     onCreate={
                         onAppend &&
@@ -373,13 +404,17 @@ const REPEAT_OPTIONS: Record<RepeatType, string> = {
     turns: 'Once per player',
 } as const
 
+const MOVE_TYPE_OPTIONS = { text: 'Text', audio: 'Audio' }
+
 const CreateStepModal: FC<{
     existingSteps: Step[]
+    ancestors: Step[]
     onClose: () => void
     onCreate: (steps: Step[]) => void
-}> = ({ existingSteps, onClose, onCreate }) => {
+}> = ({ existingSteps, ancestors, onClose, onCreate }) => {
     const [action, setAction] = useState<StepType | 'game' | ''>()
     const [repeatType, setRepeatType] = useState<RepeatType>('')
+    const [moveType, setMoveType] = useState<MoveType>('text')
     const [name, setName] = useState<string>()
 
     const id = useMemo(() => uuid(), [])
@@ -387,8 +422,6 @@ const CreateStepModal: FC<{
         () => getUniqueName(existingSteps, (repeatType || action) ?? ''),
         [action, repeatType]
     )
-
-    console.log(existingSteps)
 
     return (
         <Modal close={onClose} style={{ padding: 25, overflow: 'visible' }}>
@@ -406,16 +439,44 @@ const CreateStepModal: FC<{
                             name: name ?? uniqueName,
                         }
                         switch (action) {
-                            case 'move':
-                                step = {
+                            case 'move': {
+                                const baseMove = {
                                     ...baseStep,
-                                    type: 'move',
                                     // title: elements.title.value,
                                     text: elements.text.value,
                                     timeout: elements.timeout.value,
                                 }
 
+                                switch (moveType) {
+                                    case 'audio':
+                                        step = {
+                                            ...baseMove,
+                                            type: 'move',
+                                            move: {
+                                                type: 'audio',
+                                                player: elements.player.value,
+                                                maxDuration: elements.maxDuration.value,
+                                            },
+                                        }
+                                        break
+                                    case 'text':
+                                        step = {
+                                            ...baseMove,
+                                            type: 'move',
+                                            move: {
+                                                type: 'text',
+                                                player: elements.player.value,
+                                            },
+                                        }
+                                        break
+                                    default: {
+                                        const exhaustivenessCheck: never = moveType
+                                        throw exhaustivenessCheck
+                                    }
+                                }
+
                                 break
+                            }
                             case 'sequence':
                                 step = {
                                     ...baseStep,
@@ -490,6 +551,43 @@ const CreateStepModal: FC<{
                                             placeholder='e.g. 2d 5h 30m 15s'
                                             style={{ marginBottom: 10 }}
                                         />
+                                        <Input
+                                            type='text'
+                                            title='Player'
+                                            name='player'
+                                            style={{ marginBottom: 10 }}
+                                            defaultValue={ancestors
+                                                .filter(
+                                                    (ancestor) =>
+                                                        ancestor.type === 'sequence' &&
+                                                        ancestor.repeat?.type === 'turns'
+                                                )
+                                                .map((step) => `[${step.name}]`)
+                                                .join(' or ')}
+                                        />
+                                        <DropDown
+                                            title='Move Type'
+                                            style={{ marginBottom: 10 }}
+                                            options={Object.values(MOVE_TYPE_OPTIONS)}
+                                            selectedOption={MOVE_TYPE_OPTIONS[moveType]}
+                                            setSelectedOption={(newMoveType) =>
+                                                setRepeatType(
+                                                    Object.entries(MOVE_TYPE_OPTIONS).find(
+                                                        ([, value]) => value === newMoveType
+                                                    )![0] as RepeatType
+                                                )
+                                            }
+                                        />
+                                        {moveType === 'audio' && (
+                                            <Input
+                                                type='text'
+                                                title='Max duration'
+                                                name='maxDuration'
+                                                defaultValue='1m'
+                                                placeholder='e.g. 2d 5h 30m 15s'
+                                                style={{ marginBottom: 10 }}
+                                            />
+                                        )}
                                     </>
                                 )
                             case 'sequence':
@@ -595,6 +693,18 @@ const UpdateStepModal: FC<{ step: Step; onClose: () => void; onUpdate: (step: St
                             // newStep.title = elements.title.value
                             newStep.text = elements.text.value
                             newStep.timeout = elements.timeout.value
+                            newStep.move.player = elements.player.value
+                            switch (newStep.move.type) {
+                                case 'audio':
+                                    newStep.move.maxDuration = elements.maxDuration.value
+                                    break
+                                case 'text':
+                                    break
+                                default: {
+                                    const exhaustivenessCheck: never = newStep.move
+                                    throw exhaustivenessCheck
+                                }
+                            }
                             break
                         case 'sequence': {
                             switch (repeatType) {
@@ -666,6 +776,23 @@ const UpdateStepModal: FC<{ step: Step; onClose: () => void; onUpdate: (step: St
                                         style={{ marginBottom: 10 }}
                                         defaultValue={step.timeout}
                                     />
+                                    <Input
+                                        type='text'
+                                        title='Player'
+                                        name='player'
+                                        style={{ marginBottom: 10 }}
+                                        defaultValue={step.move.player}
+                                    />
+                                    {step.move.type === 'audio' && (
+                                        <Input
+                                            type='text'
+                                            title='Max duration'
+                                            name='maxDuration'
+                                            defaultValue='1m'
+                                            placeholder='e.g. 2d 5h 30m 15s'
+                                            style={{ marginBottom: 10 }}
+                                        />
+                                    )}
                                 </>
                             )
                         case 'sequence':
@@ -728,6 +855,7 @@ export const CreateGameCard: FC<{
                         <Steps
                             prefix=''
                             allSteps={state.game.steps}
+                            ancestors={[]}
                             steps={state.game.steps}
                             setSteps={
                                 setState &&
@@ -908,15 +1036,19 @@ export const Plays: FC<{ post: Post; onlyRelated?: boolean }> = ({ post, onlyRel
     )
 }
 
-const STATUS_COLOR: Record<PlayStatus, string> = {
+const STATUS_COLOR: Record<PlayStatus | MoveStatus, string> = {
     waiting: '#f59c27',
-    ended: 'inherit',
+    ended: 'black',
     paused: '#f59c27',
     started: '#159437',
     stopped: '#ff4848',
+    skipped: '#ff4848',
 }
 
-export const PlayStatusIndicator: FC<{ status: PlayStatus }> = ({ status }) => (
+export const GameStatusIndicator: FC<{ status: PlayStatus | MoveStatus; style?: any }> = ({
+    status,
+    style,
+}) => (
     <span
         style={{
             color: STATUS_COLOR[status],
@@ -924,7 +1056,7 @@ export const PlayStatusIndicator: FC<{ status: PlayStatus }> = ({ status }) => (
             border: `1px solid ${STATUS_COLOR[status]}`,
             borderRadius: 10,
             padding: `2px 5px`,
-            marginRight: 5,
+            ...style,
         }}
     >
         {status}
@@ -939,7 +1071,7 @@ const GameLink: FC<{ post: BaseGamePost; overrideTitle?: string; main?: boolean 
     const navigate = useNavigate()
     return (
         <Row centerY spaceBetween style={{ marginBottom: 5, fontSize: 12 }}>
-            <PlayStatusIndicator status={post.game.play.status} />
+            <GameStatusIndicator status={post.game.play.status} style={{ marginRight: 5 }} />
             <a
                 href={`/p/${post.id}`}
                 style={{
@@ -976,6 +1108,22 @@ const reduceSteps = <T,>(steps: Step[], cb: (acc: T, step: Step) => T, acc: T): 
             step.type === 'move' ? cb(subAcc, step) : reduceSteps(step.steps, cb, cb(subAcc, step)),
         acc
     )
+
+const getAncestors = (steps: Step[], step: Step): Step[] | undefined => {
+    for (const s of steps) {
+        if (s.id === step.id) {
+            return [step]
+        }
+        if (s.type === 'sequence') {
+            const result = getAncestors(s.steps, step)
+            if (result) {
+                return [s, ...result]
+            }
+        }
+    }
+
+    return undefined
+}
 
 const mapSteps = <T,>(steps: Step[], cb: (step: Step) => T) =>
     steps.map((step) =>

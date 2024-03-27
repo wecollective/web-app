@@ -229,16 +229,25 @@ export type Game = {
     players: BaseUser[]
 }
 
+type MoveConfig =
+    | {
+          type: 'audio'
+          maxDuration: number
+      }
+    | { type: 'text' }
+
 export type Move = (
-    | { status: 'skipped' | 'ended' }
+    | { status: 'skipped' | 'ended' | 'stopped' }
     | { status: 'paused'; elapsedTime: number; remainingTime: number }
     | {
+          status: 'started'
           elapsedTime: number
           startedAt: number
           timeout: number
-          status: 'started'
       }
-) & { gameId?: number }
+) & { gameId?: number; player?: BaseUser } & MoveConfig
+
+export type MoveStatus = Move['status']
 
 export type PlayVariables = Record<string, string | number | boolean | BaseUser>
 
@@ -268,6 +277,7 @@ export type Step = {
           title?: string
           text: string
           timeout: string
+          move: MoveConfig & { player: string }
       }
     | {
           type: 'sequence'
@@ -276,9 +286,9 @@ export type Step = {
       }
 )
 
-export type MoveStep = Extract<Step, { type: 'move' }>
-
 export type StepType = Step['type']
+export type MoveStep = Extract<Step, { type: 'move' }>
+export type MoveType = MoveStep['move']['type']
 
 export type Event = {
     id: number

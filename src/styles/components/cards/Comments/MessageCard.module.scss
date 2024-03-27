@@ -34,6 +34,8 @@
         justify-content: center;
 
         .message {
+            flex-basis: 450px;
+            flex-shrink: 1;
             background-color: $green3light;
         }
 
