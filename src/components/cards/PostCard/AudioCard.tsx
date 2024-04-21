@@ -145,81 +145,76 @@ function AudioCard(props: {
     }, [])
 
     return (
-        <Row>
-            <Column
-                className={`${styles.wrapper} ${styles[location]}`}
-                style={{ ...style, position: 'relative' }}
-            >
-                <Column centerY style={{ height: 'calc(100% - 30px)', marginBottom: 10 }}>
-                    <AudioVisualiser
-                        audioId={audioId}
-                        audioURL={url}
-                        audioPlaying={audioPlaying}
-                        staticBars={staticBars}
-                        staticColor={colors.audioVisualiserStatic}
-                        dynamicBars={dynamicBars || 160}
-                        dynamicColor={colors.audioVisualiserDynamic}
-                        style={{ height }}
-                    />
-                </Column>
-                <Row centerY style={{ height: 30 }}>
-                    <button
-                        id={`play-button-${audioId}`}
-                        className={styles.playButton}
-                        type='button'
-                        aria-label='toggle-audio'
-                        // onClick={toggleAudio}
-                        // style={{ position: 'absolute' }}
+        <Column
+            className={`${styles.wrapper} ${styles[location]}`}
+            style={{ ...style, position: 'relative' }}
+        >
+            <Column centerY style={{ height: 'calc(100% - 30px)', marginBottom: 10 }}>
+                <AudioVisualiser
+                    audioId={audioId}
+                    audioURL={url}
+                    audioPlaying={audioPlaying}
+                    staticBars={staticBars}
+                    staticColor={colors.audioVisualiserStatic}
+                    dynamicBars={dynamicBars || 160}
+                    dynamicColor={colors.audioVisualiserDynamic}
+                    style={{ height }}
+                />
+            </Column>
+            <Row centerY style={{ height: 30 }}>
+                <button
+                    id={`play-button-${audioId}`}
+                    className={styles.playButton}
+                    type='button'
+                    aria-label='toggle-audio'
+                    // onClick={toggleAudio}
+                    // style={{ position: 'absolute' }}
+                >
+                    {audioPlaying ? <PauseIcon /> : <PlayIcon />}
+                </button>
+                <Column className={styles.timeSlider}>
+                    <Row centerY className={`${styles.slider} ${location === 'gbg' && styles.gbg}`}>
+                        <div className={styles.progressBarBackground} />
+                        <div
+                            className={styles.bufferedAmount}
+                            style={{ width: `${bufferPercent}%` }}
+                        />
+                        <div
+                            className={styles.progressBar}
+                            style={{ width: `${sliderPercent}%` }}
+                        />
+                        <div
+                            className={styles.thumb}
+                            style={{
+                                left: `${sliderPercent}%`,
+                                marginLeft: `${thumbOffset}px`,
+                            }}
+                        />
+                        <input type='range' onClick={updateSlider} onChange={updateSlider} />
+                    </Row>
+                    <Row centerY spaceBetween className={styles.times}>
+                        <p>{formatTimeMMSS(currentTime)}</p>
+                        <p>{formatTimeMMSS(duration)}</p>
+                    </Row>
+                    <audio
+                        id={audioId}
+                        onLoadedData={onLoadedData}
+                        onTimeUpdate={onTimeUpdate}
+                        crossOrigin='anonymous'
+                        // preload='none'
                     >
-                        {audioPlaying ? <PauseIcon /> : <PlayIcon />}
-                    </button>
-                    <Column className={styles.timeSlider}>
-                        <Row
-                            centerY
-                            className={`${styles.slider} ${location === 'gbg' && styles.gbg}`}
-                        >
-                            <div className={styles.progressBarBackground} />
-                            <div
-                                className={styles.bufferedAmount}
-                                style={{ width: `${bufferPercent}%` }}
-                            />
-                            <div
-                                className={styles.progressBar}
-                                style={{ width: `${sliderPercent}%` }}
-                            />
-                            <div
-                                className={styles.thumb}
-                                style={{
-                                    left: `${sliderPercent}%`,
-                                    marginLeft: `${thumbOffset}px`,
-                                }}
-                            />
-                            <input type='range' onClick={updateSlider} onChange={updateSlider} />
-                        </Row>
-                        <Row centerY spaceBetween className={styles.times}>
-                            <p>{formatTimeMMSS(currentTime)}</p>
-                            <p>{formatTimeMMSS(duration)}</p>
-                        </Row>
-                        <audio
-                            id={audioId}
-                            onLoadedData={onLoadedData}
-                            onTimeUpdate={onTimeUpdate}
-                            crossOrigin='anonymous'
-                            // preload='none'
-                        >
-                            <source src={url} type='audio/mpeg' />
-                            {/* src={url} */}
-                            <track kind='captions' />
-                        </audio>
-                    </Column>
-                </Row>
-            </Column>{' '}
+                        <source src={url} type='audio/mpeg' />
+                        {/* src={url} */}
+                        <track kind='captions' />
+                    </audio>
+                </Column>
+            </Row>
             {remove && (
                 <PlainButton size={17} style={{ marginLeft: 5 }} onClick={remove}>
                     <TimesIcon />
                 </PlainButton>
             )}
-        </Row>
+        </Column>
     )
 }
 

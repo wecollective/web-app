@@ -34,7 +34,7 @@
         justify-content: center;
 
         .buttons {
-            display: none
+            display: none;
         }
 
         .message {
@@ -132,7 +132,7 @@
             right: 5px;
             bottom: -15px;
 
-            >button {
+            > button {
                 all: unset;
                 cursor: pointer;
                 background-color: white;
@@ -189,7 +189,7 @@
         visibility: hidden;
         margin: 0 10px;
 
-        >button {
+        > button {
             all: unset;
             cursor: pointer;
             margin-right: 10px;
@@ -219,12 +219,12 @@
             }
         }
 
-        >a {
+        > a {
             margin: 0 7px 1px 2px;
         }
 
-        >button,
-        >a {
+        > button,
+        > a {
             width: 18px;
 
             svg {
@@ -262,11 +262,11 @@
                     margin-bottom: 10px;
                 }
 
-                &:hover>svg {
+                &:hover > svg {
                     color: $grey6;
                 }
 
-                >svg {
+                > svg {
                     width: 18px;
                     height: 18px;
                     margin-right: 6px;
