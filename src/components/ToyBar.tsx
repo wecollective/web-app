@@ -441,6 +441,16 @@ function ToyBar(): JSX.Element {
                             <CardIcon />
                             <p>Create a card</p>
                         </button>
+                        <button
+                            type='button'
+                            onClick={() => {
+                                setCreatePostModalSettings({ type: 'game-builder' })
+                                setGameModalOpen(false)
+                            }}
+                        >
+                            <CastaliaIcon />
+                            <p>Game Builder (new)</p>
+                        </button>
                     </Row>
                 </Modal>
             )}

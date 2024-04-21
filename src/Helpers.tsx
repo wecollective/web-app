@@ -74,7 +74,7 @@ type GameConfig = {
     settingsEditable?: boolean
 }
 
-export const GAMES: Record<GameType, GameConfig> = {
+export const GAMES: Record<GameType, GameConfig | null> = {
     'glass-bead-game': {
         defaultSettings: {
             synchronous: true,
@@ -94,9 +94,11 @@ export const GAMES: Record<GameType, GameConfig> = {
         },
         settingsEditable: true,
     },
+    card: null,
+    'game-builder': null,
 }
 
-export const GAME_TYPES = ['glass-bead-game'] as const
+export const GAME_TYPES = ['glass-bead-game', 'card', 'game-builder'] as const
 
 export type GameType = (typeof GAME_TYPES)[number]
 
@@ -117,8 +119,6 @@ export const MEDIA_TYPES = [
     'event',
     'poll',
     ...GAME_TYPES,
-    'card',
-    'game',
 ] as const
 
 export type MediaType = (typeof MEDIA_TYPES)[number]

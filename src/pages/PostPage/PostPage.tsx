@@ -7,7 +7,7 @@ import LoadingWheel from '@components/animations/LoadingWheel'
 import PostCard from '@components/cards/PostCard/PostCard'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
-import { Post, getDraftPlainText, includesSpecificGame } from '@src/Helpers'
+import { Post, getDraftPlainText } from '@src/Helpers'
 import styles from '@styles/pages/PostPage/PostPage.module.scss'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
@@ -27,6 +27,7 @@ type State =
 function PostPage(): JSX.Element {
     const location = useLocation()
     const postId = +location.pathname.split('/')[2]
+    const subPage = location.pathname.split('/')[3]
     const { accountDataLoading, loggedIn } = useContext(AccountContext)
     const [state, setState] = useState<State>({ state: 'loading' })
 
@@ -133,9 +134,9 @@ function PostPage(): JSX.Element {
             />
             {post.mediaTypes?.includes('prism') ? (
                 <Prism post={post} setPost={setPost} onDelete={onDelete} />
-            ) : includesSpecificGame(post.mediaTypes) ? (
+            ) : post.mediaTypes?.includes('glass-bead-game') && subPage === 'game-room' ? (
                 <GameRoom key={post.id} post={post} setPost={setPost} />
-            ) : post.mediaTypes?.includes('game') ? (
+            ) : post.mediaTypes?.includes('game-builder') ? (
                 <GamePage key={post.id} post={post} onDelete={onDelete} setPost={setPost} />
             ) : (
                 <Column centerX className={styles.wrapper}>

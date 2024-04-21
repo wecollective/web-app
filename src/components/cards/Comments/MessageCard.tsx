@@ -23,7 +23,6 @@ import {
     Post,
     dateCreated,
     getDraftPlainText,
-    getGameType,
     includesSpecificGame,
     timeSinceCreated,
     trimText,
@@ -319,7 +318,6 @@ function MessageCard(props: {
                     )}
                     {includesSpecificGame(mediaTypes) && (
                         <Game
-                            type={getGameType(mediaTypes)}
                             postId={id}
                             setTopicImage={() => null}
                             isOwnPost={Creator.id === accountData.id}

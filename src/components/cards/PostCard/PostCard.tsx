@@ -25,14 +25,7 @@ import RepostModal from '@components/modals/RepostModal'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
-import {
-    Post,
-    dateCreated,
-    getGameType,
-    includesSpecificGame,
-    timeSinceCreated,
-    timeSinceCreatedShort,
-} from '@src/Helpers'
+import { Post, dateCreated, timeSinceCreated, timeSinceCreatedShort } from '@src/Helpers'
 import { GameCard, GameState } from '@src/components/cards/GameCard'
 import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
 import {
@@ -418,9 +411,8 @@ function PostCard(props: {
                 )}
                 {Event && <EventCard post={post} location={location} />}
                 {mediaTypes?.includes('poll') && <PollCard postData={post} location={location} />}
-                {includesSpecificGame(mediaTypes) && (
+                {mediaTypes?.includes('glass-bead-game') && (
                     <Game
-                        type={getGameType(mediaTypes)}
                         postId={id}
                         setTopicImage={setTopicImage}
                         isOwnPost={Creator.id === accountData.id}
