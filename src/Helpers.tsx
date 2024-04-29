@@ -21,9 +21,9 @@ import { IUser } from './Interfaces'
 
 // constants
 export const megaByte = 1048576
-export const imageMBLimit = 10
-export const audioMBLimit = 30
-export const totalMBUploadLimit = 50
+export const imageMBLimit = 20
+export const audioMBLimit = 100
+export const totalMBUploadLimit = 100
 export const allowedImageTypes = ['.png', '.jpg', '.jpeg', '.gif', '.webp']
 export const allowedAudioTypes = ['.mp3', '.mpeg']
 export const maxPostChars = 5000
