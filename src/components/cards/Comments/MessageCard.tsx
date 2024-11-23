@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import CloseOnClickOutside from '@components/CloseOnClickOutside'
 import Column from '@components/Column'
 import FlagImage from '@components/FlagImage'
@@ -19,10 +20,10 @@ import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
 import {
+    Post,
     dateCreated,
     getDraftPlainText,
-    getGameType,
-    includesGame,
+    includesSpecificGame,
     timeSinceCreated,
     trimText,
 } from '@src/Helpers'
@@ -41,13 +42,16 @@ import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
+import { GameStatusIndicator } from '../GameCard'
+import MoveCard from '../MoveCard'
 
 function MessageCard(props: {
-    message: any
+    message: Post
     removeMessage: (message: any) => void
     setReplyParent: () => void
+    emit: (event: string, data) => void
 }): JSX.Element {
-    const { message: messageData, setReplyParent, removeMessage } = props
+    const { message: messageData, emit, setReplyParent, removeMessage } = props
     const { loggedIn, accountData, updateDragItem, alert } = useContext(AccountContext)
     const { spaceData } = useContext(SpaceContext)
     const [message, setMessage] = useState(messageData)
@@ -61,7 +65,6 @@ function MessageCard(props: {
         totalLikes,
         totalRatings,
         totalLinks,
-        totalChildComments,
         createdAt,
         updatedAt,
         Creator,
@@ -69,8 +72,9 @@ function MessageCard(props: {
         ImageBlocks,
         AudioBlocks,
         Event,
-        Reactions,
+        Reactions = [],
         Parent,
+        move,
     } = message
     const [visible, setVisible] = useState(false)
     const [accountReactions, setAccountReactions] = useState<any>({
@@ -192,6 +196,8 @@ function MessageCard(props: {
         )
     }
 
+    useEffect(() => setMessage(messageData), [messageData])
+
     useEffect(() => {
         setVisible(true)
         // addDragEvents()
@@ -201,21 +207,21 @@ function MessageCard(props: {
         <Row
             className={`${styles.wrapper} ${visible && styles.visible} ${
                 Creator.id === accountData.id && styles.isOwnComment
-            }`}
+            } ${move && `${styles.move} ${styles[move.status]}`}`}
             style={{ marginBottom: hasReactions ? 10 : 0 }}
         >
             {isOwnComment && renderButtons()}
-            {!isOwnComment && (
+            {!isOwnComment && !move && (
                 <Column style={{ marginRight: 10 }}>
                     <FlagImage type='user' size={30} imagePath={Creator.flagImagePath} />
                 </Column>
             )}
             <Column
                 className={styles.message}
-                style={{ width: fullWidth ? 'calc(100% - 100px)' : 'auto' }}
+                style={{ width: move ? undefined : fullWidth ? 'calc(100% - 100px)' : 'auto' }}
             >
                 <Row className={styles.header}>
-                    {!isOwnComment && (
+                    {!isOwnComment && !move && (
                         <>
                             {state === 'account-deleted' ? (
                                 <p className='grey' style={{ marginRight: 5 }}>
@@ -229,14 +235,13 @@ function MessageCard(props: {
                         </>
                     )}
                     <p
-                        className='grey'
                         title={`${dateCreated(createdAt)} ${
                             edited ? `(edited: ${dateCreated(updatedAt)})` : ''
                         }`}
                     >
                         {timeSinceCreated(createdAt)}
                     </p>
-                    {edited && <p className='grey'>*</p>}
+                    {edited && !move && <p className='grey'>*</p>}
                     {/* {muted && (
                             <button
                                 type='button'
@@ -247,6 +252,17 @@ function MessageCard(props: {
                                 <EyeClosedIcon />
                             </button>
                         )} */}
+                    {move && (
+                        <>
+                            <div style={{ flexGrow: 1 }} />
+                            <div style={{ alignSelf: 'flex-end' }}>
+                                <GameStatusIndicator
+                                    status={move.status}
+                                    style={{ marginLeft: 5, fontSize: 12 }}
+                                />
+                            </div>
+                        </>
+                    )}
                 </Row>
                 {Parent && (
                     <Column className={styles.parent}>
@@ -300,9 +316,8 @@ function MessageCard(props: {
                             style={{ minWidth: 600, marginTop: 10 }}
                         />
                     )}
-                    {includesGame(mediaTypes) && (
+                    {includesSpecificGame(mediaTypes) && (
                         <Game
-                            type={getGameType(mediaTypes)}
                             postId={id}
                             setTopicImage={() => null}
                             isOwnPost={Creator.id === accountData.id}
@@ -312,6 +327,7 @@ function MessageCard(props: {
                     {mediaTypes.includes('card') && (
                         <Card postId={id} style={{ minWidth: 600, marginTop: 10 }} />
                     )}
+                    {move && <MoveCard post={message} emit={emit} />}
                 </Column>
                 <Row className={styles.reactions}>
                     {totalLikes > 0 && (

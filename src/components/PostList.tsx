@@ -102,7 +102,19 @@ function PostList(props: {
                                             }
                                         }
                                     }}
-                                    setPost={() => console.error('TODO')}
+                                    setPost={(newPost) => {
+                                        switch (location) {
+                                            case 'space-posts':
+                                                setSpacePosts(
+                                                    spacePosts.map((p) =>
+                                                        p.id === newPost.id ? newPost : p
+                                                    )
+                                                )
+                                                break
+                                            default:
+                                                console.error('TODO')
+                                        }
+                                    }}
                                     collapse
                                 />
                             ))}

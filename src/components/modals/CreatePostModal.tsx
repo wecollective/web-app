@@ -33,12 +33,13 @@ import GlassBeadGameTopics from '@src/GlassBeadGameTopics'
 import {
     GAMES,
     GAME_TYPES,
-    GameSettings,
+    Game,
     MEDIA_TYPES,
     MediaType,
     allowedAudioTypes,
     allowedImageTypes,
     audioMBLimit,
+    baseUserData,
     capitalise,
     findDraftLength,
     findSearchableText,
@@ -46,14 +47,13 @@ import {
     formatTimeMMSS,
     getDraftPlainText,
     imageMBLimit,
-    isSpecificGame,
     postTypeIcons,
     scrapeUrl,
     simplifyText,
     uploadPost,
     validatePost,
 } from '@src/Helpers'
-import GameCard, { useGameStatus } from '@src/components/GameCard'
+import { CreateGameCard, GameState } from '@src/components/cards/GameCard'
 import styles from '@styles/components/modals/CreatePostModal.module.scss'
 import {
     AudioIcon,
@@ -73,7 +73,7 @@ import * as d3 from 'd3'
 import flatpickr from 'flatpickr'
 import 'flatpickr/dist/themes/material_green.css'
 import React, { useContext, useEffect, useRef, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import RecordRTC from 'recordrtc'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -106,21 +106,26 @@ const SOURCE_TYPES = ['post']
 
 type SourceType = (typeof SOURCE_TYPES)[number]
 
-export type CreatePostModalSettings = { type: ModalType; source?: { type: SourceType; id: number } }
+export type CreatePostModalSettings = {
+    type: ModalType
+    title?: string
+    source?: { type: SourceType; id: number; relationship?: string }
+    game?: Game
+    onCreate?: 'redirect' | 'close'
+}
 
 // eslint-disable-next-line react/require-default-props
 export type CreatePostModalProps = { settings: CreatePostModalSettings; onClose: () => void }
 
-const MODAL_HEADER: Record<ModalType, string> = {
+const MODAL_HEADER = {
     'glass-bead-game': 'New Glass Bead Game',
     card: 'New Card',
     poll: 'New Governance Poll',
-    'wisdom-gym': 'New Wisdom Gym',
     post: 'New Post',
 }
 
 function CreatePostModal({
-    settings: { type, source },
+    settings: { type, source, game: initialGame, title: initialTitle, onCreate },
     onClose,
 }: CreatePostModalProps): JSX.Element {
     const { accountData } = useContext(AccountContext)
@@ -129,12 +134,22 @@ function CreatePostModal({
     const { userPosts, setUserPosts } = useContext(UserContext)
     const [loading, setLoading] = useState(false)
     const [linkDescription, setLinkDescription] = useState('')
-    const [mediaTypes, setMediaTypes] = useState<MediaType[]>(() =>
-        MEDIA_TYPES.includes(type as MediaType) ? [type as MediaType] : []
-    )
+    const [mediaTypes, setMediaTypes] = useState<MediaType[]>(() => {
+        const initialMediaTypes: MediaType[] = []
+
+        if (MEDIA_TYPES.includes(type as MediaType)) {
+            initialMediaTypes.push(type as MediaType)
+        }
+
+        if (initialGame) {
+            initialMediaTypes.push('game-builder')
+        }
+
+        return initialMediaTypes
+    })
     const [spaces, setSpaces] = useState<any[]>([spaceData.id ? spaceData : defaultSelectedSpace])
     const [showTitle, setShowTitle] = useState(true)
-    const [title, setTitle] = useState('')
+    const [title, setTitle] = useState(initialTitle ?? '')
     const [text, setText] = useState('')
     const [mentions, setMentions] = useState<any[]>([])
     const [rawUrls, setRawUrls] = useState<any[]>([])
@@ -148,11 +163,12 @@ function CreatePostModal({
     const maxUrls = 5
     const location = useLocation()
     const [x, page, pageHandle, subPage] = location.pathname.split('/')
-    const contentTypes: MediaType[] = ['image', 'audio', 'event', 'game']
+    const contentTypes: MediaType[] = ['image', 'audio', 'event']
+    const navigate = useNavigate()
+
     if (type !== 'poll') {
         contentTypes.push('poll')
     }
-    console.log(mediaTypes)
 
     function initializeMediaDropBox(mediaType: MediaType) {
         let dragLeaveCounter = 0 // used to avoid dragleave firing when hovering child elements
@@ -482,9 +498,7 @@ function CreatePostModal({
 
     // game
     const [gameSettingsModalOpen, setGameSettingsModalOpen] = useState(false)
-    const [gameSettings, setGameSettings] = useState<GameSettings>(
-        () => type in GAMES && GAMES[type].defaultSettings
-    )
+    const [gameSettings, setGameSettings] = useState(GAMES[type]?.defaultSettings)
     const [topicOptions, setTopicOptions] = useState<any[]>([])
     const [topicImage, setTopicImage] = useState<any>({ id: uuidv4(), Image: { url: '' } })
     const [beads, setBeads] = useState<any[]>([])
@@ -512,11 +526,13 @@ function CreatePostModal({
     }
 
     // new game
-    const initialGame = { steps: [] }
-    const [status, setStatus] = useGameStatus({
-        game: initialGame,
-        editing: true,
-        collapsed: false,
+    const [gameState, setGameState] = useState<GameState>({
+        game: initialGame ?? {
+            steps: [],
+            players: [baseUserData(accountData)],
+            play: { status: 'waiting', variables: {} },
+        },
+        dirty: true,
     })
 
     // todo: merge groups into single array
@@ -664,7 +680,7 @@ function CreatePostModal({
             front.mediaTypes = frontMediaTypes.join(',')
             back.mediaTypes = backMediaTypes.join(',')
         }
-        if (mediaTypes.some(isSpecificGame)) {
+        if (mediaTypes.includes('glass-bead-game')) {
             post.glassBeadGame = {
                 settings: gameSettings,
                 topicImage,
@@ -672,10 +688,16 @@ function CreatePostModal({
                 beads: !gameSettings.multiplayer && !gameSettings.synchronous ? beads : [],
             }
         }
-        if (mediaTypes.includes('game')) {
-            post.game = status
+        if (mediaTypes.includes('game-builder')) {
+            post.game = gameState.game
         }
-        if (source) post.source = { type: source.type, id: source.id, linkDescription }
+        if (source)
+            post.source = {
+                type: source.type,
+                id: source.id,
+                relationship: source.relationship,
+                linkDescription,
+            }
         if (type === 'poll') post.governance = { action: pollAction, threshold: pollThreshold }
         post.searchableText = findSearchableText(post)
         // validate post
@@ -706,7 +728,12 @@ function CreatePostModal({
                     if (type === 'poll') setGovernancePolls([...governancePolls, newPost])
                     setLoading(false)
                     setSaved(true)
-                    setTimeout(() => onClose(), 1000)
+                    setTimeout(() => {
+                        onClose()
+                        if (onCreate === 'redirect') {
+                            navigate(`/p/${newPost.id}`)
+                        }
+                    }, 1000)
                 })
                 .catch((error) => console.log(error))
         }
@@ -822,7 +849,7 @@ function CreatePostModal({
             ) : (
                 <Column centerX style={{ width: '100%' }}>
                     <h1>{MODAL_HEADER[type]}</h1>
-                    {mediaTypes.some(isSpecificGame) && GAMES[type].settingsEditable && (
+                    {mediaTypes.includes('glass-bead-game') && (
                         <Button
                             text='Game settings'
                             color='aqua'
@@ -867,7 +894,7 @@ function CreatePostModal({
                             )}
                         </Row>
                         <Column className={styles.content}>
-                            {showTitle && !mediaTypes.some(isSpecificGame) && (
+                            {showTitle && !mediaTypes.includes('glass-bead-game') && (
                                 <Row centerY spaceBetween className={styles.title}>
                                     <input
                                         placeholder='Title...'
@@ -888,7 +915,7 @@ function CreatePostModal({
                                     />
                                 </Row>
                             )}
-                            {mediaTypes.some(isSpecificGame) && (
+                            {mediaTypes.includes('glass-bead-game') && (
                                 <Row centerY spaceBetween className={styles.topic}>
                                     <Column centerX centerY className={styles.imageWrapper}>
                                         {topicImage.Image.url && (
@@ -1242,7 +1269,7 @@ function CreatePostModal({
                                     </Row>
                                 </Column>
                             )}
-                            {mediaTypes.some(isSpecificGame) && (
+                            {mediaTypes.includes('glass-bead-game') && (
                                 <Column className={styles.game}>
                                     {!gameSettings.synchronous && (
                                         <Column>
@@ -1308,12 +1335,8 @@ function CreatePostModal({
                                         renderBeads()}
                                 </Column>
                             )}
-                            {mediaTypes.includes('game') && (
-                                <GameCard
-                                    initialGame={initialGame}
-                                    status={status}
-                                    setStatus={setStatus}
-                                />
+                            {mediaTypes.includes('game-builder') && (
+                                <CreateGameCard state={gameState} setState={setGameState} />
                             )}
                         </Column>
                     </Column>

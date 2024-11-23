@@ -830,8 +830,8 @@ function LinkMap(): JSX.Element {
     }
 
     function findTargetFromText() {
-        const text = `${targetTextRef.current}`
-        if (!text) {
+        const search = `${targetTextRef.current}`
+        if (!search) {
             setTargetSearchOptions(null)
             setTargetFromTextLoading(false)
         } else {
@@ -841,11 +841,11 @@ function LinkMap(): JSX.Element {
             // include sourceId if matching types to prevent link to self
             const sourceId = item === targetType.toLowerCase() ? `&sourceId=${id}` : ''
             const userId = selectedUserRef.current ? `&userId=${selectedUserRef.current}` : ''
-            const params = `?type=${targetType}&text=${text}${userId}${sourceId}`
+            const params = `?type=${targetType}&search=${search}${userId}${sourceId}`
             axios
-                .get(`${config.apiURL}/target-from-text${params}`, options)
+                .get(`${config.apiURL}/search${params}`, options)
                 .then((res) => {
-                    if (text === targetTextRef.current) {
+                    if (search === targetTextRef.current) {
                         setTargetSearchOptions(res.data)
                         setTargetFromTextLoading(false)
                     }

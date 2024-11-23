@@ -21,14 +21,28 @@ import { IUser } from './Interfaces'
 
 // constants
 export const megaByte = 1048576
-export const imageMBLimit = 10
-export const audioMBLimit = 30
-export const totalMBUploadLimit = 50
+export const imageMBLimit = 20
+export const audioMBLimit = 100
+export const totalMBUploadLimit = 100
 export const allowedImageTypes = ['.png', '.jpg', '.jpeg', '.gif', '.webp']
 export const allowedAudioTypes = ['.mp3', '.mpeg']
 export const maxPostChars = 5000
 export const maxUrls = 5
 const cookies = new Cookies()
+
+export const GAME_EVENTS = {
+    outgoing: {
+        updateGame: 'gs:outgoing-update',
+        start: 'gs:outgoing-start',
+        stop: 'gs:outgoing-stop',
+        skip: 'gs:outgoing-skip',
+        pause: 'gs:outgoing-pause',
+        submit: 'gs:outgoing-submit',
+    },
+    incoming: {
+        updated: 'gs:incoming-updated',
+    },
+} as const
 
 export type GameSettings = {
     synchronous: boolean
@@ -60,7 +74,7 @@ type GameConfig = {
     settingsEditable?: boolean
 }
 
-export const GAMES: Record<GameType, GameConfig> = {
+export const GAMES: Record<GameType, GameConfig | null> = {
     'glass-bead-game': {
         defaultSettings: {
             synchronous: true,
@@ -80,29 +94,22 @@ export const GAMES: Record<GameType, GameConfig> = {
         },
         settingsEditable: true,
     },
-    'wisdom-gym': {
-        defaultSettings: {
-            synchronous: true,
-            multiplayer: true,
-            players: [],
-            allowedBeadTypes: ['audio'],
-        },
-        settingsEditable: false,
-    },
+    card: null,
+    'game-builder': null,
 }
 
-export const GAME_TYPES = ['glass-bead-game', 'wisdom-gym'] as const
+export const GAME_TYPES = ['glass-bead-game', 'card', 'game-builder'] as const
 
 export type GameType = (typeof GAME_TYPES)[number]
 
 export const isSpecificGame = (type: string): type is GameType =>
     GAME_TYPES.includes(type as GameType)
 
-export const includesGame = (mediaTypes: string) =>
-    GAME_TYPES.some((type) => mediaTypes.includes(type))
+export const includesSpecificGame = (mediaTypes?: string) =>
+    GAME_TYPES.some((type) => mediaTypes?.includes(type))
 
-export const getGameType = (mediaTypes: string) =>
-    GAME_TYPES.find((type) => mediaTypes.includes(type))!
+export const getGameType = (mediaTypes?: string) =>
+    GAME_TYPES.find((type) => mediaTypes?.includes(type))!
 
 export const MEDIA_TYPES = [
     'text',
@@ -112,8 +119,6 @@ export const MEDIA_TYPES = [
     'event',
     'poll',
     ...GAME_TYPES,
-    'card',
-    'game',
 ] as const
 
 export type MediaType = (typeof MEDIA_TYPES)[number]
@@ -140,6 +145,16 @@ export type BlockPost<MediaLinkType> = {
     MediaLink: MediaLinkType
 }
 
+export type BaseGamePost = { id: number; title: string; game: Game }
+
+export type ParentBlock = {
+    Parent: BaseGamePost
+}
+
+export type ChildBlock = {
+    Post: BaseGamePost
+}
+
 export type UrlMediaLink = {
     Url: Url
 }
@@ -159,11 +174,19 @@ export type AudioBlock = {
 }
 
 export type AudioMediaLink = {
-    Audio: unknown
+    Audio: {
+        url: string
+    }
 }
+
+type PostState = 'active' | 'deleted' | 'account-deleted'
+
+type ReactionType = 'like' | 'rating' | 'linked'
 
 export type Post = {
     id: number
+    rootId?: number
+    state: PostState
     type: PostType
     mediaTypes: string
     title: string
@@ -175,13 +198,20 @@ export type Post = {
     totalRatings: number
     totalReposts: number
     totalLinks: number
-    game: Game
+    game?: Game
+    move?: Move
     Creator: IUser
     DirectSpaces: { id: number }[]
     UrlBlocks?: UrlBlock[]
     ImageBlocks?: ImageBlock[]
     AudioBlocks?: AudioBlock[]
+    Reactions?: { type: ReactionType }[]
+    Parent?: Post
     Event: Event
+    Originals?: ParentBlock
+    Remixes?: ChildBlock[]
+    Submissions?: { Post: { id: number; type: string; text: string; AudioBlocks?: AudioBlock[] } }[]
+    IncludedInGames?: ParentBlock[]
     Image: { url: string }
     Audio: { id: number; url: string }
     Url: { id: number }
@@ -189,37 +219,78 @@ export type Post = {
 
 export type Game = {
     steps: Step[]
+    play: Play
+    players: BaseUser[]
 }
+
+type SubmissionConfig =
+    | {
+          type: 'audio'
+          maxDuration: string
+      }
+    | { type: 'text' }
+
+export type Move = (
+    | { status: 'skipped' | 'ended' | 'stopped' | 'timeout' }
+    | { status: 'paused'; elapsedTime: number; remainingTime: number }
+    | {
+          status: 'started'
+          elapsedTime: number
+          startedAt: number
+          timeout: number
+      }
+) & { gameId?: number; submission?: MoveSubmission }
+export type MoveSubmission = { player?: BaseUser } & (
+    | {
+          type: 'audio'
+          maxDuration: number
+      }
+    | { type: 'text' }
+)
+export type MoveSubmissionAudio = Extract<MoveSubmission, { type: 'audio' }>
+
+export type MoveStatus = Move['status']
+
+export type PlayVariables = Record<string, string | number | boolean | BaseUser>
+
+export type StepContext = {
+    stepId: string
+    variables: PlayVariables
+    players: BaseUser[]
+}
+
+export type Play = {
+    variables: PlayVariables
+} & (
+    | { status: 'waiting' | 'stopped' | 'ended' }
+    | { status: 'paused'; step: MoveStep; moveId?: number }
+    | { status: 'started' | 'paused'; step: MoveStep; moveId: number }
+)
+
+export type PlayStatus = Play['status']
 
 export type Step = {
     id: string
+    name: string
+    originalStep?: { gameId: number; stepId: string }
 } & (
     | {
-          type: 'post'
-          post: {
-              title: string
-              text: string
-              timeout: number
-          }
+          type: 'move'
+          title?: string
+          text: string
+          timeout: string
+          submission?: SubmissionConfig & { player: string }
       }
     | {
-          type: 'game'
-          gameId: number
-      }
-    | {
-          type: 'rounds'
-          amount: string
-          steps: Step[]
-      }
-    | {
-          type: 'turns'
+          type: 'sequence'
+          repeat?: { type: 'rounds'; amount: number } | { type: 'turns' }
           steps: Step[]
       }
 )
 
 export type StepType = Step['type']
-
-export const STEP_TYPES = ['post', 'rounds', 'turns', 'game'] as const
+export type MoveStep = Extract<Step, { type: 'move' }>
+export type MoveType = SubmissionConfig['type']
 
 export type Event = {
     id: number
@@ -230,6 +301,15 @@ export type Event = {
 }
 
 export type UserEvent = { id: number; flagImagePath: string }
+
+export type BaseUser = {
+    id: number
+    handle: string
+    name: string
+    flagImagePath: string
+}
+
+export type Peer = BaseUser & { socketId: string }
 
 export const weekDays = [
     'Monday',
@@ -352,7 +432,7 @@ export function resizeTextArea(target: HTMLElement): void {
     t.style.height = `${target.scrollHeight}px`
 }
 
-export function dateCreated(createdAt: string | undefined): string | undefined {
+export function dateCreated(createdAt: string | number | undefined): string | undefined {
     if (createdAt === undefined) return undefined
     const sourceDate = new Date(createdAt)
     const d = sourceDate.toString().split(/[ :]/)
@@ -857,7 +937,7 @@ export function uploadPost(post) {
     return axios.post(`${config.apiURL}/create-${route}`, formData, options)
 }
 
-export function baseUserData(accountData) {
+export function baseUserData(accountData): BaseUser {
     const { id, name, handle, flagImagePath } = accountData
     return { id, name, handle, flagImagePath }
 }

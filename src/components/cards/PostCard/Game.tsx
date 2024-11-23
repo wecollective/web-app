@@ -9,7 +9,7 @@ import BeadCard from '@components/cards/PostCard/BeadCard'
 import NextBeadModal from '@components/modals/NextBeadModal'
 import { AccountContext } from '@contexts/AccountContext'
 import config from '@src/Config'
-import { GameState, GameType, formatTimeHHDDMMSS, pluralise } from '@src/Helpers'
+import { GameState, formatTimeHHDDMMSS, pluralise } from '@src/Helpers'
 import styles from '@styles/components/cards/PostCard/GlassBeadGameCard.module.scss'
 import { DNAIcon, DoorIcon, PlusIcon, UsersIcon } from '@svgs/all'
 import axios from 'axios'
@@ -18,13 +18,12 @@ import { useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 
 function Game(props: {
-    type: GameType
     postId: number
     isOwnPost: boolean
     setTopicImage: (url: string) => void
     style?: any
 }): JSX.Element {
-    const { type, postId, isOwnPost, setTopicImage, style } = props
+    const { postId, isOwnPost, setTopicImage, style } = props
     const { accountData, alert, loggedIn } = useContext(AccountContext)
     const [game, setGame] = useState<GameState>()
     const [beads, setBeads] = useState<any[]>([])
@@ -328,7 +327,7 @@ function Game(props: {
             {synchronous && (
                 <Row style={{ marginBottom: 10 }}>
                     <Button
-                        text={`Play ${type.replaceAll('-', ' ')}`}
+                        text='Open game room'
                         color='game-white'
                         icon={<DoorIcon />}
                         onClick={() => history(`/p/${postId}/game-room`)}

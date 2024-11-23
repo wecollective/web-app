@@ -2,16 +2,17 @@ import AudioVisualiser from '@components/AudioVisualiser'
 import Column from '@components/Column'
 import Row from '@components/Row'
 import { formatTimeMMSS } from '@src/Helpers'
+import PlainButton from '@src/components/modals/PlainButton'
 import colors from '@styles/Colors.module.scss'
 import styles from '@styles/components/cards/PostCard/AudioCard.module.scss'
-import { PauseIcon, PlayIcon } from '@svgs/all'
+import { PauseIcon, PlayIcon, TimesIcon } from '@svgs/all'
 import * as d3 from 'd3'
 import getBlobDuration from 'get-blob-duration'
 import React, { useEffect, useState } from 'react'
 
 // todo: pass in height as a prop?
 function AudioCard(props: {
-    id?: number
+    id?: number | string
     index?: number
     url: string
     staticBars: number
@@ -184,7 +185,10 @@ function AudioCard(props: {
                         />
                         <div
                             className={styles.thumb}
-                            style={{ left: `${sliderPercent}%`, marginLeft: `${thumbOffset}px` }}
+                            style={{
+                                left: `${sliderPercent}%`,
+                                marginLeft: `${thumbOffset}px`,
+                            }}
                         />
                         <input type='range' onClick={updateSlider} onChange={updateSlider} />
                     </Row>
@@ -205,6 +209,11 @@ function AudioCard(props: {
                     </audio>
                 </Column>
             </Row>
+            {remove && (
+                <PlainButton size={17} style={{ marginLeft: 5 }} onClick={remove}>
+                    <TimesIcon />
+                </PlainButton>
+            )}
         </Column>
     )
 }

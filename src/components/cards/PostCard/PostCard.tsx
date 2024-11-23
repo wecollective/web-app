@@ -25,19 +25,13 @@ import RepostModal from '@components/modals/RepostModal'
 import { AccountContext } from '@contexts/AccountContext'
 import { SpaceContext } from '@contexts/SpaceContext'
 import config from '@src/Config'
-import {
-    Post,
-    dateCreated,
-    getGameType,
-    includesGame,
-    timeSinceCreated,
-    timeSinceCreatedShort,
-} from '@src/Helpers'
-import GameCard, { useGameStatus } from '@src/components/GameCard'
+import { Post, dateCreated, timeSinceCreated, timeSinceCreatedShort } from '@src/Helpers'
+import { GameCard, GameState } from '@src/components/cards/GameCard'
 import styles from '@styles/components/cards/PostCard/PostCard.module.scss'
 import {
     AngleUpIcon,
     AnglesUpIcon,
+    CastaliaIcon,
     CommentIcon,
     DeleteIcon,
     EditIcon,
@@ -110,7 +104,7 @@ function PostCard(props: {
     const [likeModalOpen, setLikeModalOpen] = useState(false)
     const [repostModalOpen, setRepostModalOpen] = useState(false)
     const [ratingModalOpen, setRatingModalOpen] = useState(false)
-    const [commentsOpen, setCommentsOpen] = useState(location === 'post-page')
+    const [commentsOpen, setCommentsOpen] = useState(false)
     const [deletePostModalOpen, setDeletePostModalOpen] = useState(false)
     const [editPostModalOpen, setEditPostModalOpen] = useState(false)
     const [removePostModalOpen, setRemovePostModalOpen] = useState(false)
@@ -128,12 +122,12 @@ function PostCard(props: {
     Object.keys(urlParams).forEach((param) => {
         params[param] = urlParams[param]
     })
-    const [gameStatus, setGameStatus] = useGameStatus({
-        postId: id,
-        game,
-        editing: false,
-        collapsed: !!collapse,
-    })
+    const [gameState, setGameState] = useState<GameState | undefined>(
+        game && {
+            game,
+            dirty: false,
+        }
+    )
 
     function getAccountReactions() {
         // only request values if reactions present
@@ -360,7 +354,7 @@ function PostCard(props: {
                     <Column className={`post-${id}-drag-disabled`} style={{ cursor: 'text' }}>
                         {title && (
                             <>
-                                {mediaTypes.includes('glass-bead-game') ? (
+                                {mediaTypes?.includes('glass-bead-game') ? (
                                     <Row centerY className={styles.topic}>
                                         {topicImage && <img src={topicImage} alt='' />}
                                         <h1>{title}</h1>
@@ -387,7 +381,7 @@ function PostCard(props: {
                         )}
                     </Column>
                 )}
-                {!isBlock && mediaTypes.includes('url') && (
+                {!isBlock && mediaTypes?.includes('url') && (
                     <Urls
                         key={updatedAt}
                         postId={id}
@@ -397,7 +391,7 @@ function PostCard(props: {
                         style={{ marginBottom: 10 }}
                     />
                 )}
-                {!isBlock && mediaTypes.includes('image') && (
+                {!isBlock && mediaTypes?.includes('image') && (
                     <Images
                         postId={id}
                         imageBlocks={ImageBlocks?.map((block) => {
@@ -406,7 +400,7 @@ function PostCard(props: {
                         style={{ marginBottom: 10 }}
                     />
                 )}
-                {!isBlock && mediaTypes.includes('audio') && (
+                {!isBlock && mediaTypes?.includes('audio') && (
                     <Audios
                         postId={id}
                         audioBlocks={AudioBlocks?.map((block) => {
@@ -415,25 +409,16 @@ function PostCard(props: {
                         style={{ marginBottom: 10 }}
                     />
                 )}
-                {mediaTypes.includes('game') && game && (
-                    <GameCard
-                        initialGame={game}
-                        updateInitialGame={() => setPost({ ...post, game: gameStatus.game })}
-                        status={gameStatus}
-                        setStatus={setGameStatus}
-                    />
-                )}
                 {Event && <EventCard post={post} location={location} />}
-                {mediaTypes.includes('poll') && <PollCard postData={post} location={location} />}
-                {includesGame(mediaTypes) && (
+                {mediaTypes?.includes('poll') && <PollCard postData={post} location={location} />}
+                {mediaTypes?.includes('glass-bead-game') && (
                     <Game
-                        type={getGameType(mediaTypes)}
                         postId={id}
                         setTopicImage={setTopicImage}
                         isOwnPost={Creator.id === accountData.id}
                     />
                 )}
-                {mediaTypes.includes('card') && <Card postId={id} />}
+                {mediaTypes?.includes('card') && <Card postId={id} />}
                 {/* block posts */}
                 {type === 'url-block' && (
                     <UrlCard type='post' urlData={Url} style={{ marginBottom: 10 }} />
@@ -453,6 +438,28 @@ function PostCard(props: {
                         staticBars={250}
                         location='post'
                         style={{ height: 160, width: '100%', marginBottom: 10 }}
+                    />
+                )}
+                {game && gameState && location !== 'post-page' && (
+                    <GameCard
+                        collapsed={!!collapse}
+                        initialGame={game}
+                        post={post}
+                        saveState={async (state) => {
+                            await axios.post(
+                                `${config.apiURL}/update-post`,
+                                { id: post.id, game: state.game },
+                                {
+                                    headers: {
+                                        Authorization: `Bearer ${new Cookies().get('accessToken')}`,
+                                    },
+                                }
+                            )
+                            setGameState(state)
+                            setPost({ ...post, game: state.game })
+                        }}
+                        state={gameState}
+                        setState={isOwnPost && setGameState}
                     />
                 )}
             </Column>
@@ -480,6 +487,9 @@ function PostCard(props: {
                             className={`${styles.comment} ${commented && styles.highlighted}`}
                             disabled={buttonsDisabled}
                             onClick={() => {
+                                if (game && location === 'post-page') {
+                                    return
+                                }
                                 if (loggedIn || totalComments) setCommentsOpen(!commentsOpen)
                                 else {
                                     alert('Log in to comment on posts')
@@ -530,6 +540,14 @@ function PostCard(props: {
                                     <RepostIcon />
                                 </Column>
                                 <p>{totalReposts}</p>
+                            </button>
+                        )}
+                        {game && (
+                            <button type='button' className={`${styles.game}`} disabled>
+                                <Column centerX centerY>
+                                    <CastaliaIcon />
+                                </Column>
+                                <p>{post.Remixes?.length ?? 0}</p>
                             </button>
                         )}
                     </Row>

@@ -12,13 +12,14 @@ import { v4 as uuidv4 } from 'uuid'
 
 function UserButton(props: {
     user: any
+    textOverride?: string
     imageSize?: number
     fontSize?: number
     maxChars?: number
     style?: any
     className?: any
 }): JSX.Element {
-    const { user, imageSize, fontSize, maxChars, style, className } = props
+    const { user, imageSize, fontSize, maxChars, style, className, textOverride } = props
     const { id, handle, name, flagImagePath, coverImagePath, state } = user
     const { updateDragItem } = useContext(AccountContext)
     const [showModal, setShowModal] = useState(false)
@@ -31,7 +32,7 @@ function UserButton(props: {
     const mouseOver = useRef(false)
     const buttonId = uuidv4()
     const hoverDelay = 500
-    const text = state === 'deleted' ? `[user deleted]` : name
+    const text = textOverride ?? (state === 'deleted' ? `[user deleted]` : name)
     const color = state === 'deleted' ? '#acacae' : ''
 
     function onMouseEnter() {
@@ -119,6 +120,7 @@ UserButton.defaultProps = {
     maxChars: null,
     style: null,
     className: null,
+    textOverride: null,
 }
 
 export default UserButton
