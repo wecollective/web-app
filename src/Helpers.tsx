@@ -7,6 +7,7 @@ import {
     CalendarIcon,
     CardIcon,
     CastaliaIcon,
+    DownloadIcon,
     ImageIcon,
     LinkIcon,
     PollIcon,
@@ -21,9 +22,10 @@ import { IUser } from './Interfaces'
 
 // constants
 export const megaByte = 1048576
-export const imageMBLimit = 20
-export const audioMBLimit = 100
-export const totalMBUploadLimit = 100
+export const imageMBLimit = 250
+export const audioMBLimit = 250
+export const fileMBLimit = 250
+export const totalMBUploadLimit = 250
 export const allowedImageTypes = ['.png', '.jpg', '.jpeg', '.gif', '.webp']
 export const allowedAudioTypes = ['.mp3', '.mpeg']
 export const maxPostChars = 5000
@@ -118,6 +120,7 @@ export const MEDIA_TYPES = [
     'audio',
     'event',
     'poll',
+    'file',
     ...GAME_TYPES,
 ] as const
 
@@ -133,6 +136,7 @@ export const POST_TYPE = [
     'url-block',
     'image-block',
     'audio-block',
+    'file-block',
 ] as const
 
 export type PostType = (typeof POST_TYPE)[number]
@@ -173,6 +177,14 @@ export type AudioBlock = {
     Post: BlockPost<AudioMediaLink>
 }
 
+export type FileBlock = {
+    Post: BlockPost<FileMediaLink>
+}
+
+export type FileMediaLink = {
+    File: any
+}
+
 export type AudioMediaLink = {
     Audio: {
         url: string
@@ -205,6 +217,7 @@ export type Post = {
     UrlBlocks?: UrlBlock[]
     ImageBlocks?: ImageBlock[]
     AudioBlocks?: AudioBlock[]
+    FileBlocks?: FileBlock[]
     Reactions?: { type: ReactionType }[]
     Parent?: Post
     Event: Event
@@ -215,6 +228,7 @@ export type Post = {
     Image: { url: string }
     Audio: { id: number; url: string }
     Url: { id: number }
+    File: any
 }
 
 export type Game = {
@@ -411,6 +425,7 @@ export const postTypeIcons = {
     card: <CardIcon />,
     'glass-bead-game': <CastaliaIcon />,
     game: <CastaliaIcon />,
+    file: <DownloadIcon />,
 }
 
 // functions
@@ -893,7 +908,7 @@ export function validatePost(post, constraints?) {
 
 function attachPostFiles(formData, postData) {
     // attaches postData files to formData (recursive for poll answers, cards, and beads)
-    const { mediaTypes, images, audios, poll, card, glassBeadGame } = postData
+    const { mediaTypes, images, audios, files, poll, card, glassBeadGame } = postData
     if (mediaTypes.includes('image')) {
         images.forEach((i) => {
             if (i.Image.file) formData.append('image', i.Image.file, i.id)
@@ -903,6 +918,11 @@ function attachPostFiles(formData, postData) {
         audios.forEach((a) =>
             formData.append(`audio${a.Audio.file.name ? '' : '-blob'}`, a.Audio.file, a.id)
         )
+    }
+    if (mediaTypes.includes('file')) {
+        files.forEach((f) => {
+            if (f.File.file) formData.append('file', f.File.file, f.id)
+        })
     }
     if (poll) poll.answers.forEach((answer) => attachPostFiles(formData, answer))
     if (glassBeadGame) {

@@ -32,9 +32,10 @@ function PostFilters(props: { pageType: 'space' | 'user'; urlParams: any }): JSX
     const typeOptions = [
         'All Types',
         'Text',
-        'Image',
         'Url',
+        'Image',
         'Audio',
+        'File',
         'Event',
         'Poll',
         'Glass Bead Game',

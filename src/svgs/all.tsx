@@ -31,6 +31,7 @@ import { ReactComponent as CurvedDNAIcon } from '@svgs/curved-dna.svg'
 import { ReactComponent as DNAIcon } from '@svgs/dna.svg'
 import { ReactComponent as DonateIcon } from '@svgs/donate-solid.svg'
 import { ReactComponent as DoorIcon } from '@svgs/door-open-solid.svg'
+import { ReactComponent as DownloadIcon } from '@svgs/download.svg'
 import { ReactComponent as VerticalEllipsisIcon } from '@svgs/ellipsis-vertical-solid.svg'
 import { ReactComponent as MessageIcon } from '@svgs/envelope-solid.svg'
 import { ReactComponent as DangerIcon } from '@svgs/exclamation-circle-solid.svg'
@@ -38,6 +39,7 @@ import { ReactComponent as OpenIcon } from '@svgs/expand-icon.svg'
 import { ReactComponent as ExpandIcon } from '@svgs/expand-solid.svg'
 import { ReactComponent as EyeClosedIcon } from '@svgs/eye-slash-solid.svg'
 import { ReactComponent as EyeIcon } from '@svgs/eye-solid.svg'
+import { ReactComponent as FileIcon } from '@svgs/file.svg'
 import { ReactComponent as ReactionIcon } from '@svgs/fire-alt-solid.svg'
 import { ReactComponent as TextIcon } from '@svgs/font-solid.svg'
 import { ReactComponent as HandshakeIcon } from '@svgs/handshake-solid.svg'
@@ -98,8 +100,8 @@ import { ReactComponent as WecoLogo } from '@svgs/weco-logo.svg'
 
 export {
     AboutIcon,
-    AngleUpIcon,
     AnglesUpIcon,
+    AngleUpIcon,
     AppsIcon,
     ArrowDownIcon,
     ArrowRightIcon,
@@ -123,16 +125,18 @@ export {
     CollapseIcon,
     CommentIcon,
     CurvedDNAIcon,
-    DNAIcon,
     DangerIcon,
     DeleteIcon,
+    DNAIcon,
     DonateIcon,
     DoorIcon,
+    DownloadIcon,
     EditIcon,
     ExpandIcon,
     EyeClosedIcon,
     EyeIcon,
     FailIcon,
+    FileIcon,
     GovernanceIcon,
     HandshakeIcon,
     HelpIcon,
@@ -149,8 +153,8 @@ export {
     MinusIcon,
     NeuronIcon,
     NewIcon,
-    OSIcon,
     OpenIcon,
+    OSIcon,
     PaperClipIcon,
     PauseIcon,
     PlayIcon,
@@ -171,8 +175,8 @@ export {
     SourceIcon,
     SpaceCirclesIcon,
     SpaceListIcon,
-    SpaceTreeIcon,
     SpacesIcon,
+    SpaceTreeIcon,
     StarIcon,
     StreamIcon,
     StringIcon,

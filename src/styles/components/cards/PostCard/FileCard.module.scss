@@ -1,0 +1,33 @@
+.wrapper {
+    width: 200px;
+    height: 200px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    background-color: white;
+    padding: 10px;
+    flex-shrink: 0;
+
+    > a {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 10px;
+
+        svg {
+            width: 50px;
+            height: 50px;
+            color: #ddd;
+            margin-bottom: 5px;
+        }
+
+        p {
+            color: #b0b0b0;
+        }
+    }
+
+    > p {
+        font-size: 14px;
+        text-align: center;
+        word-break: break-all;
+    }
+}

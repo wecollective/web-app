@@ -9,6 +9,8 @@ import AudioCard from '@components/cards/PostCard/AudioCard'
 import Audios from '@components/cards/PostCard/Audios'
 import Card from '@components/cards/PostCard/Card'
 import EventCard from '@components/cards/PostCard/EventCard'
+import FileCard from '@components/cards/PostCard/FileCard'
+import Files from '@components/cards/PostCard/Files'
 import Game from '@components/cards/PostCard/Game'
 import Images from '@components/cards/PostCard/Images'
 import PollCard from '@components/cards/PostCard/PollCard'
@@ -82,10 +84,12 @@ function PostCard(props: {
         UrlBlocks,
         ImageBlocks,
         AudioBlocks,
+        FileBlocks,
         Event,
         Image,
         Audio,
         Url,
+        File,
         game,
     } = post
     const [totalLikes, setTotalLikes] = useState(post.totalLikes)
@@ -409,6 +413,19 @@ function PostCard(props: {
                         style={{ marginBottom: 10 }}
                     />
                 )}
+                {!isBlock && mediaTypes?.includes('file') && (
+                    <Files
+                        postId={id}
+                        fileBlocks={FileBlocks?.map((block: any) => {
+                            return {
+                                id: block.Post.id,
+                                text: block.Post.text,
+                                File: block.Post.MediaLink.File,
+                            }
+                        })}
+                        style={{ marginBottom: 10 }}
+                    />
+                )}
                 {Event && <EventCard post={post} location={location} />}
                 {mediaTypes?.includes('poll') && <PollCard postData={post} location={location} />}
                 {mediaTypes?.includes('glass-bead-game') && (
@@ -440,6 +457,7 @@ function PostCard(props: {
                         style={{ height: 160, width: '100%', marginBottom: 10 }}
                     />
                 )}
+                {type === 'file-block' && <FileCard data={{ File }} />}
                 {game && gameState && location !== 'post-page' && (
                     <GameCard
                         collapsed={!!collapse}

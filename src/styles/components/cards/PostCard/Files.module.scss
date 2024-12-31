@@ -1,0 +1,23 @@
+@import '@styles/Variables';
+
+.wrapper {
+    padding: 10px;
+    background-color: $grey1;
+    margin: 0 -15px 0 -15px;
+    gap: 20px;
+
+    @include for-tablet-portrait-up {
+        border-radius: 10px;
+        margin: 0;
+        border: 1px solid $grey2;
+    }
+
+    .id {
+        position: absolute;
+        display: flex;
+        right: 8px;
+        top: 5px;
+        z-index: 3;
+        font-size: 14px;
+    }
+}

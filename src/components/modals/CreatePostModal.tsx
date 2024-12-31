@@ -15,6 +15,7 @@ import SuccessMessage from '@components/SuccessMessage'
 import Toggle from '@components/Toggle'
 import AudioCard from '@components/cards/PostCard/AudioCard'
 import BeadCard from '@components/cards/PostCard/BeadCard'
+import FileCard from '@components/cards/PostCard/FileCard'
 import PollAnswer from '@components/cards/PostCard/PollAnswer'
 import PostSpaces from '@components/cards/PostCard/PostSpaces'
 import UrlCard from '@components/cards/PostCard/UrlCard'
@@ -41,6 +42,7 @@ import {
     audioMBLimit,
     baseUserData,
     capitalise,
+    fileMBLimit,
     findDraftLength,
     findSearchableText,
     findUrlSearchableText,
@@ -61,6 +63,7 @@ import {
     ChevronLeftIcon,
     ChevronRightIcon,
     DNAIcon,
+    DownloadIcon,
     ImageIcon,
     PlusIcon,
     PollIcon,
@@ -163,7 +166,7 @@ function CreatePostModal({
     const maxUrls = 5
     const location = useLocation()
     const [x, page, pageHandle, subPage] = location.pathname.split('/')
-    const contentTypes: MediaType[] = ['image', 'audio', 'event']
+    const contentTypes: MediaType[] = ['image', 'audio', 'file', 'event']
     const navigate = useNavigate()
 
     if (type !== 'poll') {
@@ -190,6 +193,7 @@ function CreatePostModal({
                 if (e.dataTransfer) {
                     if (mediaType === 'image') addImageFiles(e.dataTransfer)
                     if (mediaType === 'audio') addAudioFiles(e.dataTransfer)
+                    if (mediaType === 'file') addFiles(e.dataTransfer)
                 }
             })
         }
@@ -200,7 +204,8 @@ function CreatePostModal({
             setMediaTypes(mediaTypes.filter((t) => t !== mediaType))
         } else {
             Promise.all([setMediaTypes([...mediaTypes, mediaType])]).then(() => {
-                if (['image', 'audio'].includes(mediaType)) initializeMediaDropBox(mediaType)
+                if (['image', 'audio', 'file'].includes(mediaType))
+                    initializeMediaDropBox(mediaType)
             })
         }
     }
@@ -398,6 +403,44 @@ function CreatePostModal({
                     setRecording(true)
                 })
         }
+    }
+
+    // files
+    const [files, setFiles] = useState<any[]>([])
+
+    function addFiles(drop?) {
+        const input = drop || (document.getElementById('file-input') as HTMLInputElement)
+        if (input && input.files && input.files.length) {
+            for (let i = 0; i < input.files.length; i += 1) {
+                const tooLarge = input.files[i].size > fileMBLimit * 1024 * 1024
+                if (tooLarge) setErrors([`Max file size: ${fileMBLimit} MBs`])
+                else {
+                    const newFile = {
+                        id: uuidv4(),
+                        File: {
+                            file: input.files[i],
+                            url: URL.createObjectURL(input.files[i]),
+                            name: input.files[i].name,
+                            type: input.files[i].type,
+                            size: (input.files[i].size / (1024 * 1024)).toFixed(2),
+                        },
+                    }
+                    setFiles((oldFiles) => [...oldFiles, newFile])
+                    setErrors([])
+                }
+            }
+        }
+    }
+
+    function removeFile(id) {
+        setFiles(files.filter((file) => file.id !== id))
+    }
+
+    function updateFileCaption(id, caption) {
+        const newFiles = [...files]
+        const file = newFiles.find((a) => a.id === id)
+        file.text = caption
+        setFiles(newFiles)
     }
 
     // events
@@ -651,6 +694,7 @@ function CreatePostModal({
             urls,
             images,
             audios,
+            files,
         } as any
         if (mediaTypes.includes('event')) post.event = { startTime, endTime }
         if (mediaTypes.includes('poll')) {
@@ -1086,6 +1130,63 @@ function CreatePostModal({
                                             </Column>
                                         ))}
                                     </Column>
+                                </Column>
+                            )}
+                            {mediaTypes.includes('file') && (
+                                <Column id='file-drop' className={styles.dropBlockWrapper}>
+                                    <Row centerY centerX wrap>
+                                        <DownloadIcon className={styles.icon} />
+                                        <Row
+                                            className={styles.fileUploadInput}
+                                            style={{ marginRight: 10 }}
+                                        >
+                                            <label htmlFor='file-input'>
+                                                Add files
+                                                <input
+                                                    type='file'
+                                                    id='file-input'
+                                                    onChange={() => addFiles()}
+                                                    multiple
+                                                    hidden
+                                                />
+                                            </label>
+                                        </Row>
+                                    </Row>
+                                    <Row centerX wrap style={{ gap: 20 }}>
+                                        {files.map((file) => (
+                                            <Column
+                                                key={file.id}
+                                                style={{
+                                                    position: 'relative',
+                                                    marginTop: 20,
+                                                    width: 200,
+                                                }}
+                                            >
+                                                <CloseButton
+                                                    size={18}
+                                                    onClick={() => removeFile(file.id)}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        right: 5,
+                                                        top: 5,
+                                                        zIndex: 5,
+                                                    }}
+                                                />
+                                                <FileCard
+                                                    data={file}
+                                                    style={{ marginBottom: 10 }}
+                                                />
+                                                <Input
+                                                    type='text'
+                                                    placeholder='add caption...'
+                                                    value={file.text}
+                                                    onChange={(value) =>
+                                                        updateFileCaption(file.id, value)
+                                                    }
+                                                />
+                                            </Column>
+                                        ))}
+                                    </Row>
                                 </Column>
                             )}
                             {mediaTypes.includes('event') && (
