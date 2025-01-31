@@ -49,6 +49,13 @@ function Posts(): JSX.Element {
         params[param] = urlParams[param]
     })
 
+    function filteredPeopleInRoom() {
+        const totalAnons = peopleInRoom.filter((user) => !user.id).length
+        const filteredPeople = peopleInRoom.filter((user) => user.id)
+        if (totalAnons > 0) filteredPeople.unshift({ name: `Anon x${totalAnons}` })
+        return filteredPeople
+    }
+
     useEffect(() => {
         if (spaceData.handle !== spaceHandle) setSpacePostsLoading(true)
         else if (params.lens === 'List') {
@@ -119,7 +126,7 @@ function Posts(): JSX.Element {
                                     <HereIcon />
                                     <p>Present</p>
                                 </Row>
-                                {peopleInRoom.map((user) => (
+                                {filteredPeopleInRoom().map((user) => (
                                     <UserButton
                                         key={user.socketId}
                                         user={user}

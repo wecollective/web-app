@@ -107,9 +107,13 @@ function UserButton(props: {
             </Link>
         )
     return (
-        <Row centerY className={className} style={style}>
+        <Row
+            centerY
+            className={`${styles.wrapper} ${className}`}
+            style={{ ...style, pointerEvents: 'none' }}
+        >
             <FlagImage type='user' size={imageSize!} imagePath='' />
-            <p style={{ marginLeft: 5, fontSize, color }}>Anon</p>
+            <p style={{ fontSize, color }}>{maxChars ? trimText(text, maxChars) : text}</p>
         </Row>
     )
 }
