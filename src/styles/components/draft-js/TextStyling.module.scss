@@ -1,8 +1,17 @@
 @import '@styles/Variables';
 
+/* Force editor to maintain focus on mobile */
+.editor * {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
 .editor {
     position: relative;
     width: 100%;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 22px;
+    cursor: text;
 
     span {
         font-family: inherit;

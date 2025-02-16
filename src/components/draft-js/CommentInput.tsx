@@ -390,6 +390,12 @@ function CommentInput(props: {
         return 'not-handled'
     }
 
+    const handleEditorFocus = (e: React.FocusEvent) => {
+        // fixes editor focus issues on mobile
+        e.preventDefault()
+        if (editorRef.current) editorRef.current.focus()
+    }
+
     useEffect(() => {
         if (enterKeyPressed) {
             if (!saveDisabled()) save()
@@ -493,6 +499,8 @@ function CommentInput(props: {
                                 onChange={onEditorStateChange}
                                 keyBindingFn={keyBindingFn}
                                 handleKeyCommand={handleKeyCommand}
+                                onFocus={handleEditorFocus}
+                                preserveSelectionOnBlur
                                 stripPastedStyles
                                 spellCheck
                             />
