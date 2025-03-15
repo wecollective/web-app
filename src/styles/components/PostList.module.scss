@@ -32,4 +32,8 @@
         background-color: white;
         border-radius: 10px;
     }
+
+    &.dragOver {
+        background-color: rgba(0, 157, 255, 0.046);
+    }
 }

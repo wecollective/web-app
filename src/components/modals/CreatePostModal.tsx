@@ -115,6 +115,7 @@ export type CreatePostModalSettings = {
     source?: { type: SourceType; id: number; relationship?: string }
     game?: Game
     onCreate?: 'redirect' | 'close'
+    dropFiles?: any[]
 }
 
 // eslint-disable-next-line react/require-default-props
@@ -128,7 +129,7 @@ const MODAL_HEADER = {
 }
 
 function CreatePostModal({
-    settings: { type, source, game: initialGame, title: initialTitle, onCreate },
+    settings: { type, source, game: initialGame, title: initialTitle, onCreate, dropFiles },
     onClose,
 }: CreatePostModalProps): JSX.Element {
     const { accountData } = useContext(AccountContext)
@@ -171,6 +172,22 @@ function CreatePostModal({
 
     if (type !== 'poll') {
         contentTypes.push('poll')
+    }
+
+    function initializeWithDropFiles(files) {
+        files.forEach((file) => {
+            const fileType = file.type.split('/')[1]
+            if (allowedImageTypes.includes(`.${fileType}`)) {
+                addImageFiles({ files: [file] })
+                setMediaTypes((oldMediaTypes) => [...oldMediaTypes, 'image'])
+            } else if (allowedAudioTypes.includes(`.${fileType}`)) {
+                addAudioFiles({ files: [file] })
+                setMediaTypes((oldMediaTypes) => [...oldMediaTypes, 'audio'])
+            } else {
+                addFiles({ files: [file] })
+                setMediaTypes((oldMediaTypes) => [...oldMediaTypes, 'file'])
+            }
+        })
     }
 
     function initializeMediaDropBox(mediaType: MediaType) {
@@ -782,6 +799,10 @@ function CreatePostModal({
                 .catch((error) => console.log(error))
         }
     }
+
+    useEffect(() => {
+        if (dropFiles) initializeWithDropFiles(dropFiles)
+    }, [])
 
     // remove errors and initialise date picker if mediaTypes include event
     useEffect(() => {

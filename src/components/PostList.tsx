@@ -23,7 +23,8 @@ function PostList(props: {
 }): JSX.Element {
     const { location, posts, totalPosts, loading, nextPostsLoading, className, styling, style } =
         props
-    const { dragItemRef, setDropLocation, setDropModalOpen } = useContext(AccountContext)
+    const { dragItemRef, setDropLocation, setDropModalOpen, setCreatePostModalSettings } =
+        useContext(AccountContext)
     const { spaceData, spacePosts, setSpacePosts, resetSpacePosts } = useContext(SpaceContext)
     const { userData, userPosts, setUserPosts, resetUserPosts } = useContext(UserContext)
     const mobileView = document.documentElement.clientWidth < 900
@@ -31,14 +32,41 @@ function PostList(props: {
     const handle = l.pathname.split('/')[2]
 
     useEffect(() => {
+        let dragLeaveCounter = 0
         if (location === 'space-posts' && handle === spaceData.handle) {
             const postList = document.getElementById('post-list')
-            postList?.addEventListener('dragover', (e) => e.preventDefault())
-            postList?.addEventListener('drop', () => {
-                const { data, fromToyBox } = dragItemRef.current
-                if (data.type === 'post' && data.state === 'active' && fromToyBox) {
-                    setDropLocation({ type: 'space', data: spaceData })
-                    setDropModalOpen(true)
+            postList?.addEventListener('dragover', (e) => {
+                e.preventDefault()
+                e.stopPropagation()
+            })
+            postList?.addEventListener('dragenter', (e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                console.log('dragenter', dragLeaveCounter)
+                dragLeaveCounter += 1
+                if (dragLeaveCounter === 1) postList.classList.add(styles.dragOver)
+            })
+            postList?.addEventListener('dragleave', (e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                console.log('dragleave', dragLeaveCounter)
+                dragLeaveCounter -= 1
+                if (dragLeaveCounter === 0) postList.classList.remove(styles.dragOver)
+            })
+            postList?.addEventListener('drop', (e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                if (dragItemRef.current) {
+                    const { data, fromToyBox } = dragItemRef.current
+                    if (data.type === 'post' && data.state === 'active' && fromToyBox) {
+                        setDropLocation({ type: 'space', data: spaceData })
+                        setDropModalOpen(true)
+                    }
+                } else {
+                    const files = Array.from(e.dataTransfer?.files || [])
+                    setCreatePostModalSettings({ type: 'post', dropFiles: files })
+                    dragLeaveCounter = 0
+                    postList.classList.remove(styles.dragOver)
                 }
             })
         }
